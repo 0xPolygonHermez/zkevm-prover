@@ -413,12 +413,14 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_INVALID_DATA_STREAM = 115,
   EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE = 116,
   EXECUTOR_ERROR_UNSUPPORTED_PRECOMPILED = 117,
+  EXECUTOR_ERROR_OOG_2 = 118,
+  EXECUTOR_ERROR_CLOSE_BATCH = 119,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_UNSUPPORTED_PRECOMPILED;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_CLOSE_BATCH;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
