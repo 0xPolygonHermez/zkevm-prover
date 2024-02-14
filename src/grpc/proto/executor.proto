@@ -883,4 +883,8 @@ enum ExecutorError {
     EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE = 116;
     // EXECUTOR_ERROR_UNSUPPORTED_PRECOMPILED indicates that an unsupported precompiled has been used
     EXECUTOR_ERROR_UNSUPPORTED_PRECOMPILED = 117;
+    // EXECUTOR_ERROR_OOG_2 indicates that an out of gas has occurred
+    EXECUTOR_ERROR_OOG_2 = 118;
+    // EXECUTOR_ERROR_CLOSE_BATCH indicates that batch must be closed
+    EXECUTOR_ERROR_CLOSE_BATCH = 119;
 }
