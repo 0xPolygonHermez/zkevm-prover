@@ -37,6 +37,7 @@ void TranscriptBN128::getField(uint64_t *output)
     {
         output[i] = getFields1();
     }
+    cout << output[0] << " " << output[1] << " " << output[2] << endl;
 }
 
 RawFr::Element TranscriptBN128::getFields253()

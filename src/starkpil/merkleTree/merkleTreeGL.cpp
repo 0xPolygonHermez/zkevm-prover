@@ -2,6 +2,80 @@
 #include <cassert>
 #include <algorithm> // std::max
 
+MerkleTreeGL::MerkleTreeGL(Goldilocks::Element *tree)
+{
+    width = Goldilocks::toU64(tree[0]);
+    height = Goldilocks::toU64(tree[1]);
+    source = &tree[2];
+    nodes = &tree[2 + height * width];
+    isNodesAllocated = false;
+    isSourceAllocated = false;
+};
+
+MerkleTreeGL::MerkleTreeGL(uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source(_source)
+{
+
+    if (source == NULL)
+    {
+        source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
+        isSourceAllocated = true;
+    }
+    nodes = (Goldilocks::Element *)calloc(getTreeNumElements(), sizeof(Goldilocks::Element));
+    isNodesAllocated = true;
+};
+
+MerkleTreeGL::~MerkleTreeGL()
+{
+    if (isSourceAllocated)
+    {
+        free(source);
+    }
+    if (isNodesAllocated)
+    {
+        free(nodes);
+    }
+}
+
+void MerkleTreeGL::getRoot(Goldilocks::Element *root)
+{
+    std::memcpy(root, &nodes[getTreeNumElements() - elementSize], elementSize * sizeof(Goldilocks::Element));
+    zklog.info("MerkleTree root: [ " + Goldilocks::toString(root[0]) + ", " + Goldilocks::toString(root[1]) + ", " + Goldilocks::toString(root[2]) + ", " + Goldilocks::toString(root[3]) + " ]");
+}
+
+void MerkleTreeGL::copySource(Goldilocks::Element *_source)
+{
+    std::memcpy(source, _source, height * width * sizeof(Goldilocks::Element));
+}
+
+uint64_t MerkleTreeGL::getTreeNumElements()
+{
+    return height * elementSize + (height - 1) * elementSize;
+}
+
+uint64_t MerkleTreeGL::getElementSize() 
+{
+    return elementSize;
+}
+
+uint64_t MerkleTreeGL::getMerkleTreeWidth() 
+{
+    return width;
+}
+
+uint64_t MerkleTreeGL::getMerkleProofSize() {
+    if(height > 1) {
+        return (uint64_t)ceil(log10(height) / log10(hashArity)) * elementSize;
+    } 
+    return 0;
+}
+
+uint64_t MerkleTreeGL::getMerkleProofLength() {
+    if(height > 1) {
+        return (uint64_t)ceil(log10(height) / log10(hashArity));
+    } 
+    return 0;
+}
+
 void MerkleTreeGL::getElement(Goldilocks::Element &element, uint64_t idx, uint64_t subIdx)
 {
     assert((idx > 0) || (idx < width));

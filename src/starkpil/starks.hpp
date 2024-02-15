@@ -13,7 +13,11 @@
 #include "zhInv.hpp"
 #include "steps.hpp"
 #include "zklog.hpp"
+#include "merkleTreeBN128.hpp"
+#include "transcriptBN128.hpp"
 #include "exit_process.hpp"
+
+#define BN128_ARITY 16
 
 struct StarkFiles
 {
@@ -23,6 +27,7 @@ struct StarkFiles
     std::string zkevmStarkInfo;
 };
 
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
 class Starks
 {
 public:
@@ -40,16 +45,17 @@ private:
     ZhInv zi;
     uint64_t N;
     uint64_t NExtended;
+    uint64_t hashSize;
+    uint64_t merkleTreeArity;
     NTT_Goldilocks ntt;
     NTT_Goldilocks nttExtended;
     Polinomial x_n;
     Polinomial x_2ns;
     uint64_t constPolsSize;
     uint64_t constPolsDegree;
-    MerkleTreeGL **treesGL;
-    MerkleTreeGL **treesFRI;
-
-    Transcript transcript;
+    MerkleTreeType **treesGL;
+    MerkleTreeType **treesFRI;
+  
     Goldilocks::Element *mem;
     void *pAddress;
 
@@ -76,6 +82,14 @@ public:
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
+
+        if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
+            hashSize = 1;
+            merkleTreeArity = BN128_ARITY;
+        } else {
+            hashSize = HASH_SIZE;
+            merkleTreeArity = 2;
+        }
 
         // Allocate an area of memory, mapped to file, to read all the constant polynomials,
         // and create them using the allocated address
@@ -111,15 +125,17 @@ public:
             exitProcess();
         }
 
+        uint64_t constTreeSizeBytes = getConstTreeSize();
+
         if (config.mapConstantsTreeFile)
         {
-            pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes(), false);
-            zklog.info("Starks::Starks() successfully mapped " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
+            pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes, false);
+            zklog.info("Starks::Starks() successfully mapped " + to_string(constTreeSizeBytes) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
         }
         else
         {
-            pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes());
-            zklog.info("Starks::Starks() successfully copied " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
+            pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes);
+            zklog.info("Starks::Starks() successfully copied " + to_string(constTreeSizeBytes) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
         }
         TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
 
@@ -159,10 +175,18 @@ public:
         }
 
         TimerStart(MERKLE_TREE_ALLOCATION);
-        treesGL = new MerkleTreeGL*[starkInfo.nStages + 2];
-        treesGL[starkInfo.nStages + 1] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
+        treesGL = new MerkleTreeType*[starkInfo.nStages + 2];
+        for (uint64_t i = 0; i < starkInfo.nStages + 1; i++)
+        {
+            std::string section = "cm" + to_string(i + 1) + "_n";
+            std::string sectionExt = "cm" + to_string(i + 1) + "_2ns";
+            uint64_t nCols = starkInfo.mapSectionsN.section[string2section(section)];
+            Goldilocks::Element *pBuffExtended = &mem[starkInfo.mapOffsets.section[string2section(sectionExt)]];
+            treesGL[i] = new MerkleTreeType(NExtended, nCols, pBuffExtended);
+        }
+        treesGL[starkInfo.nStages + 1] = new MerkleTreeType((Goldilocks::Element *)pConstTreeAddress);
 
-        treesFRI = new MerkleTreeGL*[starkInfo.starkStruct.steps.size() - 1];
+        treesFRI = new MerkleTreeType*[starkInfo.starkStruct.steps.size() - 1];
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
     };
     ~Starks()
@@ -204,33 +228,69 @@ public:
         delete[] treesFRI;
     };
 
-    void genProof(FRIProof<Goldilocks::Element, Goldilocks> &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps);
+    uint64_t getConstTreeSize()
+    {
+        uint n_tmp = 1 << starkInfo.starkStruct.nBitsExt;
+        uint64_t nextN = floor(((double)(n_tmp - 1) / merkleTreeArity) + 1);
+        uint64_t acc = nextN * merkleTreeArity;
+        while (n_tmp > 1)
+        {
+            // FIll with zeros if n nodes in the leve is not even
+            n_tmp = nextN;
+            nextN = floor((n_tmp - 1) / merkleTreeArity) + 1;
+            if (n_tmp > 1)
+            {
+                acc += nextN * merkleTreeArity;
+            }
+            else
+            {
+                acc += 1;
+            }
+        }
+
+        uint64_t numElements = (1 << starkInfo.starkStruct.nBitsExt) * starkInfo.nConstants * sizeof(Goldilocks::Element);
+        uint64_t total = numElements + acc * hashSize * sizeof(ElementType);
+        if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
+            total += merkleTreeArity;
+        } else {
+            total += merkleTreeArity * sizeof(ElementType);
+        }
+        return total; 
+    }
+
+    void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, Steps *steps);
     
-    void calculateZ(StepsParams& params, StarkInfo starkInfo);
-    void calculateH1H2(StepsParams& params, StarkInfo starkInfo);
+    void calculateZ(StepsParams& params);
+    void calculateH1H2(StepsParams& params);
 
-    void extendAndMerkelize(uint64_t step, StepsParams& params, StarkInfo starkInfo, FRIProof<Goldilocks::Element, Goldilocks> &proof);
+    void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
     void calculateExpressions(std::string step, uint64_t nrowsStepBatch, Steps *steps, StepsParams &params, uint64_t N);
-    void computeQ(StepsParams& params, StarkInfo starkInfo, FRIProof<Goldilocks::Element, Goldilocks> &proof);
-    void computeEvals(StepsParams& params, FRIProof<Goldilocks::Element, Goldilocks> &proof, StarkInfo starkInfo);
+    
+    void computeQ(StepsParams& params, FRIProof<ElementType> &proof);
+    void computeEvals(StepsParams& params, FRIProof<ElementType> &proof);
 
-    Polinomial computeFRIPol(StepsParams& params, StarkInfo starkInfo, Steps *steps, uint64_t nrowsStepBatch);
-    void computeFRIFolding(FRIProof<Goldilocks::Element, Goldilocks> &fproof, StarkInfo starkInfo, Polinomial &friPol, uint64_t step, Polinomial &challenge);
-    void computeFRIQueries(FRIProof<Goldilocks::Element, Goldilocks> &fproof, StarkInfo starkInfo, Polinomial &friPol, uint64_t* friQueries);
+    Polinomial *computeFRIPol(StepsParams& params, Steps *steps, uint64_t nrowsStepBatch);
+    
+    void computeFRIFolding(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t step, Polinomial &challenge);
+    void computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries);
 
-    void addTranscript(Transcript &transcript, Goldilocks::Element* buffer, uint64_t nElements);
-    void addTranscript(Transcript &transcript, Polinomial& pol);
-    void getChallenges(Transcript &transcript, Polinomial &challenges, uint64_t nChallenges, uint64_t index);
+    void addTranscriptPublics(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
+    void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);
+    void addTranscript(TranscriptType &transcript, Polinomial &pol);
+    void getChallenges(TranscriptType &transcript, Goldilocks::Element* challenges, uint64_t nChallenges);
 
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
 
 private:
-    Polinomial *transposeH1H2Columns(StepsParams& params, StarkInfo starkInfo);
-    void transposeH1H2Rows(StepsParams& params, StarkInfo starkInfo, Polinomial *transPols);
-    Polinomial *transposeZColumns(StepsParams& params, StarkInfo starkInfo);
-    void transposeZRows(StepsParams& params, StarkInfo starkInfo, Polinomial *transPols);
-    void evmap(StepsParams &params, Polinomial *LEv, StarkInfo starkInfo);
+    Polinomial *transposeH1H2Columns(StepsParams& params);
+    void transposeH1H2Rows(StepsParams& params, Polinomial *transPols);
+    Polinomial *transposeZColumns(StepsParams& params);
+    void transposeZRows(StepsParams& params, Polinomial *transPols);
+    void evmap(StepsParams &params, Polinomial &LEv);
 
 };
+
+template class Starks<Goldilocks::Element, MerkleTreeGL, Transcript>;
+template class Starks<RawFr::Element, MerkleTreeBN128, TranscriptBN128>;
 
 #endif // STARKS_H

@@ -28,11 +28,12 @@ void Transcript::_add1(Goldilocks::Element input)
     }
 }
 
-void Transcript::getField(Goldilocks3::Element output)
+void Transcript::getField(uint64_t* output)
 {
     for (int i = 0; i < 3; i++)
     {
-        output[i] = getFields1();
+        Goldilocks::Element val = getFields1();
+        output[i] = val.fe;
     }
 }
 

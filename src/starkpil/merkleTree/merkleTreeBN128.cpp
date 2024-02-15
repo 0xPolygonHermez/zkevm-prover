@@ -15,11 +15,9 @@ MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width)
     isNodesAllocated = true;
 }
 
-void MerkleTreeBN128::initialize(Goldilocks::Element *_source)
+void MerkleTreeBN128::copySource(Goldilocks::Element *_source)
 {
     std::memcpy(source, _source, height * source_width * sizeof(Goldilocks::Element));
-    merkelize();
-    intialized = true;
 }
 
 MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : source(_source), height(_height), width(_width), source_width(_width)
@@ -35,7 +33,6 @@ MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::
     numNodes = getNumNodes(height);
     nodes = (RawFr::Element *)calloc(numNodes, sizeof(RawFr::Element));
     isNodesAllocated = true;
-    intialized = true;
 }
 
 MerkleTreeBN128::MerkleTreeBN128(void *_source)
@@ -186,6 +183,8 @@ void MerkleTreeBN128::merkelize()
 void MerkleTreeBN128::getRoot(RawFr::Element *root)
 {
     std::memcpy(root, &nodes[numNodes - 1], sizeof(RawFr::Element));
+    zklog.info("MerkleTree root: " + RawFr::field.toString(root[0], 10));
+
 }
 
 uint64_t MerkleTreeBN128::getMerkleProofLength()
@@ -208,7 +207,7 @@ uint64_t MerkleTreeBN128::getElementSize() {
 }
 
 
-void MerkleTreeBN128::getGroupProof(void *res, uint64_t idx)
+void MerkleTreeBN128::getGroupProof(RawFr::Element *res, uint64_t idx)
 {
     assert(idx < height);
 

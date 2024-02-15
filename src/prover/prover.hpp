@@ -18,7 +18,6 @@
 #include "sm/pols_generated/constant_pols.hpp"
 
 
-#include "starkRecursiveF.hpp"
 #include "starkpil/stark_info.hpp"
 #include "starks.hpp"
 #include "constant_pols_starks.hpp"
@@ -29,12 +28,12 @@ class Prover
     PoseidonGoldilocks &poseidon;
     Executor executor;
 
-    StarkRecursiveF *starksRecursiveF;
+    Starks<RawFr::Element, MerkleTreeBN128, TranscriptBN128> *starksRecursiveF;
 
-    Starks *starkZkevm;
-    Starks *starksC12a;
-    Starks *starksRecursive1;
-    Starks *starksRecursive2;
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starkZkevm;
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starksC12a;
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starksRecursive1;
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starksRecursive2;
 
     Fflonk::FflonkProver<AltBn128::Engine> *prover;
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;

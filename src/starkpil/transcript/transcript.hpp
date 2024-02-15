@@ -31,7 +31,7 @@ public:
         std::memset(out, 0, TRANSCRIPT_OUT_SIZE * sizeof(Goldilocks::Element));
     }
     void put(Goldilocks::Element *input, uint64_t size);
-    void getField(Goldilocks::Element *output);
+    void getField(uint64_t *output);
     void getPermutations(uint64_t *res, uint64_t n, uint64_t nBits);
     Goldilocks::Element getFields1();
 };

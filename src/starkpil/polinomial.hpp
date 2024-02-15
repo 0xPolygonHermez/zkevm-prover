@@ -466,6 +466,8 @@ public:
         }
         // double time4 = omp_get_wtime();
         // std::cout << "holu: " << id << " " << pos << " times: " << time2 - time1 << " " << time3 - time2 << " " << time4 - time3 << " " << h2.dim() << std::endl;
+        counter.clear();
+        touched.clear();
     }
 
     static void calculateH1H2_opt3(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys, uint64_t size_values)
@@ -587,6 +589,9 @@ public:
         }
         // double time4 = omp_get_wtime();
         // std::cout << "holu: " << id << " " << pos << " times: " << time2 - time1 << " " << time3 - time2 << " " << time4 - time3 << " " << h2.dim() << std::endl;
+
+        counter.clear();
+        touched.clear();
     }
 
     static void calculateZ(Polinomial &z, Polinomial &num, Polinomial &den)

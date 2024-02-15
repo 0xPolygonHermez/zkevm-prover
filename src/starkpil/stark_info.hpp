@@ -329,15 +329,6 @@ public:
 
     /* Returns a polynomial specified by its ID */
     Polinomial getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol);
-
-    /* Returns the size of the constant tree data/file */
-    uint64_t getConstTreeSizeInBytes (void) const
-    {
-        uint64_t NExtended = 1 << starkStruct.nBitsExt;
-        uint64_t constTreeSize = nConstants * NExtended + NExtended * HASH_SIZE + (NExtended - 1) * HASH_SIZE + MERKLEHASHGOLDILOCKS_HEADER_SIZE;
-        uint64_t constTreeSizeBytes = constTreeSize * sizeof(Goldilocks::Element);
-        return constTreeSizeBytes;
-    }
 };
 
 #endif

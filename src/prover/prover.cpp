@@ -19,7 +19,6 @@
 #include <math.h> /* log2 */
 #include "proof2zkinStark.hpp"
 
-#include "friProofC12.hpp"
 #include <algorithm> // std::min
 #include <openssl/sha.h>
 
@@ -28,6 +27,7 @@
 #include "c12aSteps.hpp"
 #include "recursive1Steps.hpp"
 #include "recursive2Steps.hpp"
+#include "starkRecursiveFSteps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
@@ -119,12 +119,13 @@ Prover::Prover(Goldilocks &fr,
             StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
 
-            starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
+            starkZkevm = new Starks<Goldilocks::Element, MerkleTreeGL, Transcript>(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
             starkZkevm->nrowsStepBatch = NROWS_STEPS_;
-            starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
-            starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
-            starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
-            starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
+            starksC12a = new Starks<Goldilocks::Element, MerkleTreeGL, Transcript>(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
+            starksRecursive1 = new Starks<Goldilocks::Element, MerkleTreeGL, Transcript>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
+            starksRecursive2 = new Starks<Goldilocks::Element, MerkleTreeGL, Transcript>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
+            starksRecursiveF = new Starks<RawFr::Element, MerkleTreeBN128, TranscriptBN128>(config, {config.recursivefConstPols, config.mapConstPolsFile, config.recursivefConstantsTree, config.recursivefStarkInfo}, pAddressStarksRecursiveF);
+            // starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
         }
     }
     catch (std::exception &e)
@@ -571,8 +572,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         TimerStart(STARK_PROOF_BATCH_PROOF);
 
         ZkevmSteps zkevmSteps;
-        FRIProof<Goldilocks::Element, Goldilocks> fproof(starkZkevm->starkInfo, 4);
-        starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &zkevmSteps);
+        FRIProof<Goldilocks::Element> fproof(starkZkevm->starkInfo, 4);
+        starkZkevm->genProof(fproof, &publics[0], &zkevmSteps);
 
         TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
         TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
@@ -599,12 +600,12 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         //-------------------------------------------
         TimerStopAndLog(STARK_GEN_AND_CALC_WITNESS_C12A);
         TimerStart(STARK_C12_A_PROOF_BATCH_PROOF);
-        FRIProof<Goldilocks::Element, Goldilocks> fproofC12a(starksC12a->starkInfo, 4);
+        FRIProof<Goldilocks::Element> fproofC12a(starksC12a->starkInfo, 4);
 
         // Generate the proof
         C12aSteps c12aSteps;
 
-        starksC12a->genProof(fproofC12a, publics, c12aVerkey, &c12aSteps);
+        starksC12a->genProof(fproofC12a, publics, &c12aSteps);
 
         TimerStopAndLog(STARK_C12_A_PROOF_BATCH_PROOF);
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
@@ -635,9 +636,9 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         //-------------------------------------------
 
         TimerStart(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
-        FRIProof<Goldilocks::Element, Goldilocks> fproofRecursive1(starksRecursive1->starkInfo, 4);
+        FRIProof<Goldilocks::Element> fproofRecursive1(starksRecursive1->starkInfo, 4);
         Recursive1Steps recursive1Steps;
-        starksRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1Steps);
+        starksRecursive1->genProof(fproofRecursive1, publics, &recursive1Steps);
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
 
         // Save the proof & zkinproof
@@ -772,9 +773,9 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     //-------------------------------------------
 
     TimerStart(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
-    FRIProof<Goldilocks::Element, Goldilocks> fproofRecursive2(starksRecursive2->starkInfo, 4);
+    FRIProof<Goldilocks::Element> fproofRecursive2(starksRecursive2->starkInfo, 4);
     Recursive2Steps recursive2Steps;
-    starksRecursive2->genProof(fproofRecursive2, publics, recursive2VerkeyValues, &recursive2Steps);
+    starksRecursive2->genProof(fproofRecursive2, publics, &recursive2Steps);
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
@@ -861,9 +862,10 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     //  ----------------------------------------------
 
     TimerStart(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
-    uint64_t polBitsRecursiveF = starksRecursiveF->starkInfo.starkStruct.steps[starksRecursiveF->starkInfo.starkStruct.steps.size() - 1].nBits;
-    FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
-    starksRecursiveF->genProof(fproofRecursiveF, publics);
+    StarkRecursiveFSteps recursiveFSteps;
+    FRIProof<RawFr::Element> fproofRecursiveF(starksRecursiveF->starkInfo, 1);
+
+    starksRecursiveF->genProof(fproofRecursiveF, publics, &recursiveFSteps);
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
@@ -871,6 +873,9 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     json zkinRecursiveF = proof2zkinStark(jProofRecursiveF, starksRecursiveF->starkInfo);
     zkinRecursiveF["publics"] = zkinFinal["publics"];
     zkinRecursiveF["aggregatorAddr"] = strAddress10;
+
+    json2file(zkinRecursiveF, "runtime/output/zkinRecursiveF.json");
+    json2file(jProofRecursiveF, "runtime/output/jProofRecursiveF.json");
 
     // Save proof to file
     if (config.saveProofToFile)
