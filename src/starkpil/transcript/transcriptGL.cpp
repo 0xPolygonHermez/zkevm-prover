@@ -1,7 +1,7 @@
-#include "transcript.hpp"
+#include "transcriptGL.hpp"
 #include "math.h"
 
-void Transcript::put(Goldilocks::Element *input, uint64_t size)
+void TranscriptGL::put(Goldilocks::Element *input, uint64_t size)
 {
     for (uint64_t i = 0; i < size; i++)
     {
@@ -9,7 +9,7 @@ void Transcript::put(Goldilocks::Element *input, uint64_t size)
     }
 }
 
-void Transcript::_add1(Goldilocks::Element input)
+void TranscriptGL::_add1(Goldilocks::Element input)
 {
     pending[pending_cursor] = input;
     pending_cursor++;
@@ -28,7 +28,7 @@ void Transcript::_add1(Goldilocks::Element input)
     }
 }
 
-void Transcript::getField(uint64_t* output)
+void TranscriptGL::getField(uint64_t* output)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -37,7 +37,7 @@ void Transcript::getField(uint64_t* output)
     }
 }
 
-Goldilocks::Element Transcript::getFields1()
+Goldilocks::Element TranscriptGL::getFields1()
 {
     if (out_cursor == 0)
     {
@@ -55,7 +55,7 @@ Goldilocks::Element Transcript::getFields1()
     return res;
 }
 
-void Transcript::getPermutations(uint64_t *res, uint64_t n, uint64_t nBits)
+void TranscriptGL::getPermutations(uint64_t *res, uint64_t n, uint64_t nBits)
 {
     uint64_t totalBits = n * nBits;
 

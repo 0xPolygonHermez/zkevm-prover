@@ -24,7 +24,7 @@ int main()
     void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
 
-    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile}, pAddress);
+    Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile}, pAddress);
 
     starks.nrowsStepBatch = 4;
 

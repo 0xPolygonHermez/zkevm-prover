@@ -10,10 +10,12 @@
 #include "merkleTreeGL.hpp"
 #include "merkleTreeBN128.hpp"
 
-template <typename ElementType, typename MerkleTreeType>
+template <typename ElementType>
 class FRI
 {
 public:
+    using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
+
     static void fold(uint64_t step, FRIProof<ElementType> &proof, Polinomial &friPol, Polinomial& challenge, StarkInfo starkInfo, MerkleTreeType** treesFRI);
     static void proveQueries(uint64_t* friQueries, FRIProof<ElementType> &fproof, MerkleTreeType **trees, MerkleTreeType **treesFRI, StarkInfo starkInfo);
 private:
@@ -24,7 +26,7 @@ private:
     static void getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits);
 };
 
-template class FRI<RawFr::Element, MerkleTreeBN128>;
-template class FRI<Goldilocks::Element, MerkleTreeGL>;
+template class FRI<RawFr::Element>;
+template class FRI<Goldilocks::Element>;
 
 #endif

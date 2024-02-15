@@ -127,12 +127,12 @@ Prover::Prover(Goldilocks &fr,
             StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
 
-            starkZkevm = new Starks<Goldilocks::Element, MerkleTreeGL, Transcript>(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
+            starkZkevm = new Starks<Goldilocks::Element>(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
             starkZkevm->nrowsStepBatch = NROWS_STEPS_;
-            starksC12a = new Starks<Goldilocks::Element, MerkleTreeGL, Transcript>(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
-            starksRecursive1 = new Starks<Goldilocks::Element, MerkleTreeGL, Transcript>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
-            starksRecursive2 = new Starks<Goldilocks::Element, MerkleTreeGL, Transcript>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
-            starksRecursiveF = new Starks<RawFr::Element, MerkleTreeBN128, TranscriptBN128>(config, {config.recursivefConstPols, config.mapConstPolsFile, config.recursivefConstantsTree, config.recursivefStarkInfo}, pAddressStarksRecursiveF);
+            starksC12a = new Starks<Goldilocks::Element>(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
+            starksRecursive1 = new Starks<Goldilocks::Element>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
+            starksRecursive2 = new Starks<Goldilocks::Element>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
+            starksRecursiveF = new Starks<RawFr::Element>(config, {config.recursivefConstPols, config.mapConstPolsFile, config.recursivefConstantsTree, config.recursivefStarkInfo}, pAddressStarksRecursiveF);
         }
     }
     catch (std::exception &e)

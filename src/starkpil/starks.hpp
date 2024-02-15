@@ -9,7 +9,7 @@
 #include "constant_pols_starks.hpp"
 #include "proof_stark.hpp"
 #include "fri.hpp"
-#include "transcript.hpp"
+#include "transcriptGL.hpp"
 #include "zhInv.hpp"
 #include "steps.hpp"
 #include "zklog.hpp"
@@ -27,13 +27,16 @@ struct StarkFiles
     std::string zkevmStarkInfo;
 };
 
-template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+template <typename ElementType>
 class Starks
 {
 public:
     const Config &config;
     StarkInfo starkInfo;
     uint64_t nrowsStepBatch;
+
+    using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
+    using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
 
 private:
     void *pConstPolsAddress;
@@ -305,7 +308,7 @@ public:
     void ffi_extend_and_merkelize(uint64_t step, void *pParams, void *pProof);
 };
 
-template class Starks<Goldilocks::Element, MerkleTreeGL, Transcript>;
-template class Starks<RawFr::Element, MerkleTreeBN128, TranscriptBN128>;
+template class Starks<Goldilocks::Element>;
+template class Starks<RawFr::Element>;
 
 #endif // STARKS_H

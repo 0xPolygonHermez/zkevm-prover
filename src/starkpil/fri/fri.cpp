@@ -4,8 +4,8 @@
 #include "timer.hpp"
 #include "zklog.hpp"
 
-template <typename ElementType, typename MerkleTreeType>
-void FRI<ElementType, MerkleTreeType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinomial &friPol, Polinomial& challenge, StarkInfo starkInfo, MerkleTreeType** treesFRI) {
+template <typename ElementType>
+void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinomial &friPol, Polinomial& challenge, StarkInfo starkInfo, MerkleTreeType** treesFRI) {
 
     uint64_t polBits = log2(friPol.degree());
 
@@ -109,8 +109,8 @@ void FRI<ElementType, MerkleTreeType>::fold(uint64_t step, FRIProof<ElementType>
     }
 }
 
-template <typename ElementType, typename MerkleTreeType>
-void FRI<ElementType, MerkleTreeType>::proveQueries(uint64_t* friQueries, FRIProof<ElementType> &fproof, MerkleTreeType **trees, MerkleTreeType **treesFRI, StarkInfo starkInfo) {
+template <typename ElementType>
+void FRI<ElementType>::proveQueries(uint64_t* friQueries, FRIProof<ElementType> &fproof, MerkleTreeType **trees, MerkleTreeType **treesFRI, StarkInfo starkInfo) {
 
     for (uint64_t step = 0; step < starkInfo.starkStruct.steps.size(); step++)
     {
@@ -134,8 +134,8 @@ void FRI<ElementType, MerkleTreeType>::proveQueries(uint64_t* friQueries, FRIPro
     return;
 }
 
-template <typename ElementType, typename MerkleTreeType>
-void FRI<ElementType, MerkleTreeType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *trees[], uint64_t nTrees, uint64_t idx, uint64_t treeIdx)
+template <typename ElementType>
+void FRI<ElementType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *trees[], uint64_t nTrees, uint64_t idx, uint64_t treeIdx)
 {
     vector<MerkleProof<ElementType>> vMkProof;
     for (uint i = 0; i < nTrees; i++)
@@ -153,8 +153,8 @@ void FRI<ElementType, MerkleTreeType>::queryPol(FRIProof<ElementType> &fproof, M
 }
 
 
-template <typename ElementType, typename MerkleTreeType>
-void FRI<ElementType, MerkleTreeType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *tree, uint64_t idx, uint64_t treeIdx)
+template <typename ElementType>
+void FRI<ElementType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *tree, uint64_t idx, uint64_t treeIdx)
 {
     vector<MerkleProof<ElementType>> vMkProof;
 
@@ -169,8 +169,8 @@ void FRI<ElementType, MerkleTreeType>::queryPol(FRIProof<ElementType> &fproof, M
     return;
 }
 
-template <typename ElementType, typename MerkleTreeType>
-void FRI<ElementType, MerkleTreeType>::polMulAxi(Polinomial &pol, Goldilocks::Element init, Goldilocks::Element acc)
+template <typename ElementType>
+void FRI<ElementType>::polMulAxi(Polinomial &pol, Goldilocks::Element init, Goldilocks::Element acc)
 {
     Goldilocks::Element r = init;
     for (uint64_t i = 0; i < pol.degree(); i++)
@@ -180,8 +180,8 @@ void FRI<ElementType, MerkleTreeType>::polMulAxi(Polinomial &pol, Goldilocks::El
     }
 }
 
-template <typename ElementType, typename MerkleTreeType>
-void FRI<ElementType, MerkleTreeType>::evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinomial &x)
+template <typename ElementType>
+void FRI<ElementType>::evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinomial &x)
 {
     if (p.degree() == 0)
     {
@@ -199,8 +199,8 @@ void FRI<ElementType, MerkleTreeType>::evalPol(Polinomial &res, uint64_t res_idx
     }
 }
 
-template <typename ElementType, typename MerkleTreeType>
-void FRI<ElementType, MerkleTreeType>::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits)
+template <typename ElementType>
+void FRI<ElementType>::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits)
 {
     uint64_t w = (1 << trasposeBits);
     uint64_t h = pol.degree() / w;

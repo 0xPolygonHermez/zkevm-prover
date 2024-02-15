@@ -28,12 +28,12 @@ class Prover
     PoseidonGoldilocks &poseidon;
     Executor executor;
 
-    Starks<RawFr::Element, MerkleTreeBN128, TranscriptBN128> *starksRecursiveF;
+    Starks<RawFr::Element> *starksRecursiveF;
 
-    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starkZkevm;
-    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starksC12a;
-    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starksRecursive1;
-    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starksRecursive2;
+    Starks<Goldilocks::Element> *starkZkevm;
+    Starks<Goldilocks::Element> *starksC12a;
+    Starks<Goldilocks::Element> *starksRecursive1;
+    Starks<Goldilocks::Element> *starksRecursive2;
 
     Fflonk::FflonkProver<AltBn128::Engine> *prover;
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;

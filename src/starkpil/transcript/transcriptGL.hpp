@@ -10,7 +10,7 @@
 #define TRANSCRIPT_OUT_SIZE 12
 
 // TODO: Pending to review and re-factor
-class Transcript
+class TranscriptGL
 {
 private:
     void _add1(Goldilocks::Element input);
@@ -24,7 +24,7 @@ public:
     uint out_cursor = 0;
     uint state_cursor = 0;
 
-    Transcript()
+    TranscriptGL()
     {
         std::memset(state, 0, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
         std::memset(pending, 0, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));
