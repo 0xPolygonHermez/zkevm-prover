@@ -1044,6 +1044,10 @@ void starks_free(void *pStarks) {
     delete starks;
 }
 
+void *get_stark_info(void *pStarks) {
+    return &((Starks*)pStarks)->starkInfo;
+}
+
 // void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer) 
 // {
 //     return ((Starks*)pStarks)->transposeH1H2Columns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
@@ -1286,12 +1290,6 @@ void get_challenges(void *pTranscript, void *pPolinomial, uint64_t nChallenges, 
 void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits) {
     Transcript *transcript = (Transcript *)pTranscript;
     transcript->getPermutations(res, n, nBits);
-}
-
-void Starks::getChallenges(Transcript &transcript, Polinomial &challenges, uint64_t nChallenges, uint64_t index) {
-    for(uint64_t i = 0; i < nChallenges; i++) {
-        transcript.getField(challenges[index + i]);
-    }
 }
 
 uint64_t get_num_rows_step_batch(void *pStarks) {

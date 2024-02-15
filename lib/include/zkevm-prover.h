@@ -54,6 +54,7 @@
     void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress);
     void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps);
     void starks_free(void *pStarks);
+    void *get_stark_info(void *pStarks);
 
     // void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
     // void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
