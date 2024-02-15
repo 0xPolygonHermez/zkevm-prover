@@ -3,9 +3,9 @@ name: Prover e2e test
 on:
   workflow_dispatch:
   push:
-    branches: [ "main","develop", "release_*", "fork_8" ]
+    branches: [ "main","develop", "release_*", "fork_8", "fork_8_2" ]
   pull_request:
-    branches: [ "main","develop", "release_*", "fork_8" ]
+    branches: [ "main","develop", "release_*", "fork_8", "fork_8_2" ]
 
 jobs:
   e2e-collection-tests:
@@ -22,7 +22,7 @@ jobs:
     - name: Install snarkjs
       run: npm -g install snarkjs
     - name: make
-      run: cd src/grpc && make && cd ../.. && make -j
+      run: cd src/grpc && make && cd ../.. && make generate && make -j
     - name: remove all config 
       run: rm -rf config
     - name: remove old proofs

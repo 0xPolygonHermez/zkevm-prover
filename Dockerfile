@@ -9,6 +9,7 @@ COPY ./test ./test
 COPY ./tools ./tools
 COPY ./config ./config
 COPY Makefile .
+RUN make generate
 RUN make -j
 
 FROM ubuntu:22.04
