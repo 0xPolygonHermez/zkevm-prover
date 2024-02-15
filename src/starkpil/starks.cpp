@@ -775,25 +775,25 @@ void Starks::merkelizeMemory()
     delete[] treeDBG;
 }
 
-// void * Starks::createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
-//     StepsParams *params = (StepsParams*)calloc(1, sizeof(StepsParams));
+void * Starks::createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
+    StepsParams *params = (StepsParams*)calloc(1, sizeof(StepsParams));
 
-//     params->pols = mem;
-//     params->pConstPols = pConstPols;
-//     params->pConstPols2ns = pConstPols2ns;
-//     params->challenges = (Polinomial&)pChallenges;
-//     params->x_n = x_n;
-//     params->x_2ns = x_2ns;
-//     params->zi = zi;
-//     params->evals = (Polinomial&)pEvals;
-//     params->xDivXSubXi = (Polinomial&)pXDivXSubXi;
-//     params->xDivXSubWXi = (Polinomial&)pXDivXSubWXi;
-//     params->publicInputs = (Goldilocks::Element*)pPublicInputs;
-//     params->q_2ns = p_q_2ns;
-//     params->f_2ns = p_f_2ns;
+    params->pols = mem;
+    params->pConstPols = pConstPols;
+    params->pConstPols2ns = pConstPols2ns;
+    params->challenges = (Polinomial&)pChallenges;
+    params->x_n = x_n;
+    params->x_2ns = x_2ns;
+    params->zi = zi;
+    params->evals = (Polinomial&)pEvals;
+    params->xDivXSubXi = (Polinomial&)pXDivXSubXi;
+    params->xDivXSubWXi = (Polinomial&)pXDivXSubWXi;
+    params->publicInputs = (Goldilocks::Element*)pPublicInputs;
+    params->q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
+    params->f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
 
-//     return params;
-// }
+    return params;
+}
 
 // void Starks::treeMerkelize(uint64_t index) {
 //     treesGL[index]->merkelize();
@@ -939,6 +939,8 @@ void Starks::merkelizeMemory()
 //     std::memcpy(&(*proof).proofs.root4[0], (*root3).address(), HASH_SIZE * sizeof(Goldilocks::Element));
 // }
 
-
+void Starks::ffi_extend_and_merkelize(uint64_t step, void *pParams, void *pProof) {
+    extendAndMerkelize(step, (StepsParams&)pParams, starkInfo, (FRIProof<Goldilocks::Element, Goldilocks>&)pProof);
+}
 
 

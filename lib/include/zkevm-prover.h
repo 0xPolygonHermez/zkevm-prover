@@ -39,7 +39,9 @@
 
     // FRIProof
     // ========================================================================================
-    void *fri_proof_new(uint64_t polN, uint64_t dim, uint64_t numTrees, uint64_t evalSize, uint64_t nPublics);
+    void *fri_proof_new(void *pStarks);
+    void *fri_proof_get_root(void *pFriProof, uint64_t root_index, uint64_t root_subindex);
+    void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t root_index);
     void fri_proof_free(void *pFriProof);
 
     // Config
@@ -53,25 +55,34 @@
     void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps);
     void starks_free(void *pStarks);
 
-    void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
-    void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
-    void *transpose_z_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
-    void transpose_z_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
-    void evmap(void *pStarks, void *pAddress, void *evals, void *LEv, void *LpEv);
+    // void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
+    // void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
+    // void *transpose_z_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
+    // void transpose_z_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
+    // void evmap(void *pStarks, void *pAddress, void *evals, void *LEv, void *LpEv);
 
     void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs);
     void steps_params_free(void *pStepsParams);
-    void tree_merkelize(void *pStarks, uint64_t index);
-    void tree_get_root(void *pStarks, uint64_t index, void *root);
-    void extend_pol(void *pStarks, uint64_t step);
-    void *get_pbuffer(void *pStarks);
+    void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
+    // void tree_merkelize(void *pStarks, uint64_t index);
+    // void tree_get_root(void *pStarks, uint64_t index, void *root);
+    // void extend_pol(void *pStarks, uint64_t step);
+    // void *get_pbuffer(void *pStarks);
 
-    void calculate_h1_h2(void *pStarks, void *pTransPols);
-    void calculate_z(void *pStarks, void *pNewPols);
-    void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2);
-    void calculate_lev_lpev(void *pStarks, void *pLEv, void *pLpEv, void *pXis, void *pWxis, void *pC_w, void *pChallenges);
-    void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi);
-    void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3);
+    void calculate_h1_h2(void *pStarks, void *pParams);
+    void calculate_z(void *pStarks, void *pParams);
+    void calculate_expressions(void *pStarks, char* step, uint64_t nrowsStepBatch, void *pSteps, void *pParams, uint64_t n);
+    void compute_q(void *pStarks, void *pParams, void *pProof);
+    void compute_evals(void *pStarks, void *pParams, void *pProof);
+
+    void *compute_fri_pol(void *pStarks, void *pParams, void *steps, uint64_t nrowsStepBatch);
+    void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *challenge);
+    void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* friQueries);
+
+    // void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2);
+    // void calculate_lev_lpev(void *pStarks, void *pLEv, void *pLpEv, void *pXis, void *pWxis, void *pC_w, void *pChallenges);
+    // void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi);
+    // void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3);
 
     uint64_t get_num_rows_step_batch(void *pStarks);
 
@@ -87,22 +98,26 @@
 
     // zkin
     // ========================================================================================
-    void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC);
+    void *zkin_new(void* pStarks, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC);
 
     // FRI Proof
     // ========================================================================================
-    void save_proof(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
+    void save_proof(void* pStarks, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
 
     // Transcript
     // =================================================================================
     void *transcript_new();
-    void transcript_put(void *pTranscript, void *pInput, uint64_t size);
+    void transcript_add(void *pTranscript, void *pInput, uint64_t size);
+    void transcript_add_polinomial(void *pTranscript, void *pPolinomial);
     void transcript_get_field(void *pTranscript, void *pOutput);
     void transcript_free(void *pTranscript);
+    void get_challenges(void *pTranscript, void *pPolinomial, uint64_t nChallenges, uint64_t index);
+    void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits);
 
     // Polinomial
     // =================================================================================
     void *polinomial_new(uint64_t degree, uint64_t dim, char* name);
+    void *polinomial_new_void();
     void *polinomial_get_address(void *pPolinomial);
     void *polinomial_get_p_element(void *pPolinomial, uint64_t index);
     void polinomial_free(void *pPolinomial);
