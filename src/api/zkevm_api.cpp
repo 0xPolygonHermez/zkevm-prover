@@ -53,6 +53,8 @@
 #include "c12aSteps.hpp"
 #include "recursive1Steps.hpp"
 #include "recursive2Steps.hpp"
+#include "starkRecursiveFSteps.hpp"
+#include "proof2zkinStark.hpp"
 #include "starks.hpp"
 
 
@@ -989,25 +991,25 @@ void step52ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
 }
 
 void *fri_proof_new(void *pStarks) {
-    Starks *starks = (Starks*)pStarks;
-    FRIProof<Goldilocks::Element, Goldilocks>* friProof = new FRIProof<Goldilocks::Element, Goldilocks>(starks->starkInfo, 4);
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
+    FRIProof<Goldilocks::Element>* friProof = new FRIProof<Goldilocks::Element>(starks->starkInfo, 4);
 
     return friProof;
 }
 
 void *fri_proof_get_root(void *pFriProof, uint64_t root_index, uint64_t root_subindex) {
-    FRIProof<Goldilocks::Element, Goldilocks>* friProof = (FRIProof<Goldilocks::Element, Goldilocks>*)pFriProof;
+    FRIProof<Goldilocks::Element>* friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     return &friProof->proofs.roots[root_index][root_subindex];
 }
 
 void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t root_index) {
-    FRIProof<Goldilocks::Element, Goldilocks>* friProof = (FRIProof<Goldilocks::Element, Goldilocks>*)pFriProof;
+    FRIProof<Goldilocks::Element>* friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     return &friProof->proofs.fri.trees[tree_index].root[root_index];
 }
 
 
 void fri_proof_free(void *pFriProof) {
-    FRIProof<Goldilocks::Element, Goldilocks>* friProof = (FRIProof<Goldilocks::Element, Goldilocks>*)pFriProof;
+    FRIProof<Goldilocks::Element>* friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     delete friProof;
 }
 
@@ -1027,50 +1029,49 @@ void config_free(void *pConfig) {
 
 void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress) {
     Config* config = (Config*)pConfig;
-    return new Starks(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo}, pAddress);
+    return new Starks<Goldilocks::Element, MerkleTreeGL, Transcript>(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo}, pAddress);
 }
 
 void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps) {
-    Starks* starks = (Starks*)pStarks;
-    auto friProof = (FRIProof<Goldilocks::Element, Goldilocks>*)pFRIProof;
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript>* starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
+    auto friProof = (FRIProof<Goldilocks::Element>*)pFRIProof;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
-    Goldilocks::Element* verkey = (Goldilocks::Element*)pVerkey;
     ZkevmSteps* zkevmSteps = (ZkevmSteps*)pSteps;
-    starks->genProof(*friProof, publicInputs, verkey, zkevmSteps);
+    starks->genProof(*friProof, publicInputs, zkevmSteps);
 }
 
 void starks_free(void *pStarks) {
-    Starks* starks = (Starks*)pStarks;
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript>* starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
     delete starks;
 }
 
 void *get_stark_info(void *pStarks) {
-    return &((Starks*)pStarks)->starkInfo;
+    return &((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->starkInfo;
 }
 
 // void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer) 
 // {
-//     return ((Starks*)pStarks)->transposeH1H2Columns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
+//     return ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->transposeH1H2Columns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
 // }
 
 // void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols) {
-//     ((Starks*)pStarks)->transposeH1H2Rows(pAddress, *numCommited, (Polinomial *)transPols);
+//     ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->transposeH1H2Rows(pAddress, *numCommited, (Polinomial *)transPols);
 // }
 
 // void *transpose_z_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer) {
-//     return ((Starks*)pStarks)->transposeZColumns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
+//     return ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->transposeZColumns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
 // }
 
 // void transpose_z_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols) {
-//     ((Starks*)pStarks)->transposeZRows(pAddress, *numCommited, (Polinomial*)transPols);
+//     ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->transposeZRows(pAddress, *numCommited, (Polinomial*)transPols);
 // }
 
 // void evmap(void *pStarks, void *pAddress, void *evals, void *LEv, void *LpEv) {
-//     ((Starks*)pStarks)->evmap(pAddress, *(Polinomial*)evals, *(Polinomial*)LEv, *(Polinomial*)LpEv);
+//     ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->evmap(pAddress, *(Polinomial*)evals, *(Polinomial*)LEv, *(Polinomial*)LpEv);
 // }
 
 void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
-    Starks* starks = (Starks*)pStarks;
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript>* starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
 
     return starks->createStepsParams(pChallenges, pEvals, pXDivXSubXi, pXDivXSubWXi, pPublicInputs);
 }
@@ -1082,85 +1083,85 @@ void steps_params_free(void *pStepsParams) {
 }
 
 void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *pProof) {
-    Starks* starks = (Starks*)pStarks;
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript>* starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
 
     starks->ffi_extend_and_merkelize(step, (StepsParams*)pParams, pProof);
 }
 
 // void tree_merkelize(void *pStarks, uint64_t index) {
-//     Starks* starks = (Starks*)pStarks;
+//     Starks<Goldilocks::Element, MerkleTreeGL, Transcript>* starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
 //     starks->treeMerkelize(index);
 // }
 
 // void tree_get_root(void *pStarks, uint64_t index, void *root) {
-//     Starks* starks = (Starks*)pStarks;
+//     Starks<Goldilocks::Element, MerkleTreeGL, Transcript>* starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
 
 //     starks->treeGetRoot(index, (Goldilocks::Element*)root);
 // }
 
 // void extend_pol(void *pStarks, uint64_t step) {
-//     Starks* starks = (Starks*)pStarks;
+//     Starks<Goldilocks::Element, MerkleTreeGL, Transcript>* starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
 //     starks->extendPol(step);
 // }
 
 // void *get_pbuffer(void *pStarks) {
-//     return ((Starks*)pStarks)->getPBuffer();
+//     return ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->getPBuffer();
 // }
 
 void calculate_h1_h2(void *pStarks, void *pParams) {
-    Starks *starks = (Starks*)pStarks;
-    starks->calculateH1H2((StepsParams&)pParams, starks->starkInfo);
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
+    starks->calculateH1H2((StepsParams&)pParams);
 }
 
 void calculate_z(void *pStarks, void *pParams) {
-    Starks *starks = (Starks*)pStarks;
-    starks->calculateZ(*(StepsParams*)pParams, starks->starkInfo);
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
+    starks->calculateZ(*(StepsParams*)pParams);
 }
 
 void calculate_expressions(void *pStarks, char* step, uint64_t nrowsStepBatch, void *pSteps, void *pParams, uint64_t n) {
-    ((Starks*)pStarks)->calculateExpressions(step, nrowsStepBatch, (Steps*)pSteps, *(StepsParams*)pParams, n);
+    ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->calculateExpressions(step, nrowsStepBatch, (Steps*)pSteps, *(StepsParams*)pParams, n);
 }
 
 void compute_q(void *pStarks, void *pParams, void *pProof) {
-    Starks *starks = (Starks*)pStarks;
-    starks->computeQ(*(StepsParams*)pParams, starks->starkInfo, *(FRIProof<Goldilocks::Element, Goldilocks>*)pProof);
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
+    starks->computeQ(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof);
 }
 
 void compute_evals(void *pStarks, void *pParams, void *pProof) {
-    Starks *starks = (Starks*)pStarks;
-    starks->computeEvals(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element, Goldilocks>*)pProof, starks->starkInfo);
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
+    starks->computeEvals(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof);
 }
 
 void *compute_fri_pol(void *pStarks, void *pParams, void *steps, uint64_t nrowsStepBatch) {
-    Starks *starks = (Starks*)pStarks;
-    starks->computeFRIPol(*(StepsParams*)pParams, starks->starkInfo, (Steps*)steps, nrowsStepBatch);
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
+    starks->computeFRIPol(*(StepsParams*)pParams, (Steps*)steps, nrowsStepBatch);
 }
 
 void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *challenge) {
-    Starks *starks = (Starks*)pStarks;
-    starks->computeFRIFolding(*(FRIProof<Goldilocks::Element, Goldilocks>*)pProof, starks->starkInfo, *(Polinomial*)pFriPol, step, *(Polinomial *)challenge);
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
+    starks->computeFRIFolding(*(FRIProof<Goldilocks::Element>*)pProof, *(Polinomial*)pFriPol, step, *(Polinomial *)challenge);
 }
 
 void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* friQueries) {
-    Starks *starks = (Starks*)pStarks;
-    starks->computeFRIQueries(*(FRIProof<Goldilocks::Element, Goldilocks>*)pProof, starks->starkInfo, *(Polinomial*)pFriPol, friQueries);
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> *starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
+    starks->computeFRIQueries(*(FRIProof<Goldilocks::Element>*)pProof, *(Polinomial*)pFriPol, friQueries);
 }
 
 
 // void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2) {
-//     ((Starks*)pStarks)->ffi_exps_2ns((Polinomial*)pQq1, (Polinomial*)pQq2);
+//     ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->ffi_exps_2ns((Polinomial*)pQq1, (Polinomial*)pQq2);
 // }
 
 // void calculate_lev_lpev(void *pStarks, void *pLEv, void *pLpEv, void *pXis, void *pWxis, void *pC_w, void *pChallenges) {
-//     ((Starks*)pStarks)->ffi_lev_lpev((Polinomial*)pLEv, (Polinomial*)pLpEv, (Polinomial*)pXis, (Polinomial*)pWxis, (Polinomial*)pC_w, (Polinomial*)pChallenges);
+//     ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->ffi_lev_lpev((Polinomial*)pLEv, (Polinomial*)pLpEv, (Polinomial*)pXis, (Polinomial*)pWxis, (Polinomial*)pC_w, (Polinomial*)pChallenges);
 // }
 
 // void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi) {
-//     ((Starks*)pStarks)->ffi_xdivxsubxi(extendBits, (Polinomial*)xi, (Polinomial*)wxi, (Polinomial*)challenges, (Polinomial*)xDivXSubXi, (Polinomial*)xDivXSubWXi);
+//     ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->ffi_xdivxsubxi(extendBits, (Polinomial*)xi, (Polinomial*)wxi, (Polinomial*)challenges, (Polinomial*)xDivXSubXi, (Polinomial*)xDivXSubWXi);
 // }
 
 // void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3) {
-//     ((Starks*)pStarks)->ffi_finalize_proof((FRIProof*)proof, (Transcript*)transcript, (Polinomial*)evals, (Polinomial*)root0, (Polinomial*)root1, (Polinomial*)root2, (Polinomial*)root3);
+//     ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->ffi_finalize_proof((FRIProof*)proof, (Transcript*)transcript, (Polinomial*)evals, (Polinomial*)root0, (Polinomial*)root1, (Polinomial*)root2, (Polinomial*)root3);
 // }
 
 void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols) {
@@ -1183,7 +1184,7 @@ void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char* zkevmVer
 }
 
 void *zkin_new(void* pStarks, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC) {
-    auto friProof = (FRIProof<Goldilocks::Element, Goldilocks>*)pFriProof;
+    auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
     Goldilocks::Element* rootC = (Goldilocks::Element*)pRootC;
 
@@ -1204,7 +1205,7 @@ void *zkin_new(void* pStarks, void *pFriProof, unsigned long numPublicInputs, vo
     nlohmann::json* zkin = new nlohmann::json();
     *jProof = friProof->proofs.proof2json();
 
-    *zkin = proof2zkinStark(*jProof, ((Starks*)pStarks)->starkInfo);
+    *zkin = proof2zkinStark(*jProof, ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->starkInfo);
     (*zkin)["publics"] = publicStarkJson;
     if (numRootC != 0) (*zkin)["rootC"] = xrootC;
 
@@ -1212,7 +1213,7 @@ void *zkin_new(void* pStarks, void *pFriProof, unsigned long numPublicInputs, vo
 }
 
 void save_proof(void* pStarks, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
-    auto friProof = (FRIProof<Goldilocks::Element, Goldilocks>*)pFriProof;
+    auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
 
     // Generate publics
@@ -1225,7 +1226,7 @@ void save_proof(void* pStarks, void *pFriProof, unsigned long numPublicInputs, v
 
 
     nlohmann::ordered_json jProofRecursive1 = friProof->proofs.proof2json();
-    nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1, ((Starks*)pStarks)->starkInfo);
+    nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1, ((Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks)->starkInfo);
     zkinRecursive1["publics"] = publicStarkJson;
 
     // save publics to filestarks
@@ -1267,7 +1268,7 @@ void transcript_add_polinomial(void *pTranscript, void *pPolinomial) {
 
 void transcript_get_field(void *pTranscript, void *pOutput) {
     auto transcript = (Transcript *)pTranscript;
-    auto output = (Goldilocks::Element *)pOutput;
+    auto output = (uint64_t *)pOutput;
 
     transcript->getField(output);
 }
@@ -1283,7 +1284,7 @@ void get_challenges(void *pTranscript, void *pPolinomial, uint64_t nChallenges, 
     Polinomial *polinomial = (Polinomial *)pPolinomial;
 
      for(uint64_t i = 0; i < nChallenges; i++) {
-        transcript->getField(polinomial->operator[](index + i));
+        transcript->getField((uint64_t*)polinomial->operator[](index + i));
     }  
 }
 
@@ -1293,7 +1294,7 @@ void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBi
 }
 
 uint64_t get_num_rows_step_batch(void *pStarks) {
-    Starks* starks = (Starks*)pStarks;
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript>* starks = (Starks<Goldilocks::Element, MerkleTreeGL, Transcript>*)pStarks;
 
     return starks->nrowsStepBatch;
 }

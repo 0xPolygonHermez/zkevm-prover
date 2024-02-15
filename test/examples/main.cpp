@@ -19,12 +19,12 @@ int main()
 
     StarkInfo starkInfo(config, starkInfoFile);
 
-    FRIProof<Goldilocks::Element, Goldilocks> fproof(starkInfo, 4);
+    FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
 
     void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
 
-    Starks starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile}, pAddress);
+    Starks<Goldilocks::Element, MerkleTreeGL, Transcript> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile}, pAddress);
 
     starks.nrowsStepBatch = 4;
 
@@ -56,7 +56,7 @@ int main()
     allVerkey[2] = Goldilocks::fromU64(allVerkeyJson["constRoot"][2]);
     allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
 
-    starks.genProof(fproof, &publicInputs[0], allVerkey, &allSteps);
+    starks.genProof(fproof, &publicInputs[0], &allSteps);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
 

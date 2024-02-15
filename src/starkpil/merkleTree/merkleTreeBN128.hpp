@@ -5,6 +5,7 @@
 #include "fr.hpp"
 #include "goldilocks_base_field.hpp"
 #include "poseidon_opt.hpp"
+#include "zklog.hpp"
 
 #define MT_BN128_ARITY 16
 #define GOLDILOCKS_ELEMENTS 3
@@ -23,8 +24,7 @@ public:
     uint64_t width;
     uint64_t source_width;
     uint64_t hashArity = MT_BN128_ARITY;
-    uint64_t elementSize = 1;
-    bool intialized = false;
+    uint64_t elementSize = 16;
     bool isSourceAllocated = false;
     bool isNodesAllocated = false;
     MerkleTreeBN128(){};
@@ -39,10 +39,10 @@ public:
     uint64_t getMerkleProofSize();
     uint64_t getElementSize();
     RawFr::Element *address() { return nodes; };
-    void getGroupProof(void *res, uint64_t idx);
+    void getGroupProof(RawFr::Element *res, uint64_t idx);
     Goldilocks::Element getElement(uint64_t idx, uint64_t subIdx);
     void merkle_genMerkleProof(RawFr::Element *proof, uint64_t idx, uint64_t offset, uint64_t n);
-    void initialize(Goldilocks::Element *source);
+    void copySource(Goldilocks::Element *source);
     void merkelize();
 };
 #endif

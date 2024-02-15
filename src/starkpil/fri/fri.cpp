@@ -4,8 +4,8 @@
 #include "timer.hpp"
 #include "zklog.hpp"
 
-template <typename ElementType, typename FieldType, typename MerkleTree>
-void FRI<ElementType, FieldType, MerkleTree>::fold(uint64_t step, FRIProof<ElementType, FieldType> &proof, Polinomial &friPol, Polinomial& challenge, StarkInfo starkInfo, MerkleTree** treesFRI) {
+template <typename ElementType, typename MerkleTreeType>
+void FRI<ElementType, MerkleTreeType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinomial &friPol, Polinomial& challenge, StarkInfo starkInfo, MerkleTreeType** treesFRI) {
 
     uint64_t polBits = log2(friPol.degree());
 
@@ -95,7 +95,7 @@ void FRI<ElementType, FieldType, MerkleTree>::fold(uint64_t step, FRIProof<Eleme
         // Re-org in groups
         Polinomial aux(pol2N, FIELD_EXTENSION);
         getTransposed(aux, pol2_e, starkInfo.starkStruct.steps[step + 1].nBits);
-        treesFRI[step] = new MerkleTree(nGroups, groupSize * FIELD_EXTENSION, NULL);
+        treesFRI[step] = new MerkleTreeType(nGroups, groupSize * FIELD_EXTENSION, NULL);
         treesFRI[step]->copySource(aux.address());
         treesFRI[step]->merkelize();
         treesFRI[step]->getRoot(&proof.proofs.fri.trees[step + 1].root[0]);
@@ -109,8 +109,8 @@ void FRI<ElementType, FieldType, MerkleTree>::fold(uint64_t step, FRIProof<Eleme
     }
 }
 
-template <typename ElementType, typename FieldType, typename MerkleTree>
-void FRI<ElementType, FieldType, MerkleTree>::proveQueries(uint64_t* friQueries, FRIProof<ElementType, FieldType> &fproof, MerkleTree **trees, MerkleTree **treesFRI, StarkInfo starkInfo) {
+template <typename ElementType, typename MerkleTreeType>
+void FRI<ElementType, MerkleTreeType>::proveQueries(uint64_t* friQueries, FRIProof<ElementType> &fproof, MerkleTreeType **trees, MerkleTreeType **treesFRI, StarkInfo starkInfo) {
 
     for (uint64_t step = 0; step < starkInfo.starkStruct.steps.size(); step++)
     {
@@ -134,17 +134,17 @@ void FRI<ElementType, FieldType, MerkleTree>::proveQueries(uint64_t* friQueries,
     return;
 }
 
-template <typename ElementType, typename FieldType, typename MerkleTree>
-void FRI<ElementType, FieldType, MerkleTree>::queryPol(FRIProof<ElementType, FieldType> &fproof, MerkleTree *trees[], uint64_t nTrees, uint64_t idx, uint64_t treeIdx)
+template <typename ElementType, typename MerkleTreeType>
+void FRI<ElementType, MerkleTreeType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *trees[], uint64_t nTrees, uint64_t idx, uint64_t treeIdx)
 {
-    vector<MerkleProof<ElementType, FieldType>> vMkProof;
+    vector<MerkleProof<ElementType>> vMkProof;
     for (uint i = 0; i < nTrees; i++)
     {
-        ElementType buff[trees[i]->getMerkleTreeWidth() + trees[i]->getMerkleProofSize()] = {FieldType::zero()};
+        ElementType buff[trees[i]->getMerkleTreeWidth() + trees[i]->getMerkleProofSize()];
 
         trees[i]->getGroupProof(&buff[0], idx);
 
-        MerkleProof<ElementType, FieldType> mkProof(trees[i]->getMerkleTreeWidth(), trees[i]->getMerkleProofLength(), trees[i]->getElementSize(), &buff[0]);
+        MerkleProof<ElementType> mkProof(trees[i]->getMerkleTreeWidth(), trees[i]->getMerkleProofLength(), trees[i]->getElementSize(), &buff[0]);
         vMkProof.push_back(mkProof);
     }
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
@@ -153,15 +153,15 @@ void FRI<ElementType, FieldType, MerkleTree>::queryPol(FRIProof<ElementType, Fie
 }
 
 
-template <typename ElementType, typename FieldType, typename MerkleTree>
-void FRI<ElementType, FieldType, MerkleTree>::queryPol(FRIProof<ElementType, FieldType> &fproof, MerkleTree *tree, uint64_t idx, uint64_t treeIdx)
+template <typename ElementType, typename MerkleTreeType>
+void FRI<ElementType, MerkleTreeType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *tree, uint64_t idx, uint64_t treeIdx)
 {
-    vector<MerkleProof<ElementType, FieldType>> vMkProof;
+    vector<MerkleProof<ElementType>> vMkProof;
 
-    ElementType buff[tree->getMerkleTreeWidth() + tree->getMerkleProofSize()] = {FieldType::zero()};
+    ElementType buff[tree->getMerkleTreeWidth() + tree->getMerkleProofSize()];
     tree->getGroupProof(&buff[0], idx);
 
-    MerkleProof<ElementType, FieldType> mkProof(tree->getMerkleTreeWidth(), tree->getMerkleProofLength(), tree->getElementSize(), &buff[0]);
+    MerkleProof<ElementType> mkProof(tree->getMerkleTreeWidth(), tree->getMerkleProofLength(), tree->getElementSize(), &buff[0]);
     vMkProof.push_back(mkProof);
 
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
@@ -169,8 +169,8 @@ void FRI<ElementType, FieldType, MerkleTree>::queryPol(FRIProof<ElementType, Fie
     return;
 }
 
-template <typename ElementType, typename FieldType, typename MerkleTree>
-void FRI<ElementType, FieldType, MerkleTree>::polMulAxi(Polinomial &pol, Goldilocks::Element init, Goldilocks::Element acc)
+template <typename ElementType, typename MerkleTreeType>
+void FRI<ElementType, MerkleTreeType>::polMulAxi(Polinomial &pol, Goldilocks::Element init, Goldilocks::Element acc)
 {
     Goldilocks::Element r = init;
     for (uint64_t i = 0; i < pol.degree(); i++)
@@ -180,8 +180,8 @@ void FRI<ElementType, FieldType, MerkleTree>::polMulAxi(Polinomial &pol, Goldilo
     }
 }
 
-template <typename ElementType, typename FieldType, typename MerkleTree>
-void FRI<ElementType, FieldType, MerkleTree>::evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinomial &x)
+template <typename ElementType, typename MerkleTreeType>
+void FRI<ElementType, MerkleTreeType>::evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinomial &x)
 {
     if (p.degree() == 0)
     {
@@ -199,8 +199,8 @@ void FRI<ElementType, FieldType, MerkleTree>::evalPol(Polinomial &res, uint64_t 
     }
 }
 
-template <typename ElementType, typename FieldType, typename MerkleTree>
-void FRI<ElementType, FieldType, MerkleTree>::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits)
+template <typename ElementType, typename MerkleTreeType>
+void FRI<ElementType, MerkleTreeType>::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits)
 {
     uint64_t w = (1 << trasposeBits);
     uint64_t h = pol.degree() / w;

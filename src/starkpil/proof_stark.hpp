@@ -10,22 +10,36 @@
 
 using ordered_json = nlohmann::ordered_json;
 
-template <typename ElementType, typename FieldType>
+template <typename ElementType>
+std::string toString(const ElementType& element);
+
+template<>
+inline std::string toString(const Goldilocks::Element& element) {
+    return Goldilocks::toString(element);
+}
+
+template<>
+inline std::string toString(const RawFr::Element& element) {
+    return RawFr::field.toString(element, 10);
+}
+
+template <typename ElementType>
 class MerkleProof
 {
 public:
     std::vector<std::vector<Goldilocks::Element>> v;
     std::vector<std::vector<ElementType>> mp;
 
-    MerkleProof(uint64_t nLinears, uint64_t elementsTree, uint64_t elementsTreeSize, void *pointer) : v(nLinears, std::vector<Goldilocks::Element>(1, Goldilocks::zero())), mp(elementsTree, std::vector<ElementType>(elementsTreeSize, FieldType::zero()))
+    MerkleProof(uint64_t nLinears, uint64_t elementsTree, uint64_t elementsTreeSize, void *pointer) : v(nLinears, std::vector<Goldilocks::Element>(1, Goldilocks::zero())), mp(elementsTree, std::vector<ElementType>(elementsTreeSize))
     {
         for (uint64_t i = 0; i < nLinears; i++)
         {
             std::memcpy(&v[i][0], &((Goldilocks::Element *)pointer)[i], sizeof(Goldilocks::Element));
         }
+        ElementType *mpCursor = (ElementType *)&((Goldilocks::Element *)pointer)[nLinears];
         for (uint64_t j = 0; j < elementsTree; j++)
         {
-            std::memcpy(&mp[j][0], &((ElementType *)pointer)[nLinears + j * elementsTreeSize], elementsTreeSize * sizeof(ElementType));
+            std::memcpy(&mp[j][0], &mpCursor[j * elementsTreeSize], elementsTreeSize * sizeof(ElementType));
         }
     }
 
@@ -57,7 +71,7 @@ public:
             ordered_json element = ordered_json::array();
             for (uint j = 0; j < mp[i].size(); j++)
             {
-                element.push_back(FieldType::toString(mp[i][j]));
+                element.push_back(toString(mp[i][j]));
             }
             json_mp.push_back(element);
         }
@@ -66,12 +80,12 @@ public:
     }
 };
 
-template <typename ElementType, typename FieldType>
+template <typename ElementType>
 class ProofTree
 {
 public:
     std::vector<ElementType> root;
-    std::vector<std::vector<MerkleProof<ElementType, FieldType>>> polQueries;
+    std::vector<std::vector<MerkleProof<ElementType>>> polQueries;
 
     uint64_t elementSize;
 
@@ -87,13 +101,15 @@ public:
         ordered_json j_ProofTree2json = ordered_json::object();
 
         ordered_json json_root = ordered_json::array();
-        for (uint i = 0; i < root.size(); i++)
-        {
-            json_root.push_back(FieldType::toString(root[i]));
+        if(root.size() == 1) {
+            j_ProofTree2json["root"] = toString(root[0]);
+        } else {
+            for (uint i = 0; i < root.size(); i++)
+            {
+                json_root.push_back(toString(root[i]));
+            }
+            j_ProofTree2json["root"] = json_root;
         }
-
-        if (FieldType::toU64(root[0]) != 0 && FieldType::toU64(root[1]) != 0 && FieldType::toU64(root[2]) != 0 && FieldType::toU64(root[3]) != 0)
-            j_ProofTree2json.erase("root");
 
         ordered_json json_polQueries = ordered_json::array();
         for (uint i = 0; i < polQueries.size(); i++)
@@ -113,19 +129,18 @@ public:
             }
         }
 
-        j_ProofTree2json["root"] = json_root;
         j_ProofTree2json["polQueries"] = json_polQueries;
 
         return j_ProofTree2json;
     }
 };
 
-template <typename ElementType, typename FieldType>
+template <typename ElementType>
 class Fri
 {
 public:
     std::vector<std::vector<Goldilocks::Element>> pol;
-    std::vector<ProofTree<ElementType, FieldType>> trees;
+    std::vector<ProofTree<ElementType>> trees;
 
     Fri(StarkInfo starkInfo, int64_t elementSize) : pol(1 << starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
                                                              trees(starkInfo.starkStruct.steps.size(), elementSize) {}
@@ -162,28 +177,25 @@ public:
     }
 };
 
-template <typename ElementType, typename FieldType>
+template <typename ElementType>
 class Proofs
 {
 public:
     uint64_t elementSize;
     uint64_t nStages;
     ElementType **roots;
-    Fri<ElementType, FieldType> fri;
+    Fri<ElementType> fri;
     std::vector<std::vector<Goldilocks::Element>> evals;
     Proofs(StarkInfo starkInfo, uint64_t elementSize) :
         elementSize(elementSize),
         fri(starkInfo, elementSize),
         evals(starkInfo.evMap.size(), std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero()))
         {
-            roots = new ElementType*[elementSize];
             nStages = starkInfo.nStages + 1;
+            roots = new ElementType*[nStages];
             for(uint64_t i = 0; i < nStages; i++)
             {
                 roots[i] = new ElementType[elementSize];
-                for (uint64_t j = 0; j < elementSize; ++j) {
-                    roots[i][j] = FieldType::zero(); 
-                }
             }
         };
 
@@ -208,11 +220,15 @@ public:
 
         for(uint64_t i = 0; i < nStages; i++) {
             ordered_json json_root = ordered_json::array();
-            for (uint k = 0; k < elementSize; k++)
-            {
-                json_root.push_back(FieldType::toString(roots[i][k]));
+            if(elementSize == 1) {
+                j["root" + to_string(i + 1)] = toString(roots[i][0]);
+            } else {
+                for (uint k = 0; k < elementSize; k++)
+                {
+                    json_root.push_back(toString(roots[i][k]));
+                }
+                j["root" + to_string(i + 1)] = json_root;
             }
-            j["root" + to_string(i + 1)] = json_root;
         }
 
         ordered_json json_evals = ordered_json::array();
@@ -231,11 +247,11 @@ public:
     }
 };
 
-template <typename ElementType, typename FieldType>
+template <typename ElementType>
 class FRIProof
 {
 public:
-    Proofs<ElementType, FieldType> proofs;
+    Proofs<ElementType> proofs;
     std::vector<ElementType> publics;
 
     FRIProof(StarkInfo starkInfo, uint64_t elementSize) : proofs(starkInfo, elementSize), publics(starkInfo.nPublics){};

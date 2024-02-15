@@ -7,14 +7,24 @@
 
 USING_PROVER_FORK_NAMESPACE;
 
-void Starks::genProof(FRIProof<Goldilocks::Element, Goldilocks> &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps)
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, Steps *steps)
 {
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
+    TranscriptType transcript;
+
     Polinomial evals(starkInfo.evMap.size(), FIELD_EXTENSION);
-    Polinomial* xDivXSubXi = new Polinomial[starkInfo.openingPoints.size()];
     Polinomial challenges(starkInfo.nChallenges, FIELD_EXTENSION);
+
+    Polinomial xDivXSub(starkInfo.openingPoints.size() * NExtended, FIELD_EXTENSION);
+
+    Polinomial xDivXSubXi(xDivXSub[0], NExtended, FIELD_EXTENSION, FIELD_EXTENSION);
+    Polinomial xDivXSubWXi(xDivXSub[NExtended], NExtended, FIELD_EXTENSION, FIELD_EXTENSION);
+
+    ElementType verkey[hashSize];
+    treesGL[starkInfo.nStages + 1]->getRoot(verkey);
 
     StepsParams params = {
         pols : mem,
@@ -25,8 +35,8 @@ void Starks::genProof(FRIProof<Goldilocks::Element, Goldilocks> &proof, Goldiloc
         x_2ns : x_2ns,
         zi : zi,
         evals : evals,
-        xDivXSubXi : xDivXSubXi[0],
-        xDivXSubWXi : xDivXSubXi[1],
+        xDivXSubXi : xDivXSubXi,
+        xDivXSubWXi : xDivXSubWXi,
         publicInputs : publicInputs,
         q_2ns : &mem[starkInfo.mapOffsets.section[eSection::q_2ns]],
         f_2ns : &mem[starkInfo.mapOffsets.section[eSection::f_2ns]]
@@ -40,50 +50,53 @@ void Starks::genProof(FRIProof<Goldilocks::Element, Goldilocks> &proof, Goldiloc
     // 0.- Add const root and publics to transcript
     //--------------------------------
 
-    addTranscript(transcript, &verkey[0], HASH_SIZE);
-    addTranscript(transcript, &publicInputs[0], starkInfo.nPublics);
+    addTranscript(transcript, &verkey[0], hashSize);
+    addTranscriptPublics(transcript, &publicInputs[0], starkInfo.nPublics);
 
     //--------------------------------
     // 1.- Calculate Stage 1
     //--------------------------------
     TimerStart(STARK_STEP_1);
    
-    extendAndMerkelize(step, params, starkInfo, proof);
+    extendAndMerkelize(step, params, proof);
 
-    addTranscript(transcript, &proof.proofs.roots[step - 1][0], HASH_SIZE);
+    addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
 
     //--------------------------------
     // 2.- Calculate plookups h1 and h2
     //--------------------------------
     TimerStart(STARK_STEP_2);
     step = 2;
-    getChallenges(transcript, params.challenges, starkInfo.numChallenges[step - 1], 0);
+    getChallenges(transcript, params.challenges[0], starkInfo.numChallenges[step - 1]);
 
     calculateExpressions("step2prev", nrowsStepBatch, steps, params, N);
 
-    calculateH1H2(params, starkInfo);
+    calculateH1H2(params);
 
-    extendAndMerkelize(step, params, starkInfo, proof);
+    extendAndMerkelize(step, params, proof);
 
-    addTranscript(transcript, &proof.proofs.roots[step - 1][0], HASH_SIZE);
+    addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
 
+    TimerStopAndLog(STARK_STEP_2);
     //--------------------------------
     // 3.- Compute Z polynomials
     //--------------------------------
     TimerStart(STARK_STEP_3);
     step = 3;
 
-    getChallenges(transcript, params.challenges, starkInfo.numChallenges[step - 1], 2);
+    getChallenges(transcript, params.challenges[2], starkInfo.numChallenges[step - 1]);
     
     calculateExpressions("step3prev", nrowsStepBatch, steps, params, N);
 
-    calculateZ(params, starkInfo);
+    calculateZ(params);
     
     calculateExpressions("step3", nrowsStepBatch, steps, params, N);
 
-    extendAndMerkelize(step, params, starkInfo, proof);
+    extendAndMerkelize(step, params, proof);
 
-    addTranscript(transcript, &proof.proofs.roots[step - 1][0], HASH_SIZE);
+    addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
+
+    TimerStopAndLog(STARK_STEP_3);
 
     //--------------------------------
     // 4. Compute C Polynomial
@@ -91,13 +104,13 @@ void Starks::genProof(FRIProof<Goldilocks::Element, Goldilocks> &proof, Goldiloc
     TimerStart(STARK_STEP_4);
     step = 4;
 
-    getChallenges(transcript, params.challenges, 1, 4);
+    getChallenges(transcript, params.challenges[4], 1);
     
     calculateExpressions("step42ns", nrowsStepBatch, steps, params, NExtended);
 
-    computeQ(params, starkInfo, proof);
+    computeQ(params, proof);
 
-    addTranscript(transcript, &proof.proofs.roots[step - 1][0], HASH_SIZE);
+    addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
 
     TimerStopAndLog(STARK_STEP_4);
 
@@ -106,13 +119,13 @@ void Starks::genProof(FRIProof<Goldilocks::Element, Goldilocks> &proof, Goldiloc
     //--------------------------------
     TimerStart(STARK_STEP_5);
 
-    getChallenges(transcript, params.challenges, 1, 7);
+    getChallenges(transcript, params.challenges[7], 1);
 
-    computeEvals(params, proof, starkInfo);
+    computeEvals(params, proof);
 
     addTranscript(transcript, evals);
 
-    getChallenges(transcript, params.challenges, 2, 5);
+    getChallenges(transcript, params.challenges[5], 2);
 
     TimerStopAndLog(STARK_STEP_5);
 
@@ -121,78 +134,68 @@ void Starks::genProof(FRIProof<Goldilocks::Element, Goldilocks> &proof, Goldiloc
     //--------------------------------
     TimerStart(STARK_STEP_FRI);
     
-    Polinomial friPol = computeFRIPol(params, starkInfo, steps, nrowsStepBatch);
+    Polinomial* friPol = computeFRIPol(params, steps, nrowsStepBatch);
 
     for (uint64_t step = 0; step < starkInfo.starkStruct.steps.size(); step++) {
         Polinomial challenge(1, FIELD_EXTENSION);
-        getChallenges(transcript, challenge, 1, 0);
-        computeFRIFolding(proof, starkInfo, friPol, step, challenge);
+        getChallenges(transcript, challenge[0], 1);
+        computeFRIFolding(proof, friPol[0], step, challenge);
         if(step < starkInfo.starkStruct.steps.size() - 1) {
-            addTranscript(transcript, &proof.proofs.fri.trees[step + 1].root[0], HASH_SIZE);
+            addTranscript(transcript, &proof.proofs.fri.trees[step + 1].root[0], hashSize);
         } else {
-            addTranscript(transcript, friPol);
+            addTranscript(transcript, *friPol);
         }
     }
 
     uint64_t friQueries[starkInfo.starkStruct.nQueries];
     transcript.getPermutations(friQueries, starkInfo.starkStruct.nQueries, starkInfo.starkStruct.steps[0].nBits);
 
-    computeFRIQueries(proof, starkInfo, friPol, friQueries);
+    computeFRIQueries(proof, *friPol, friQueries);
+
+    delete friPol;
 
     TimerStopAndLog(STARK_STEP_FRI);
 }
 
-void Starks::extendAndMerkelize(uint64_t step, StepsParams& params, StarkInfo starkInfo, FRIProof<Goldilocks::Element, Goldilocks> &proof) {
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof) {
     TimerStart(STARK_STEP_LDE_AND_MERKLETREE);
     TimerStart(STARK_STEP_LDE);
-    Goldilocks::Element* pBuff;
-    Goldilocks::Element* pBuffExtended;
-    Goldilocks::Element* pBuffHelper;
-    uint64_t nCols;
-    // TODO: Map offset section should not be an enum
-    if(step == 1) {
-        pBuff = &params.pols[starkInfo.mapOffsets.section[eSection::cm1_n]];
-        pBuffExtended = &params.pols[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
-        nCols = starkInfo.mapSectionsN.section[eSection::cm1_n];
-        pBuffHelper = &params.pols[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
-    } else if (step == 2) {
-        pBuff = &params.pols[starkInfo.mapOffsets.section[eSection::cm2_n]];
-        pBuffExtended = &params.pols[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
-        nCols = starkInfo.mapSectionsN.section[eSection::cm2_n];
-        pBuffHelper = &params.pols[starkInfo.mapTotalN];
-    } else if (step == 3) {
-        pBuff = &params.pols[starkInfo.mapOffsets.section[eSection::cm3_n]];
-        pBuffExtended = &params.pols[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
-        nCols = starkInfo.mapSectionsN.section[eSection::cm3_n];
-        pBuffHelper = &params.pols[starkInfo.mapTotalN];
-    } else throw std::invalid_argument("Invalid step: " + step);
+    
+    std::string section = "cm" + to_string(step) + "_n";
+    std::string sectionExtended = "cm" + to_string(step) + "_2ns";
+    std::string nextSectionExtended = "cm" + to_string(step + 1) + "_2ns";
+
+    uint64_t nCols = starkInfo.mapSectionsN.section[string2section(section)];
+
+    Goldilocks::Element* pBuff = &params.pols[starkInfo.mapOffsets.section[string2section(section)]];
+    Goldilocks::Element* pBuffExtended = &params.pols[starkInfo.mapOffsets.section[string2section(sectionExtended)]];
+    Goldilocks::Element* pBuffHelper = &params.pols[starkInfo.mapOffsets.section[string2section(nextSectionExtended)]];
+      
     ntt.extendPol(pBuffExtended, pBuff, 1 << starkInfo.starkStruct.nBitsExt, 1 << starkInfo.starkStruct.nBits, nCols, pBuffHelper);
     TimerStopAndLog(STARK_STEP_LDE);
     TimerStart(STARK_STEP_MERKLETREE);
-    treesGL[step - 1] = new MerkleTreeGL(1 << starkInfo.starkStruct.nBitsExt, nCols, pBuffExtended);
     treesGL[step - 1]->merkelize();
     treesGL[step - 1]->getRoot(&proof.proofs.roots[step - 1][0]);
     TimerStopAndLog(STARK_STEP_MERKLETREE);
     TimerStopAndLog(STARK_STEP_LDE_AND_MERKLETREE);
 }
 
-void Starks::computeQ(StepsParams& params, StarkInfo starkInfo, FRIProof<Goldilocks::Element, Goldilocks> &proof) {
-    uint64_t extN = 1 << starkInfo.starkStruct.nBitsExt;
-    uint64_t N = 1 << starkInfo.starkStruct.nBits;
-
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::computeQ(StepsParams& params, FRIProof<ElementType> &proof) {
     uint64_t step = starkInfo.nStages + 1;
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
-    Polinomial qq1 = Polinomial(extN, starkInfo.qDim, "qq1");
-    Polinomial qq2 = Polinomial(extN * starkInfo.qDeg, starkInfo.qDim, "qq2");
-    nttExtended.INTT(qq1.address(), &params.pols[starkInfo.mapOffsets.section[eSection::q_2ns]], extN, starkInfo.qDim, NULL, 2, 1);
+    Polinomial qq1 = Polinomial(NExtended, starkInfo.qDim, "qq1");
+    Polinomial qq2 = Polinomial(NExtended * starkInfo.qDeg, starkInfo.qDim, "qq2");
+    nttExtended.INTT(qq1.address(), &params.pols[starkInfo.mapOffsets.section[eSection::q_2ns]], NExtended, starkInfo.qDim, NULL, 2, 1);
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
     Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
 
-    // TODO: THis should not be an enum;
-    Goldilocks::Element* pBuffExtended = &params.pols[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
+    std::string sectionStageQ = "cm" + to_string(starkInfo.nStages + 1) + "_2ns";
+    Goldilocks::Element* pBuffExtended = &params.pols[starkInfo.mapOffsets.section[string2section(sectionStageQ)]];
     uint64_t stride = 2048;
 #pragma omp parallel for
     for (uint64_t ii = 0; ii < N; ii += stride)
@@ -210,34 +213,31 @@ void Starks::computeQ(StepsParams& params, StarkInfo starkInfo, FRIProof<Goldilo
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
-    nttExtended.NTT(pBuffExtended, qq2.address(), extN, starkInfo.qDim * starkInfo.qDeg);
+    nttExtended.NTT(pBuffExtended, qq2.address(), NExtended, starkInfo.qDim * starkInfo.qDeg);
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
 
     TimerStart(STARK_STEP_4_MERKLETREE);
-    treesGL[step - 1] = new MerkleTreeGL(extN, starkInfo.mapSectionsN.section[eSection::cm4_2ns], pBuffExtended);
     treesGL[step - 1]->merkelize();
     treesGL[step - 1]->getRoot(&proof.proofs.roots[step - 1][0]);
 
     TimerStopAndLog(STARK_STEP_4_MERKLETREE);
 }
 
-void Starks::computeEvals(StepsParams& params, FRIProof<Goldilocks::Element, Goldilocks> &proof, StarkInfo starkInfo) {
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::computeEvals(StepsParams& params, FRIProof<ElementType> &proof) {
     TimerStart(STARK_STEP_5_LEv);
-
-    Goldilocks::Element* pBuffer = &params.pols[starkInfo.mapTotalN];
+    
     vector<uint64_t> openingPoints = starkInfo.openingPoints;
 
-    Polinomial *LEv = new Polinomial[openingPoints.size()];
+    Polinomial LEv(openingPoints.size() * N, FIELD_EXTENSION);
 
-    Polinomial w(openingPoints.size(), 3);
-    Polinomial c_w(openingPoints.size(), 3);
-    Polinomial xi(openingPoints.size(), 3);
-
-    u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8; // assuming all polinomials have same degree
+    Polinomial w(openingPoints.size(), FIELD_EXTENSION);
+    Polinomial c_w(openingPoints.size(), FIELD_EXTENSION);
+    Polinomial xi(openingPoints.size(), FIELD_EXTENSION);
 
     for (uint64_t i = 0; i < openingPoints.size(); ++i) {
-        LEv[i].potConstruct(&(pBuffer[i * stride_pol_]), N, 3, 3);
-        Goldilocks3::one((Goldilocks3::Element &)*LEv[i][0]);
+        uint64_t offset = i*N;
+        Goldilocks3::one((Goldilocks3::Element &)*LEv[offset]);
         uint64_t opening = openingPoints[i] < 0 ? -openingPoints[i] : openingPoints[i];
         Goldilocks3::one((Goldilocks3::Element &)*w[i]);
         for (uint64_t j = 0; j < opening; ++j) {
@@ -254,36 +254,26 @@ void Starks::computeEvals(StepsParams& params, FRIProof<Goldilocks::Element, Gol
 
         for (uint64_t k = 1; k < N; k++)
         {
-            Polinomial::mulElement(LEv[i], k, LEv[i], k - 1, xi, i);
+            Polinomial::mulElement(LEv, k + offset, LEv, k + offset - 1, xi, i);
         }
 
-        ntt.INTT(LEv[i].address(), LEv[i].address(), N, 3);
+        ntt.INTT(LEv[offset], LEv[offset], N, 3);
     }
     
     TimerStopAndLog(STARK_STEP_5_LEv);
 
     TimerStart(STARK_STEP_5_EVMAP);
-    evmap(params, LEv, starkInfo);
+    evmap(params, LEv);
     proof.proofs.setEvals(params.evals.address());
     TimerStopAndLog(STARK_STEP_5_EVMAP);
 }
 
-Polinomial Starks::computeFRIPol(StepsParams& params, StarkInfo starkInfo, Steps *steps, uint64_t nrowsStepBatch) {
-
-    uint64_t extN = 1 << starkInfo.starkStruct.nBitsExt;
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+Polinomial* Starks<ElementType, MerkleTreeType, TranscriptType>::computeFRIPol(StepsParams& params, Steps *steps, uint64_t nrowsStepBatch) {
 
     TimerStart(STARK_STEP_5_XDIVXSUB);
 
-    Goldilocks::Element* pBuffer = &params.pols[starkInfo.mapTotalN];
-
     vector<uint64_t> openingPoints = starkInfo.openingPoints;
-
-    u_int64_t stride_pol_ = NExtended * FIELD_EXTENSION + 8; // assuming all polinomials have same degree
-
-    for (uint64_t i = 0; i < openingPoints.size(); ++i) {
-        Polinomial& xDiv = i == 0 ? params.xDivXSubXi : params.xDivXSubWXi;
-        xDiv.potConstruct(&(pBuffer[i * stride_pol_]), NExtended, 3, 3);
-    }
 
     Polinomial xi(openingPoints.size(), FIELD_EXTENSION);
     Polinomial w(openingPoints.size(), FIELD_EXTENSION);
@@ -319,22 +309,25 @@ Polinomial Starks::computeFRIPol(StepsParams& params, StarkInfo starkInfo, Steps
     }
     TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
 
-    calculateExpressions("step52ns", nrowsStepBatch, steps, params, extN);
+    calculateExpressions("step52ns", nrowsStepBatch, steps, params, NExtended);
 
-    Polinomial friPol = Polinomial(params.f_2ns, extN, 3, 3, "friPol");
+    Polinomial *friPol = new Polinomial(params.f_2ns, NExtended, FIELD_EXTENSION, FIELD_EXTENSION, "friPol");
 
     return friPol;
 }
 
-void Starks::computeFRIFolding(FRIProof<Goldilocks::Element, Goldilocks> &fproof, StarkInfo starkInfo, Polinomial &friPol, uint64_t step, Polinomial &challenge) {
-    FRI<Goldilocks::Element, Goldilocks, MerkleTreeGL>::fold(step, fproof, friPol, challenge, starkInfo, treesFRI);
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::computeFRIFolding(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t step, Polinomial &challenge) {
+    FRI<ElementType, MerkleTreeType>::fold(step, fproof, friPol, challenge, starkInfo, treesFRI);
 }
 
-void Starks::computeFRIQueries(FRIProof<Goldilocks::Element, Goldilocks> &fproof, StarkInfo starkInfo, Polinomial &friPol, uint64_t* friQueries) {
-    FRI<Goldilocks::Element, Goldilocks, MerkleTreeGL>::proveQueries(friQueries, fproof, treesGL, treesFRI, starkInfo);
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries) {
+    FRI<ElementType, MerkleTreeType>::proveQueries(friQueries, fproof, treesGL, treesFRI, starkInfo);
 }
 
-void Starks::calculateExpressions(std::string step, uint64_t nrowsStepBatch, Steps *steps, StepsParams &params, uint64_t N) {
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::calculateExpressions(std::string step, uint64_t nrowsStepBatch, Steps *steps, StepsParams &params, uint64_t N) {
     if (nrowsStepBatch == 4)
     {
         TimerStart(STARK_STEP_CALCULATE_EXPS_AVX);
@@ -389,7 +382,8 @@ void Starks::calculateExpressions(std::string step, uint64_t nrowsStepBatch, Ste
     }
 }
 
-Polinomial *Starks::transposeH1H2Columns(StepsParams& params, StarkInfo starkInfo)
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+Polinomial *Starks<ElementType, MerkleTreeType, TranscriptType>::transposeH1H2Columns(StepsParams& params)
 {
     Goldilocks::Element *pBuffer = &params.pols[starkInfo.mapTotalN];
     uint64_t numCommited = starkInfo.nCm1;
@@ -423,7 +417,9 @@ Polinomial *Starks::transposeH1H2Columns(StepsParams& params, StarkInfo starkInf
     }
     return transPols;
 }
-void Starks::transposeH1H2Rows(StepsParams& params, StarkInfo starkInfo, Polinomial *transPols)
+
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::transposeH1H2Rows(StepsParams& params, Polinomial *transPols)
 {
     uint64_t numCommited = starkInfo.nCm1;
 
@@ -442,7 +438,8 @@ void Starks::transposeH1H2Rows(StepsParams& params, StarkInfo starkInfo, Polinom
     }
 }
 
-Polinomial *Starks::transposeZColumns(StepsParams& params, StarkInfo starkInfo)
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+Polinomial *Starks<ElementType, MerkleTreeType, TranscriptType>::transposeZColumns(StepsParams& params)
 {
     Goldilocks::Element *pBuffer = &params.pols[starkInfo.mapTotalN];
 
@@ -523,7 +520,9 @@ Polinomial *Starks::transposeZColumns(StepsParams& params, StarkInfo starkInfo)
     }
     return newpols_;
 }
-void Starks::transposeZRows(StepsParams& params, StarkInfo starkInfo, Polinomial *transPols)
+
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::transposeZRows(StepsParams& params, Polinomial *transPols)
 {
     u_int64_t numpols = starkInfo.ciCtx.size() + starkInfo.peCtx.size() + starkInfo.puCtx.size();
     uint64_t numCommited = starkInfo.nCm1 + starkInfo.puCtx.size()*2;
@@ -539,9 +538,10 @@ void Starks::transposeZRows(StepsParams& params, StarkInfo starkInfo, Polinomial
     }
 }
 
-void Starks::calculateH1H2(StepsParams& params, StarkInfo starkInfo) {
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::calculateH1H2(StepsParams& params) {
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
-    Polinomial *transPols = transposeH1H2Columns(params, starkInfo);
+    Polinomial *transPols = transposeH1H2Columns(params);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
     TimerStart(STARK_STEP_2_CALCULATEH1H2);
 
@@ -577,13 +577,14 @@ void Starks::calculateH1H2(StepsParams& params, StarkInfo starkInfo) {
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
 
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
-    transposeH1H2Rows(params, starkInfo, transPols);
+    transposeH1H2Rows(params, transPols);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
 }
 
-void Starks::calculateZ(StepsParams& params, StarkInfo starkInfo) {
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::calculateZ(StepsParams& params) {
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
-    Polinomial *newpols_ = transposeZColumns(params, starkInfo);
+    Polinomial *newpols_ = transposeZColumns(params);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
 
     TimerStart(STARK_STEP_3_CALCULATE_Z);
@@ -596,11 +597,12 @@ void Starks::calculateZ(StepsParams& params, StarkInfo starkInfo) {
     }
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z);
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
-    transposeZRows(params, starkInfo, newpols_);
+    transposeZRows(params, newpols_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
 }
 
-void Starks::evmap(StepsParams &params, Polinomial *LEv, StarkInfo starkInfo)
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::evmap(StepsParams &params, Polinomial &LEv)
 {
     vector<uint64_t> openingPoints = starkInfo.openingPoints;
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
@@ -677,7 +679,7 @@ void Starks::evmap(StepsParams &params, Polinomial *LEv, StarkInfo starkInfo)
             for (uint64_t i = 0; i < size_eval; i++)
             {
                 int index = findIndex(openingPoints, isPrime[i]);
-                Polinomial::mulAddElement_adim3(&(evals_acc[thread_idx][i * FIELD_EXTENSION]),  &(LEv[index][k][0]), ordPols[i], k << extendBits);
+                Polinomial::mulAddElement_adim3(&(evals_acc[thread_idx][i * FIELD_EXTENSION]),  &(LEv[index*N + k][0]), ordPols[i], k << extendBits);
             }
         }
 #pragma omp for
@@ -712,10 +714,10 @@ void Starks::evmap(StepsParams &params, Polinomial *LEv, StarkInfo starkInfo)
         free(evals_acc[i]);
     }
     free(evals_acc);
-    delete[] LEv;
 }
 
-int Starks::findIndex(std::vector<uint64_t> openingPoints, int prime) {
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+int Starks<ElementType, MerkleTreeType, TranscriptType>::findIndex(std::vector<uint64_t> openingPoints, int prime) {
     auto it = std::find_if(openingPoints.begin(), openingPoints.end(), [prime](int p) {
         return p == prime;
     });
@@ -727,24 +729,33 @@ int Starks::findIndex(std::vector<uint64_t> openingPoints, int prime) {
     }
 }
 
-// TODO: REFACTOR SO IT DEPENDS ON GOLDILOCKS::ELEMENT*
-void Starks::getChallenges(Transcript &transcript, Polinomial &challenges, uint64_t nChallenges, uint64_t index) {
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::getChallenges(TranscriptType &transcript, Goldilocks::Element* challenges, uint64_t nChallenges) {
     for(uint64_t i = 0; i < nChallenges; i++) {
-        transcript.getField(challenges[index + i]);
+        transcript.getField((uint64_t*)&challenges[i*FIELD_EXTENSION]);
     }
 }
 
-void Starks::addTranscript(Transcript &transcript, Goldilocks::Element* buffer, uint64_t nElements) {
+
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::addTranscriptPublics(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements) {
     transcript.put(buffer, nElements);
 };
 
-void Starks::addTranscript(Transcript &transcript, Polinomial& pol) {
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements) {
+    transcript.put(buffer, nElements);
+};
+
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::addTranscript(TranscriptType &transcript, Polinomial& pol) {
     for (uint64_t i = 0; i < pol.degree(); i++) {
         transcript.put(pol[i], pol.dim());
     }
 };
 
-void Starks::merkelizeMemory()
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::merkelizeMemory()
 {
     uint64_t polsSize = starkInfo.mapTotalN + starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << starkInfo.starkStruct.nBitsExt);
     uint64_t nrowsDGB = 2;
@@ -775,7 +786,8 @@ void Starks::merkelizeMemory()
     delete[] treeDBG;
 }
 
-void * Starks::createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void * Starks<ElementType, MerkleTreeType, TranscriptType>::createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
     StepsParams *params = (StepsParams*)calloc(1, sizeof(StepsParams));
 
     params->pols = mem;
@@ -939,8 +951,9 @@ void * Starks::createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSu
 //     std::memcpy(&(*proof).proofs.root4[0], (*root3).address(), HASH_SIZE * sizeof(Goldilocks::Element));
 // }
 
-void Starks::ffi_extend_and_merkelize(uint64_t step, void *pParams, void *pProof) {
-    extendAndMerkelize(step, (StepsParams&)pParams, starkInfo, (FRIProof<Goldilocks::Element, Goldilocks>&)pProof);
+template <typename ElementType, typename MerkleTreeType, typename TranscriptType>
+void Starks<ElementType, MerkleTreeType, TranscriptType>::ffi_extend_and_merkelize(uint64_t step, void *pParams, void *pProof) {
+    extendAndMerkelize(step, (StepsParams&)pParams, (FRIProof<ElementType>&)pProof);
 }
 
 
