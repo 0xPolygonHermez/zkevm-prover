@@ -103,6 +103,10 @@ namespace Circom
           pu32 += len + 2;
         }
         p.defs = (IODef *)calloc(10, sizeof(IODef));
+        if(p.defs==NULL){
+          std::cout << "Error loadCircuit: malloc failed" << std::endl;
+          exitProcess();
+        }
         for (u32 j = 0; j < p.len; j++)
         {
           p.defs[j] = defs[j];

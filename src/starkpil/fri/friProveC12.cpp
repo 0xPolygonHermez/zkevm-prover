@@ -245,6 +245,10 @@ void FRIProveC12::queryPol(FRIProofC12 &fproof, MerkleTreeBN128 **trees, uint64_
     for (uint i = 0; i < 5; i++)
     {
         RawFr::Element *buff = (RawFr::Element *)calloc(trees[i]->source_width * sizeof(Goldilocks::Element) + MerkleTreeBN128::getMerkleProofSize(trees[i]->height), 1);
+        if(buff==NULL){
+            std::cout << "queryPol: malloc failed" << std::endl;
+            exitProcess();            
+        }
         trees[i]->getGroupProof(&buff[0], idx);
         MerkleProofC12 mkProof(trees[i]->source_width, MerkleTreeBN128::getMerkleProofLength(trees[i]->height), &buff[0]);
         vMkProof.push_back(mkProof);
@@ -262,6 +266,10 @@ void FRIProveC12::queryPol(FRIProofC12 &fproof, MerkleTreeBN128 *tree, uint64_t 
 
     RawFr::Element *buff = (RawFr::Element *)calloc(tree->source_width * sizeof(Goldilocks::Element) + MerkleTreeBN128::getMerkleProofSize(tree->height), 1);
     tree->getGroupProof(&buff[0], idx);
+    if(buff==NULL){
+        std::cout << "queryPol(FRIProofC12 &fproof, MerkleTreeBN128 *tree, uint64_t idx, uint64_t treeIdx): malloc failed" << std::endl;
+        exitProcess();
+    }
     MerkleProofC12 mkProof(tree->source_width, MerkleTreeBN128::getMerkleProofLength(tree->height), &buff[0]);
     vMkProof.push_back(mkProof);
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);

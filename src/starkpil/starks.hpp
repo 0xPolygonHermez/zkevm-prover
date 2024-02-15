@@ -139,6 +139,10 @@ public:
         // Initialize and allocate ConstantPols2ns
         TimerStart(LOAD_CONST_POLS_2NS_TO_MEMORY);
         pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
+        if(pConstPolsAddress2ns == NULL){
+            zklog.error("Starks::Starks() failed to allocate memory for pConstPolsAddress2ns");
+            exitProcess();
+        }
         pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
         std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
 

@@ -41,7 +41,7 @@ public:
     }
     static void info(const string &s)
     {
-        cout << s << endl;
+        std::cout << s << endl;
     }
 };
 
@@ -287,9 +287,9 @@ void _fft_block(Goldilocks::Element *buff, uint64_t rel_pos, uint64_t start_pos,
 
 Goldilocks::Element *fft_block(Goldilocks::Element *buff, uint64_t start_pos, uint64_t nPols, uint64_t nBits, uint64_t s, uint64_t blockBits, uint64_t layers)
 {
-    // cout << "start block " << s << " " << start_pos << endl;
+    // std::cout << "start block " << s << " " << start_pos << endl;
     _fft_block(buff, start_pos, start_pos, nPols, nBits, s, blockBits, layers);
-    // cout << "end block " << s << " " << start_pos << endl;
+    // std::cout << "end block " << s << " " << start_pos << endl;
     return buff;
 }
 
@@ -341,7 +341,7 @@ void traspose(Goldilocks::Element *buffDst, Goldilocks::Element *buffSrc, uint64
 
 Goldilocks::Element *interpolatePrepareBlock(Goldilocks::Element *buff, uint64_t bufflen, uint64_t width, Goldilocks::Element start, Goldilocks::Element inc, uint64_t st_i, uint64_t st_n)
 {
-    // cout << time() << " linear interpolatePrepare start.... " << st_i << "/" << st_n << endl;
+    // std::cout << time() << " linear interpolatePrepare start.... " << st_i << "/" << st_n << endl;
 
     uint64_t heigth = bufflen / width;
     Goldilocks::Element w = start;
@@ -353,7 +353,7 @@ Goldilocks::Element *interpolatePrepareBlock(Goldilocks::Element *buff, uint64_t
         }
         w = fr.mul(w, inc);
     }
-    // cout << time() << " linear interpolatePrepare end.... " << st_i << "/" << st_n << endl;
+    // std::cout << time() << " linear interpolatePrepare end.... " << st_i << "/" << st_n << endl;
     return buff;
 }
 
@@ -382,6 +382,10 @@ void interpolatePrepare(Goldilocks::Element *buff, uint64_t nPols, uint64_t nBit
         uint64_t curN = min(nPerThreadF, n - i);
 
         Goldilocks::Element *bb = (Goldilocks::Element *)malloc(curN * nPols * SIZE_GL);
+        if(bb==NULL){
+            zklog.error("interpolatePrepare() failed calling malloc() of size: " + to_string(curN * nPols * SIZE_GL));
+            exitProcess();
+        }
         memcpy(bb, buff + (i * nPols), curN * nPols * SIZE_GL);
 
         Goldilocks::Element start = fr.mul(invN, fr.exp(fr.shift(), i));
@@ -400,6 +404,10 @@ void interpolate(Goldilocks::Element *buffSrc, uint64_t nPols, uint64_t nBits, G
     uint64_t n = 1 << nBits;
     uint64_t nExt = 1 << nBitsExt;
     Goldilocks::Element *tmpBuff = (Goldilocks::Element *)malloc(nExt * nPols * SIZE_GL);
+    if(tmpBuff==NULL){
+        zklog.error("interpolate() failed calling malloc() of size: " + to_string(nExt * nPols * SIZE_GL));
+        exitProcess();
+    }
     Goldilocks::Element *outBuff = buffDst;
 
     Goldilocks::Element *bIn;
@@ -450,7 +458,7 @@ void interpolate(Goldilocks::Element *buffSrc, uint64_t nPols, uint64_t nBits, G
         bIn = tmpBuff;
     }
 
-    cout << time() << " Interpolating bit reverse" << endl;
+    std::cout << time() << " Interpolating bit reverse" << endl;
     interpolateBitReverse(bOut, buffSrc, nPols, nBits);
 
     //    writeToTextFile ("interpolateBitReverse.new.txt", bOut, (1 << nBitsExt)*nPols);
@@ -462,13 +470,17 @@ void interpolate(Goldilocks::Element *buffSrc, uint64_t nPols, uint64_t nBits, G
 
     for (uint64_t i = 0; i < nBits; i += blockBits)
     {
-        cout << time() << " Layer ifft " << i << endl;
+        std::cout << time() << " Layer ifft " << i << endl;
         uint64_t sInc = min(blockBits, nBits - i);
 
 #pragma omp parallel for
         for (uint64_t j = 0; j < nBlocks; j++)
         {
             Goldilocks::Element *bb = (Goldilocks::Element *)malloc(blockSize * nPols * SIZE_GL);
+            if(bb==NULL){
+                std::cout << "interpolate() failed calling malloc() of size: " << blockSize * nPols * SIZE_GL << endl;
+                exitProcess();
+            }
             memcpy(bb, bIn + (j * blockSize * nPols), blockSize * nPols * SIZE_GL);
 
             Goldilocks::Element *res = fft_block(bb, j * blockSize, nPols, nBits, i + sInc, blockBits, sInc);
@@ -489,9 +501,9 @@ void interpolate(Goldilocks::Element *buffSrc, uint64_t nPols, uint64_t nBits, G
     // writeToTextFile("bIn.new.txt", bIn, (1 << nBitsExt));
     // writeToTextFile("bOut.new.txt", bOut, (1 << nBitsExt));
 
-    cout << time() << " Interpolating prepare" << endl;
+    std::cout << time() << " Interpolating prepare" << endl;
     interpolatePrepare(bIn, nPols, nBits, nBitsExt);
-    cout << time() << " Bit reverse" << endl;
+    std::cout << time() << " Bit reverse" << endl;
     bitReverse(bOut, bIn, nPols, nBitsExt);
 
     // writeToTextFile("bitReverse.bIn.new.txt", bIn, (1 << nBitsExt));
@@ -503,13 +515,17 @@ void interpolate(Goldilocks::Element *buffSrc, uint64_t nPols, uint64_t nBits, G
 
     for (uint64_t i = 0; i < nBitsExt; i += blockBitsExt)
     {
-        cout << time() << " Layer fft " << i << endl;
+        std::cout << time() << " Layer fft " << i << endl;
         uint64_t sInc = min(blockBitsExt, nBitsExt - i);
 
 #pragma omp parallel for
         for (uint64_t j = 0; j < nBlocksExt; j++)
         {
             Goldilocks::Element *bb = (Goldilocks::Element *)malloc(blockSizeExt * nPols * SIZE_GL);
+            if(bb==NULL){
+                std::cout << "interpolate() failed calling malloc() of size: " << blockSizeExt * nPols * SIZE_GL << endl;
+                exitProcess();
+            }
             memcpy(bb, bIn + (j * blockSizeExt * nPols), blockSizeExt * nPols * SIZE_GL);
 
             Goldilocks::Element *res = fft_block(bb, j * blockSizeExt, nPols, nBitsExt, i + sInc, blockBitsExt, sInc);
@@ -545,13 +561,17 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
     uintmax_t constFileSize = filesystem::file_size(constFile);
     uint64_t nPols = constFileSize / (n * SIZE_GL);
 
-    cout << time() << " Pols=" << nPols << endl;
-    cout << time() << " nBits=" << nBits << endl;
-    cout << time() << " nBitsExt=" << nBitsExt << endl;
+    std::cout << time() << " Pols=" << nPols << endl;
+    std::cout << time() << " nBits=" << nBits << endl;
+    std::cout << time() << " nBitsExt=" << nBitsExt << endl;
 
-    cout << time() << " Loading const file " << constFile << endl;
+    std::cout << time() << " Loading const file " << constFile << endl;
     Goldilocks::Element *pConstPols = (Goldilocks::Element *)copyFile(constFile, constFileSize);
     Goldilocks::Element *constPolsArrayE = (Goldilocks::Element *)malloc(nExt * nPols * SIZE_GL);
+    if(constPolsArrayE==NULL){
+        std::cout << "buildConstTree() failed calling malloc() of size: " << nExt * nPols * SIZE_GL << endl;
+        exitProcess();
+    }
 
     TimerStart(Interpolate);
     interpolate(pConstPols, nPols, nBits, constPolsArrayE, nBitsExt);
@@ -571,6 +591,10 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         uint64_t sizeConstTree = numElements * sizeof(Goldilocks::Element);
         //uint64_t batchSize = std::max((uint64_t)8, (nPols + 3) / 4);
         Goldilocks::Element *constTree = (Goldilocks::Element *)malloc(sizeConstTree);
+        if(constTree==NULL){
+            std::cout << "buildConstTree() failed calling malloc() of size: " << sizeConstTree << endl;
+            exitProcess();
+        }
         constTree[0] = Goldilocks::fromU64(nPols);
         constTree[1] = Goldilocks::fromU64(nExt);
         int numThreads = omp_get_max_threads() / 2;
@@ -582,7 +606,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         PoseidonGoldilocks::merkletree(&constTree[numElementsCopy], constPolsArrayE, nPols, nExt);
         TimerStopAndLog(MerkleTree_GL);
 
-        cout << time() << " Generating files..." << endl;
+        std::cout << time() << " Generating files..." << endl;
 
         // VerKey
         if (verKeyFile != "")
@@ -602,7 +626,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         fw.write((char const *)constTree, sizeConstTree);
         fw.close();
 
-        cout << time() << " Files Generated Correctly" << endl;
+        std::cout << time() << " Files Generated Correctly" << endl;
 
         free(constTree);
     }
@@ -614,7 +638,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         mt.merkelize();
         TimerStopAndLog(MerkleTree_BN128);
 
-        cout << time() << " Generating files..." << endl;
+        std::cout << time() << " Generating files..." << endl;
 
         // VerKey
         if (verKeyFile != "")
@@ -637,7 +661,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         fw.write((const char *)mt.nodes, mt.numNodes * sizeof(RawFr::Element));
         fw.close();
 
-        cout << time() << " Files Generated Correctly" << endl;
+        std::cout << time() << " Files Generated Correctly" << endl;
     }
     else
     {

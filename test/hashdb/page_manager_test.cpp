@@ -65,6 +65,10 @@ uint64_t PageManagerPerformanceTest (void)
     // Evaluate numPositions different random positions in the range [0,numPages)
     uint64_t numPages = pageManagerFile.getNumFreePages() +2;
     uint64_t *position = (uint64_t *)malloc(numPositions * sizeof(uint64_t));
+    if(position == NULL){
+        zklog.error("Error allocating memory");
+        exitProcess();
+    }
     std::random_device rd;
     std::mt19937 rng(rd());
 

@@ -108,7 +108,7 @@ Prover::Prover(Goldilocks &fr,
                 pAddress = calloc(polsSize, 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
+                    zklog.error("Prover::genBatchProof() failed calling calloc() of size " + to_string(polsSize));
                     exitProcess();
                 }
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
@@ -119,6 +119,10 @@ Prover::Prover(Goldilocks &fr,
 
             StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
+            if(pAddressStarksRecursiveF==NULL){
+                zklog.error("Prover::Prover() failed calling malloc() of size " + to_string(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element)));
+                exitProcess();
+            }
 
             starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
             starkZkevm->nrowsStepBatch = NROWS_STEPS_;
