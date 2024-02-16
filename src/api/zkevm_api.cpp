@@ -294,12 +294,9 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
 }
 
 
-int zkevm_main(char *pConfigFile)
+int zkevm_main(char *pConfigFile, void* pAddress)
 {
-    /* CONFIG */
-
-    char *pConfigFile = configFile;
-
+    
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
     file2json(pConfigFile, configJson);
