@@ -31,7 +31,9 @@ public:
         bGenerateStack(false),
         bGenerateMemory(false),
         bGenerateReturnData(false)
-        {};
+    {
+        calculateFlags();
+    };
 
     // Call calculateFlags() once all configuration parameters have been set
     void calculateFlags (void)
