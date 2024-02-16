@@ -5454,10 +5454,13 @@ code += "    #endif\n";
 
             if ((proverForkID == 7) && rom["program"][zkPC].contains("jmpAddrLabel") && (rom["program"][zkPC]["jmpAddrLabel"] == "funcModexp"))
             {
-                code += "        proverRequest.result = ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED;\n";
-                code += "        mainExecutor.logError(ctx, \"Invalid funcModexp call\");\n";
-                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
+                code += "        if (proverRequest.input.executionMode != 1)\n";
+                code += "        {\n";
+                code += "            proverRequest.result = ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED;\n";
+                code += "            mainExecutor.logError(ctx, \"Invalid funcModexp call\");\n";
+                code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+                code += "            return;\n";
+                code += "        }\n";
             }
 
             code += "    }\n";

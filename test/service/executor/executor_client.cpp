@@ -93,6 +93,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     {
         no_counters = true;
     }
+    uint64_t executionMode = input.executionMode;
     
     // Resulting new state root
     string newStateRoot;
@@ -214,6 +215,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
         request.set_update_merkle_tree(update_merkle_tree);
         request.set_no_counters(no_counters);
+        request.set_execution_mode(executionMode);
         request.set_get_keys(get_keys);
         request.set_skip_verify_l1_info_root(input.bSkipVerifyL1InfoRoot);
         request.set_skip_first_change_l2_block(input.bSkipFirstChangeL2Block);
