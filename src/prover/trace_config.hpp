@@ -27,18 +27,19 @@ public:
         bDisableStack(false),
         bEnableMemory(false),
         bEnableReturnData(false),
+        bGenerateFullTrace(true),
         bGenerateStorage(false),
         bGenerateStack(false),
         bGenerateMemory(false),
         bGenerateReturnData(false)
     {
-        calculateFlags();
+        //calculateFlags();
     };
 
     // Call calculateFlags() once all configuration parameters have been set
     void calculateFlags (void)
     {
-        bGenerateFullTrace    = bEnabled && (txHashToGenerateFullTrace.size() > 0);
+        //bGenerateFullTrace    = bEnabled && (txHashToGenerateFullTrace.size() > 0);
         bGenerateStorage      = bEnabled && !bDisableStorage;
         bGenerateStack        = bEnabled && !bDisableStack;
         bGenerateMemory       = bEnabled && bEnableMemory;
