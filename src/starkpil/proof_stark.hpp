@@ -30,7 +30,7 @@ public:
     std::vector<std::vector<Goldilocks::Element>> v;
     std::vector<std::vector<ElementType>> mp;
 
-    MerkleProof(uint64_t nLinears, uint64_t elementsTree, uint64_t elementsTreeSize, void *pointer) : v(nLinears, std::vector<Goldilocks::Element>(1, Goldilocks::zero())), mp(elementsTree, std::vector<ElementType>(elementsTreeSize))
+    MerkleProof(uint64_t nLinears, uint64_t elementsTree, uint64_t numSiblings, void *pointer) : v(nLinears, std::vector<Goldilocks::Element>(1, Goldilocks::zero())), mp(elementsTree, std::vector<ElementType>(numSiblings))
     {
         for (uint64_t i = 0; i < nLinears; i++)
         {
@@ -39,7 +39,7 @@ public:
         ElementType *mpCursor = (ElementType *)&((Goldilocks::Element *)pointer)[nLinears];
         for (uint64_t j = 0; j < elementsTree; j++)
         {
-            std::memcpy(&mp[j][0], &mpCursor[j * elementsTreeSize], elementsTreeSize * sizeof(ElementType));
+            std::memcpy(&mp[j][0], &mpCursor[j * numSiblings], numSiblings * sizeof(ElementType));
         }
     }
 

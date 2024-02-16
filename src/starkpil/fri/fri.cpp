@@ -144,7 +144,7 @@ void FRI<ElementType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *t
 
         trees[i]->getGroupProof(&buff[0], idx);
 
-        MerkleProof<ElementType> mkProof(trees[i]->getMerkleTreeWidth(), trees[i]->getMerkleProofLength(), trees[i]->getElementSize(), &buff[0]);
+        MerkleProof<ElementType> mkProof(trees[i]->getMerkleTreeWidth(), trees[i]->getMerkleProofLength(), trees[i]->getNumSiblings(), &buff[0]);
         vMkProof.push_back(mkProof);
     }
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
@@ -161,7 +161,7 @@ void FRI<ElementType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *t
     ElementType buff[tree->getMerkleTreeWidth() + tree->getMerkleProofSize()];
     tree->getGroupProof(&buff[0], idx);
 
-    MerkleProof<ElementType> mkProof(tree->getMerkleTreeWidth(), tree->getMerkleProofLength(), tree->getElementSize(), &buff[0]);
+    MerkleProof<ElementType> mkProof(tree->getMerkleTreeWidth(), tree->getMerkleProofLength(), tree->getNumSiblings(), &buff[0]);
     vMkProof.push_back(mkProof);
 
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
