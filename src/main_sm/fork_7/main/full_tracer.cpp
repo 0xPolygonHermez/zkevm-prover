@@ -449,8 +449,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
 
     // Intrinsic error should be set at tx level (not opcode)
     // Error triggered with no previous opcode set at tx level
-    if ( (responseErrors.find(lastError) != responseErrors.end()) ||
-         full_trace.empty() )
+    if ( (responseErrors.find(lastError) != responseErrors.end()) || (numberOfOpcodesInThisTx == 0) )
     {
         if (currentBlock.responses.size() > txIndex)
         {

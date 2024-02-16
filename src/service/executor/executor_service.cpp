@@ -939,6 +939,7 @@ using grpc::Status;
     proverRequest.input.bSkipVerifyL1InfoRoot = request->skip_verify_l1_info_root();
     proverRequest.input.bSkipFirstChangeL2Block = request->skip_first_change_l2_block();
     proverRequest.input.bSkipWriteBlockInfoRoot = request->skip_write_block_info_root();
+    proverRequest.input.executionMode = request->execution_mode();
 
     // Trace config
     if (request->has_trace_config())
@@ -1295,6 +1296,7 @@ using grpc::Status;
         " from=" + proverRequest.input.from +
         " bUpdateMerkleTree=" + to_string(proverRequest.input.bUpdateMerkleTree) +
         " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
+        " executionMode=" + to_string(proverRequest.input.executionMode) +
         " bGetKeys=" + to_string(proverRequest.input.bGetKeys) +
         " bSkipVerifyL1InfoRoot=" + to_string(proverRequest.input.bSkipVerifyL1InfoRoot) +
         " bSkipFirstChangeL2Block=" + to_string(proverRequest.input.bSkipFirstChangeL2Block) +

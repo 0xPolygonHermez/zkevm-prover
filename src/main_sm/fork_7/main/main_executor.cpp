@@ -5060,7 +5060,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             pols.JMPN[i] = fr.one();
 
-            if (pols.zkPC[nexti] == fr.fromU64(funcModexpLabel))
+            if ((proverRequest.input.executionMode != 1) && (pols.zkPC[nexti] == fr.fromU64(funcModexpLabel)))
             {
                 proverRequest.result = ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED;
                 logError(ctx, "Invalid funcModexp call");
