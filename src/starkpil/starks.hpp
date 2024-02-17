@@ -281,11 +281,12 @@ public:
     void addTranscriptPublics(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, Polinomial &pol);
+public:
     void getChallenges(TranscriptType &transcript, Goldilocks::Element* challenges, uint64_t nChallenges);
 
+private:
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
 
-private:
     Polinomial *transposeH1H2Columns(StepsParams& params);
     void transposeH1H2Rows(StepsParams& params, Polinomial *transPols);
     Polinomial *transposeZColumns(StepsParams& params);
@@ -306,6 +307,7 @@ public:
     // void ffi_xdivxsubxi(uint64_t extendBits, Polinomial *xi, Polinomial *wxi, Polinomial *challenges, Polinomial *xDivXSubXi, Polinomial *xDivXSubWXi);
     // void ffi_finalize_proof(FRIProof<Goldilocks::Element, Goldilocks> *proof, Transcript *transcript, Polinomial *evals, Polinomial *root0, Polinomial *root1, Polinomial *root2, Polinomial *root3);
     void ffi_extend_and_merkelize(uint64_t step, void *pParams, void *pProof);
+    void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 };
 
 template class Starks<Goldilocks::Element>;

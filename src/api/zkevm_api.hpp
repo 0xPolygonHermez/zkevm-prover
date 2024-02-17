@@ -66,7 +66,7 @@
     void steps_params_free(void *pStepsParams);
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
     // void tree_merkelize(void *pStarks, uint64_t index);
-    // void tree_get_root(void *pStarks, uint64_t index, void *root);
+    void treesGL_get_root(void *pStarks, uint64_t index, void *root);
     // void extend_pol(void *pStarks, uint64_t step);
     // void *get_pbuffer(void *pStarks);
 
@@ -112,13 +112,14 @@
     void transcript_add_polinomial(void *pTranscript, void *pPolinomial);
     void transcript_get_field(void *pTranscript, void *pOutput);
     void transcript_free(void *pTranscript);
-    void get_challenges(void *pTranscript, void *pPolinomial, uint64_t nChallenges, uint64_t index);
+    void get_challenges(void *pStarks, void *pTranscript, void *pElement, uint64_t nChallenges);
     void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits);
 
     // Polinomial
     // =================================================================================
     void *polinomial_new(uint64_t degree, uint64_t dim, char* name);
     void *polinomial_new_void();
+    void *polinomial_new_with_address(void* pAddress, uint64_t degree, uint64_t dim, uint64_t offset, char* name);
     void *polinomial_get_address(void *pPolinomial);
     void *polinomial_get_p_element(void *pPolinomial, uint64_t index);
     void polinomial_free(void *pPolinomial);

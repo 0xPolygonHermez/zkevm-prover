@@ -956,4 +956,8 @@ void Starks<ElementType>::ffi_extend_and_merkelize(uint64_t step, void *pParams,
     extendAndMerkelize(step, (StepsParams&)pParams, (FRIProof<ElementType>&)pProof);
 }
 
+template <typename ElementType>
+void Starks<ElementType>::ffi_treesGL_get_root(uint64_t index, ElementType *dst) {
+    treesGL[index]->getRoot(dst);
+}
 

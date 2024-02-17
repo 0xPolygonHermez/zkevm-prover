@@ -1093,11 +1093,11 @@ void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *pPr
 //     starks->treeMerkelize(index);
 // }
 
-// void tree_get_root(void *pStarks, uint64_t index, void *root) {
-//     Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
+void treesGL_get_root(void *pStarks, uint64_t index, void *dst) {
+    Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
 
-//     starks->treeGetRoot(index, (Goldilocks::Element*)root);
-// }
+    starks->ffi_treesGL_get_root(index, (Goldilocks::Element*)dst);
+}
 
 // void extend_pol(void *pStarks, uint64_t step) {
 //     Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
@@ -1279,13 +1279,10 @@ void transcript_free(void *pTranscript) {
     delete transcript;
 }
 
-void get_challenges(void *pTranscript, void *pPolinomial, uint64_t nChallenges, uint64_t index) {
+void get_challenges(void *pStarks, void *pTranscript, void *pElement, uint64_t nChallenges) {
     TranscriptGL *transcript = (TranscriptGL *)pTranscript;
-    Polinomial *polinomial = (Polinomial *)pPolinomial;
 
-     for(uint64_t i = 0; i < nChallenges; i++) {
-        transcript->getField((uint64_t*)polinomial->operator[](index + i));
-    }  
+    ((Starks<Goldilocks::Element>*)pStarks)->getChallenges(*transcript, (Goldilocks::Element*)pElement, nChallenges);
 }
 
 void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits) {
@@ -1301,6 +1298,10 @@ uint64_t get_num_rows_step_batch(void *pStarks) {
 
 void *polinomial_new(uint64_t degree, uint64_t dim, char* name) {
     return new Polinomial(degree, dim, string(name));
+}
+
+void *polinomial_new_with_address(void* pAddress, uint64_t degree, uint64_t dim, uint64_t offset, char* name) {
+    return new Polinomial(pAddress, degree, dim, offset, string(name));
 }
 
 void *polinomial_new_void() {
