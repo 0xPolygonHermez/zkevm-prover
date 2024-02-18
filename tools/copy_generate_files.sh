@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-VERSION=v4.0.0-rc.6-fork.7
+VERSION=v5.0.0-rc.2-fork.8
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 
@@ -75,8 +75,7 @@ cp ${CONFIG_DIR}/scripts/metadata-rom.txt ./src/main_sm/$FORK_ID/scripts/
 cp ${WORKING_DIR}/pil/zkevm/main.pil.json  ./src/main_sm/$FORK_ID/scripts/
 
 #main generator files
-make main_generator
-./build/mainGenerator
+make generate
 
 #pols generator files
 make pols_generator
