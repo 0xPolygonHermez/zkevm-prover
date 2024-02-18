@@ -21,6 +21,8 @@ jobs:
         node-version: '16'
     - name: Install snarkjs
       run: npm -g install snarkjs
+    - name: list files
+      run: find /home/gha/v5.0.0-rc.2-fork.8 -ls
     - name: make
       run: cd src/grpc && make && cd ../.. && make generate && make -j
     - name: remove all config 
@@ -31,8 +33,6 @@ jobs:
       run: ln -s /home/gha/v5.0.0-rc.2-fork.8/config/ config
     - name: hash file
       run: sha256sum /home/gha/v5.0.0-rc.2-fork.8/config/scripts/storage_sm_rom.json
-    - name: list files
-      run: find /home/gha/v5.0.0-rc.2-fork.8 -ls
     - name: run collection native tests
       run: ./build/zkProver -c testvectors/config_collection_native.json
     - name: run collection generated tests
