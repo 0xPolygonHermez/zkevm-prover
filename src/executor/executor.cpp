@@ -459,7 +459,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-        if (proverRequest.result != ZKR_SUCCESS)
+        if (proverRequest.result == ZKR_SM_MAIN_CLOSE_BATCH)
+        {
+            proverRequest.result = ZKR_SUCCESS;
+        }
+        else if (proverRequest.result != ZKR_SUCCESS)
         {
             return;
         }
@@ -576,7 +580,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-        if (proverRequest.result != ZKR_SUCCESS)
+        if (proverRequest.result == ZKR_SM_MAIN_CLOSE_BATCH)
+        {
+            proverRequest.result = ZKR_SUCCESS;
+        }
+        else if (proverRequest.result != ZKR_SUCCESS)
         {
             zklog.error("Executor::execute() got from main execution proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
             return;
