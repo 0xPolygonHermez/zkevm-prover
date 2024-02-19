@@ -13,6 +13,7 @@ COPY ./src ./src
 COPY ./test ./test
 COPY ./tools ./tools
 COPY Makefile .
+RUN make generate
 RUN make -j
 
 

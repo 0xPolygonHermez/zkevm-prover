@@ -341,6 +341,16 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
+    // Input JSON file may contain a executionMode key at the root level
+    if ( input.contains("executionMode") &&
+         input["executionMode"].is_number_unsigned() )
+    {
+        executionMode = input["executionMode"];
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals() executionMode=" + to_string(executionMode));
+#endif
+    }
+
     if (publicInputsExtended.publicInputs.forkID >= 7)
     {
         // Input JSON file might contain a stepsN key at the root level
@@ -660,6 +670,7 @@ void Input::saveGlobals (json &input) const
     if (!from.empty() && (from != "0x")) input["from"] = from;
     input["updateMerkleTree"] = bUpdateMerkleTree;
     if (bNoCounters) input["noCounters"] = bNoCounters;
+    if (executionMode != 0) input["executionMode"] = executionMode;
     if (bGetKeys) input["getKeys"] = bGetKeys;
     if (bSkipVerifyL1InfoRoot) input["skipVerifyL1InfoRoot"] = bSkipVerifyL1InfoRoot;
     if (bSkipFirstChangeL2Block) input["skipFirstChangeL2Block"] = bSkipFirstChangeL2Block;

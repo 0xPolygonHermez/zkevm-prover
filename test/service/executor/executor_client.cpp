@@ -103,6 +103,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     {
         no_counters = true;
     }
+    uint64_t executionMode = input.executionMode;
     
     // Resulting new state root
     string newStateRoot;
@@ -225,6 +226,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
         request.set_update_merkle_tree(update_merkle_tree);
         request.set_no_counters(no_counters);
+        request.set_execution_mode(executionMode);
         request.set_get_keys(get_keys);
         request.set_skip_verify_l1_info_root(input.bSkipVerifyL1InfoRoot);
         request.set_skip_first_change_l2_block(input.bSkipFirstChangeL2Block);
@@ -506,7 +508,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
                 return false;
             }
         }
-        else
+        else if (NormalizeToNFormat(input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64) !=
+                 NormalizeToNFormat(newStateRoot, 64))
         {
             blockStateRoots.emplace_back(newStateRoot);
             vector<string>::iterator it = unique(blockStateRoots.begin(), blockStateRoots.end());
@@ -568,15 +571,15 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
         // Skip some files that we know are failing
         if ( skipping 
              /* Files and directories expected to be skipped */
-             || (files[i].find("ignore") != string::npos) // Ignore tests masked as "ignore"
-             || (files[i].find("-list.json") != string::npos) // Ignore tests masked as "-list"
+             || (inputFile.find("ignore") != string::npos) // Ignore tests masked as "ignore"
+             || (inputFile.find("-list.json") != string::npos) // Ignore tests masked as "-list"
 #ifndef MULTI_ROM_TEST
-             || (files[i].find("tests-30M") != string::npos) // Ignore tests that require a rom with a different gas limit
+             || (inputFile.find("tests-30M") != string::npos) // Ignore tests that require a rom with a different gas limit
 #endif
-             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/rlp-error/test-length-data_1.json") // batchL2Data.size()=120119 > MAX_BATCH_L2_DATA_SIZE=120000
-             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/rlp-error/test-length-data_2.json") // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
-             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return2_0.json") // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
-             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return_0.json") // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
+             || (inputFile.find("rlp-error/test-length-data_1.json") != string::npos) // batchL2Data.size()=120119 > MAX_BATCH_L2_DATA_SIZE=120000
+             || (inputFile.find("rlp-error/test-length-data_2.json") != string::npos) // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
+             || (inputFile.find("ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return2_0.json") != string::npos) // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
+             || (inputFile.find("ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return_0.json") != string::npos) // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
            )
         {
             zklog.warning("ProcessDirectory() skipping file=" + inputFile + " fileCounter=" + to_string(fileCounter) + " skippedFileCounter=" + to_string(skippedFileCounter));

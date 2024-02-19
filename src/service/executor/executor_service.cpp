@@ -172,6 +172,13 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
+    if (proverRequest.input.bUpdateMerkleTree && config.dbReadOnly)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got bUpdateMerkleTree=true while dbReadOnly=true", &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
 
     // Trace config
     if (request->has_trace_config())
@@ -920,11 +927,19 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
+    if (proverRequest.input.bUpdateMerkleTree && config.dbReadOnly)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatchV2() got bUpdateMerkleTree=true while dbReadOnly=true", &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
     proverRequest.input.bNoCounters = request->no_counters();
     proverRequest.input.bGetKeys = request->get_keys();
     proverRequest.input.bSkipVerifyL1InfoRoot = request->skip_verify_l1_info_root();
     proverRequest.input.bSkipFirstChangeL2Block = request->skip_first_change_l2_block();
     proverRequest.input.bSkipWriteBlockInfoRoot = request->skip_write_block_info_root();
+    proverRequest.input.executionMode = request->execution_mode();
 
     // Trace config
     if (request->has_trace_config())
@@ -1281,6 +1296,7 @@ using grpc::Status;
         " from=" + proverRequest.input.from +
         " bUpdateMerkleTree=" + to_string(proverRequest.input.bUpdateMerkleTree) +
         " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
+        " executionMode=" + to_string(proverRequest.input.executionMode) +
         " bGetKeys=" + to_string(proverRequest.input.bGetKeys) +
         " bSkipVerifyL1InfoRoot=" + to_string(proverRequest.input.bSkipVerifyL1InfoRoot) +
         " bSkipFirstChangeL2Block=" + to_string(proverRequest.input.bSkipFirstChangeL2Block) +
