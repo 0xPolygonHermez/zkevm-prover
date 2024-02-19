@@ -89,13 +89,9 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinom
     }
 
     if (step != starkInfo.starkStruct.steps.size() - 1) {
-        uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
-        uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
-    
         // Re-org in groups
         Polinomial aux(pol2N, FIELD_EXTENSION);
         getTransposed(aux, pol2_e, starkInfo.starkStruct.steps[step + 1].nBits);
-        treesFRI[step] = new MerkleTreeType(nGroups, groupSize * FIELD_EXTENSION, NULL);
         treesFRI[step]->copySource(aux.address());
         treesFRI[step]->merkelize();
         treesFRI[step]->getRoot(&proof.proofs.fri.trees[step + 1].root[0]);
