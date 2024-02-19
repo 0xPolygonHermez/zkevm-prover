@@ -433,6 +433,10 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_BATCH_PROOF);
     executor.execute(*pProverRequest, cmPols);
+    if (pProverRequest->result == ZKR_SM_MAIN_CLOSE_BATCH)
+    {
+        pProverRequest->result = ZKR_SUCCESS;
+    }
     TimerStopAndLog(EXECUTOR_EXECUTE_BATCH_PROOF);
 
     uint64_t lastN = cmPols.pilDegree() - 1;
