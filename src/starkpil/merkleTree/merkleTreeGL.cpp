@@ -86,18 +86,13 @@ Goldilocks::Element MerkleTreeGL::getElement(uint64_t idx, uint64_t subIdx)
 void MerkleTreeGL::getGroupProof(Goldilocks::Element *proof, uint64_t idx) {
     assert(idx < height);
 
-    Goldilocks::Element v[width];
 #pragma omp parallel for
-    for (uint64_t i = 0; i < width; i++) {
-        v[i] = getElement(idx, i);
+    for (uint64_t i = 0; i < width; i++)
+    {
+        proof[i] = getElement(idx, i);
     }
-    std::memcpy(proof, &v[0], width * sizeof(Goldilocks::Element));
 
-    Goldilocks::Element *mp = (Goldilocks::Element *)calloc(getMerkleProofSize(), sizeof(Goldilocks::Element));
-    genMerkleProof(mp, idx, 0, height);
-
-    std::memcpy(proof + width, mp, getMerkleProofSize() * sizeof(Goldilocks::Element));
-    free(mp);
+    genMerkleProof(&proof[width], idx, 0, height * HASH_SIZE);
 }
 
 void MerkleTreeGL::genMerkleProof(Goldilocks::Element *proof, uint64_t idx, uint64_t offset, uint64_t n)
