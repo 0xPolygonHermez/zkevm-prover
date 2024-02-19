@@ -127,6 +127,8 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     getChallenges(transcript, params.challenges[5], 2);
 
+    Polinomial* friPol = computeFRIPol(params, steps, nrowsStepBatch);
+
     TimerStopAndLog(STARK_STEP_5);
 
     //--------------------------------
@@ -134,8 +136,6 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     //--------------------------------
     TimerStart(STARK_STEP_FRI);
     
-    Polinomial* friPol = computeFRIPol(params, steps, nrowsStepBatch);
-
     for (uint64_t step = 0; step < starkInfo.starkStruct.steps.size(); step++) {
         Polinomial challenge(1, FIELD_EXTENSION);
         getChallenges(transcript, challenge[0], 1);
@@ -607,6 +607,19 @@ void Starks<ElementType>::evmap(StepsParams &params, Polinomial &LEv)
     vector<uint64_t> openingPoints = starkInfo.openingPoints;
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
     u_int64_t size_eval = starkInfo.evMap.size();
+ 
+    Polinomial LEv_Helpers(openingPoints.size() * N, FIELD_EXTENSION);
+   
+#pragma omp parallel for
+    for(uint64_t k = 0; k < N; ++k) {
+        for (uint64_t i = 0; i < openingPoints.size(); ++i) {
+            Goldilocks::Element *LEv_ = &LEv[i*N + k][0]; 
+            LEv_Helpers[i*N + k][0] = LEv_[0] + LEv_[1];
+            LEv_Helpers[i*N + k][1] = LEv_[0] + LEv_[2];
+            LEv_Helpers[i*N + k][2] = LEv_[1] + LEv_[2];
+        }
+    }
+
     // Order polinomials by address, note that there are collisions!
     map<uintptr_t, vector<uint>> map_offsets;
     for (uint64_t i = 0; i < size_eval; i++)
@@ -679,7 +692,7 @@ void Starks<ElementType>::evmap(StepsParams &params, Polinomial &LEv)
             for (uint64_t i = 0; i < size_eval; i++)
             {
                 int index = findIndex(openingPoints, isPrime[i]);
-                Polinomial::mulAddElement_adim3(&(evals_acc[thread_idx][i * FIELD_EXTENSION]),  &(LEv[index*N + k][0]), ordPols[i], k << extendBits);
+                Polinomial::mulAddElement_adim3(&(evals_acc[thread_idx][i * FIELD_EXTENSION]),  &(LEv[index*N + k][0]), &(LEv_Helpers[index*N + k][0]), ordPols[i], k << extendBits);
             }
         }
 #pragma omp for

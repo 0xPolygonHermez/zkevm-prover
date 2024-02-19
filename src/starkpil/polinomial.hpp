@@ -725,7 +725,7 @@ public:
         Polinomial::copyElement(res, 0, z, 0);
     }
 
-    static inline void mulAddElement_adim3(Goldilocks::Element *out, Goldilocks::Element *in_a, Polinomial &in_b, uint64_t idx_b)
+    static inline void mulAddElement_adim3(Goldilocks::Element *out, Goldilocks::Element *in_a, Goldilocks::Element *in_a_helpers, Polinomial &in_b, uint64_t idx_b)
     {
         if (in_b.dim() == 1)
         {
@@ -735,7 +735,7 @@ public:
         }
         else
         {
-            Goldilocks::Element A = (in_a[0] + in_a[1]) * (in_b[idx_b][0] + in_b[idx_b][1]);
+            Goldilocks::Element A = in_a_helpers[0] * (in_b[idx_b][0] + in_b[idx_b][1]);
             Goldilocks::Element B = (in_a[0] + in_a[2]) * (in_b[idx_b][0] + in_b[idx_b][2]);
             Goldilocks::Element C = (in_a[1] + in_a[2]) * (in_b[idx_b][1] + in_b[idx_b][2]);
             Goldilocks::Element D = in_a[0] * in_b[idx_b][0];
