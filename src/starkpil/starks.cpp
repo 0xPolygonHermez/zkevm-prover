@@ -800,22 +800,22 @@ void Starks<ElementType>::merkelizeMemory()
 }
 
 template <typename ElementType>
-void * Starks<ElementType>::createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
-    StepsParams *params = (StepsParams*)calloc(1, sizeof(StepsParams));
-
-    params->pols = mem;
-    params->pConstPols = pConstPols;
-    params->pConstPols2ns = pConstPols2ns;
-    params->challenges = (Polinomial&)pChallenges;
-    params->x_n = x_n;
-    params->x_2ns = x_2ns;
-    params->zi = zi;
-    params->evals = (Polinomial&)pEvals;
-    params->xDivXSubXi = (Polinomial&)pXDivXSubXi;
-    params->xDivXSubWXi = (Polinomial&)pXDivXSubWXi;
-    params->publicInputs = (Goldilocks::Element*)pPublicInputs;
-    params->q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
-    params->f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
+void * Starks<ElementType>::ffi_create_steps_params(Polinomial *pChallenges, Polinomial *pEvals, Polinomial *pXDivXSubXi, Polinomial *pXDivXSubWXi, Goldilocks::Element *pPublicInputs) {
+    StepsParams* params = new StepsParams {
+        pols : mem,
+        pConstPols : pConstPols,
+        pConstPols2ns : pConstPols2ns,
+        challenges : *pChallenges,
+        x_n : x_n,
+        x_2ns : x_2ns,
+        zi : zi,
+        evals : *pEvals,
+        xDivXSubXi : *pXDivXSubXi,
+        xDivXSubWXi : *pXDivXSubWXi,
+        publicInputs : pPublicInputs,
+        q_2ns : &mem[starkInfo.mapOffsets.section[eSection::q_2ns]],
+        f_2ns : &mem[starkInfo.mapOffsets.section[eSection::f_2ns]]
+    };
 
     return params;
 }
@@ -965,8 +965,8 @@ void * Starks<ElementType>::createStepsParams(void *pChallenges, void *pEvals, v
 // }
 
 template <typename ElementType>
-void Starks<ElementType>::ffi_extend_and_merkelize(uint64_t step, void *pParams, void *pProof) {
-    extendAndMerkelize(step, (StepsParams&)pParams, (FRIProof<ElementType>&)pProof);
+void Starks<ElementType>::ffi_extend_and_merkelize(uint64_t step, StepsParams* params, FRIProof<ElementType>* proof) {
+    extendAndMerkelize(step, *params, *proof);
 }
 
 template <typename ElementType>

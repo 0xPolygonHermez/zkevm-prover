@@ -90,7 +90,7 @@ Prover::Prover(Goldilocks &fr,
 
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
             // and create them using the allocated address
-            uint64_t polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element) + _starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
+            polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element) + _starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
 
             zkassert(_starkInfo.mapSectionsN.section[eSection::cm1_2ns] * sizeof(Goldilocks::Element) <= polsSize - _starkInfo.mapSectionsN.section[eSection::cm2_2ns] * sizeof(Goldilocks::Element));
 
@@ -121,6 +121,7 @@ Prover::Prover(Goldilocks &fr,
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
+#ifndef __LIB__
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
             prover->setZkey(zkey.get());
 
@@ -133,6 +134,7 @@ Prover::Prover(Goldilocks &fr,
             starksRecursive1 = new Starks<Goldilocks::Element>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
             starksRecursive2 = new Starks<Goldilocks::Element>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
             starksRecursiveF = new Starks<RawFr::Element>(config, {config.recursivefConstPols, config.mapConstPolsFile, config.recursivefConstantsTree, config.recursivefStarkInfo}, pAddressStarksRecursiveF);
+#endif
         }
     }
     catch (std::exception &e)
@@ -144,8 +146,6 @@ Prover::Prover(Goldilocks &fr,
 
 Prover::~Prover()
 {
-    mpz_clear(altBbn128r);
-
     if (config.generateProof())
     {
         Groth16::Prover<AltBn128::Engine> *pGroth16 = groth16Prover.release();
@@ -163,8 +163,6 @@ Prover::~Prover()
         delete pZkey;
         delete pZkeyHeader;
 
-        uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
-
         // Unmap committed polynomials address
         if (config.zkevmCmPols.size() > 0)
         {
@@ -174,6 +172,8 @@ Prover::~Prover()
         {
             if(!externalAllocated) free(pAddress);
         }
+
+#ifndef __LIB__
         free(pAddressStarksRecursiveF);
 
         delete prover;
@@ -183,7 +183,10 @@ Prover::~Prover()
         delete starksRecursive1;
         delete starksRecursive2;
         delete starksRecursiveF;
+#endif
     }
+
+    mpz_clear(altBbn128r);
 }
 
 void *proverThread(void *arg)

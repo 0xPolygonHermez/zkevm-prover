@@ -301,7 +301,9 @@ private:
 
 public:
     // Following function are created to be used by the ffi interface
-    void *createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs);
+    // void *ffi_create_steps_params(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs);
+    void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial *pEvals, Polinomial *pXDivXSubXi, Polinomial *pXDivXSubWXi, Goldilocks::Element *pPublicInputs);
+
     // void treeMerkelize(uint64_t index);
     // void treeGetRoot(uint64_t index, Goldilocks::Element *root);
     // void extendPol(uint64_t step);
@@ -312,7 +314,7 @@ public:
     // void ffi_lev_lpev(Polinomial *LEv, Polinomial *LpEv, Polinomial *xis, Polinomial *wxis, Polinomial *c_w, Polinomial *challenges);
     // void ffi_xdivxsubxi(uint64_t extendBits, Polinomial *xi, Polinomial *wxi, Polinomial *challenges, Polinomial *xDivXSubXi, Polinomial *xDivXSubWXi);
     // void ffi_finalize_proof(FRIProof<Goldilocks::Element, Goldilocks> *proof, Transcript *transcript, Polinomial *evals, Polinomial *root0, Polinomial *root1, Polinomial *root2, Polinomial *root3);
-    void ffi_extend_and_merkelize(uint64_t step, void *pParams, void *pProof);
+    void ffi_extend_and_merkelize(uint64_t step, StepsParams* params, FRIProof<ElementType>* proof);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 };
 

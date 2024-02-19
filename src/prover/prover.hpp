@@ -41,6 +41,8 @@ class Prover
     std::unique_ptr<ZKeyUtils::Header> zkeyHeader;
     mpz_t altBbn128r;
 
+    uint64_t polsSize;
+
 public:
     unordered_map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
 

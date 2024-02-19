@@ -1072,8 +1072,13 @@ void *get_stark_info(void *pStarks) {
 
 void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
     Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
+    Polinomial* challenges = (Polinomial*)pChallenges;
+    Polinomial* evals = (Polinomial*)pEvals;
+    Polinomial* xDivXSubXi = (Polinomial*)pXDivXSubXi;
+    Polinomial* xDivXSubWXi = (Polinomial*)pXDivXSubWXi;
+    Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
 
-    return starks->createStepsParams(pChallenges, pEvals, pXDivXSubXi, pXDivXSubWXi, pPublicInputs);
+    return starks->ffi_create_steps_params(challenges, evals, xDivXSubXi, xDivXSubWXi, publicInputs);
 }
 
 void steps_params_free(void *pStepsParams) {
@@ -1083,9 +1088,11 @@ void steps_params_free(void *pStepsParams) {
 }
 
 void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *pProof) {
-    Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
+    auto starks = (Starks<Goldilocks::Element>*)pStarks;
+    auto params = (StepsParams*)pParams;
+    auto proof = (FRIProof<Goldilocks::Element>*)pProof;
 
-    starks->ffi_extend_and_merkelize(step, (StepsParams*)pParams, pProof);
+    starks->ffi_extend_and_merkelize(step, params, proof);
 }
 
 // void tree_merkelize(void *pStarks, uint64_t index) {
@@ -1110,7 +1117,7 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst) {
 
 void calculate_h1_h2(void *pStarks, void *pParams) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->calculateH1H2((StepsParams&)pParams);
+    starks->calculateH1H2(*(StepsParams*)pParams);
 }
 
 void calculate_z(void *pStarks, void *pParams) {
@@ -1132,14 +1139,14 @@ void compute_evals(void *pStarks, void *pParams, void *pProof) {
     starks->computeEvals(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof);
 }
 
-void *compute_fri_pol(void *pStarks, void *pParams, void *steps, uint64_t nrowsStepBatch) {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->computeFRIPol(*(StepsParams*)pParams, (Steps*)steps, nrowsStepBatch);
+void *compute_fri_pol(void *pStarks, void *pParams, void *pSteps, uint64_t nrowsStepBatch) {
+    auto *starks = (Starks<Goldilocks::Element>*)pStarks;
+    return starks->computeFRIPol(*(StepsParams*)pParams, (Steps*)pSteps, nrowsStepBatch);
 }
 
-void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *challenge) {
+void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->computeFRIFolding(*(FRIProof<Goldilocks::Element>*)pProof, *(Polinomial*)pFriPol, step, *(Polinomial *)challenge);
+    starks->computeFRIFolding(*(FRIProof<Goldilocks::Element>*)pProof, *(Polinomial*)pFriPol, step, *(Polinomial *)pChallenge);
 }
 
 void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* friQueries) {
@@ -1183,10 +1190,10 @@ void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char* zkevmVer
     CircomRecursive1::getCommitedPols((CommitPolsStarks*)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
 }
 
-void *zkin_new(void* pStarks, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC) {
+void *zkin_new(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
-    Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
-    Goldilocks::Element* rootC = (Goldilocks::Element*)pRootC;
+    auto publicInputs = (Goldilocks::Element*)pPublicInputs;
+    auto rootC = (Goldilocks::Element*)pRootC;
 
     // Generate publics
     json publicStarkJson;
@@ -1205,14 +1212,14 @@ void *zkin_new(void* pStarks, void *pFriProof, unsigned long numPublicInputs, vo
     nlohmann::json* zkin = new nlohmann::json();
     *jProof = friProof->proofs.proof2json();
 
-    *zkin = proof2zkinStark(*jProof, ((Starks<Goldilocks::Element>*)pStarks)->starkInfo);
+    *zkin = proof2zkinStark(*jProof, *(StarkInfo*)pStarkInfo);
     (*zkin)["publics"] = publicStarkJson;
     if (numRootC != 0) (*zkin)["rootC"] = xrootC;
 
     return zkin;
 }
 
-void save_proof(void* pStarks, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
+void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
 
@@ -1223,10 +1230,8 @@ void save_proof(void* pStarks, void *pFriProof, unsigned long numPublicInputs, v
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
 
-
-
     nlohmann::ordered_json jProofRecursive1 = friProof->proofs.proof2json();
-    nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1, ((Starks<Goldilocks::Element>*)pStarks)->starkInfo);
+    nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1, *(StarkInfo*)pStarkInfo);
     zkinRecursive1["publics"] = publicStarkJson;
 
     // save publics to filestarks
@@ -1297,7 +1302,8 @@ uint64_t get_num_rows_step_batch(void *pStarks) {
 }
 
 void *polinomial_new(uint64_t degree, uint64_t dim, char* name) {
-    return new Polinomial(degree, dim, string(name));
+    auto pol = new Polinomial(degree, dim, string(name));
+    return (void *)pol;
 }
 
 void *polinomial_new_with_address(void* pAddress, uint64_t degree, uint64_t dim, uint64_t offset, char* name) {

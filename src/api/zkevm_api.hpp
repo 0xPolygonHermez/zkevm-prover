@@ -76,8 +76,8 @@
     void compute_q(void *pStarks, void *pParams, void *pProof);
     void compute_evals(void *pStarks, void *pParams, void *pProof);
 
-    void *compute_fri_pol(void *pStarks, void *pParams, void *steps, uint64_t nrowsStepBatch);
-    void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *challenge);
+    void *compute_fri_pol(void *pStarks, void *pParams, void *pSteps, uint64_t nrowsStepBatch);
+    void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* friQueries);
 
     // void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2);
@@ -99,11 +99,11 @@
 
     // zkin
     // ========================================================================================
-    void *zkin_new(void* pStarks, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC);
+    void *zkin_new(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC);
 
     // FRI Proof
     // ========================================================================================
-    void save_proof(void* pStarks, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
+    void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
 
     // Transcript
     // =================================================================================
