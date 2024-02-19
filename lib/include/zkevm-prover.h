@@ -2,7 +2,7 @@
 #define ZKEVM_API_H
     #include <stdint.h>
 
-    int zkevm_main(char *configFile, void* pAddress);
+    int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests);
 
     // FFI functions
 

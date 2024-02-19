@@ -294,7 +294,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
 }
 
 
-int zkevm_main(char *pConfigFile, void* pAddress)
+int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
 {
     
     // Create one instance of Config based on the contents of the file config.json
@@ -541,6 +541,7 @@ int zkevm_main(char *pConfigFile, void* pAddress)
                   poseidon,
                   config,
                   pAddress);
+    prover.setMainSMRequestsPointer(pMainSMRquests);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* SERVERS */

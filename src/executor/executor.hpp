@@ -90,7 +90,7 @@ public:
         {};
 
     // Full version: all polynomials are evaluated, in all evaluations
-    void execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols);
+    void execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols, void* pMainSMRequests=NULL);
 
     // Reduced version: only 2 evaluations are allocated, and assert is disabled
     void process_batch (ProverRequest &proverRequest);

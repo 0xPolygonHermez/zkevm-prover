@@ -83,6 +83,13 @@ public:
 
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
+
+    // pMainRequests used to pass requests to transfer requets to Rust proof manager
+    inline void setMainSMRequestsPointer(void *pMainSMRequests_){pMainSMRequests= pMainSMRequests_;};
+    private:
+    void *pMainSMRequests;
+
+
 };
 
 void *proverThread(void *arg);

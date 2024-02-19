@@ -39,7 +39,8 @@ Prover::Prover(Goldilocks &fr,
                                        executor(fr, config, poseidon),
                                        pCurrentRequest(NULL),
                                        config(config),
-                                       lastComputedRequestEndTime(0)
+                                       lastComputedRequestEndTime(0),
+                                       pMainSMRequests(NULL)
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
@@ -442,7 +443,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     TimerStopAndLog(EXECUTOR_EXECUTE_INITIALIZATION);
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_BATCH_PROOF);
-    executor.execute(*pProverRequest, cmPols);
+    executor.execute(*pProverRequest, cmPols, pMainSMRequests);
+    
     TimerStopAndLog(EXECUTOR_EXECUTE_BATCH_PROOF);
 
     uint64_t lastN = cmPols.pilDegree() - 1;
