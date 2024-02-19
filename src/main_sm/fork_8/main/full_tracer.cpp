@@ -412,7 +412,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
         if (!currentBlock.initialized)
         {
 #ifdef LOG_FULL_TRACER_ON_ERROR
-            zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
+            zklog.info("FullTracer::onError() 1 error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
 #endif
 #ifdef LOG_TIME_STATISTICS
             tms.add("onError", TimeDiff(t));
@@ -426,7 +426,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     {
         currentBlock.error = lastError;
 #ifdef LOG_FULL_TRACER_ON_ERROR
-        zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
+        zklog.info("FullTracer::onError() 2 error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
 #endif
 #ifdef LOG_TIME_STATISTICS
         tms.add("onError", TimeDiff(t));
@@ -439,7 +439,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     {
         currentBlock.error = lastError;
 #ifdef LOG_FULL_TRACER_ON_ERROR
-        zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
+        zklog.info("FullTracer::onError() 3 error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
 #endif
 #ifdef LOG_TIME_STATISTICS
         tms.add("onError", TimeDiff(t));
@@ -462,7 +462,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
             exitProcess();
         }
 #ifdef LOG_FULL_TRACER_ON_ERROR
-        zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
+        zklog.info("FullTracer::onError() 4 error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
 #endif
 #ifdef LOG_TIME_STATISTICS
         tms.add("onError", TimeDiff(t));
@@ -494,7 +494,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     }
 
 #ifdef LOG_FULL_TRACER_ON_ERROR
-    zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
+    zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onError", TimeDiff(t));
