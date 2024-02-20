@@ -3,6 +3,9 @@
 
 #include "goldilocks_base_field.hpp"
 #include "database.hpp"
+#include <grpcpp/grpcpp.h>
+
+using grpc::Server;
 
 class HashDBServer
 {
@@ -10,6 +13,7 @@ private:
     Goldilocks &fr;
     Config &config;
     pthread_t t;
+    std::unique_ptr<Server> server;
 
 public:
     HashDBServer (Goldilocks &fr, Config &config) : fr(fr), config(config) {}; 
