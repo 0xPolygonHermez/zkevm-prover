@@ -110,9 +110,6 @@ typedef enum : int
     ZKR_SM_MAIN_INVALID_WITNESS = 96, // Main state machine input witness is invalid or corrupt
     ZKR_CBOR_INVALID_DATA = 97, // CBOR data is invalid
     ZKR_DATA_STREAM_INVALID_DATA = 98, // Data stream data is invalid
-    ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED = 99, // Main state machine tried to use an unsupported precompiled
-    ZKR_SM_MAIN_OOG_2 = 100, // Main state machine found an out of gase
-    ZKR_SM_MAIN_CLOSE_BATCH = 101, // Main state machine completes but batch must be closed
 
 } zkresult;
 
