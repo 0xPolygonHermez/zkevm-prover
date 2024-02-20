@@ -65,7 +65,6 @@ public:
     bool bSkipVerifyL1InfoRoot; // If true, skip the check when l1Data is verified (fork ID >= 7)
     bool bSkipFirstChangeL2Block; // If true, skip the restriction to start a batch with a changeL2Block transaction (fork ID >= 7)
     bool bSkipWriteBlockInfoRoot; // If true, skip the block info root (fork ID >= 7)
-    uint64_t executionMode;
     TraceConfig traceConfig; // FullTracer configuration
     unordered_map<uint64_t, L1Data> l1InfoTreeData;
     unordered_map<string, OverrideEntry> stateOverride;
@@ -81,7 +80,6 @@ public:
         bSkipVerifyL1InfoRoot(false),
         bSkipFirstChangeL2Block(false),
         bSkipWriteBlockInfoRoot(false),
-        executionMode(0),
         stepsN(0)
         {};
 
