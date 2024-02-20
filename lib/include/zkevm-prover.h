@@ -17,25 +17,25 @@
     void *recursive2_steps_new();
     void recursive2_steps_free(void *Recursive2Steps);
 
-    void step2prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step2prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step2prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
+    // void step2prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step2prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step2prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
     
-    void step3prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step3prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step3prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
+    // void step3prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step3prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step3prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
 
-    void step3_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step3_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step3_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
+    // void step3_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step3_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step3_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
 
-    void step42ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step42ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step42ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
+    // void step42ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step42ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step42ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
 
-    void step52ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step52ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
-    void step52ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
+    // void step52ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step52ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    // void step52ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
 
     // FRIProof
     // ========================================================================================
@@ -51,7 +51,7 @@
 
     // Starks
     // ========================================================================================
-    void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress);
+    void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, char* cHelpers, void *pAddress);
     void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps);
     void starks_free(void *pStarks);
     void *get_stark_info(void *pStarks);
@@ -72,11 +72,13 @@
 
     void calculate_h1_h2(void *pStarks, void *pParams);
     void calculate_z(void *pStarks, void *pParams);
-    void calculate_expressions(void *pStarks, char* step, uint64_t nrowsStepBatch, void *pSteps, void *pParams, uint64_t n);
+    void calculate_expressions(void *pStarks, char* step, void *pParams, void *pChelpersSteps);
+
+
     void compute_q(void *pStarks, void *pParams, void *pProof);
     void compute_evals(void *pStarks, void *pParams, void *pProof);
 
-    void *compute_fri_pol(void *pStarks, void *pParams, void *pSteps, uint64_t nrowsStepBatch);
+    void *compute_fri_pol(void *pStarks, void *pParams, void *cHelpersSteps);
     void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* friQueries);
 
@@ -85,7 +87,7 @@
     // void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi);
     // void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3);
 
-    uint64_t get_num_rows_step_batch(void *pStarks);
+    // uint64_t get_num_rows_step_batch(void *pStarks);
 
     // CommitPolsStarks
     // ========================================================================================

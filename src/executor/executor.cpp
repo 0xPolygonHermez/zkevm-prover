@@ -461,14 +461,14 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
+
+#ifdef __ZKEVM_SM__
         if(pMainSMRequests!=NULL){
             TimerStart(MAIN_SM_REQUESTS_COPY);
-#ifdef __ZKEVM_SM__
-            add_binary_requests((void *)pMainSMRequests, (void *)required.Binary.data(), required.Binary.size());
-#endif
+            add_binary_inputs((void *)pMainSMRequests, (void *)required.Binary.data(), required.Binary.size());
             TimerStopAndLog(MAIN_SM_REQUESTS_COPY);
-
         }
+#endif
 
         if (proverRequest.result != ZKR_SUCCESS)
         {

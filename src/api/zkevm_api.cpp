@@ -903,9 +903,9 @@ void config_free(void *pConfig) {
     delete config;
 }
 
-void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress) {
+void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, char* cHelpers,void *pAddress) {
     Config* config = (Config*)pConfig;
-    return new Starks<Goldilocks::Element>(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo}, pAddress);
+    return new Starks<Goldilocks::Element>(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo, cHelpers}, pAddress);
 }
 
 void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps) {
@@ -1017,7 +1017,7 @@ void compute_evals(void *pStarks, void *pParams, void *pProof) {
 
 void *compute_fri_pol(void *pStarks, void *pParams, void *cHelpersSteps) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->computeFRIPol(*(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps);
+    return starks->computeFRIPol(*(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps);
 }
 
 void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge) {
