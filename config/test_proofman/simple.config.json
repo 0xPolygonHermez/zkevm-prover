@@ -1,0 +1,5 @@
+{
+    "name": "zkevm vadcops test",
+    "pilout": "config/test_proofman/fake.pilout",
+    "meta": "testvectors/config_runFile_BatchProof.json"
+}
