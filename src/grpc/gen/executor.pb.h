@@ -412,15 +412,12 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_INVALID_CBOR = 114,
   EXECUTOR_ERROR_INVALID_DATA_STREAM = 115,
   EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE = 116,
-  EXECUTOR_ERROR_UNSUPPORTED_PRECOMPILED = 117,
-  EXECUTOR_ERROR_OOG_2 = 118,
-  EXECUTOR_ERROR_CLOSE_BATCH = 119,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_CLOSE_BATCH;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
@@ -4610,7 +4607,6 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
     kSkipFirstChangeL2BlockFieldNumber = 15,
     kSkipWriteBlockInfoRootFieldNumber = 16,
     kGetKeysFieldNumber = 22,
-    kExecutionModeFieldNumber = 25,
   };
   // map<uint32, .executor.v1.L1DataV2> l1_info_tree_data = 17;
   int l1_info_tree_data_size() const;
@@ -5006,15 +5002,6 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   void _internal_set_get_keys(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint64 execution_mode = 25;
-  void clear_execution_mode();
-  ::PROTOBUF_NAMESPACE_ID::uint64 execution_mode() const;
-  void set_execution_mode(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_execution_mode() const;
-  void _internal_set_execution_mode(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchRequestV2)
  private:
   class _Internal;
@@ -5066,7 +5053,6 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 skip_first_change_l2_block_;
   ::PROTOBUF_NAMESPACE_ID::uint32 skip_write_block_info_root_;
   ::PROTOBUF_NAMESPACE_ID::uint32 get_keys_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 execution_mode_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -16206,26 +16192,6 @@ inline void ProcessBatchRequestV2::set_allocated_debug(::executor::v1::DebugV2* 
   }
   debug_ = debug;
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequestV2.debug)
-}
-
-// uint64 execution_mode = 25;
-inline void ProcessBatchRequestV2::clear_execution_mode() {
-  execution_mode_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchRequestV2::_internal_execution_mode() const {
-  return execution_mode_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchRequestV2::execution_mode() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequestV2.execution_mode)
-  return _internal_execution_mode();
-}
-inline void ProcessBatchRequestV2::_internal_set_execution_mode(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  execution_mode_ = value;
-}
-inline void ProcessBatchRequestV2::set_execution_mode(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_execution_mode(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV2.execution_mode)
 }
 
 // -------------------------------------------------------------------
