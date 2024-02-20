@@ -8,7 +8,7 @@
 USING_PROVER_FORK_NAMESPACE;
 
 template <typename ElementType>
-void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, Steps *steps)
+void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps* chelpersSteps)
 {
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
@@ -69,7 +69,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     step = 2;
     getChallenges(transcript, params.challenges[0], starkInfo.numChallenges[step - 1]);
 
-    calculateExpressions("step2prev", nrowsStepBatch, steps, params, N);
+    calculateExpressions("step2", params, chelpersSteps);
 
     calculateH1H2(params);
 
@@ -86,11 +86,11 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     getChallenges(transcript, params.challenges[2], starkInfo.numChallenges[step - 1]);
     
-    calculateExpressions("step3prev", nrowsStepBatch, steps, params, N);
+    calculateExpressions("step3", params, chelpersSteps);
 
     calculateZ(params);
     
-    calculateExpressions("step3", nrowsStepBatch, steps, params, N);
+    calculateExpressions("step3_after", params, chelpersSteps);
 
     extendAndMerkelize(step, params, proof);
 
@@ -106,7 +106,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     getChallenges(transcript, params.challenges[4], 1);
     
-    calculateExpressions("step42ns", nrowsStepBatch, steps, params, NExtended);
+    calculateExpressions("step4", params, chelpersSteps);
 
     computeQ(params, proof);
 
@@ -127,7 +127,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     getChallenges(transcript, params.challenges[5], 2);
 
-    Polinomial* friPol = computeFRIPol(params, steps, nrowsStepBatch);
+    Polinomial* friPol = computeFRIPol(params, chelpersSteps);
 
     TimerStopAndLog(STARK_STEP_5);
 
@@ -155,6 +155,11 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     delete friPol;
 
     TimerStopAndLog(STARK_STEP_FRI);
+}
+
+template <typename ElementType>
+void Starks<ElementType>::calculateExpressions(std::string step, StepsParams &params, CHelpersSteps *chelpersSteps) {
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo[step], USE_GENERIC_PARSER);
 }
 
 template <typename ElementType>
@@ -269,7 +274,7 @@ void Starks<ElementType>::computeEvals(StepsParams& params, FRIProof<ElementType
 }
 
 template <typename ElementType>
-Polinomial* Starks<ElementType>::computeFRIPol(StepsParams& params, Steps *steps, uint64_t nrowsStepBatch) {
+Polinomial* Starks<ElementType>::computeFRIPol(StepsParams& params, CHelpersSteps *chelpersSteps) {
 
     TimerStart(STARK_STEP_5_XDIVXSUB);
 
@@ -309,7 +314,7 @@ Polinomial* Starks<ElementType>::computeFRIPol(StepsParams& params, Steps *steps
     }
     TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
 
-    calculateExpressions("step52ns", nrowsStepBatch, steps, params, NExtended);
+    calculateExpressions("step5", params, chelpersSteps);
 
     Polinomial *friPol = new Polinomial(params.f_2ns, NExtended, FIELD_EXTENSION, FIELD_EXTENSION, "friPol");
 
@@ -324,62 +329,6 @@ void Starks<ElementType>::computeFRIFolding(FRIProof<ElementType> &fproof, Polin
 template <typename ElementType>
 void Starks<ElementType>::computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries) {
     FRI<ElementType>::proveQueries(friQueries, fproof, treesGL, treesFRI, starkInfo);
-}
-
-template <typename ElementType>
-void Starks<ElementType>::calculateExpressions(std::string step, uint64_t nrowsStepBatch, Steps *steps, StepsParams &params, uint64_t N) {
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_CALCULATE_EXPS_AVX);
-        if(step == "step2prev") {
-            steps->step2prev_parser_first_avx(params, N, nrowsStepBatch);
-        } else if (step == "step3prev") {
-            steps->step3prev_parser_first_avx(params, N, nrowsStepBatch);
-        } else if (step == "step3") {
-            steps->step3_parser_first_avx(params, N, nrowsStepBatch);
-        } else if (step == "step42ns") {
-            steps->step42ns_parser_first_avx(params, N, nrowsStepBatch);
-        } else if (step == "step52ns") {
-            steps->step52ns_parser_first_avx(params, N, nrowsStepBatch);
-        }
-        TimerStopAndLog(STARK_STEP_CALCULATE_EXPS_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_CALCULATE_EXPS_AVX512);
-        if(step == "step2prev") {
-            steps->step2prev_parser_first_avx512(params, N, nrowsStepBatch);
-        } else if (step == "step3prev") {
-            steps->step3prev_parser_first_avx512(params, N, nrowsStepBatch);
-        } else if (step == "step3") {
-            steps->step3_parser_first_avx512(params, N, nrowsStepBatch);
-        } else if (step == "step42ns") {
-            steps->step42ns_parser_first_avx512(params, N, nrowsStepBatch);
-        } else if (step == "step52ns") {
-            steps->step52ns_parser_first_avx512(params, N, nrowsStepBatch);
-        }
-        TimerStopAndLog(STARK_STEP_CALCULATE_EXPS_AVX512);
-    }
-    else {
-        TimerStart(STARK_STEP_CALCULATE_EXPS);
-        if(step == "step2prev") {
-            #pragma omp parallel for
-            for (uint64_t i = 0; i < N; i++) steps->step2prev_first(params, i);
-        } else if (step == "step3prev") {
-            #pragma omp parallel for
-            for (uint64_t i = 0; i < N; i++) steps->step3prev_first(params, i);
-        } else if (step == "step3") {
-            #pragma omp parallel for
-            for (uint64_t i = 0; i < N; i++) steps->step3_first(params, i);
-        } else if (step == "step42ns") {
-            #pragma omp parallel for
-            for (uint64_t i = 0; i < N; i++) steps->step42ns_first(params, i);
-        } else if (step == "step52ns") {
-            #pragma omp parallel for
-            for (uint64_t i = 0; i < N; i++) steps->step52ns_first(params, i);
-        } 
-        TimerStopAndLog(STARK_STEP_CALCULATE_EXPS);
-    }
 }
 
 template <typename ElementType>

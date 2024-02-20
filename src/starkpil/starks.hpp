@@ -16,8 +16,8 @@
 #include "merkleTreeBN128.hpp"
 #include "transcriptBN128.hpp"
 #include "exit_process.hpp"
-
-#define BN128_ARITY 16
+#include "chelpers.hpp"
+#include "chelpers_steps.hpp"
 
 struct StarkFiles
 {
@@ -25,6 +25,7 @@ struct StarkFiles
     bool mapConstPolsFile;
     std::string zkevmConstantsTree;
     std::string zkevmStarkInfo;
+    std::string zkevmCHelpers;
 };
 
 template <typename ElementType>
@@ -33,7 +34,6 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
-    uint64_t nrowsStepBatch;
 
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
@@ -64,7 +64,10 @@ private:
 
     Polinomial x;
 
-    void merkelizeMemory(); // function for DBG purposes
+    std::unique_ptr<BinFileUtils::BinFile> cHelpersBinFile;
+    CHelpers chelpers;
+
+void merkelizeMemory(); // function for DBG purposes
 
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
@@ -81,14 +84,13 @@ public:
                                                                            pAddress(_pAddress),
                                                                            x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
     {
-        nrowsStepBatch = 1;
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
 
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             hashSize = 1;
-            merkleTreeArity = BN128_ARITY;
+            merkleTreeArity = 16;
         } else {
             hashSize = HASH_SIZE;
             merkleTreeArity = 2;
@@ -198,6 +200,13 @@ public:
             treesFRI[step] = new MerkleTreeType(nGroups, groupSize * FIELD_EXTENSION, NULL);
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
+
+        TimerStart(CHELPERS_ALLOCATION);
+        if(!starkFiles.zkevmCHelpers.empty()) {
+            cHelpersBinFile = BinFileUtils::openExisting(starkFiles.zkevmCHelpers, "chps", 1);
+            chelpers.loadCHelpers(cHelpersBinFile.get());
+        }
+        TimerStopAndLog(CHELPERS_ALLOCATION);
     };
     ~Starks()
     {
@@ -266,20 +275,22 @@ public:
             total += merkleTreeArity * sizeof(ElementType);
         }
         return total; 
-    }
+        
+    };
 
-    void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, Steps *steps);
+    void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps *chelpersSteps);
     
     void calculateZ(StepsParams& params);
     void calculateH1H2(StepsParams& params);
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
-    void calculateExpressions(std::string step, uint64_t nrowsStepBatch, Steps *steps, StepsParams &params, uint64_t N);
+
+    void calculateExpressions(std::string step, StepsParams &params, CHelpersSteps *chelpersSteps);
     
     void computeQ(StepsParams& params, FRIProof<ElementType> &proof);
     void computeEvals(StepsParams& params, FRIProof<ElementType> &proof);
 
-    Polinomial *computeFRIPol(StepsParams& params, Steps *steps, uint64_t nrowsStepBatch);
+    Polinomial *computeFRIPol(StepsParams& params, CHelpersSteps *chelpersSteps);
     
     void computeFRIFolding(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t step, Polinomial &challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries);

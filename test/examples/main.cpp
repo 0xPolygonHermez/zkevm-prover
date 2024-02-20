@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
-#include "allSteps.hpp"
+#include "AllSteps.hpp"
 
 int main()
 {
@@ -15,6 +15,7 @@ int main()
     string constTree = "test/examples/all/all.consttree";
     string starkInfoFile = "test/examples/all/all.starkinfo.json";
     string commitPols = "test/examples/all/all.commit";
+    string cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
     string verkey = "test/examples/all/all.verkey.json";
 
     StarkInfo starkInfo(config, starkInfoFile);
@@ -24,9 +25,7 @@ int main()
     void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
 
-    Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile}, pAddress);
-
-    starks.nrowsStepBatch = 4;
+    Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
 
     uint64_t N = (1 << starkInfo.starkStruct.nBits);
     #pragma omp parallel for
@@ -46,16 +45,8 @@ int main()
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
+
     AllSteps allSteps;
-
-    json allVerkeyJson;
-    file2json(verkey, allVerkeyJson);
-    Goldilocks::Element allVerkey[4];
-    allVerkey[0] = Goldilocks::fromU64(allVerkeyJson["constRoot"][0]);
-    allVerkey[1] = Goldilocks::fromU64(allVerkeyJson["constRoot"][1]);
-    allVerkey[2] = Goldilocks::fromU64(allVerkeyJson["constRoot"][2]);
-    allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
-
     starks.genProof(fproof, &publicInputs[0], &allSteps);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();

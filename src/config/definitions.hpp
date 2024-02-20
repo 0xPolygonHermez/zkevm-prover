@@ -77,18 +77,8 @@
 
 //#define MULTI_ROM_TEST
 
-#define USE_CHELPERS_PARSER
-
 /* chelpers defines */
-#ifdef USE_CHELPERS_PARSER
-    #ifndef __AVX512__
-        #define NROWS_STEPS_ 4
-    #else
-        #define NROWS_STEPS_ 8
-    #endif
-#else
-#define NROWS_STEPS_ 1
-#endif
+#define USE_GENERIC_PARSER true
 
 
 #endif

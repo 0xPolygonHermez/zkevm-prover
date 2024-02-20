@@ -49,11 +49,11 @@
 #include "page_manager_test.hpp"
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
-#include "zkevmSteps.hpp"
-#include "c12aSteps.hpp"
-#include "recursive1Steps.hpp"
-#include "recursive2Steps.hpp"
-#include "starkRecursiveFSteps.hpp"
+#include "ZkevmSteps.hpp"
+#include "C12aSteps.hpp"
+#include "Recursive1Steps.hpp"
+#include "Recursive2Steps.hpp"
+#include "RecursiveFSteps.hpp"
 #include "proof2zkinStark.hpp"
 #include "starks.hpp"
 
@@ -865,131 +865,6 @@ void recursive2_steps_free(void *pRecursive2Steps) {
     delete recursive2Steps;
 }
 
-void step2prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step2prev_parser_first_avx(*stepsParams, nrows, nrowsBatch);
-}
-
-void step2prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step2prev_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
-}
-
-void step2prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-#pragma omp parallel for
-    for (uint64_t i = 0; i < nrows; i++)
-    {
-        steps->step2prev_first(*stepsParams, i);
-    }
-
-}
-
-void step3prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step3prev_parser_first_avx(*stepsParams, nrows, nrowsBatch);
-}
-
-void step3prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step3prev_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
-}
-
-void step3prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-#pragma omp parallel for
-    for (uint64_t i = 0; i < nrows; i++)
-    {
-        steps->step3prev_first(*stepsParams, i);
-    }
-}
-
-void step3_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step3_parser_first_avx(*stepsParams, nrows, nrowsBatch);
-}
-
-void step3_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step3_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
-}
-
-void step3_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-#pragma omp parallel for
-    for (uint64_t i = 0; i < nrows; i++)
-    {
-        steps->step3_first(*stepsParams, i);
-    }
-}
-
-void step42ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step42ns_parser_first_avx(*stepsParams, nrows, nrowsBatch);
-}
-
-void step42ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step42ns_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
-}
-
-void step42ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-#pragma omp parallel for
-    for (uint64_t i = 0; i < nrows; i++)
-    {
-        steps->step42ns_first(*stepsParams, i);
-    }
-}
-
-void step52ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step52ns_parser_first_avx(*stepsParams, nrows, nrowsBatch);
-}
-
-void step52ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-    steps->step52ns_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
-}
-
-void step52ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
-    auto steps = (Steps*)pSteps;
-    StepsParams* stepsParams = (StepsParams*)pParams;
-
-#pragma omp parallel for
-    for (uint64_t i = 0; i < nrows; i++)
-    {
-        steps->step52ns_first(*stepsParams, i);
-    }
-}
 
 void *fri_proof_new(void *pStarks) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
@@ -1126,8 +1001,8 @@ void calculate_z(void *pStarks, void *pParams) {
     starks->calculateZ(*(StepsParams*)pParams);
 }
 
-void calculate_expressions(void *pStarks, char* step, uint64_t nrowsStepBatch, void *pSteps, void *pParams, uint64_t n) {
-    ((Starks<Goldilocks::Element>*)pStarks)->calculateExpressions(step, nrowsStepBatch, (Steps*)pSteps, *(StepsParams*)pParams, n);
+void calculate_expressions(void *pStarks, char* step, void *pParams, void *pChelpersSteps) {
+    ((Starks<Goldilocks::Element>*)pStarks)->calculateExpressions(step, *(StepsParams*)pParams, (CHelpersSteps*)pChelpersSteps);
 }
 
 void compute_q(void *pStarks, void *pParams, void *pProof) {
@@ -1140,9 +1015,9 @@ void compute_evals(void *pStarks, void *pParams, void *pProof) {
     starks->computeEvals(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof);
 }
 
-void *compute_fri_pol(void *pStarks, void *pParams, void *pSteps, uint64_t nrowsStepBatch) {
-    auto *starks = (Starks<Goldilocks::Element>*)pStarks;
-    return starks->computeFRIPol(*(StepsParams*)pParams, (Steps*)pSteps, nrowsStepBatch);
+void *compute_fri_pol(void *pStarks, void *pParams, void *cHelpersSteps) {
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    starks->computeFRIPol(*(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps);
 }
 
 void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge) {
@@ -1294,12 +1169,6 @@ void get_challenges(void *pStarks, void *pTranscript, void *pElement, uint64_t n
 void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits) {
     TranscriptGL *transcript = (TranscriptGL *)pTranscript;
     transcript->getPermutations(res, n, nBits);
-}
-
-uint64_t get_num_rows_step_batch(void *pStarks) {
-    Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
-
-    return starks->nrowsStepBatch;
 }
 
 void *polinomial_new(uint64_t degree, uint64_t dim, char* name) {
