@@ -97,13 +97,21 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 #endif
 
     // Get labels
-    finalizeExecutionLabel    = rom.getLabel(string("finalizeExecution"));
-    checkAndSaveFromLabel     = rom.getLabel(string("checkAndSaveFrom"));
-    ecrecoverStoreArgsLabel   = rom.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel         = rom.getLabel(string("ecrecover_end"));
-    checkFirstTxTypeLabel     = rom.getLabel(string("checkFirstTxType"));
-    writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
-    verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
+    finalizeExecutionLabel     = rom.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel      = rom.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel    = rom.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel          = rom.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel      = rom.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel    = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel  = rom.getLabel(string("verifyMerkleProofEnd"));
+    outOfCountersStepLabel     = rom.getLabel(string("outOfCountersStep"));
+    outOfCountersArithLabel    = rom.getLabel(string("outOfCountersArith"));
+    outOfCountersBinaryLabel   = rom.getLabel(string("outOfCountersBinary"));
+    outOfCountersKeccakLabel   = rom.getLabel(string("outOfCountersKeccak"));
+    outOfCountersSha256Label   = rom.getLabel(string("outOfCountersSha256"));
+    outOfCountersMemalignLabel = rom.getLabel(string("outOfCountersMemalign"));
+    outOfCountersPoseidonLabel = rom.getLabel(string("outOfCountersPoseidon"));
+    outOfCountersPaddingLabel  = rom.getLabel(string("outOfCountersPadding"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -4988,6 +4996,47 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_JMP
             zklog.info("JMPN: op0=" + fr.toString(op0));
 #endif
+            if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersStepLabel))
+            {
+                uint64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(op0);
+                proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, reserve);
+            }
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersArithLabel))
+            {
+                uint64_t reserve = int64_t(rom.constants.MAX_CNT_ARITH) - fr.toS64(op0);
+                proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, reserve);
+            }
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersBinaryLabel))
+            {
+                uint64_t reserve = int64_t(rom.constants.MAX_CNT_BINARY) - fr.toS64(op0);
+                proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, reserve);
+            }
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersKeccakLabel))
+            {
+                uint64_t reserve = int64_t(rom.constants.MAX_CNT_KECCAK_F) - fr.toS64(op0);
+                proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, reserve);
+            }
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersSha256Label))
+            {
+                uint64_t reserve = int64_t(rom.constants.MAX_CNT_SHA256_F) - fr.toS64(op0);
+                proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, reserve);
+            }
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersMemalignLabel))
+            {
+                uint64_t reserve = int64_t(rom.constants.MAX_CNT_MEM_ALIGN) - fr.toS64(op0);
+                proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, reserve);
+            }
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPoseidonLabel))
+            {
+                uint64_t reserve = int64_t(rom.constants.MAX_CNT_POSEIDON_G) - fr.toS64(op0);
+                proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, reserve);
+            }
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPaddingLabel))
+            {
+                uint64_t reserve = int64_t(rom.constants.MAX_CNT_PADDING_PG) - fr.toS64(op0);
+                proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, reserve);
+            }
+
             uint64_t jmpnCondValue = fr.toU64(op0);
 
             // If op<0, jump to addr: zkPC'=addr
@@ -5339,6 +5388,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
     proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);
     proverRequest.counters.steps = ctx.lastStep;
+    proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, proverRequest.counters.arith);
+    proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, proverRequest.counters.binary);
+    proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, proverRequest.counters.keccakF);
+    proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, proverRequest.counters.memAlign);
+    proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, proverRequest.counters.paddingPG);
+    proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, proverRequest.counters.poseidonG);
+    proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, proverRequest.counters.sha256F);
+    proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, proverRequest.counters.steps);
 
     // Set the error (all previous errors generated a return)
     proverRequest.result = ZKR_SUCCESS;
