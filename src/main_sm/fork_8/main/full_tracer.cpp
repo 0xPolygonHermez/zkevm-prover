@@ -1604,6 +1604,16 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     }
     response.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
+    // Set status
+    mpz_class statusScalar;
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txStatusOffset, statusScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.txStatusOffset)");
+        return zkr;
+    }
+    response.status = statusScalar.get_ui();
+
     // If processed opcodes
     if ( ctx.proverRequest.input.traceConfig.bGenerateFullTrace &&
          (full_trace.size() > 0) )

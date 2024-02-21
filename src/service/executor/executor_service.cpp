@@ -1433,6 +1433,7 @@ using grpc::Status;
             pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
             pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
             pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+            pProcessTransactionResponse->set_status(responses[tx].status);
             pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
             pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
             pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);
@@ -2062,6 +2063,7 @@ using grpc::Status;
             pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
             pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
             pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+            pProcessTransactionResponse->set_status(responses[tx].status);
             pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
             pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
             pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);

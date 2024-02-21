@@ -8942,6 +8942,7 @@ class ProcessTransactionResponseV2 PROTOBUF_FINAL :
     kEffectivePercentageFieldNumber = 18,
     kHasGaspriceOpcodeFieldNumber = 19,
     kHasBalanceOpcodeFieldNumber = 20,
+    kStatusFieldNumber = 21,
   };
   // repeated .executor.v1.LogV2 logs = 15;
   int logs_size() const;
@@ -9269,6 +9270,15 @@ class ProcessTransactionResponseV2 PROTOBUF_FINAL :
   void _internal_set_has_balance_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
+  // uint32 status = 21;
+  void clear_status();
+  ::PROTOBUF_NAMESPACE_ID::uint32 status() const;
+  void set_status(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_status() const;
+  void _internal_set_status(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessTransactionResponseV2)
  private:
   class _Internal;
@@ -9296,6 +9306,7 @@ class ProcessTransactionResponseV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 effective_percentage_;
   ::PROTOBUF_NAMESPACE_ID::uint32 has_gasprice_opcode_;
   ::PROTOBUF_NAMESPACE_ID::uint32 has_balance_opcode_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 status_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -22682,6 +22693,26 @@ inline void ProcessTransactionResponseV2::_internal_set_has_balance_opcode(::PRO
 inline void ProcessTransactionResponseV2::set_has_balance_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_has_balance_opcode(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponseV2.has_balance_opcode)
+}
+
+// uint32 status = 21;
+inline void ProcessTransactionResponseV2::clear_status() {
+  status_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponseV2::_internal_status() const {
+  return status_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponseV2::status() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponseV2.status)
+  return _internal_status();
+}
+inline void ProcessTransactionResponseV2::_internal_set_status(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  status_ = value;
+}
+inline void ProcessTransactionResponseV2::set_status(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_status(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponseV2.status)
 }
 
 // -------------------------------------------------------------------
