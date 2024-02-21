@@ -9,10 +9,9 @@ struct StepsParams
     Polinomial &challenges;
     Polinomial &x_n;
     Polinomial &x_2ns;
-    ZhInv &zi;
+    Polinomial &zi;
     Polinomial &evals;
     Polinomial &xDivXSubXi;
-    Polinomial &xDivXSubWXi;
     Goldilocks::Element *publicInputs;
     Goldilocks::Element *q_2ns;
     Goldilocks::Element *f_2ns;

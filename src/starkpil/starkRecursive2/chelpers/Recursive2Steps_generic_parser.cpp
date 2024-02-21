@@ -322,19 +322,12 @@ void Recursive2Steps::parser_avx(StarkInfo &starkInfo, StepsParams &params, Pars
             }
             case 23: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: xDivXSubXi
-                    Goldilocks3::load_avx(tmp3_1, params.xDivXSubXi[i], params.xDivXSubXi.offset());
+                    Goldilocks3::load_avx(tmp3_1, params.xDivXSubXi[i + args[i_args + 3]*domainSize], params.xDivXSubXi.offset());
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3_1);
-                    i_args += 3;
+                    i_args += 4;
                     break;
             }
             case 24: {
-                    // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: xDivXSubWXi
-                    Goldilocks3::load_avx(tmp3_1, params.xDivXSubWXi[i], params.xDivXSubWXi.offset());
-                    Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3_1);
-                    i_args += 3;
-                    break;
-            }
-            case 25: {
                     // OPERATION WITH DEST: q - SRC0: tmp3 - SRC1: Zi
                     Goldilocks::Element tmp_inv[3];
                     Goldilocks::Element ti0[4];
@@ -347,19 +340,19 @@ void Recursive2Steps::parser_avx(StarkInfo &starkInfo, StepsParams &params, Pars
                         tmp_inv[0] = ti0[j];
                         tmp_inv[1] = ti1[j];
                         tmp_inv[2] = ti2[j];
-                        Goldilocks3::mul((Goldilocks3::Element &)(params.q_2ns[(i + j) * 3]), params.zi.zhInv((i + j)),(Goldilocks3::Element &)tmp_inv);
+                        Goldilocks3::mul((Goldilocks3::Element &)(params.q_2ns[(i + j) * 3]), params.zi[i + j][0],(Goldilocks3::Element &)tmp_inv);
                     }
                     i_args += 1;
                     break;
             }
-            case 26: {
+            case 25: {
                     // OPERATION WITH DEST: f - SRC0: tmp3 - SRC1: tmp3
                     Goldilocks3::op_avx(args[i_args], tmp3_, tmp3[args[i_args + 1]], tmp3[args[i_args + 2]]);
                     Goldilocks3::store_avx(&params.f_2ns[i*3], uint64_t(3), tmp3_);
                     i_args += 3;
                     break;
             }
-            case 27: {
+            case 26: {
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], tmp1[args[i_args + 3]]);

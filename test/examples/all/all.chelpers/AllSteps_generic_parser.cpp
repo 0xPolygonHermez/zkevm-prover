@@ -198,11 +198,12 @@ void AllSteps::parser_avx(StarkInfo &starkInfo, StepsParams &params, ParserArgs 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         &(tmp3[args[i_args + 7]][0]), 1);
                     if(needModule) {
-                        for(uint64_t j = 0; j < nrowsBatch; ++j) {
-                            uint64_t l = i + j + nextStride * args[i_args + 3];
-                            if(l >= domainSize) l -= domainSize;
-                            offsetsDest[j] = offsetsSteps[args[i_args + 1]] + args[i_args + 2] + l * nColsSteps[args[i_args + 1]];
-                        }
+                        uint64_t stepOffset = offsetsSteps[args[i_args + 1]] + args[i_args + 2];
+                        uint64_t nextStrideOffset = i + nextStride * args[i_args + 3];
+                        offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[args[i_args + 1]];
+                        offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[args[i_args + 1]];
+                        offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[args[i_args + 1]];
+                        offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[args[i_args + 1]];
                         Goldilocks3::store_avx(&params.pols[0], offsetsDest, &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2);
                     } else {
                         Goldilocks3::store_avx(&params.pols[offsetsSteps[args[i_args + 1]] + args[i_args + 2] + (i + nextStride * args[i_args + 3]) * nColsSteps[args[i_args + 1]]], nColsSteps[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2);
@@ -216,11 +217,12 @@ void AllSteps::parser_avx(StarkInfo &starkInfo, StepsParams &params, ParserArgs 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         &(tmp3[args[i_args + 5]][0]), 1);
                     if(needModule) {
-                        for(uint64_t j = 0; j < nrowsBatch; ++j) {
-                            uint64_t l = i + j + nextStride * args[i_args + 3];
-                            if(l >= domainSize) l -= domainSize;
-                            offsetsDest[j] = offsetsSteps[args[i_args + 1]] + args[i_args + 2] + l * nColsSteps[args[i_args + 1]];
-                        }
+                        uint64_t stepOffset = offsetsSteps[args[i_args + 1]] + args[i_args + 2];
+                        uint64_t nextStrideOffset = i + nextStride * args[i_args + 3];
+                        offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[args[i_args + 1]];
+                        offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[args[i_args + 1]];
+                        offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[args[i_args + 1]];
+                        offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[args[i_args + 1]];
                         Goldilocks3::store_avx(&params.pols[0], offsetsDest, &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2);
                     } else {
                         Goldilocks3::store_avx(&params.pols[offsetsSteps[args[i_args + 1]] + args[i_args + 2] + (i + nextStride * args[i_args + 3]) * nColsSteps[args[i_args + 1]]], nColsSteps[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2);
@@ -234,11 +236,12 @@ void AllSteps::parser_avx(StarkInfo &starkInfo, StepsParams &params, ParserArgs 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         &(challenges[args[i_args + 5]][0]), 1);
                     if(needModule) {
-                        for(uint64_t j = 0; j < nrowsBatch; ++j) {
-                            uint64_t l = i + j + nextStride * args[i_args + 3];
-                            if(l >= domainSize) l -= domainSize;
-                            offsetsDest[j] = offsetsSteps[args[i_args + 1]] + args[i_args + 2] + l * nColsSteps[args[i_args + 1]];
-                        }
+                        uint64_t stepOffset = offsetsSteps[args[i_args + 1]] + args[i_args + 2];
+                        uint64_t nextStrideOffset = i + nextStride * args[i_args + 3];
+                        offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[args[i_args + 1]];
+                        offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[args[i_args + 1]];
+                        offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[args[i_args + 1]];
+                        offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[args[i_args + 1]];
                         Goldilocks3::store_avx(&params.pols[0], offsetsDest, &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2);
                     } else {
                         Goldilocks3::store_avx(&params.pols[offsetsSteps[args[i_args + 1]] + args[i_args + 2] + (i + nextStride * args[i_args + 3]) * nColsSteps[args[i_args + 1]]], nColsSteps[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2);
@@ -364,19 +367,12 @@ void AllSteps::parser_avx(StarkInfo &starkInfo, StepsParams &params, ParserArgs 
             }
             case 27: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: xDivXSubXi
-                    Goldilocks3::load_avx(tmp3_1, params.xDivXSubXi[i], params.xDivXSubXi.offset());
+                    Goldilocks3::load_avx(tmp3_1, params.xDivXSubXi[i + args[i_args + 3]*domainSize], params.xDivXSubXi.offset());
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3_1);
-                    i_args += 3;
+                    i_args += 4;
                     break;
             }
             case 28: {
-                    // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: xDivXSubWXi
-                    Goldilocks3::load_avx(tmp3_1, params.xDivXSubWXi[i], params.xDivXSubWXi.offset());
-                    Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3_1);
-                    i_args += 3;
-                    break;
-            }
-            case 29: {
                     // OPERATION WITH DEST: q - SRC0: tmp3 - SRC1: Zi
                     Goldilocks::Element tmp_inv[3];
                     Goldilocks::Element ti0[4];
@@ -389,12 +385,12 @@ void AllSteps::parser_avx(StarkInfo &starkInfo, StepsParams &params, ParserArgs 
                         tmp_inv[0] = ti0[j];
                         tmp_inv[1] = ti1[j];
                         tmp_inv[2] = ti2[j];
-                        Goldilocks3::mul((Goldilocks3::Element &)(params.q_2ns[(i + j) * 3]), params.zi.zhInv((i + j)),(Goldilocks3::Element &)tmp_inv);
+                        Goldilocks3::mul((Goldilocks3::Element &)(params.q_2ns[(i + j) * 3]), params.zi[i + j][0],(Goldilocks3::Element &)tmp_inv);
                     }
                     i_args += 1;
                     break;
             }
-            case 30: {
+            case 29: {
                     // OPERATION WITH DEST: f - SRC0: tmp3 - SRC1: tmp3
                     Goldilocks3::op_avx(args[i_args], tmp3_, tmp3[args[i_args + 1]], tmp3[args[i_args + 2]]);
                     Goldilocks3::store_avx(&params.f_2ns[i*3], uint64_t(3), tmp3_);

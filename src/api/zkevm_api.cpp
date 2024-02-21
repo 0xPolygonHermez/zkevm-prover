@@ -946,15 +946,14 @@ void starks_free(void *pStarks) {
     delete starks;
 }
 
-void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
+void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pPublicInputs) {
     Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
     Polinomial* challenges = (Polinomial*)pChallenges;
     Polinomial* evals = (Polinomial*)pEvals;
     Polinomial* xDivXSubXi = (Polinomial*)pXDivXSubXi;
-    Polinomial* xDivXSubWXi = (Polinomial*)pXDivXSubWXi;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
 
-    return starks->ffi_create_steps_params(challenges, evals, xDivXSubXi, xDivXSubWXi, publicInputs);
+    return starks->ffi_create_steps_params(challenges, evals, xDivXSubXi, publicInputs);
 }
 
 void steps_params_free(void *pStepsParams) {

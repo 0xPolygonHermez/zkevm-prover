@@ -4,13 +4,11 @@
 #include <string>
 #include <map>
 #include "binfile_utils.hpp"
-#include "zhInv.hpp"
 #include "polinomial.hpp"
 #include "goldilocks_base_field.hpp"
 #include "goldilocks_base_field_avx.hpp"
 #include "goldilocks_cubic_extension.hpp"
 #include "constant_pols_starks.hpp"
-#include "steps.hpp"
 #include "stark_info.hpp"
 #include <immintrin.h>
 #include <cassert>
