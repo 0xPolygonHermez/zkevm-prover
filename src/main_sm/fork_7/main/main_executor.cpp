@@ -5345,6 +5345,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
     proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);
     proverRequest.counters.steps = ctx.lastStep;
+    proverRequest.counters_reserve = proverRequest.counters;
 
     // Set the error (all previous errors generated a return)
     proverRequest.result = ZKR_SUCCESS;

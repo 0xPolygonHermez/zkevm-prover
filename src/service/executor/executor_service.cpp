@@ -1328,6 +1328,7 @@ using grpc::Status;
     
     response->set_error(zkresult2error(proverRequest.result));
     response->set_gas_used(proverRequest.pFullTracer->get_gas_used());
+
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
     response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
     response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
@@ -1336,6 +1337,16 @@ using grpc::Status;
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_sha256_hashes(proverRequest.counters.sha256F);
     response->set_cnt_steps(proverRequest.counters.steps);
+    
+    response->set_cnt_reserve_keccak_hashes(proverRequest.counters_reserve.keccakF);
+    response->set_cnt_reserve_poseidon_hashes(proverRequest.counters_reserve.poseidonG);
+    response->set_cnt_reserve_poseidon_paddings(proverRequest.counters_reserve.paddingPG);
+    response->set_cnt_reserve_mem_aligns(proverRequest.counters_reserve.memAlign);
+    response->set_cnt_reserve_arithmetics(proverRequest.counters_reserve.arith);
+    response->set_cnt_reserve_binaries(proverRequest.counters_reserve.binary);
+    response->set_cnt_reserve_sha256_hashes(proverRequest.counters_reserve.sha256F);
+    response->set_cnt_reserve_steps(proverRequest.counters_reserve.steps);
+
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
     response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
@@ -1946,6 +1957,7 @@ using grpc::Status;
     
     response->set_error(zkresult2error(proverRequest.result));
     response->set_gas_used(proverRequest.pFullTracer->get_gas_used());
+
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
     response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
     response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
@@ -1954,6 +1966,16 @@ using grpc::Status;
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_sha256_hashes(proverRequest.counters.sha256F);
     response->set_cnt_steps(proverRequest.counters.steps);
+    
+    response->set_cnt_reserve_keccak_hashes(proverRequest.counters_reserve.keccakF);
+    response->set_cnt_reserve_poseidon_hashes(proverRequest.counters_reserve.poseidonG);
+    response->set_cnt_reserve_poseidon_paddings(proverRequest.counters_reserve.paddingPG);
+    response->set_cnt_reserve_mem_aligns(proverRequest.counters_reserve.memAlign);
+    response->set_cnt_reserve_arithmetics(proverRequest.counters_reserve.arith);
+    response->set_cnt_reserve_binaries(proverRequest.counters_reserve.binary);
+    response->set_cnt_reserve_sha256_hashes(proverRequest.counters_reserve.sha256F);
+    response->set_cnt_reserve_steps(proverRequest.counters_reserve.steps);
+
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
     response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
