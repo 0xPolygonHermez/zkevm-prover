@@ -464,7 +464,9 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         if(pMainSMRequests!=NULL){
             TimerStart(MAIN_SM_REQUESTS_COPY);
 #ifdef __ZKEVM_SM__
-            add_binary_requests((void *)pMainSMRequests, (void *)required.Binary.data(), required.Binary.size());
+        TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
+        add_binary_inputs((void *)pMainSMRequests, (void *)required.Binary.data(), (uint64_t) required.Binary.size());
+        TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
 #endif
             TimerStopAndLog(MAIN_SM_REQUESTS_COPY);
 
@@ -489,11 +491,12 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(ARITH_SM_EXECUTE);
         arithExecutor.execute(required.Arith, commitPols.Arith);
         TimerStopAndLog(ARITH_SM_EXECUTE);
-
+#ifndef __ZKEVM_SM__
         // Execute the Binary State Machine
         TimerStart(BINARY_SM_EXECUTE);
         binaryExecutor.execute(required.Binary, commitPols.Binary);
         TimerStopAndLog(BINARY_SM_EXECUTE);
+#endif
 
         // Execute the MemAlign State Machine
         TimerStart(MEM_ALIGN_SM_EXECUTE);
