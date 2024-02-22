@@ -36413,16 +36413,16 @@
    "mWR": 0,
    "JMPZ": 1,
    "useJmpAddr": 1,
-   "jmpAddr": 11805,
+   "jmpAddr": 11804,
    "useElseAddr": 1,
    "elseAddr": 2606,
    "line": 10,
    "offsetLabel": "originCTX",
    "useCTX": 1,
-   "jmpAddrLabel": "handleGas",
+   "jmpAddrLabel": "handleGasFromError",
    "elseAddrLabel": "next",
    "fileName": "precompiled/revert-precompiled.zkasm",
-   "lineStr": "    $ => A          :MLOAD(originCTX), JMPZ(handleGas) ; first context"
+   "lineStr": "    $ => A          :MLOAD(originCTX), JMPZ(handleGasFromError) ; first context"
   },
   {
    "inA": "1",
