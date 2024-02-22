@@ -932,6 +932,18 @@ void config_free(void *pConfig) {
     delete config;
 }
 
+void *starkinfo_new(void* pConfig, char* filename) {
+    auto config = (Config*)pConfig;
+    auto starkInfo = new StarkInfo(*config, filename);
+
+    return starkInfo;
+}
+
+void starkinfo_free(void *pStarkInfo) {
+    auto starkInfo = (StarkInfo*)pStarkInfo;
+    delete starkInfo;
+}
+
 void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, char* cHelpers,void *pAddress) {
     Config* config = (Config*)pConfig;
     return new Starks<Goldilocks::Element>(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo, cHelpers}, pAddress);
@@ -1103,10 +1115,6 @@ void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBi
 void *polinomial_new(uint64_t degree, uint64_t dim, char* name) {
     auto pol = new Polinomial(degree, dim, string(name));
     return (void *)pol;
-}
-
-void *polinomial_new_with_address(void* pAddress, uint64_t degree, uint64_t dim, uint64_t offset, char* name) {
-    return new Polinomial(pAddress, degree, dim, offset, string(name));
 }
 
 void *polinomial_get_p_element(void *pPolinomial, uint64_t index) {

@@ -33,6 +33,11 @@
     void *config_new(char* filename);
     void config_free(void *pConfig);
 
+    // Stark Info
+    // ========================================================================================
+    void *starkinfo_new(void* pConfig, char* filename);
+    void starkinfo_free(void *pStarkInfo);
+
     // Starks
     // ========================================================================================
     void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, char* cHelpers, void *pAddress);
@@ -81,7 +86,6 @@
     // Polinomial
     // =================================================================================
     void *polinomial_new(uint64_t degree, uint64_t dim, char* name);
-    void *polinomial_new_with_address(void* pAddress, uint64_t degree, uint64_t dim, uint64_t offset, char* name);
     void *polinomial_get_p_element(void *pPolinomial, uint64_t index);
     void polinomial_free(void *pPolinomial);
 #endif
