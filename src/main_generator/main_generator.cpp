@@ -461,7 +461,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     }
     if (forkID >= 8)
     {
-    code += "    uint64_t reserve;\n";
+    code += "    int64_t reserve;\n";
     }
 
     if (!bFastMode)
@@ -5519,42 +5519,50 @@ code += "    #endif\n";
                 if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersStep")
                 {
                     code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_STEPS"]["value"] + ") - fr.toS64(op0);\n";
-                    code += "    proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, reserve);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, uint64_t(reserve));\n";
                 }
                 else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersArith")
                 {
                     code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_ARITH"]["value"] + ") - fr.toS64(op0);\n";
-                    code += "    proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, reserve);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, uint64_t(reserve));\n";
                 }
                 else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersBinary")
                 {
                     code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_BINARY"]["value"] + ") - fr.toS64(op0);\n";
-                    code += "    proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, reserve);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, uint64_t(reserve));\n";
                 }
                 else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersKeccak")
                 {
                     code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_KECCAK_F"]["value"] + ") - fr.toS64(op0);\n";
-                    code += "    proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, reserve);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, uint64_t(reserve));\n";
                 }
                 else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersSha256")
                 {
                     code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_SHA256_F"]["value"] + ") - fr.toS64(op0);\n";
-                    code += "    proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, reserve);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, uint64_t(reserve));\n";
                 }
                 else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersMemalign")
                 {
                     code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_MEM_ALIGN"]["value"] + ") - fr.toS64(op0);\n";
-                    code += "    proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, reserve);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, uint64_t(reserve));\n";
                 }
                 else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersPoseidon")
                 {
                     code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_POSEIDON_G"]["value"] + ") - fr.toS64(op0);\n";
-                    code += "    proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, reserve);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, uint64_t(reserve));\n";
                 }
                 else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersPadding")
                 {
                     code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_PADDING_PG"]["value"] + ") - fr.toS64(op0);\n";
-                    code += "    proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, reserve);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, uint64_t(reserve));\n";
                 }
             }
 

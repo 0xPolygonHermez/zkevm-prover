@@ -4998,43 +4998,75 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
             if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersStepLabel))
             {
-                uint64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(op0);
-                proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, reserve);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(op0);
+                if (reserve < 0)
+                {
+                    reserve = 0;
+                }
+                proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersArithLabel))
             {
-                uint64_t reserve = int64_t(rom.constants.MAX_CNT_ARITH) - fr.toS64(op0);
-                proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, reserve);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_ARITH) - fr.toS64(op0);
+                if (reserve < 0)
+                {
+                    reserve = 0;
+                }
+                proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersBinaryLabel))
             {
-                uint64_t reserve = int64_t(rom.constants.MAX_CNT_BINARY) - fr.toS64(op0);
-                proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, reserve);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_BINARY) - fr.toS64(op0);
+                if (reserve < 0)
+                {
+                    reserve = 0;
+                }
+                proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersKeccakLabel))
             {
-                uint64_t reserve = int64_t(rom.constants.MAX_CNT_KECCAK_F) - fr.toS64(op0);
-                proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, reserve);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_KECCAK_F) - fr.toS64(op0);
+                if (reserve < 0)
+                {
+                    reserve = 0;
+                }
+                proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersSha256Label))
             {
-                uint64_t reserve = int64_t(rom.constants.MAX_CNT_SHA256_F) - fr.toS64(op0);
-                proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, reserve);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_SHA256_F) - fr.toS64(op0);
+                if (reserve < 0)
+                {
+                    reserve = 0;
+                }
+                proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersMemalignLabel))
             {
-                uint64_t reserve = int64_t(rom.constants.MAX_CNT_MEM_ALIGN) - fr.toS64(op0);
-                proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, reserve);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_MEM_ALIGN) - fr.toS64(op0);
+                if (reserve < 0)
+                {
+                    reserve = 0;
+                }
+                proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPoseidonLabel))
             {
-                uint64_t reserve = int64_t(rom.constants.MAX_CNT_POSEIDON_G) - fr.toS64(op0);
-                proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, reserve);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_POSEIDON_G) - fr.toS64(op0);
+                if (reserve < 0)
+                {
+                    reserve = 0;
+                }
+                proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPaddingLabel))
             {
-                uint64_t reserve = int64_t(rom.constants.MAX_CNT_PADDING_PG) - fr.toS64(op0);
-                proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, reserve);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_PADDING_PG) - fr.toS64(op0);
+                if (reserve < 0)
+                {
+                    reserve = 0;
+                }
+                proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, uint64_t(reserve));
             }
 
             uint64_t jmpnCondValue = fr.toU64(op0);
