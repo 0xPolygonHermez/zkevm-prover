@@ -33,7 +33,8 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
-
+    bool optimizeMemoryNTT = false;
+    
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
 

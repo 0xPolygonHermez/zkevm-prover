@@ -91,7 +91,20 @@ Prover::Prover(Goldilocks &fr,
 
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
             // and create them using the allocated address
-            polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element) + _starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
+
+            polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element);
+            for(uint64_t i = 1; i <= _starkInfo.nStages; ++i) {
+                std::string currentSection = "cm" + to_string(i) + "_n";
+                std::string nextSectionExtended = "cm" + to_string(i + 1) + "_2ns";
+                uint64_t nttHelperSize = _starkInfo.mapSectionsN.section[string2section(currentSection)] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
+                uint64_t currentSectionStart = _starkInfo.mapOffsets.section[string2section(currentSection)] * sizeof(Goldilocks::Element);
+                if (i == _starkInfo.nStages && currentSectionStart > nttHelperSize) optimizeMemoryNTT = true;
+                uint64_t nttHelperBufferStart = optimizeMemoryNTT ? 0 : _starkInfo.mapOffsets.section[string2section(nextSectionExtended)] * sizeof(Goldilocks::Element);
+                uint64_t totalMemSize = nttHelperBufferStart + nttHelperSize;
+                if(totalMemSize > polsSize) {
+                    polsSize = totalMemSize;
+                }
+            }
 
             zkassert(_starkInfo.mapSectionsN.section[eSection::cm1_2ns] * sizeof(Goldilocks::Element) <= polsSize - _starkInfo.mapSectionsN.section[eSection::cm2_2ns] * sizeof(Goldilocks::Element));
 
@@ -130,6 +143,7 @@ Prover::Prover(Goldilocks &fr,
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
 
             starkZkevm = new Starks<Goldilocks::Element>(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, config.zkevmCHelpers}, pAddress);
+            if(optimizeMemoryNTT) starkZkevm->optimizeMemoryNTT = true;
             starksC12a = new Starks<Goldilocks::Element>(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, config.c12aCHelpers}, pAddress);
             starksRecursive1 = new Starks<Goldilocks::Element>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, config.recursive1CHelpers}, pAddress);
             starksRecursive2 = new Starks<Goldilocks::Element>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, config.recursive2CHelpers}, pAddress);

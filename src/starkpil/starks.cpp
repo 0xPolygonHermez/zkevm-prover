@@ -104,6 +104,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     
     calculateExpressions("step4", params, chelpersSteps);
 
+
     computeQ(params, proof);
 
     addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
@@ -167,13 +168,16 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams& params,
     
     std::string section = "cm" + to_string(step) + "_n";
     std::string sectionExtended = "cm" + to_string(step) + "_2ns";
-    std::string nextSectionExtended = "cm" + to_string(step + 1) + "_2ns";
+
+    std::string nttBufferHelperSectionStart = step < starkInfo.nStages || !optimizeMemoryNTT
+        ? "cm" + to_string(step + 1) + "_2ns"
+        : "cm1_n";
 
     uint64_t nCols = starkInfo.mapSectionsN.section[string2section(section)];
 
     Goldilocks::Element* pBuff = &params.pols[starkInfo.mapOffsets.section[string2section(section)]];
     Goldilocks::Element* pBuffExtended = &params.pols[starkInfo.mapOffsets.section[string2section(sectionExtended)]];
-    Goldilocks::Element* pBuffHelper = &params.pols[starkInfo.mapOffsets.section[string2section(nextSectionExtended)]];
+    Goldilocks::Element* pBuffHelper = &params.pols[starkInfo.mapOffsets.section[string2section(nttBufferHelperSectionStart)]];
       
     ntt.extendPol(pBuffExtended, pBuff, NExtended, N, nCols, pBuffHelper);
     TimerStopAndLog(STARK_STEP_LDE);
@@ -333,7 +337,9 @@ void Starks<ElementType>::computeFRIQueries(FRIProof<ElementType> &fproof, Polin
 template <typename ElementType>
 Polinomial *Starks<ElementType>::transposeH1H2Columns(StepsParams& params)
 {
-    Goldilocks::Element *pBuffer = &params.pols[starkInfo.mapTotalN];
+    std::string currentSectionExtended = "cm2_2ns"; 
+    Goldilocks::Element *pBuffer = &params.pols[starkInfo.mapOffsets.section[string2section(currentSectionExtended)]];
+    // Goldilocks::Element *pBuffer = &params.pols[starkInfo.mapTotalN];
     uint64_t numCommited = starkInfo.nCm1;
 
     u_int64_t stride_pol0 = N * FIELD_EXTENSION + 8;
@@ -389,7 +395,9 @@ void Starks<ElementType>::transposeH1H2Rows(StepsParams& params, Polinomial *tra
 template <typename ElementType>
 Polinomial *Starks<ElementType>::transposeZColumns(StepsParams& params)
 {
-    Goldilocks::Element *pBuffer = &params.pols[starkInfo.mapTotalN];
+    std::string currentSectionExtended = "cm3_2ns";
+    Goldilocks::Element *pBuffer = &params.pols[starkInfo.mapOffsets.section[string2section(currentSectionExtended)]];
+    // Goldilocks::Element *pBuffer = &params.pols[starkInfo.mapTotalN];
 
     uint64_t numCommited = starkInfo.nCm1 + starkInfo.puCtx.size()*2;
 
@@ -498,10 +506,12 @@ void Starks<ElementType>::calculateH1H2(StepsParams& params) {
     {
         nthreads += 1;
     }
-    uint64_t buffSize = 8 * starkInfo.puCtx.size() * N;
-    assert(buffSize <= starkInfo.mapSectionsN.section[eSection::cm3_2ns] * NExtended);
-    uint64_t *mam = (uint64_t *)pAddress;
-    uint64_t *pbufferH = &mam[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
+    std::string currentSectionExtended = "cm2_2ns"; 
+    uint64_t buffTransposedH1H2Size = 4 * starkInfo.puCtx.size() * (N * FIELD_EXTENSION + 8);
+    uint64_t *mem_ = (uint64_t *)pAddress;
+    uint64_t *pbufferH = &mem_[starkInfo.mapOffsets.section[string2section(currentSectionExtended)] + buffTransposedH1H2Size];
+    
+    uint64_t buffSize = sizeof(Goldilocks::Element) * starkInfo.puCtx.size() * N; 
     uint64_t buffSizeThread = buffSize / nthreads;
 
 #pragma omp parallel for num_threads(nthreads)
