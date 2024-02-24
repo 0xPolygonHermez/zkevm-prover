@@ -516,7 +516,10 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             Database &db = hashDB.db;
             for (uint64_t b = 0; b < blockStateRoots.size(); b++)
             {
-                db.clearCache();
+                if (config.executorClientClearCache)
+                {
+                    db.clearCache();
+                }
 
                 CheckTreeCounters checkTreeCounters;
 

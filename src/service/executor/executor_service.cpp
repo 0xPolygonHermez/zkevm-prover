@@ -1733,17 +1733,18 @@ using grpc::Status;
     // PUBLIC INPUTS
 
     // Get witness
-    const string &witness = request->witness();
-    if (witness.empty())
+    proverRequest.input.publicInputsExtended.publicInputs.witness = request->witness();
+    if (proverRequest.input.publicInputsExtended.publicInputs.witness.empty())
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got an empty witness", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_WITNESS);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
     }
+    //zklog.info("witness.size=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.witness.size()) + " witness=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.witness.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.witness.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.witness.size())-10), proverRequest.input.publicInputsExtended.publicInputs.witness.size())));
 
     // Parse witness and get db, programs and old state root
-    zkr = witness2db(witness, proverRequest.input.db, proverRequest.input.contractsBytecode, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot);
+    zkr = witness2db(proverRequest.input.publicInputsExtended.publicInputs.witness, proverRequest.input.db, proverRequest.input.contractsBytecode, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() failed calling witness2db() result=" + zkresult2string(zkr), &proverRequest.tags);
@@ -1753,8 +1754,8 @@ using grpc::Status;
     }
 
     // Get data stream
-    const string &dataStream = request->data_stream();
-    if (dataStream.empty())
+    proverRequest.input.publicInputsExtended.publicInputs.dataStream = request->data_stream();
+    if (proverRequest.input.publicInputsExtended.publicInputs.dataStream.empty())
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got an empty data stream", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM);
@@ -1764,7 +1765,7 @@ using grpc::Status;
 
     // Parse data stream and get a binary structure
     DataStreamBatch batch;
-    zkr = dataStream2batch(dataStream, batch);
+    zkr = dataStream2batch(proverRequest.input.publicInputsExtended.publicInputs.dataStream, batch);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() failed calling dataStream2batch() result=" + zkresult2string(zkr), &proverRequest.tags);
@@ -1774,7 +1775,7 @@ using grpc::Status;
     }
     if (batch.blocks.empty())
     {
-        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() called dataStream2batch() but got zero blocks=", &proverRequest.tags);
+        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() called dataStream2batch() but got zero blocks", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -1808,7 +1809,14 @@ using grpc::Status;
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, request->old_acc_input_hash());
 
     // Get old batch number
-    proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber;
+    if (batch.batchNumber == 0)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() called dataStream2batch() but got batch.batchNumber=0", &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
+    proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber - 1;
 
     // Get chain ID
     proverRequest.input.publicInputsExtended.publicInputs.chainID = batch.chainId;
@@ -1882,8 +1890,8 @@ using grpc::Status;
 
     // ROOT
 
-    // Get from
-    proverRequest.input.from = "0x0";
+    // Leave from empty
+    //proverRequest.input.from = "0x";
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = true;
