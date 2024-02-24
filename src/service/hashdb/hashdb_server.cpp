@@ -35,13 +35,13 @@ void HashDBServer::run (void)
     builder.RegisterService(&service);
 
     // Finally assemble the server.
-    std::unique_ptr<Server> server(builder.BuildAndStart());
+    this->server = builder.BuildAndStart();
 
     zklog.info("HashDB server listening on " + server_address);
 
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
-    server->Wait();
+    this->server->Wait();
 }
 
 void HashDBServer::runThread (void)
@@ -51,6 +51,7 @@ void HashDBServer::runThread (void)
 
 void HashDBServer::waitForThread (void)
 {
+    this->server->Shutdown();
     pthread_join(t, NULL);
 }
 

@@ -461,6 +461,8 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
+
+#ifdef __ZKEVM_SM__
         if(pMainSMRequests!=NULL){
             TimerStart(MAIN_SM_REQUESTS_COPY);
 #ifdef __ZKEVM_SM__
@@ -469,8 +471,8 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
 #endif
             TimerStopAndLog(MAIN_SM_REQUESTS_COPY);
-
         }
+#endif
 
         if (proverRequest.result != ZKR_SUCCESS)
         {

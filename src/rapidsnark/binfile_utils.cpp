@@ -185,6 +185,21 @@ namespace BinFileUtils
         return sections[sectionId][sectionPos].size;
     }
 
+    u_int8_t BinFile::readU8LE()
+    {
+        u_int8_t res = *((u_int8_t *)((u_int64_t)addr + pos));
+        pos += 1;
+        return res;
+    }
+
+
+    u_int16_t BinFile::readU16LE()
+    {
+        u_int16_t res = *((u_int16_t *)((u_int64_t)addr + pos));
+        pos += 2;
+        return res;
+    }
+
     u_int32_t BinFile::readU32LE()
     {
         u_int32_t res = *((u_int32_t *)((u_int64_t)addr + pos));

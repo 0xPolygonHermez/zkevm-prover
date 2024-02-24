@@ -18,6 +18,14 @@ using namespace std;
 /* StarkInfo class contains the contents of the file zkevm.starkinfo.json,
    which is parsed during the constructor */
 
+class Boundary
+{
+public:
+    std::string name;
+    uint64_t offsetMin;
+    uint64_t offsetMax;
+};
+
 class StepStruct
 {
 public:
@@ -58,11 +66,18 @@ public:
     uint64_t section[eSectionMax];
 };
 
-class PolsSectionsVector
+class CmPolMap
 {
 public:
-    vector<uint64_t> section[eSectionMax];
+    std::string stage;
+    uint64_t stageNum;
+    std::string name;
+    uint64_t dim;
+    bool imPol;
+    uint64_t stagePos;
+    uint64_t stageId;
 };
+
 
 class VarPolMap
 {
@@ -70,36 +85,7 @@ public:
     eSection section;
     uint64_t dim;
     uint64_t sectionPos;
-};
-
-class PolInfo
-{
-public:
-    VarPolMap map;
-    uint64_t N;
-    uint64_t offset;
-    uint64_t size;
-    Goldilocks::Element * pAddress;
-    Goldilocks::Element * get(uint64_t step)
-    {
-        zkassert(map.dim==1);
-        return pAddress + step*size;
-    }
-    Goldilocks::Element * get1(uint64_t step)
-    {
-        zkassert(map.dim==3);
-        return pAddress + step*size;
-    }
-    Goldilocks::Element * get2(uint64_t step)
-    {
-        zkassert(map.dim==3);
-        return pAddress + step*size + 1;
-    }
-    Goldilocks::Element * get3(uint64_t step)
-    {
-        zkassert(map.dim==3);
-        return pAddress + step*size + 2;
-    }
+    uint64_t deg;
 };
 
 class PeCtx
@@ -165,155 +151,50 @@ public:
     }
 };
 
-class StepType
-{
-public:
-    typedef enum
-    {
-        tmp = 0,
-        exp = 1,
-        eval = 2,
-        challenge = 3,
-        tree1 = 4,
-        tree2 = 5,
-        tree3 = 6,
-        tree4 = 7,
-        number = 8,
-        x = 9,
-        Z = 10,
-        _public = 11,
-        xDivXSubXi = 12,
-        xDivXSubWXi = 13,
-        cm = 14,
-        _const = 15,
-        q = 16,
-        Zi = 17,
-        tmpExp = 18,
-        f = 19
-    } eType;
-
-    eType type;
-    uint64_t id;
-    bool prime;
-    uint64_t p;
-    string value;
-
-    void setType (string s)
-    {
-        if (s == "tmp") type = tmp;
-        else if (s == "exp") type = exp;
-        else if (s == "eval") type = eval;
-        else if (s == "challenge") type = challenge;
-        else if (s == "tree1") type = tree1;
-        else if (s == "tree2") type = tree2;
-        else if (s == "tree3") type = tree3;
-        else if (s == "tree4") type = tree4;
-        else if (s == "number") type = number;
-        else if (s == "x") type = x;
-        else if (s == "Z") type = Z;
-        else if (s == "public") type = _public;
-        else if (s == "xDivXSubXi") type = xDivXSubXi;
-        else if (s == "xDivXSubWXi") type = xDivXSubWXi;
-        else if (s == "cm") type = cm;
-        else if (s == "const") type = _const;
-        else if (s == "q") type = q;
-        else if (s == "Zi") type = Zi;
-        else if (s == "tmpExp") type = tmpExp;
-        else if (s == "f") type = f;
-        else
-        {
-            zklog.error("StepType::setType() found invalid type: " + s);
-            exitProcess();
-        }
-    }
-};
-
-class StepOperation
-{
-public:
-    typedef enum
-    {
-        add = 0,
-        sub = 1,
-        mul = 2,
-        copy = 3
-    } eOperation;
-
-    eOperation op;
-    StepType dest;
-    vector<StepType> src;
-
-    void setOperation (string s)
-    {
-        if (s == "add") op = add;
-        else if (s == "sub") op = sub;
-        else if (s == "mul") op = mul;
-        else if (s == "copy") op = copy;
-        else
-        {
-            zklog.error("StepOperation::setOperation() found invalid type: " + s);
-            exitProcess();
-        }
-    }
-};
-
-class Step
-{
-public:
-    vector<StepOperation> first;
-    vector<StepOperation> i;
-    vector<StepOperation> last;
-    uint64_t tmpUsed;
-};
-
 class StarkInfo
 {
     const Config &config;
 public:
     StarkStruct starkStruct;
 
-    uint64_t mapTotalN;
-    uint64_t nConstants;
+    bool pil2;
+    uint64_t subproofId;
+    uint64_t airId;
+
     uint64_t nPublics;
+    uint64_t nConstants;
     uint64_t nCm1;
-    uint64_t nCm2;
-    uint64_t nCm3;
-    uint64_t nCm4;
+
+    uint64_t nStages;
+
+    vector<uint64_t> numChallenges;
+
+    uint64_t nChallenges;
+
+    vector<uint64_t> openingPoints;
+    
+    vector<Boundary> boundaries;
+
     uint64_t qDeg;
     uint64_t qDim;
-    uint64_t friExpId;
-    uint64_t nExps;
-
-    PolsSections mapDeg;
-    PolsSections mapOffsets;
-    PolsSectionsVector mapSections;
-    PolsSections mapSectionsN;
-    PolsSections mapSectionsN1;
-    PolsSections mapSectionsN3;
-    vector<VarPolMap> varPolMap;
     vector<uint64_t> qs;
+
+    uint64_t mapTotalN;
+    PolsSections mapSectionsN;
+    PolsSections mapOffsets;
+
+    // pil2-stark-js specific
+    vector<CmPolMap> cmPolsMap;
+
+    // pil-stark specific
+    vector<VarPolMap> varPolMap;
     vector<uint64_t> cm_n;
     vector<uint64_t> cm_2ns;
     vector<PeCtx> peCtx;
     vector<PuCtx> puCtx;
     vector<CiCtx> ciCtx;
     vector<EvMap> evMap;
-    Step step2prev;
-    Step step3prev;
-    Step step3;
-    Step step42ns;
-    Step step52ns;
-    vector<uint64_t> exps_n;
-    vector<uint64_t> q_2nsVector;
-    vector<uint64_t> cm4_nVector;
-    vector<uint64_t> cm4_2nsVector;
-    vector<uint64_t> tmpExp_n;
-    map<string,uint64_t> exp2pol;
-
-    vector<uint64_t> openingPoints;
-    vector<uint64_t> numChallenges;
-    uint64_t nStages;
-    uint64_t nChallenges;
+    map<uint64_t,uint64_t> exp2pol;
     
     /* Constructor */
     StarkInfo(const Config &config, string file);
@@ -321,14 +202,10 @@ public:
     /* Loads data from a json object */
     void load (json j);
 
-    /* Returns information about a polynomial specified by its ID */
-    void getPol(void * pAddress, uint64_t idPol, PolInfo &polInfo);
-
-    /* Returns the size of a polynomial specified by its ID */
-    uint64_t getPolSize(uint64_t polId);
+    uint64_t getPolinomialRef(std::string type, uint64_t index);
 
     /* Returns a polynomial specified by its ID */
-    Polinomial getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol);
+    Polinomial getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg);
 };
 
 #endif

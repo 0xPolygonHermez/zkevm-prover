@@ -24,11 +24,11 @@ rm config/scripts/metadata-rom.txt
 #Uncomment the following line if you want to generate source code the first time after the release files generation
 
 #Copy the chelpers files
-cp ${C_FILES}/zkevm.chelpers/*.step* ./src/starkpil/zkevm/chelpers/
-cp ${C_FILES}/c12a.chelpers/*.step* ./src/starkpil/starkC12a/chelpers/
-cp ${C_FILES}/recursive1.chelpers/*.step* ./src/starkpil/starkRecursive1/chelpers/
-cp ${C_FILES}/recursive2.chelpers/*.step* ./src/starkpil/starkRecursive2/chelpers/
-cp ${C_FILES}/recursivef.chelpers/*.step* ./src/starkpil/starkRecursiveF/chelpers/
+cp ${C_FILES}/zkevm.chelpers/* ./src/starkpil/zkevm/chelpers/
+cp ${C_FILES}/c12a.chelpers/* ./src/starkpil/starkC12a/chelpers/
+cp ${C_FILES}/recursive1.chelpers/* ./src/starkpil/starkRecursive1/chelpers/
+cp ${C_FILES}/recursive2.chelpers/* ./src/starkpil/starkRecursive2/chelpers/
+cp ${C_FILES}/recursivef.chelpers/* ./src/starkpil/starkRecursiveF/chelpers/
 
 # Generate the zkevm.verifier.cpp
 cp ${C_FILES}/zkevm.verifier_cpp/zkevm.verifier.cpp ${ZKEVM_VERIFIER_CPP}
