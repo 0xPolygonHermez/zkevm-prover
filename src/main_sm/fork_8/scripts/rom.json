@@ -21955,7 +21955,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 4 - B            :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "149792",
+   "CONST": "142303",
    "inCntPaddingPG": "-1",
    "inB": "-1",
    "JMPN": 1,
@@ -21967,7 +21967,7 @@
    "jmpAddrLabel": "outOfCountersPadding",
    "elseAddrLabel": "next",
    "fileName": "opcodes/logs.zkasm",
-   "lineStr": "    %MAX_CNT_PADDING_PG_LIMIT - CNT_PADDING_PG - 4 - B      :JMPN(outOfCountersPadding)"
+   "lineStr": "    %MAX_CNT_PADDING_PG - CNT_PADDING_PG - 4 - B      :JMPN(outOfCountersPadding)"
   },
   {
    "CONST": "0",
@@ -32349,7 +32349,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - %MAX_CNT_POSEIDON_SLOAD_SSTORE - 1 - B  :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "149795",
+   "CONST": "142306",
    "inCntPaddingPG": "-1",
    "inB": "-1",
    "JMPN": 1,
@@ -32361,7 +32361,7 @@
    "jmpAddrLabel": "outOfCountersPadding",
    "elseAddrLabel": "next",
    "fileName": "opcodes/calldata-returndata-code.zkasm",
-   "lineStr": "    %MAX_CNT_PADDING_PG_LIMIT - CNT_PADDING_PG - 1 - B  :JMPN(outOfCountersPadding)"
+   "lineStr": "    %MAX_CNT_PADDING_PG - CNT_PADDING_PG - 1 - B  :JMPN(outOfCountersPadding)"
   },
   {
    "CONST": "2",
@@ -162451,7 +162451,7 @@
    "lineStr": "        %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 1 - B            :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "149795",
+   "CONST": "142306",
    "inCntPaddingPG": "-1",
    "inB": "-1",
    "JMPN": 1,
@@ -162463,7 +162463,7 @@
    "jmpAddrLabel": "outOfCountersPadding",
    "elseAddrLabel": "next",
    "fileName": "process-tx.zkasm",
-   "lineStr": "        %MAX_CNT_PADDING_PG_LIMIT - CNT_PADDING_PG - 1 - B      :JMPN(outOfCountersPadding)"
+   "lineStr": "        %MAX_CNT_PADDING_PG - CNT_PADDING_PG - 1 - B      :JMPN(outOfCountersPadding)"
   },
   {
    "freeInTag": {
@@ -175058,7 +175058,7 @@
    "lineStr": "    %MAX_CNT_POSEIDON_G - CNT_POSEIDON_G - 1 - B            :JMPN(outOfCountersPoseidon)"
   },
   {
-   "CONST": "149795",
+   "CONST": "142306",
    "inCntPaddingPG": "-1",
    "inB": "-1",
    "JMPN": 1,
@@ -175070,7 +175070,7 @@
    "jmpAddrLabel": "outOfCountersPadding",
    "elseAddrLabel": "next",
    "fileName": "utils.zkasm",
-   "lineStr": "    %MAX_CNT_PADDING_PG_LIMIT - CNT_PADDING_PG - 1 - B      :JMPN(outOfCountersPadding)"
+   "lineStr": "    %MAX_CNT_PADDING_PG - CNT_PADDING_PG - 1 - B      :JMPN(outOfCountersPadding)"
   },
   {
    "freeInTag": {
