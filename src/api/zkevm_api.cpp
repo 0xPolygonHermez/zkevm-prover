@@ -830,8 +830,7 @@ int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
 }
 
 
-int zkevm_mem_align(char * inputs_, int ninputs, char* pols_) {
-    PROVER_FORK_NAMESPACE::MemAlignCommitPols *pols = (PROVER_FORK_NAMESPACE::MemAlignCommitPols *) pols_;
+int zkevm_mem_align(char * inputs_, int ninputs, char* pAddress) {
     MemAlignAction *pinputs = (MemAlignAction*) inputs_;
     std::vector<MemAlignAction> inputs;
     inputs.resize(ninputs);
@@ -846,7 +845,7 @@ int zkevm_mem_align(char * inputs_, int ninputs, char* pols_) {
         inputs[i].wr256 = pinputs[i].wr256;
     }
     MemAlignExecutor memAlignExecutor(fr, config);
-    memAlignExecutor.execute(inputs, *pols);
+    memAlignExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
     return 0;
 }
 
