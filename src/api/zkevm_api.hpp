@@ -5,6 +5,7 @@
     // FFI functions
 
     int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests);
+    int zkevm_mem_align(char * inputs_, int ninputs, char* pols_); 
 
     // FRI Proof
     // ========================================================================================

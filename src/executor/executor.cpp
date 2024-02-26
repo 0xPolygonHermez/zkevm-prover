@@ -19,6 +19,7 @@
 #include "zklog.hpp"
 #ifdef __ZKEVM_SM__
 #include "zkevm_sm.h"
+#include "zkevm_api.hpp"
 #endif
 
 // Reduced version: only 1 evaluation is allocated, and some asserts are disabled
@@ -464,13 +465,10 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 
 #ifdef __ZKEVM_SM__
         if(pMainSMRequests!=NULL){
-            TimerStart(MAIN_SM_REQUESTS_COPY);
-#ifdef __ZKEVM_SM__
-        TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
-        add_binary_inputs((void *)pMainSMRequests, (void *)required.Binary.data(), (uint64_t) required.Binary.size());
-        TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
-#endif
-            TimerStopAndLog(MAIN_SM_REQUESTS_COPY);
+            TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
+            add_mem_align_inputs((void *)pMainSMRequests, (void *)required.MemAlign.data(), (uint64_t) required.MemAlign.size());
+            add_binary_inputs((void *)pMainSMRequests, (void *)required.Binary.data(), (uint64_t) required.Binary.size());
+            TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
         }
 #endif
 
@@ -498,12 +496,12 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(BINARY_SM_EXECUTE);
         binaryExecutor.execute(required.Binary, commitPols.Binary);
         TimerStopAndLog(BINARY_SM_EXECUTE);
-#endif
 
         // Execute the MemAlign State Machine
         TimerStart(MEM_ALIGN_SM_EXECUTE);
         memAlignExecutor.execute(required.MemAlign, commitPols.MemAlign);
-        TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);
+        TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);       
+#endif
 
         // Execute the Memory State Machine
         TimerStart(MEMORY_SM_EXECUTE);

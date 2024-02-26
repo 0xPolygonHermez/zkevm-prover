@@ -829,6 +829,28 @@ int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
     return 1;
 }
 
+
+int zkevm_mem_align(char * inputs_, int ninputs, char* pols_) {
+    PROVER_FORK_NAMESPACE::MemAlignCommitPols *pols = (PROVER_FORK_NAMESPACE::MemAlignCommitPols *) pols_;
+    MemAlignAction *pinputs = (MemAlignAction*) inputs_;
+    std::vector<MemAlignAction> inputs;
+    inputs.resize(ninputs);
+    for(int i=0; i<ninputs; i++){
+        inputs[i].m0 = pinputs[i].m0;
+        inputs[i].m1 = pinputs[i].m1;
+        inputs[i].v = pinputs[i].v;
+        inputs[i].w0 = pinputs[i].w0;
+        inputs[i].w1 = pinputs[i].w1;
+        inputs[i].offset = pinputs[i].offset;
+        inputs[i].wr8 = pinputs[i].wr8;
+        inputs[i].wr256 = pinputs[i].wr256;
+    }
+    MemAlignExecutor memAlignExecutor(fr, config);
+    memAlignExecutor.execute(inputs, *pols);
+    return 0;
+}
+
+
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
