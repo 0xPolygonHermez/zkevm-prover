@@ -1,6 +1,6 @@
 #include "chelpers.hpp"
 
-void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
+void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
 
     cHelpersBin->startReadSection(CHELPERS_HEADER_SECTION);
 
@@ -23,14 +23,15 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
         ParserParams parserParamsStage;
 
         uint32_t stage = cHelpersBin->readU32LE();
-        uint32_t executeBefore = cHelpersBin->readU32LE();
-
         parserParamsStage.stage = stage;
-        parserParamsStage.executeBefore = executeBefore;
         
         std::string stageName = "step" + std::to_string(stage);
-        if(executeBefore == 0) stageName += "_after";
 
+        if(!pil2) {
+            parserParamsStage.executeBefore = cHelpersBin->readU32LE();
+            if(parserParamsStage.executeBefore == 0) stageName += "_after";
+        }
+      
         parserParamsStage.nTemp1 = cHelpersBin->readU32LE();
         parserParamsStage.nTemp3 = cHelpersBin->readU32LE();
 
@@ -58,6 +59,36 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
     }
     for(uint64_t j = 0; j < nNumbers; ++j) {
         cHelpersArgs.numbers[j] = cHelpersBin->readU64LE();
+    }
+
+    if(pil2) {
+        cHelpersBin->startReadSection(CHELPERS_EXPRESSIONS_SECTION);
+
+        uint64_t nExpressions = cHelpersBin->readU32LE();
+
+        for(uint64_t i = 0; i < nExpressions; ++i) {
+            ParserParams parserParamsExpression;
+
+            uint32_t expId = cHelpersBin->readU32LE();
+            parserParamsExpression.expId = expId;
+            
+            parserParamsExpression.stage = cHelpersBin->readU32LE();
+            parserParamsExpression.nTemp1 = cHelpersBin->readU32LE();
+            parserParamsExpression.nTemp3 = cHelpersBin->readU32LE();
+
+            parserParamsExpression.nOps = cHelpersBin->readU32LE();
+            parserParamsExpression.opsOffset = cHelpersBin->readU32LE();
+
+            parserParamsExpression.nArgs = cHelpersBin->readU32LE();
+            parserParamsExpression.argsOffset = cHelpersBin->readU32LE();
+
+            parserParamsExpression.nNumbers = cHelpersBin->readU32LE();
+            parserParamsExpression.numbersOffset = cHelpersBin->readU32LE();
+
+            expressionsInfo[expId] = parserParamsExpression;
+        }
+    
+        cHelpersBin->endReadSection();
     }
 
     cHelpersBin->endReadSection();

@@ -17,11 +17,13 @@
 const int CHELPERS_HEADER_SECTION = 2;
 const int CHELPERS_STAGES_SECTION = 3;
 const int CHELPERS_BUFFERS_SECTION = 4;
+const int CHELPERS_EXPRESSIONS_SECTION = 5;
 
-struct ParserParams 
+struct ParserParams
 {
     uint32_t stage;
     uint32_t executeBefore;
+    uint32_t expId;
     uint32_t nTemp1;
     uint32_t nTemp3;
     uint32_t nOps;
@@ -42,7 +44,8 @@ struct ParserArgs
 class CHelpers
 {
 public:
-    std::map<std::string, ParserParams> stagesInfo;
+    std::map<string, ParserParams> stagesInfo;
+    std::map<uint64_t, ParserParams> expressionsInfo;
     
     ParserArgs cHelpersArgs;
 
@@ -54,7 +57,7 @@ public:
         stagesInfo.clear();
     };
 
-    void loadCHelpers(BinFileUtils::BinFile *cHelpersBin);
+    void loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2);
 };
 
 

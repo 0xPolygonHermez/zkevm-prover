@@ -209,7 +209,7 @@ public:
         TimerStart(CHELPERS_ALLOCATION);
         if(!starkFiles.zkevmCHelpers.empty()) {
             cHelpersBinFile = BinFileUtils::openExisting(starkFiles.zkevmCHelpers, "chps", 1);
-            chelpers.loadCHelpers(cHelpersBinFile.get());
+            chelpers.loadCHelpers(cHelpersBinFile.get(), starkInfo.pil2);
         }
         TimerStopAndLog(CHELPERS_ALLOCATION);
     };
@@ -306,9 +306,7 @@ public:
     void addTranscriptPublics(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, Polinomial &pol);
-public:
     void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
-
 
 private:
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
@@ -320,7 +318,7 @@ private:
 
 public:
     // Following function are created to be used by the ffi interface
-    void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
+    void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial* pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
     void ffi_extend_and_merkelize(uint64_t step, StepsParams* params, FRIProof<ElementType>* proof);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 };

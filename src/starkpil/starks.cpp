@@ -19,6 +19,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     Polinomial evals(starkInfo.evMap.size(), FIELD_EXTENSION);
     Polinomial challenges(starkInfo.nChallenges, FIELD_EXTENSION);
+    Polinomial subproofValues(starkInfo.nSubAirValues, FIELD_EXTENSION);
 
     Polinomial xDivXSubXi(starkInfo.openingPoints.size() * NExtended, FIELD_EXTENSION);
 
@@ -30,6 +31,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         pConstPols : pConstPols,
         pConstPols2ns : pConstPols2ns,
         challenges : challenges,
+        subproofValues: subproofValues,
         x_n : x_n,
         x_2ns : x_2ns,
         zi : zi,
@@ -155,7 +157,7 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams& params, FRIPr
 
     calculateHints(step, params);
 
-    if(step == starkInfo.nStages) {
+    if(step == starkInfo.nStages && !starkInfo.pil2) {
         calculateExpressions(step, true, params, chelpersSteps);
     }
 
@@ -317,15 +319,15 @@ void Starks<ElementType>::transposePolsColumns(StepsParams& params, Polinomial* 
     u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8;
 
     for(uint64_t i = 0; i < hint.fields.size(); i++) {
-        uint64_t id = hint.fieldId[hint.fields[i]];
+        uint64_t id = hint.fieldSymbols[hint.fields[i]].id;
         Polinomial p = starkInfo.getPolinomial(params.pols, starkInfo.getPolinomialRef("exp", id), N);
         transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
         Polinomial::copy(transPols[indx], p);
         indx++;
     }
 
-    for(uint64_t i = 0; i < hint.dests.size(); i++) {
-        uint64_t id = hint.destId[hint.dests[i]];
+    for(uint64_t i = 0; i < hint.destSymbols.size(); i++) {
+        uint64_t id = hint.destSymbols[i].id;
         Polinomial p = starkInfo.getPolinomial(params.pols, starkInfo.getPolinomialRef("cm_n", id), N);
         transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
         cm2Transposed[id] = indx;
@@ -337,15 +339,18 @@ void Starks<ElementType>::transposePolsColumns(StepsParams& params, Polinomial* 
 template <typename ElementType>
 void Starks<ElementType>::transposePolsRows(uint64_t step, StepsParams& params, Polinomial *transPols)
 {
+    TimerStartStep(STARK_CALCULATE_TRANSPOSE_2, step);
     for (uint64_t i = 0; i < starkInfo.hints[step].size(); i++)
-    {
-        for(uint64_t j = 0; j < starkInfo.hints[step][i].dests.size(); j++) {
-            uint64_t polId = starkInfo.hints[step][i].destId[starkInfo.hints[step][i].dests[j]];
+    {   
+        Hint hint = starkInfo.hints[step][i];
+        for(uint64_t j = 0; j < hint.destSymbols.size(); j++) {
+            uint64_t polId = hint.destSymbols[j].id;
             uint64_t transposedId = cm2Transposed[polId];
             Polinomial cmPol = starkInfo.getPolinomial(params.pols, starkInfo.getPolinomialRef("cm_n", polId), N);
             Polinomial::copy(cmPol, transPols[transposedId]);
         }
     }
+    TimerStopAndLogStep(STARK_CALCULATE_TRANSPOSE_2, step);
 }
 
 template <typename ElementType>
@@ -357,7 +362,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
     uint64_t numHints = starkInfo.hints[step].size();
     uint64_t numPols = 0;
     for(uint64_t i = 0; i < numHints; ++i) {
-        numPols += starkInfo.hints[step][i].fields.size() + starkInfo.hints[step][i].dests.size();
+        numPols += starkInfo.hints[step][i].fields.size() + starkInfo.hints[step][i].destSymbols.size();
     }
 
     Polinomial *transPols = new Polinomial[numPols];
@@ -403,9 +408,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
     }
     TimerStopAndLogStep(STARK_CALCULATE_HINTS, step);
 
-    TimerStartStep(STARK_CALCULATE_TRANSPOSE_2, step);
     transposePolsRows(step, params, transPols);
-    TimerStopAndLogStep(STARK_CALCULATE_TRANSPOSE_2, step);
 
     delete[] transPols;
 }
@@ -607,12 +610,13 @@ void Starks<ElementType>::merkelizeMemory()
 }
 
 template <typename ElementType>
-void * Starks<ElementType>::ffi_create_steps_params(Polinomial *pChallenges, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs) {
+void * Starks<ElementType>::ffi_create_steps_params(Polinomial *pChallenges, Polinomial *pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs) {
     StepsParams* params = new StepsParams {
         pols : mem,
         pConstPols : pConstPols,
         pConstPols2ns : pConstPols2ns,
         challenges : *pChallenges,
+        subproofValues : *pSubproofValues,
         x_n : x_n,
         x_2ns : x_2ns,
         zi : zi,
