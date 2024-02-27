@@ -3,6 +3,7 @@
 #include "scalar.hpp"
 #include "timer.hpp"
 #include "sha256.hpp"
+#include "bcon_sha256.hpp"
 
 // Initialize hash values:
 // (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19)
@@ -35,6 +36,16 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
 }
 
 void SHA256 (const uint8_t * pData, uint64_t dataSize, mpz_class &hashScalar)
+{
+	BYTE buf[SHA256_BLOCK_SIZE];
+	SHA256_CTX ctx;
+	sha256_init(&ctx);
+	sha256_update(&ctx, pData, dataSize);
+	sha256_final(&ctx, buf);
+    ba2scalar(buf, SHA256_BLOCK_SIZE, hashScalar);
+}
+
+void SHA256_old (const uint8_t * pData, uint64_t dataSize, mpz_class &hashScalar)
 {
     // Padding:
     // original message of length L bits
