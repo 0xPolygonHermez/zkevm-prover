@@ -76,6 +76,7 @@ eSection string2section (const string s);
 typedef enum {
     h1h2 = 0,
     gprod = 1,
+    publicValue = 2,
 } hintType;
 
 hintType string2hintType (const string s);

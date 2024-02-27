@@ -182,6 +182,7 @@ void StarkInfo::load(json j)
 
         for(uint64_t i = 0; i < j["hints"].size(); i++) {
             Hint hint;
+            if(j["hints"][i]["name"] == string("public")) continue;
             hint.type = string2hintType(j["hints"][i]["name"]);
             
             uint64_t stage = j["hints"][i]["dest"][0]["stage"];
@@ -257,8 +258,6 @@ void StarkInfo::load(json j)
             h2.setSymbol(2, j["puCtx"][i]["h2Id"]);
             hintH1H2.destSymbols.push_back(h1);
             hintH1H2.destSymbols.push_back(h2);
-
-            cout << h1.id << " " << hintH1H2.destSymbols[0].id << endl;
   
             hintH1H2.index = indxStage2;
             indxStage2 += 4;
@@ -367,12 +366,24 @@ uint64_t StarkInfo::getPolinomialRef(std::string type, uint64_t index) {
 
 Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg)
 {
-    VarPolMap polInfo = varPolMap[idPol];
-    uint64_t dim = polInfo.dim;
-    uint64_t offset = mapOffsets.section[polInfo.section];
-    offset += polInfo.sectionPos;
-    uint64_t next = mapSectionsN.section[polInfo.section];
-    return Polinomial(&pAddress[offset], deg, dim, next, std::to_string(idPol));
+    if(pil2) {
+        CmPolMap polInfo = cmPolsMap[idPol];
+        uint64_t dim = polInfo.dim;
+        uint64_t N = (1 << starkStruct.nBits);
+        eSection section = N == deg ? string2section(polInfo.stage + "_n") : string2section(polInfo.stage + "_2ns");
+        uint64_t nCols = mapSectionsN.section[section];
+        uint64_t offset = mapOffsets.section[section];
+        offset += polInfo.stagePos;
+        return Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
+    } else {
+        VarPolMap polInfo = varPolMap[idPol];
+        uint64_t dim = polInfo.dim;
+        uint64_t offset = mapOffsets.section[polInfo.section];
+        uint64_t nCols = mapSectionsN.section[polInfo.section];
+        offset += polInfo.sectionPos;
+        return Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
+    }
+    
 }
 
 opType string2opType(const string s) 
@@ -431,6 +442,8 @@ hintType string2hintType(const string s)
         return h1h2;
     if(s == "gprod")
         return gprod;
+    if(s == "public")
+        return publicValue;
     zklog.error("string2hintType() found invalid string=" + s);
     exitProcess();
     exit(-1);

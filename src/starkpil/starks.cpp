@@ -355,11 +355,14 @@ void Starks<ElementType>::transposePolsRows(uint64_t step, StepsParams& params, 
 
 template <typename ElementType>
 void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
+    uint64_t numHints = starkInfo.hints[step].size();
+
+    if(numHints == 0) return;
+        
     std::string sectionExtended = "cm" + to_string(step) + "_2ns";
     uint64_t sectionExtendedOffset = starkInfo.mapOffsets.section[string2section(sectionExtended)];
     Goldilocks::Element *pBuffer = &params.pols[sectionExtendedOffset];
 
-    uint64_t numHints = starkInfo.hints[step].size();
     uint64_t numPols = 0;
     for(uint64_t i = 0; i < numHints; ++i) {
         numPols += starkInfo.hints[step][i].fields.size() + starkInfo.hints[step][i].destSymbols.size();

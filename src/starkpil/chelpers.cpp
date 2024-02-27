@@ -49,20 +49,8 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
     
     cHelpersBin->endReadSection();
 
-    cHelpersBin->startReadSection(CHELPERS_BUFFERS_SECTION);
-
-    for(uint64_t j = 0; j < nOps; ++j) {
-        cHelpersArgs.ops[j] = cHelpersBin->readU8LE();
-    }
-    for(uint64_t j = 0; j < nArgs; ++j) {
-        cHelpersArgs.args[j] = cHelpersBin->readU16LE();
-    }
-    for(uint64_t j = 0; j < nNumbers; ++j) {
-        cHelpersArgs.numbers[j] = cHelpersBin->readU64LE();
-    }
-
     if(pil2) {
-        cHelpersBin->startReadSection(CHELPERS_EXPRESSIONS_SECTION);
+        cHelpersBin->startReadSection(CHELPERS_EXPRESSIONS_PIL2_SECTION);
 
         uint64_t nExpressions = cHelpersBin->readU32LE();
 
@@ -71,8 +59,8 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
 
             uint32_t expId = cHelpersBin->readU32LE();
             parserParamsExpression.expId = expId;
-            
             parserParamsExpression.stage = cHelpersBin->readU32LE();
+
             parserParamsExpression.nTemp1 = cHelpersBin->readU32LE();
             parserParamsExpression.nTemp3 = cHelpersBin->readU32LE();
 
@@ -87,8 +75,24 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
 
             expressionsInfo[expId] = parserParamsExpression;
         }
-    
+
         cHelpersBin->endReadSection();
+    }
+
+    if(pil2) {
+        cHelpersBin->startReadSection(CHELPERS_BUFFERS_PIL2_SECTION);
+    } else {
+        cHelpersBin->startReadSection(CHELPERS_BUFFERS_PIL1_SECTION);
+    }
+
+    for(uint64_t j = 0; j < nOps; ++j) {
+        cHelpersArgs.ops[j] = cHelpersBin->readU8LE();
+    }
+    for(uint64_t j = 0; j < nArgs; ++j) {
+        cHelpersArgs.args[j] = cHelpersBin->readU16LE();
+    }
+    for(uint64_t j = 0; j < nNumbers; ++j) {
+        cHelpersArgs.numbers[j] = cHelpersBin->readU64LE();
     }
 
     cHelpersBin->endReadSection();
