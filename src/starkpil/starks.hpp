@@ -59,6 +59,8 @@ private:
     MerkleTreeType **treesGL;
     MerkleTreeType **treesFRI;
 
+    map<uint64_t, uint64_t> cm2Transposed;
+
     Goldilocks::Element *mem;
     void *pAddress;
 
@@ -248,6 +250,8 @@ public:
             delete treesFRI[i];
         }
         delete[] treesFRI;
+
+        cm2Transposed.clear();
     };
 
     uint64_t getConstTreeSize()
@@ -283,17 +287,18 @@ public:
 
     void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps *chelpersSteps);
     
-    void calculateZ(StepsParams& params);
-    void calculateH1H2(StepsParams& params);
+    void calculateHints(uint64_t step, StepsParams& params);
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
-    void calculateExpressions(std::string step, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpressions(uint64_t step, bool after, StepsParams &params, CHelpersSteps *chelpersSteps);
     
-    void computeQ(StepsParams& params, FRIProof<ElementType> &proof);
+    void computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps);
+    void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
+
     void computeEvals(StepsParams& params, FRIProof<ElementType> &proof);
 
-    Polinomial *computeFRIPol(StepsParams& params, CHelpersSteps *chelpersSteps);
+    Polinomial *computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps *chelpersSteps);
     
     void computeFRIFolding(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t step, Polinomial &challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries);
@@ -302,15 +307,15 @@ public:
     void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, Polinomial &pol);
 public:
-    void getChallenges(TranscriptType &transcript, Goldilocks::Element* challenges, uint64_t nChallenges);
+    void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
+
 
 private:
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
 
-    Polinomial *transposeH1H2Columns(StepsParams& params);
-    void transposeH1H2Rows(StepsParams& params, Polinomial *transPols);
-    Polinomial *transposeZColumns(StepsParams& params);
-    void transposeZRows(StepsParams& params, Polinomial *transPols);
+    void transposePolsColumns(StepsParams& params, Polinomial* transPols, uint64_t &indx, Hint hint, Goldilocks::Element *pBuffer);
+    void transposePolsRows(uint64_t step, StepsParams& params, Polinomial *transPols);
+    
     void evmap(StepsParams &params, Polinomial &LEv);
 
 public:

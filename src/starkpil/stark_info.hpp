@@ -60,6 +60,11 @@ typedef enum
 
 eSection string2section (const string s);
 
+typedef enum {
+    h1h2 = 0,
+    gprod = 1,
+} hintType;
+
 class PolsSections
 {
 public:
@@ -88,40 +93,15 @@ public:
     uint64_t deg;
 };
 
-class PeCtx
+class Hint
 {
 public:
-    uint64_t tExpId;
-    uint64_t fExpId;
-    uint64_t zId;
-    uint64_t c1Id;
-    uint64_t numId;
-    uint64_t denId;
-    uint64_t c2Id;
-};
-
-class PuCtx
-{
-public:
-    uint64_t tExpId;
-    uint64_t fExpId;
-    uint64_t h1Id;
-    uint64_t h2Id;
-    uint64_t zId;
-    uint64_t c1Id;
-    uint64_t numId;
-    uint64_t denId;
-    uint64_t c2Id;
-};
-
-class CiCtx
-{
-public:
-    uint64_t zId;
-    uint64_t numId;
-    uint64_t denId;
-    uint64_t c1Id;
-    uint64_t c2Id;
+    hintType type;
+    vector<string> fields;
+    map<string, uint64_t> fieldId;
+    vector<string> dests;
+    map<string, uint64_t> destId;
+    uint64_t index;
 };
 
 class EvMap
@@ -190,10 +170,11 @@ public:
     vector<VarPolMap> varPolMap;
     vector<uint64_t> cm_n;
     vector<uint64_t> cm_2ns;
-    vector<PeCtx> peCtx;
-    vector<PuCtx> puCtx;
-    vector<CiCtx> ciCtx;
+
     vector<EvMap> evMap;
+
+    std::map<uint64_t, vector<Hint>> hints;
+
     map<uint64_t,uint64_t> exp2pol;
     
     /* Constructor */

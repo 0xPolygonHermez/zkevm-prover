@@ -990,21 +990,21 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst) {
 
 void calculate_h1_h2(void *pStarks, void *pParams) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->calculateH1H2(*(StepsParams*)pParams);
+    // starks->calculateH1H2(*(StepsParams*)pParams); // TODO
 }
 
 void calculate_z(void *pStarks, void *pParams) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->calculateZ(*(StepsParams*)pParams);
+    // starks->calculateZ(*(StepsParams*)pParams); // TODO
 }
 
 void calculate_expressions(void *pStarks, char* step, void *pParams, void *pChelpersSteps) {
-    ((Starks<Goldilocks::Element>*)pStarks)->calculateExpressions(step, *(StepsParams*)pParams, (CHelpersSteps*)pChelpersSteps);
+    // ((Starks<Goldilocks::Element>*)pStarks)->calculateExpressions(step, *(StepsParams*)pParams, (CHelpersSteps*)pChelpersSteps); // TODO
 }
 
 void compute_q(void *pStarks, void *pParams, void *pProof) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->computeQ(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof);
+    // starks->computeQ(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof); // TODO 
 }
 
 void compute_evals(void *pStarks, void *pParams, void *pProof) {
@@ -1014,7 +1014,7 @@ void compute_evals(void *pStarks, void *pParams, void *pProof) {
 
 void *compute_fri_pol(void *pStarks, void *pParams, void *cHelpersSteps) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    return starks->computeFRIPol(*(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps);
+    // starks->computeFRIPol(*(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps); // TODO
 }
 
 void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge) {
@@ -1103,8 +1103,7 @@ void transcript_free(void *pTranscript) {
 
 void get_challenges(void *pStarks, void *pTranscript, void *pElement, uint64_t nChallenges) {
     TranscriptGL *transcript = (TranscriptGL *)pTranscript;
-
-    ((Starks<Goldilocks::Element>*)pStarks)->getChallenges(*transcript, (Goldilocks::Element*)pElement, nChallenges);
+    // ((Starks<Goldilocks::Element>*)pStarks)->getChallenges(*transcript, (Goldilocks::Element*)pElement, nChallenges); // TODO
 }
 
 void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits) {

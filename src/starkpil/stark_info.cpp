@@ -148,44 +148,89 @@ void StarkInfo::load(json j)
 
         for (uint64_t i = 0; i < j["cm_2ns"].size(); i++)
             cm_2ns.push_back(j["cm_2ns"][i]);
+        
 
-        for (uint64_t i = 0; i < j["peCtx"].size(); i++)
-        {
-            PeCtx pe;
-            pe.tExpId = j["peCtx"][i]["tExpId"];
-            pe.fExpId = j["peCtx"][i]["fExpId"];
-            pe.zId = j["peCtx"][i]["zId"];
-            pe.c1Id = j["peCtx"][i]["c1Id"];
-            pe.numId = j["peCtx"][i]["numId"];
-            pe.denId = j["peCtx"][i]["denId"];
-            pe.c2Id = j["peCtx"][i]["c2Id"];
-            peCtx.push_back(pe);
-        }
+        uint64_t indxStage2 = 0;
+        uint64_t indxStage3 = 0;
 
         for (uint64_t i = 0; i < j["puCtx"].size(); i++)
         {
-            PuCtx pu;
-            pu.tExpId = j["puCtx"][i]["tExpId"];
-            pu.fExpId = j["puCtx"][i]["fExpId"];
-            pu.h1Id = j["puCtx"][i]["h1Id"];
-            pu.h2Id = j["puCtx"][i]["h2Id"];
-            pu.zId = j["puCtx"][i]["zId"];
-            pu.c1Id = j["puCtx"][i]["c1Id"];
-            pu.numId = j["puCtx"][i]["numId"];
-            pu.denId = j["puCtx"][i]["denId"];
-            pu.c2Id = j["puCtx"][i]["c2Id"];
-            puCtx.push_back(pu);
+            Hint hintH1H2;
+            hintH1H2.type = hintType::h1h2;
+
+            hintH1H2.fields.push_back("fExpId");
+            hintH1H2.fieldId["fExpId"] = j["puCtx"][i]["fExpId"];
+
+            hintH1H2.fields.push_back("tExpId");
+            hintH1H2.fieldId["tExpId"] = j["puCtx"][i]["tExpId"];
+
+            hintH1H2.dests.push_back("h1Id");
+            hintH1H2.destId["h1Id"] = j["puCtx"][i]["h1Id"];
+
+            hintH1H2.dests.push_back("h2Id");
+            hintH1H2.destId["h2Id"] = j["puCtx"][i]["h2Id"];
+            
+            hintH1H2.index = indxStage2;
+            indxStage2 += 4;
+
+            hints[2].push_back(hintH1H2);
+
+            Hint hintGProd;
+            hintGProd.type = hintType::gprod;
+
+            hintGProd.fields.push_back("numId");
+            hintGProd.fieldId["numId"] = j["puCtx"][i]["numId"];
+
+            hintGProd.fields.push_back("denId");
+            hintGProd.fieldId["denId"] = j["puCtx"][i]["denId"];
+
+            hintGProd.dests.push_back("zId");
+            hintGProd.destId["zId"] = j["puCtx"][i]["zId"];
+
+            hintGProd.index = indxStage3;
+            indxStage3 += 3;
+
+            hints[3].push_back(hintGProd);
         }
 
-        for (uint64_t i = 0; i < j["ciCtx"].size(); i++)
+        for (uint64_t i = 0; i < j["peCtx"].size(); i++) 
         {
-            CiCtx ci;
-            ci.zId = j["ciCtx"][i]["zId"];
-            ci.numId = j["ciCtx"][i]["numId"];
-            ci.denId = j["ciCtx"][i]["denId"];
-            ci.c1Id = j["ciCtx"][i]["c1Id"];
-            ci.c2Id = j["ciCtx"][i]["c2Id"];
-            ciCtx.push_back(ci);
+            Hint hintGProd;
+            hintGProd.type = hintType::gprod;
+
+            hintGProd.fields.push_back("numId");
+            hintGProd.fieldId["numId"] = j["peCtx"][i]["numId"];
+
+            hintGProd.fields.push_back("denId");
+            hintGProd.fieldId["denId"] = j["peCtx"][i]["denId"];
+
+            hintGProd.dests.push_back("zId");
+            hintGProd.destId["zId"] = j["peCtx"][i]["zId"];
+
+            hintGProd.index = indxStage3;
+            indxStage3 += 3;
+
+            hints[3].push_back(hintGProd);
+        }
+
+        for (uint64_t i = 0; i < j["ciCtx"].size(); i++) 
+        {
+            Hint hintGProd;
+            hintGProd.type = hintType::gprod;
+
+            hintGProd.fields.push_back("numId");
+            hintGProd.fieldId["numId"] = j["ciCtx"][i]["numId"];
+
+            hintGProd.fields.push_back("denId");
+            hintGProd.fieldId["denId"] = j["ciCtx"][i]["denId"];
+
+            hintGProd.dests.push_back("zId");
+            hintGProd.destId["zId"] = j["ciCtx"][i]["zId"];
+
+            hintGProd.index = indxStage3;
+            indxStage3 += 3;
+
+            hints[3].push_back(hintGProd);
         }
 
         for (auto it =  j["exp2pol"].begin(); it != j["exp2pol"].end(); ++it) {

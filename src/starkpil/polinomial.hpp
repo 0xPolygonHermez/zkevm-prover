@@ -108,7 +108,7 @@ public:
         return res;
     }
 
-    static void copy(Polinomial &a, Polinomial &b, uint64_t size = 0)
+    static void copy(Polinomial &a, Polinomial &b)
     {
         assert(a.dim() == b.dim());
         assert(a.degree() == b.degree());
@@ -353,7 +353,7 @@ public:
         }
     }
 
-    static void calculateH1H2_opt1(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys, uint64_t size_values)
+    static void calculateH1H2_opt1(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys)
     {
         vector<int> counter(tPol.degree(), 1);  // this 1 is important, space of the original buffer could be used
         vector<bool> touched(size_keys, false); // faster use this than initialize buffer, bitmask could be used
@@ -469,7 +469,7 @@ public:
         // std::cout << "holu: " << id << " " << pos << " times: " << time2 - time1 << " " << time3 - time2 << " " << time4 - time3 << " " << h2.dim() << std::endl;
     }
 
-    static void calculateH1H2_opt3(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys, uint64_t size_values)
+    static void calculateH1H2_opt3(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys)
     {
         vector<int> counter(tPol.degree(), 1);  // this 1 is important, space of the original buffer could be used
         vector<bool> touched(size_keys, false); // faster use this than initialize buffer, bitmask could be used
