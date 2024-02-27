@@ -849,12 +849,14 @@ int zkevm_mem_align(char * inputs_, int ninputs, char* pAddress) {
     return 0;
 }
 
-int zkevm_padding_sha256(char * inputs_, char * pAddress){
+int zkevm_padding_sha256(char * inputs_, int ninputs, char * pAddress){
    
+    PaddingSha256ExecutorInput::DTO * p_inputs= (PaddingSha256ExecutorInput::DTO*) inputs_;
     std::vector<PaddingSha256ExecutorInput> inputs;
-    PaddingSha256ExecutorInput::deserialize((uint8_t*)inputs_, inputs);
+    PaddingSha256ExecutorInput::fromDTO(p_inputs, ninputs, inputs);
     PaddingSha256Executor paddingSha256Executor(fr);
     paddingSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress);
+    return 0;
 }
 
 

@@ -468,9 +468,8 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
             add_mem_align_inputs((void *)pMainSMRequests, (void *)required.MemAlign.data(), (uint64_t) required.MemAlign.size());
             add_binary_inputs((void *)pMainSMRequests, (void *)required.Binary.data(), (uint64_t) required.Binary.size());
-            vector<uint8_t> buffer;
-            PaddingSha256ExecutorInput::serialize(required.PaddingSha256, buffer);
-            add_padding_sha256_inputs((void *)pMainSMRequests, (void *) buffer.data(), buffer.size());
+            PaddingSha256ExecutorInput::DTO *buffer = PaddingSha256ExecutorInput::toDTO(required.PaddingSha256);
+            add_padding_sha256_inputs((void *)pMainSMRequests, (void *) buffer, required.PaddingSha256.size());
             TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
         }
 #endif
