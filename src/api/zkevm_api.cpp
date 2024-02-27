@@ -849,6 +849,14 @@ int zkevm_mem_align(char * inputs_, int ninputs, char* pAddress) {
     return 0;
 }
 
+int zkevm_padding_sha256(char * inputs_, char * pAddress){
+   
+    std::vector<PaddingSha256ExecutorInput> inputs;
+    PaddingSha256ExecutorInput::deserialize((uint8_t*)inputs_, inputs);
+    PaddingSha256Executor paddingSha256Executor(fr);
+    paddingSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress);
+}
+
 
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
