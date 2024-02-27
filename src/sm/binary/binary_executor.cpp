@@ -89,7 +89,7 @@ void BinaryExecutor::buildReset (void)
 void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &pols)
 {
 #ifdef __ZKEVM_SM__
-    sm_binary_execute(ZkevmSMBinaryPtr, (void *)action.data(), action.size(), (void *)pols.address(), 1880, 751 * 8, N);
+    sm_binary_execute(ZkevmSMBinaryPtr, (void *)action.data(), action.size(), (void *)pols.address(), N);
 #else
     // Check that we have enough room in polynomials  TODO: Do this check in JS
     if (action.size()*LATCH_SIZE > N)
