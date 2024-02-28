@@ -859,6 +859,17 @@ int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSM
     return 0;
 }
 
+int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+    std::vector<PaddingSha256BitExecutorInput> inputs;
+    if(ninputs > 0){
+        inputs.assign((PaddingSha256BitExecutorInput*)inputs_, (PaddingSha256BitExecutorInput*)inputs_ + ninputs);
+    }
+    PaddingSha256BitExecutor paddingSha256BitExecutor(fr);
+    paddingSha256BitExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    return 0;
+}
+
+
 int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
     PaddingKKExecutorInput::DTO * p_inputs= (PaddingKKExecutorInput::DTO*) inputs_;
     std::vector<PaddingKKExecutorInput> inputs;

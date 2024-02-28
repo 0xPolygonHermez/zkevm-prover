@@ -7,6 +7,7 @@
     int zkevm_main(char *pConfigFile, void* pAddress, void* pSMRquests);
     int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress); 
     int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
+    int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
     int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
     int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
 
