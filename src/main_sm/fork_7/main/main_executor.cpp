@@ -3468,7 +3468,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             ctx.hashS[addr].digestCalled = true;
 
-            incCounter = ceil((double(hashSIterator->second.data.size()) + double(1)) / double(64));
+            incCounter = ceil((double(hashSIterator->second.data.size()) + double(1+8)) / double(64));
 
 #ifdef LOG_HASHS
             zklog.info("hashSDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashS[addr].digest.get_str(16));
