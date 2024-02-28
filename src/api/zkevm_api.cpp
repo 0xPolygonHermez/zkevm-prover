@@ -859,6 +859,15 @@ int zkevm_padding_sha256(char * inputs_, int ninputs, char * pAddress){
     return 0;
 }
 
+int zkevm_padding_kk(char * inputs_, int ninputs, char * pAddress){
+    PaddingKKExecutorInput::DTO * p_inputs= (PaddingKKExecutorInput::DTO*) inputs_;
+    std::vector<PaddingKKExecutorInput> inputs;
+    PaddingKKExecutorInput::fromDTO(p_inputs, ninputs, inputs);
+    PaddingKKExecutor paddingKKExecutor(fr);
+    paddingKKExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    return 0;
+}
+
 
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;

@@ -33,24 +33,26 @@ public:
     mpz_class hash;
     bool digestCalled;
     bool lenCalled;
-    PaddingSha256ExecutorInput() : realLen(0), digestCalled(false), lenCalled(false) {};
-
     
-    void toDTO(DTO* dto){
+    PaddingSha256ExecutorInput() : realLen(0), digestCalled(false), lenCalled(false) {};
+    
+    inline void toDTO(DTO* dto){
         dto->data = (char*)data.c_str();
         dto->reads = reads.data();
         dto->reads_size = reads.size();
         dto->digestCalled = digestCalled;
         dto->lenCalled = lenCalled;
     }
-    void fromDTO(DTO* dto){
+    inline void fromDTO(DTO* dto){
         data = string(dto->data);
         reads.assign(dto->reads, dto->reads + dto->reads_size);
         digestCalled = dto->digestCalled;
         lenCalled = dto->lenCalled;
+        realLen = 0; // is evaluated in the prepareInput function
+        dataBytes.clear(); // is evaluated in the prepareInput function
     }
 
-    static DTO*  toDTO(vector<PaddingSha256ExecutorInput> &input){
+    static inline DTO*  toDTO(vector<PaddingSha256ExecutorInput> &input){
         DTO* dto = new DTO[input.size()];
         for (uint64_t i = 0; i < input.size(); i++){
             input[i].toDTO(dto + i);
@@ -58,7 +60,7 @@ public:
         return dto;
     }
 
-    static void fromDTO(DTO* dto, uint64_t dto_size, vector<PaddingSha256ExecutorInput> &output){
+    static inline void fromDTO(DTO* dto, uint64_t dto_size, vector<PaddingSha256ExecutorInput> &output){
         output.resize(dto_size);
         for (uint64_t i = 0; i < dto_size; i++){
             output[i].fromDTO(dto + i);

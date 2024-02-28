@@ -7,6 +7,7 @@
     int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests);
     int zkevm_mem_align(char * inputs_, int ninputs, char* pAddress); 
     int zkevm_padding_sha256(char * inputs_, int ninputs, char * pAddress);
+    int zkevm_padding_kk(char * inputs_, int ninputs, char * pAddress);
 
     // FRI Proof
     // ========================================================================================
