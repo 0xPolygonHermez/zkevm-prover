@@ -294,7 +294,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
 }
 
 
-int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
+int zkevm_main(char *pConfigFile, void* pAddress, void* pSMRquests)
 {
     
     // Create one instance of Config based on the contents of the file config.json
@@ -541,7 +541,7 @@ int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
                   poseidon,
                   config,
                   pAddress);
-    prover.setMainSMRequestsPointer(pMainSMRquests);
+    prover.setMainSMRequestsPointer(pSMRquests);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* SERVERS */
@@ -830,7 +830,7 @@ int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
 }
 
 
-int zkevm_mem_align(char * inputs_, int ninputs, char* pAddress) {
+int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress) {
     MemAlignAction *pinputs = (MemAlignAction*) inputs_;
     std::vector<MemAlignAction> inputs;
     inputs.resize(ninputs);
@@ -849,22 +849,32 @@ int zkevm_mem_align(char * inputs_, int ninputs, char* pAddress) {
     return 0;
 }
 
-int zkevm_padding_sha256(char * inputs_, int ninputs, char * pAddress){
+int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
    
     PaddingSha256ExecutorInput::DTO * p_inputs= (PaddingSha256ExecutorInput::DTO*) inputs_;
     std::vector<PaddingSha256ExecutorInput> inputs;
     PaddingSha256ExecutorInput::fromDTO(p_inputs, ninputs, inputs);
     PaddingSha256Executor paddingSha256Executor(fr);
-    paddingSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress);
+    paddingSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
     return 0;
 }
 
-int zkevm_padding_kk(char * inputs_, int ninputs, char * pAddress){
+int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
     PaddingKKExecutorInput::DTO * p_inputs= (PaddingKKExecutorInput::DTO*) inputs_;
     std::vector<PaddingKKExecutorInput> inputs;
     PaddingKKExecutorInput::fromDTO(p_inputs, ninputs, inputs);
     PaddingKKExecutor paddingKKExecutor(fr);
-    paddingKKExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    paddingKKExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    return 0;
+}
+
+int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+    std::vector<PaddingKKBitExecutorInput> inputs;
+    if(ninputs > 0){
+        inputs.assign((PaddingKKBitExecutorInput*)inputs_, (PaddingKKBitExecutorInput*)inputs_ + ninputs);
+    }
+    PaddingKKBitExecutor paddingKKBitExecutor(fr);
+    paddingKKBitExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
     return 0;
 }
 

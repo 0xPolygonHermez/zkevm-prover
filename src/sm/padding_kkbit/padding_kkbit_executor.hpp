@@ -48,6 +48,12 @@ public:
 
     /* Executor */
     void execute (vector<PaddingKKBitExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols &pols, vector<Bits2FieldExecutorInput> &required);
+    inline void execute(vector<PaddingKKBitExecutorInput> &input, Goldilocks::Element * pAddress){
+        PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols pols(pAddress, N);
+        vector<Bits2FieldExecutorInput> required;
+        execute(input, pols, required);
+    }
+    
 };
 
 #endif
