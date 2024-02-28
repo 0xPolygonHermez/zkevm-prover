@@ -3878,7 +3878,7 @@ code += "    #endif\n";
             code += "    }\n";
             code += "    ctx.hashS[addr].digestCalled = true;\n";
 
-            code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(64));\n";
+            code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1+8)) / double(64));\n";
 
             code += "#ifdef LOG_HASHS\n";
             code += "    zklog.info(\"hashSDigest 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashS[addr].digest.get_str(16));\n";
