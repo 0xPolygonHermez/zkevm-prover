@@ -96,12 +96,17 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
             if (j > input[i].realLen) pols.spare[p] = fr.one(); // padding bytes will meet condition: rem == 0 or spare == 1
             pols.incCounter[p] = fr.fromU64((j / bytesPerBlock) +1);
 
-            uint64_t s=input[i].dataBytes.size()-1-j;
-            if(s < 8) pols.lengthSection[p] = fr.one();
-            if(s < 4) pols.accLength[p] = fr.fromU64((input[i].realLen<<3) & (0xFFFFFFFF<<(s*8)));
+            uint64_t s = input[i].dataBytes.size()-1-j;
+            uint64_t lengthSection = 0;
+            if (s < 8)
+            {
+                lengthSection = 1;
+                pols.lengthSection[p] = fr.one();
+            }
+            if (s < 4) pols.accLength[p] = fr.fromU64((input[i].realLen<<3) & (0xFFFFFFFF<<(s*8)));
 
             bool lastBlockLatch = (p % bytesPerBlock) == (bytesPerBlock - 1);
-            bool lastHashLatch = lastBlockLatch && ((!fr.isZero(pols.spare[p])) || fr.isZero(pols.rem[p]));
+            bool lastHashLatch = lastBlockLatch && lengthSection;
             if (lastHashLatch)
             {
                 if (input[i].lenCalled)
