@@ -1817,11 +1817,6 @@ code += "    #endif\n";
                 if ( (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"] == 1)) ||
                      (rom["program"][zkPC].contains("hashS1") && (rom["program"][zkPC]["hashS1"] == 1)))
                 {
-                    code += "    proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
-                    code += "    mainExecutor.logError(ctx, \"SHA256 unavailable\");\n";
-                    code += "    mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "    return;\n";
-
                     code += "    // HashS free in\n";
                     code += "    // If there is no entry in the hash database for this address, then create a new one\n";
                     code += "    hashIterator = ctx.hashS.find(addr);\n";
@@ -1891,11 +1886,6 @@ code += "    #endif\n";
                 // HashSDigest free in
                 if (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"] == 1))
                 {
-                    code += "    proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
-                    code += "    mainExecutor.logError(ctx, \"SHA256 unavailable\");\n";
-                    code += "    mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "    return;\n";
-
                     code += "    // HashSDigest free in\n";
                     code += "    // If there is no entry in the hash database for this address, this is an error\n";
                     code += "    hashIterator = ctx.hashS.find(addr);\n";
@@ -3634,11 +3624,6 @@ code += "    #endif\n";
         {
             code += "    // HashS instruction\n";
 
-            code += "    proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
-            code += "    mainExecutor.logError(ctx, \"SHA256 unavailable\");\n";
-            code += "    mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "    return;\n";
-
             if (!bFastMode)
             {
                 if (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"] == 1))
@@ -3774,11 +3759,6 @@ code += "    #endif\n";
         {
             code += "    // HashSLen instruction\n";
 
-            code += "    proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
-            code += "    mainExecutor.logError(ctx, \"SHA256 unavailable\");\n";
-            code += "    mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "    return;\n";
-
             if (!bFastMode)
                 code += "    pols.hashSLen[i] = fr.one();\n";
 
@@ -3854,11 +3834,6 @@ code += "    #endif\n";
         if (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"] == 1))
         {
             code += "    // HashKDigest instruction\n";
-
-            code += "    proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
-            code += "    mainExecutor.logError(ctx, \"SHA256 unavailable\");\n";
-            code += "    mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "    return;\n";
             
             if (!bFastMode)
                 code += "    pols.hashSDigest[i] = fr.one();\n";
@@ -3903,7 +3878,7 @@ code += "    #endif\n";
             code += "    }\n";
             code += "    ctx.hashS[addr].digestCalled = true;\n";
 
-            code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(64));\n";
+            code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1+8)) / double(64));\n";
 
             code += "#ifdef LOG_HASHS\n";
             code += "    zklog.info(\"hashSDigest 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashS[addr].digest.get_str(16));\n";
