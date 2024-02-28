@@ -169,7 +169,8 @@ void Config::load(json &config)
     ParseBool(config, "saveFilesInSubfolders", "SAVE_FILES_IN_SUBFOLDERS", saveFilesInSubfolders, false);
 
     // Load DB to mem cache TODO: Discontinue this functionality
-    ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
+    //ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
+    loadDBToMemCache = false;
     ParseBool(config, "loadDBToMemCacheInParallel", "LOAD_DB_TO_MEM_CACHE_IN_PARALLEL", loadDBToMemCacheInParallel, false);
     ParseU64(config, "loadDBToMemTimeout", "LOAD_DB_TO_MEM_TIMEOUT", loadDBToMemTimeout, 30*1000*1000); // Default = 30 seconds
 
@@ -195,6 +196,7 @@ void Config::load(json &config)
     ParseU64(config, "executorClientLoops", "EXECUTOR_CLIENT_LOOPS", executorClientLoops, 1);
     ParseBool(config, "executorClientCheckNewStateRoot", "EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT", executorClientCheckNewStateRoot, false);
     ParseBool(config, "executorClientResetDB", "EXECUTOR_CLIENT_RESET_DB", executorClientResetDB, false);
+    ParseBool(config, "executorClientClearCache", "EXECUTOR_CLIENT_CLEAR_CACHE", executorClientClearCache, true);
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
     //ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
@@ -438,6 +440,7 @@ void Config::print(void)
     zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
     zklog.info("    executorClientCheckNewStateRoot=" + to_string(executorClientCheckNewStateRoot));
     zklog.info("    executorClientResetDB=" + to_string(executorClientResetDB));
+    zklog.info("    executorClientClearCache=" + to_string(executorClientClearCache));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
     zklog.info("    hashDB64=" + to_string(hashDB64));

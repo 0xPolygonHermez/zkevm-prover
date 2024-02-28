@@ -1,80 +1,88 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <nlohmann/json.hpp>
 #include <gmpxx.h>
+#include <sys/stat.h>
 #include "../config/definitions.hpp" // This is the only project file allowed to be included
 
 using namespace std;
 using json = nlohmann::json;
 
-// Fork ID and depending parameters
-uint64_t forkID = PROVER_FORK_ID;
-string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
-uint64_t consolidateStateRootZKPC = uint64_t(0xFFFFFFFFFFFFFFFF);
-
 // Forward declaration
 void file2json (json &rom, string &romFileName);
 void string2file (const string & s, const string & fileName);
-string generate(const json &rom, const string &functionName, const string &fileName, bool bFastMode, bool bHeader);
+string generate(const json &rom, uint64_t forkID, string forkNamespace, const string &functionName, const string &fileName, bool bFastMode, bool bHeader);
 string selector8 (const string &regName, const string &regValue, bool opInitialized, bool bFastMode);
 string selector1 (const string &regName, const string &regValue, bool opInitialized, bool bFastMode);
 string selectorConst (int64_t CONST, bool opInitialized, bool bFastMode);
 string selectorConstL (const string &CONSTL, bool opInitialized, bool bFastMode);
-string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, const json &rom);
+string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, const json &rom, uint64_t forkID);
 string string2lower (const string &s);
 string string2upper (const string &s);
 bool stringIsDec (const string &s);
+void ensureDirectoryExists (const string &fileName);
 
 int main(int argc, char **argv)
 {
     cout << "Main generator" << endl;
 
+    uint64_t firstForkID = PROVER_FORK_ID;
+    uint64_t lastForkID = firstForkID;
+
     // Overwrite fork ID it one has been provided as a parameter
     if (argc == 2)
     {
         string argString = argv[1];
-        if (!stringIsDec(argString))
+        if (argString == "all")
+        {
+            firstForkID = 4;
+        }
+        else if (!stringIsDec(argString))
         {
             cout << "Main generator got invalid parameter=" + argString << endl;
             return -1;
         }
-        forkID = atoi(argString.c_str());
+        else
+        {
+            firstForkID = atoi(argString.c_str());
+            lastForkID = firstForkID;
+        }
     }
-    cout << "Main generator starting for fork ID=" << forkID << endl;
+    for (uint64_t forkID = firstForkID; forkID <= lastForkID; forkID ++)
+    {
+        cout << "Main generator starting for fork ID=" << forkID << endl;
 
-    // Set fork namespace based on fork ID
-    forkNamespace = "fork_" + to_string(forkID);
+        // Set fork namespace based on fork ID
+        string forkNamespace = "fork_" + to_string(forkID);
 
-    // Set consolidateStateRootZKPC based on fork ID
-    consolidateStateRootZKPC =
-        forkNamespace == "fork_6" ? 4928 :
-        forkNamespace == "fork_5" ? 4924 :
-        forkNamespace == "fork_4" ? 4925 :
-        uint64_t(0xFFFFFFFFFFFFFFFF);
+        string codeGenerationName = "main_exec_generated";
 
-    string codeGenerationName = "main_exec_generated";
+        string functionName = codeGenerationName;
+        string fileName = codeGenerationName;
+        string directoryName = "src/main_sm/" + forkNamespace + "/" + codeGenerationName;
 
-    string functionName = codeGenerationName;
-    string fileName = codeGenerationName;
-    string directoryName = "src/main_sm/" + forkNamespace + "/" + codeGenerationName;
+        // Load rom.json
+        string romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom.json";
+        cout << "ROM file name=" << romFileName << endl;
+        json rom;
+        file2json(rom, romFileName);
+        cout << "ROM file loaded" << endl;
 
-    // Load rom.json
-    string romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom.json";
-    cout << "ROM file name=" << romFileName << endl;
-    json rom;
-    file2json(rom, romFileName);
-    cout << "ROM file loaded" << endl;
+        // Create directory
+        ensureDirectoryExists(directoryName.c_str());
 
-    string code = generate(rom, functionName, fileName, false, false);
-    string2file(code, directoryName + "/" + fileName + ".cpp");
-    string header = generate(rom, functionName, fileName, false,  true);
-    string2file(header, directoryName + "/" + fileName + ".hpp");
-    functionName += "_fast";
-    fileName += "_fast";
-    string codeFast = generate(rom, functionName, fileName, true, false);
-    string2file(codeFast, directoryName + "/" + fileName + ".cpp");
-    string headerFast = generate(rom, functionName, fileName, true,  true);
-    string2file(headerFast, directoryName + "/" + fileName + ".hpp");
+        string code = generate(rom, forkID, forkNamespace, functionName, fileName, false, false);
+        string2file(code, directoryName + "/" + fileName + ".cpp");
+        string header = generate(rom, forkID, forkNamespace, functionName, fileName, false,  true);
+        string2file(header, directoryName + "/" + fileName + ".hpp");
+        functionName += "_fast";
+        fileName += "_fast";
+        string codeFast = generate(rom, forkID, forkNamespace, functionName, fileName, true, false);
+        string2file(codeFast, directoryName + "/" + fileName + ".cpp");
+        string headerFast = generate(rom, forkID, forkNamespace, functionName, fileName, true,  true);
+        string2file(headerFast, directoryName + "/" + fileName + ".hpp");
+    }
 
     return 0;
 }
@@ -148,7 +156,7 @@ std::string removeDuplicateSpaces(std::string const &str)
     return s;
 }
 
-string generate(const json &rom, const string &functionName, const string &fileName, bool bFastMode, bool bHeader)
+string generate(const json &rom, uint64_t forkID, string forkNamespace, const string &functionName, const string &fileName, bool bFastMode, bool bHeader)
 {
     //const Fr = new F1Field(0xffffffff00000001n);
 
@@ -168,6 +176,31 @@ string generate(const json &rom, const string &functionName, const string &fileN
             }
         }
     }*/
+    // Set consolidateStateRootZKPC based on fork ID
+    uint64_t consolidateStateRootZKPC;
+    switch (forkID)
+    {
+        case 4:
+        {
+            consolidateStateRootZKPC = 4925;
+            break;
+        }
+        case 5:
+        {
+            consolidateStateRootZKPC = 4924;
+            break;
+        }
+        case 6:
+        {
+            consolidateStateRootZKPC = 4928;
+            break;
+        }
+        default:
+        {
+            consolidateStateRootZKPC = uint64_t(0xFFFFFFFFFFFFFFFF);
+            break;
+        }
+    }
 
     // INCLUDES
 
@@ -270,7 +303,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    int32_t addrRel = 0; // Relative and absolute address auxiliary variables\n";
     code += "    uint64_t addr = 0;\n";
     code += "    int32_t sp;\n";
-    code += "    int64_t i64Aux;\n";
+    if (forkID < 8)
+        code += "    int64_t i64Aux;\n";
     //code += "    int64_t incHashPos = 0;\n"; // TODO: Remove initialization to check it is initialized before being used
     code += "    Rom &rom = mainExecutor.rom;\n";
     code += "    Goldilocks &fr = mainExecutor.fr;\n";
@@ -425,9 +459,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;\n";
     code += "    RawFq::Element _x3fe, _y3fe;\n";
     }
-    if (forkID == 7)
+    if (forkID >= 8)
     {
-    code += "    uint64_t depth;\n";
+    code += "    int64_t reserve;\n";
     }
 
     if (!bFastMode)
@@ -5247,12 +5281,12 @@ code += "    #endif\n";
         /* SETTERS */
         /***********/
 
-        code += setter8("A", rom["program"][zkPC].contains("setA") && (rom["program"][zkPC]["setA"]==1), bFastMode, zkPC, rom);
-        code += setter8("B", rom["program"][zkPC].contains("setB") && (rom["program"][zkPC]["setB"]==1), bFastMode, zkPC, rom);
-        code += setter8("C", rom["program"][zkPC].contains("setC") && (rom["program"][zkPC]["setC"]==1), bFastMode, zkPC, rom);
-        code += setter8("D", rom["program"][zkPC].contains("setD") && (rom["program"][zkPC]["setD"]==1), bFastMode, zkPC, rom);
-        code += setter8("E", rom["program"][zkPC].contains("setE") && (rom["program"][zkPC]["setE"]==1), bFastMode, zkPC, rom);
-        code += setter8("SR", rom["program"][zkPC].contains("setSR") && (rom["program"][zkPC]["setSR"]==1), bFastMode, zkPC, rom);
+        code += setter8("A", rom["program"][zkPC].contains("setA") && (rom["program"][zkPC]["setA"]==1), bFastMode, zkPC, rom, forkID);
+        code += setter8("B", rom["program"][zkPC].contains("setB") && (rom["program"][zkPC]["setB"]==1), bFastMode, zkPC, rom, forkID);
+        code += setter8("C", rom["program"][zkPC].contains("setC") && (rom["program"][zkPC]["setC"]==1), bFastMode, zkPC, rom, forkID);
+        code += setter8("D", rom["program"][zkPC].contains("setD") && (rom["program"][zkPC]["setD"]==1), bFastMode, zkPC, rom, forkID);
+        code += setter8("E", rom["program"][zkPC].contains("setE") && (rom["program"][zkPC]["setE"]==1), bFastMode, zkPC, rom, forkID);
+        code += setter8("SR", rom["program"][zkPC].contains("setSR") && (rom["program"][zkPC]["setSR"]==1), bFastMode, zkPC, rom, forkID);
 
         // If setCTX, CTX'=op
         if (rom["program"][zkPC].contains("setCTX") && (rom["program"][zkPC]["setCTX"]==1))
@@ -5480,6 +5514,58 @@ code += "    #endif\n";
         // If JMPN, jump conditionally if op0<0
         if (rom["program"][zkPC].contains("JMPN") && (rom["program"][zkPC]["JMPN"]==1))
         {
+            if ((forkID >= 8) && rom["program"][zkPC].contains("jmpAddrLabel"))
+            {
+                if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersStep")
+                {
+                    code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_STEPS"]["value"] + ") - fr.toS64(op0);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, uint64_t(reserve));\n";
+                }
+                else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersArith")
+                {
+                    code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_ARITH"]["value"] + ") - fr.toS64(op0);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, uint64_t(reserve));\n";
+                }
+                else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersBinary")
+                {
+                    code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_BINARY"]["value"] + ") - fr.toS64(op0);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, uint64_t(reserve));\n";
+                }
+                else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersKeccak")
+                {
+                    code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_KECCAK_F"]["value"] + ") - fr.toS64(op0);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, uint64_t(reserve));\n";
+                }
+                else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersSha256")
+                {
+                    code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_SHA256_F"]["value"] + ") - fr.toS64(op0);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, uint64_t(reserve));\n";
+                }
+                else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersMemalign")
+                {
+                    code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_MEM_ALIGN"]["value"] + ") - fr.toS64(op0);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, uint64_t(reserve));\n";
+                }
+                else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersPoseidon")
+                {
+                    code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_POSEIDON_G"]["value"] + ") - fr.toS64(op0);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, uint64_t(reserve));\n";
+                }
+                else if (rom["program"][zkPC]["jmpAddrLabel"] == "outOfCountersPadding")
+                {
+                    code += "    reserve = int64_t(" + (string)rom["constants"]["MAX_CNT_PADDING_PG"]["value"] + ") - fr.toS64(op0);\n";
+                    code += "    if (reserve < 0) reserve = 0;\n";
+                    code += "    proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, uint64_t(reserve));\n";
+                }
+            }
+
             if (!bFastMode)
                 code += "    pols.JMPN[i] = fr.one();\n";
 
@@ -5487,24 +5573,7 @@ code += "    #endif\n";
             // If op<0, jump to addr: zkPC'=addr
             code += "    if (jmpnCondValue >= FrFirst32Negative)\n";
             code += "    {\n";
-#if PROVER_FORK_ID >= 7
-            if (zkPC == 1582)
-            {
-                code += "        depth = ((fork_7::FullTracer *)proverRequest.pFullTracer)->depth;\n";
-                code += "        if (depth > 1)\n";
-                code += "        {\n";
-                code += "            proverRequest.result = ZKR_SM_MAIN_OOG_2;\n";
-                code += "            mainExecutor.logError(ctx, \"Invalid OOG 2\");\n";
-                code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "            return;\n";
-                code += "        }\n";
-                code += "        else\n";
-                code += "        {\n";
-                code += "            proverRequest.result = ZKR_SM_MAIN_CLOSE_BATCH;\n";
-                code += "            zklog.info(\"Main Executor OOG_2 ZKR_SM_MAIN_CLOSE_BATCH\");\n";
-                code += "        }\n";
-            }
-#endif
+            
             if (!bFastMode)
             {
                 code += "        pols.isNeg[i] = fr.one();\n";
@@ -5518,14 +5587,6 @@ code += "    #endif\n";
             //code += "        goto *" + functionName + "_labels[addr]; // If op<0, jump to addr: zkPC'=addr\n";
             code += "        bJump = true;\n";
             bConditionalJump = true;
-
-            if ((proverForkID == 7) && rom["program"][zkPC].contains("jmpAddrLabel") && (rom["program"][zkPC]["jmpAddrLabel"] == "funcModexp"))
-            {
-                code += "        proverRequest.result = ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED;\n";
-                code += "        mainExecutor.logError(ctx, \"Invalid funcModexp call\");\n";
-                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-            }
 
             code += "    }\n";
             // If op>=0, simply increase zkPC'=zkPC+1
@@ -5690,11 +5751,21 @@ code += "    #endif\n";
         // If setHASHPOS, HASHPOS' = op0 + incHashPos
         if ( rom["program"][zkPC].contains("setHASHPOS") && (rom["program"][zkPC]["setHASHPOS"] == 1) )
         {
-            code += "    fr.toS64(i64Aux, op0);\n";
-            if (bIncHashPos)
-                code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(i64Aux + incHashPos);\n";
+            if (forkID < 8)
+            {
+                code += "    fr.toS64(i64Aux, op0);\n";
+                if (bIncHashPos)
+                    code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(i64Aux + incHashPos);\n";
+                else
+                    code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(i64Aux);\n";
+            }
             else
-                code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(i64Aux);\n";
+            {
+                if (bIncHashPos)
+                    code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.add(op0, fr.fromU64(incHashPos));\n";
+                else
+                    code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = op0;\n";
+            }
             if (!bFastMode)
                 code += "    pols.setHASHPOS[i] = fr.one();\n";
         }
@@ -6007,10 +6078,24 @@ code += "    #endif\n";
     code += "    proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);\n";
     }
     code += "    proverRequest.counters.steps = ctx.lastStep;\n\n";
+    if (forkID >= 8)
+    {
+    code += "    proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, proverRequest.counters.arith);\n";
+    code += "    proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, proverRequest.counters.binary);\n";
+    code += "    proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, proverRequest.counters.keccakF);\n";
+    code += "    proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, proverRequest.counters.memAlign);\n";
+    code += "    proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, proverRequest.counters.paddingPG);\n";
+    code += "    proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, proverRequest.counters.poseidonG);\n";
+    code += "    proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, proverRequest.counters.sha256F);\n";
+    code += "    proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, proverRequest.counters.steps);\n";
+    }
+    if (forkID == 7)
+    {
+    code += "    proverRequest.counters_reserve = proverRequest.counters;\n";
+    }
 
     code += "    // Set the error (all previous errors generated a return)\n";
-    code += "    if (proverRequest.result != ZKR_SM_MAIN_CLOSE_BATCH)\n";
-    code += "        proverRequest.result = ZKR_SUCCESS;\n";
+    code += "    proverRequest.result = ZKR_SUCCESS;\n";
 
     code += "    // Check that we did not run out of steps during the execution\n";
     code += "    if (ctx.lastStep == 0)\n";
@@ -6381,7 +6466,7 @@ string selectorConstL (const string &CONSTL, bool opInitialized, bool bFastMode)
 /* SETTERS */
 /***********/
 
-string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, const json &rom)
+string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, const json &rom, uint64_t forkID)
 {
     string code = "";
 
@@ -6469,4 +6554,15 @@ bool stringIsDec (const string &s)
         if (!charIsDec(s.at(i))) return false;
     }
     return true;
+}
+
+void ensureDirectoryExists (const string &fileName)
+{
+    string command = "[ -d " + fileName + " ] || mkdir -p " + fileName;
+    int iResult = system(command.c_str());
+    if (iResult != 0)
+    {
+        cout <<"ensureDirectoryExists() system() returned: " << iResult << endl;
+        exit(-1);
+    }
 }

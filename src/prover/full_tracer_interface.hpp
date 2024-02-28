@@ -178,7 +178,8 @@ public:
     uint32_t effective_percentage;
     bool has_gasprice_opcode;
     bool has_balance_opcode;
-    ResponseV2() : block_number(0), type(0), gas_left(0), gas_used(0), gas_refunded(0), cumulative_gas_used(0), effective_percentage(0), has_gasprice_opcode(false), has_balance_opcode(false) {};
+    uint32_t status;
+    ResponseV2() : block_number(0), type(0), gas_left(0), gas_used(0), gas_refunded(0), cumulative_gas_used(0), effective_percentage(0), has_gasprice_opcode(false), has_balance_opcode(false), status(0) {};
 };
 
 class FinalTrace

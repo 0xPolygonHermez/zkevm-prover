@@ -412,15 +412,12 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_INVALID_CBOR = 114,
   EXECUTOR_ERROR_INVALID_DATA_STREAM = 115,
   EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE = 116,
-  EXECUTOR_ERROR_UNSUPPORTED_PRECOMPILED = 117,
-  EXECUTOR_ERROR_OOG_2 = 118,
-  EXECUTOR_ERROR_CLOSE_BATCH = 119,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_CLOSE_BATCH;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
@@ -6003,6 +6000,14 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
     kGasUsedFieldNumber = 19,
     kForkIdFieldNumber = 22,
     kErrorRomFieldNumber = 24,
+    kCntReserveKeccakHashesFieldNumber = 25,
+    kCntReservePoseidonHashesFieldNumber = 26,
+    kCntReservePoseidonPaddingsFieldNumber = 27,
+    kCntReserveMemAlignsFieldNumber = 28,
+    kCntReserveArithmeticsFieldNumber = 29,
+    kCntReserveBinariesFieldNumber = 30,
+    kCntReserveStepsFieldNumber = 31,
+    kCntReserveSha256HashesFieldNumber = 32,
   };
   // repeated .executor.v1.ProcessBlockResponseV2 block_responses = 13;
   int block_responses_size() const;
@@ -6331,6 +6336,78 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   void _internal_set_error_rom(::executor::v1::RomError value);
   public:
 
+  // uint32 cnt_reserve_keccak_hashes = 25;
+  void clear_cnt_reserve_keccak_hashes();
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_keccak_hashes() const;
+  void set_cnt_reserve_keccak_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_cnt_reserve_keccak_hashes() const;
+  void _internal_set_cnt_reserve_keccak_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 cnt_reserve_poseidon_hashes = 26;
+  void clear_cnt_reserve_poseidon_hashes();
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_poseidon_hashes() const;
+  void set_cnt_reserve_poseidon_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_cnt_reserve_poseidon_hashes() const;
+  void _internal_set_cnt_reserve_poseidon_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 cnt_reserve_poseidon_paddings = 27;
+  void clear_cnt_reserve_poseidon_paddings();
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_poseidon_paddings() const;
+  void set_cnt_reserve_poseidon_paddings(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_cnt_reserve_poseidon_paddings() const;
+  void _internal_set_cnt_reserve_poseidon_paddings(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 cnt_reserve_mem_aligns = 28;
+  void clear_cnt_reserve_mem_aligns();
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_mem_aligns() const;
+  void set_cnt_reserve_mem_aligns(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_cnt_reserve_mem_aligns() const;
+  void _internal_set_cnt_reserve_mem_aligns(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 cnt_reserve_arithmetics = 29;
+  void clear_cnt_reserve_arithmetics();
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_arithmetics() const;
+  void set_cnt_reserve_arithmetics(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_cnt_reserve_arithmetics() const;
+  void _internal_set_cnt_reserve_arithmetics(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 cnt_reserve_binaries = 30;
+  void clear_cnt_reserve_binaries();
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_binaries() const;
+  void set_cnt_reserve_binaries(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_cnt_reserve_binaries() const;
+  void _internal_set_cnt_reserve_binaries(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 cnt_reserve_steps = 31;
+  void clear_cnt_reserve_steps();
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_steps() const;
+  void set_cnt_reserve_steps(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_cnt_reserve_steps() const;
+  void _internal_set_cnt_reserve_steps(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 cnt_reserve_sha256_hashes = 32;
+  void clear_cnt_reserve_sha256_hashes();
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_sha256_hashes() const;
+  void set_cnt_reserve_sha256_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_cnt_reserve_sha256_hashes() const;
+  void _internal_set_cnt_reserve_sha256_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchResponseV2)
  private:
   class _Internal;
@@ -6367,6 +6444,14 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   int error_rom_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_keccak_hashes_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_poseidon_hashes_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_poseidon_paddings_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_mem_aligns_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_arithmetics_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_binaries_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_steps_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_reserve_sha256_hashes_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -8857,6 +8942,7 @@ class ProcessTransactionResponseV2 PROTOBUF_FINAL :
     kEffectivePercentageFieldNumber = 18,
     kHasGaspriceOpcodeFieldNumber = 19,
     kHasBalanceOpcodeFieldNumber = 20,
+    kStatusFieldNumber = 21,
   };
   // repeated .executor.v1.LogV2 logs = 15;
   int logs_size() const;
@@ -9184,6 +9270,15 @@ class ProcessTransactionResponseV2 PROTOBUF_FINAL :
   void _internal_set_has_balance_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
+  // uint32 status = 21;
+  void clear_status();
+  ::PROTOBUF_NAMESPACE_ID::uint32 status() const;
+  void set_status(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_status() const;
+  void _internal_set_status(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessTransactionResponseV2)
  private:
   class _Internal;
@@ -9211,6 +9306,7 @@ class ProcessTransactionResponseV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 effective_percentage_;
   ::PROTOBUF_NAMESPACE_ID::uint32 has_gasprice_opcode_;
   ::PROTOBUF_NAMESPACE_ID::uint32 has_balance_opcode_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 status_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -18201,6 +18297,166 @@ inline void ProcessBatchResponseV2::set_error_rom(::executor::v1::RomError value
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.error_rom)
 }
 
+// uint32 cnt_reserve_keccak_hashes = 25;
+inline void ProcessBatchResponseV2::clear_cnt_reserve_keccak_hashes() {
+  cnt_reserve_keccak_hashes_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_cnt_reserve_keccak_hashes() const {
+  return cnt_reserve_keccak_hashes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::cnt_reserve_keccak_hashes() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.cnt_reserve_keccak_hashes)
+  return _internal_cnt_reserve_keccak_hashes();
+}
+inline void ProcessBatchResponseV2::_internal_set_cnt_reserve_keccak_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  cnt_reserve_keccak_hashes_ = value;
+}
+inline void ProcessBatchResponseV2::set_cnt_reserve_keccak_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_cnt_reserve_keccak_hashes(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_reserve_keccak_hashes)
+}
+
+// uint32 cnt_reserve_poseidon_hashes = 26;
+inline void ProcessBatchResponseV2::clear_cnt_reserve_poseidon_hashes() {
+  cnt_reserve_poseidon_hashes_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_cnt_reserve_poseidon_hashes() const {
+  return cnt_reserve_poseidon_hashes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::cnt_reserve_poseidon_hashes() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.cnt_reserve_poseidon_hashes)
+  return _internal_cnt_reserve_poseidon_hashes();
+}
+inline void ProcessBatchResponseV2::_internal_set_cnt_reserve_poseidon_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  cnt_reserve_poseidon_hashes_ = value;
+}
+inline void ProcessBatchResponseV2::set_cnt_reserve_poseidon_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_cnt_reserve_poseidon_hashes(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_reserve_poseidon_hashes)
+}
+
+// uint32 cnt_reserve_poseidon_paddings = 27;
+inline void ProcessBatchResponseV2::clear_cnt_reserve_poseidon_paddings() {
+  cnt_reserve_poseidon_paddings_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_cnt_reserve_poseidon_paddings() const {
+  return cnt_reserve_poseidon_paddings_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::cnt_reserve_poseidon_paddings() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.cnt_reserve_poseidon_paddings)
+  return _internal_cnt_reserve_poseidon_paddings();
+}
+inline void ProcessBatchResponseV2::_internal_set_cnt_reserve_poseidon_paddings(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  cnt_reserve_poseidon_paddings_ = value;
+}
+inline void ProcessBatchResponseV2::set_cnt_reserve_poseidon_paddings(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_cnt_reserve_poseidon_paddings(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_reserve_poseidon_paddings)
+}
+
+// uint32 cnt_reserve_mem_aligns = 28;
+inline void ProcessBatchResponseV2::clear_cnt_reserve_mem_aligns() {
+  cnt_reserve_mem_aligns_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_cnt_reserve_mem_aligns() const {
+  return cnt_reserve_mem_aligns_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::cnt_reserve_mem_aligns() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.cnt_reserve_mem_aligns)
+  return _internal_cnt_reserve_mem_aligns();
+}
+inline void ProcessBatchResponseV2::_internal_set_cnt_reserve_mem_aligns(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  cnt_reserve_mem_aligns_ = value;
+}
+inline void ProcessBatchResponseV2::set_cnt_reserve_mem_aligns(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_cnt_reserve_mem_aligns(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_reserve_mem_aligns)
+}
+
+// uint32 cnt_reserve_arithmetics = 29;
+inline void ProcessBatchResponseV2::clear_cnt_reserve_arithmetics() {
+  cnt_reserve_arithmetics_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_cnt_reserve_arithmetics() const {
+  return cnt_reserve_arithmetics_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::cnt_reserve_arithmetics() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.cnt_reserve_arithmetics)
+  return _internal_cnt_reserve_arithmetics();
+}
+inline void ProcessBatchResponseV2::_internal_set_cnt_reserve_arithmetics(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  cnt_reserve_arithmetics_ = value;
+}
+inline void ProcessBatchResponseV2::set_cnt_reserve_arithmetics(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_cnt_reserve_arithmetics(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_reserve_arithmetics)
+}
+
+// uint32 cnt_reserve_binaries = 30;
+inline void ProcessBatchResponseV2::clear_cnt_reserve_binaries() {
+  cnt_reserve_binaries_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_cnt_reserve_binaries() const {
+  return cnt_reserve_binaries_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::cnt_reserve_binaries() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.cnt_reserve_binaries)
+  return _internal_cnt_reserve_binaries();
+}
+inline void ProcessBatchResponseV2::_internal_set_cnt_reserve_binaries(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  cnt_reserve_binaries_ = value;
+}
+inline void ProcessBatchResponseV2::set_cnt_reserve_binaries(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_cnt_reserve_binaries(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_reserve_binaries)
+}
+
+// uint32 cnt_reserve_steps = 31;
+inline void ProcessBatchResponseV2::clear_cnt_reserve_steps() {
+  cnt_reserve_steps_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_cnt_reserve_steps() const {
+  return cnt_reserve_steps_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::cnt_reserve_steps() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.cnt_reserve_steps)
+  return _internal_cnt_reserve_steps();
+}
+inline void ProcessBatchResponseV2::_internal_set_cnt_reserve_steps(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  cnt_reserve_steps_ = value;
+}
+inline void ProcessBatchResponseV2::set_cnt_reserve_steps(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_cnt_reserve_steps(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_reserve_steps)
+}
+
+// uint32 cnt_reserve_sha256_hashes = 32;
+inline void ProcessBatchResponseV2::clear_cnt_reserve_sha256_hashes() {
+  cnt_reserve_sha256_hashes_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_cnt_reserve_sha256_hashes() const {
+  return cnt_reserve_sha256_hashes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::cnt_reserve_sha256_hashes() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.cnt_reserve_sha256_hashes)
+  return _internal_cnt_reserve_sha256_hashes();
+}
+inline void ProcessBatchResponseV2::_internal_set_cnt_reserve_sha256_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  cnt_reserve_sha256_hashes_ = value;
+}
+inline void ProcessBatchResponseV2::set_cnt_reserve_sha256_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_cnt_reserve_sha256_hashes(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_reserve_sha256_hashes)
+}
+
 // -------------------------------------------------------------------
 
 // TraceConfigV2
@@ -22437,6 +22693,26 @@ inline void ProcessTransactionResponseV2::_internal_set_has_balance_opcode(::PRO
 inline void ProcessTransactionResponseV2::set_has_balance_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_has_balance_opcode(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponseV2.has_balance_opcode)
+}
+
+// uint32 status = 21;
+inline void ProcessTransactionResponseV2::clear_status() {
+  status_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponseV2::_internal_status() const {
+  return status_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponseV2::status() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponseV2.status)
+  return _internal_status();
+}
+inline void ProcessTransactionResponseV2::_internal_set_status(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  status_ = value;
+}
+inline void ProcessTransactionResponseV2::set_status(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_status(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponseV2.status)
 }
 
 // -------------------------------------------------------------------

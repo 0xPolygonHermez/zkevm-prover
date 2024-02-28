@@ -193,7 +193,8 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
                 poseidon.hash(hash, input);
 
                 // Store the hash-value pair into db
-                vector<Goldilocks::Element> valueData(12);
+                vector<Goldilocks::Element> valueData;
+                valueData.reserve(12);
                 for (uint64_t i=0; i<12; i++)
                 {
                     valueData.emplace_back(input[i]);
@@ -343,7 +344,8 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
                 poseidon.hash(valueHash, input);
 
                 // Store the hash-value pair into db
-                vector<Goldilocks::Element> valueData(12);
+                vector<Goldilocks::Element> valueData;
+                valueData.reserve(12);
                 for (uint64_t i=0; i<12; i++)
                 {
                     valueData.emplace_back(input[i]);
