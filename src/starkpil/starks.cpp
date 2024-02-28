@@ -58,15 +58,29 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     }
    
     TimerStartStep(STARK, starkInfo.nStages + 2);
+    
+    uint64_t challengeIndex = 1; // Challenge for Q polynomial
+    for(uint64_t i = 0; i < starkInfo.nStages; i++) {
+        challengeIndex += starkInfo.numChallenges[i];
+    }
 
-    getChallenge(transcript, *params.challenges[7]);
+    if(starkInfo.pil2) {
+        getChallenge(transcript, *params.challenges[challengeIndex++]);
+    } else {
+        getChallenge(transcript, *params.challenges[7]);
+    }
 
     computeEvals(params, proof);
 
     addTranscript(transcript, evals);
 
-    getChallenge(transcript, *params.challenges[5]);
-    getChallenge(transcript, *params.challenges[6]);
+    if(starkInfo.pil2) {
+        getChallenge(transcript, *params.challenges[challengeIndex++]);
+        getChallenge(transcript, *params.challenges[challengeIndex++]);
+    } else {
+        getChallenge(transcript, *params.challenges[5]);
+        getChallenge(transcript, *params.challenges[6]);
+    }
 
 
     Polinomial* friPol = computeFRIPol(starkInfo.nStages + 2, params, chelpersSteps);

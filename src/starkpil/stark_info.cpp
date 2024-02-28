@@ -178,7 +178,7 @@ void StarkInfo::load(json j)
             }
         }
 
-        std::vector<uint64_t> indxStages(nStages, 0);
+        std::vector<uint64_t> indxStages(nStages + 1, 0);
 
         for(uint64_t i = 0; i < j["hints"].size(); i++) {
             Hint hint;
@@ -211,7 +211,7 @@ void StarkInfo::load(json j)
             }
 
             hint.index = indxStages[stage];
-            indxStages[stage] += hint.fields.size();
+            indxStages[stage] += hint.fields.size() + hint.destSymbols.size();
 
             hints[stage].push_back(hint);
         }
@@ -370,7 +370,8 @@ Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPo
         CmPolMap polInfo = cmPolsMap[idPol];
         uint64_t dim = polInfo.dim;
         uint64_t N = (1 << starkStruct.nBits);
-        eSection section = N == deg ? string2section(polInfo.stage + "_n") : string2section(polInfo.stage + "_2ns");
+        string stage = polInfo.stage == string("cmQ") ? "cm" + to_string(nStages + 1) : polInfo.stage;
+        eSection section = N == deg ? string2section(stage + "_n") : string2section(stage + "_2ns");
         uint64_t nCols = mapSectionsN.section[section];
         uint64_t offset = mapOffsets.section[section];
         offset += polInfo.stagePos;
