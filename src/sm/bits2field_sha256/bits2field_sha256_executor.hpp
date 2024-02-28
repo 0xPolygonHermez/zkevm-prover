@@ -44,6 +44,17 @@ public:
 
     /* Executor */
     void execute (vector<Bits2FieldSha256ExecutorInput> &input, Bits2FieldSha256CommitPols &pols, vector<Sha256FExecutorInput> &required);
+    inline void execute(vector<Bits2FieldSha256ExecutorInput> &input, Goldilocks::Element * pAddress, void *pRequests){
+        PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols pols(pAddress, N);
+        vector<Sha256FExecutorInput> required;
+        execute(input, pols, required);
+    }
+    /*
+#ifdef __ZKEVM_SM__
+        add_bits_2_field_inputs(pRequests, (void *)required.data(), (uint64_t) required.size());
+#endif
+    }*/
+
 
 private:
     enum BitType {

@@ -54,11 +54,13 @@ public:
 
     /* Executor */
     void execute (vector<PaddingSha256BitExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols &pols, vector<Bits2FieldSha256ExecutorInput> &required);
-    inline void execute(vector<PaddingSha256BitExecutorInput> &input, Goldilocks::Element * pAddress){
+    inline void execute(vector<PaddingSha256BitExecutorInput> &input, Goldilocks::Element * pAddress, void *pRequests){
         PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols pols(pAddress, N);
         vector<Bits2FieldSha256ExecutorInput> required;
         execute(input, pols, required);
+        #ifdef __ZKEVM_SM__
+        add_bits_2_field_sha256_inputs(pRequests, (void *)required.data(), (uint64_t) required.size());
+        #endif
     }
 };
-
 #endif

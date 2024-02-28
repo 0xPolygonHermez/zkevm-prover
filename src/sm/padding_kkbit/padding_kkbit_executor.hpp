@@ -5,6 +5,10 @@
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/bits2field/bits2field_executor.hpp"
+#if __ZKEVM_SM__
+#include "zkevm_sm.h"
+#include "zkevm_api.hpp"
+#endif
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -48,10 +52,14 @@ public:
 
     /* Executor */
     void execute (vector<PaddingKKBitExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols &pols, vector<Bits2FieldExecutorInput> &required);
-    inline void execute(vector<PaddingKKBitExecutorInput> &input, Goldilocks::Element * pAddress){
+    inline void execute(vector<PaddingKKBitExecutorInput> &input, Goldilocks::Element * pAddress,
+    void *pRequests){
         PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols pols(pAddress, N);
         vector<Bits2FieldExecutorInput> required;
         execute(input, pols, required);
+#ifdef __ZKEVM_SM__
+        add_bits_2_field_inputs(pRequests, (void *)required.data(), (uint64_t) required.size());
+#endif
     }
     
 };

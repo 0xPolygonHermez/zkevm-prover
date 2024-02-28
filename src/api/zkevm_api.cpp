@@ -865,7 +865,17 @@ int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void*
         inputs.assign((PaddingSha256BitExecutorInput*)inputs_, (PaddingSha256BitExecutorInput*)inputs_ + ninputs);
     }
     PaddingSha256BitExecutor paddingSha256BitExecutor(fr);
-    paddingSha256BitExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    paddingSha256BitExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    return 0;
+}
+
+int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+    std::vector<Bits2FieldSha256ExecutorInput> inputs;
+    if(ninputs > 0){
+        inputs.assign((Bits2FieldSha256ExecutorInput*)inputs_, (Bits2FieldSha256ExecutorInput*)inputs_ + ninputs);
+    }
+    Bits2FieldSha256Executor bits2fieldSha256Executor(fr);
+    //bits2fieldSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
     return 0;
 }
 
@@ -885,10 +895,18 @@ int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSM
         inputs.assign((PaddingKKBitExecutorInput*)inputs_, (PaddingKKBitExecutorInput*)inputs_ + ninputs);
     }
     PaddingKKBitExecutor paddingKKBitExecutor(fr);
-    paddingKKBitExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    paddingKKBitExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
     return 0;
 }
-
+int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+    std::vector<Bits2FieldExecutorInput> inputs;
+    if(ninputs > 0){
+        inputs.assign((Bits2FieldExecutorInput*)inputs_, (Bits2FieldExecutorInput*)inputs_ + ninputs);
+    }
+    Bits2FieldExecutor bits2fieldExecutor(fr);
+    //bits2fieldExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    return 0;
+}
 
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
