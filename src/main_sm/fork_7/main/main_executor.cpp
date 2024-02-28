@@ -1628,6 +1628,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // HashS free in
                 if ( (rom.line[zkPC].hashS == 1) || (rom.line[zkPC].hashS1 == 1) )
                 {
+                    proverRequest.result = ZKR_SM_MAIN_ASSERT;
+                    logError(ctx, "SHA256 unavailable");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+
                     unordered_map< uint64_t, HashValue >::iterator hashSIterator;
 
                     // If there is no entry in the hash database for this address, then create a new one
@@ -1694,6 +1699,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // HashSDigest free in
                 if (rom.line[zkPC].hashSDigest == 1)
                 {
+                    proverRequest.result = ZKR_SM_MAIN_ASSERT;
+                    logError(ctx, "SHA256 unavailable");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+
                     unordered_map< uint64_t, HashValue >::iterator hashSIterator;
 
                     // If there is no entry in the hash database for this address, this is an error
@@ -3224,6 +3234,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // HashS instruction
         if ( (rom.line[zkPC].hashS == 1) || (rom.line[zkPC].hashS1 == 1) )
         {
+            proverRequest.result = ZKR_SM_MAIN_ASSERT;
+            logError(ctx, "SHA256 unavailable");
+            pHashDB->cancelBatch(proverRequest.uuid);
+            return;
+
             if (!bProcessBatch)
             {
                 if (rom.line[zkPC].hashS == 1)
@@ -3354,6 +3369,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // HashSLen instruction
         if (rom.line[zkPC].hashSLen == 1)
         {
+            proverRequest.result = ZKR_SM_MAIN_ASSERT;
+            logError(ctx, "SHA256 unavailable");
+            pHashDB->cancelBatch(proverRequest.uuid);
+            return;
+
             if (!bProcessBatch) pols.hashSLen[i] = fr.one();
 
             unordered_map< uint64_t, HashValue >::iterator hashSIterator;
@@ -3427,6 +3447,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // HashSDigest instruction
         if (rom.line[zkPC].hashSDigest == 1)
         {
+            proverRequest.result = ZKR_SM_MAIN_ASSERT;
+            logError(ctx, "SHA256 unavailable");
+            pHashDB->cancelBatch(proverRequest.uuid);
+            return;
+
             if (!bProcessBatch) pols.hashSDigest[i] = fr.one();
 
             unordered_map< uint64_t, HashValue >::iterator hashSIterator;
