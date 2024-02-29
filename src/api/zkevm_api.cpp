@@ -952,6 +952,17 @@ int zkevm_arith(void * inputs_, int ninputs, void * pAddress){
     return 0;
 }
 
+int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress){
+    KeccakFExecutorInput::DTO * p_inputs= (KeccakFExecutorInput::DTO*) inputs_;
+    std::vector<std::vector<Goldilocks::Element>> inputs;
+    KeccakFExecutorInput::fromDTO(p_inputs, ninputs, inputs);
+    Config config_;
+    config_.keccakScriptFile="config/scripts/keccak_script.json";
+    KeccakFExecutor paddingPGExecutor(fr, config_);
+    paddingPGExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    return 0;
+}
+
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;

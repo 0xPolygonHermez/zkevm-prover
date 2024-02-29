@@ -4,6 +4,11 @@
 #include <vector>
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
+#include "keccak_f_executor.hpp"
+#if __ZKEVM_SM__
+#include "zkevm_sm.h"
+#include "zkevm_api.hpp"
+#endif
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -45,6 +50,10 @@ public:
         PROVER_FORK_NAMESPACE::Bits2FieldCommitPols pols(pAddress, N);
         vector<vector<Goldilocks::Element>> required;
         execute(input, pols, required);
+#ifdef __ZKEVM_SM__
+        KeccakFExecutorInput::DTO *dto = KeccakFExecutorInput::toDTO(required);
+        add_keccak_f_inputs(pRequests, dto, (uint64_t) required.size());
+#endif
     }
 
 private:

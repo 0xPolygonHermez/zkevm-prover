@@ -16,6 +16,7 @@
     int zkevm_memory(void * inputs_, int ninputs, void * pAddress);
     int zkevm_climb_key(void * inputs_, int ninputs, void * pAddress);
     int zkevm_arith(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress);
 
     // FRI Proof
     // ========================================================================================

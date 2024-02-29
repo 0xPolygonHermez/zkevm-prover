@@ -8,8 +8,15 @@
     int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress); 
     int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
     int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
+    int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
     int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
     int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
+    int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
+    int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
+    int zkevm_memory(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_climb_key(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_arith(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress);
 
     // FRI Proof
     // ========================================================================================
