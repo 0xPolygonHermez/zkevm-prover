@@ -875,7 +875,7 @@ int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* 
         inputs.assign((Bits2FieldSha256ExecutorInput*)inputs_, (Bits2FieldSha256ExecutorInput*)inputs_ + ninputs);
     }
     Bits2FieldSha256Executor bits2fieldSha256Executor(fr);
-    //bits2fieldSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    bits2fieldSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
     return 0;
 }
 
@@ -904,7 +904,7 @@ int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMR
         inputs.assign((Bits2FieldExecutorInput*)inputs_, (Bits2FieldExecutorInput*)inputs_ + ninputs);
     }
     Bits2FieldExecutor bits2fieldExecutor(fr);
-    //bits2fieldExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    bits2fieldExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
     return 0;
 }
 
@@ -918,6 +918,16 @@ int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRque
     return 0;
 }
 
+int zkevm_memory(void * inputs_, int ninputs, void * pAddress){
+   std::vector<MemoryAccess> inputs;
+    if(ninputs > 0){
+        inputs.assign((MemoryAccess*)inputs_, (MemoryAccess*)inputs_ + ninputs);
+    }
+    Config config_;
+    MemoryExecutor bits2fieldExecutor(fr, config_);
+    bits2fieldExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    return 0;
+}
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;

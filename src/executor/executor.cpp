@@ -477,6 +477,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             PaddingPGExecutorInput::DTO *buffer3 = PaddingPGExecutorInput::toDTO(required.PaddingPG);
             add_padding_pg_inputs((void *)pMainSMRequests, (void *) buffer3, required.PaddingPG.size());
             delete[] buffer3;
+            add_memory_inputs((void *)pMainSMRequests, (void *)required.Memory.data(), (uint64_t) required.Memory.size());
             TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
         }
 #endif
