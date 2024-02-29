@@ -35,6 +35,10 @@ public:
     {
     }
     void execute (vector<ArithAction> &action, PROVER_FORK_NAMESPACE::ArithCommitPols &pols);
+    inline void execute (vector<ArithAction> &input, Goldilocks::Element *pAddress){
+        PROVER_FORK_NAMESPACE::ArithCommitPols pols(pAddress, N);
+        execute(input, pols);
+    }
 };
 
 #endif

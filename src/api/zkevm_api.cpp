@@ -929,7 +929,7 @@ int zkevm_memory(void * inputs_, int ninputs, void * pAddress){
     return 0;
 }
 
-int climb_key(void * inputs_, int ninputs, void * pAddress){
+int zkevm_climb_key(void * inputs_, int ninputs, void * pAddress){
     std::vector<ClimbKeyAction> inputs;
     if(ninputs > 0){
         inputs.assign((ClimbKeyAction*)inputs_, (ClimbKeyAction*)inputs_ + ninputs);
@@ -939,6 +939,17 @@ int climb_key(void * inputs_, int ninputs, void * pAddress){
     climbKeyExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
     return 0;
 
+}
+
+int zkevm_arith(void * inputs_, int ninputs, void * pAddress){
+    std::vector<ArithAction> inputs;
+    if(ninputs > 0){
+        inputs.assign((ArithAction*)inputs_, (ArithAction*)inputs_ + ninputs);
+    }
+    Config config_;
+    ArithExecutor arithExecutor(fr, config_);
+    arithExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    return 0;
 }
 
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
