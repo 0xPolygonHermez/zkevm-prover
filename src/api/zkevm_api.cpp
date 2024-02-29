@@ -908,6 +908,16 @@ int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMR
     return 0;
 }
 
+int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+    PaddingPGExecutorInput::DTO * p_inputs= (PaddingPGExecutorInput::DTO*) inputs_;
+    std::vector<PaddingPGExecutorInput> inputs;
+    PaddingPGExecutorInput::fromDTO(p_inputs, ninputs, inputs);
+    PoseidonGoldilocks poseidon;
+    PaddingPGExecutor paddingPGExecutor(fr, poseidon);
+    paddingPGExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    return 0;
+}
+
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;

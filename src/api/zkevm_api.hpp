@@ -12,6 +12,7 @@
     int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
     int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
     int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
+    int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
 
     // FRI Proof
     // ========================================================================================
