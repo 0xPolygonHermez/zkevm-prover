@@ -928,6 +928,19 @@ int zkevm_memory(void * inputs_, int ninputs, void * pAddress){
     bits2fieldExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
     return 0;
 }
+
+int climb_key(void * inputs_, int ninputs, void * pAddress){
+    std::vector<ClimbKeyAction> inputs;
+    if(ninputs > 0){
+        inputs.assign((ClimbKeyAction*)inputs_, (ClimbKeyAction*)inputs_ + ninputs);
+    }
+    Config config_;
+    ClimbKeyExecutor climbKeyExecutor(fr, config_);
+    climbKeyExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    return 0;
+
+}
+
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;

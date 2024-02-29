@@ -14,6 +14,7 @@
     int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
     int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
     int zkevm_memory(void * inputs_, int ninputs, void * pAddress);
+    int climb_key(void * inputs_, int ninputs, void * pAddress);
 
     // FRI Proof
     // ========================================================================================
