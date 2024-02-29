@@ -48,19 +48,35 @@ void StarkInfo::load(json j)
     }
 
     if(j.contains("numChallenges")) {
+        nChallenges = 0;
         for(uint64_t i = 0; i < j["numChallenges"].size(); i++) {
             numChallenges.push_back(j["numChallenges"][i]);
+            nChallenges += numChallenges[i];
+            if(i == 0) {
+                stageChallengeIndex.push_back(0);
+            } else {
+                stageChallengeIndex.push_back(stageChallengeIndex[i - 1] + numChallenges[i - 1]);
+            }
         }
+        qChallengeIndex = nChallenges++;
+        xiChallengeIndex = nChallenges++;
+        fri1ChallengeIndex = nChallenges++;
+        fri2ChallengeIndex = nChallenges++;
     } else {
         numChallenges.push_back(0);
         numChallenges.push_back(2);
         numChallenges.push_back(2);
+        stageChallengeIndex.push_back(0);
+        stageChallengeIndex.push_back(0);
+        stageChallengeIndex.push_back(2);
+        qChallengeIndex = 4;
+        xiChallengeIndex = 7;
+        fri1ChallengeIndex = 5;
+        fri2ChallengeIndex = 6; 
+        nChallenges = 8;
     }
 
     nStages = numChallenges.size();
-
-    nChallenges = std::accumulate(numChallenges.begin(), numChallenges.end(), 0);
-    nChallenges += 4; // Challenges for FRI, Q and evals
 
     if(j.contains("openingPoints")) {
         for(uint64_t i = 0; i < j["openingPoints"].size(); i++) {

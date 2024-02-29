@@ -59,29 +59,14 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
    
     TimerStartStep(STARK, starkInfo.nStages + 2);
     
-    uint64_t challengeIndex = 1; // Challenge for Q polynomial
-    for(uint64_t i = 0; i < starkInfo.nStages; i++) {
-        challengeIndex += starkInfo.numChallenges[i];
-    }
-
-    if(starkInfo.pil2) {
-        getChallenge(transcript, *params.challenges[challengeIndex++]);
-    } else {
-        getChallenge(transcript, *params.challenges[7]);
-    }
+    getChallenge(transcript, *params.challenges[starkInfo.xiChallengeIndex]);
 
     computeEvals(params, proof);
 
     addTranscript(transcript, evals);
 
-    if(starkInfo.pil2) {
-        getChallenge(transcript, *params.challenges[challengeIndex++]);
-        getChallenge(transcript, *params.challenges[challengeIndex++]);
-    } else {
-        getChallenge(transcript, *params.challenges[5]);
-        getChallenge(transcript, *params.challenges[6]);
-    }
-
+    getChallenge(transcript, *params.challenges[starkInfo.fri1ChallengeIndex]);
+    getChallenge(transcript, *params.challenges[starkInfo.fri2ChallengeIndex]);
 
     Polinomial* friPol = computeFRIPol(starkInfo.nStages + 2, params, chelpersSteps);
 
@@ -104,8 +89,17 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     }
 
     uint64_t friQueries[starkInfo.starkStruct.nQueries];
-    transcript.getPermutations(friQueries, starkInfo.starkStruct.nQueries, starkInfo.starkStruct.steps[0].nBits);
 
+    if(starkInfo.pil2) {
+        Polinomial challenge(1, FIELD_EXTENSION);
+        getChallenge(transcript, *challenge[0]);
+        TranscriptType transcriptPermutation;
+        addTranscript(transcriptPermutation, challenge);
+        transcriptPermutation.getPermutations(friQueries, starkInfo.starkStruct.nQueries, starkInfo.starkStruct.steps[0].nBits);
+    } else {
+        transcript.getPermutations(friQueries, starkInfo.starkStruct.nQueries, starkInfo.starkStruct.steps[0].nBits);
+    }
+    
     computeFRIQueries(proof, *friPol, friQueries);
 
     delete friPol;
@@ -156,15 +150,12 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams& params,
 
 template <typename ElementType>
 void Starks<ElementType>::computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof,TranscriptType &transcript, CHelpersSteps *chelpersSteps) {
-    uint64_t challengeIndex = 0;
-    for(uint64_t i = 0; i < step - 1; i++) {
-        challengeIndex += starkInfo.numChallenges[i];
-    }
-
-    uint64_t nChallenges = step <= starkInfo.nStages ? starkInfo.numChallenges[step - 1] : 1;
-
-    for(uint64_t i = 0; i < nChallenges; i++) {
-        getChallenge(transcript, *params.challenges[challengeIndex + i]);
+    if(step <= starkInfo.nStages) {
+        for(uint64_t i = 0; i < starkInfo.numChallenges[step - 1]; i++) {
+            getChallenge(transcript, *params.challenges[starkInfo.stageChallengeIndex[step - 1] + i]);
+        }
+    } else {
+        getChallenge(transcript, *params.challenges[starkInfo.qChallengeIndex]);
     }
 
     calculateExpressions(step, false, params, chelpersSteps);
@@ -239,9 +230,9 @@ void Starks<ElementType>::computeEvals(StepsParams& params, FRIProof<ElementType
     for (uint64_t i = 0; i < openingPoints.size(); ++i) {
         uint64_t offset = i*N;
         Goldilocks3::one((Goldilocks3::Element &)*LEv[offset]);
-        uint64_t opening = openingPoints[i] < 0 ? -openingPoints[i] : openingPoints[i];
+        uint64_t openingAbs = openingPoints[i] < 0 ? -openingPoints[i] : openingPoints[i];
         Goldilocks3::one((Goldilocks3::Element &)*w[i]);
-        for (uint64_t j = 0; j < opening; ++j) {
+        for (uint64_t j = 0; j < openingAbs; ++j) {
             Polinomial::mulElement(w, i, w, i, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
         }
 
@@ -249,7 +240,7 @@ void Starks<ElementType>::computeEvals(StepsParams& params, FRIProof<ElementType
             Polinomial::divElement(w, i, (Goldilocks::Element &)Goldilocks::one(), w, i);
         }
 
-        Polinomial::mulElement(c_w, i, params.challenges, 7, w, i);
+        Polinomial::mulElement(c_w, i, params.challenges, starkInfo.xiChallengeIndex, w, i);
 
         Polinomial::divElement(xi, i, c_w, i, (Goldilocks::Element &)Goldilocks::shift());
 
@@ -293,7 +284,7 @@ Polinomial* Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams& param
             Polinomial::divElement(w, i, (Goldilocks::Element &)Goldilocks::one(), w, i);
         }
 
-        Polinomial::mulElement(xi, i, params.challenges, 7, w, i);
+        Polinomial::mulElement(xi, i, params.challenges, starkInfo.xiChallengeIndex, w, i);
 
         #pragma omp parallel for
         for (uint64_t k = 0; k < (N << extendBits); k++) {

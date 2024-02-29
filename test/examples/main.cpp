@@ -37,8 +37,8 @@ int main()
     Goldilocks::Element publicInputs[3] = {
         Goldilocks::fromU64(1),
         Goldilocks::fromU64(2),
-        Goldilocks::fromU64(74469561660084004),
-        // Goldilocks::fromU64(16222592280316846942ULL),
+        // Goldilocks::fromU64(74469561660084004),
+        Goldilocks::fromU64(16222592280316846942ULL),
     };
 
     json publicStarkJson;

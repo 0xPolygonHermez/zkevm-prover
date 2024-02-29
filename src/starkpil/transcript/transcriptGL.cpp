@@ -68,6 +68,8 @@ void TranscriptGL::getPermutations(uint64_t *res, uint64_t n, uint64_t nBits)
     {
         fields[i] = getFields1();
     }
+    
+    std::string permutation = " ";
 
     uint64_t curField = 0;
     uint64_t curBit = 0;
@@ -87,5 +89,8 @@ void TranscriptGL::getPermutations(uint64_t *res, uint64_t n, uint64_t nBits)
             }
         }
         res[i] = a;
+        permutation += std::to_string(a) + " ";
     }
+
+    zklog.info("Permutation: [ " + permutation + " ]");
 }

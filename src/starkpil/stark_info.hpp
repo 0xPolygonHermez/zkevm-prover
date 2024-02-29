@@ -190,6 +190,12 @@ public:
     uint64_t nStages;
 
     vector<uint64_t> numChallenges;
+    
+    vector<uint64_t> stageChallengeIndex;
+    uint64_t qChallengeIndex;
+    uint64_t xiChallengeIndex;
+    uint64_t fri1ChallengeIndex;
+    uint64_t fri2ChallengeIndex;
 
     uint64_t nChallenges;
     uint64_t nSubAirValues;
