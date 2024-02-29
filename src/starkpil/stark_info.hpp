@@ -123,6 +123,14 @@ public:
     };
 };
 
+class ExpressionCodeSymbol 
+{
+public:
+    uint64_t stage;
+    uint64_t expId;
+    vector<Symbol> symbolsUsed;
+};
+
 class Hint 
 {
 public:
@@ -198,7 +206,7 @@ public:
     uint64_t fri2ChallengeIndex;
 
     uint64_t nChallenges;
-    uint64_t nSubAirValues;
+    uint64_t nSubProofValues;
 
     vector<uint64_t> openingPoints;
     
@@ -216,7 +224,7 @@ public:
     vector<CmPolMap> cmPolsMap;
     vector<vector<Symbol>> symbolsStage;
     vector<vector<Symbol>> stageCodeSymbols;
-    map<uint64_t, Symbol> expressionsCodeSymbols;
+    vector<vector<ExpressionCodeSymbol>> expressionsCodeSymbols;
     
     std::map<uint64_t, vector<Hint>> hints;
 

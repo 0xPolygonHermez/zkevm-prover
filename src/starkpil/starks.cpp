@@ -19,7 +19,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     Polinomial evals(starkInfo.evMap.size(), FIELD_EXTENSION);
     Polinomial challenges(starkInfo.nChallenges, FIELD_EXTENSION);
-    Polinomial subproofValues(starkInfo.nSubAirValues, FIELD_EXTENSION);
+    Polinomial subproofValues(starkInfo.nSubProofValues, FIELD_EXTENSION);
 
     Polinomial xDivXSubXi(starkInfo.openingPoints.size() * NExtended, FIELD_EXTENSION);
 
@@ -41,6 +41,16 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         q_2ns : &mem[starkInfo.mapOffsets.section[eSection::q_2ns]],
         f_2ns : &mem[starkInfo.mapOffsets.section[eSection::f_2ns]]
     };
+
+    publicsCalculated.resize(starkInfo.nPublics, true);
+
+    subProofValuesCalculated.resize(starkInfo.nSubProofValues, false);
+    challengesCalculated.resize(starkInfo.nChallenges, false);
+
+    witnessCalculated.resize(starkInfo.cmPolsMap.size(), false);
+    for(uint64_t i = 0; i < starkInfo.nCm1; ++i) {
+        witnessCalculated[i] = true;
+    }
     
     TimerStopAndLog(STARK_INITIALIZATION);
 
@@ -60,13 +70,17 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     TimerStartStep(STARK, starkInfo.nStages + 2);
     
     getChallenge(transcript, *params.challenges[starkInfo.xiChallengeIndex]);
+    challengesCalculated[starkInfo.xiChallengeIndex] = true;
 
     computeEvals(params, proof);
 
     addTranscript(transcript, evals);
 
     getChallenge(transcript, *params.challenges[starkInfo.fri1ChallengeIndex]);
+    challengesCalculated[starkInfo.fri1ChallengeIndex] = true;
+
     getChallenge(transcript, *params.challenges[starkInfo.fri2ChallengeIndex]);
+    challengesCalculated[starkInfo.fri2ChallengeIndex] = true;
 
     Polinomial* friPol = computeFRIPol(starkInfo.nStages + 2, params, chelpersSteps);
 
@@ -118,7 +132,20 @@ void Starks<ElementType>::calculateExpressions(uint64_t step, bool after, StepsP
     if(chelpers.stagesInfo[stepName].nOps > 0) {
             chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo[stepName], USE_GENERIC_PARSER);
     }
+    if(starkInfo.pil2 && step <= starkInfo.nStages) {
+        for(uint64_t i = 0; i < starkInfo.stageCodeSymbols[step - 1].size(); ++i) {
+            uint64_t id = starkInfo.stageCodeSymbols[step - 1][i].id;
+            witnessCalculated[id] = true;
+        }
+    }
     TimerStopAndLogStep(STARK_CALCULATE_EXPS, step);
+}
+
+template <typename ElementType>
+void Starks<ElementType>::calculateExpression(uint64_t expId, StepsParams &params, CHelpersSteps *chelpersSteps) {    
+    TimerStartExpr(STARK_CALCULATE_EXPRESSION, expId);
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.expressionsInfo[expId], USE_GENERIC_PARSER);
+    TimerStopAndLogExpr(STARK_CALCULATE_EXPRESSION, expId);
 }
 
 template <typename ElementType>
@@ -152,24 +179,56 @@ template <typename ElementType>
 void Starks<ElementType>::computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof,TranscriptType &transcript, CHelpersSteps *chelpersSteps) {
     if(step <= starkInfo.nStages) {
         for(uint64_t i = 0; i < starkInfo.numChallenges[step - 1]; i++) {
-            getChallenge(transcript, *params.challenges[starkInfo.stageChallengeIndex[step - 1] + i]);
+            uint64_t challengeIndex = starkInfo.stageChallengeIndex[step - 1] + i;
+            getChallenge(transcript, *params.challenges[challengeIndex]);
+            challengesCalculated[challengeIndex] = true;
         }
     } else {
         getChallenge(transcript, *params.challenges[starkInfo.qChallengeIndex]);
+        challengesCalculated[starkInfo.qChallengeIndex] = true;
     }
 
     calculateExpressions(step, false, params, chelpersSteps);
 
     calculateHints(step, params);
 
-    if(step == starkInfo.nStages && !starkInfo.pil2) {
-        calculateExpressions(step, true, params, chelpersSteps);
+    if(!starkInfo.pil2) {
+        if(step == starkInfo.nStages) {
+            calculateExpressions(step, true, params, chelpersSteps);
+        } 
+    } else {
+        if(step <= starkInfo.nStages) {
+            TimerStartStep(STARK_TRY_CALCULATE_EXPS, step);
+            uint64_t symbolsToBeCalculated = checkSymbolsToBeCalculated(starkInfo.symbolsStage[step - 1]);
+            while(symbolsToBeCalculated > 0) {
+                for(uint64_t i = 0; i < starkInfo.expressionsCodeSymbols[step - 1].size(); i++) {
+                    uint64_t expId = starkInfo.expressionsCodeSymbols[step - 1][i].expId;
+                    
+                    if(!witnessCalculated[expId]) {
+                        if(!checkSymbolsToBeCalculated(starkInfo.expressionsCodeSymbols[step - 1][i].symbolsUsed)) {
+                            calculateExpression(expId, params, chelpersSteps);
+                        };
+                    }
+                }
+                uint64_t newSymbolsToBeCalculated = checkSymbolsToBeCalculated(starkInfo.symbolsStage[step - 1]);
+                if(newSymbolsToBeCalculated == symbolsToBeCalculated) {
+                    zklog.error("Something went wrong when calculating stage " + to_string(step));
+                    exitProcess();
+                    exit(-1);
+                }
+                symbolsToBeCalculated = newSymbolsToBeCalculated;
+            }
+            TimerStopAndLogStep(STARK_TRY_CALCULATE_EXPS, step);
+        }
     }
 
     if(step <= starkInfo.nStages) {
         extendAndMerkelize(step, params, proof);
     } else {
-        computeQ(step, params, proof);  
+        computeQ(step, params, proof);
+        for(uint64_t i = 0; i < starkInfo.qs.size(); ++i) {
+            witnessCalculated[starkInfo.qs[i]] = true;
+        }  
     }
 
     addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
@@ -360,7 +419,21 @@ void Starks<ElementType>::transposePolsRows(uint64_t step, StepsParams& params, 
 
 template <typename ElementType>
 void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
-    uint64_t numHints = starkInfo.hints[step].size();
+
+    std::vector<Hint> hints;
+    for(uint64_t i = 0; i < starkInfo.hints[step].size(); i++) {
+        if(!starkInfo.pil2) {
+            hints.push_back(starkInfo.hints[step][i]);
+        } else {
+            uint64_t symbolsHintsToBeCalculated = checkSymbolsToBeCalculated(starkInfo.hints[step][i].symbols);
+            if(!symbolsHintsToBeCalculated) {
+                hints.push_back(starkInfo.hints[step][i]);
+            } else {
+                zklog.error("Skipping hint=" + to_string(i) + " because it has symbols that are not calculated yet.");
+            }
+        }
+    }
+    uint64_t numHints = hints.size();
 
     if(numHints == 0) return;
         
@@ -368,9 +441,12 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
     uint64_t sectionExtendedOffset = starkInfo.mapOffsets.section[string2section(sectionExtended)];
     Goldilocks::Element *pBuffer = &params.pols[sectionExtendedOffset];
 
+    std::vector<uint64_t> hintsIndex(numHints, 0);
+
     uint64_t numPols = 0;
     for(uint64_t i = 0; i < numHints; ++i) {
-        numPols += starkInfo.hints[step][i].fields.size() + starkInfo.hints[step][i].destSymbols.size();
+        hintsIndex[i] = numPols;
+        numPols += hints[i].fields.size() + hints[i].destSymbols.size();
     }
 
     Polinomial *transPols = new Polinomial[numPols];
@@ -392,9 +468,10 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
 #pragma omp parallel for num_threads(nThreads)
     for (uint64_t i = 0; i < numHints; i++)
     {
-        int index = starkInfo.hints[step][i].index;
+        Hint hint = starkInfo.hints[step][i];
+        int index = hintsIndex[i];
         
-        if(starkInfo.hints[step][i].type == hintType::h1h2) {
+        if(hint.type == hintType::h1h2) {
             if (transPols[index + 2].dim() == 1)
             {
                 Polinomial::calculateH1H2_opt1(transPols[index + 2], transPols[index + 3], transPols[index], transPols[index + 1], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 3) * N);
@@ -406,10 +483,13 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
                 std::cerr << "Error: calculateH1H2_ invalid" << std::endl;   
                 exit(-1);
             }
-        } else if(starkInfo.hints[step][i].type == hintType::gprod) {
+            witnessCalculated[hint.destSymbols[0].id] = true;
+            witnessCalculated[hint.destSymbols[1].id] = true;
+        } else if(hint.type == hintType::gprod) {
             Polinomial::calculateZ(transPols[index + 2], transPols[index], transPols[index + 1]);
+            witnessCalculated[hint.destSymbols[0].id] = true;
         } else {
-            zklog.error("Invalid hint type=" + starkInfo.hints[step][i].type);
+            zklog.error("Invalid hint type=" + hint.type);
             exitProcess();
             exit(-1);
         }
@@ -584,6 +664,33 @@ void Starks<ElementType>::addTranscript(TranscriptType &transcript, Polinomial& 
         transcript.put(pol[i], pol.dim());
     }
 };
+
+template <typename ElementType>
+uint64_t Starks<ElementType>::checkSymbolsToBeCalculated(vector<Symbol> symbols) {
+    uint64_t symbolsToBeCalculated = 0;
+    for(uint64_t i = 0; i < symbols.size(); ++i) {
+        Symbol sym = symbols[i];
+        if(sym.op == opType::const_) {
+            if(!constsCalculated[sym.id]) symbolsToBeCalculated++;
+        } else if(sym.op == opType::cm) {
+            if(!witnessCalculated[sym.id]) symbolsToBeCalculated++;
+        } else if(sym.op == opType::tmp) {
+            if(!witnessCalculated[sym.id]) symbolsToBeCalculated++;
+        } else if(sym.op == opType::public_) {
+            if(!publicsCalculated[sym.id]) symbolsToBeCalculated++;
+        } else if(sym.op == opType::subproofvalue) {
+            if(!subProofValuesCalculated[sym.id]) symbolsToBeCalculated++;
+        } else if(sym.op == opType::challenge) {
+            if(!challengesCalculated[sym.id]) symbolsToBeCalculated++;
+        } else {
+            zklog.error("Invalid symbol type=" + sym.op);
+            exitProcess();
+            exit(-1);
+        }
+    }
+
+    return symbolsToBeCalculated;
+}
 
 template <typename ElementType>
 void Starks<ElementType>::merkelizeMemory()

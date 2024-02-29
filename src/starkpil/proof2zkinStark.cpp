@@ -9,8 +9,8 @@ ordered_json proof2zkinStark(ordered_json &proof, StarkInfo starkInfo)
 {
     uint64_t friSteps = starkInfo.starkStruct.steps.size();
     uint64_t nQueries = starkInfo.starkStruct.nQueries;
-    uint64_t nStages = 3; // TODO
-    uint64_t nSubAirValues = 0; // TODO
+    uint64_t nStages = starkInfo.nStages;
+    uint64_t nSubProofValues = starkInfo.nSubProofValues;
    
     ordered_json zkinOut = ordered_json::object();
 
@@ -67,8 +67,8 @@ ordered_json proof2zkinStark(ordered_json &proof, StarkInfo starkInfo)
 
     zkinOut["finalPol"] = friProof[friSteps];
 
-    if (nSubAirValues > 0) {
-        // zkin.subAirValues = proof.subAirValues;
+    if (nSubProofValues > 0) {
+        // zkin.subProofValues = proof.subProofValues;
     }
     
     return zkinOut;

@@ -61,6 +61,12 @@ private:
 
     map<uint64_t, uint64_t> cm2Transposed;
 
+    vector<bool> publicsCalculated;
+    vector<bool> constsCalculated;
+    vector<bool> subProofValuesCalculated;
+    vector<bool> witnessCalculated;
+    vector<bool> challengesCalculated;
+
     Goldilocks::Element *mem;
     void *pAddress;
 
@@ -212,6 +218,8 @@ public:
             chelpers.loadCHelpers(cHelpersBinFile.get(), starkInfo.pil2);
         }
         TimerStopAndLog(CHELPERS_ALLOCATION);
+
+        constsCalculated.resize(starkInfo.nConstants, true);
     };
     ~Starks()
     {
@@ -292,10 +300,11 @@ public:
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
     void calculateExpressions(uint64_t step, bool after, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpression(uint64_t expId, StepsParams &params, CHelpersSteps *chelpersSteps);
     
     void computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps);
     void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
-
+    
     void computeEvals(StepsParams& params, FRIProof<ElementType> &proof);
 
     Polinomial *computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps *chelpersSteps);
@@ -316,6 +325,7 @@ private:
     
     void evmap(StepsParams &params, Polinomial &LEv);
 
+    uint64_t checkSymbolsToBeCalculated(vector<Symbol> symbols);
 public:
     // Following function are created to be used by the ffi interface
     void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial* pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);

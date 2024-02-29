@@ -42,9 +42,9 @@ void StarkInfo::load(json j)
     nCm1 = j["nCm1"];
 
     if(j.contains("nSubAirValues")) {
-        nSubAirValues = j["nSubAirValues"];
+        nSubProofValues = j["nSubAirValues"];
     } else {
-        nSubAirValues = 0;
+        nSubProofValues = 0;
     }
 
     if(j.contains("numChallenges")) {
@@ -178,6 +178,7 @@ void StarkInfo::load(json j)
         for(uint64_t i = 0; i < nStages; ++i) {
             std::string stage = "stage" + to_string(i + 1);
             stageCodeSymbols.push_back(std::vector<Symbol>());
+            expressionsCodeSymbols.push_back(std::vector<ExpressionCodeSymbol>());
             for(uint64_t k = 0; k < j["code"][stage]["symbolsCalculated"].size(); k++) {
                 Symbol symbol;
                 symbol.setSymbol(j["code"][stage]["symbolsCalculated"][k]);
@@ -186,15 +187,16 @@ void StarkInfo::load(json j)
         }
 
         for(uint64_t i = 0; i < j["expressionsCode"].size(); i++) {
-            for(uint64_t k = 0; k < j["expressionsCode"][i]["symbols"].size(); k++) {
+            ExpressionCodeSymbol expSymbol;
+            expSymbol.stage = j["expressionsCode"][i]["stage"];
+            expSymbol.expId = j["expressionsCode"][i]["expId"];
+            for(uint64_t k = 0; k < j["expressionsCode"][i]["code"]["symbolsUsed"].size(); k++) {
                 Symbol symbol; 
-                uint64_t expId = j["expressionsCode"][i]["expId"];
-                symbol.setSymbol(j["expressionsCode"][i]["symbols"][k]);
-                expressionsCodeSymbols.insert(pair(expId,symbol));
+                symbol.setSymbol(j["expressionsCode"][i]["code"]["symbolsUsed"][k]);
+                expSymbol.symbolsUsed.push_back(symbol);
             }
+            expressionsCodeSymbols[expSymbol.stage - 1].push_back(expSymbol);
         }
-
-        std::vector<uint64_t> indxStages(nStages + 1, 0);
 
         for(uint64_t i = 0; i < j["hints"].size(); i++) {
             Hint hint;
@@ -225,9 +227,6 @@ void StarkInfo::load(json j)
                 symbol.setSymbol(j["hints"][i]["symbols"][k]);
                 hint.symbols.push_back(symbol);
             }
-
-            hint.index = indxStages[stage];
-            indxStages[stage] += hint.fields.size() + hint.destSymbols.size();
 
             hints[stage].push_back(hint);
         }
