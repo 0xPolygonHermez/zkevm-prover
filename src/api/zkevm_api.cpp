@@ -990,12 +990,12 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst) {
 }
 
 void calculate_h1_h2(void *pStarks, void *pParams) {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    // Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
     // starks->calculateH1H2(*(StepsParams*)pParams); // TODO
 }
 
 void calculate_z(void *pStarks, void *pParams) {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    // Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
     // starks->calculateZ(*(StepsParams*)pParams); // TODO
 }
 
@@ -1003,8 +1003,21 @@ void calculate_expressions(void *pStarks, char* step, void *pParams, void *pChel
     // ((Starks<Goldilocks::Element>*)pStarks)->calculateExpressions(step, *(StepsParams*)pParams, (CHelpersSteps*)pChelpersSteps); // TODO
 }
 
+void compute_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pTranscript, void *pChelpersSteps) {
+    // type == 1 => Goldilocks
+    // type == 2 => BN128
+    switch (elementType) {
+        case 1:
+            ((Starks<Goldilocks::Element>*)pStarks)->computeStage(step, *(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof, *(TranscriptGL*)pTranscript, (CHelpersSteps*)pChelpersSteps);
+            break;
+        default: 
+            cerr << "Invalid elementType: " << elementType << endl;
+            break;
+    }
+}
+
 void compute_q(void *pStarks, void *pParams, void *pProof) {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    // Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
     // starks->computeQ(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof); // TODO 
 }
 
@@ -1015,7 +1028,7 @@ void compute_evals(void *pStarks, void *pParams, void *pProof) {
 
 void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    // starks->computeFRIPol(step, *(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps); // TODO
+    return starks->computeFRIPol(step, *(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps);
 }
 
 void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge) {
@@ -1076,9 +1089,17 @@ void *zkin_new(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs,
     return zkin;
 }
 
-void *transcript_new() {
-    TranscriptGL *transcript = new TranscriptGL();
-    return transcript;
+void *transcript_new(uint32_t elementType) {
+    // type == 1 => Goldilocks
+    // type == 2 => BN128
+    switch (elementType) {
+        case 1:
+            return new TranscriptGL();
+        case 2:
+            return new TranscriptBN128();
+        default:
+            return NULL;
+    }
 }
 
 void transcript_add(void *pTranscript, void *pInput, uint64_t size) {
@@ -1097,14 +1118,20 @@ void transcript_add_polinomial(void *pTranscript, void *pPolinomial) {
     }
 }
 
-void transcript_free(void *pTranscript) {
-    TranscriptGL* transcript = (TranscriptGL*)pTranscript;
-    delete transcript;
+void transcript_free(void *pTranscript, uint32_t elementType) {
+    switch (elementType) {
+        case 1:
+            delete (TranscriptGL*)pTranscript;
+            break;
+        case 2:
+            delete (TranscriptBN128*)pTranscript;
+            break;
+    }
 }
 
-void get_challenges(void *pStarks, void *pTranscript, void *pElement, uint64_t nChallenges) {
+void get_challenge(void *pStarks, void *pTranscript, void *pElement) {
     TranscriptGL *transcript = (TranscriptGL *)pTranscript;
-    // ((Starks<Goldilocks::Element>*)pStarks)->getChallenge(*transcript, (Goldilocks::Element*)pElement, nChallenges); // TODO
+    ((Starks<Goldilocks::Element>*)pStarks)->getChallenge(*transcript, *(Goldilocks::Element*)pElement);
 }
 
 void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits) {
