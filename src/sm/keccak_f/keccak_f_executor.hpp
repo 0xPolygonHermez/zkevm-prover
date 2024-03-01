@@ -85,7 +85,7 @@ public:
 
     /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
     void execute (const vector<vector<Goldilocks::Element>> &input, PROVER_FORK_NAMESPACE::KeccakFCommitPols &pols);
-     inline void execute (vector<vector<Goldilocks::Element>> &input, Goldilocks::Element *pAddress){
+    inline void execute (vector<vector<Goldilocks::Element>> &input, Goldilocks::Element *pAddress){
         PROVER_FORK_NAMESPACE::KeccakFCommitPols pols(pAddress, N);
         execute(input, pols);
     }   

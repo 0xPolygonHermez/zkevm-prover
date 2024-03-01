@@ -5,6 +5,10 @@
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/sha256_f/sha256_f_executor.hpp"
+#if __ZKEVM_SM__
+#include "zkevm_sm.h"
+#include "zkevm_api.hpp"
+#endif
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -48,12 +52,11 @@ public:
         PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols pols(pAddress, N);
         vector<Sha256FExecutorInput> required;
         execute(input, pols, required);
-    }
-    /*
 #ifdef __ZKEVM_SM__
-        add_bits_2_field_inputs(pRequests, (void *)required.data(), (uint64_t) required.size());
+        add_sha256_f_inputs(pRequests, (void *)required.data(), (uint64_t) required.size());
 #endif
-    }*/
+    }
+    
 
 
 private:

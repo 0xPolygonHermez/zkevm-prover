@@ -294,12 +294,12 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
 }
 
 
-int zkevm_main(char *pConfigFile, void* pAddress, void* pSMRquests)
+int zkevm_main(char *configFile, void* pAddress, void* pSMRequestsOut)
 {
     
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
-    file2json(pConfigFile, configJson);
+    file2json(configFile, configJson);
     config.load(configJson);
     zklog.setJsonLogs(config.jsonLogs);
     zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
@@ -312,7 +312,7 @@ int zkevm_main(char *pConfigFile, void* pAddress, void* pSMRquests)
     zklog.warning("Checking warning channel; ignore this trace");
 
     // Print the configuration file name
-    string configFileName = pConfigFile;
+    string configFileName = configFile;
     zklog.info("Config file: " + configFileName);
 
     // Print the number of cores
@@ -541,7 +541,7 @@ int zkevm_main(char *pConfigFile, void* pAddress, void* pSMRquests)
                   poseidon,
                   config,
                   pAddress);
-    prover.setMainSMRequestsPointer(pSMRquests);
+    prover.setMainSMRequestsPointer(pSMRequestsOut);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* SERVERS */
@@ -849,72 +849,81 @@ int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress) {
     return 0;
 }
 
-int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
    
     PaddingSha256ExecutorInput::DTO * p_inputs= (PaddingSha256ExecutorInput::DTO*) inputs_;
     std::vector<PaddingSha256ExecutorInput> inputs;
     PaddingSha256ExecutorInput::fromDTO(p_inputs, ninputs, inputs);
     PaddingSha256Executor paddingSha256Executor(fr);
-    paddingSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    paddingSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
     return 0;
 }
 
-int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
     std::vector<PaddingSha256BitExecutorInput> inputs;
     if(ninputs > 0){
         inputs.assign((PaddingSha256BitExecutorInput*)inputs_, (PaddingSha256BitExecutorInput*)inputs_ + ninputs);
     }
     PaddingSha256BitExecutor paddingSha256BitExecutor(fr);
-    paddingSha256BitExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    paddingSha256BitExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
     return 0;
 }
 
-int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
     std::vector<Bits2FieldSha256ExecutorInput> inputs;
     if(ninputs > 0){
         inputs.assign((Bits2FieldSha256ExecutorInput*)inputs_, (Bits2FieldSha256ExecutorInput*)inputs_ + ninputs);
     }
     Bits2FieldSha256Executor bits2fieldSha256Executor(fr);
-    bits2fieldSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    bits2fieldSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
     return 0;
 }
 
+int zkevm_sha256_f(void * inputs_, int ninputs, void * pAddress){
+    Sha256FExecutorInput::DTO * p_inputs= (Sha256FExecutorInput::DTO*) inputs_;
+    std::vector<Sha256FExecutorInput> inputs;
+    Sha256FExecutorInput::fromDTO(p_inputs, ninputs, inputs);
+    Config config_;
+    config_.sha256ScriptFile="config/scripts/sha256_script.json";
+    Sha256FExecutor sha256FExecutor(fr,config_);
+    sha256FExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+}
 
-int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
     PaddingKKExecutorInput::DTO * p_inputs= (PaddingKKExecutorInput::DTO*) inputs_;
     std::vector<PaddingKKExecutorInput> inputs;
     PaddingKKExecutorInput::fromDTO(p_inputs, ninputs, inputs);
     PaddingKKExecutor paddingKKExecutor(fr);
-    paddingKKExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    paddingKKExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
     return 0;
 }
 
-int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
     std::vector<PaddingKKBitExecutorInput> inputs;
     if(ninputs > 0){
         inputs.assign((PaddingKKBitExecutorInput*)inputs_, (PaddingKKBitExecutorInput*)inputs_ + ninputs);
     }
     PaddingKKBitExecutor paddingKKBitExecutor(fr);
-    paddingKKBitExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    paddingKKBitExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
     return 0;
 }
-int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
     std::vector<Bits2FieldExecutorInput> inputs;
     if(ninputs > 0){
         inputs.assign((Bits2FieldExecutorInput*)inputs_, (Bits2FieldExecutorInput*)inputs_ + ninputs);
     }
     Bits2FieldExecutor bits2fieldExecutor(fr);
-    bits2fieldExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    bits2fieldExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
     return 0;
 }
 
-int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRquests){
+int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
     PaddingPGExecutorInput::DTO * p_inputs= (PaddingPGExecutorInput::DTO*) inputs_;
     std::vector<PaddingPGExecutorInput> inputs;
     PaddingPGExecutorInput::fromDTO(p_inputs, ninputs, inputs);
     PoseidonGoldilocks poseidon;
     PaddingPGExecutor paddingPGExecutor(fr, poseidon);
-    paddingPGExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRquests);
+    paddingPGExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
     return 0;
 }
 
@@ -962,6 +971,27 @@ int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress){
     paddingPGExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
     return 0;
 }
+
+/*int zkevm_poseidon_g(void * inputs_from_main_, int ninputs_from_main,
+                     void * inputs_from_padding_, int ninputs_from_padding,
+                     void * inputs_from_storage_, int ninputs_from_storage,
+                     void * pAddress){
+    Goldilocks::Element* inputs_from_main = (Goldilocks::Element*) inputs_from_main_;
+    Goldilocks::Element* inputs_from_padding = (Goldilocks::Element*) inputs_from_padding_;
+    Goldilocks::Element* inputs_from_storage = (Goldilocks::Element*) inputs_from_storage_;
+    vector<array<Goldilocks::Element, 17>> inputs_from_main_vector;
+    vector<array<Goldilocks::Element, 17>> inputs_from_padding_vector;
+    vector<array<Goldilocks::Element, 17>> inputs_from_storage_vector;
+    if(ninputs_from_main > 0){
+        inputs_from_main_vector.assign(inputs_from_main, inputs_from_main + ninputs_from_main);
+    }
+    if(ninputs_from_padding > 0){
+        inputs_from_padding_vector.assign(inputs_from_padding, inputs_from_padding + ninputs_from_padding);
+    }
+    if(ninputs_from_storage > 0){
+        inputs_from_storage_vector.assign(inputs_from_storage, inputs_from_storage + ninputs_from_storage);
+    }
+}*/
 
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;

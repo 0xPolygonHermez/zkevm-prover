@@ -4,19 +4,25 @@
 
     // FFI functions
 
-    int zkevm_main(char *pConfigFile, void* pAddress, void* pSMRquests);
+    int zkevm_main(char *configFile, void* pAddress, void* pSMRequestsOut);
     int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress); 
-    int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
-    int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
-    int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
-    int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
-    int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
-    int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
-    int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRquests);
+    int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
+    int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
+    int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
+    int zkevm_sha256_f(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
+    int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
+    int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
+    int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
     int zkevm_memory(void * inputs_, int ninputs, void * pAddress);
     int zkevm_climb_key(void * inputs_, int ninputs, void * pAddress);
     int zkevm_arith(void * inputs_, int ninputs, void * pAddress);
-    int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress);
+    /*int zkevm_poseidon_g(void * inputs_from_main_, int ninputs_from_main,
+                         void * inputs_from_padding_, int ninputs_from_padding,
+                         void * inputs_from_storage_, int ninputs_from_storage,
+                         void * pAddress);*/
+
 
     // FRI Proof
     // ========================================================================================
