@@ -59,9 +59,10 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     //--------------------------------
 
     addTranscript(transcript, &verkey[0], hashSize);
-    addTranscriptPublics(transcript, &publicInputs[0], starkInfo.nPublics);
+    addTranscriptGL(transcript, &publicInputs[0], starkInfo.nPublics);
 
     for(uint64_t step = 1; step <= starkInfo.nStages + 1; step++) {
+        if(debug && step == starkInfo.nStages + 1) return;
         TimerStartStep(STARK, step);
         computeStage(step, params, proof, transcript, chelpersSteps);
         TimerStopAndLogStep(STARK, step);
@@ -149,6 +150,13 @@ void Starks<ElementType>::calculateExpression(uint64_t expId, StepsParams &param
 }
 
 template <typename ElementType>
+void Starks<ElementType>::calculateConstraint(ParserParams &constraintCode, StepsParams &params, CHelpersSteps *chelpersSteps) {    
+    TimerStart(STARK_CALCULATE_CONSTRAINT);
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgsDebug, constraintCode, USE_GENERIC_PARSER);
+    TimerStopAndLog(STARK_CALCULATE_CONSTRAINT);
+}
+
+template <typename ElementType>
 void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof) {
     TimerStartStep(STARK_LDE_AND_MERKLETREE, step);
     TimerStartStep(STARK_LDE, step);
@@ -223,7 +231,13 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams& params, FRIPr
     }
 
     if(step <= starkInfo.nStages) {
-        extendAndMerkelize(step, params, proof);
+        if(debug) {
+            for(uint64_t i = 0; i < chelpers.constraintsInfoDebug[step].size(); i++) {
+                calculateConstraint(chelpers.constraintsInfoDebug[step][i], params, chelpersSteps);
+            }
+        } else {
+            extendAndMerkelize(step, params, proof);
+        }
     } else {
         computeQ(step, params, proof);
         for(uint64_t i = 0; i < starkInfo.qs.size(); ++i) {
@@ -231,7 +245,12 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams& params, FRIPr
         }  
     }
 
-    addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
+    if(debug) {
+        Goldilocks::Element randomValues[hashSize] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
+        addTranscriptGL(transcript, randomValues, hashSize);
+    } else {
+        addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
+    }
 }
 
 template <typename ElementType>
@@ -649,7 +668,7 @@ void Starks<ElementType>::getChallenge(TranscriptType &transcript, Goldilocks::E
 
 
 template <typename ElementType>
-void Starks<ElementType>::addTranscriptPublics(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements) {
+void Starks<ElementType>::addTranscriptGL(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements) {
     transcript.put(buffer, nElements);
 };
 

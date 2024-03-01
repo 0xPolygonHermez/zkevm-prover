@@ -34,6 +34,7 @@ public:
     const Config &config;
     StarkInfo starkInfo;
     bool optimizeMemoryNTT = false;
+    bool debug = false;
     
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
@@ -301,6 +302,7 @@ public:
 
     void calculateExpressions(uint64_t step, bool after, StepsParams &params, CHelpersSteps *chelpersSteps);
     void calculateExpression(uint64_t expId, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateConstraint(ParserParams &constraintCode, StepsParams &params, CHelpersSteps *chelpersSteps);
     
     void computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps);
     void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
@@ -312,7 +314,7 @@ public:
     void computeFRIFolding(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t step, Polinomial &challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries);
 
-    void addTranscriptPublics(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
+    void addTranscriptGL(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, Polinomial &pol);
     void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);

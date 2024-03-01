@@ -43,6 +43,14 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
 
         parserParamsStage.nNumbers = cHelpersBin->readU32LE();
         parserParamsStage.numbersOffset = cHelpersBin->readU32LE();
+        
+        if(pil2) {
+            parserParamsStage.nConstPolsUsed = cHelpersBin->readU32LE();
+            parserParamsStage.constPolsOffset = cHelpersBin->readU32LE();
+            
+            parserParamsStage.nCmPolsUsed = cHelpersBin->readU32LE();
+            parserParamsStage.cmPolsOffset = cHelpersBin->readU32LE();
+        }
 
         stagesInfo[stageName] = parserParamsStage;
     }
@@ -73,6 +81,12 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
             parserParamsExpression.nNumbers = cHelpersBin->readU32LE();
             parserParamsExpression.numbersOffset = cHelpersBin->readU32LE();
 
+            parserParamsExpression.nConstPolsUsed = cHelpersBin->readU32LE();
+            parserParamsExpression.constPolsOffset = cHelpersBin->readU32LE();
+
+            parserParamsExpression.nCmPolsUsed = cHelpersBin->readU32LE();
+            parserParamsExpression.cmPolsOffset = cHelpersBin->readU32LE();
+
             expressionsInfo[expId] = parserParamsExpression;
         }
 
@@ -96,4 +110,100 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
     }
 
     cHelpersBin->endReadSection();
+
+     if(pil2) {
+        cHelpersBin->startReadSection(CHELPERS_SYMBOLS_PIL2_SECTION);
+
+        uint32_t nConstPolsIds = cHelpersBin->readU32LE();
+        uint32_t nCmPolsIds = cHelpersBin->readU32LE();
+
+        cHelpersArgs.constPolsIds = new uint16_t[nConstPolsIds];
+        cHelpersArgs.cmPolsIds = new uint16_t[nCmPolsIds];
+    
+        for(uint64_t j = 0; j < nConstPolsIds; ++j) {
+            cHelpersArgs.constPolsIds[j] = cHelpersBin->readU16LE();
+        }
+
+        for(uint64_t j = 0; j < nCmPolsIds; ++j) {
+            cHelpersArgs.cmPolsIds[j] = cHelpersBin->readU16LE();
+        }
+
+        cHelpersBin->endReadSection();
+    }
+
+    if(pil2) {
+        cHelpersBin->startReadSection(CHELPERS_CONSTRAINTS_DEBUG_PIL2_SECTION);
+
+        uint32_t nOpsDebug = cHelpersBin->readU32LE();
+        uint32_t nArgsDebug = cHelpersBin->readU32LE();
+        uint32_t nNumbersDebug = cHelpersBin->readU32LE();
+        uint32_t nConstPolsIdsDebug = cHelpersBin->readU32LE();
+        uint32_t nCmPolsIdsDebug = cHelpersBin->readU32LE();
+
+    
+        cHelpersArgsDebug.ops = new uint8_t[nOpsDebug];
+        cHelpersArgsDebug.args = new uint16_t[nArgsDebug];
+        cHelpersArgsDebug.numbers = new uint64_t[nNumbersDebug];
+        cHelpersArgsDebug.constPolsIds = new uint16_t[nConstPolsIdsDebug];
+        cHelpersArgsDebug.cmPolsIds = new uint16_t[nCmPolsIdsDebug];
+
+        constraintsInfoDebug.resize(nStages);
+        
+        uint32_t nConstraints = cHelpersBin->readU32LE();
+
+        for(uint64_t i = 0; i < nConstraints; ++i) {
+            ParserParams parserParamsConstraint;
+
+            uint32_t stage = cHelpersBin->readU32LE();
+            parserParamsConstraint.stage = stage;
+
+            parserParamsConstraint.destDim = cHelpersBin->readU32LE();
+            parserParamsConstraint.destId = cHelpersBin->readU32LE();
+
+            parserParamsConstraint.nTemp1 = cHelpersBin->readU32LE();
+            parserParamsConstraint.nTemp3 = cHelpersBin->readU32LE();
+
+            parserParamsConstraint.nOps = cHelpersBin->readU32LE();
+            parserParamsConstraint.opsOffset = cHelpersBin->readU32LE();
+
+            parserParamsConstraint.nArgs = cHelpersBin->readU32LE();
+            parserParamsConstraint.argsOffset = cHelpersBin->readU32LE();
+
+            parserParamsConstraint.nNumbers = cHelpersBin->readU32LE();
+            parserParamsConstraint.numbersOffset = cHelpersBin->readU32LE();
+
+            parserParamsConstraint.nConstPolsUsed = cHelpersBin->readU32LE();
+            parserParamsConstraint.constPolsOffset = cHelpersBin->readU32LE();
+
+            parserParamsConstraint.nCmPolsUsed = cHelpersBin->readU32LE();
+            parserParamsConstraint.cmPolsOffset = cHelpersBin->readU32LE();
+
+            if(constraintsInfoDebug[stage].empty()) {
+                constraintsInfoDebug[stage].emplace_back();
+            }
+
+            constraintsInfoDebug[stage].push_back(parserParamsConstraint);
+        }
+
+
+        for(uint64_t j = 0; j < nOpsDebug; ++j) {
+            cHelpersArgsDebug.ops[j] = cHelpersBin->readU8LE();
+        }
+        for(uint64_t j = 0; j < nArgsDebug; ++j) {
+            cHelpersArgsDebug.args[j] = cHelpersBin->readU16LE();
+        }
+        for(uint64_t j = 0; j < nNumbersDebug; ++j) {
+            cHelpersArgsDebug.numbers[j] = cHelpersBin->readU64LE();
+        }
+
+        for(uint64_t j = 0; j < nConstPolsIdsDebug; ++j) {
+            cHelpersArgsDebug.constPolsIds[j] = cHelpersBin->readU16LE();
+        }
+
+        for(uint64_t j = 0; j < nCmPolsIdsDebug; ++j) {
+            cHelpersArgsDebug.cmPolsIds[j] = cHelpersBin->readU16LE();
+        }
+
+        cHelpersBin->endReadSection();
+    }
 };

@@ -21,6 +21,9 @@ const int CHELPERS_BUFFERS_PIL1_SECTION = 4;
 
 const int CHELPERS_EXPRESSIONS_PIL2_SECTION = 4;
 const int CHELPERS_BUFFERS_PIL2_SECTION = 5;
+const int CHELPERS_SYMBOLS_PIL2_SECTION = 6;
+const int CHELPERS_CONSTRAINTS_DEBUG_PIL2_SECTION = 7;
+
 
 struct ParserParams
 {
@@ -35,6 +38,12 @@ struct ParserParams
     uint32_t argsOffset;
     uint32_t nNumbers;
     uint64_t numbersOffset;
+    uint32_t nConstPolsUsed;
+    uint32_t constPolsOffset;
+    uint32_t nCmPolsUsed;
+    uint32_t cmPolsOffset;
+    uint32_t destDim;
+    uint32_t destId;
 };
 
 struct ParserArgs 
@@ -42,6 +51,8 @@ struct ParserArgs
     uint8_t* ops;
     uint16_t* args;
     uint64_t* numbers;
+    uint16_t* constPolsIds;
+    uint16_t* cmPolsIds;
 };
 
 class CHelpers
@@ -49,13 +60,25 @@ class CHelpers
 public:
     std::map<string, ParserParams> stagesInfo;
     std::map<uint64_t, ParserParams> expressionsInfo;
+
+    std::vector<std::vector<ParserParams>> constraintsInfoDebug;
     
     ParserArgs cHelpersArgs;
+
+    ParserArgs cHelpersArgsDebug;
 
     ~CHelpers() {
         delete[] cHelpersArgs.ops;
         delete[] cHelpersArgs.args;
         delete[] cHelpersArgs.numbers;
+        delete[] cHelpersArgs.constPolsIds;
+        delete[] cHelpersArgs.cmPolsIds;
+
+        delete[] cHelpersArgsDebug.ops;
+        delete[] cHelpersArgsDebug.args;
+        delete[] cHelpersArgsDebug.numbers;
+        delete[] cHelpersArgsDebug.constPolsIds;
+        delete[] cHelpersArgsDebug.cmPolsIds;
 
         stagesInfo.clear();
     };

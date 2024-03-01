@@ -27,6 +27,8 @@ int main()
 
     Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
 
+    // starks.debug = true;
+
     uint64_t N = (1 << starkInfo.starkStruct.nBits);
     #pragma omp parallel for
     for (uint64_t i = 0; i < N; i += 1)
