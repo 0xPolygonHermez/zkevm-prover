@@ -65,7 +65,8 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
-    rom(config),
+    romBatch(config),
+    romBlob(config),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
     rom_gas_limit_2147483647(config),
@@ -82,7 +83,14 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     file2json("src/main_sm/fork_9/scripts/rom.json", romJson);
 
     // Load ROM data from JSON data
-    rom.load(fr, romJson);
+    romBatch.load(fr, romJson);
+
+    // Load file contents into a json instance
+    romJson.clear();
+    file2json("src/main_sm/fork_9/scripts/rom_blob.json", romJson);
+
+    // Load ROM data from JSON data
+    romBlob.load(fr, romJson);
 
 #ifdef MULTI_ROM_TEST
     romJson.clear();
@@ -97,6 +105,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 #endif
 
     // Get labels
+    Rom &rom = romBatch;
     finalizeExecutionLabel     = rom.getLabel(string("finalizeExecution"));
     checkAndSaveFromLabel      = rom.getLabel(string("checkAndSaveFrom"));
     ecrecoverStoreArgsLabel    = rom.getLabel(string("ecrecover_store_args"));
@@ -173,6 +182,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
     verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
     
+#else
+
+    Rom &rom = romBatch;
+
 #endif
 
     // Init execution flags
@@ -5923,7 +5936,7 @@ void MainExecutor::logError (Context &ctx, const string &message)
     uint64_t step = (ctx.pStep != NULL) ? *ctx.pStep : INVALID_LOG_ERROR_VALUE;
     uint64_t evaluation = (ctx.pEvaluation != NULL) ? *ctx.pEvaluation : INVALID_LOG_ERROR_VALUE;
     uint64_t zkpc = (ctx.pZKPC != NULL) ? *ctx.pZKPC : INVALID_LOG_ERROR_VALUE;
-    string romLine = (ctx.pZKPC != NULL) ? rom.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+    string romLine = (ctx.pZKPC != NULL) ? ctx.rom.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
     zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) +
         " step=" + to_string(step) +
         " eval=" + to_string(evaluation) +

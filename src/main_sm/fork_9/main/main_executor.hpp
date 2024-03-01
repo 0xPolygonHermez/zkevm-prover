@@ -45,7 +45,9 @@ public:
     PoseidonGoldilocks &poseidon;
 
     // ROM JSON file data:
-    Rom rom;
+    Rom romBatch;
+    Rom romBlob;
+
 #ifdef MULTI_ROM_TEST
     Rom rom_gas_limit_100000000;
     Rom rom_gas_limit_2147483647;

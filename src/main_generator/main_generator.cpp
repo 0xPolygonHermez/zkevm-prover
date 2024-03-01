@@ -306,7 +306,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     if (forkID < 8)
         code += "    int64_t i64Aux;\n";
     //code += "    int64_t incHashPos = 0;\n"; // TODO: Remove initialization to check it is initialized before being used
-    code += "    Rom &rom = mainExecutor.rom;\n";
+    
+    if (forkID >=9)
+        code += "    Rom &rom = mainExecutor.romBatch;\n";
+    else
+        code += "    Rom &rom = mainExecutor.rom;\n";
+
     code += "    Goldilocks &fr = mainExecutor.fr;\n";
     code += "    uint64_t flushId;\n";
     code += "    uint64_t lastSentFlushId;\n";
@@ -335,7 +340,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "        return;\n";
     code += "    }\n\n";
 
-    code += "    Context ctx(mainExecutor.fr, mainExecutor.config, mainExecutor.fec, mainExecutor.fnec, pols, mainExecutor.rom, proverRequest, mainExecutor.pHashDB);\n\n";
+    code += "    Context ctx(mainExecutor.fr, mainExecutor.config, mainExecutor.fec, mainExecutor.fnec, pols, rom, proverRequest, mainExecutor.pHashDB);\n\n";
 
     code += "    mainExecutor.initState(ctx);\n\n";
 
