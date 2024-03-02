@@ -4,8 +4,20 @@
 
     // FFI functions
 
-    int zkevm_main(char *configFile, void* pAddress, void* pSMRequestsOut);
-    int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress); 
+    int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRequestsOut);
+    int zkevm_delete_sm_requests(void **pSMRequests);
+    int zkevm_arith(void * inputs, int ninputs, void * pAddress);
+    int zkevm_arith_req(void* pSMRequests,  void * pAddress);
+    int zkevm_binary_req(void* pSMRequests,  void * pAddress);
+    int zkevm_memory(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_memory_req(void* pSMRequests,  void * pAddress);
+    int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress);
+    int zkevm_mem_align_req(void* pSMRequests,  void * pAddress); 
+
+
+
+
+
     int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
     int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
     int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
@@ -15,14 +27,8 @@
     int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
     int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress);
     int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
-    int zkevm_memory(void * inputs_, int ninputs, void * pAddress);
     int zkevm_climb_key(void * inputs_, int ninputs, void * pAddress);
-    int zkevm_arith(void * inputs_, int ninputs, void * pAddress);
-    /*int zkevm_poseidon_g(void * inputs_from_main_, int ninputs_from_main,
-                         void * inputs_from_padding_, int ninputs_from_padding,
-                         void * inputs_from_storage_, int ninputs_from_storage,
-                         void * pAddress);*/
-
+    
 
     // FRI Proof
     // ========================================================================================

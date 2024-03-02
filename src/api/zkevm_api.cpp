@@ -293,8 +293,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     prover.execute(&proverRequest);
 }
 
-
-int zkevm_main(char *configFile, void* pAddress, void* pSMRequestsOut)
+int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRequestsOut)
 {
     
     // Create one instance of Config based on the contents of the file config.json
@@ -541,7 +540,8 @@ int zkevm_main(char *configFile, void* pAddress, void* pSMRequestsOut)
                   poseidon,
                   config,
                   pAddress);
-    prover.setMainSMRequestsPointer(pSMRequestsOut);
+    prover.setSMRequestsPointer(pSMRequests);
+    prover.setSMRequestsOutPointer(pSMRequestsOut);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* SERVERS */
@@ -828,8 +828,45 @@ int zkevm_main(char *configFile, void* pAddress, void* pSMRequestsOut)
     zklog.info("Done");
     return 1;
 }
+int zkevm_delete_sm_requests(void **pSMRequests){
+    if(pSMRequests!=NULL){
+            delete (PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests[0];
+        }
+    return 0;
+}
 
-
+int zkevm_arith(void * inputs_, int ninputs, void * pAddress){
+    std::vector<ArithAction> inputs;
+    if(ninputs > 0){
+        inputs.assign((ArithAction*)inputs_, (ArithAction*)inputs_ + ninputs);
+    }
+    ArithExecutor arithExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::ArithCommitPols pols(pAddress, 1<<23);
+    arithExecutor.execute(inputs, pols);
+    return 0;
+}
+int zkevm_arith_req( void* pSMRequests,  void * pAddress){
+    ArithExecutor arithExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::ArithCommitPols pols(pAddress, 1<<23);
+    arithExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Arith, pols);
+    return 0;
+}
+int zkevm_memory(void * inputs_, int ninputs, void * pAddress){
+   std::vector<MemoryAccess> inputs;
+    if(ninputs > 0){
+        inputs.assign((MemoryAccess*)inputs_, (MemoryAccess*)inputs_ + ninputs);
+    }
+    MemoryExecutor bits2fieldExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::MemCommitPols pols(pAddress, 1<<23);
+    bits2fieldExecutor.execute(inputs, pols);
+    return 0;
+}
+int zkevm_memory_req( void* pSMRequests,  void * pAddress){
+    MemoryExecutor bits2fieldExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::MemCommitPols pols(pAddress, 1<<23);
+    bits2fieldExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Memory, pols);
+    return 0;
+}
 int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress) {
     MemAlignAction *pinputs = (MemAlignAction*) inputs_;
     std::vector<MemAlignAction> inputs;
@@ -845,9 +882,26 @@ int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress) {
         inputs[i].wr256 = pinputs[i].wr256;
     }
     MemAlignExecutor memAlignExecutor(fr, config);
-    memAlignExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    PROVER_FORK_NAMESPACE::MemAlignCommitPols pols(pAddress, 1<<23);
+    memAlignExecutor.execute(inputs,pols);
     return 0;
 }
+int zkevm_mem_align_req( void* pSMRequests,  void * pAddress){
+    MemAlignExecutor memAlignExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::MemAlignCommitPols pols(pAddress, 1<<23);
+    memAlignExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->MemAlign, pols);
+    return 0;
+}
+int zkevm_binary_req( void* pSMRequests,  void * pAddress){
+    BinaryExecutor binaryExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::BinaryCommitPols pols(pAddress, 1<<23);
+    binaryExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Binary, pols);
+    return 0;
+}
+
+
+
+
 
 int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
    
@@ -907,6 +961,7 @@ int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSM
     paddingKKBitExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
     return 0;
 }
+
 int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
     std::vector<Bits2FieldExecutorInput> inputs;
     if(ninputs > 0){
@@ -927,17 +982,6 @@ int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRequ
     return 0;
 }
 
-int zkevm_memory(void * inputs_, int ninputs, void * pAddress){
-   std::vector<MemoryAccess> inputs;
-    if(ninputs > 0){
-        inputs.assign((MemoryAccess*)inputs_, (MemoryAccess*)inputs_ + ninputs);
-    }
-    Config config_;
-    MemoryExecutor bits2fieldExecutor(fr, config_);
-    bits2fieldExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
-    return 0;
-}
-
 int zkevm_climb_key(void * inputs_, int ninputs, void * pAddress){
     std::vector<ClimbKeyAction> inputs;
     if(ninputs > 0){
@@ -948,17 +992,6 @@ int zkevm_climb_key(void * inputs_, int ninputs, void * pAddress){
     climbKeyExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
     return 0;
 
-}
-
-int zkevm_arith(void * inputs_, int ninputs, void * pAddress){
-    std::vector<ArithAction> inputs;
-    if(ninputs > 0){
-        inputs.assign((ArithAction*)inputs_, (ArithAction*)inputs_ + ninputs);
-    }
-    Config config_;
-    ArithExecutor arithExecutor(fr, config_);
-    arithExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
-    return 0;
 }
 
 int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress){
@@ -972,26 +1005,6 @@ int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress){
     return 0;
 }
 
-/*int zkevm_poseidon_g(void * inputs_from_main_, int ninputs_from_main,
-                     void * inputs_from_padding_, int ninputs_from_padding,
-                     void * inputs_from_storage_, int ninputs_from_storage,
-                     void * pAddress){
-    Goldilocks::Element* inputs_from_main = (Goldilocks::Element*) inputs_from_main_;
-    Goldilocks::Element* inputs_from_padding = (Goldilocks::Element*) inputs_from_padding_;
-    Goldilocks::Element* inputs_from_storage = (Goldilocks::Element*) inputs_from_storage_;
-    vector<array<Goldilocks::Element, 17>> inputs_from_main_vector;
-    vector<array<Goldilocks::Element, 17>> inputs_from_padding_vector;
-    vector<array<Goldilocks::Element, 17>> inputs_from_storage_vector;
-    if(ninputs_from_main > 0){
-        inputs_from_main_vector.assign(inputs_from_main, inputs_from_main + ninputs_from_main);
-    }
-    if(ninputs_from_padding > 0){
-        inputs_from_padding_vector.assign(inputs_from_padding, inputs_from_padding + ninputs_from_padding);
-    }
-    if(ninputs_from_storage > 0){
-        inputs_from_storage_vector.assign(inputs_from_storage, inputs_from_storage + ninputs_from_storage);
-    }
-}*/
 
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
@@ -1038,18 +1051,22 @@ void *c12a_steps_new() {
     C12aSteps* c12aSteps = new C12aSteps();
     return c12aSteps;
 }
+
 void c12a_steps_free(void *pC12aSteps) {
     C12aSteps* c12aSteps = (C12aSteps*)pC12aSteps;
     delete c12aSteps;
 }
+
 void *recursive1_steps_new() {
     Recursive1Steps* recursive1Steps = new Recursive1Steps();
     return recursive1Steps;
 }
+
 void recursive1_steps_free(void *pRecursive1Steps) {
     Recursive1Steps* recursive1Steps = (Recursive1Steps*)pRecursive1Steps;
     delete recursive1Steps;
 }
+
 void *recursive2_steps_new() {
     Recursive2Steps* recursive2Steps = new Recursive2Steps();
     return recursive2Steps;

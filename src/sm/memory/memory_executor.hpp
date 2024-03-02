@@ -36,10 +36,6 @@ public:
         N(PROVER_FORK_NAMESPACE::MemCommitPols::pilDegree()) {}
 
     void execute (vector<MemoryAccess> &input, PROVER_FORK_NAMESPACE::MemCommitPols &pols);
-    inline void execute (vector<MemoryAccess> &input, Goldilocks::Element *pAddress){
-        PROVER_FORK_NAMESPACE::MemCommitPols pols(pAddress, N);
-        execute(input, pols);
-    }
 
     /* Reorder access list by the following criteria:
         - In order of incremental address

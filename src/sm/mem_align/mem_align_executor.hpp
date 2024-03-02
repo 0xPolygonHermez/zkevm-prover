@@ -34,10 +34,6 @@ public:
         config(config),
         N(PROVER_FORK_NAMESPACE::MemAlignCommitPols::pilDegree()) {}
     void execute (vector<MemAlignAction> &input, PROVER_FORK_NAMESPACE::MemAlignCommitPols &pols);
-    inline void execute (vector<MemAlignAction> &input, Goldilocks::Element *pAddress){
-        PROVER_FORK_NAMESPACE::MemAlignCommitPols pols(pAddress, N);
-        execute(input, pols);
-    }
 };
 
 #endif

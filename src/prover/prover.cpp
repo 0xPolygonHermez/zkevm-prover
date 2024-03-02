@@ -40,7 +40,8 @@ Prover::Prover(Goldilocks &fr,
                                        pCurrentRequest(NULL),
                                        config(config),
                                        lastComputedRequestEndTime(0),
-                                       pMainSMRequests(NULL)
+                                       pSMRequests(NULL),
+                                       pSMRequestsOut(NULL)
 {
     mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
@@ -442,7 +443,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     TimerStopAndLog(EXECUTOR_EXECUTE_INITIALIZATION);
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_BATCH_PROOF);
-    executor.execute(*pProverRequest, cmPols, pMainSMRequests);
+    executor.execute(*pProverRequest, cmPols, pSMRequests, pSMRequestsOut);
     
     TimerStopAndLog(EXECUTOR_EXECUTE_BATCH_PROOF);
 
@@ -1037,8 +1038,9 @@ void Prover::execute(ProverRequest *pProverRequest)
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_EXECUTE);
-    executor.execute(*pProverRequest, cmPols);
+    executor.execute(*pProverRequest, cmPols, pSMRequests);
     TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE);
+    
 
     uint64_t lastN = cmPols.pilDegree() - 1;
     zklog.info("Prover::execute() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
