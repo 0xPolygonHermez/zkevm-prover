@@ -16,7 +16,6 @@ inline uint64_t getStateBit ( const uint32_t (&state)[8], uint64_t i )
 
 void PaddingSha256BitExecutor::execute (vector<PaddingSha256BitExecutorInput> &input, PaddingSha256BitCommitPols &pols, vector<Bits2FieldSha256ExecutorInput> &required)
 {
-
     // Check that input size does not exeed the number of slots
     if (input.size() > nSlots)
     {
@@ -144,7 +143,7 @@ void PaddingSha256BitExecutor::execute (vector<PaddingSha256BitExecutorInput> &i
 
     uint64_t pDone = p;
 
-    zklog.info("PaddingKKBitExecutor successfully processed " + to_string(input.size()) + " Keccak actions p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
+    zklog.info("PaddingSha256BitExecutor successfully processed " + to_string(input.size()) + " Sha256 actions p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
 
 }
 

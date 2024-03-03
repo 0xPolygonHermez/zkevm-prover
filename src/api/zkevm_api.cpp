@@ -898,41 +898,89 @@ int zkevm_binary_req( void* pSMRequests,  void * pAddress){
     binaryExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Binary, pols);
     return 0;
 }
-int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
+int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
    
     PaddingSha256ExecutorInput::DTO * p_inputs= (PaddingSha256ExecutorInput::DTO*) inputs_;
     std::vector<PaddingSha256ExecutorInput> inputs;
     PaddingSha256ExecutorInput::fromDTO(p_inputs, ninputs, inputs);
     PaddingSha256Executor paddingSha256Executor(fr);
-    paddingSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
+    PROVER_FORK_NAMESPACE::PaddingSha256CommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingSha256CommitPols::pilDegree());
+    std::vector<PaddingSha256BitExecutorInput> &required = ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256Bit;
+    required.clear();
+    paddingSha256Executor.execute(inputs, pols, required);
+    #ifdef __ZKEVM_SM__
+        add_padding_sha256_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
+    #endif
     return 0;
 }
-int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
+int zkevm_padding_sha256_req(void* pSMRequests,  void * pAddress){
+    PaddingSha256Executor paddingSha256Executor(fr);
+    PROVER_FORK_NAMESPACE::PaddingSha256CommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingSha256CommitPols::pilDegree());
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256Bit.clear();
+    paddingSha256Executor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256, 
+                                  pols,
+                                  ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256Bit);
+    return 0;
+}
+int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
     std::vector<PaddingSha256BitExecutorInput> inputs;
     if(ninputs > 0){
         inputs.assign((PaddingSha256BitExecutorInput*)inputs_, (PaddingSha256BitExecutorInput*)inputs_ + ninputs);
     }
     PaddingSha256BitExecutor paddingSha256BitExecutor(fr);
-    paddingSha256BitExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
+    PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree());
+    vector<Bits2FieldSha256ExecutorInput> &required=((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2FieldSha256;
+    required.clear();
+    paddingSha256BitExecutor.execute(inputs, pols,required);
+    #ifdef __ZKEVM_SM__
+        add_bits_2_field_sha256_inputs(pSMRequestsOut, (void *) required.data(), (uint64_t) required.size());
+    #endif
     return 0;
 }
-int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
+int zkevm_padding_sha256_bit_req(void* pSMRequests,  void * pAddress){
+    PaddingSha256BitExecutor paddingSha256BitExecutor(fr);
+    PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree());
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2FieldSha256.clear();
+    paddingSha256BitExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256Bit, pols, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2FieldSha256);
+    return 0;
+}
+int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
     std::vector<Bits2FieldSha256ExecutorInput> inputs;
     if(ninputs > 0){
         inputs.assign((Bits2FieldSha256ExecutorInput*)inputs_, (Bits2FieldSha256ExecutorInput*)inputs_ + ninputs);
     }
     Bits2FieldSha256Executor bits2fieldSha256Executor(fr);
-    bits2fieldSha256Executor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
+    PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols::pilDegree());
+    vector<Sha256FExecutorInput> &required = ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Sha256F;
+    required.clear();
+    bits2fieldSha256Executor.execute(inputs, pols, required);
+    #ifdef __ZKEVM_SM__
+        Sha256FExecutorInput::DTO *dto = Sha256FExecutorInput::toDTO(required);
+        add_sha256_f_inputs(pSMRequestsOut, dto, (uint64_t) required.size());
+    #endif
+    return 0;
+}
+int zkevm_bits2field_sha256_req(void* pSMRequests,  void * pAddress){
+    Bits2FieldSha256Executor bits2fieldSha256Executor(fr);
+    PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols::pilDegree());
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Sha256F.clear();
+    bits2fieldSha256Executor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2FieldSha256, pols, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Sha256F);
     return 0;
 }
 int zkevm_sha256_f(void * inputs_, int ninputs, void * pAddress){
     Sha256FExecutorInput::DTO * p_inputs= (Sha256FExecutorInput::DTO*) inputs_;
     std::vector<Sha256FExecutorInput> inputs;
     Sha256FExecutorInput::fromDTO(p_inputs, ninputs, inputs);
-    Config config_;
-    config_.sha256ScriptFile="config/scripts/sha256_script.json";
-    Sha256FExecutor sha256FExecutor(fr,config_);
-    sha256FExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
+    Sha256FExecutor sha256FExecutor(fr,config);
+    PROVER_FORK_NAMESPACE::Sha256FCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Sha256FCommitPols::pilDegree());
+    sha256FExecutor.execute(inputs, pols);
+    return 0;
+}
+int zkevm_sha256_f_req( void* pSMRequests,  void * pAddress){
+    Sha256FExecutor sha256FExecutor(fr,config);
+    PROVER_FORK_NAMESPACE::Sha256FCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Sha256FCommitPols::pilDegree());
+    sha256FExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Sha256F, pols);
+    return 0;
 }
 int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
     PaddingKKExecutorInput::DTO * p_inputs= (PaddingKKExecutorInput::DTO*) inputs_;

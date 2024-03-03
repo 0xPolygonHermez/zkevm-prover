@@ -519,7 +519,6 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(KECCAK_F_SM_EXECUTE);
         keccakFExecutor.execute(required->KeccakF, commitPols.KeccakF);
         TimerStopAndLog(KECCAK_F_SM_EXECUTE);
-#endif
 
         // Execute the PaddingSha256 State Machine
         TimerStart(PADDING_SHA256_SM_EXECUTE);
@@ -540,6 +539,8 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(SHA256_F_SM_EXECUTE);
         sha256FExecutor.execute(required->Sha256F, commitPols.Sha256F);
         TimerStopAndLog(SHA256_F_SM_EXECUTE);
+
+    #endif
 
         // Execute the PoseidonG State Machine
         TimerStart(POSEIDON_G_SM_EXECUTE);
