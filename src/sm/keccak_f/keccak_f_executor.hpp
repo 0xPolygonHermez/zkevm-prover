@@ -24,6 +24,7 @@ public:
     } DTO; 
     static inline DTO*  toDTO(const vector<vector<Goldilocks::Element>> &input){
         DTO* dto = new DTO[input.size()];
+        std::cout<<(input[0][0]).fe<<" "<<(input[0][1]).fe<<" "<<(input[0][1]).fe<<" "<<(input[0][1]).fe<<std::endl;
         for (uint64_t i = 0; i < input.size(); i++){
             dto[i].inData = (uint64_t*) input[i].data();
             dto[i].inData_size = input[i].size();
@@ -84,11 +85,7 @@ public:
     void execute (GateState &S);
 
     /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-    void execute (const vector<vector<Goldilocks::Element>> &input, PROVER_FORK_NAMESPACE::KeccakFCommitPols &pols);
-    inline void execute (vector<vector<Goldilocks::Element>> &input, Goldilocks::Element *pAddress){
-        PROVER_FORK_NAMESPACE::KeccakFCommitPols pols(pAddress, N);
-        execute(input, pols);
-    }   
+    void execute (const vector<vector<Goldilocks::Element>> &input, PROVER_FORK_NAMESPACE::KeccakFCommitPols &pols);  
 
     void setPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index, uint64_t value);
     uint64_t getPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index);

@@ -52,16 +52,6 @@ public:
 
     /* Executor */
     void execute (vector<PaddingKKBitExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols &pols, vector<Bits2FieldExecutorInput> &required);
-    inline void execute(vector<PaddingKKBitExecutorInput> &input, Goldilocks::Element * pAddress,
-    void *pRequests){
-        PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols pols(pAddress, N);
-        vector<Bits2FieldExecutorInput> required;
-        execute(input, pols, required);
-#ifdef __ZKEVM_SM__
-        add_bits_2_field_inputs(pRequests, (void *)required.data(), (uint64_t) required.size());
-#endif
-    }
-    
 };
 
 #endif

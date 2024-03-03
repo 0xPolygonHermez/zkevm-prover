@@ -465,31 +465,6 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-#ifdef __ZKEVM_SM__
-        if(pSMRequestsOut!=NULL){
-            TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
-            add_mem_align_inputs((void *)pSMRequestsOut, (void *)required->MemAlign.data(), (uint64_t) required->MemAlign.size());
-            add_binary_inputs((void *)pSMRequestsOut, (void *)required->Binary.data(), (uint64_t) required->Binary.size());
-            PaddingSha256ExecutorInput::DTO *buffer1 = PaddingSha256ExecutorInput::toDTO(required->PaddingSha256);
-            add_padding_sha256_inputs((void *)pSMRequestsOut, (void *) buffer1, required->PaddingSha256.size());
-            delete[] buffer1;
-            PaddingKKExecutorInput::DTO *buffer2 = PaddingKKExecutorInput::toDTO(required->PaddingKK);
-            add_padding_kk_inputs((void *)pSMRequestsOut, (void *) buffer2, required->PaddingKK.size());
-            delete[] buffer2;
-            PaddingPGExecutorInput::DTO *buffer3 = PaddingPGExecutorInput::toDTO(required->PaddingPG);
-            add_padding_pg_inputs((void *)pSMRequestsOut, (void *) buffer3, required->PaddingPG.size());
-            delete[] buffer3;
-            add_memory_inputs((void *)pSMRequestsOut, (void *)required->Memory.data(), (uint64_t) required->Memory.size());
-            add_arith_inputs((void *)pSMRequestsOut, (void *)required->Arith.data(), (uint64_t) required->Arith.size());
-            TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
-        }
-        if(pSMRequestsOut!=NULL){
-            TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
-
-            TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
-        }
-#endif
-
         if (proverRequest.result != ZKR_SUCCESS)
         {
             return;
@@ -505,13 +480,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         storageExecutor.execute(required->Storage, commitPols.Storage, required->PoseidonGFromST, required->ClimbKey);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
 
-//#ifndef __ZKEVM_SM__
-#ifdef __ZKEVM_SM__
+#ifndef __ZKEVM_SM__
         // Execute the Arith State Machine
         TimerStart(ARITH_SM_EXECUTE);
         arithExecutor.execute(required->Arith, commitPols.Arith);
         TimerStopAndLog(ARITH_SM_EXECUTE);
-#endif
 
         // Execute the Binary State Machine
         TimerStart(BINARY_SM_EXECUTE);
@@ -527,12 +500,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(MEMORY_SM_EXECUTE);
         memoryExecutor.execute(required->Memory, commitPols.Mem);
         TimerStopAndLog(MEMORY_SM_EXECUTE);
-//#endif
+
         // Execute the PaddingKK State Machine
         TimerStart(PADDING_KK_SM_EXECUTE);
         paddingKKExecutor.execute(required->PaddingKK, commitPols.PaddingKK, required->PaddingKKBit);
         TimerStopAndLog(PADDING_KK_SM_EXECUTE);
-
         // Execute the PaddingKKBit State Machine
         TimerStart(PADDING_KK_BIT_SM_EXECUTE);
         paddingKKBitExecutor.execute(required->PaddingKKBit, commitPols.PaddingKKBit, required->Bits2Field);
@@ -547,6 +519,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(KECCAK_F_SM_EXECUTE);
         keccakFExecutor.execute(required->KeccakF, commitPols.KeccakF);
         TimerStopAndLog(KECCAK_F_SM_EXECUTE);
+#endif
 
         // Execute the PaddingSha256 State Machine
         TimerStart(PADDING_SHA256_SM_EXECUTE);
@@ -577,6 +550,26 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(CLIMB_KEY_SM_EXECUTE);
         climbKeyExecutor.execute(required->ClimbKey, commitPols.ClimbKey);
         TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);
+
+        #ifdef __ZKEVM_SM__
+        if(pSMRequestsOut!=NULL){
+            TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
+            add_mem_align_inputs((void *)pSMRequestsOut, (void *)required->MemAlign.data(), (uint64_t) required->MemAlign.size());
+            add_binary_inputs((void *)pSMRequestsOut, (void *)required->Binary.data(), (uint64_t) required->Binary.size());
+            PaddingSha256ExecutorInput::DTO *buffer1 = PaddingSha256ExecutorInput::toDTO(required->PaddingSha256);
+            add_padding_sha256_inputs((void *)pSMRequestsOut, (void *) buffer1, required->PaddingSha256.size());
+            delete[] buffer1;
+            PaddingKKExecutorInput::DTO *buffer2 = PaddingKKExecutorInput::toDTO(required->PaddingKK);
+            add_padding_kk_inputs((void *)pSMRequestsOut, (void *) buffer2, required->PaddingKK.size());
+            delete[] buffer2;
+            PaddingPGExecutorInput::DTO *buffer3 = PaddingPGExecutorInput::toDTO(required->PaddingPG);
+            add_padding_pg_inputs((void *)pSMRequestsOut, (void *) buffer3, required->PaddingPG.size());
+            delete[] buffer3;
+            add_memory_inputs((void *)pSMRequestsOut, (void *)required->Memory.data(), (uint64_t) required->Memory.size());
+            add_arith_inputs((void *)pSMRequestsOut, (void *)required->Arith.data(), (uint64_t) required->Arith.size());
+            TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
+        }
+#endif
     }
     else
     {

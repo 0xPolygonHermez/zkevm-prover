@@ -46,15 +46,6 @@ public:
 
     /* Executor */
     void execute (vector<Bits2FieldExecutorInput> &input, Bits2FieldCommitPols &pols, vector<vector<Goldilocks::Element>> &required);
-    inline void execute(vector<Bits2FieldExecutorInput> &input, Goldilocks::Element * pAddress, void *pRequests){
-        PROVER_FORK_NAMESPACE::Bits2FieldCommitPols pols(pAddress, N);
-        vector<vector<Goldilocks::Element>> required;
-        execute(input, pols, required);
-#ifdef __ZKEVM_SM__
-        KeccakFExecutorInput::DTO *dto = KeccakFExecutorInput::toDTO(required);
-        add_keccak_f_inputs(pRequests, dto, (uint64_t) required.size());
-#endif
-    }
 
 private:
 

@@ -110,14 +110,7 @@ public:
 
     /* Executor */
     void execute (vector<PaddingKKExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
-    inline void execute (vector<PaddingKKExecutorInput> &input, Goldilocks::Element *pAddress, void *pRequests){
-        PROVER_FORK_NAMESPACE::PaddingKKCommitPols pols(pAddress, N);
-        vector<PaddingKKBitExecutorInput> required;
-        execute(input, pols, required);
-#ifdef __ZKEVM_SM__
-        add_padding_kk_bit_inputs(pRequests, (void *)required.data(), (uint64_t) required.size());
-#endif
-    }
+    
 };
 
 #endif
