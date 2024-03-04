@@ -65,9 +65,9 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
-    romBatch(config),
-    romBlob(config),
-    romCollection(config, true),
+    romBatch(config, BATCH),
+    romBlob(config, BLOB),
+    romCollection(config, COLLECTION),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
     rom_gas_limit_2147483647(config),

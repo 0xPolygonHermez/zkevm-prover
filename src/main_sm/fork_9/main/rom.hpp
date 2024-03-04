@@ -7,12 +7,21 @@
 #include "main_sm/fork_9/main/rom_constants.hpp"
 #include "main_sm/fork_9/main/rom_labels.hpp"
 #include "config.hpp"
+#include "zkassert.hpp"
 
 using json = nlohmann::json;
 using namespace std;
 
 namespace fork_9
 {
+
+enum RomType
+{
+    UNSPECIFIED = 0,
+    BATCH = 1,
+    BLOB = 2,
+    COLLECTION = 3
+};
 
 class Rom
 {
@@ -82,10 +91,10 @@ public:
     /* Labels */
     RomLabels labels;
 
-    bool collection; // set to true, if this is a test collection rom
+    RomType type;
 
     /* Constructor */
-    Rom (const Config &config, bool collection = false) :
+    Rom (const Config &config, RomType type) :
             config(config),
             size(0),
             line(NULL),
@@ -136,8 +145,10 @@ public:
             l2TxHashOffset(0),
             currentTxOffset(0),
             txStatusOffset(0),
-            collection(collection)
-            { };
+            type(type)
+            {
+                zkassert((type == BATCH) || (type == BLOB) || (type == COLLECTION));
+            };
 
     /* Destructor */
     ~Rom() { if (line!=NULL) unload(); }

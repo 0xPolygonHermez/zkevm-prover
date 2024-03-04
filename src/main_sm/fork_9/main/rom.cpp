@@ -26,8 +26,10 @@ void Rom::load(Goldilocks &fr, json &romJson)
     }
     loadLabels(fr, romJson["labels"]);
 
+    // finalizeExecution is a mandatory label for all types of roms
     labels.finalizeExecutionLabel     = getLabel(string("finalizeExecution"));
-    if (!collection)
+    
+    if (type == BATCH)
     {
         labels.checkAndSaveFromLabel      = getLabel(string("checkAndSaveFrom"));
         labels.ecrecoverStoreArgsLabel    = getLabel(string("ecrecover_store_args"));
@@ -46,7 +48,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     }
 
     // Get labels offsets
-    if (!collection)
+    if (type == BATCH)
     {
         memLengthOffset              = getMemoryOffset("memLength");
         txDestAddrOffset             = getMemoryOffset("txDestAddr");
@@ -100,7 +102,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     }
 
     // Load ROM integer constants
-    if (!collection)
+    if (type == BATCH)
     {
         constants.BATCH_DIFFICULTY                  = getConstant(romJson, "BATCH_DIFFICULTY");
         constants.TX_GAS_LIMIT                      = getConstant(romJson, "TX_GAS_LIMIT");
@@ -188,7 +190,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         constants.MAX_NONCE                           = getConstantL(romJson, "MAX_NONCE");
         constants.MAX_UINT_256                        = getConstantL(romJson, "MAX_UINT_256");
     }
-    else
+    else if (type == COLLECTION)
     {
         constants.MAX_CNT_STEPS_LIMIT               = U64Mask64;
         constants.MAX_CNT_ARITH_LIMIT               = U64Mask64;
@@ -443,7 +445,7 @@ uint64_t Rom::getMemoryOffset(const string &label) const
     it = memoryMap.find(label);
     if (it==memoryMap.end())
     {
-        zklog.error("Rom::getMemoryOffset() could not find label=" + label);
+        zklog.error("Rom::getMemoryOffset() could not find label=" + label + " type=" + to_string(type));
         exitProcess();
     }
     return it->second;
