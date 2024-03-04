@@ -33,6 +33,8 @@ jobs:
       run: ./build/zkProver -c testvectors/config_collection_native.json
     - name: run collection generated tests
       run: ./build/zkProver -c testvectors/config_collection_generated.json
+    - name: run collection rom tests
+      run: ./build/zkProver -c testvectors/config_collection_rom.json
     - name: run e2e tests
       run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
     - name: run snarkjs verification

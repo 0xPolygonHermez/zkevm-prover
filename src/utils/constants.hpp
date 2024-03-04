@@ -9,5 +9,6 @@
 #define U64Mask16 uint64_t(0xFFFF)
 #define U64Mask32 uint64_t(0xFFFFFFFF)
 #define U64Mask48 uint64_t(0xFFFFFFFFFFFF)
+#define U64Mask64 uint64_t(0xFFFFFFFFFFFFFFFF)
 
 #endif

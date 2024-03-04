@@ -71,6 +71,8 @@ public:
     uint64_t SMT_KEY_SC_LENGTH;
     uint64_t SMT_KEY_SC_STORAGE;
 
+    
+
     /* Constructor */
     Rom (const Config &config) :
             config(config),

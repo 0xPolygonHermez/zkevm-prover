@@ -112,7 +112,7 @@ public:
     uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
     bool logExecutorServerResponses;
     bool logExecutorServerTxs;
-    bool dontLoadRomOffsets;
+    bool loadCollectionRom;
 
     // Files
     string inputFile;

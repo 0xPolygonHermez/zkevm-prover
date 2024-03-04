@@ -5,6 +5,7 @@
 #include <string>
 #include "main_sm/fork_9/main/rom_line.hpp"
 #include "main_sm/fork_9/main/rom_constants.hpp"
+#include "main_sm/fork_9/main/rom_labels.hpp"
 #include "config.hpp"
 
 using json = nlohmann::json;
@@ -22,7 +23,7 @@ public:
     uint64_t size; // Size of the ROM program, i.e. number of ROM lines found in rom.json
     RomLine *line; // ROM program lines, parsed and stored in memory
     unordered_map<string, uint64_t> memoryMap; // Map of memory variables offsets
-    unordered_map<string, uint64_t> labels; // ROM lines labels, i.e. names of the ROM lines
+    unordered_map<string, uint64_t> labelsMap; // ROM lines labels, i.e. names of the ROM lines
 
     /* Offsets of memory variables */
     uint64_t memLengthOffset;
@@ -78,8 +79,13 @@ public:
     /* Constants */
     RomConstants constants;
 
+    /* Labels */
+    RomLabels labels;
+
+    bool collection; // set to true, if this is a test collection rom
+
     /* Constructor */
-    Rom (const Config &config) :
+    Rom (const Config &config, bool collection = false) :
             config(config),
             size(0),
             line(NULL),
@@ -129,7 +135,8 @@ public:
             txIndexOffset(0),
             l2TxHashOffset(0),
             currentTxOffset(0),
-            txStatusOffset(0)
+            txStatusOffset(0),
+            collection(collection)
             { };
 
     /* Destructor */

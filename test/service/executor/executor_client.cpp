@@ -451,7 +451,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         }
     }
 
-    if (input.publicInputsExtended.newStateRoot != 0)
+    if (!config.loadCollectionRom && (input.publicInputsExtended.newStateRoot != 0))
     {
         mpz_class newStateRootScalar;
         newStateRootScalar.set_str(Remove0xIfPresent(newStateRoot), 16);
@@ -506,8 +506,9 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
                 return false;
             }
         }
-        else if (NormalizeToNFormat(input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64) !=
-                 NormalizeToNFormat(newStateRoot, 64))
+        else if ( !config.loadCollectionRom &&
+                 ( NormalizeToNFormat(input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64) !=
+                   NormalizeToNFormat(newStateRoot, 64)) )
         {
             blockStateRoots.emplace_back(newStateRoot);
             vector<string>::iterator it = unique(blockStateRoots.begin(), blockStateRoots.end());

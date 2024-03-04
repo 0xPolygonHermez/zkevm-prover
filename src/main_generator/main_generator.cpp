@@ -308,7 +308,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     //code += "    int64_t incHashPos = 0;\n"; // TODO: Remove initialization to check it is initialized before being used
     
     if (forkID >=9)
-        code += "    Rom &rom = mainExecutor.romBatch;\n";
+        code += "    Rom &rom = config.loadCollectionRom ? mainExecutor.romCollection : mainExecutor.romBatch;\n";
     else
         code += "    Rom &rom = mainExecutor.rom;\n";
 
@@ -1010,7 +1010,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             {
                 code += "    // If addrRel is possitive, and the sum is too big, fail\n";
 
-                if (forkNamespace == "fork_4")
+                if (forkID == 4)
                 {
 
                     code += "    if (proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum > 382000)\n";
@@ -1038,7 +1038,10 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 }
                 else
                 {
-                    code += "    if ( addrRel >= " + to_string( ( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) - 2048 ) + ")\n";
+                    if (forkID < 9)
+                        code += "    if ( addrRel >= " + to_string( ( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) - 2048 ) + ")\n";
+                    else
+                        code += "    if ( addrRel >= " + to_string( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) + ")\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";

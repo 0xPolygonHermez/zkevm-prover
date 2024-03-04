@@ -67,6 +67,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     poseidon(poseidon),
     romBatch(config),
     romBlob(config),
+    romCollection(config, true),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
     rom_gas_limit_2147483647(config),
@@ -78,19 +79,18 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     TimerStart(ROM_LOAD);
 
-    // Load file contents into a json instance
+    // Load zkEVM ROM definition file
     json romJson;
     file2json("src/main_sm/fork_9/scripts/rom.json", romJson);
-
-    // Load ROM data from JSON data
     romBatch.load(fr, romJson);
 
-    // Load file contents into a json instance
-    romJson.clear();
+    // Load Blob ROM definition file
     file2json("src/main_sm/fork_9/scripts/rom_blob.json", romJson);
-
-    // Load ROM data from JSON data
     romBlob.load(fr, romJson);
+
+    // Load Collection (unit test) ROM definition file
+    file2json("src/main_sm/fork_9/scripts/rom_collection.json", romJson);
+    romCollection.load(fr, romJson);
 
 #ifdef MULTI_ROM_TEST
     romJson.clear();
@@ -103,24 +103,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     file2json("src/main_sm/fork_9/scripts/rom_gas_limit_89128960.json", romJson);
     rom_gas_limit_89128960.load(fr, romJson);
 #endif
-
-    // Get labels
-    Rom &rom = romBatch;
-    finalizeExecutionLabel     = rom.getLabel(string("finalizeExecution"));
-    checkAndSaveFromLabel      = rom.getLabel(string("checkAndSaveFrom"));
-    ecrecoverStoreArgsLabel    = rom.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel          = rom.getLabel(string("ecrecover_end"));
-    checkFirstTxTypeLabel      = rom.getLabel(string("checkFirstTxType"));
-    writeBlockInfoRootLabel    = rom.getLabel(string("writeBlockInfoRoot"));
-    verifyMerkleProofEndLabel  = rom.getLabel(string("verifyMerkleProofEnd"));
-    outOfCountersStepLabel     = rom.getLabel(string("outOfCountersStep"));
-    outOfCountersArithLabel    = rom.getLabel(string("outOfCountersArith"));
-    outOfCountersBinaryLabel   = rom.getLabel(string("outOfCountersBinary"));
-    outOfCountersKeccakLabel   = rom.getLabel(string("outOfCountersKeccak"));
-    outOfCountersSha256Label   = rom.getLabel(string("outOfCountersSha256"));
-    outOfCountersMemalignLabel = rom.getLabel(string("outOfCountersMemalign"));
-    outOfCountersPoseidonLabel = rom.getLabel(string("outOfCountersPoseidon"));
-    outOfCountersPaddingLabel  = rom.getLabel(string("outOfCountersPadding"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -183,8 +165,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
     
 #else
-
-    Rom &rom = romBatch;
+    Rom &rom = config.loadCollectionRom ? romCollection : romBatch;
 
 #endif
 
@@ -307,8 +288,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         ctx.mem[rom.timestampOffset] = fea;
     }
 
-    logError(ctx, "test");
-
     for (step=0; step<N_Max; step++)
     {
         if (bProcessBatch)
@@ -353,7 +332,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 #endif
 
-        if (zkPC == ecrecoverStoreArgsLabel && config.ECRecoverPrecalc)
+        if ((zkPC == rom.labels.ecrecoverStoreArgsLabel) && config.ECRecoverPrecalc)
         {
             zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);
             mpz_class signature_, r_, s_, v_;
@@ -368,7 +347,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.ecRecoverPrecalcBuffer.filled = true;
             }
         }
-        if (zkPC == ecrecoverEndLabel)
+        if (zkPC == rom.labels.ecrecoverEndLabel)
         {
             if ( ctx.ecRecoverPrecalcBuffer.filled)
             {
@@ -830,7 +809,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 addrRel += sp;
             }
             // Check addrRel is not too big
-            if ( addrRel >= ( ( (rom.line[zkPC].isMem==1) ? 0x20000 : 0x10000) - 2048 ) )
+            if ( addrRel >= ((rom.line[zkPC].isMem == 1) ? 0x20000 : 0x10000) )
 
             {
                 proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;
@@ -2248,7 +2227,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // overwrite 'op' when hiting 'checkFirstTxType' label
-        if ((zkPC == checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
+        if ((zkPC == rom.labels.checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
         {
             op0 = fr.one();
             op1 = fr.one();
@@ -2261,7 +2240,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // overwrite 'op' when hiting 'writeBlockInfoRoot' label
-        if ((zkPC == writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
+        if ((zkPC == rom.labels.writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
         {
             op0 = fr.zero();
             op1 = fr.zero();
@@ -4685,7 +4664,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setA A[nexti]=" + fea2string(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
 #endif
-        } else if (bUnsignedTransaction && (zkPC == checkAndSaveFromLabel)) {
+        } else if (bUnsignedTransaction && (zkPC == rom.labels.checkAndSaveFromLabel)) {
             // Set A register with input.from to process unsigned transactions
             mpz_class from(proverRequest.input.from);
             scalar2fea(fr, from, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti] );
@@ -4740,7 +4719,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             zklog.info("setC C[nexti]=" + fea2string(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
         }            
-        else if ((zkPC == verifyMerkleProofEndLabel) && proverRequest.input.bSkipVerifyL1InfoRoot)
+        else if ((zkPC == rom.labels.verifyMerkleProofEndLabel) && proverRequest.input.bSkipVerifyL1InfoRoot)
         {
             // Set C register with input.l1InfoRoot to process unsigned transactions
             scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot,
@@ -5011,7 +4990,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_JMP
             zklog.info("JMPN: op0=" + fr.toString(op0));
 #endif
-            if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersStepLabel))
+            if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersStepLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5020,7 +4999,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersArithLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersArithLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_ARITH) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5029,7 +5008,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersBinaryLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersBinaryLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_BINARY) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5038,7 +5017,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersKeccakLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersKeccakLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_KECCAK_F) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5047,7 +5026,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersSha256Label))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersSha256Label))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_SHA256_F) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5056,7 +5035,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersMemalignLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersMemalignLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_MEM_ALIGN) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5065,7 +5044,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPoseidonLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersPoseidonLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_POSEIDON_G) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5074,7 +5053,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPaddingLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersPaddingLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_PADDING_PG) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5410,7 +5389,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
         // When processing a txs batch, break the loop when done to complete the execution faster
-        if ( zkPC == finalizeExecutionLabel )
+        if ( zkPC == rom.labels.finalizeExecutionLabel )
         {
             if (ctx.lastStep != 0)
             {

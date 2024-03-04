@@ -95,7 +95,7 @@ The configuration parameters can be of different uses:
 |`logExecutorServerInputGasThreshold`|test|u64|Log main state machine executor input if gas/s < this value; active if this value is > 0|0|LOG_EXECUTOR_SERVER_INPUT_GAS_THRESHOLD|
 |`logExecutorServerResponses`|test|bool|Log executor server resonses|false|LOG_EXECUTOR_SERVER_RESPONSES|
 |`logExecutorServerTxs`|test|bool|Log executor server transactins details|true|LOG_EXECUTOR_SERVER_TXS|
-|`dontLoadRomOffsets`|test|bool|Avoid loading ROM offsets; used with experimental or testing ROM.json files|false|DONT_LOAD_ROM_OFFSETS|
+|`loadCollectionRom`|test|bool|Loads a test collection ROM to run a unit-test of the main executor; used with experimental or testing ROM.json files|false|LOAD_COLLECTION_ROM|
 |`inputFile`|test|string|Input file in some tests|"testvectors/batchProof/input_executor_0.json"|INPUT_FILE|
 |`inputFile2`|test|string|Second input file, used as the second input in genAggregatedProof|""|INPUT_FILE_2|
 |`outputPath`|test|string|Output directory for saved files|"output"|OUTPUT_PATH|
