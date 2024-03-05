@@ -165,6 +165,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
     
 #else
+
     Rom &rom = config.loadCollectionRom ? romCollection : romBatch;
 
 #endif

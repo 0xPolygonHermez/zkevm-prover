@@ -98,7 +98,7 @@ bool AggregatorClientMock::GenAggregatedProof (const aggregator::v1::GenAggregat
 #ifdef LOG_SERVICE
     cout << "AggregatorClientMock::GenAggregatedProof() called with request: " << genAggregatedProofRequest.DebugString() << endl;
 #endif
-    requestType = prt_genAggregatedProof;
+    requestType = prt_genAggregatedBatchProof;
 
     // Build the response as Ok, returning the UUID assigned by the prover to this request
     genAggregatedProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
@@ -205,7 +205,7 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
                 getProofResponse.set_recursive_proof("88888670604050723159190639550237390237901487387303122609079617855313706601738");
                 break;
             }
-            case prt_genAggregatedProof:
+            case prt_genAggregatedBatchProof:
             {
                 getProofResponse.set_recursive_proof("99999670604050723159190639550237390237901487387303122609079617855313706601738");
                 break;

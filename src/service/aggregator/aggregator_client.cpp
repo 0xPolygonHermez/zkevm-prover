@@ -619,7 +619,7 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
 #ifdef LOG_SERVICE
     zklog.info("AggregatorClient::GenAggregatedProof() called with request: " + genAggregatedProofRequest.DebugString());
 #endif
-    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genAggregatedProof);
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genAggregatedBatchProof);
     if (pProverRequest == NULL)
     {
         zklog.error("AggregatorClient::GenAggregatedProof() failed allocation a new ProveRequest");
@@ -816,7 +816,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     getProofResponse.set_recursive_proof(recursiveProof);
                     break;
                 }
-                case prt_genAggregatedProof:
+                case prt_genAggregatedBatchProof:
                 {
                     string recursiveProof = pProverRequest->aggregatedProofOutput.dump();
                     getProofResponse.set_recursive_proof(recursiveProof);

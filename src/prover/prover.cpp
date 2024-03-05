@@ -220,13 +220,13 @@ void *proverThread(void *arg)
         case prt_genBatchProof:
             pProver->genBatchProof(pProver->pCurrentRequest);
             break;
-        case prt_genAggregatedProof:
+        case prt_genAggregatedBatchProof:
             pProver->genAggregatedProof(pProver->pCurrentRequest);
             break;
         case prt_genFinalProof:
             pProver->genFinalProof(pProver->pCurrentRequest);
             break;
-        case prt_execute:
+        case prt_executeBatch:
             pProver->execute(pProver->pCurrentRequest);
             break;
         default:
@@ -678,7 +678,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     zkassert(config.generateProof());
     zkassert(pProverRequest != NULL);
-    zkassert(pProverRequest->type == prt_genAggregatedProof);
+    zkassert(pProverRequest->type == prt_genAggregatedBatchProof);
 
     TimerStart(PROVER_AGGREGATED_PROOF);
 

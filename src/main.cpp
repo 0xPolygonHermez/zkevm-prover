@@ -116,7 +116,7 @@ void runFileGenAggregatedProof(Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_genAggregatedProof);
+    ProverRequest proverRequest(fr, config, prt_genAggregatedBatchProof);
     if (config.inputFile.size() > 0)
     {
         file2json(config.inputFile, proverRequest.aggregatedProofInput1);
@@ -264,7 +264,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_execute);
+    ProverRequest proverRequest(fr, config, prt_executeBatch);
     if (config.inputFile.size() > 0)
     {
         json inputJson;
