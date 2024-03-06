@@ -10,6 +10,8 @@ service ExecutorService {
     /// Processes a batch
     rpc ProcessBatch(ProcessBatchRequest) returns (ProcessBatchResponse) {}
     rpc ProcessBatchV2(ProcessBatchRequestV2) returns (ProcessBatchResponseV2) {}
+    rpc ProcessBatchV3(ProcessBatchRequestV3) returns (ProcessBatchResponseV3) {}
+    rpc ProcessBlobInnerV3(ProcessBlobInnerRequestV3) returns (ProcessBlobInnerResponseV3) {}
     rpc ProcessStatelessBatchV2(ProcessStatelessBatchRequestV2) returns (ProcessBatchResponseV2) {}
     rpc GetFlushStatus (google.protobuf.Empty) returns (GetFlushStatusResponse) {}
 }
@@ -321,7 +323,7 @@ message L1DataV2 {
 
 message DebugV2 {
     uint64 gas_limit = 1;
-    bytes new_state_root = 2; 
+    bytes new_state_root = 2;
     bytes new_acc_input_hash = 3;
     bytes new_local_exit_root = 4;
     uint64 new_batch_num = 5;
@@ -890,4 +892,137 @@ enum ExecutorError {
     EXECUTOR_ERROR_INVALID_DATA_STREAM = 115;
     // EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE indicates that the provided update merkle tree is invalid, e.g. because the executor is configured not to write to database
     EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE = 116;
+    // EXECUTOR_ERROR_INVALID_PREVIOUS_L1_INFO_TREE_ROOT indicates that the input parameter previous_l1_info_tree_root is invalid
+    EXECUTOR_ERROR_INVALID_PREVIOUS_L1_INFO_TREE_ROOT = 117;
+    // EXECUTOR_ERROR_INVALID_FORCED_HASH_DATA indicates that the input parameter forced_hash_data is invalid
+    EXECUTOR_ERROR_INVALID_FORCED_HASH_DATA = 118;
+    // EXECUTOR_ERROR_INVALID_FORCED_DATA_GLOBAL_EXIT_ROOT indicates that the input parameter forced_data.global_exit_root is invalid
+    EXECUTOR_ERROR_INVALID_FORCED_DATA_GLOBAL_EXIT_ROOT = 119;
+    // EXECUTOR_ERROR_INVALID_FORCED_DATA_BLOCK_HASH_L1 indicates that the input parameter forced_data.block_hash_l1 is invalid
+    EXECUTOR_ERROR_INVALID_FORCED_DATA_BLOCK_HASH_L1 = 120;
+    // EXECUTOR_ERROR_INVALID_L1_DATA_V3_INITIAL_HISTORIC_ROOT indicates that the input parameter L1 Data initiali_historic_root is invalid
+    EXECUTOR_ERROR_INVALID_L1_DATA_V3_INITIAL_HISTORIC_ROOT = 121;
+}
+
+////////////////////////////////////////////////
+////////////  START V3 SECTION  ////////////////
+////////////////////////////////////////////////
+
+message ProcessBatchRequestV3 {
+    bytes old_state_root = 1;
+    bytes old_acc_input_hash = 2;
+    bytes previous_l1_info_tree_root = 3;
+    uint32 previous_l1_info_tree_index = 4;
+    uint64 chain_id = 5;
+    uint64 fork_id = 6;
+    bytes batch_l2_data = 7;
+    uint32 type = 8;
+    bytes forced_hash_data = 9;
+    ForcedData forced_data = 10;
+    string coinbase = 11;
+    uint32 update_merkle_tree = 12;
+    // flag to indicate that counters should not be taken into account
+    uint32 no_counters = 13;
+    // from is used for unsigned transactions with sender
+    string from = 14;
+    // flag to skip the restriction to start a batch with a changeL2Block transaction
+    uint32 skip_first_change_l2_block = 15;
+    // flag to skip writing the block info root in the state
+    uint32 skip_write_block_info_root = 16;
+    // lInfoTree information
+    map<uint32, L1DataV3> l1_info_tree_data = 17;
+    // For testing purposes only
+    map<string, string> db = 18;
+    map<string, string> contracts_bytecode = 19; // For debug/testing purpposes only. Don't fill this on production
+    TraceConfigV2 trace_config = 20;
+    string context_id = 21;
+    uint32 get_keys = 22; // if 1, the keys used to read or write storage values will be returned
+    // The state override set is an optional address-to-state mapping,
+    // where each entry specifies some state to be ephemerally overridden
+    // prior to executing the call.
+    map<string, OverrideAccountV2> state_override = 23;
+    DebugV2 debug = 24;
+}
+
+message L1DataV3 {
+    bytes global_exit_root = 1;
+    bytes block_hash_l1 = 2;
+    uint64 min_timestamp = 3;
+    repeated bytes smt_proof = 4;
+    bytes initial_historic_root = 5;
+}
+
+message ProcessBatchResponseV3 {
+    bytes new_state_root = 1;
+    bytes new_acc_input_hash = 2;
+    bytes new_local_exit_root = 3;
+    bytes new_last_timestamp = 4;
+    bytes current_l1_info_tree_root = 5;
+    uint32 current_l1_info_tree_index = 6;
+    uint32 cnt_keccak_hashes = 7;
+    uint32 cnt_poseidon_hashes = 8;
+    uint32 cnt_poseidon_paddings = 9;
+    uint32 cnt_mem_aligns = 10;
+    uint32 cnt_arithmetics = 11;
+    uint32 cnt_binaries = 12;
+    uint32 cnt_steps = 13;
+    uint32 cnt_sha256_hashes = 14;
+    repeated ProcessBlockResponseV2 block_responses = 15;
+    ExecutorError error = 16;
+    map<string, InfoReadWriteV2> read_write_addresses = 17;
+    uint64 flush_id = 18;
+    uint64 stored_flush_id = 19;
+    string prover_id = 20;
+    uint64 gas_used = 21;
+    repeated bytes smt_keys = 22;
+    repeated bytes program_keys = 23;
+    uint64 fork_id = 24;
+    uint32 invalid_batch = 25;
+    RomError error_rom = 26;
+    uint32 cnt_reserve_keccak_hashes = 27;
+    uint32 cnt_reserve_poseidon_hashes = 28;
+    uint32 cnt_reserve_poseidon_paddings = 29;
+    uint32 cnt_reserve_mem_aligns = 30;
+    uint32 cnt_reserve_arithmetics = 31;
+    uint32 cnt_reserve_binaries = 32;
+    uint32 cnt_reserve_steps = 33;
+    uint32 cnt_reserve_sha256_hashes = 34;
+}
+
+message ForcedData {
+    bytes global_exit_root = 1;
+    bytes block_hash_l1 = 2;
+    uint64 min_timestamp = 3;
+}
+
+message ProcessBlobInnerRequestV3 {
+    // inputs
+    bytes old_blob_state_root = 1;
+    bytes old_blob_acc_input_hash = 2;
+    uint64 old_num_blob = 3;
+    bytes old_state_root = 4;
+    uint64 fork_id = 5;
+    // belong to blobAccInputHash
+    uint32 last_l1_info_tree_index = 6;
+    bytes last_l1_info_tree_root = 7;
+    uint64 last_timestamp = 8;
+    string coinbase = 9;
+    bytes zk_gas_limit = 10;
+    uint32 type = 11;
+    bytes point_z = 12;
+    bytes point_y = 13;
+    bytes blob_data = 14;
+    bytes forced_hash_data = 15;
+}
+
+message ProcessBlobInnerResponseV3 {
+    // outputs
+    bytes new_blob_state_root = 1;
+    bytes new_blob_acc_input_hash = 2;
+    uint64 new_num_blob = 3;
+    bytes final_acc_batch_hash_data = 4;
+    bytes local_exit_root_from_blob = 5;
+    uint32 is_invalid = 6;
+    // extra
+    repeated bytes batch_data = 7;
 }
