@@ -148,7 +148,7 @@ The configuration parameters can be of different uses:
 |`blobInnerRecursive1Verifier`|production|string|BLOB_INNER_RECURSIVE1 verifier data file|config + "/blobinner_recursive1/blobinner_recursive1.verifier.dat"|BLOB_INNER_RECURSIVE1_VERIFIER|
 |`blobInnerRecursive1Verkey`|production|string|BLOB_INNER_RECURSIVE1 verification key file|config + "/blobinner_recursive1/blobinner_recursive1.verkey.json"|BLOB_INNER_RECURSIVE1_VERKEY|
 |`blobInnerRecursive1Exec`|production|string|BLOB_INNER_RECURSIVE1 exec file|config + "/blobinner_recursive1/blobinner_recursive1.exec"|BLOB_INNER_RECURSIVE1_EXEC|
-|`blobInnerRecursive1StarkInfo`|production|string|BLOB_INNER_RECURSIVE1 STARK info file|config + "/blobinner_recursive1/blobinner_recursive1.starkinfo.json"|BLOB_INNER_RECURSIVE1_STARK_INFO|
+|`blobInnerRecursive1StarkInfo`|production|string|BLOB_INNER_RECURSIVE1 stark info file|config + "/blobinner_recursive1/blobinner_recursive1.starkinfo.json"|BLOB_INNER_RECURSIVE1_STARK_INFO|
 |`blobOuterCmPols`|test|string|Saves commit polynomials into file|""|BLOB_OUTER_CM_POLS|
 |`blobOuterConstPols`|production|string|Saves constant polynomials into file|config + "/blobouter/blobouter.const"|BLOB_OUTER_CONST_POLS|
 |`blobOuterConstantsTree`|production|string|Constant polynomials tree file|config + "/blobouter/blobouter.consttree"|BLOB_OUTER_CONSTANTS_TREE|
