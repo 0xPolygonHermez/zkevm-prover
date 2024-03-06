@@ -315,6 +315,45 @@ void Executor::processBatch (ProverRequest &proverRequest)
     }
 }
 
+// Reduced version: only 1 evaluation is allocated, and some asserts are disabled
+void Executor::processBlobInner (ProverRequest &proverRequest)
+{
+    // Execute the Main State Machine
+    switch (proverRequest.input.publicInputsExtended.publicInputs.forkID)
+    {
+        case 9: // fork_9
+        {
+            {
+                //zklog.info("Executor::processBlobInner() fork 9 native");
+
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_9::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    zklog.error("Executor::processBlobInner() failed calling calloc(" + to_string(fork_9::CommitPols::pilSize()) + ")");
+                    exitProcess();
+                }
+                fork_9::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_9::MainExecRequired required;
+
+                mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
+        default:
+        {
+            zklog.error("Executor::processBlobInner() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
+            proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
+            return;
+        }
+    }
+}
+
 class ExecutorContext
 {
 public:
@@ -516,7 +555,7 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
         }
         else
         {
-            zklog.error("Executor::execute() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
+            zklog.error("Executor::executeBatch() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
             proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
@@ -640,7 +679,7 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
 
         if (proverRequest.result != ZKR_SUCCESS)
         {
-            zklog.error("Executor::execute() got from main execution proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
+            zklog.error("Executor::executeBatch() got from main execution proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
             return;
         }
 
@@ -703,12 +742,205 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
     }
 }
 
-void Executor::processBlobInner (ProverRequest &proverRequest)
-{
-    processBatch(proverRequest);
-}
-
+// Full version: all polynomials are evaluated, in all evaluations
 void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols)
 {
-    executeBatch(proverRequest, commitPols);
+    if (!config.executeInParallel)
+    {
+        // This instance will store all data required to execute the rest of State Machines
+        PROVER_FORK_NAMESPACE::MainExecRequired required;
+
+        // Execute the Main State Machine
+        TimerStart(MAIN_EXECUTOR_EXECUTE);
+        if (proverRequest.input.publicInputsExtended.publicInputs.forkID == PROVER_FORK_ID)
+        {
+            // Call the main executor
+            mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+
+            // Save input to <timestamp>.input.json after execution including dbReadLog
+            if (config.saveDbReadsToFile)
+            {
+                json inputJsonEx;
+                proverRequest.input.save(inputJsonEx, *proverRequest.dbReadLog);
+                json2file(inputJsonEx, proverRequest.inputDbFile());
+            }
+        }
+        else
+        {
+            zklog.error("Executor::executeBlobInner() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
+            proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
+        }
+        TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
+
+        if (proverRequest.result != ZKR_SUCCESS)
+        {
+            return;
+        }
+
+        // Execute the Padding PG State Machine
+        TimerStart(PADDING_PG_SM_EXECUTE);
+        paddingPGExecutor.execute(required.PaddingPG, commitPols.PaddingPG, required.PoseidonGFromPG);
+        TimerStopAndLog(PADDING_PG_SM_EXECUTE);
+
+        // Execute the Storage State Machine
+        TimerStart(STORAGE_SM_EXECUTE);
+        storageExecutor.execute(required.Storage, commitPols.Storage, required.PoseidonGFromST, required.ClimbKey);
+        TimerStopAndLog(STORAGE_SM_EXECUTE);
+
+        // Execute the Arith State Machine
+        TimerStart(ARITH_SM_EXECUTE);
+        arithExecutor.execute(required.Arith, commitPols.Arith);
+        TimerStopAndLog(ARITH_SM_EXECUTE);
+
+        // Execute the Binary State Machine
+        TimerStart(BINARY_SM_EXECUTE);
+        binaryExecutor.execute(required.Binary, commitPols.Binary);
+        TimerStopAndLog(BINARY_SM_EXECUTE);
+
+        // Execute the MemAlign State Machine
+        TimerStart(MEM_ALIGN_SM_EXECUTE);
+        memAlignExecutor.execute(required.MemAlign, commitPols.MemAlign);
+        TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);
+
+        // Execute the Memory State Machine
+        TimerStart(MEMORY_SM_EXECUTE);
+        memoryExecutor.execute(required.Memory, commitPols.Mem);
+        TimerStopAndLog(MEMORY_SM_EXECUTE);
+
+        // Execute the PaddingKK State Machine
+        TimerStart(PADDING_KK_SM_EXECUTE);
+        paddingKKExecutor.execute(required.PaddingKK, commitPols.PaddingKK, required.PaddingKKBit);
+        TimerStopAndLog(PADDING_KK_SM_EXECUTE);
+
+        // Execute the PaddingKKBit State Machine
+        TimerStart(PADDING_KK_BIT_SM_EXECUTE);
+        paddingKKBitExecutor.execute(required.PaddingKKBit, commitPols.PaddingKKBit, required.Bits2Field);
+        TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE);
+
+        // Execute the Bits2Field State Machine
+        TimerStart(BITS2FIELD_SM_EXECUTE);
+        bits2FieldExecutor.execute(required.Bits2Field, commitPols.Bits2Field, required.KeccakF);
+        TimerStopAndLog(BITS2FIELD_SM_EXECUTE);
+
+        // Execute the Keccak F State Machine
+        TimerStart(KECCAK_F_SM_EXECUTE);
+        keccakFExecutor.execute(required.KeccakF, commitPols.KeccakF);
+        TimerStopAndLog(KECCAK_F_SM_EXECUTE);
+
+        // Execute the PaddingSha256 State Machine
+        TimerStart(PADDING_SHA256_SM_EXECUTE);
+        paddingSha256Executor.execute(required.PaddingSha256, commitPols.PaddingSha256, required.PaddingSha256Bit);
+        TimerStopAndLog(PADDING_SHA256_SM_EXECUTE);
+
+        // Execute the PaddingSha256Bit State Machine
+        TimerStart(PADDING_SHA256_BIT_SM_EXECUTE);
+        paddingSha256BitExecutor.execute(required.PaddingSha256Bit, commitPols.PaddingSha256Bit, required.Bits2FieldSha256);
+        TimerStopAndLog(PADDING_SHA256_BIT_SM_EXECUTE);
+
+        // Execute the Bits2FieldSha256 State Machine
+        TimerStart(BITS2FIELDSHA256_SM_EXECUTE);
+        bits2FieldSha256Executor.execute(required.Bits2FieldSha256, commitPols.Bits2FieldSha256, required.Sha256F);
+        TimerStopAndLog(BITS2FIELDSHA256_SM_EXECUTE);
+
+        // Excute the Sha256 F State Machine
+        TimerStart(SHA256_F_SM_EXECUTE);
+        sha256FExecutor.execute(required.Sha256F, commitPols.Sha256F);
+        TimerStopAndLog(SHA256_F_SM_EXECUTE);
+
+        // Execute the PoseidonG State Machine
+        TimerStart(POSEIDON_G_SM_EXECUTE);
+        poseidonGExecutor.execute(required.PoseidonG, required.PoseidonGFromPG, required.PoseidonGFromST, commitPols.PoseidonG);
+        TimerStopAndLog(POSEIDON_G_SM_EXECUTE);
+
+        // Execute the ClimbKey State Machine
+        TimerStart(CLIMB_KEY_SM_EXECUTE);
+        climbKeyExecutor.execute(required.ClimbKey, commitPols.ClimbKey);
+        TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);
+    }
+    else
+    {
+        // This instance will store all data required to execute the rest of State Machines
+        PROVER_FORK_NAMESPACE::MainExecRequired required;
+        ExecutorContext executorContext;
+        executorContext.pExecutor = this;
+        executorContext.pCommitPols = &commitPols;
+        executorContext.pRequired = &required;
+
+        // Execute the Main State Machine
+        TimerStart(MAIN_EXECUTOR_EXECUTE);
+        mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+
+        // Save input to <timestamp>.input.json after execution including dbReadLog
+        if (config.saveDbReadsToFile)
+        {
+            json inputJsonEx;
+            proverRequest.input.save(inputJsonEx, *proverRequest.dbReadLog);
+            json2file(inputJsonEx, proverRequest.inputDbFile());
+        }
+
+        TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
+
+        if (proverRequest.result != ZKR_SUCCESS)
+        {
+            zklog.error("Executor::executeBlobInner() got from main execution proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
+            return;
+        }
+
+        // Execute the Storage State Machines
+        pthread_t storageThread;
+        pthread_create(&storageThread, NULL, StorageThread, &executorContext);
+
+        // Execute the Padding PG
+        pthread_t paddingPGThread;
+        pthread_create(&paddingPGThread, NULL, PaddingPGThread, &executorContext);
+
+        // Execute the Arith State Machine, in parallel
+        pthread_t arithThread;
+        pthread_create(&arithThread, NULL, ArithThread, &executorContext);
+
+        // Execute the Binary State Machine, in parallel
+        pthread_t binaryThread;
+        pthread_create(&binaryThread, NULL, BinaryThread, &executorContext);
+
+        // Execute the Mem Align State Machine, in parallel
+        pthread_t memAlignThread;
+        pthread_create(&memAlignThread, NULL, MemAlignThread, &executorContext);
+
+        // Execute the Memory State Machine, in parallel
+        pthread_t memoryThread;
+        pthread_create(&memoryThread, NULL, MemoryThread, &executorContext);
+
+        // Execute the PaddingKK, PaddingKKBit, Bits2Field, Keccak F
+        pthread_t keccakThread;
+        pthread_create(&keccakThread, NULL, KeccakThread, &executorContext);
+
+        // Execute the PaddingSha256, PaddingSha256Bit, Bits2FieldSha256, Sha256 F
+        pthread_t sha256Thread;
+        pthread_create(&sha256Thread, NULL, Sha256Thread, &executorContext);
+
+        // Wait for the Storage SM threads
+        pthread_join(storageThread, NULL);
+
+        // Execute the ClimKey State Machines (now that Storage is done)
+        pthread_t climbKeyThread;
+        pthread_create(&climbKeyThread, NULL, ClimbKeyThread, &executorContext);
+
+        // Wait for the PaddingPG SM threads
+        pthread_join(paddingPGThread, NULL);
+
+        // Execute the PoseidonG State Machine (now that Storage and PaddingPG are done)
+        pthread_t poseidonThread;
+        pthread_create(&poseidonThread, NULL, PoseidonThread, &executorContext);
+
+        // Wait for the parallel SM threads
+        pthread_join(binaryThread, NULL);
+        pthread_join(memAlignThread, NULL);
+        pthread_join(memoryThread, NULL);
+        pthread_join(arithThread, NULL);
+        pthread_join(poseidonThread, NULL);
+        pthread_join(keccakThread, NULL);
+        pthread_join(sha256Thread, NULL);
+        pthread_join(climbKeyThread, NULL);
+
+    }
 }
