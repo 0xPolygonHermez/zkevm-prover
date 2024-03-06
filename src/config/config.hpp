@@ -165,6 +165,11 @@ public:
     string recursive1StarkInfo;
     string recursive2StarkInfo;
     string recursivefStarkInfo;
+    string zkevmCHelpers;
+    string c12aCHelpers;
+    string recursive1CHelpers;
+    string recursive2CHelpers;
+    string recursivefCHelpers;
 
     // Database
     string databaseURL;
