@@ -17,6 +17,7 @@ using json = nlohmann::json;
 // We keep a security margin for other small keccaks, padding bytes, etc. = 60000
 // This max length is checked in preprocessTxs()
 #define MAX_BATCH_L2_DATA_SIZE (120000)
+#define MAX_BLOB_DATA_SIZE (128*1024)
 
 class L1Data
 {

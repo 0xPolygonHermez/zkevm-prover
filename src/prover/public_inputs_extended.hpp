@@ -17,8 +17,13 @@ public:
     uint32_t  newBatchNum;
     mpz_class newLocalExitRoot;
     mpz_class newStateRoot;
+
+    // Blob inner fields
+    mpz_class newBlobStateRoot;
+    mpz_class newBlobAccInputHash;
+    uint64_t  newBlobNum;
     
-    PublicInputsExtended() : newBatchNum(0) {};
+    PublicInputsExtended() : newBatchNum(0), newBlobNum(0) {};
 
     bool operator==(PublicInputsExtended &publicInputsExtended)
     {

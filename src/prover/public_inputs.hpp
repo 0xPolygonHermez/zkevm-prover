@@ -39,7 +39,29 @@ public:
     string     witness; // Byte array of the SMT required data in witness (binary) format
     string     dataStream; // Byte array of the batch input required data in Data Streadm (binary) format
 
-    PublicInputs() : forkID(0), previousL1InfoTreeIndex(0), oldBatchNum(0), chainID(0), type(0), timestamp(0), timestampLimit(0)
+    // Blob inner data // Used when forkID >= 9 (V3)
+    mpz_class  oldBlobStateRoot;
+    mpz_class  oldBlobAccInputHash;
+    uint64_t   oldBlobNum;
+    uint32_t   lastL1InfoTreeIndex;
+    mpz_class  lastL1InfoTreeRoot;
+    uint64_t   lastTimestamp;
+    mpz_class  zkGasLimit;
+    mpz_class  pointZ;
+    mpz_class  pointY;
+    string     blobData;
+
+    PublicInputs() :
+        forkID(0),
+        previousL1InfoTreeIndex(0),
+        oldBatchNum(0),
+        chainID(0),
+        type(0),
+        timestamp(0),
+        timestampLimit(0),
+        oldBlobNum(0),
+        lastL1InfoTreeIndex(0),
+        lastTimestamp(0)
     {
         aggregatorAddress.set_str("f39fd6e51aad88f6f4ce6ab8827279cfffb92266", 16); // Default aggregator address
     }

@@ -17,6 +17,7 @@
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Contract_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ContractV2_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DebugV2_executor_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DebugV3_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ForcedData_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FullTrace_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FullTraceV2_executor_2eproto;
@@ -267,6 +268,10 @@ class ProcessBlobInnerRequestV3DefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBlobInnerRequestV3> _instance;
 } _ProcessBlobInnerRequestV3_default_instance_;
+class DebugV3DefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<DebugV3> _instance;
+} _DebugV3_default_instance_;
 class ProcessBlobInnerResponseV3DefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBlobInnerResponseV3> _instance;
@@ -314,6 +319,20 @@ static void InitDefaultsscc_info_DebugV2_executor_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DebugV2_executor_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_DebugV2_executor_2eproto}, {}};
+
+static void InitDefaultsscc_info_DebugV3_executor_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::executor::v1::_DebugV3_default_instance_;
+    new (ptr) ::executor::v1::DebugV3();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+  ::executor::v1::DebugV3::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DebugV3_executor_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_DebugV3_executor_2eproto}, {}};
 
 static void InitDefaultsscc_info_ForcedData_executor_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -851,8 +870,9 @@ static void InitDefaultsscc_info_ProcessBlobInnerRequestV3_executor_2eproto() {
   ::executor::v1::ProcessBlobInnerRequestV3::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessBlobInnerRequestV3_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_ProcessBlobInnerRequestV3_executor_2eproto}, {}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBlobInnerRequestV3_executor_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ProcessBlobInnerRequestV3_executor_2eproto}, {
+      &scc_info_DebugV3_executor_2eproto.base,}};
 
 static void InitDefaultsscc_info_ProcessBlobInnerResponseV3_executor_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -1044,7 +1064,7 @@ static void InitDefaultsscc_info_TransactionStepV2_StorageEntry_DoNotUse_executo
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto}, {}};
 
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_executor_2eproto[53];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_executor_2eproto[54];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_executor_2eproto[2];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_executor_2eproto = nullptr;
 
@@ -1751,6 +1771,16 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerRequestV3, point_y_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerRequestV3, blob_data_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerRequestV3, forced_hash_data_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerRequestV3, context_id_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerRequestV3, debug_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::executor::v1::DebugV3, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::executor::v1::DebugV3, new_blob_state_root_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::DebugV3, new_blob_acc_input_hash_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::DebugV3, new_blob_num_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerResponseV3, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1763,6 +1793,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerResponseV3, local_exit_root_from_blob_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerResponseV3, is_invalid_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerResponseV3, batch_data_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBlobInnerResponseV3, error_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, 7, sizeof(::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse)},
@@ -1817,7 +1848,8 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 635, -1, sizeof(::executor::v1::ProcessBatchResponseV3)},
   { 674, -1, sizeof(::executor::v1::ForcedData)},
   { 682, -1, sizeof(::executor::v1::ProcessBlobInnerRequestV3)},
-  { 702, -1, sizeof(::executor::v1::ProcessBlobInnerResponseV3)},
+  { 704, -1, sizeof(::executor::v1::DebugV3)},
+  { 712, -1, sizeof(::executor::v1::ProcessBlobInnerResponseV3)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -1873,6 +1905,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchResponseV3_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ForcedData_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBlobInnerRequestV3_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_DebugV3_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBlobInnerResponseV3_default_instance_),
 };
 
@@ -2160,7 +2193,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "\002 \001(\0132\034.executor.v1.InfoReadWriteV2:\0028\001\""
   "T\n\nForcedData\022\030\n\020global_exit_root\030\001 \001(\014\022"
   "\025\n\rblock_hash_l1\030\002 \001(\014\022\025\n\rmin_timestamp\030"
-  "\003 \001(\004\"\366\002\n\031ProcessBlobInnerRequestV3\022\033\n\023o"
+  "\003 \001(\004\"\257\003\n\031ProcessBlobInnerRequestV3\022\033\n\023o"
   "ld_blob_state_root\030\001 \001(\014\022\037\n\027old_blob_acc"
   "_input_hash\030\002 \001(\014\022\024\n\014old_num_blob\030\003 \001(\004\022"
   "\026\n\016old_state_root\030\004 \001(\014\022\017\n\007fork_id\030\005 \001(\004"
@@ -2169,192 +2202,207 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "amp\030\010 \001(\004\022\020\n\010coinbase\030\t \001(\t\022\024\n\014zk_gas_li"
   "mit\030\n \001(\014\022\014\n\004type\030\013 \001(\r\022\017\n\007point_z\030\014 \001(\014"
   "\022\017\n\007point_y\030\r \001(\014\022\021\n\tblob_data\030\016 \001(\014\022\030\n\020"
-  "forced_hash_data\030\017 \001(\014\"\336\001\n\032ProcessBlobIn"
-  "nerResponseV3\022\033\n\023new_blob_state_root\030\001 \001"
-  "(\014\022\037\n\027new_blob_acc_input_hash\030\002 \001(\014\022\024\n\014n"
-  "ew_num_blob\030\003 \001(\004\022!\n\031final_acc_batch_has"
-  "h_data\030\004 \001(\014\022!\n\031local_exit_root_from_blo"
-  "b\030\005 \001(\014\022\022\n\nis_invalid\030\006 \001(\r\022\022\n\nbatch_dat"
-  "a\030\007 \003(\014*\275\n\n\010RomError\022\031\n\025ROM_ERROR_UNSPEC"
-  "IFIED\020\000\022\026\n\022ROM_ERROR_NO_ERROR\020\001\022\030\n\024ROM_E"
-  "RROR_OUT_OF_GAS\020\002\022\034\n\030ROM_ERROR_STACK_OVE"
-  "RFLOW\020\003\022\035\n\031ROM_ERROR_STACK_UNDERFLOW\020\004\022$"
-  "\n ROM_ERROR_MAX_CODE_SIZE_EXCEEDED\020\005\022(\n$"
-  "ROM_ERROR_CONTRACT_ADDRESS_COLLISION\020\006\022 "
-  "\n\034ROM_ERROR_EXECUTION_REVERTED\020\007\022\"\n\036ROM_"
-  "ERROR_OUT_OF_COUNTERS_STEP\020\010\022$\n ROM_ERRO"
-  "R_OUT_OF_COUNTERS_KECCAK\020\t\022$\n ROM_ERROR_"
-  "OUT_OF_COUNTERS_BINARY\020\n\022!\n\035ROM_ERROR_OU"
-  "T_OF_COUNTERS_MEM\020\013\022#\n\037ROM_ERROR_OUT_OF_"
-  "COUNTERS_ARITH\020\014\022%\n!ROM_ERROR_OUT_OF_COU"
-  "NTERS_PADDING\020\r\022&\n\"ROM_ERROR_OUT_OF_COUN"
-  "TERS_POSEIDON\020\016\022!\n\035ROM_ERROR_OUT_OF_COUN"
-  "TERS_SHA\020\017\022\032\n\026ROM_ERROR_INVALID_JUMP\020\020\022\034"
-  "\n\030ROM_ERROR_INVALID_OPCODE\020\021\022\034\n\030ROM_ERRO"
-  "R_INVALID_STATIC\020\022\022(\n$ROM_ERROR_INVALID_"
-  "BYTECODE_STARTS_EF\020\023\022)\n%ROM_ERROR_INTRIN"
-  "SIC_INVALID_SIGNATURE\020\024\022(\n$ROM_ERROR_INT"
-  "RINSIC_INVALID_CHAIN_ID\020\025\022%\n!ROM_ERROR_I"
-  "NTRINSIC_INVALID_NONCE\020\026\022)\n%ROM_ERROR_IN"
-  "TRINSIC_INVALID_GAS_LIMIT\020\027\022\'\n#ROM_ERROR"
-  "_INTRINSIC_INVALID_BALANCE\020\030\022/\n+ROM_ERRO"
-  "R_INTRINSIC_INVALID_BATCH_GAS_LIMIT\020\031\022+\n"
-  "\'ROM_ERROR_INTRINSIC_INVALID_SENDER_CODE"
-  "\020\032\022\'\n#ROM_ERROR_INTRINSIC_TX_GAS_OVERFLO"
-  "W\020\033\022 \n\034ROM_ERROR_BATCH_DATA_TOO_BIG\020\034\022!\n"
-  "\035ROM_ERROR_UNSUPPORTED_FORK_ID\020\035\022\031\n\025ROM_"
-  "ERROR_INVALID_RLP\020\036\022,\n(ROM_ERROR_INVALID"
-  "_DECODE_CHANGE_L2_BLOCK\020\037\0222\n.ROM_ERROR_I"
-  "NVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK\020 \0228\n"
-  "4ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_LI"
-  "MIT_TIMESTAMP\020!\0226\n2ROM_ERROR_INVALID_TX_"
-  "CHANGE_L2_BLOCK_MIN_TIMESTAMP\020\"*\311-\n\rExec"
-  "utorError\022\036\n\032EXECUTOR_ERROR_UNSPECIFIED\020"
-  "\000\022\033\n\027EXECUTOR_ERROR_NO_ERROR\020\001\022\033\n\027EXECUT"
-  "OR_ERROR_DB_ERROR\020\002\0222\n.EXECUTOR_ERROR_SM"
-  "_MAIN_COUNTERS_OVERFLOW_STEPS\020\003\0223\n/EXECU"
-  "TOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_KECC"
-  "AK\020\004\0223\n/EXECUTOR_ERROR_SM_MAIN_COUNTERS_"
-  "OVERFLOW_BINARY\020\005\0220\n,EXECUTOR_ERROR_SM_M"
-  "AIN_COUNTERS_OVERFLOW_MEM\020\006\0222\n.EXECUTOR_"
-  "ERROR_SM_MAIN_COUNTERS_OVERFLOW_ARITH\020\007\022"
-  "4\n0EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERF"
-  "LOW_PADDING\020\010\0225\n1EXECUTOR_ERROR_SM_MAIN_"
-  "COUNTERS_OVERFLOW_POSEIDON\020\t\022&\n\"EXECUTOR"
-  "_ERROR_UNSUPPORTED_FORK_ID\020\n\022#\n\037EXECUTOR"
-  "_ERROR_BALANCE_MISMATCH\020\013\022\035\n\031EXECUTOR_ER"
-  "ROR_FEA2SCALAR\020\014\022\030\n\024EXECUTOR_ERROR_TOS32"
-  "\020\r\022.\n*EXECUTOR_ERROR_SM_MAIN_INVALID_UNS"
-  "IGNED_TX\020\016\022.\n*EXECUTOR_ERROR_SM_MAIN_INV"
-  "ALID_NO_COUNTERS\020\017\0229\n5EXECUTOR_ERROR_SM_"
-  "MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO\020\020\022/\n"
-  "+EXECUTOR_ERROR_SM_MAIN_ADDRESS_OUT_OF_R"
-  "ANGE\020\021\022+\n\'EXECUTOR_ERROR_SM_MAIN_ADDRESS"
-  "_NEGATIVE\020\022\022.\n*EXECUTOR_ERROR_SM_MAIN_ST"
-  "ORAGE_INVALID_KEY\020\023\022 \n\034EXECUTOR_ERROR_SM"
-  "_MAIN_HASHK\020\024\0222\n.EXECUTOR_ERROR_SM_MAIN_"
-  "HASHK_SIZE_OUT_OF_RANGE\020\025\0222\n.EXECUTOR_ER"
-  "ROR_SM_MAIN_HASHK_POSITION_NEGATIVE\020\026\022@\n"
-  "<EXECUTOR_ERROR_SM_MAIN_HASHK_POSITION_P"
-  "LUS_SIZE_OUT_OF_RANGE\020\027\0228\n4EXECUTOR_ERRO"
-  "R_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND\020"
-  "\030\0224\n0EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_"
-  "NOT_COMPLETED\020\031\022 \n\034EXECUTOR_ERROR_SM_MAI"
-  "N_HASHP\020\032\0222\n.EXECUTOR_ERROR_SM_MAIN_HASH"
-  "P_SIZE_OUT_OF_RANGE\020\033\0222\n.EXECUTOR_ERROR_"
-  "SM_MAIN_HASHP_POSITION_NEGATIVE\020\034\022@\n<EXE"
-  "CUTOR_ERROR_SM_MAIN_HASHP_POSITION_PLUS_"
-  "SIZE_OUT_OF_RANGE\020\035\0228\n4EXECUTOR_ERROR_SM"
-  "_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND\020\036\0224\n"
-  "0EXECUTOR_ERROR_SM_MAIN_HASHPDIGEST_NOT_"
-  "COMPLETED\020\037\0227\n3EXECUTOR_ERROR_SM_MAIN_ME"
-  "MALIGN_OFFSET_OUT_OF_RANGE\020 \022*\n&EXECUTOR"
-  "_ERROR_SM_MAIN_MULTIPLE_FREEIN\020!\022!\n\035EXEC"
-  "UTOR_ERROR_SM_MAIN_ASSERT\020\"\022!\n\035EXECUTOR_"
-  "ERROR_SM_MAIN_MEMORY\020#\0220\n,EXECUTOR_ERROR"
-  "_SM_MAIN_STORAGE_READ_MISMATCH\020$\0221\n-EXEC"
-  "UTOR_ERROR_SM_MAIN_STORAGE_WRITE_MISMATC"
-  "H\020%\022/\n+EXECUTOR_ERROR_SM_MAIN_HASHK_VALU"
-  "E_MISMATCH\020&\0221\n-EXECUTOR_ERROR_SM_MAIN_H"
-  "ASHK_PADDING_MISMATCH\020\'\022.\n*EXECUTOR_ERRO"
-  "R_SM_MAIN_HASHK_SIZE_MISMATCH\020(\0223\n/EXECU"
-  "TOR_ERROR_SM_MAIN_HASHKLEN_LENGTH_MISMAT"
-  "CH\020)\0220\n,EXECUTOR_ERROR_SM_MAIN_HASHKLEN_"
-  "CALLED_TWICE\020*\0220\n,EXECUTOR_ERROR_SM_MAIN"
-  "_HASHKDIGEST_NOT_FOUND\020+\0226\n2EXECUTOR_ERR"
-  "OR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH\020,"
-  "\0223\n/EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_C"
-  "ALLED_TWICE\020-\022/\n+EXECUTOR_ERROR_SM_MAIN_"
-  "HASHP_VALUE_MISMATCH\020.\0221\n-EXECUTOR_ERROR"
-  "_SM_MAIN_HASHP_PADDING_MISMATCH\020/\022.\n*EXE"
-  "CUTOR_ERROR_SM_MAIN_HASHP_SIZE_MISMATCH\020"
-  "0\0223\n/EXECUTOR_ERROR_SM_MAIN_HASHPLEN_LEN"
-  "GTH_MISMATCH\0201\0220\n,EXECUTOR_ERROR_SM_MAIN"
-  "_HASHPLEN_CALLED_TWICE\0202\0226\n2EXECUTOR_ERR"
-  "OR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH\0203"
-  "\0223\n/EXECUTOR_ERROR_SM_MAIN_HASHPDIGEST_C"
-  "ALLED_TWICE\0204\022)\n%EXECUTOR_ERROR_SM_MAIN_"
-  "ARITH_MISMATCH\0205\0223\n/EXECUTOR_ERROR_SM_MA"
-  "IN_ARITH_ECRECOVER_MISMATCH\0206\022.\n*EXECUTO"
-  "R_ERROR_SM_MAIN_BINARY_ADD_MISMATCH\0207\022.\n"
-  "*EXECUTOR_ERROR_SM_MAIN_BINARY_SUB_MISMA"
-  "TCH\0208\022-\n)EXECUTOR_ERROR_SM_MAIN_BINARY_L"
-  "T_MISMATCH\0209\022.\n*EXECUTOR_ERROR_SM_MAIN_B"
-  "INARY_SLT_MISMATCH\020:\022-\n)EXECUTOR_ERROR_S"
-  "M_MAIN_BINARY_EQ_MISMATCH\020;\022.\n*EXECUTOR_"
-  "ERROR_SM_MAIN_BINARY_AND_MISMATCH\020<\022-\n)E"
-  "XECUTOR_ERROR_SM_MAIN_BINARY_OR_MISMATCH"
-  "\020=\022.\n*EXECUTOR_ERROR_SM_MAIN_BINARY_XOR_"
-  "MISMATCH\020>\0222\n.EXECUTOR_ERROR_SM_MAIN_MEM"
-  "ALIGN_WRITE_MISMATCH\020\?\0223\n/EXECUTOR_ERROR"
-  "_SM_MAIN_MEMALIGN_WRITE8_MISMATCH\020@\0221\n-E"
-  "XECUTOR_ERROR_SM_MAIN_MEMALIGN_READ_MISM"
-  "ATCH\020A\022,\n(EXECUTOR_ERROR_SM_MAIN_JMPN_OU"
-  "T_OF_RANGE\020B\0222\n.EXECUTOR_ERROR_SM_MAIN_H"
-  "ASHK_READ_OUT_OF_RANGE\020C\0222\n.EXECUTOR_ERR"
-  "OR_SM_MAIN_HASHP_READ_OUT_OF_RANGE\020D\022)\n%"
-  "EXECUTOR_ERROR_INVALID_OLD_STATE_ROOT\020E\022"
-  "-\n)EXECUTOR_ERROR_INVALID_OLD_ACC_INPUT_"
-  "HASH\020F\022#\n\037EXECUTOR_ERROR_INVALID_CHAIN_I"
-  "D\020G\022(\n$EXECUTOR_ERROR_INVALID_BATCH_L2_D"
-  "ATA\020H\022+\n\'EXECUTOR_ERROR_INVALID_GLOBAL_E"
-  "XIT_ROOT\020I\022#\n\037EXECUTOR_ERROR_INVALID_COI"
-  "NBASE\020J\022\037\n\033EXECUTOR_ERROR_INVALID_FROM\020K"
-  "\022!\n\035EXECUTOR_ERROR_INVALID_DB_KEY\020L\022#\n\037E"
-  "XECUTOR_ERROR_INVALID_DB_VALUE\020M\0221\n-EXEC"
-  "UTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KE"
-  "Y\020N\0223\n/EXECUTOR_ERROR_INVALID_CONTRACTS_"
-  "BYTECODE_VALUE\020O\022\"\n\036EXECUTOR_ERROR_INVAL"
-  "ID_GET_KEY\020P\0223\n/EXECUTOR_ERROR_SM_MAIN_C"
-  "OUNTERS_OVERFLOW_SHA256\020Q\022 \n\034EXECUTOR_ER"
-  "ROR_SM_MAIN_HASHS\020R\0222\n.EXECUTOR_ERROR_SM"
-  "_MAIN_HASHS_SIZE_OUT_OF_RANGE\020S\0222\n.EXECU"
-  "TOR_ERROR_SM_MAIN_HASHS_POSITION_NEGATIV"
-  "E\020T\022@\n<EXECUTOR_ERROR_SM_MAIN_HASHS_POSI"
-  "TION_PLUS_SIZE_OUT_OF_RANGE\020U\0228\n4EXECUTO"
-  "R_ERROR_SM_MAIN_HASHSDIGEST_ADDRESS_NOT_"
-  "FOUND\020V\0224\n0EXECUTOR_ERROR_SM_MAIN_HASHSD"
-  "IGEST_NOT_COMPLETED\020W\022/\n+EXECUTOR_ERROR_"
-  "SM_MAIN_HASHS_VALUE_MISMATCH\020X\0221\n-EXECUT"
-  "OR_ERROR_SM_MAIN_HASHS_PADDING_MISMATCH\020"
-  "Y\022.\n*EXECUTOR_ERROR_SM_MAIN_HASHS_SIZE_M"
-  "ISMATCH\020Z\0223\n/EXECUTOR_ERROR_SM_MAIN_HASH"
-  "SLEN_LENGTH_MISMATCH\020[\0220\n,EXECUTOR_ERROR"
-  "_SM_MAIN_HASHSLEN_CALLED_TWICE\020\\\0220\n,EXEC"
-  "UTOR_ERROR_SM_MAIN_HASHSDIGEST_NOT_FOUND"
-  "\020]\0226\n2EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST"
-  "_DIGEST_MISMATCH\020^\0223\n/EXECUTOR_ERROR_SM_"
-  "MAIN_HASHSDIGEST_CALLED_TWICE\020_\0222\n.EXECU"
-  "TOR_ERROR_SM_MAIN_HASHS_READ_OUT_OF_RANG"
-  "E\020`\022\'\n#EXECUTOR_ERROR_INVALID_L1_INFO_RO"
-  "OT\020a\022.\n*EXECUTOR_ERROR_INVALID_FORCED_BL"
-  "OCKHASH_L1\020b\0226\n2EXECUTOR_ERROR_INVALID_L"
-  "1_DATA_V2_GLOBAL_EXIT_ROOT\020c\0223\n/EXECUTOR"
-  "_ERROR_INVALID_L1_DATA_V2_BLOCK_HASH_L1\020"
-  "d\022\'\n#EXECUTOR_ERROR_INVALID_L1_SMT_PROOF"
-  "\020e\022\"\n\036EXECUTOR_ERROR_INVALID_BALANCE\020f\022."
-  "\n*EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISM"
-  "ATCH\020g\022)\n%EXECUTOR_ERROR_INVALID_NEW_STA"
-  "TE_ROOT\020h\022-\n)EXECUTOR_ERROR_INVALID_NEW_"
-  "ACC_INPUT_HASH\020i\022.\n*EXECUTOR_ERROR_INVAL"
-  "ID_NEW_LOCAL_EXIT_ROOT\020j\022#\n\037EXECUTOR_ERR"
-  "OR_DB_KEY_NOT_FOUND\020k\022(\n$EXECUTOR_ERROR_"
-  "SMT_INVALID_DATA_SIZE\020l\022$\n EXECUTOR_ERRO"
-  "R_HASHDB_GRPC_ERROR\020m\022 \n\034EXECUTOR_ERROR_"
-  "STATE_MANAGER\020n\022-\n)EXECUTOR_ERROR_INVALI"
-  "D_L1_INFO_TREE_INDEX\020o\0227\n3EXECUTOR_ERROR"
-  "_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE\020p\022"
-  "\"\n\036EXECUTOR_ERROR_INVALID_WITNESS\020q\022\037\n\033E"
-  "XECUTOR_ERROR_INVALID_CBOR\020r\022&\n\"EXECUTOR"
-  "_ERROR_INVALID_DATA_STREAM\020s\022-\n)EXECUTOR"
-  "_ERROR_INVALID_UPDATE_MERKLE_TREE\020t\0225\n1E"
-  "XECUTOR_ERROR_INVALID_PREVIOUS_L1_INFO_T"
-  "REE_ROOT\020u\022+\n\'EXECUTOR_ERROR_INVALID_FOR"
-  "CED_HASH_DATA\020v\0227\n3EXECUTOR_ERROR_INVALI"
-  "D_FORCED_DATA_GLOBAL_EXIT_ROOT\020w\0224\n0EXEC"
-  "UTOR_ERROR_INVALID_FORCED_DATA_BLOCK_HAS"
-  "H_L1\020x\022;\n7EXECUTOR_ERROR_INVALID_L1_DATA"
-  "_V3_INITIAL_HISTORIC_ROOT\020y2\313\004\n\017Executor"
+  "forced_hash_data\030\017 \001(\014\022\022\n\ncontext_id\030\020 \001"
+  "(\t\022#\n\005debug\030\021 \001(\0132\024.executor.v1.DebugV3\""
+  "]\n\007DebugV3\022\033\n\023new_blob_state_root\030\001 \001(\014\022"
+  "\037\n\027new_blob_acc_input_hash\030\002 \001(\014\022\024\n\014new_"
+  "blob_num\030\003 \001(\004\"\211\002\n\032ProcessBlobInnerRespo"
+  "nseV3\022\033\n\023new_blob_state_root\030\001 \001(\014\022\037\n\027ne"
+  "w_blob_acc_input_hash\030\002 \001(\014\022\024\n\014new_num_b"
+  "lob\030\003 \001(\004\022!\n\031final_acc_batch_hash_data\030\004"
+  " \001(\014\022!\n\031local_exit_root_from_blob\030\005 \001(\014\022"
+  "\022\n\nis_invalid\030\006 \001(\r\022\022\n\nbatch_data\030\007 \003(\014\022"
+  ")\n\005error\030\010 \001(\0162\032.executor.v1.ExecutorErr"
+  "or*\275\n\n\010RomError\022\031\n\025ROM_ERROR_UNSPECIFIED"
+  "\020\000\022\026\n\022ROM_ERROR_NO_ERROR\020\001\022\030\n\024ROM_ERROR_"
+  "OUT_OF_GAS\020\002\022\034\n\030ROM_ERROR_STACK_OVERFLOW"
+  "\020\003\022\035\n\031ROM_ERROR_STACK_UNDERFLOW\020\004\022$\n ROM"
+  "_ERROR_MAX_CODE_SIZE_EXCEEDED\020\005\022(\n$ROM_E"
+  "RROR_CONTRACT_ADDRESS_COLLISION\020\006\022 \n\034ROM"
+  "_ERROR_EXECUTION_REVERTED\020\007\022\"\n\036ROM_ERROR"
+  "_OUT_OF_COUNTERS_STEP\020\010\022$\n ROM_ERROR_OUT"
+  "_OF_COUNTERS_KECCAK\020\t\022$\n ROM_ERROR_OUT_O"
+  "F_COUNTERS_BINARY\020\n\022!\n\035ROM_ERROR_OUT_OF_"
+  "COUNTERS_MEM\020\013\022#\n\037ROM_ERROR_OUT_OF_COUNT"
+  "ERS_ARITH\020\014\022%\n!ROM_ERROR_OUT_OF_COUNTERS"
+  "_PADDING\020\r\022&\n\"ROM_ERROR_OUT_OF_COUNTERS_"
+  "POSEIDON\020\016\022!\n\035ROM_ERROR_OUT_OF_COUNTERS_"
+  "SHA\020\017\022\032\n\026ROM_ERROR_INVALID_JUMP\020\020\022\034\n\030ROM"
+  "_ERROR_INVALID_OPCODE\020\021\022\034\n\030ROM_ERROR_INV"
+  "ALID_STATIC\020\022\022(\n$ROM_ERROR_INVALID_BYTEC"
+  "ODE_STARTS_EF\020\023\022)\n%ROM_ERROR_INTRINSIC_I"
+  "NVALID_SIGNATURE\020\024\022(\n$ROM_ERROR_INTRINSI"
+  "C_INVALID_CHAIN_ID\020\025\022%\n!ROM_ERROR_INTRIN"
+  "SIC_INVALID_NONCE\020\026\022)\n%ROM_ERROR_INTRINS"
+  "IC_INVALID_GAS_LIMIT\020\027\022\'\n#ROM_ERROR_INTR"
+  "INSIC_INVALID_BALANCE\020\030\022/\n+ROM_ERROR_INT"
+  "RINSIC_INVALID_BATCH_GAS_LIMIT\020\031\022+\n\'ROM_"
+  "ERROR_INTRINSIC_INVALID_SENDER_CODE\020\032\022\'\n"
+  "#ROM_ERROR_INTRINSIC_TX_GAS_OVERFLOW\020\033\022 "
+  "\n\034ROM_ERROR_BATCH_DATA_TOO_BIG\020\034\022!\n\035ROM_"
+  "ERROR_UNSUPPORTED_FORK_ID\020\035\022\031\n\025ROM_ERROR"
+  "_INVALID_RLP\020\036\022,\n(ROM_ERROR_INVALID_DECO"
+  "DE_CHANGE_L2_BLOCK\020\037\0222\n.ROM_ERROR_INVALI"
+  "D_NOT_FIRST_TX_CHANGE_L2_BLOCK\020 \0228\n4ROM_"
+  "ERROR_INVALID_TX_CHANGE_L2_BLOCK_LIMIT_T"
+  "IMESTAMP\020!\0226\n2ROM_ERROR_INVALID_TX_CHANG"
+  "E_L2_BLOCK_MIN_TIMESTAMP\020\"*\3360\n\rExecutorE"
+  "rror\022\036\n\032EXECUTOR_ERROR_UNSPECIFIED\020\000\022\033\n\027"
+  "EXECUTOR_ERROR_NO_ERROR\020\001\022\033\n\027EXECUTOR_ER"
+  "ROR_DB_ERROR\020\002\0222\n.EXECUTOR_ERROR_SM_MAIN"
+  "_COUNTERS_OVERFLOW_STEPS\020\003\0223\n/EXECUTOR_E"
+  "RROR_SM_MAIN_COUNTERS_OVERFLOW_KECCAK\020\004\022"
+  "3\n/EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERF"
+  "LOW_BINARY\020\005\0220\n,EXECUTOR_ERROR_SM_MAIN_C"
+  "OUNTERS_OVERFLOW_MEM\020\006\0222\n.EXECUTOR_ERROR"
+  "_SM_MAIN_COUNTERS_OVERFLOW_ARITH\020\007\0224\n0EX"
+  "ECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_P"
+  "ADDING\020\010\0225\n1EXECUTOR_ERROR_SM_MAIN_COUNT"
+  "ERS_OVERFLOW_POSEIDON\020\t\022&\n\"EXECUTOR_ERRO"
+  "R_UNSUPPORTED_FORK_ID\020\n\022#\n\037EXECUTOR_ERRO"
+  "R_BALANCE_MISMATCH\020\013\022\035\n\031EXECUTOR_ERROR_F"
+  "EA2SCALAR\020\014\022\030\n\024EXECUTOR_ERROR_TOS32\020\r\022.\n"
+  "*EXECUTOR_ERROR_SM_MAIN_INVALID_UNSIGNED"
+  "_TX\020\016\022.\n*EXECUTOR_ERROR_SM_MAIN_INVALID_"
+  "NO_COUNTERS\020\017\0229\n5EXECUTOR_ERROR_SM_MAIN_"
+  "ARITH_ECRECOVER_DIVIDE_BY_ZERO\020\020\022/\n+EXEC"
+  "UTOR_ERROR_SM_MAIN_ADDRESS_OUT_OF_RANGE\020"
+  "\021\022+\n\'EXECUTOR_ERROR_SM_MAIN_ADDRESS_NEGA"
+  "TIVE\020\022\022.\n*EXECUTOR_ERROR_SM_MAIN_STORAGE"
+  "_INVALID_KEY\020\023\022 \n\034EXECUTOR_ERROR_SM_MAIN"
+  "_HASHK\020\024\0222\n.EXECUTOR_ERROR_SM_MAIN_HASHK"
+  "_SIZE_OUT_OF_RANGE\020\025\0222\n.EXECUTOR_ERROR_S"
+  "M_MAIN_HASHK_POSITION_NEGATIVE\020\026\022@\n<EXEC"
+  "UTOR_ERROR_SM_MAIN_HASHK_POSITION_PLUS_S"
+  "IZE_OUT_OF_RANGE\020\027\0228\n4EXECUTOR_ERROR_SM_"
+  "MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND\020\030\0224\n0"
+  "EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_NOT_C"
+  "OMPLETED\020\031\022 \n\034EXECUTOR_ERROR_SM_MAIN_HAS"
+  "HP\020\032\0222\n.EXECUTOR_ERROR_SM_MAIN_HASHP_SIZ"
+  "E_OUT_OF_RANGE\020\033\0222\n.EXECUTOR_ERROR_SM_MA"
+  "IN_HASHP_POSITION_NEGATIVE\020\034\022@\n<EXECUTOR"
+  "_ERROR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_"
+  "OUT_OF_RANGE\020\035\0228\n4EXECUTOR_ERROR_SM_MAIN"
+  "_HASHPDIGEST_ADDRESS_NOT_FOUND\020\036\0224\n0EXEC"
+  "UTOR_ERROR_SM_MAIN_HASHPDIGEST_NOT_COMPL"
+  "ETED\020\037\0227\n3EXECUTOR_ERROR_SM_MAIN_MEMALIG"
+  "N_OFFSET_OUT_OF_RANGE\020 \022*\n&EXECUTOR_ERRO"
+  "R_SM_MAIN_MULTIPLE_FREEIN\020!\022!\n\035EXECUTOR_"
+  "ERROR_SM_MAIN_ASSERT\020\"\022!\n\035EXECUTOR_ERROR"
+  "_SM_MAIN_MEMORY\020#\0220\n,EXECUTOR_ERROR_SM_M"
+  "AIN_STORAGE_READ_MISMATCH\020$\0221\n-EXECUTOR_"
+  "ERROR_SM_MAIN_STORAGE_WRITE_MISMATCH\020%\022/"
+  "\n+EXECUTOR_ERROR_SM_MAIN_HASHK_VALUE_MIS"
+  "MATCH\020&\0221\n-EXECUTOR_ERROR_SM_MAIN_HASHK_"
+  "PADDING_MISMATCH\020\'\022.\n*EXECUTOR_ERROR_SM_"
+  "MAIN_HASHK_SIZE_MISMATCH\020(\0223\n/EXECUTOR_E"
+  "RROR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH\020)\022"
+  "0\n,EXECUTOR_ERROR_SM_MAIN_HASHKLEN_CALLE"
+  "D_TWICE\020*\0220\n,EXECUTOR_ERROR_SM_MAIN_HASH"
+  "KDIGEST_NOT_FOUND\020+\0226\n2EXECUTOR_ERROR_SM"
+  "_MAIN_HASHKDIGEST_DIGEST_MISMATCH\020,\0223\n/E"
+  "XECUTOR_ERROR_SM_MAIN_HASHKDIGEST_CALLED"
+  "_TWICE\020-\022/\n+EXECUTOR_ERROR_SM_MAIN_HASHP"
+  "_VALUE_MISMATCH\020.\0221\n-EXECUTOR_ERROR_SM_M"
+  "AIN_HASHP_PADDING_MISMATCH\020/\022.\n*EXECUTOR"
+  "_ERROR_SM_MAIN_HASHP_SIZE_MISMATCH\0200\0223\n/"
+  "EXECUTOR_ERROR_SM_MAIN_HASHPLEN_LENGTH_M"
+  "ISMATCH\0201\0220\n,EXECUTOR_ERROR_SM_MAIN_HASH"
+  "PLEN_CALLED_TWICE\0202\0226\n2EXECUTOR_ERROR_SM"
+  "_MAIN_HASHPDIGEST_DIGEST_MISMATCH\0203\0223\n/E"
+  "XECUTOR_ERROR_SM_MAIN_HASHPDIGEST_CALLED"
+  "_TWICE\0204\022)\n%EXECUTOR_ERROR_SM_MAIN_ARITH"
+  "_MISMATCH\0205\0223\n/EXECUTOR_ERROR_SM_MAIN_AR"
+  "ITH_ECRECOVER_MISMATCH\0206\022.\n*EXECUTOR_ERR"
+  "OR_SM_MAIN_BINARY_ADD_MISMATCH\0207\022.\n*EXEC"
+  "UTOR_ERROR_SM_MAIN_BINARY_SUB_MISMATCH\0208"
+  "\022-\n)EXECUTOR_ERROR_SM_MAIN_BINARY_LT_MIS"
+  "MATCH\0209\022.\n*EXECUTOR_ERROR_SM_MAIN_BINARY"
+  "_SLT_MISMATCH\020:\022-\n)EXECUTOR_ERROR_SM_MAI"
+  "N_BINARY_EQ_MISMATCH\020;\022.\n*EXECUTOR_ERROR"
+  "_SM_MAIN_BINARY_AND_MISMATCH\020<\022-\n)EXECUT"
+  "OR_ERROR_SM_MAIN_BINARY_OR_MISMATCH\020=\022.\n"
+  "*EXECUTOR_ERROR_SM_MAIN_BINARY_XOR_MISMA"
+  "TCH\020>\0222\n.EXECUTOR_ERROR_SM_MAIN_MEMALIGN"
+  "_WRITE_MISMATCH\020\?\0223\n/EXECUTOR_ERROR_SM_M"
+  "AIN_MEMALIGN_WRITE8_MISMATCH\020@\0221\n-EXECUT"
+  "OR_ERROR_SM_MAIN_MEMALIGN_READ_MISMATCH\020"
+  "A\022,\n(EXECUTOR_ERROR_SM_MAIN_JMPN_OUT_OF_"
+  "RANGE\020B\0222\n.EXECUTOR_ERROR_SM_MAIN_HASHK_"
+  "READ_OUT_OF_RANGE\020C\0222\n.EXECUTOR_ERROR_SM"
+  "_MAIN_HASHP_READ_OUT_OF_RANGE\020D\022)\n%EXECU"
+  "TOR_ERROR_INVALID_OLD_STATE_ROOT\020E\022-\n)EX"
+  "ECUTOR_ERROR_INVALID_OLD_ACC_INPUT_HASH\020"
+  "F\022#\n\037EXECUTOR_ERROR_INVALID_CHAIN_ID\020G\022("
+  "\n$EXECUTOR_ERROR_INVALID_BATCH_L2_DATA\020H"
+  "\022+\n\'EXECUTOR_ERROR_INVALID_GLOBAL_EXIT_R"
+  "OOT\020I\022#\n\037EXECUTOR_ERROR_INVALID_COINBASE"
+  "\020J\022\037\n\033EXECUTOR_ERROR_INVALID_FROM\020K\022!\n\035E"
+  "XECUTOR_ERROR_INVALID_DB_KEY\020L\022#\n\037EXECUT"
+  "OR_ERROR_INVALID_DB_VALUE\020M\0221\n-EXECUTOR_"
+  "ERROR_INVALID_CONTRACTS_BYTECODE_KEY\020N\0223"
+  "\n/EXECUTOR_ERROR_INVALID_CONTRACTS_BYTEC"
+  "ODE_VALUE\020O\022\"\n\036EXECUTOR_ERROR_INVALID_GE"
+  "T_KEY\020P\0223\n/EXECUTOR_ERROR_SM_MAIN_COUNTE"
+  "RS_OVERFLOW_SHA256\020Q\022 \n\034EXECUTOR_ERROR_S"
+  "M_MAIN_HASHS\020R\0222\n.EXECUTOR_ERROR_SM_MAIN"
+  "_HASHS_SIZE_OUT_OF_RANGE\020S\0222\n.EXECUTOR_E"
+  "RROR_SM_MAIN_HASHS_POSITION_NEGATIVE\020T\022@"
+  "\n<EXECUTOR_ERROR_SM_MAIN_HASHS_POSITION_"
+  "PLUS_SIZE_OUT_OF_RANGE\020U\0228\n4EXECUTOR_ERR"
+  "OR_SM_MAIN_HASHSDIGEST_ADDRESS_NOT_FOUND"
+  "\020V\0224\n0EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST"
+  "_NOT_COMPLETED\020W\022/\n+EXECUTOR_ERROR_SM_MA"
+  "IN_HASHS_VALUE_MISMATCH\020X\0221\n-EXECUTOR_ER"
+  "ROR_SM_MAIN_HASHS_PADDING_MISMATCH\020Y\022.\n*"
+  "EXECUTOR_ERROR_SM_MAIN_HASHS_SIZE_MISMAT"
+  "CH\020Z\0223\n/EXECUTOR_ERROR_SM_MAIN_HASHSLEN_"
+  "LENGTH_MISMATCH\020[\0220\n,EXECUTOR_ERROR_SM_M"
+  "AIN_HASHSLEN_CALLED_TWICE\020\\\0220\n,EXECUTOR_"
+  "ERROR_SM_MAIN_HASHSDIGEST_NOT_FOUND\020]\0226\n"
+  "2EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_DIGE"
+  "ST_MISMATCH\020^\0223\n/EXECUTOR_ERROR_SM_MAIN_"
+  "HASHSDIGEST_CALLED_TWICE\020_\0222\n.EXECUTOR_E"
+  "RROR_SM_MAIN_HASHS_READ_OUT_OF_RANGE\020`\022\'"
+  "\n#EXECUTOR_ERROR_INVALID_L1_INFO_ROOT\020a\022"
+  ".\n*EXECUTOR_ERROR_INVALID_FORCED_BLOCKHA"
+  "SH_L1\020b\0226\n2EXECUTOR_ERROR_INVALID_L1_DAT"
+  "A_V2_GLOBAL_EXIT_ROOT\020c\0223\n/EXECUTOR_ERRO"
+  "R_INVALID_L1_DATA_V2_BLOCK_HASH_L1\020d\022\'\n#"
+  "EXECUTOR_ERROR_INVALID_L1_SMT_PROOF\020e\022\"\n"
+  "\036EXECUTOR_ERROR_INVALID_BALANCE\020f\022.\n*EXE"
+  "CUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH\020"
+  "g\022)\n%EXECUTOR_ERROR_INVALID_NEW_STATE_RO"
+  "OT\020h\022-\n)EXECUTOR_ERROR_INVALID_NEW_ACC_I"
+  "NPUT_HASH\020i\022.\n*EXECUTOR_ERROR_INVALID_NE"
+  "W_LOCAL_EXIT_ROOT\020j\022#\n\037EXECUTOR_ERROR_DB"
+  "_KEY_NOT_FOUND\020k\022(\n$EXECUTOR_ERROR_SMT_I"
+  "NVALID_DATA_SIZE\020l\022$\n EXECUTOR_ERROR_HAS"
+  "HDB_GRPC_ERROR\020m\022 \n\034EXECUTOR_ERROR_STATE"
+  "_MANAGER\020n\022-\n)EXECUTOR_ERROR_INVALID_L1_"
+  "INFO_TREE_INDEX\020o\0227\n3EXECUTOR_ERROR_INVA"
+  "LID_L1_INFO_TREE_SMT_PROOF_VALUE\020p\022\"\n\036EX"
+  "ECUTOR_ERROR_INVALID_WITNESS\020q\022\037\n\033EXECUT"
+  "OR_ERROR_INVALID_CBOR\020r\022&\n\"EXECUTOR_ERRO"
+  "R_INVALID_DATA_STREAM\020s\022-\n)EXECUTOR_ERRO"
+  "R_INVALID_UPDATE_MERKLE_TREE\020t\0225\n1EXECUT"
+  "OR_ERROR_INVALID_PREVIOUS_L1_INFO_TREE_R"
+  "OOT\020u\022+\n\'EXECUTOR_ERROR_INVALID_FORCED_H"
+  "ASH_DATA\020v\0227\n3EXECUTOR_ERROR_INVALID_FOR"
+  "CED_DATA_GLOBAL_EXIT_ROOT\020w\0224\n0EXECUTOR_"
+  "ERROR_INVALID_FORCED_DATA_BLOCK_HASH_L1\020"
+  "x\022;\n7EXECUTOR_ERROR_INVALID_L1_DATA_V3_I"
+  "NITIAL_HISTORIC_ROOT\020y\022.\n*EXECUTOR_ERROR"
+  "_INVALID_OLD_BLOB_STATE_ROOT\020z\0222\n.EXECUT"
+  "OR_ERROR_INVALID_OLD_BLOB_ACC_INPUT_HASH"
+  "\020{\0221\n-EXECUTOR_ERROR_INVALID_LAST_L1_INF"
+  "O_TREE_ROOT\020|\022.\n*EXECUTOR_ERROR_INVALID_"
+  "NEW_BLOB_STATE_ROOT\020}\0222\n.EXECUTOR_ERROR_"
+  "INVALID_NEW_BLOB_ACC_INPUT_HASH\020~\022$\n EXE"
+  "CUTOR_ERROR_INVALID_BLOB_DATA\020\177\022(\n#EXECU"
+  "TOR_ERROR_INVALID_ZK_GAS_LIMIT\020\200\001\022#\n\036EXE"
+  "CUTOR_ERROR_INVALID_POINT_Z\020\201\001\022#\n\036EXECUT"
+  "OR_ERROR_INVALID_POINT_Y\020\202\0012\313\004\n\017Executor"
   "Service\022U\n\014ProcessBatch\022 .executor.v1.Pr"
   "ocessBatchRequest\032!.executor.v1.ProcessB"
   "atchResponse\"\000\022[\n\016ProcessBatchV2\022\".execu"
@@ -2376,10 +2424,11 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_executor_2eproto_sccs[53] = {
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_executor_2eproto_sccs[54] = {
   &scc_info_Contract_executor_2eproto.base,
   &scc_info_ContractV2_executor_2eproto.base,
   &scc_info_DebugV2_executor_2eproto.base,
+  &scc_info_DebugV3_executor_2eproto.base,
   &scc_info_ForcedData_executor_2eproto.base,
   &scc_info_FullTrace_executor_2eproto.base,
   &scc_info_FullTraceV2_executor_2eproto.base,
@@ -2433,10 +2482,10 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 19769,
-  &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 53, 1,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 20369,
+  &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 54, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
-  file_level_metadata_executor_2eproto, 53, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
+  file_level_metadata_executor_2eproto, 54, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
 };
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -2618,6 +2667,15 @@ bool ExecutorError_IsValid(int value) {
     case 119:
     case 120:
     case 121:
+    case 122:
+    case 123:
+    case 124:
+    case 125:
+    case 126:
+    case 127:
+    case 128:
+    case 129:
+    case 130:
       return true;
     default:
       return false;
@@ -19398,11 +19456,18 @@ void ForcedData::InternalSwap(ForcedData* other) {
 // ===================================================================
 
 void ProcessBlobInnerRequestV3::InitAsDefaultInstance() {
+  ::executor::v1::_ProcessBlobInnerRequestV3_default_instance_._instance.get_mutable()->debug_ = const_cast< ::executor::v1::DebugV3*>(
+      ::executor::v1::DebugV3::internal_default_instance());
 }
 class ProcessBlobInnerRequestV3::_Internal {
  public:
+  static const ::executor::v1::DebugV3& debug(const ProcessBlobInnerRequestV3* msg);
 };
 
+const ::executor::v1::DebugV3&
+ProcessBlobInnerRequestV3::_Internal::debug(const ProcessBlobInnerRequestV3* msg) {
+  return *msg->debug_;
+}
 ProcessBlobInnerRequestV3::ProcessBlobInnerRequestV3(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -19462,6 +19527,16 @@ ProcessBlobInnerRequestV3::ProcessBlobInnerRequestV3(const ProcessBlobInnerReque
     forced_hash_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_forced_hash_data(),
       GetArena());
   }
+  context_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_context_id().empty()) {
+    context_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_context_id(),
+      GetArena());
+  }
+  if (from._internal_has_debug()) {
+    debug_ = new ::executor::v1::DebugV3(*from.debug_);
+  } else {
+    debug_ = nullptr;
+  }
   ::memcpy(&old_num_blob_, &from.old_num_blob_,
     static_cast<size_t>(reinterpret_cast<char*>(&type_) -
     reinterpret_cast<char*>(&old_num_blob_)) + sizeof(type_));
@@ -19480,9 +19555,10 @@ void ProcessBlobInnerRequestV3::SharedCtor() {
   point_y_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   blob_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   forced_hash_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(&old_num_blob_, 0, static_cast<size_t>(
+  context_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  ::memset(&debug_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&type_) -
-      reinterpret_cast<char*>(&old_num_blob_)) + sizeof(type_));
+      reinterpret_cast<char*>(&debug_)) + sizeof(type_));
 }
 
 ProcessBlobInnerRequestV3::~ProcessBlobInnerRequestV3() {
@@ -19503,6 +19579,8 @@ void ProcessBlobInnerRequestV3::SharedDtor() {
   point_y_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   blob_data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   forced_hash_data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  context_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete debug_;
 }
 
 void ProcessBlobInnerRequestV3::ArenaDtor(void* object) {
@@ -19536,6 +19614,11 @@ void ProcessBlobInnerRequestV3::Clear() {
   point_y_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   blob_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   forced_hash_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  context_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (GetArena() == nullptr && debug_ != nullptr) {
+    delete debug_;
+  }
+  debug_ = nullptr;
   ::memset(&old_num_blob_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&type_) -
       reinterpret_cast<char*>(&old_num_blob_)) + sizeof(type_));
@@ -19666,6 +19749,22 @@ const char* ProcessBlobInnerRequestV3::_InternalParse(const char* ptr, ::PROTOBU
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // string context_id = 16;
+      case 16:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 130)) {
+          auto str = _internal_mutable_context_id();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "executor.v1.ProcessBlobInnerRequestV3.context_id"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .executor.v1.DebugV3 debug = 17;
+      case 17:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 138)) {
+          ptr = ctx->ParseMessage(_internal_mutable_debug(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -19788,6 +19887,24 @@ failure:
         15, this->_internal_forced_hash_data(), target);
   }
 
+  // string context_id = 16;
+  if (this->context_id().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_context_id().data(), static_cast<int>(this->_internal_context_id().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "executor.v1.ProcessBlobInnerRequestV3.context_id");
+    target = stream->WriteStringMaybeAliased(
+        16, this->_internal_context_id(), target);
+  }
+
+  // .executor.v1.DebugV3 debug = 17;
+  if (this->has_debug()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        17, _Internal::debug(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -19872,6 +19989,20 @@ size_t ProcessBlobInnerRequestV3::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
         this->_internal_forced_hash_data());
+  }
+
+  // string context_id = 16;
+  if (this->context_id().size() > 0) {
+    total_size += 2 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_context_id());
+  }
+
+  // .executor.v1.DebugV3 debug = 17;
+  if (this->has_debug()) {
+    total_size += 2 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *debug_);
   }
 
   // uint64 old_num_blob = 3;
@@ -19970,6 +20101,12 @@ void ProcessBlobInnerRequestV3::MergeFrom(const ProcessBlobInnerRequestV3& from)
   if (from.forced_hash_data().size() > 0) {
     _internal_set_forced_hash_data(from._internal_forced_hash_data());
   }
+  if (from.context_id().size() > 0) {
+    _internal_set_context_id(from._internal_context_id());
+  }
+  if (from.has_debug()) {
+    _internal_mutable_debug()->::executor::v1::DebugV3::MergeFrom(from._internal_debug());
+  }
   if (from.old_num_blob() != 0) {
     _internal_set_old_num_blob(from._internal_old_num_blob());
   }
@@ -20018,15 +20155,280 @@ void ProcessBlobInnerRequestV3::InternalSwap(ProcessBlobInnerRequestV3* other) {
   point_y_.Swap(&other->point_y_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   blob_data_.Swap(&other->blob_data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   forced_hash_data_.Swap(&other->forced_hash_data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  context_id_.Swap(&other->context_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ProcessBlobInnerRequestV3, type_)
       + sizeof(ProcessBlobInnerRequestV3::type_)
-      - PROTOBUF_FIELD_OFFSET(ProcessBlobInnerRequestV3, old_num_blob_)>(
-          reinterpret_cast<char*>(&old_num_blob_),
-          reinterpret_cast<char*>(&other->old_num_blob_));
+      - PROTOBUF_FIELD_OFFSET(ProcessBlobInnerRequestV3, debug_)>(
+          reinterpret_cast<char*>(&debug_),
+          reinterpret_cast<char*>(&other->debug_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ProcessBlobInnerRequestV3::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+void DebugV3::InitAsDefaultInstance() {
+}
+class DebugV3::_Internal {
+ public:
+};
+
+DebugV3::DebugV3(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:executor.v1.DebugV3)
+}
+DebugV3::DebugV3(const DebugV3& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  new_blob_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_new_blob_state_root().empty()) {
+    new_blob_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_new_blob_state_root(),
+      GetArena());
+  }
+  new_blob_acc_input_hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_new_blob_acc_input_hash().empty()) {
+    new_blob_acc_input_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_new_blob_acc_input_hash(),
+      GetArena());
+  }
+  new_blob_num_ = from.new_blob_num_;
+  // @@protoc_insertion_point(copy_constructor:executor.v1.DebugV3)
+}
+
+void DebugV3::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_DebugV3_executor_2eproto.base);
+  new_blob_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  new_blob_acc_input_hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  new_blob_num_ = PROTOBUF_ULONGLONG(0);
+}
+
+DebugV3::~DebugV3() {
+  // @@protoc_insertion_point(destructor:executor.v1.DebugV3)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void DebugV3::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  new_blob_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  new_blob_acc_input_hash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void DebugV3::ArenaDtor(void* object) {
+  DebugV3* _this = reinterpret_cast< DebugV3* >(object);
+  (void)_this;
+}
+void DebugV3::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void DebugV3::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const DebugV3& DebugV3::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_DebugV3_executor_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void DebugV3::Clear() {
+// @@protoc_insertion_point(message_clear_start:executor.v1.DebugV3)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  new_blob_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  new_blob_acc_input_hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  new_blob_num_ = PROTOBUF_ULONGLONG(0);
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* DebugV3::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // bytes new_blob_state_root = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_new_blob_state_root();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bytes new_blob_acc_input_hash = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_new_blob_acc_input_hash();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 new_blob_num = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          new_blob_num_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* DebugV3::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:executor.v1.DebugV3)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // bytes new_blob_state_root = 1;
+  if (this->new_blob_state_root().size() > 0) {
+    target = stream->WriteBytesMaybeAliased(
+        1, this->_internal_new_blob_state_root(), target);
+  }
+
+  // bytes new_blob_acc_input_hash = 2;
+  if (this->new_blob_acc_input_hash().size() > 0) {
+    target = stream->WriteBytesMaybeAliased(
+        2, this->_internal_new_blob_acc_input_hash(), target);
+  }
+
+  // uint64 new_blob_num = 3;
+  if (this->new_blob_num() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_new_blob_num(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:executor.v1.DebugV3)
+  return target;
+}
+
+size_t DebugV3::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:executor.v1.DebugV3)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // bytes new_blob_state_root = 1;
+  if (this->new_blob_state_root().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_new_blob_state_root());
+  }
+
+  // bytes new_blob_acc_input_hash = 2;
+  if (this->new_blob_acc_input_hash().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_new_blob_acc_input_hash());
+  }
+
+  // uint64 new_blob_num = 3;
+  if (this->new_blob_num() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_new_blob_num());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void DebugV3::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:executor.v1.DebugV3)
+  GOOGLE_DCHECK_NE(&from, this);
+  const DebugV3* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DebugV3>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:executor.v1.DebugV3)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:executor.v1.DebugV3)
+    MergeFrom(*source);
+  }
+}
+
+void DebugV3::MergeFrom(const DebugV3& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:executor.v1.DebugV3)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.new_blob_state_root().size() > 0) {
+    _internal_set_new_blob_state_root(from._internal_new_blob_state_root());
+  }
+  if (from.new_blob_acc_input_hash().size() > 0) {
+    _internal_set_new_blob_acc_input_hash(from._internal_new_blob_acc_input_hash());
+  }
+  if (from.new_blob_num() != 0) {
+    _internal_set_new_blob_num(from._internal_new_blob_num());
+  }
+}
+
+void DebugV3::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:executor.v1.DebugV3)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DebugV3::CopyFrom(const DebugV3& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:executor.v1.DebugV3)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DebugV3::IsInitialized() const {
+  return true;
+}
+
+void DebugV3::InternalSwap(DebugV3* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  new_blob_state_root_.Swap(&other->new_blob_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  new_blob_acc_input_hash_.Swap(&other->new_blob_acc_input_hash_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(new_blob_num_, other->new_blob_num_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata DebugV3::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -20071,8 +20473,8 @@ ProcessBlobInnerResponseV3::ProcessBlobInnerResponseV3(const ProcessBlobInnerRes
       GetArena());
   }
   ::memcpy(&new_num_blob_, &from.new_num_blob_,
-    static_cast<size_t>(reinterpret_cast<char*>(&is_invalid_) -
-    reinterpret_cast<char*>(&new_num_blob_)) + sizeof(is_invalid_));
+    static_cast<size_t>(reinterpret_cast<char*>(&error_) -
+    reinterpret_cast<char*>(&new_num_blob_)) + sizeof(error_));
   // @@protoc_insertion_point(copy_constructor:executor.v1.ProcessBlobInnerResponseV3)
 }
 
@@ -20083,8 +20485,8 @@ void ProcessBlobInnerResponseV3::SharedCtor() {
   final_acc_batch_hash_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   local_exit_root_from_blob_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&new_num_blob_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&is_invalid_) -
-      reinterpret_cast<char*>(&new_num_blob_)) + sizeof(is_invalid_));
+      reinterpret_cast<char*>(&error_) -
+      reinterpret_cast<char*>(&new_num_blob_)) + sizeof(error_));
 }
 
 ProcessBlobInnerResponseV3::~ProcessBlobInnerResponseV3() {
@@ -20128,8 +20530,8 @@ void ProcessBlobInnerResponseV3::Clear() {
   final_acc_batch_hash_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   local_exit_root_from_blob_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::memset(&new_num_blob_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&is_invalid_) -
-      reinterpret_cast<char*>(&new_num_blob_)) + sizeof(is_invalid_));
+      reinterpret_cast<char*>(&error_) -
+      reinterpret_cast<char*>(&new_num_blob_)) + sizeof(error_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -20198,6 +20600,14 @@ const char* ProcessBlobInnerResponseV3::_InternalParse(const char* ptr, ::PROTOB
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<58>(ptr));
+        } else goto handle_unusual;
+        continue;
+      // .executor.v1.ExecutorError error = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
+          ::PROTOBUF_NAMESPACE_ID::uint64 val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_error(static_cast<::executor::v1::ExecutorError>(val));
         } else goto handle_unusual;
         continue;
       default: {
@@ -20270,6 +20680,13 @@ failure:
     target = stream->WriteBytes(7, s, target);
   }
 
+  // .executor.v1.ExecutorError error = 8;
+  if (this->error() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
+      8, this->_internal_error(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -20336,6 +20753,12 @@ size_t ProcessBlobInnerResponseV3::ByteSizeLong() const {
         this->_internal_is_invalid());
   }
 
+  // .executor.v1.ExecutorError error = 8;
+  if (this->error() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_error());
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -20386,6 +20809,9 @@ void ProcessBlobInnerResponseV3::MergeFrom(const ProcessBlobInnerResponseV3& fro
   if (from.is_invalid() != 0) {
     _internal_set_is_invalid(from._internal_is_invalid());
   }
+  if (from.error() != 0) {
+    _internal_set_error(from._internal_error());
+  }
 }
 
 void ProcessBlobInnerResponseV3::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -20415,8 +20841,8 @@ void ProcessBlobInnerResponseV3::InternalSwap(ProcessBlobInnerResponseV3* other)
   final_acc_batch_hash_data_.Swap(&other->final_acc_batch_hash_data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   local_exit_root_from_blob_.Swap(&other->local_exit_root_from_blob_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ProcessBlobInnerResponseV3, is_invalid_)
-      + sizeof(ProcessBlobInnerResponseV3::is_invalid_)
+      PROTOBUF_FIELD_OFFSET(ProcessBlobInnerResponseV3, error_)
+      + sizeof(ProcessBlobInnerResponseV3::error_)
       - PROTOBUF_FIELD_OFFSET(ProcessBlobInnerResponseV3, new_num_blob_)>(
           reinterpret_cast<char*>(&new_num_blob_),
           reinterpret_cast<char*>(&other->new_num_blob_));
@@ -20586,6 +21012,9 @@ template<> PROTOBUF_NOINLINE ::executor::v1::ForcedData* Arena::CreateMaybeMessa
 }
 template<> PROTOBUF_NOINLINE ::executor::v1::ProcessBlobInnerRequestV3* Arena::CreateMaybeMessage< ::executor::v1::ProcessBlobInnerRequestV3 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::executor::v1::ProcessBlobInnerRequestV3 >(arena);
+}
+template<> PROTOBUF_NOINLINE ::executor::v1::DebugV3* Arena::CreateMaybeMessage< ::executor::v1::DebugV3 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::executor::v1::DebugV3 >(arena);
 }
 template<> PROTOBUF_NOINLINE ::executor::v1::ProcessBlobInnerResponseV3* Arena::CreateMaybeMessage< ::executor::v1::ProcessBlobInnerResponseV3 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::executor::v1::ProcessBlobInnerResponseV3 >(arena);

@@ -902,6 +902,24 @@ enum ExecutorError {
     EXECUTOR_ERROR_INVALID_FORCED_DATA_BLOCK_HASH_L1 = 120;
     // EXECUTOR_ERROR_INVALID_L1_DATA_V3_INITIAL_HISTORIC_ROOT indicates that the input parameter L1 Data initiali_historic_root is invalid
     EXECUTOR_ERROR_INVALID_L1_DATA_V3_INITIAL_HISTORIC_ROOT = 121;
+    // EXECUTOR_ERROR_INVALID_OLD_BLOB_STATE_ROOT indicates that the input parameter old_blob_state_root is invalid
+    EXECUTOR_ERROR_INVALID_OLD_BLOB_STATE_ROOT = 122;
+    // EXECUTOR_ERROR_INVALID_OLD_BLOB_ACC_INPUT_HASH indicates that the input parameter old_blob_acc_input_hash is invalid
+    EXECUTOR_ERROR_INVALID_OLD_BLOB_ACC_INPUT_HASH = 123;
+    // EXECUTOR_ERROR_INVALID_LAST_L1_INFO_TREE_ROOT indicates that the input parameter last_l1_info_tree_root is invalid
+    EXECUTOR_ERROR_INVALID_LAST_L1_INFO_TREE_ROOT = 124;
+    // EXECUTOR_ERROR_INVALID_NEW_BLOB_STATE_ROOT indicates that the input parameter new_blob_state_root is invalid
+    EXECUTOR_ERROR_INVALID_NEW_BLOB_STATE_ROOT = 125;
+    // EXECUTOR_ERROR_INVALID_NEW_BLOB_ACC_INPUT_HASH indicates that the input parameter new_blob_acc_input_hash is invalid
+    EXECUTOR_ERROR_INVALID_NEW_BLOB_ACC_INPUT_HASH = 126;
+    // EXECUTOR_ERROR_INVALID_BLOB_DATA indicates that the input parameter blob_data is invalid (too long)
+    EXECUTOR_ERROR_INVALID_BLOB_DATA = 127;
+    // EXECUTOR_ERROR_INVALID_ZK_GAS_LIMIT indicates that the input parameter zk_gas_limit is invalid
+    EXECUTOR_ERROR_INVALID_ZK_GAS_LIMIT = 128;
+    // EXECUTOR_ERROR_INVALID_POINT_Z indicates that the input parameter point_z is invalid
+    EXECUTOR_ERROR_INVALID_POINT_Z = 129;
+    // EXECUTOR_ERROR_INVALID_POINT_Y indicates that the input parameter point_y is invalid
+    EXECUTOR_ERROR_INVALID_POINT_Y = 130;
 }
 
 ////////////////////////////////////////////////
@@ -1013,6 +1031,14 @@ message ProcessBlobInnerRequestV3 {
     bytes point_y = 13;
     bytes blob_data = 14;
     bytes forced_hash_data = 15;
+    string context_id = 16;
+    DebugV3 debug = 17;
+}
+
+message DebugV3 {
+    bytes new_blob_state_root = 1;
+    bytes new_blob_acc_input_hash = 2;
+    uint64 new_blob_num = 3;
 }
 
 message ProcessBlobInnerResponseV3 {
@@ -1025,4 +1051,5 @@ message ProcessBlobInnerResponseV3 {
     uint32 is_invalid = 6;
     // extra
     repeated bytes batch_data = 7;
+    ExecutorError error = 8;
 }
