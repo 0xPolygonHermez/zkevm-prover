@@ -1214,7 +1214,7 @@ using grpc::Status;
         zklog.info("ExecutorServiceImpl::ProcessBlobInnerV3() Input=" + inputJsonString, &proverRequest.tags);
     }
 
-    prover.processBatch(&proverRequest); // TODO: call prover.processBlobInner()
+    prover.processBlobInner(&proverRequest);
 
     //TimerStart(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
 

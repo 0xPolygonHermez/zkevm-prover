@@ -702,3 +702,13 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
 
     }
 }
+
+void Executor::processBlobInner (ProverRequest &proverRequest)
+{
+    processBatch(proverRequest);
+}
+
+void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols)
+{
+    executeBatch(proverRequest, commitPols);
+}

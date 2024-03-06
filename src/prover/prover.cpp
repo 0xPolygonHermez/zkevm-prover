@@ -348,7 +348,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
     return pProverRequest;
 }
 
-void Prover::processBatch(ProverRequest *pProverRequest)
+void Prover::processBatch (ProverRequest *pProverRequest)
 {
     //TimerStart(PROVER_PROCESS_BATCH);
     zkassert(pProverRequest != NULL);
@@ -387,6 +387,39 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     }
 
     //TimerStopAndLog(PROVER_PROCESS_BATCH);
+}
+
+void Prover::processBlobInner (ProverRequest *pProverRequest)
+{
+    //TimerStart(PROVER_PROCESS_BLOB_INNER);
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_processBlobInner);
+
+    if (config.runAggregatorClient)
+    {
+        zklog.info("Prover::processBlobInner() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    }
+
+    // Save input to <timestamp>.input.json, as provided by client
+    if (config.saveInputToFile)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        json2file(inputJson, pProverRequest->inputFile());
+    }
+
+    // Log input if requested
+    if (config.logExecutorServerInput)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        zklog.info("Input=" + inputJson.dump());
+    }
+
+    // Execute the program, in the process batch way
+    executor.processBlobInner(*pProverRequest);
+
+    //TimerStopAndLog(PROVER_PROCESS_BLOB_INNER);
 }
 
 void Prover::genBatchProof(ProverRequest *pProverRequest)
@@ -442,7 +475,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
         " pols.SR[lastN]=" + fea2string(fr, cmPols.Main.SR0[lastN], cmPols.Main.SR1[lastN], cmPols.Main.SR2[lastN], cmPols.Main.SR3[lastN], cmPols.Main.SR4[lastN], cmPols.Main.SR5[lastN], cmPols.Main.SR6[lastN], cmPols.Main.SR7[lastN]) +
         " lastN=" + to_string(lastN));
-    zklog.info("Prover::genBatchProof() called executor.execute() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+    zklog.info("Prover::genBatchProof() called executor.executeBatch() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
         " newAccInputHash=" + pProverRequest->pFullTracer->get_new_acc_input_hash() +
         " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
         " pols.D[lastN]=" + fea2string(fr, cmPols.Main.D0[lastN], cmPols.Main.D1[lastN], cmPols.Main.D2[lastN], cmPols.Main.D3[lastN], cmPols.Main.D4[lastN], cmPols.Main.D5[lastN], cmPols.Main.D6[lastN], cmPols.Main.D7[lastN]) +
@@ -992,7 +1025,7 @@ void Prover::executeBatch (ProverRequest *pProverRequest)
     zkassert(!config.generateProof());
     zkassert(pProverRequest != NULL);
 
-    TimerStart(PROVER_EXECUTE);
+    TimerStart(PROVER_EXECUTE_BATCH);
 
     printMemoryInfo(true);
     printProcessInfo(true);
@@ -1002,8 +1035,6 @@ void Prover::executeBatch (ProverRequest *pProverRequest)
     zklog.info("Prover::executeBatch() timestamp: " + pProverRequest->timestamp);
     zklog.info("Prover::executeBatch() UUID: " + pProverRequest->uuid);
     zklog.info("Prover::executeBatch() input file: " + pProverRequest->inputFile());
-    // zklog.info("Prover::execute() public file: " + pProverRequest->publicsOutputFile());
-    // zklog.info("Prover::execute() proof file: " + pProverRequest->proofFile());
 
     // In proof-generation executions we can only process the exact number of steps
     if (pProverRequest->input.stepsN > 0)
@@ -1039,7 +1070,7 @@ void Prover::executeBatch (ProverRequest *pProverRequest)
         pExecuteAddress = calloc(polsSize, 1);
         if (pExecuteAddress == NULL)
         {
-            zklog.error("Prover::execute() failed calling malloc() of size " + to_string(polsSize));
+            zklog.error("Prover::executeBatch() failed calling malloc() of size " + to_string(polsSize));
             exitProcess();
         }
         zklog.info("Prover::executeBatch() successfully allocated " + to_string(polsSize) + " bytes");
@@ -1052,9 +1083,9 @@ void Prover::executeBatch (ProverRequest *pProverRequest)
     PROVER_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
 
     // Execute all the State Machines
-    TimerStart(EXECUTOR_EXECUTE_EXECUTE);
+    TimerStart(EXECUTOR_EXECUTE_EXECUTE_BATCH);
     executor.executeBatch(*pProverRequest, cmPols);
-    TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE);
+    TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE_BATCH);
 
     uint64_t lastN = cmPols.pilDegree() - 1;
     zklog.info("Prover::executeBatch() called executor.executeBatch() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
@@ -1062,7 +1093,7 @@ void Prover::executeBatch (ProverRequest *pProverRequest)
         " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
         " pols.SR[lastN]=" + fea2string(fr, cmPols.Main.SR0[lastN], cmPols.Main.SR1[lastN], cmPols.Main.SR2[lastN], cmPols.Main.SR3[lastN], cmPols.Main.SR4[lastN], cmPols.Main.SR5[lastN], cmPols.Main.SR6[lastN], cmPols.Main.SR7[lastN]) +
         " lastN=" + to_string(lastN));
-    zklog.info("Prover::execute() called executor.execute() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+    zklog.info("Prover::executeBatch() called executor.executeBatch() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
         " newAccInputHash=" + pProverRequest->pFullTracer->get_new_acc_input_hash() +
         " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
         " pols.D[lastN]=" + fea2string(fr, cmPols.Main.D0[lastN], cmPols.Main.D1[lastN], cmPols.Main.D2[lastN], cmPols.Main.D3[lastN], cmPols.Main.D4[lastN], cmPols.Main.D5[lastN], cmPols.Main.D6[lastN], cmPols.Main.D7[lastN]) +
@@ -1100,5 +1131,119 @@ void Prover::executeBatch (ProverRequest *pProverRequest)
         free(pExecuteAddress);
     }
 
-    TimerStopAndLog(PROVER_EXECUTE);
+    TimerStopAndLog(PROVER_EXECUTE_BATCH);
+}
+
+void Prover::executeBlobInner (ProverRequest *pProverRequest)
+{
+    zkassert(!config.generateProof());
+    zkassert(pProverRequest != NULL);
+
+    TimerStart(PROVER_EXECUTE_BLOB_INNER);
+
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
+    zkassert(pProverRequest != NULL);
+
+    zklog.info("Prover::executeBlobInner() timestamp: " + pProverRequest->timestamp);
+    zklog.info("Prover::executeBlobInner() UUID: " + pProverRequest->uuid);
+    zklog.info("Prover::executeBlobInner() input file: " + pProverRequest->inputFile());
+
+    // In proof-generation executions we can only process the exact number of steps
+    if (pProverRequest->input.stepsN > 0)
+    {
+        zklog.error("Prover::executeBlobInner() called with input.stepsN=" + to_string(pProverRequest->input.stepsN));
+        exitProcess();
+    }
+
+    // Save input to <timestamp>.input.json, as provided by client
+    if (config.saveInputToFile)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        json2file(inputJson, pProverRequest->inputFile());
+    }
+
+    /*******************/
+    /* Allocate memory */
+    /*******************/
+
+    // Allocate an area of memory, mapped to file, to store all the committed polynomials,
+    // and create them using the allocated address
+    uint64_t polsSize = PROVER_FORK_NAMESPACE::CommitPols::pilSize();
+    void *pExecuteAddress = NULL;
+
+    if (config.zkevmCmPols.size() > 0)
+    {
+        pExecuteAddress = mapFile(config.zkevmCmPols, polsSize, true);
+        zklog.info("Prover::executeBlobInner() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
+    }
+    else
+    {
+        pExecuteAddress = calloc(polsSize, 1);
+        if (pExecuteAddress == NULL)
+        {
+            zklog.error("Prover::executeBlobInner() failed calling malloc() of size " + to_string(polsSize));
+            exitProcess();
+        }
+        zklog.info("Prover::executeBlobInner() successfully allocated " + to_string(polsSize) + " bytes");
+    }
+
+    /************/
+    /* Executor */
+    /************/
+
+    PROVER_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
+
+    // Execute all the State Machines
+    TimerStart(EXECUTOR_EXECUTE_EXECUTE_BLOB_INNER);
+    executor.executeBlobInner(*pProverRequest, cmPols);
+    TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE_BLOB_INNER);
+
+    uint64_t lastN = cmPols.pilDegree() - 1;
+    zklog.info("Prover::executeBlobInner() called executor.executeBatch() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+        " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root() +
+        " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
+        " pols.SR[lastN]=" + fea2string(fr, cmPols.Main.SR0[lastN], cmPols.Main.SR1[lastN], cmPols.Main.SR2[lastN], cmPols.Main.SR3[lastN], cmPols.Main.SR4[lastN], cmPols.Main.SR5[lastN], cmPols.Main.SR6[lastN], cmPols.Main.SR7[lastN]) +
+        " lastN=" + to_string(lastN));
+    zklog.info("Prover::executeBlobInner() called executor.executeBatch() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+        " newAccInputHash=" + pProverRequest->pFullTracer->get_new_acc_input_hash() +
+        " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
+        " pols.D[lastN]=" + fea2string(fr, cmPols.Main.D0[lastN], cmPols.Main.D1[lastN], cmPols.Main.D2[lastN], cmPols.Main.D3[lastN], cmPols.Main.D4[lastN], cmPols.Main.D5[lastN], cmPols.Main.D6[lastN], cmPols.Main.D7[lastN]) +
+        " lastN=" + to_string(lastN));
+
+    // Save input to <timestamp>.input.json after execution including dbReadLog
+    if (config.saveDbReadsToFile)
+    {
+        json inputJsonEx;
+        pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
+        json2file(inputJsonEx, pProverRequest->inputDbFile());
+    }
+
+    // Save commit pols to file zkevm.commit
+    if (config.zkevmCmPolsAfterExecutor != "")
+    {
+        TimerStart(PROVER_EXECUTE_SAVE_COMMIT_POLS_AFTER_EXECUTOR);
+        void *pointerCmPols = mapFile(config.zkevmCmPolsAfterExecutor, cmPols.size(), true);
+        memcpy(pointerCmPols, cmPols.address(), cmPols.size());
+        unmapFile(pointerCmPols, cmPols.size());
+        TimerStopAndLog(PROVER_EXECUTE_SAVE_COMMIT_POLS_AFTER_EXECUTOR);
+    }
+
+    /***************/
+    /* Free memory */
+    /***************/
+
+    // Unmap committed polynomials address
+    if (config.zkevmCmPols.size() > 0)
+    {
+        unmapFile(pExecuteAddress, polsSize);
+    }
+    else
+    {
+        free(pExecuteAddress);
+    }
+
+    TimerStopAndLog(PROVER_EXECUTE_BLOB_INNER);
 }
