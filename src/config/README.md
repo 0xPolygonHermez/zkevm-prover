@@ -100,37 +100,76 @@ The configuration parameters can be of different uses:
 |`inputFile2`|test|string|Second input file, used as the second input in genAggregatedProof|""|INPUT_FILE_2|
 |`outputPath`|test|string|Output directory for saved files|"output"|OUTPUT_PATH|
 |**`configPath`**|production|string|Default input directory for configuration and constant files|"config"|CONFIG_PATH|
+|`mapConstPolsFile`|test|boolean|Maps constant polynomials file to memory|false|MAP_CONST_POLS_FILE|
 |`zkevmCmPols`|test|string|Maps commit pols memory into file, which slows down a bit the executor|""|ZKEVM_CM_POLS|
 |`zkevmCmPolsAfterExecutor`|test|string|Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning|""|ZKEVM_CM_POLS_AFTER_EXECUTOR|
-|`recursive1CmPols`|test|string|Saves recursive 1 commit polynomials into file|""|RECURSIVE1_CM_POLS|
 |`zkevmConstPols`|production|string|Saves constant polynomials into file|config + "/zkevm/zkevm.const"|ZKEVM_CONST_POLS|
-|`mapConstPolsFile`|test|boolean|Maps constant polynomials file to memory|false|MAP_CONST_POLS_FILE|
+|`zkevmConstantsTree`|production|string|Constant polynomials tree file|config + "/zkevm/zkevm.consttree"|ZKEVM_CONSTANTS_TREE|
+|`zkevmVerifier`|production|string|zkEVM verifier data file|config + "/zkevm/zkevm.verifier.dat"|ZKEVM_VERIFIER|
+|`zkevmVerkey`|production|string|ZKEVM verification key file|config + "/zkevm/zkevm.verkey.json"|ZKEVM_VERKEY|
+|`zkevmStarkInfo`|production|string|zkEVN STARK info file|config + "/zkevm/zkevm.starkinfo.json"|ZKEVM_STARK_INFO|
 |`c12aCmPols`|test|string|Saves C12A commit polynomials into file|""|C12A_CM_POLS|
 |`c12aConstPols`|production|string|C12A constant polynomials file|config + "/c12a/c12a.const"|C12A_CONST_POLS|
 |`c12aConstantsTree`|production|string|C12A constant tree polynomials file|config + "/c12a/c12a.consttree"|C12A_CONSTANTS_TREE|
+|`c12aVerifier`| production | string | C12A verifier data file | config +  "/c12z/c12a.verifier.dat"|C12A_VERIFIER|
+|`c12aVerkey`|production|string|C12A verification key file|config + "/c12a/c12a.verkey.json"|C12A_VERKEY|
 |`c12aExec`|production|string|C12A exec file|config + "/c12a/c12a.exec"|C12A_EXEC|
 |`c12aStarkInfo`|production|string|C12A STARK info file|config + "/c12a/c12a.starkinfo.json"|C12A_STARK_INFO|
+|`recursive1CmPols`|test|string|Saves recursive 1 commit polynomials into file|""|RECURSIVE1_CM_POLS|
 |`recursive1ConstPols`|production|string|Recursive 1 constant polynomials file|config + "/recursive1/recursive1.const"|RECURSIVE1_CONST_POLS|
-|`recursive2ConstPols`|production|string|Recursive 2 constant polynomials file|config + "/recursive2/recursive2.const"|RECURSIVE2_CONST_POLS|
-|`recursivefConstPols`|production|string|Recursive final constant polynomials file|config + "/recursivef/recursivef.const"|RECURSIVEF_CONST_POLS|
+|`recursive1ConstantsTree`|production|string|Recursive 1 contant polynomials tree file|config + "/recursive1/recursive1.consttree"|
 |`recursive1Verifier`|production|string|Recursive 1 verifier data file|config + "/recursive1/recursive1.verifier.dat"|RECURSIVE1_VERIFIER|
-|`recursive2Verifier`|production|string|Recursive 2 verifier data file|config + "/recursive2/recursive2.verifier.dat"|RECURSIVE2_VERIFIER|
-|`recursivefVerifier`|production|string|Recursive final verifier data file|config + "/recursivef/recursivef.verifier.dat"|RECURSIVEF_VERIFIER|
-|`zkevmConstantsTree`|production|string|Constant polynomials tree file|config + "/zkevm/zkevm.consttree"|ZKEVM_CONSTANTS_TREE|
-|`mapConstantsTreeFile`|test|boolean|Maps constant polynomials tree file to memory|false|MAP_CONSTANTS_TREE_FILE|
+|`recursive1Verkey`|production|string|Recursive 1 verification key file|config + "/recursive1/recursive1.verkey.json"|RECURSIVE1_VERKEY|
+|`recursive1Exec`|production|string|Recursive 1 exec file|config + "/recursive1/recursive1.exec"|RECURSIVE1_EXEC|
 |`recursive1StarkInfo`|production|string|Recursive 1 STARK info file|config + "/recursive1/recursive1.starkinfo.json"|RECURSIVE1_STARK_INFO|
+|`recursive2CmPols`|test|string|Saves recursive 2 commit polynomials into file|""|RECURSIVE2_CM_POLS|
+|`recursive2ConstPols`|production|string|Recursive 2 constant polynomials file|config + "/recursive2/recursive2.const"|RECURSIVE2_CONST_POLS|
+|`recursive2ConstantsTree`|production|string|Recursive 2 contant polynomials tree file|config + "/recursive2/recursive2.consttree"|
+|`recursive2Verifier`|production|string|Recursive 2 verifier data file|config + "/recursive2/recursive2.verifier.dat"|RECURSIVE2_VERIFIER|
+|`recursive2Verkey`|production|string|Recursive 2 verification key file|config + "/recursive2/recursive2.verkey.json"|RECURSIVE2_VERKEY|
+|`recursive2Exec`|production|string|Recursive 2 exec file|config + "/recursive2/recursive2.exec"|RECURSIVE2_EXEC|
 |`recursive2StarkInfo`|production|string|Recursive 2 STARK info file|config + "/recursive2/recursive2.starkinfo.json"|RECURSIVE2_STARK_INFO|
+|`blobInnerCmPols`|test|string|Saves commit polynomials into file|""|BLOB_INNER_CM_POLS|
+|`blobInnerConstPols`|production|string|Saves constant polynomials into file|config + "/blobinner/blobinner.const"|BLOB_INNER_CONST_POLS|
+|`blobInnerConstantsTree`|production|string|Constant polynomials tree file|config + "/blobinner/blobinner.consttree"|BLOB_INNER_CONSTANTS_TREE|
+|`blobInnerVerifier`|production|string|BLOB_INNER verifier data file|config + "/blobinner/blobinner.verifier.dat"|BLOB_INNER_VERIFIER|
+|`blobInnerVerkey`|production|string|BLOB_INNER verification key file|config + "/blobinner/blobinner.verkey.json"|BLOB_INNER_VERKEY|
+|`blobInnerStarkInfo`|production|string|BLOB_INNER STARK info file|config + "/blobinner/blobinner.starkinfo.json"|BLOB_INNER_STARK_INFO|
+|`blobInnerC12ACmPols`|test|string|Saves commit polynomials into file|""|BLOB_INNER_C12A_CM_POLS|
+|`blobInnerC12AConstPols`|production|string|Saves constant polynomials into file|config + "/blobinner_c12a/blobinner_c12a.const"|BLOB_INNER_C12A_CONST_POLS|
+|`blobInnerC12AConstantsTree`|production|string|Constant polynomials tree file|config + "/blobinner_c12a/blobinner_c12a.consttree"|BLOB_INNER_C12A_CONSTANTS_TREE|
+|`blobInnerC12AVerifier`|production|string|BLOB_INNER_C12A verifier data file|config + "/blobinner_c12a/blobinner_c12a.verifier.dat"|BLOB_INNER_C12A_VERIFIER|
+|`blobInnerC12AVerkey`|production|string|BLOB_INNER_C12A verification key file|config + "/blobinner_c12a/blobinner_c12a.verkey.json"|BLOB_INNER_C12A_VERKEY|
+|`blobInnerC12AExec`|production|string|BLOB_INNER_C12A exec file|config + "/blobinner_c12a/blobinner_c12a.exec"|BLOB_INNER_C12A_EXEC|
+|`blobInnerC12AStarkInfo`|production|string|BLOB_INNER_C12A STARK info file|config + "/blobinner_c12a/blobinner_c12a.starkinfo.json"|BLOB_INNER_C12A_STARK_INFO|
+|`blobInnerRecursive1CmPols`|test|string|Saves commit polynomials into file|""|BLOB_INNER_RECURSIVE1_CM_POLS|
+|`blobInnerRecursive1ConstPols`|production|string|Saves constant polynomials into file|config + "/blobinner_recursive1/blobinner_recursive1.const"|BLOB_INNER_RECURSIVE1_CONST_POLS|
+|`blobInnerRecursive1ConstantsTree`|production|string|Constant polynomials tree file|config + "/blobinner_recursive1/blobinner_recursive1.consttree"|BLOB_INNER_RECURSIVE1_CONSTANTS_TREE|
+|`blobInnerRecursive1Verifier`|production|string|BLOB_INNER_RECURSIVE1 verifier data file|config + "/blobinner_recursive1/blobinner_recursive1.verifier.dat"|BLOB_INNER_RECURSIVE1_VERIFIER|
+|`blobInnerRecursive1Verkey`|production|string|BLOB_INNER_RECURSIVE1 verification key file|config + "/blobinner_recursive1/blobinner_recursive1.verkey.json"|BLOB_INNER_RECURSIVE1_VERKEY|
+|`blobInnerRecursive1Exec`|production|string|BLOB_INNER_RECURSIVE1 exec file|config + "/blobinner_recursive1/blobinner_recursive1.exec"|BLOB_INNER_RECURSIVE1_EXEC|
+|`blobInnerRecursive1StarkInfo`|production|string|BLOB_INNER_RECURSIVE1 STARK info file|config + "/blobinner_recursive1/blobinner_recursive1.starkinfo.json"|BLOB_INNER_RECURSIVE1_STARK_INFO|
+|`blobOuterCmPols`|test|string|Saves commit polynomials into file|""|BLOB_OUTER_CM_POLS|
+|`blobOuterConstPols`|production|string|Saves constant polynomials into file|config + "/blobouter/blobouter.const"|BLOB_OUTER_CONST_POLS|
+|`blobOuterConstantsTree`|production|string|Constant polynomials tree file|config + "/blobouter/blobouter.consttree"|BLOB_OUTER_CONSTANTS_TREE|
+|`blobOuterVerifier`|production|string|BLOB_OUTER verifier data file|config + "/blobouter/blobouter.verifier.dat"|BLOB_OUTER_VERIFIER|
+|`blobOuterVerkey`|production|string|BLOB_OUTER verification key file|config + "/blobouter/blobouter.verkey.json"|BLOB_OUTER_VERKEY|
+|`blobOuterExec`|production|string|BLOB_OUTER exec file|config + "/blobouter/blobouter.exec"|BLOB_OUTER_EXEC|
+|`blobOuterStarkInfo`|production|string|BLOB_OUTER STARK info file|config + "/blobouter/blobouter.starkinfo.json"|BLOB_OUTER_STARK_INFO|
+|`blobOuterRecursive2CmPols`|test|string|Saves commit polynomials into file|""|BLOB_OUTER_RECURSIVE2_CM_POLS|
+|`blobOuterRecursive2ConstPols`|production|string|Saves constant polynomials into file|config + "/blobouter_recursive2/blobouter_recursive2.const"|BLOB_OUTER_RECURSIVE2_CONST_POLS|
+|`blobOuterRecursive2ConstantsTree`|production|string|Constant polynomials tree file|config + "/blobouter_recursive2/blobouter_recursive2.consttree"|BLOB_OUTER_RECURSIVE2_CONSTANTS_TREE|
+|`blobOuterRecursive2Verifier`|production|string|BLOB_OUTER_RECURSIVE2 verifier data file|config + "/blobouter_recursive2/blobouter_recursive2.verifier.dat"|BLOB_OUTER_RECURSIVE2_VERIFIER|
+|`blobOuterRecursive2Verkey`|production|string|BLOB_OUTER_RECURSIVE2 verification key file|config + "/blobouter_recursive2/blobouter_recursive2.verkey.json"|BLOB_OUTER_RECURSIVE2_VERKEY|
+|`blobOuterRecursive2Exec`|production|string|BLOB_OUTER_RECURSIVE2 exec file|config + "/blobouter_recursive2/blobouter_recursive2.exec"|BLOB_OUTER_RECURSIVE2_EXEC|
+|`blobOuterRecursive2StarkInfo`|production|string|BLOB_OUTER_RECURSIVE2 STARK info file|config + "/blobouter_recursive2/blobouter_recursive2.starkinfo.json"|BLOB_OUTER_RECURSIVE2_STARK_INFO|
+|`recursivefConstPols`|production|string|Recursive final constant polynomials file|config + "/recursivef/recursivef.const"|RECURSIVEF_CONST_POLS|
+|`recursivefVerifier`|production|string|Recursive final verifier data file|config + "/recursivef/recursivef.verifier.dat"|RECURSIVEF_VERIFIER|
+|`mapConstantsTreeFile`|test|boolean|Maps constant polynomials tree file to memory|false|MAP_CONSTANTS_TREE_FILE|
 |`recursivefStarkInfo`|production|string|Recursive final STARK info file|config + "/recursivef/recursivef.starkinfo.json"|RECURSIVEF_STARK_INFO|
 |`finalVerkey`|production|string|Final verification key file|config + "/final/final.fflonk.verkey.json"|FINAL_VERKEY|
-|`zkevmVerifier`|production|string|zkEVM verifier data file|config + "/zkevm/zkevm.verifier.dat"|ZKEVM_VERIFIER|
-|`zkevmVerkey`|production|string|ZKEVM verification key file|config + "/zkevm/zkevm.verkey.json"|ZKEVM_VERKEY|
-|`c12aVerkey`|production|string|C12A verification key file|config + "/c12a/c12a.verkey.json"|C12A_VERKEY|
-|`recursive1Verkey`|production|string|Recursive 1 verification key file|config + "/recursive1/recursive1.verkey.json"|RECURSIVE1_VERKEY|
-|`recursive2Verkey`|production|string|Recursive 2 verification key file|config + "/recursive2/recursive2.verkey.json"|RECURSIVE2_VERKEY|
 |`recursivefVerkey`|production|string|Recursive F verification key file|config + "/recursivef/recursivef.verkey.json"|RECURSIVEF_VERKEY|
 |`finalVerifier`|production|string|Final verifier data file|config + "/final/final.verifier.dat"|FINAL_VERIFIER|
-|`recursive1Exec`|production|string|Recursive 1 exec file|config + "/recursive1/recursive1.exec"|RECURSIVE1_EXEC|
-|`recursive2Exec`|production|string|Recursive 2 exec file|config + "/recursive2/recursive2.exec"|RECURSIVE2_EXEC|
 |`recursivefExec`|production|string|Recursive final exec file|config + "/recursivef/recursivef.exec"|RECURSIVEF_EXEC|
 |`finalStarkZkey`|production|string|Final STARK zkey file|config + "/final/final.fflonk.zkey"|FINAL_STARK_ZKEY|
 |`publicsOutput`|production|string|Public data output file|"public.json"|PUBLICS_OUTPUT|
@@ -140,10 +179,7 @@ The configuration parameters can be of different uses:
 |`keccakPolsFile`|production|string|Keccak-f polynomials file|"keccak_pols.json"|KECCAK_POLS_FILE|
 |`keccakConnectionsFile`|production|string|Keccak-f connections file|"keccak_connections.json"|KECCAK_CONNECTIONS_FILE|
 |`sha256ConnectionsFile`|production|string|SHA-256 connections file|"sha256_connections.json"|KECCAK_CONNECTIONS_FILE|
-|`zkevmStarkInfo`|production|string|zkEVN STARK info file|config + "/zkevm/zkevm.starkinfo.json"|ZKEVM_STARK_INFO|
 |`storageRomFile`|production|string|Storage ROM file|config + "/scripts/storage_sm_rom.json"|STORAGE_ROM_FILE|
-|`recursive1ConstantsTree`|production|string|Recursive 1 contant polynomials tree file|config + "/recursive1/recursive1.consttree"|
-|`recursive2ConstantsTree`|production|string|Recursive 2 contant polynomials tree file|config + "/recursive2/recursive2.consttree"|
 |`recursivefConstantsTree`|production|string|Recursive final contant polynomials tree file|config + "/recursivef/recursivef.consttree"|RECURSIVE1_CONSTANTS_TREE|
 |`sha256PolsFile`|production|string|SHA-256 polynomials file|"sha256_pols.json"|SHA256_POLS_FILE|
 |`sha256ConnectionsFile`|production|string|SHA-256 connections file|"sha256_connections.json"|SHA256_CONNECTIONS_FILE|

@@ -119,38 +119,74 @@ public:
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
     string configPath;
+    
     string zkevmCmPols; // Maps commit pols memory into file, which slows down a bit the executor
     string zkevmCmPolsAfterExecutor; // Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning
     string c12aCmPols;
     string recursive1CmPols;
+    string blobInnerCmPols;
+    string blobInnerC12aCmPols;
+    string blobInnerRecursive1CmPols;
+    string blobOuterCmPols;
+    string blobOuterRecursive2CmPols;
+
     string zkevmConstPols;
     string c12aConstPols;
     string recursive1ConstPols;
     string recursive2ConstPols;
     string recursivefConstPols;
+    string blobInnerConstPols;
+    string blobInnerC12aConstPols;
+    string blobInnerRecursive1ConstPols;
+    string blobOuterConstPols;
+    string blobOuterRecursive2ConstPols;
     bool mapConstPolsFile;
+
     string zkevmConstantsTree;
     string c12aConstantsTree;
     string recursive1ConstantsTree;
     string recursive2ConstantsTree;
     string recursivefConstantsTree;
+    string blobInnerConstantsTree;
+    string blobInnerC12aConstantsTree;
+    string blobInnerRecursive1ConstantsTree;
+    string blobOuterConstantsTree;
+    string blobOuterRecursive2ConstantsTree;
     bool mapConstantsTreeFile;
-    string finalVerkey;
+    
     string zkevmVerifier;
     string recursive1Verifier;
     string recursive2Verifier;
     string recursivefVerifier;
+    string blobInnerVerifier;
+    string blobInnerRecursive1Verifier;
+    string blobOuterVerifier;
+    string blobOuterRecursive2Verifier;
+    string finalVerifier;
+
     string zkevmVerkey;
     string c12aVerkey;
     string recursive1Verkey;
     string recursive2Verkey;
     string recursivefVerkey;
-    string finalVerifier;
+    string blobInnerVerkey;
+    string blobInnerC12aVerkey;
+    string blobInnerRecursive1Verkey;
+    string blobOuterVerkey;
+    string blobOuterRecursive2Verkey;
+    string finalVerkey;
+    
     string c12aExec;
     string recursive1Exec;
     string recursive2Exec;
+    string blobInnerC12aExec;
+    string blobInnerRecursive1Exec;
+    string blobOuterExec;
+    string blobOuterRecursive2Exec;
     string recursivefExec;
+    
     string finalStarkZkey;
+    
     string publicsOutput;
     string proofFile;
     string keccakScriptFile;
@@ -160,11 +196,17 @@ public:
     string keccakConnectionsFile;
     string sha256ConnectionsFile;
     string storageRomFile;
+    
     string zkevmStarkInfo;
     string c12aStarkInfo;
     string recursive1StarkInfo;
     string recursive2StarkInfo;
     string recursivefStarkInfo;
+    string blobInnerStarkInfo;
+    string blobInnerC12aStarkInfo;
+    string blobInnerRecursive1StarkInfo;
+    string blobOuterStarkInfo;
+    string blobOuterRecursive2StarkInfo;
 
     // Database
     string databaseURL;

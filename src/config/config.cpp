@@ -257,6 +257,39 @@ void Config::load(json &config)
     ParseString(config, "recursive2StarkInfo", "RECURSIVE2_STARK_INFO", recursive2StarkInfo, configPath + "/recursive2/recursive2.starkinfo.json");
     ParseString(config, "recursive2Verifier", "RECURSIVE2_VERIFIER", recursive2Verifier, configPath + "/recursive2/recursive2.verifier.dat");
     ParseString(config, "recursive2Verkey", "RECURSIVE2_VERKEY", recursive2Verkey, configPath + "/recursive2/recursive2.verkey.json");
+    ParseString(config, "blobInnerCmPols", "BLOB_INNER_CM_POLS", blobInnerCmPols, "");
+    ParseString(config, "blobInnerConstPols", "BLOB_INNER_CONST_POLS", blobInnerConstPols,configPath +  "/blobinner/blobinner.const");
+    ParseString(config, "blobInnerConstantsTree", "BLOB_INNER_CONSTANTS_TREE", blobInnerConstantsTree, configPath +  "/blobinner/blobinner.consttree");
+    ParseString(config, "blobInnerVerifier", "BLOB_INNER_VERIFIER", blobInnerVerifier,configPath + "/blobinner/blobinner.verifier.dat"); 
+    ParseString(config, "blobInnerVerkey", "BLOB_INNER_VERKEY", blobInnerVerkey,configPath +  "/blobinner/blobinner.verkey.json");
+    ParseString(config, "blobInnerStarkInfo", "BLOB_INNER_STARK_INFO", blobInnerStarkInfo,configPath +  "/blobinner/blobinner.starkinfo.json");
+    ParseString(config, "blobInnerC12aCmPols", "BLOB_INNER_C12A_CM_POLS", blobInnerC12aCmPols, "");
+    ParseString(config, "blobInnerC12aConstPols", "BLOB_INNER_C12A_CONST_POLS", blobInnerC12aConstPols,configPath + "/blobinner_c12a/blobinner_c12a.const");
+    ParseString(config, "blobInnerC12aConstantsTree", "BLOB_INNER_C12A_CONSTANTS_TREE", blobInnerC12aConstantsTree,configPath + "/blobinner_c12a/blobinner_c12a.consttree");
+    ParseString(config, "blobInnerC12aVerkey", "BLOB_INNER_C12A_VERKEY", blobInnerC12aVerkey, configPath + "/blobinner_c12a/blobinner_c12a.verkey.json");
+    ParseString(config, "blobInnerC12aExec", "BLOB_INNER_C12A_EXEC", blobInnerC12aExec,configPath + "/blobinner_c12a/blobinner_c12a.exec");
+    ParseString(config, "blobInnerC12aStarkInfo", "BLOB_INNER_C12A_STARK_INFO", blobInnerC12aStarkInfo,configPath +  "/blobinner_c12a/blobinner_c12a.starkinfo.json");
+    ParseString(config, "blobInnerRecursive1CmPols", "BLOB_INNER_RECURSIVE1_CM_POLS", blobInnerRecursive1CmPols, "");
+    ParseString(config, "blobInnerRecursive1ConstPols", "BLOB_INNER_RECURSIVE1_CONST_POLS", blobInnerRecursive1ConstPols, configPath + "/blobinner_recursive1/blobinner_recursive1.const");
+    ParseString(config, "blobInnerRecursive1ConstantsTree", "BLOB_INNER_RECURSIVE1_CONSTANTS_TREE", blobInnerRecursive1ConstantsTree,configPath +  "/blobinner_recursive1/blobinner_recursive1.consttree");
+    ParseString(config, "blobInnerRecursive1Verifier", "BLOB_INNER_RECURSIVE1_VERIFIER", blobInnerRecursive1Verifier,configPath + "/blobinner_recursive1/blobinner_recursive1.verifier.dat");
+    ParseString(config, "blobInnerRecursive1Verkey", "BLOB_INNER_RECURSIVE1_VERKEY", blobInnerRecursive1Verkey, configPath + "/blobinner_recursive1/blobinner_recursive1.verkey.json");
+    ParseString(config, "blobInnerRecursive1Exec", "BLOB_INNER_RECURSIVE1_EXEC", blobInnerRecursive1Exec, configPath + "/blobinner_recursive1/blobinner_recursive1.exec");
+    ParseString(config, "blobInnerRecursive1StarkInfo", "BLOB_INNER_RECURSIVE1_STARK_INFO", blobInnerRecursive1StarkInfo,configPath +  "/blobinner_recursive1/blobinner_recursive1.starkinfo.json");
+    ParseString(config, "blobOuterCmPols", "BLOB_OUTER_CM_POLS", blobOuterCmPols,configPath +  "");
+    ParseString(config, "blobOuterConstPols", "BLOB_OUTER_CONST_POLS", blobOuterConstPols, configPath + "/blobouter/blobouter.const");
+    ParseString(config, "blobOuterConstantsTree", "BLOB_OUTER_CONSTANTS_TREE", blobOuterConstantsTree,configPath +  "/blobouter/blobouter.consttree");
+    ParseString(config, "blobOuterVerifier", "BLOB_OUTER_VERIFIER", blobOuterVerifier,configPath + "/blobouter/blobouter.verifier.dat");
+    ParseString(config, "blobOuterVerkey", "BLOB_OUTER_VERKEY", blobOuterVerkey,configPath +  "/blobouter/blobouter.verkey.json");
+    ParseString(config, "blobOuterExec", "BLOB_OUTER_EXEC", blobOuterExec, configPath + "/blobouter/blobouter.exec");
+    ParseString(config, "blobOuterStarkInfo", "BLOB_OUTER_STARK_INFO", blobOuterStarkInfo, configPath + "/blobouter/blobouter.starkinfo.json");
+    ParseString(config, "blobOuterRecursive2CmPols", "BLOB_OUTER_RECURSIVE2_CM_POLS", blobOuterRecursive2CmPols, "");
+    ParseString(config, "blobOuterRecursive2ConstPols", "BLOB_OUTER_RECURSIVE2_CONST_POLS", blobOuterRecursive2ConstPols, configPath + "/blobouter_recursive2/blobouter_recursive2.const");
+    ParseString(config, "blobOuterRecursive2ConstantsTree", "BLOB_OUTER_RECURSIVE2_CONSTANTS_TREE", blobOuterRecursive2ConstantsTree,configPath +  "/blobouter_recursive2/blobouter_recursive2.consttree");
+    ParseString(config, "blobOuterRecursive2Verifier", "BLOB_OUTER_RECURSIVE2_VERIFIER", blobOuterRecursive2Verifier,configPath + "/blobouter_recursive2/blobouter_recursive2.verifier.dat");
+    ParseString(config, "blobOuterRecursive2Verkey", "BLOB_OUTER_RECURSIVE2_VERKEY", blobOuterRecursive2Verkey, configPath + "/blobouter_recursive2/blobouter_recursive2.verkey.json");
+    ParseString(config, "blobOuterRecursive2Exec", "BLOB_OUTER_RECURSIVE2_EXEC", blobOuterRecursive2Exec,configPath + "/blobouter_recursive2/blobouter_recursive2.exec");
+    ParseString(config, "blobOuterRecursive2StarkInfo", "BLOB_OUTER_RECURSIVE2_STARK_INFO", blobOuterRecursive2StarkInfo,configPath +  "/blobouter_recursive2/blobouter_recursive2.starkinfo.json");
     ParseString(config, "recursivefConstPols", "RECURSIVEF_CONST_POLS", recursivefConstPols, configPath + "/recursivef/recursivef.const");
     ParseString(config, "recursivefConstantsTree", "RECURSIVEF_CONSTANTS_TREE", recursivefConstantsTree, configPath + "/recursivef/recursivef.consttree");
     ParseString(config, "recursivefExec", "RECURSIVEF_EXEC", recursivefExec, configPath + "/recursivef/recursivef.exec");
@@ -463,13 +496,31 @@ void Config::print(void)
     zklog.info("    zkevmCmPols=" + zkevmCmPols);
     zklog.info("    c12aCmPols=" + c12aCmPols);
     zklog.info("    recursive1CmPols=" + recursive1CmPols);
+    zklog.info("    blobInnerCmPols=" + blobInnerCmPols);
+    zklog.info("    blobInnerC12aCmPols=" + blobInnerC12aCmPols);
+    zklog.info("    blobInnerRecursive1CmPols=" + blobInnerRecursive1CmPols);
+    zklog.info("    blobOuterCmPols=" + blobOuterCmPols);
+    zklog.info("    blobOuterRecursive2CmPols=" + blobOuterRecursive2CmPols);
     zklog.info("    zkevmConstPols=" + zkevmConstPols);
     zklog.info("    c12aConstPols=" + c12aConstPols);
+    zklog.info("    recursive1ConstPols=" + recursive1ConstPols);
+    zklog.info("    recursive2ConstPols=" + recursive2ConstPols);
+    zklog.info("    blobInnerConstPols=" + blobInnerConstPols);
+    zklog.info("    blobInnerC12aConstPols=" + blobInnerC12aConstPols);
+    zklog.info("    blobInnerRecursive1ConstPols=" + blobInnerRecursive1ConstPols);
+    zklog.info("    blobOuterConstPols=" + blobOuterConstPols);
+    zklog.info("    blobOuterRecursive2ConstPols=" + blobOuterRecursive2ConstPols);
     zklog.info("    mapConstPolsFile=" + to_string(mapConstPolsFile));
     zklog.info("    zkevmConstantsTree=" + zkevmConstantsTree);
     zklog.info("    c12aConstantsTree=" + c12aConstantsTree);
+    zklog.info("    recursive1ConstantsTree=" + recursive1ConstantsTree);
+    zklog.info("    recursive2ConstantsTree=" + recursive2ConstantsTree);
+    zklog.info("    blobInnerConstantsTree=" + blobInnerConstantsTree);
+    zklog.info("    blobInnerC12aConstantsTree=" + blobInnerC12aConstantsTree);
+    zklog.info("    blobInnerRecursive1ConstantsTree=" + blobInnerRecursive1ConstantsTree);
+    zklog.info("    blobOuterConstantsTree=" + blobOuterConstantsTree);
+    zklog.info("    blobOuterRecursive2ConstantsTree=" + blobOuterRecursive2ConstantsTree);
     zklog.info("    mapConstantsTreeFile=" + to_string(mapConstantsTreeFile));
-    zklog.info("    finalVerkey=" + finalVerkey);
     zklog.info("    zkevmVerifier=" + zkevmVerifier);
     zklog.info("    zkevmVerkey=" + zkevmVerkey);
     zklog.info("    c12aVerkey=" + c12aVerkey);
@@ -477,9 +528,19 @@ void Config::print(void)
     zklog.info("    recursive1Verkey=" + recursive1Verkey);
     zklog.info("    recursive2Verifier=" + recursive2Verifier);
     zklog.info("    recursive2Verkey=" + recursive2Verkey);
+    zklog.info("    blobInnerVerifier=" + blobInnerVerifier);
+    zklog.info("    blobInnerVerkey=" + blobInnerVerkey);
+    zklog.info("    blobInnerC12aVerkey=" + blobInnerC12aVerkey);
+    zklog.info("    blobInnerRecursive1Verifier=" + blobInnerRecursive1Verifier);
+    zklog.info("    blobInnerRecursive1Verkey=" + blobInnerRecursive1Verkey);
+    zklog.info("    blobOuterVerifier=" + blobOuterVerifier);
+    zklog.info("    blobOuterVerkey=" + blobOuterVerkey);
+    zklog.info("    blobOuterRecursive2Verifier=" + blobOuterRecursive2Verifier);
+    zklog.info("    blobOuterRecursive2Verkey=" + blobOuterRecursive2Verkey);
     zklog.info("    recursivefVerifier=" + recursivefVerifier);
     zklog.info("    recursivefVerkey=" + recursivefVerkey);
     zklog.info("    finalVerifier=" + finalVerifier);
+    zklog.info("    finalVerkey=" + finalVerkey);
     zklog.info("    finalStarkZkey=" + finalStarkZkey);
     zklog.info("    publicsOutput=" + publicsOutput);
     zklog.info("    proofFile=" + proofFile);
@@ -491,6 +552,13 @@ void Config::print(void)
     zklog.info("    storageRomFile=" + storageRomFile);
     zklog.info("    zkevmStarkInfo=" + zkevmStarkInfo);
     zklog.info("    c12aStarkInfo=" + c12aStarkInfo);
+    zklog.info("    recursive1StarkInfo=" + recursive1StarkInfo);
+    zklog.info("    recursive2StarkInfo=" + recursive2StarkInfo);
+    zklog.info("    blobInnerStarkInfo=" + blobInnerStarkInfo);
+    zklog.info("    blobInnerC12aStarkInfo=" + blobInnerC12aStarkInfo);
+    zklog.info("    blobInnerRecursive1StarkInfo=" + blobInnerRecursive1StarkInfo);
+    zklog.info("    blobOuterStarkInfo=" + blobOuterStarkInfo);
+    zklog.info("    blobOuterRecursive2StarkInfo=" + blobOuterRecursive2StarkInfo);
     zklog.info("    databaseURL=" + databaseURL.substr(0, 5) + "...");
     zklog.info("    dbNodesTableName=" + dbNodesTableName);
     zklog.info("    dbProgramTableName=" + dbProgramTableName);
@@ -557,7 +625,31 @@ bool Config::check (void)
             zklog.error("required file config.recursivefConstPols=" + recursivefConstPols + " does not exist");
             bError = true;
         }
-
+        if(!fileExists(blobInnerConstPols))
+        {
+            zklog.error("required file config.blobInnerConstPols=" + blobInnerConstPols + " does not exist");
+            bError = true;
+        }
+        if(!fileExists(blobInnerC12aConstPols))
+        {
+            zklog.error("required file config.blobInnerC12aConstPols=" + blobInnerC12aConstPols + " does not exist");
+            bError = true;
+        }
+        if(!fileExists(blobInnerRecursive1ConstPols))
+        {
+            zklog.error("required file config.blobInnerRecursive1ConstPols=" + blobInnerRecursive1ConstPols + " does not exist");
+            bError = true;
+        }
+        if(!fileExists(blobOuterConstPols))
+        {
+            zklog.error("required file config.blobOuterConstPols=" + blobOuterConstPols + " does not exist");
+            bError = true;
+        }
+        if(!fileExists(blobOuterRecursive2ConstPols))
+        {
+            zklog.error("required file config.blobOuterRecursive2ConstPols=" + blobOuterRecursive2ConstPols + " does not exist");
+            bError = true;
+        }
         if (!fileExists(zkevmConstantsTree))
         {
             zklog.error("required file config.zkevmConstantsTree=" + zkevmConstantsTree + " does not exist");
@@ -576,6 +668,31 @@ bool Config::check (void)
         if (!fileExists(recursive2ConstantsTree))
         {
             zklog.error("required file config.recursive2ConstantsTree=" + recursive2ConstantsTree + " does not exist");
+            bError = true;
+        }
+        if(!fileExists(blobInnerConstantsTree))
+        {
+            zklog.error("required file config.blobInnerConstantsTree=" + blobInnerConstantsTree + " does not exist");
+            bError = true;
+        }
+        if(!fileExists(blobInnerC12aConstantsTree))
+        {
+            zklog.error("required file config.blobInnerC12aConstantsTree=" + blobInnerC12aConstantsTree + " does not exist");
+            bError = true;
+        }
+        if(!fileExists(blobInnerRecursive1ConstantsTree))
+        {
+            zklog.error("required file config.blobInnerRecursive1ConstantsTree=" + blobInnerRecursive1ConstantsTree + " does not exist");
+            bError = true;
+        }
+        if(!fileExists(blobOuterConstantsTree))
+        {
+            zklog.error("required file config.blobOuterConstantsTree=" + blobOuterConstantsTree + " does not exist");
+            bError = true;
+        }
+        if(!fileExists(blobOuterRecursive2ConstantsTree))
+        {
+            zklog.error("required file config.blobOuterRecursive2ConstantsTree=" + blobOuterRecursive2ConstantsTree + " does not exist");
             bError = true;
         }
         if (!fileExists(recursivefConstantsTree))
@@ -623,6 +740,52 @@ bool Config::check (void)
             zklog.error("required file config.finalVerifier=" + finalVerifier + " does not exist");
             bError = true;
         }
+        
+        if (!fileExists(blobInnerVerifier))
+        {
+            zklog.error("required file config.blobInnerVerifier=" + blobInnerVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobInnerVerkey))
+        {
+            zklog.error("required file config.blobInnerVerkey=" + blobInnerVerkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobInnerC12aVerkey))
+        {
+            zklog.error("required file config.blobInnerC12aVerkey=" + blobInnerC12aVerkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobInnerRecursive1Verifier))
+        {
+            zklog.error("required file config.blobInnerRecursive1Verifier=" + blobInnerRecursive1Verifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobInnerRecursive1Verkey))
+        {
+            zklog.error("required file config.blobInnerRecursive1Verkey=" + blobInnerRecursive1Verkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobOuterVerifier))
+        {
+            zklog.error("required file config.blobOuterVerifier=" + blobOuterVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobOuterVerkey))
+        {
+            zklog.error("required file config.blobOuterVerkey=" + blobOuterVerkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobOuterRecursive2Verifier))
+        {
+            zklog.error("required file config.blobOuterRecursive2Verifier=" + blobOuterRecursive2Verifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobOuterRecursive2Verkey))
+        {
+            zklog.error("required file config.blobOuterRecursive2Verkey=" + blobOuterRecursive2Verkey + " does not exist");
+            bError = true;
+        }
         if (!fileExists(recursivefVerifier))
         {
             zklog.error("required file config.recursivefVerifier=" + recursivefVerifier + " does not exist");
@@ -663,6 +826,31 @@ bool Config::check (void)
             zklog.error("required file config.recursive2StarkInfo=" + recursive2StarkInfo + " does not exist");
             bError = true;
         }
+        if (!fileExists(blobInnerStarkInfo))
+        {
+            zklog.error("required file config.blobInnerStarkInfo=" + blobInnerStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobInnerC12aStarkInfo))
+        {
+            zklog.error("required file config.blobInnerC12aStarkInfo=" + blobInnerC12aStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobInnerRecursive1StarkInfo))
+        {
+            zklog.error("required file config.blobInnerRecursive1StarkInfo=" + blobInnerRecursive1StarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobOuterStarkInfo))
+        {
+            zklog.error("required file config.blobOuterStarkInfo=" + blobOuterStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobOuterRecursive2StarkInfo))
+        {
+            zklog.error("required file config.blobOuterRecursive2StarkInfo=" + blobOuterRecursive2StarkInfo + " does not exist");
+            bError = true;
+        }
         if (!fileExists(recursivefStarkInfo))
         {
             zklog.error("required file config.recursivefStarkInfo=" + recursivefStarkInfo + " does not exist");
@@ -686,6 +874,26 @@ bool Config::check (void)
         if (!fileExists(recursivefExec))
         {
             zklog.error("required file config.recursivefExec=" + recursivefExec + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobInnerC12aExec))
+        {
+            zklog.error("required file config.blobInnerC12aExec=" + blobInnerC12aExec + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobInnerRecursive1Exec))
+        {
+            zklog.error("required file config.blobInnerRecursive1Exec=" + blobInnerRecursive1Exec + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobOuterExec))
+        {
+            zklog.error("required file config.blobOuterExec=" + blobOuterExec + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(blobOuterRecursive2Exec))
+        {
+            zklog.error("required file config.blobOuterRecursive2Exec=" + blobOuterRecursive2Exec + " does not exist");
             bError = true;
         }
     }
