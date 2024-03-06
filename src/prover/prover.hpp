@@ -56,6 +56,7 @@ private:
     void *pAddress = NULL;
     void *pAddressStarksRecursiveF = NULL;
     int protocolId;
+    uint64_t polsSize;
     bool optimizeMemoryNTT = false;
     bool optimizeMemoryNTTCommitPols = false;
 public:
