@@ -59,7 +59,8 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
 #else
     TimerStart(STARK_STEP_1_LDE);
 
-    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm2_2ns);
+    Goldilocks::Element *pBufferCommitPols = optimizeMemoryNTTCommitPols ? p_tmpExp_n : p_cm2_2ns;
+    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], pBufferCommitPols);
     TimerStopAndLog(STARK_STEP_1_LDE);
     TimerStart(STARK_STEP_1_MERKLETREE);
     treesGL[0]->merkelize();
@@ -82,8 +83,8 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step2"]);
     TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
-    Goldilocks::Element *pBuffer_ = &params.pols[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
-    Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited, pBuffer_);
+    Goldilocks::Element *pBufferH1H2_ = &params.pols[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
+    Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited, pBufferH1H2_);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
     TimerStart(STARK_STEP_2_CALCULATEH1H2);
 
@@ -159,8 +160,8 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step3"]);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
-    Goldilocks::Element *pBuffer_ = &params.pols[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
-    Polinomial *newpols_ = transposeZColumns(pAddress, numCommited, pBuffer_);
+    Goldilocks::Element *pBufferZ_ = &params.pols[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
+    Polinomial *newpols_ = transposeZColumns(pAddress, numCommited, pBufferZ_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
 
     TimerStart(STARK_STEP_3_CALCULATE_Z);
