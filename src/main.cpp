@@ -287,7 +287,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     }
 
     // Call the prover
-    prover.execute(&proverRequest);
+    prover.executeBatch(&proverRequest);
 }
 
 int main(int argc, char **argv)
