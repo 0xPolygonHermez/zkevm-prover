@@ -33,6 +33,7 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
+    bool optimizeMemoryNTT = false;
 
 private:
     void *pConstPolsAddress;
