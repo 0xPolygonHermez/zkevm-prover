@@ -93,9 +93,10 @@ Prover::Prover(Goldilocks &fr,
             // and create them using the allocated address
 
             uint64_t polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element);
+            if( _starkInfo.mapOffsets.section[eSection::cm1_2ns] < _starkInfo.mapOffsets.section[eSection::tmpExp_n]) optimizeMemoryNTTCommitPols = true;
             for(uint64_t i = 1; i <= 3; ++i) {
                 std::string currentSection = "cm" + to_string(i) + "_n";
-                std::string nextSectionExtended = "cm" + to_string(i + 1) + "_2ns";
+                std::string nextSectionExtended = i == 1 && optimizeMemoryNTTCommitPols ? "tmpExp_n" : "cm" + to_string(i + 1) + "_2ns";
                 uint64_t nttHelperSize = _starkInfo.mapSectionsN.section[string2section(currentSection)] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
                 uint64_t currentSectionStart = _starkInfo.mapOffsets.section[string2section(currentSection)] * sizeof(Goldilocks::Element);
                 if (i == 3 && currentSectionStart > nttHelperSize) optimizeMemoryNTT = true;
@@ -135,6 +136,7 @@ Prover::Prover(Goldilocks &fr,
 
             starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, config.zkevmCHelpers}, pAddress);
             if(optimizeMemoryNTT) starkZkevm->optimizeMemoryNTT = true;
+            if(optimizeMemoryNTTCommitPols) starkZkevm->optimizeMemoryNTTCommitPols = true;
             starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, config.c12aCHelpers}, pAddress);
             starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, config.recursive1CHelpers}, pAddress);
             starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, config.recursive2CHelpers}, pAddress);
