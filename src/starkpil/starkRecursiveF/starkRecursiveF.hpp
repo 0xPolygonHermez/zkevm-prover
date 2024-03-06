@@ -3,7 +3,6 @@
 
 #include "stark_info.hpp"
 #include "transcriptBN128.hpp"
-#include "zhInv.hpp"
 #include "merklehash_goldilocks.hpp"
 #include "polinomial.hpp"
 #include "ntt_goldilocks.hpp"
@@ -18,6 +17,7 @@
 #include "constant_pols_starks.hpp"
 #include "commit_pols_starks.hpp"
 #include "steps.hpp"
+#include "chelpers.hpp"
 
 #define BN128_ARITY 16
 #define STARK_RECURSIVE_F_NUM_TREES 5
@@ -35,15 +35,17 @@ private:
     ConstantPolsStarks *pConstPols;
     ConstantPolsStarks *pConstPols2ns;
     void *pConstTreeAddress;
-    ZhInv zi;
     uint64_t N;
     uint64_t NExtended;
     NTT_Goldilocks ntt;
     NTT_Goldilocks nttExtended;
     Polinomial x_n;
     Polinomial x_2ns;
+    Polinomial zi;
     uint64_t constPolsSize;
     uint64_t constPolsDegree;
+
+    Polinomial x;
 
     Goldilocks::Element *mem;
 
@@ -59,6 +61,9 @@ private:
 
     Goldilocks::Element *pBuffer;
 
+    std::unique_ptr<BinFileUtils::BinFile> cHelpersBinFile;
+    CHelpers chelpers;
+    
     void *pAddress;
 
 public:

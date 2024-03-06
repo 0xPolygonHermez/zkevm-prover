@@ -6,16 +6,15 @@
 
 USING_PROVER_FORK_NAMESPACE;
 
-void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps)
+void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], CHelpersSteps *chelpersSteps)
 {
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
     uint64_t numCommited = starkInfo.nCm1;
     Transcript transcript;
-    Polinomial evals(N, FIELD_EXTENSION);
-    Polinomial xDivXSubXi(NExtended, FIELD_EXTENSION);
-    Polinomial xDivXSubWXi(NExtended, FIELD_EXTENSION);
+    Polinomial evals(starkInfo.evMap.size(), FIELD_EXTENSION);
+    Polinomial xDivXSubXi(2 * NExtended, FIELD_EXTENSION);
     Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
 
     CommitPols cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
@@ -37,7 +36,6 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
         zi : zi,
         evals : evals,
         xDivXSubXi : xDivXSubXi,
-        xDivXSubWXi : xDivXSubWXi,
         publicInputs : publicInputs,
         q_2ns : p_q_2ns,
         f_2ns : p_f_2ns
@@ -80,28 +78,9 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     TimerStart(STARK_STEP_2);
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_2_CALCULATE_EXPS_AVX);
-        steps->step2prev_parser_first_avx(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_2_CALCULATE_EXPS_AVX512);
-        steps->step2prev_parser_first_avx512(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_2_CALCULATE_EXPS);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < N; i++)
-        {
-            steps->step2prev_first(params, i);
-        }
-        TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
-    }
+    TimerStart(STARK_STEP_2_CALCULATE_EXPS);
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step2"]);
+    TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
     Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited, pBuffer);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
@@ -175,28 +154,9 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     TimerStart(STARK_STEP_3);
     transcript.getField(challenges[2]); // gamma
     transcript.getField(challenges[3]); // betta
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_AVX);
-        steps->step3prev_parser_first_avx(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_AVX512);
-        steps->step3prev_parser_first_avx512(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < N; i++)
-        {
-            steps->step3prev_first(params, i);
-        }
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
-    }
+    TimerStart(STARK_STEP_3_CALCULATE_EXPS);
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step3"]);
+    TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
     Polinomial *newpols_ = transposeZColumns(pAddress, numCommited, pBuffer);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
@@ -213,29 +173,9 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
     transposeZRows(pAddress, numCommited, newpols_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_2_AVX);
-        steps->step3_parser_first_avx(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_2_AVX512);
-        steps->step3_parser_first_avx512(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < N; i++)
-        {
-            steps->step3_first(params, i);
-        }
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
-    }
-
+    TimerStart(STARK_STEP_3_AFTER_CALCULATE_EXPS);
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step3_after"]);
+    TimerStopAndLog(STARK_STEP_3_AFTER_CALCULATE_EXPS);
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
 #ifdef __USE_CUDA__
     ncols = starkInfo.mapSectionsN.section[eSection::cm3_n];
@@ -274,31 +214,11 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
 
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
     TimerStopAndLog(STARK_STEP_4_INIT);
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX);
-        steps->step42ns_parser_first_avx(params, NExtended, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX512);
-        steps->step42ns_parser_first_avx512(params, NExtended, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < NExtended; i++)
-        {
-            steps->step42ns_first(params, i);
-        }
-        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
-    }
-
+    TimerStart(STARK_STEP_4_CALCULATE_EXPS);
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step4"]);
+    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS);
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
-    nttExtended.INTT(qq1.address(), p_q_2ns, NExtended, starkInfo.qDim, NULL, 2, 1);
+    nttExtended.INTT(qq1.address(), p_q_2ns, NExtended, starkInfo.qDim, NULL, 2, 1); 
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
@@ -380,7 +300,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     transcript.getField(challenges[5]); // v1
     transcript.getField(challenges[6]); // v2
 
-    // Calculate xDivXSubXi, xDivXSubWXi
+    // Calculate xDivXSubXi
     Polinomial xi(1, FIELD_EXTENSION);
     Polinomial wxi(1, FIELD_EXTENSION);
 
@@ -391,41 +311,21 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     for (uint64_t k = 0; k < (N << extendBits); k++)
     {
         Polinomial::subElement(xDivXSubXi, k, x, k, xi, 0);
-        Polinomial::subElement(xDivXSubWXi, k, x, k, wxi, 0);
+        Polinomial::subElement(xDivXSubXi, k + NExtended, x, k, wxi, 0);
     }
 
     Polinomial::batchInverseParallel(xDivXSubXi, xDivXSubXi);
-    Polinomial::batchInverseParallel(xDivXSubWXi, xDivXSubWXi);
 
 #pragma omp parallel for
     for (uint64_t k = 0; k < (N << extendBits); k++)
     {
         Polinomial::mulElement(xDivXSubXi, k, xDivXSubXi, k, x, k);
-        Polinomial::mulElement(xDivXSubWXi, k, xDivXSubWXi, k, x, k);
+        Polinomial::mulElement(xDivXSubXi, k + NExtended, xDivXSubXi, k + NExtended, x, k);
     }
     TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_5_CALCULATE_EXPS_AVX);
-        steps->step52ns_parser_first_avx(params, NExtended, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_5_CALCULATE_EXPS_AVX512);
-        steps->step52ns_parser_first_avx512(params, NExtended, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_5_CALCULATE_EXPS);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < NExtended; i++)
-        {
-            steps->step52ns_first(params, i);
-        }
-        TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);
-    }
+    TimerStart(STARK_STEP_5_CALCULATE_EXPS);
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step5"]);
+    TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);
 
     TimerStopAndLog(STARK_STEP_5);
     TimerStart(STARK_STEP_FRI);
