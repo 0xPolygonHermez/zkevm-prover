@@ -97,7 +97,6 @@ public:
     void processBlobInner(ProverRequest *pProverRequest);
     void executeBlobInner(ProverRequest *pProverRequest);
     
-
     string submitRequest(ProverRequest *pProverRequest);                                          // returns UUID for this request
     ProverRequest *waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
 

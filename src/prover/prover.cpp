@@ -87,7 +87,7 @@ Prover::Prover(Goldilocks &fr,
             pthread_create(&proverPthread, NULL, proverThread, this);
             pthread_create(&cleanerPthread, NULL, cleanerThread, this);
 
-            //note: this part is valid for both cases Batch and BlobInner
+            //note: this part should be valid for both cases Batch and BlobInner
             StarkInfo _starkInfo(config, config.zkevmStarkInfo);
 
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
@@ -123,8 +123,10 @@ Prover::Prover(Goldilocks &fr,
 
             starkBatch = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
             starkBatch->nrowsStepBatch = NROWS_STEPS_;  //note: this can be eliminated with new steps
-            starkBatch = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
+            starkBatchC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
             starkBatchRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
+            starkBatchRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
+            starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
         }
     }
     catch (std::exception &e)
@@ -174,7 +176,7 @@ Prover::~Prover()
         delete starkBatchC12a;
         delete starkBatchRecursive1;
         delete starkBatchRecursive2;
-        
+        delete starksRecursiveF;
 
     }
 }
@@ -223,11 +225,29 @@ void *proverThread(void *arg)
         case prt_genAggregatedBatchProof:
             pProver->genAggregatedBatchProof(pProver->pCurrentRequest);
             break;
+        case prt_genBlobInnerProof:
+            pProver->genBlobInnerProof(pProver->pCurrentRequest);
+            break;
+        case prt_genBlobOuterProof:
+            pProver->genBlobOuterProof(pProver->pCurrentRequest);
+            break;
+        case prt_genAggregatedBlobOuterProof:
+            pProver->genAggregatedBlobOuterProof(pProver->pCurrentRequest);
+            break;
         case prt_genFinalProof:
             pProver->genFinalProof(pProver->pCurrentRequest);
             break;
+        case prt_processBatch:
+            pProver->processBatch(pProver->pCurrentRequest);
+            break;
         case prt_executeBatch:
             pProver->executeBatch(pProver->pCurrentRequest);
+            break;
+        case prt_processBlobInner:
+            pProver->processBlobInner(pProver->pCurrentRequest);
+            break;
+        case prt_executeBlobInner:
+            pProver->executeBlobInner(pProver->pCurrentRequest);
             break;
         default:
             zklog.error("proverThread() got an invalid prover request type=" + to_string(pProver->pCurrentRequest->type));
@@ -634,7 +654,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         //-------------------------------------------
         TimerStopAndLog(STARK_GEN_AND_CALC_WITNESS_C12A);
         TimerStart(STARK_C12_A_PROOF_BATCH_PROOF);
-        uint64_t polBitsC12 = starkBatchC12a->starkInfo.starkStruct.steps[starkBatch->starkInfo.starkStruct.steps.size() - 1].nBits;
+        uint64_t polBitsC12 = starkBatchC12a->starkInfo.starkStruct.steps[starkBatchC12a->starkInfo.starkStruct.steps.size() - 1].nBits;
         FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starkBatchC12a->starkInfo.starkStruct.steps.size(), starkBatchC12a->starkInfo.evMap.size(), starkBatchC12a->starkInfo.nPublics);
 
         // Generate the proof
