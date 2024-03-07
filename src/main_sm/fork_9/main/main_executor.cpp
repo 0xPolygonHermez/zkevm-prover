@@ -66,7 +66,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
     romBatch(config, BATCH),
-    romBlob(config, BLOB),
     romCollection(config, COLLECTION),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
@@ -83,10 +82,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     json romJson;
     file2json("src/main_sm/fork_9/scripts/rom.json", romJson);
     romBatch.load(fr, romJson);
-
-    // Load Blob ROM definition file
-    file2json("src/main_sm/fork_9/scripts/rom_blob.json", romJson);
-    romBlob.load(fr, romJson);
 
     // Load Collection (unit test) ROM definition file
     file2json("src/main_sm/fork_9/scripts/rom_collection.json", romJson);

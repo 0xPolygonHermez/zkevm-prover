@@ -46,7 +46,6 @@ public:
 
     // ROM JSON file data:
     Rom romBatch;
-    Rom romBlob;
     Rom romCollection;
 
 #ifdef MULTI_ROM_TEST
