@@ -2246,7 +2246,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "D_NOT_FIRST_TX_CHANGE_L2_BLOCK\020 \0228\n4ROM_"
   "ERROR_INVALID_TX_CHANGE_L2_BLOCK_LIMIT_T"
   "IMESTAMP\020!\0226\n2ROM_ERROR_INVALID_TX_CHANG"
-  "E_L2_BLOCK_MIN_TIMESTAMP\020\"*\3360\n\rExecutorE"
+  "E_L2_BLOCK_MIN_TIMESTAMP\020\"*\2231\n\rExecutorE"
   "rror\022\036\n\032EXECUTOR_ERROR_UNSPECIFIED\020\000\022\033\n\027"
   "EXECUTOR_ERROR_NO_ERROR\020\001\022\033\n\027EXECUTOR_ER"
   "ROR_DB_ERROR\020\002\0222\n.EXECUTOR_ERROR_SM_MAIN"
@@ -2385,41 +2385,42 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "ECUTOR_ERROR_INVALID_WITNESS\020q\022\037\n\033EXECUT"
   "OR_ERROR_INVALID_CBOR\020r\022&\n\"EXECUTOR_ERRO"
   "R_INVALID_DATA_STREAM\020s\022-\n)EXECUTOR_ERRO"
-  "R_INVALID_UPDATE_MERKLE_TREE\020t\0225\n1EXECUT"
-  "OR_ERROR_INVALID_PREVIOUS_L1_INFO_TREE_R"
-  "OOT\020u\022+\n\'EXECUTOR_ERROR_INVALID_FORCED_H"
-  "ASH_DATA\020v\0227\n3EXECUTOR_ERROR_INVALID_FOR"
-  "CED_DATA_GLOBAL_EXIT_ROOT\020w\0224\n0EXECUTOR_"
-  "ERROR_INVALID_FORCED_DATA_BLOCK_HASH_L1\020"
-  "x\022;\n7EXECUTOR_ERROR_INVALID_L1_DATA_V3_I"
-  "NITIAL_HISTORIC_ROOT\020y\022.\n*EXECUTOR_ERROR"
-  "_INVALID_OLD_BLOB_STATE_ROOT\020z\0222\n.EXECUT"
-  "OR_ERROR_INVALID_OLD_BLOB_ACC_INPUT_HASH"
-  "\020{\0221\n-EXECUTOR_ERROR_INVALID_LAST_L1_INF"
-  "O_TREE_ROOT\020|\022.\n*EXECUTOR_ERROR_INVALID_"
-  "NEW_BLOB_STATE_ROOT\020}\0222\n.EXECUTOR_ERROR_"
-  "INVALID_NEW_BLOB_ACC_INPUT_HASH\020~\022$\n EXE"
-  "CUTOR_ERROR_INVALID_BLOB_DATA\020\177\022(\n#EXECU"
-  "TOR_ERROR_INVALID_ZK_GAS_LIMIT\020\200\001\022#\n\036EXE"
-  "CUTOR_ERROR_INVALID_POINT_Z\020\201\001\022#\n\036EXECUT"
-  "OR_ERROR_INVALID_POINT_Y\020\202\0012\313\004\n\017Executor"
-  "Service\022U\n\014ProcessBatch\022 .executor.v1.Pr"
-  "ocessBatchRequest\032!.executor.v1.ProcessB"
-  "atchResponse\"\000\022[\n\016ProcessBatchV2\022\".execu"
-  "tor.v1.ProcessBatchRequestV2\032#.executor."
-  "v1.ProcessBatchResponseV2\"\000\022[\n\016ProcessBa"
-  "tchV3\022\".executor.v1.ProcessBatchRequestV"
-  "3\032#.executor.v1.ProcessBatchResponseV3\"\000"
-  "\022g\n\022ProcessBlobInnerV3\022&.executor.v1.Pro"
-  "cessBlobInnerRequestV3\032\'.executor.v1.Pro"
-  "cessBlobInnerResponseV3\"\000\022m\n\027ProcessStat"
-  "elessBatchV2\022+.executor.v1.ProcessStatel"
-  "essBatchRequestV2\032#.executor.v1.ProcessB"
-  "atchResponseV2\"\000\022O\n\016GetFlushStatus\022\026.goo"
-  "gle.protobuf.Empty\032#.executor.v1.GetFlus"
-  "hStatusResponse\"\000B>Z<github.com/0xPolygo"
-  "nHermez/zkevm-node/state/runtime/executo"
-  "rb\006proto3"
+  "R_INVALID_UPDATE_MERKLE_TREE\020t\0222\n.EXECUT"
+  "OR_ERROR_SM_MAIN_INVALID_TX_STATUS_ERROR"
+  "\020u\0225\n1EXECUTOR_ERROR_INVALID_PREVIOUS_L1"
+  "_INFO_TREE_ROOT\020v\022+\n\'EXECUTOR_ERROR_INVA"
+  "LID_FORCED_HASH_DATA\020w\0227\n3EXECUTOR_ERROR"
+  "_INVALID_FORCED_DATA_GLOBAL_EXIT_ROOT\020x\022"
+  "4\n0EXECUTOR_ERROR_INVALID_FORCED_DATA_BL"
+  "OCK_HASH_L1\020y\022;\n7EXECUTOR_ERROR_INVALID_"
+  "L1_DATA_V3_INITIAL_HISTORIC_ROOT\020z\022.\n*EX"
+  "ECUTOR_ERROR_INVALID_OLD_BLOB_STATE_ROOT"
+  "\020{\0222\n.EXECUTOR_ERROR_INVALID_OLD_BLOB_AC"
+  "C_INPUT_HASH\020|\0221\n-EXECUTOR_ERROR_INVALID"
+  "_LAST_L1_INFO_TREE_ROOT\020}\022.\n*EXECUTOR_ER"
+  "ROR_INVALID_NEW_BLOB_STATE_ROOT\020~\0222\n.EXE"
+  "CUTOR_ERROR_INVALID_NEW_BLOB_ACC_INPUT_H"
+  "ASH\020\177\022%\n EXECUTOR_ERROR_INVALID_BLOB_DAT"
+  "A\020\200\001\022(\n#EXECUTOR_ERROR_INVALID_ZK_GAS_LI"
+  "MIT\020\201\001\022#\n\036EXECUTOR_ERROR_INVALID_POINT_Z"
+  "\020\202\001\022#\n\036EXECUTOR_ERROR_INVALID_POINT_Y\020\203\001"
+  "2\313\004\n\017ExecutorService\022U\n\014ProcessBatch\022 .e"
+  "xecutor.v1.ProcessBatchRequest\032!.executo"
+  "r.v1.ProcessBatchResponse\"\000\022[\n\016ProcessBa"
+  "tchV2\022\".executor.v1.ProcessBatchRequestV"
+  "2\032#.executor.v1.ProcessBatchResponseV2\"\000"
+  "\022[\n\016ProcessBatchV3\022\".executor.v1.Process"
+  "BatchRequestV3\032#.executor.v1.ProcessBatc"
+  "hResponseV3\"\000\022g\n\022ProcessBlobInnerV3\022&.ex"
+  "ecutor.v1.ProcessBlobInnerRequestV3\032\'.ex"
+  "ecutor.v1.ProcessBlobInnerResponseV3\"\000\022m"
+  "\n\027ProcessStatelessBatchV2\022+.executor.v1."
+  "ProcessStatelessBatchRequestV2\032#.executo"
+  "r.v1.ProcessBatchResponseV2\"\000\022O\n\016GetFlus"
+  "hStatus\022\026.google.protobuf.Empty\032#.execut"
+  "or.v1.GetFlushStatusResponse\"\000B>Z<github"
+  ".com/0xPolygonHermez/zkevm-node/state/ru"
+  "ntime/executorb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -2482,7 +2483,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 20369,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 20422,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 54, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 54, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -2676,6 +2677,7 @@ bool ExecutorError_IsValid(int value) {
     case 128:
     case 129:
     case 130:
+    case 131:
       return true;
     default:
       return false;
