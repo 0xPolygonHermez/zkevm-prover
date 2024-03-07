@@ -111,7 +111,7 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
     prover.genBatchProof(&proverRequest);
 }
 
-void runFileGenAggregatedProof(Goldilocks fr, Prover &prover, Config &config)
+void runFileGenAggregatedBatchProof(Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
@@ -128,7 +128,7 @@ void runFileGenAggregatedProof(Goldilocks fr, Prover &prover, Config &config)
     TimerStopAndLog(INPUT_LOAD);
 
     // Call the prover
-    prover.genAggregatedProof(&proverRequest);
+    prover.genAggregatedBatchProof(&proverRequest);
 }
 
 void runFileGenFinalProof(Goldilocks fr, Prover &prover, Config &config)
@@ -631,13 +631,13 @@ int main(int argc, char **argv)
                 tmpConfig.inputFile = config.inputFile + files[i];
                 zklog.info("runFileGenAggregatedProof inputFile=" + tmpConfig.inputFile);
                 // Call the prover
-                runFileGenAggregatedProof(fr, prover, tmpConfig);
+                runFileGenAggregatedBatchProof(fr, prover, tmpConfig);
             }
         }
         else
         {
             // Call the prover
-            runFileGenAggregatedProof(fr, prover, config);
+            runFileGenAggregatedBatchProof(fr, prover, config);
         }
     }
 

@@ -31,10 +31,16 @@ class Prover
 
     StarkRecursiveF *starksRecursiveF;
 
-    Starks *starkZkevm;
-    Starks *starksC12a;
-    Starks *starksRecursive1;
-    Starks *starksRecursive2;
+    Starks *starkBatch;
+    Starks *starkBatchC12a;
+    Starks *starkBatchRecursive1;
+    Starks *starkBatchRecursive2;
+    Starks *starkBlobInner;
+    Starks *starkBlobInnerC12a;
+    Starks *starkBlobInnerRecursive1;
+    Starks *starkBlobOuter;
+    Starks *starkBlobOuterRecursive2;
+    
 
     Fflonk::FflonkProver<AltBn128::Engine> *prover;
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
@@ -69,13 +75,29 @@ public:
     ~Prover();
 
     void genBatchProof(ProverRequest *pProverRequest);
-    void genAggregatedProof(ProverRequest *pProverRequest);
+    void genBlobInnerProof(ProverRequest *pProverRequest){
+            zklog.info("Prover::genBlobInnerProof() timestamp: " + pProverRequest->timestamp);
+            zklog.info("Prover::genBlobInnerProof() UUID: " + pProverRequest->uuid);
+            zklog.info("Prover::genBlobInnerProof() input file: " + pProverRequest->inputFile());
+    };
+    void genBlobOuterProof(ProverRequest *pProverRequest){
+            zklog.info("Prover::genBlobOuterProof() timestamp: " + pProverRequest->timestamp);
+            zklog.info("Prover::genBlobOuterProof() UUID: " + pProverRequest->uuid);
+            zklog.info("Prover::genBlobOuterProof() input file: " + pProverRequest->inputFile());
+    };
+    void genAggregatedBatchProof(ProverRequest *pProverRequest) ;
+    void genAggregatedBlobOuterProof(ProverRequest *pProverRequest){
+            zklog.info("Prover::genAggregatedBlobOuterProof() timestamp: " + pProverRequest->timestamp);
+            zklog.info("Prover::genAggregatedBlobOuterProof() UUID: " + pProverRequest->uuid);
+            zklog.info("Prover::genAggregatedBlobOuterProof() input file: " + pProverRequest->inputFile());
+    };
     void genFinalProof(ProverRequest *pProverRequest);
     void processBatch(ProverRequest *pProverRequest);
     void executeBatch(ProverRequest *pProverRequest);
     void processBlobInner(ProverRequest *pProverRequest);
     void executeBlobInner(ProverRequest *pProverRequest);
     
+
     string submitRequest(ProverRequest *pProverRequest);                                          // returns UUID for this request
     ProverRequest *waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
 
