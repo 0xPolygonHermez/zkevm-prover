@@ -1194,7 +1194,7 @@ void Prover::executeBlobInner (ProverRequest *pProverRequest)
     /* Executor */
     /************/
 
-    PROVER_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
+    PROVER_BLOB_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, PROVER_BLOB_FORK_NAMESPACE::CommitPols::pilDegree());
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_EXECUTE_BLOB_INNER);

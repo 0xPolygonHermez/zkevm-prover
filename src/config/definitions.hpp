@@ -5,6 +5,7 @@
 #define PROVER_FORK_NAMESPACE fork_9
 #define PROVER_FORK_NAMESPACE_STRING "fork_9"
 #define USING_PROVER_FORK_NAMESPACE using namespace fork_9
+#define PROVER_BLOB_FORK_NAMESPACE fork_9_blob
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS

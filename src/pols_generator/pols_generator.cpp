@@ -19,17 +19,41 @@ int main(int argc, char **argv)
 {
     cout << "Pols generator" << endl;
 
-    // Load main.pil.json
+    ///////////
+    // BATCH //
+    ///////////
+
+    // Load main.pil.json into a memory json object
     string pilFileName = "src/main_sm/" + forkNamespace + "/scripts/main.pil.json";
     ordered_json pols;
     file2json(pols, pilFileName);
 
+    // Build output directory name
     string directoryName = "src/main_sm/" + forkNamespace + "/pols_generated";
 
+    // Generate code for both commit and constant polynomials
     string code;
     code = generate(pols, "cmP", forkNamespace);
     string2file(code, directoryName + "/commit_pols.hpp");
     code = generate(pols, "constP", forkNamespace);
+    string2file(code, directoryName + "/constant_pols.hpp");
+
+    //////////
+    // BLOB //
+    //////////
+
+    // Load main.pil.json into a memory json object
+    pilFileName = "src/main_sm/" + forkNamespace + "_blob/scripts/main.pil.json";
+    pols.clear();
+    file2json(pols, pilFileName);
+
+    // Build output directory name
+    directoryName = "src/main_sm/" + forkNamespace + "_blob/pols_generated";
+
+    // Generate code for both commit and constant polynomials
+    code = generate(pols, "cmP", forkNamespace + "_blob");
+    string2file(code, directoryName + "/commit_pols.hpp");
+    code = generate(pols, "constP", forkNamespace + "_blob");
     string2file(code, directoryName + "/constant_pols.hpp");
 
     return 0;
@@ -37,6 +61,7 @@ int main(int argc, char **argv)
 
 void file2json (ordered_json &pols, string &polsFileName)
 {
+    cout << "Loading file " << polsFileName << " into memory" << endl;
     std::ifstream inputStream(polsFileName);
     if (!inputStream.good())
     {
@@ -86,6 +111,7 @@ vector<string> splitString (const string &s)
 
 string generate(const ordered_json &pols, const string &type, const string &namespaceName)
 {
+    cout << "Generating pols of namespace=" << namespaceName << " for pols type=" << type << endl;
 
     string code = "";
 
