@@ -1475,6 +1475,8 @@ using grpc::Status;
                 pTransactionContext->set_gas_used(responses[tx].full_trace.context.gas_used); // Total gas used as result of execution
                 pTransactionContext->set_execution_time(responses[tx].full_trace.context.execution_time);
                 pTransactionContext->set_old_state_root(string2ba(responses[tx].full_trace.context.old_state_root)); // Starting state root
+                pTransactionContext->set_chain_id(responses[tx].full_trace.context.chainId);
+                pTransactionContext->set_tx_index(responses[tx].full_trace.context.txIndex);
                 for (uint64_t step=0; step<responses[tx].full_trace.steps.size(); step++)
                 {
                     executor::v1::TransactionStepV2 * pTransactionStep = pFullTrace->add_steps();
@@ -2554,6 +2556,8 @@ using grpc::Status;
     case ZKR_SM_MAIN_INVALID_WITNESS:                       return ::executor::v1::EXECUTOR_ERROR_INVALID_WITNESS;
     case ZKR_CBOR_INVALID_DATA:                             return ::executor::v1::EXECUTOR_ERROR_INVALID_CBOR;
     case ZKR_DATA_STREAM_INVALID_DATA:                      return ::executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM;
+
+    case ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_INVALID_TX_STATUS_ERROR;
 
     case ZKR_AGGREGATED_PROOF_INVALID_INPUT: // Only returned when generating a proof
     case ZKR_DB_VERSION_NOT_FOUND_KVDB: // To be mapped to an executor error when HashDB64 is operative
