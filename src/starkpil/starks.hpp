@@ -33,6 +33,8 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
+    bool optimizeMemoryNTT = false;
+    bool optimizeMemoryNTTCommitPols = false;
 
 private:
     void *pConstPolsAddress;
@@ -63,6 +65,7 @@ private:
     Goldilocks::Element *cm4_2ns;
     Goldilocks::Element *p_q_2ns;
     Goldilocks::Element *p_f_2ns;
+    Goldilocks::Element *p_tmpExp_n;
     Goldilocks::Element *pBuffer;
 
     void *pAddress;
@@ -175,6 +178,7 @@ public:
         p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
         p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
         p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
+        p_tmpExp_n = &mem[starkInfo.mapOffsets.section[eSection::tmpExp_n]];
         cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
         p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
         p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
