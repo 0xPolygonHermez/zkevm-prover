@@ -1679,7 +1679,7 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     txIndex++;
 
     // Check TX status
-    if ((invalidBatchErrors.find(response.error) == invalidBatchErrors.end()) &&
+    if ((responseErrors.find(response.error) == responseErrors.end()) &&
         ( (response.error.empty() && (response.status == 0)) ||
           (!response.error.empty() && (response.status == 1)) )
        )
