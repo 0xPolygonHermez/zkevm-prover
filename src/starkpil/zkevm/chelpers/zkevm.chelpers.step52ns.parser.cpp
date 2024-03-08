@@ -218,7 +218,7 @@ void ZkevmSteps::step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                default:
                     std::ostringstream message;
                     message << "Invalid operation in step52ns_first, component: " << kk << " value: " << op52[kk];
-                    throw new std::invalid_argument(message.str());
+                    throw std::invalid_argument(message.str());
                }
           }
           assert(i_args == NARGS_);
@@ -385,7 +385,7 @@ void ZkevmSteps::step52ns_parser_first(StepsParams &params, uint64_t nrows, uint
                default:
                     std::ostringstream message;
                     message << "Invalid operation in step52ns_first, component: " << kk << " value: " << op52[kk];
-                    throw new std::invalid_argument(message.str());
+                    throw std::invalid_argument(message.str());
                }
           }
           assert(i_args == NARGS_);
@@ -599,7 +599,7 @@ void ZkevmSteps::step52ns_parser_first_avx512(StepsParams &params, uint64_t nrow
                default:
                     std::ostringstream message;
                     message << "Invalid operation in step52ns_first, component: " << kk << " value: " << op52[kk];
-                    throw new std::invalid_argument(message.str());
+                    throw std::invalid_argument(message.str());
                }
           }
           assert(i_args == NARGS_);

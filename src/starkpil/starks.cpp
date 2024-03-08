@@ -613,9 +613,17 @@ void Starks::evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomia
     // Build buffer for partial results of the matrix-vector product (columns distribution)  .
     int num_threads = omp_get_max_threads();
     Goldilocks::Element **evals_acc = (Goldilocks::Element **)malloc(num_threads * sizeof(Goldilocks::Element *));
+    if(evals_acc==NULL){
+        zklog.error("Starks::evmap() failed calling malloc for evals_acc");
+        exitProcess();
+    }
     for (int i = 0; i < num_threads; ++i)
     {
         evals_acc[i] = (Goldilocks::Element *)malloc(size_eval * FIELD_EXTENSION * sizeof(Goldilocks::Element));
+        if(evals_acc[i]==NULL){
+            zklog.error("Starks::evmap() failed calling malloc for evals_acc["+to_string(i)+"]");
+            exitProcess();
+        }
     }
 #pragma omp parallel
     {
