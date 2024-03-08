@@ -74,6 +74,7 @@ public:
     uint64_t l2TxHashOffset;
     uint64_t currentTxOffset;
     uint64_t txStatusOffset;
+    uint64_t currentLogIndexOffset;
 
     /* Constants */
     RomConstants constants;
@@ -129,7 +130,8 @@ public:
             txIndexOffset(0),
             l2TxHashOffset(0),
             currentTxOffset(0),
-            txStatusOffset(0)
+            txStatusOffset(0),
+            currentLogIndexOffset(0)
             { };
 
     /* Destructor */

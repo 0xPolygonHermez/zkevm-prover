@@ -547,13 +547,18 @@ zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     }
 
     // Store data in the proper vector
-    string dataString = PrependZeros(data.get_str(16), 64);
     if (isTopic)
     {
+        string dataString = PrependZeros(data.get_str(16), 64);
         it->second.topics.push_back(dataString);
     }
     else
     {
+        // Data length is stored in C
+        mpz_class cScalar;
+        getRegFromCtx(ctx, reg_C, cScalar);
+        uint64_t size = zkmin(cScalar.get_ui(), 32);
+        string dataString = PrependZeros(data.get_str(16), size*2);
         it->second.data.push_back(dataString);
     }
 
@@ -772,14 +777,27 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
     }
 
     // Append to response logs, overwriting log indexes to be sequential
-    uint64_t logIndex = 0;
+    //uint64_t logIndex = 0;
     map<uint64_t, LogV2>::iterator auxLogsIt;
     for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
     {
-        auxLogsIt->second.index = logIndex;
-        logIndex++;
+        // Set log index
+        //auxLogsIt->second.index = logIndex;
+        //logIndex++;
+
+        // Set block hash
         auxLogsIt->second.block_hash = currentBlock.block_hash;
-        currentBlock.logs.push_back(auxLogsIt->second);
+
+        // Store block log
+        currentBlock.logs.emplace_back(auxLogsIt->second);
+
+        // Store transaction log
+        if (auxLogsIt->second.tx_index >= currentBlock.responses.size())
+        {            
+            zklog.error("FullTracer::onFinishBlock() found log.tx_index=" + to_string(auxLogsIt->second.tx_index) + " >= currentBlock.responses.size=" + to_string(currentBlock.responses.size()));
+            exitProcess();
+        }
+        currentBlock.responses[auxLogsIt->second.tx_index].logs.emplace_back(auxLogsIt->second);
     }
 
     // Set block hash to all txs of block
@@ -1305,34 +1323,18 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     currentBlock.responses[currentBlock.responses.size() - 1].has_gasprice_opcode = hasGaspriceOpcode;
     currentBlock.responses[currentBlock.responses.size() - 1].has_balance_opcode = hasBalanceOpcode;
 
-    // Order all logs (from all CTX) in order of index
-    map<uint64_t, LogV2> auxLogs;
-    map<uint64_t, map<uint64_t, LogV2>>::iterator logIt;
-    map<uint64_t, LogV2>::const_iterator it;
-    for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
-    {
-        for (it = logIt->second.begin(); it != logIt->second.end(); it++)
-        {
-            auxLogs[it->second.index] = it->second;
-        }
-    }
-
-    // Append to response logs, overwriting log indexes to be sequential
-    uint64_t logIndex = 0;
-    map<uint64_t, LogV2>::iterator auxLogsIt;
-    for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
-    {
-        auxLogsIt->second.index = logIndex;
-        logIndex++;
-        currentBlock.responses[currentBlock.responses.size() - 1].logs.push_back(auxLogsIt->second);
-    }
-
     // Increase transaction index
     txIndex++;
 
+    // Check TX status
+    if ((response.error.empty() && (response.status == 0)) || (!response.error.empty() && (response.status == 1)))
+    {
+        zklog.error("FullTracer::onFinishTx() invalid TX status-error error=" + response.error + " status=" + to_string(response.status));
+        return ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR;
+    }
+
     // Clean aux array for next iteration
     full_trace.clear();
-    logs.clear();
     callData.clear();
 
     // Reset opcodes counters
@@ -1525,6 +1527,67 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // get previous opcode processed
     uint64_t numOpcodes = full_trace.size();
     Opcode * prevTraceCall = (numOpcodes > 0) ? &full_trace.at(numOpcodes - 1) : NULL;
+
+    // In case there is a log0 with 0 data length (and 0 topics), we must add it manually to logs array because it
+    // wont be added detected by onStoreLog event
+    if (codeId == 0xa0 /* LOG0 */)
+    {
+        // Get current log index
+        zkr = getVarFromCtx(ctx, true, ctx.rom.currentLogIndexOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.currentLogIndexOffset)");
+            return zkr;
+        }
+        uint64_t indexLog = auxScalar.get_ui();
+
+        // Init logs[CTX][indexLog], if required
+        uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+        map<uint64_t, map<uint64_t, LogV2>>::iterator itCTX;
+        itCTX = logs.find(CTX);
+        if (itCTX == logs.end())
+        {
+            map<uint64_t, LogV2> aux;
+            LogV2 log;
+            aux[indexLog] = log;
+            logs[CTX] = aux;
+            itCTX = logs.find(CTX);
+            zkassert(itCTX != logs.end());
+        }
+        
+        map<uint64_t, LogV2>::iterator it;
+        it = itCTX->second.find(indexLog);
+        if (it == itCTX->second.end())
+        {
+            LogV2 log;
+            logs[CTX][indexLog] = log;
+            it = itCTX->second.find(indexLog);
+            zkassert(it != itCTX->second.end());
+        }
+
+        it->second.data.clear();
+
+        // Add log info
+        mpz_class auxScalar;
+        zkr = getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.storageAddrOffset)");
+            return zkr;
+        }
+        it->second.address = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+        zkr = getVarFromCtx(ctx, true, ctx.rom.blockNumOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.blockNumOffset)");
+            return zkr;
+        }
+        it->second.block_number = auxScalar.get_ui();
+        it->second.tx_hash = currentBlock.responses[txIndex].tx_hash;
+        it->second.tx_hash_l2 = currentBlock.responses[txIndex].tx_hash_l2;
+        it->second.tx_index = txIndex;
+        it->second.index = indexLog;
+    }
 
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getCodeName", TimeDiff(top));

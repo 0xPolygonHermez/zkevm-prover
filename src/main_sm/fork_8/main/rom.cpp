@@ -76,6 +76,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     l2TxHashOffset               = getMemoryOffset("l2TxHash");
     currentTxOffset              = getMemoryOffset("currentTx");
     txStatusOffset               = getMemoryOffset("txStatus");
+    currentLogIndexOffset        = getMemoryOffset("currentLogIndex");
 
     // Load ROM integer constants
     constants.BATCH_DIFFICULTY                  = getConstant(romJson, "BATCH_DIFFICULTY");

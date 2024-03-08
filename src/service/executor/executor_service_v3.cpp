@@ -763,6 +763,8 @@ using grpc::Status;
                 pTransactionContext->set_gas_used(responses[tx].full_trace.context.gas_used); // Total gas used as result of execution
                 pTransactionContext->set_execution_time(responses[tx].full_trace.context.execution_time);
                 pTransactionContext->set_old_state_root(string2ba(responses[tx].full_trace.context.old_state_root)); // Starting state root
+                pTransactionContext->set_chain_id(responses[tx].full_trace.context.chainId);
+                pTransactionContext->set_tx_index(responses[tx].full_trace.context.txIndex);
                 for (uint64_t step=0; step<responses[tx].full_trace.steps.size(); step++)
                 {
                     executor::v1::TransactionStepV2 * pTransactionStep = pFullTrace->add_steps();
