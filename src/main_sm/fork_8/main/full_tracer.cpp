@@ -1679,7 +1679,10 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     txIndex++;
 
     // Check TX status
-    if ((response.error.empty() && (response.status == 0)) || (!response.error.empty() && (response.status == 1)))
+    if ((invalidBatchErrors.find(response.error) == invalidBatchErrors.end()) &&
+        ( (response.error.empty() && (response.status == 0)) ||
+          (!response.error.empty() && (response.status == 1)) )
+       )
     {
         zklog.error("FullTracer::onFinishTx() invalid TX status-error error=" + response.error + " status=" + to_string(response.status));
         return ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR;
