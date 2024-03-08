@@ -17,7 +17,7 @@ namespace BinFileUtils
     {
         addr = malloc(size);
         if(addr == NULL){
-            throw new std::invalid_argument("Invalid size malloc failed");
+            throw std::invalid_argument("Invalid size malloc failed");
         }
         int nThreads = omp_get_max_threads() / 2;
         ThreadUtils::parcpy(addr, data, size, nThreads);
@@ -74,7 +74,7 @@ namespace BinFileUtils
         void *addrmm = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
         addr = malloc(sb.st_size);
         if(addr==NULL){
-            throw new std::invalid_argument("Invalid size malloc failed");
+            throw std::invalid_argument("Invalid size malloc failed");
         }
 
         int nThreads = omp_get_max_threads() / 2;
