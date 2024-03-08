@@ -2,6 +2,7 @@
 #include <cassert>
 #include <algorithm> // std::max
 
+
 void MerkleTreeGL::getElement(Goldilocks::Element &element, uint64_t idx, uint64_t subIdx)
 {
     assert((idx > 0) || (idx < width));

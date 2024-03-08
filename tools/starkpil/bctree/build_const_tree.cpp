@@ -382,6 +382,11 @@ void interpolatePrepare(Goldilocks::Element *buff, uint64_t nPols, uint64_t nBit
         uint64_t curN = min(nPerThreadF, n - i);
 
         Goldilocks::Element *bb = (Goldilocks::Element *)malloc(curN * nPols * SIZE_GL);
+        if(bb==NULL){
+            zklog.error("interpolatePrepare() failed calling malloc() of size: " + to_string(curN * nPols * SIZE_GL));
+            exitProcess();
+        }
+
         memcpy(bb, buff + (i * nPols), curN * nPols * SIZE_GL);
 
         Goldilocks::Element start = fr.mul(invN, fr.exp(fr.shift(), i));
@@ -400,6 +405,10 @@ void interpolate(Goldilocks::Element *buffSrc, uint64_t nPols, uint64_t nBits, G
     uint64_t n = 1 << nBits;
     uint64_t nExt = 1 << nBitsExt;
     Goldilocks::Element *tmpBuff = (Goldilocks::Element *)malloc(nExt * nPols * SIZE_GL);
+    if(tmpBuff==NULL){
+        zklog.error("interpolate() failed calling malloc() of size: " + to_string(nExt * nPols * SIZE_GL));
+        exitProcess();
+    }
     Goldilocks::Element *outBuff = buffDst;
 
     Goldilocks::Element *bIn;
@@ -469,6 +478,10 @@ void interpolate(Goldilocks::Element *buffSrc, uint64_t nPols, uint64_t nBits, G
         for (uint64_t j = 0; j < nBlocks; j++)
         {
             Goldilocks::Element *bb = (Goldilocks::Element *)malloc(blockSize * nPols * SIZE_GL);
+            if(bb==NULL){
+                std::cout << "interpolate() failed calling malloc() of size: " << blockSize * nPols * SIZE_GL << endl;
+                exitProcess();
+            }
             memcpy(bb, bIn + (j * blockSize * nPols), blockSize * nPols * SIZE_GL);
 
             Goldilocks::Element *res = fft_block(bb, j * blockSize, nPols, nBits, i + sInc, blockBits, sInc);
@@ -510,6 +523,10 @@ void interpolate(Goldilocks::Element *buffSrc, uint64_t nPols, uint64_t nBits, G
         for (uint64_t j = 0; j < nBlocksExt; j++)
         {
             Goldilocks::Element *bb = (Goldilocks::Element *)malloc(blockSizeExt * nPols * SIZE_GL);
+            if(bb==NULL){
+                std::cout << "interpolate() failed calling malloc() of size: " << blockSizeExt * nPols * SIZE_GL << endl;
+                exitProcess();
+            }
             memcpy(bb, bIn + (j * blockSizeExt * nPols), blockSizeExt * nPols * SIZE_GL);
 
             Goldilocks::Element *res = fft_block(bb, j * blockSizeExt, nPols, nBitsExt, i + sInc, blockBitsExt, sInc);
@@ -552,6 +569,10 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
     cout << time() << " Loading const file " << constFile << endl;
     Goldilocks::Element *pConstPols = (Goldilocks::Element *)copyFile(constFile, constFileSize);
     Goldilocks::Element *constPolsArrayE = (Goldilocks::Element *)malloc(nExt * nPols * SIZE_GL);
+    if(constPolsArrayE==NULL){
+        std::cout << "buildConstTree() failed calling malloc() of size: " << nExt * nPols * SIZE_GL << endl;
+        exitProcess();
+    }
 
     TimerStart(Interpolate);
     interpolate(pConstPols, nPols, nBits, constPolsArrayE, nBitsExt);
@@ -571,6 +592,10 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         uint64_t sizeConstTree = numElements * sizeof(Goldilocks::Element);
         //uint64_t batchSize = std::max((uint64_t)8, (nPols + 3) / 4);
         Goldilocks::Element *constTree = (Goldilocks::Element *)malloc(sizeConstTree);
+        if(constTree==NULL){
+            std::cout << "buildConstTree() failed calling malloc() of size: " << sizeConstTree << endl;
+            exitProcess();
+        }
         constTree[0] = Goldilocks::fromU64(nPols);
         constTree[1] = Goldilocks::fromU64(nExt);
         int numThreads = omp_get_max_threads() / 2;
