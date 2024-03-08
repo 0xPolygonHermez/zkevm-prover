@@ -233,13 +233,13 @@ void MerkleTreeBN128::getGroupProof(void *res, uint64_t idx)
     void *resCursor = (uint8_t *)res + source_width * sizeof(Goldilocks::Element);
 
     RawFr::Element *mp = (RawFr::Element *)calloc(getMerkleProofSize(height), 1);
-    merkle_genMerkleProof(mp, idx, 0, height);
     if(mp==NULL){
         std::cout << "Error: getGroupProof() failed allocating memory size: " << getMerkleProofSize(height) << std::endl;
         exitProcess();
     }
+    merkle_genMerkleProof(mp, idx, 0, height);
 
-    std::memcpy(resCursor, &mp[0], getMerkleProofSize(height));
+    std::memcpy(resCursor, mp, getMerkleProofSize(height));
     free(mp);
 }
 
