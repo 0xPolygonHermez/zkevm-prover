@@ -15,6 +15,8 @@ TARGET_W2DB := witness2db
 BUILD_DIR := ./build
 BUILD_DIR_GPU := ./build-gpu
 SRC_DIRS := ./src ./test ./tools
+SETUP_DIRS := ./src/rapidsnark
+SETUP_DPNDS_DIR := src/ffiasm
 
 GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
 GRPCPP_LIBS := $(shell pkg-config grpc++ --libs) -lgrpc++_reflection
@@ -87,6 +89,15 @@ DEPS_W2DB := $(OBJS_W2DB:.o=.d)
 
 cpu: $(BUILD_DIR)/$(TARGET_ZKP)
 gpu: $(BUILD_DIR_GPU)/$(TARGET_ZKP_GPU)
+SRCS_SETUP := $(shell find $(SETUP_DIRS) ! -path "./src/sm/*" ! -path "./src/main_sm/*" -name *.cpp)
+SRCS_SETUP += $(shell find src/XKCP -name *.cpp)
+SRCS_SETUP += $(shell find src/fflonk_setup -name fflonk_setup.cpp)
+SRCS_SETUP += $(addprefix $(SETUP_DPNDS_DIR)/, alt_bn128.cpp fr.cpp fq.cpp fnec.cpp fec.cpp misc.cpp naf.cpp splitparstr.cpp)
+SRCS_SETUP += $(shell find $(SETUP_DPNDS_DIR) -name *.asm)
+OBJS_SETUP := $(patsubst %,$(BUILD_DIR)/%.o,$(SRCS_SETUP))
+OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
+OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main_test.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
+DEPS_SETUP := $(OBJS_SETUP:.o=.d)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
 
@@ -172,6 +183,10 @@ witness2db: $(BUILD_DIR)/$(TARGET_W2DB)
 
 $(BUILD_DIR)/$(TARGET_W2DB): $(OBJS_W2DB)
 	$(CXX) $(OBJS_W2DB) $(CXXFLAGS_W2DB) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_W2DB) $(LDFLAGS_W2DB)
+fflonk_setup: $(BUILD_DIR)/$(TARGET_SETUP)
+
+$(BUILD_DIR)/$(TARGET_SETUP): $(OBJS_SETUP)
+	$(CXX) $(OBJS_SETUP) $(CXXFLAGS) $(LDFLAGS) -o $@
 
 .PHONY: clean
 
@@ -181,6 +196,7 @@ clean:
 	find . -name main_exec_generated*pp -delete
 
 -include $(DEPS_ZKP)
+-include $(DEPS_SETUP)
 -include $(DEPS_BCT)
 
 MKDIR_P ?= mkdir -p
