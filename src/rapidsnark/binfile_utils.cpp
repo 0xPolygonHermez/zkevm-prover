@@ -200,6 +200,7 @@ namespace BinFileUtils
         return res;
     }
 
+
     u_int32_t BinFile::readU32LE()
     {
         u_int32_t res = *((u_int32_t *)((u_int64_t)addr + pos));
@@ -212,6 +213,10 @@ namespace BinFileUtils
         u_int64_t res = *((u_int64_t *)((u_int64_t)addr + pos));
         pos += 8;
         return res;
+    }
+
+    bool BinFile::sectionExists(u_int32_t sectionId) {
+        return sections.find(sectionId) != sections.end();
     }
 
     void *BinFile::read(u_int64_t len)
