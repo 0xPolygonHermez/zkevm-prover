@@ -4,6 +4,7 @@ TARGET_MNG += mainGenerator
 TARGET_PLG += polsGenerator
 TARGET_PLD += polsDiff
 TARGET_TEST := zkProverTest
+TARGET_SETUP := fflonkSetup
 
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
@@ -59,6 +60,10 @@ SRCS_TEST := $(shell find ./test/examples/ ./src/XKCP ./src/goldilocks/src ./src
 OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
 DEPS_TEST := $(OBJS_TEST:.o=.d)
 
+SRCS_FFSETUP := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS_FFSETUP := $(SRCS_FFSETUP:%=$(BUILD_DIR)/%.o)
+DEPS_FFSETUP := $(OBJS_FFSETUP:.o=.d)
+
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
@@ -111,6 +116,12 @@ pols_diff: $(BUILD_DIR)/$(TARGET_PLD)
 $(BUILD_DIR)/$(TARGET_PLD): ./src/pols_diff/pols_diff.cpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/pols_diff/pols_diff.cpp $(CXXFLAGS) $(INC_FLAGS) -o $@ $(LDFLAGS) 
+
+fflonk_setup: $(BUILD_DIR)/$(TARGET_SETUP)
+
+$(BUILD_DIR)/$(TARGET_SETUP): ./src/fflonk_setup/fflonk_setup.cpp
+	$(MKDIR_P) $(BUILD_DIR)
+	g++ -g ./src/fflonk_setup/fflonk_setup.cpp $(CXXFLAGS) $(INC_FLAGS) -o $@ $(LDFLAGS)
 
 .PHONY: clean
 
