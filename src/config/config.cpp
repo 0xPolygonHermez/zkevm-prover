@@ -240,6 +240,7 @@ void Config::load(json &config)
     ParseString(config, "zkevmStarkInfo", "ZKEVM_STARK_INFO", zkevmStarkInfo, configPath + "/zkevm/zkevm.starkinfo.json");
     ParseString(config, "zkevmVerifier", "ZKEVM_VERIFIER", zkevmVerifier, configPath + "/zkevm/zkevm.verifier.dat");
     ParseString(config, "zkevmVerkey", "ZKEVM_VERKEY", zkevmVerkey, configPath + "/zkevm/zkevm.verkey.json");
+    ParseString(config, "c12aCmPols", "C12A_CM_POLS", c12aCmPols, "");
     ParseString(config, "c12aConstPols", "C12A_CONST_POLS", c12aConstPols, configPath + "/c12a/c12a.const");
     ParseString(config, "c12aConstantsTree", "C12A_CONSTANTS_TREE", c12aConstantsTree, configPath + "/c12a/c12a.consttree");
     ParseString(config, "c12aExec", "C12A_EXEC", c12aExec, configPath + "/c12a/c12a.exec");
@@ -258,38 +259,38 @@ void Config::load(json &config)
     ParseString(config, "recursive2Verifier", "RECURSIVE2_VERIFIER", recursive2Verifier, configPath + "/recursive2/recursive2.verifier.dat");
     ParseString(config, "recursive2Verkey", "RECURSIVE2_VERKEY", recursive2Verkey, configPath + "/recursive2/recursive2.verkey.json");
     ParseString(config, "blobInnerCmPols", "BLOB_INNER_CM_POLS", blobInnerCmPols, "");
-    ParseString(config, "blobInnerConstPols", "BLOB_INNER_CONST_POLS", blobInnerConstPols,configPath +  "/blobinner/blobinner.const");
-    ParseString(config, "blobInnerConstantsTree", "BLOB_INNER_CONSTANTS_TREE", blobInnerConstantsTree, configPath +  "/blobinner/blobinner.consttree");
-    ParseString(config, "blobInnerVerifier", "BLOB_INNER_VERIFIER", blobInnerVerifier,configPath + "/blobinner/blobinner.verifier.dat"); 
-    ParseString(config, "blobInnerVerkey", "BLOB_INNER_VERKEY", blobInnerVerkey,configPath +  "/blobinner/blobinner.verkey.json");
-    ParseString(config, "blobInnerStarkInfo", "BLOB_INNER_STARK_INFO", blobInnerStarkInfo,configPath +  "/blobinner/blobinner.starkinfo.json");
-    ParseString(config, "blobInnerC12aCmPols", "BLOB_INNER_C12A_CM_POLS", blobInnerC12aCmPols, "");
-    ParseString(config, "blobInnerC12aConstPols", "BLOB_INNER_C12A_CONST_POLS", blobInnerC12aConstPols,configPath + "/blobinner_c12a/blobinner_c12a.const");
-    ParseString(config, "blobInnerC12aConstantsTree", "BLOB_INNER_C12A_CONSTANTS_TREE", blobInnerC12aConstantsTree,configPath + "/blobinner_c12a/blobinner_c12a.consttree");
-    ParseString(config, "blobInnerC12aVerkey", "BLOB_INNER_C12A_VERKEY", blobInnerC12aVerkey, configPath + "/blobinner_c12a/blobinner_c12a.verkey.json");
-    ParseString(config, "blobInnerC12aExec", "BLOB_INNER_C12A_EXEC", blobInnerC12aExec,configPath + "/blobinner_c12a/blobinner_c12a.exec");
-    ParseString(config, "blobInnerC12aStarkInfo", "BLOB_INNER_C12A_STARK_INFO", blobInnerC12aStarkInfo,configPath +  "/blobinner_c12a/blobinner_c12a.starkinfo.json");
+    ParseString(config, "blobInnerConstPols", "BLOB_INNER_CONST_POLS", blobInnerConstPols,configPath +  "/blob_inner/blob_inner.const");
+    ParseString(config, "blobInnerConstantsTree", "BLOB_INNER_CONSTANTS_TREE", blobInnerConstantsTree, configPath +  "/blob_inner/blob_inner.consttree");
+    ParseString(config, "blobInnerVerifier", "BLOB_INNER_VERIFIER", blobInnerVerifier,configPath + "/blob_inner/blob_inner.verifier.dat"); 
+    ParseString(config, "blobInnerVerkey", "BLOB_INNER_VERKEY", blobInnerVerkey,configPath +  "/blob_inner/blob_inner.verkey.json");
+    ParseString(config, "blobInnerStarkInfo", "BLOB_INNER_STARK_INFO", blobInnerStarkInfo,configPath +  "/blob_inner/blob_inner.starkinfo.json");
+    ParseString(config, "blobInnerCompressorCmPols", "BLOB_INNER_COMPRESSOR_CM_POLS", blobInnerCompressorCmPols, "");
+    ParseString(config, "blobInnerCompressorConstPols", "BLOB_INNER_COMPRESSOR_CONST_POLS", blobInnerCompressorConstPols,configPath + "/blob_inner_compressor/blob_inner_compressor.const");
+    ParseString(config, "blobInnerCompressorConstantsTree", "BLOB_INNER_COMPRESSOR_CONSTANTS_TREE", blobInnerCompressorConstantsTree,configPath + "/blob_inner_compressor/blob_inner_compressor.consttree");
+    ParseString(config, "blobInnerCompressorVerkey", "BLOB_INNER_COMPRESSOR_VERKEY", blobInnerCompressorVerkey, configPath + "/blob_inner_compressor/blob_inner_compressor.verkey.json");
+    ParseString(config, "blobInnerCompressorExec", "BLOB_INNER_COMPRESSOR_EXEC", blobInnerCompressorExec,configPath + "/blob_inner_compressor/blob_inner_compressor.exec");
+    ParseString(config, "blobInnerCompressorStarkInfo", "BLOB_INNER_COMPRESSOR_STARK_INFO", blobInnerCompressorStarkInfo,configPath +  "/blob_inner_compressor/blob_inner_compressor.starkinfo.json");
     ParseString(config, "blobInnerRecursive1CmPols", "BLOB_INNER_RECURSIVE1_CM_POLS", blobInnerRecursive1CmPols, "");
-    ParseString(config, "blobInnerRecursive1ConstPols", "BLOB_INNER_RECURSIVE1_CONST_POLS", blobInnerRecursive1ConstPols, configPath + "/blobinner_recursive1/blobinner_recursive1.const");
-    ParseString(config, "blobInnerRecursive1ConstantsTree", "BLOB_INNER_RECURSIVE1_CONSTANTS_TREE", blobInnerRecursive1ConstantsTree,configPath +  "/blobinner_recursive1/blobinner_recursive1.consttree");
-    ParseString(config, "blobInnerRecursive1Verifier", "BLOB_INNER_RECURSIVE1_VERIFIER", blobInnerRecursive1Verifier,configPath + "/blobinner_recursive1/blobinner_recursive1.verifier.dat");
-    ParseString(config, "blobInnerRecursive1Verkey", "BLOB_INNER_RECURSIVE1_VERKEY", blobInnerRecursive1Verkey, configPath + "/blobinner_recursive1/blobinner_recursive1.verkey.json");
-    ParseString(config, "blobInnerRecursive1Exec", "BLOB_INNER_RECURSIVE1_EXEC", blobInnerRecursive1Exec, configPath + "/blobinner_recursive1/blobinner_recursive1.exec");
-    ParseString(config, "blobInnerRecursive1StarkInfo", "BLOB_INNER_RECURSIVE1_STARK_INFO", blobInnerRecursive1StarkInfo,configPath +  "/blobinner_recursive1/blobinner_recursive1.starkinfo.json");
+    ParseString(config, "blobInnerRecursive1ConstPols", "BLOB_INNER_RECURSIVE1_CONST_POLS", blobInnerRecursive1ConstPols, configPath + "/blob_inner_recursive1/blob_inner_recursive1.const");
+    ParseString(config, "blobInnerRecursive1ConstantsTree", "BLOB_INNER_RECURSIVE1_CONSTANTS_TREE", blobInnerRecursive1ConstantsTree,configPath +  "/blob_inner_recursive1/blob_inner_recursive1.consttree");
+    ParseString(config, "blobInnerRecursive1Verifier", "BLOB_INNER_RECURSIVE1_VERIFIER", blobInnerRecursive1Verifier,configPath + "/blob_inner_recursive1/blob_inner_recursive1.verifier.dat");
+    ParseString(config, "blobInnerRecursive1Verkey", "BLOB_INNER_RECURSIVE1_VERKEY", blobInnerRecursive1Verkey, configPath + "/blob_inner_recursive1/blob_inner_recursive1.verkey.json");
+    ParseString(config, "blobInnerRecursive1Exec", "BLOB_INNER_RECURSIVE1_EXEC", blobInnerRecursive1Exec, configPath + "/blob_inner_recursive1/blob_inner_recursive1.exec");
+    ParseString(config, "blobInnerRecursive1StarkInfo", "BLOB_INNER_RECURSIVE1_STARK_INFO", blobInnerRecursive1StarkInfo,configPath +  "/blob_inner_recursive1/blob_inner_recursive1.starkinfo.json");
     ParseString(config, "blobOuterCmPols", "BLOB_OUTER_CM_POLS", blobOuterCmPols,configPath +  "");
-    ParseString(config, "blobOuterConstPols", "BLOB_OUTER_CONST_POLS", blobOuterConstPols, configPath + "/blobouter/blobouter.const");
-    ParseString(config, "blobOuterConstantsTree", "BLOB_OUTER_CONSTANTS_TREE", blobOuterConstantsTree,configPath +  "/blobouter/blobouter.consttree");
-    ParseString(config, "blobOuterVerifier", "BLOB_OUTER_VERIFIER", blobOuterVerifier,configPath + "/blobouter/blobouter.verifier.dat");
-    ParseString(config, "blobOuterVerkey", "BLOB_OUTER_VERKEY", blobOuterVerkey,configPath +  "/blobouter/blobouter.verkey.json");
-    ParseString(config, "blobOuterExec", "BLOB_OUTER_EXEC", blobOuterExec, configPath + "/blobouter/blobouter.exec");
-    ParseString(config, "blobOuterStarkInfo", "BLOB_OUTER_STARK_INFO", blobOuterStarkInfo, configPath + "/blobouter/blobouter.starkinfo.json");
+    ParseString(config, "blobOuterConstPols", "BLOB_OUTER_CONST_POLS", blobOuterConstPols, configPath + "/blob_outer/blob_outer.const");
+    ParseString(config, "blobOuterConstantsTree", "BLOB_OUTER_CONSTANTS_TREE", blobOuterConstantsTree,configPath +  "/blob_outer/blob_outer.consttree");
+    ParseString(config, "blobOuterVerifier", "BLOB_OUTER_VERIFIER", blobOuterVerifier,configPath + "/blob_outer/blob_outer.verifier.dat");
+    ParseString(config, "blobOuterVerkey", "BLOB_OUTER_VERKEY", blobOuterVerkey,configPath +  "/blob_outer/blob_outer.verkey.json");
+    ParseString(config, "blobOuterExec", "BLOB_OUTER_EXEC", blobOuterExec, configPath + "/blob_outer/blob_outer.exec");
+    ParseString(config, "blobOuterStarkInfo", "BLOB_OUTER_STARK_INFO", blobOuterStarkInfo, configPath + "/blob_outer/blob_outer.starkinfo.json");
     ParseString(config, "blobOuterRecursive2CmPols", "BLOB_OUTER_RECURSIVE2_CM_POLS", blobOuterRecursive2CmPols, "");
-    ParseString(config, "blobOuterRecursive2ConstPols", "BLOB_OUTER_RECURSIVE2_CONST_POLS", blobOuterRecursive2ConstPols, configPath + "/blobouter_recursive2/blobouter_recursive2.const");
-    ParseString(config, "blobOuterRecursive2ConstantsTree", "BLOB_OUTER_RECURSIVE2_CONSTANTS_TREE", blobOuterRecursive2ConstantsTree,configPath +  "/blobouter_recursive2/blobouter_recursive2.consttree");
-    ParseString(config, "blobOuterRecursive2Verifier", "BLOB_OUTER_RECURSIVE2_VERIFIER", blobOuterRecursive2Verifier,configPath + "/blobouter_recursive2/blobouter_recursive2.verifier.dat");
-    ParseString(config, "blobOuterRecursive2Verkey", "BLOB_OUTER_RECURSIVE2_VERKEY", blobOuterRecursive2Verkey, configPath + "/blobouter_recursive2/blobouter_recursive2.verkey.json");
-    ParseString(config, "blobOuterRecursive2Exec", "BLOB_OUTER_RECURSIVE2_EXEC", blobOuterRecursive2Exec,configPath + "/blobouter_recursive2/blobouter_recursive2.exec");
-    ParseString(config, "blobOuterRecursive2StarkInfo", "BLOB_OUTER_RECURSIVE2_STARK_INFO", blobOuterRecursive2StarkInfo,configPath +  "/blobouter_recursive2/blobouter_recursive2.starkinfo.json");
+    ParseString(config, "blobOuterRecursive2ConstPols", "BLOB_OUTER_RECURSIVE2_CONST_POLS", blobOuterRecursive2ConstPols, configPath + "/blob_outer_recursive2/blob_outer_recursive2.const");
+    ParseString(config, "blobOuterRecursive2ConstantsTree", "BLOB_OUTER_RECURSIVE2_CONSTANTS_TREE", blobOuterRecursive2ConstantsTree,configPath +  "/blob_outer_recursive2/blob_outer_recursive2.consttree");
+    ParseString(config, "blobOuterRecursive2Verifier", "BLOB_OUTER_RECURSIVE2_VERIFIER", blobOuterRecursive2Verifier,configPath + "/blob_outer_recursive2/blob_outer_recursive2.verifier.dat");
+    ParseString(config, "blobOuterRecursive2Verkey", "BLOB_OUTER_RECURSIVE2_VERKEY", blobOuterRecursive2Verkey, configPath + "/blob_outer_recursive2/blob_outer_recursive2.verkey.json");
+    ParseString(config, "blobOuterRecursive2Exec", "BLOB_OUTER_RECURSIVE2_EXEC", blobOuterRecursive2Exec,configPath + "/blob_outer_recursive2/blob_outer_recursive2.exec");
+    ParseString(config, "blobOuterRecursive2StarkInfo", "BLOB_OUTER_RECURSIVE2_STARK_INFO", blobOuterRecursive2StarkInfo,configPath +  "/blob_outer_recursive2/blob_outer_recursive2.starkinfo.json");
     ParseString(config, "recursivefConstPols", "RECURSIVEF_CONST_POLS", recursivefConstPols, configPath + "/recursivef/recursivef.const");
     ParseString(config, "recursivefConstantsTree", "RECURSIVEF_CONSTANTS_TREE", recursivefConstantsTree, configPath + "/recursivef/recursivef.consttree");
     ParseString(config, "recursivefExec", "RECURSIVEF_EXEC", recursivefExec, configPath + "/recursivef/recursivef.exec");
@@ -299,7 +300,6 @@ void Config::load(json &config)
     ParseString(config, "finalVerifier", "FINAL_VERIFIER", finalVerifier, configPath + "/final/final.verifier.dat");
     ParseString(config, "finalVerkey", "FINAL_VERKEY", finalVerkey, configPath + "/final/final.fflonk.verkey.json");
     ParseString(config, "finalStarkZkey", "FINAL_STARK_ZKEY", finalStarkZkey, configPath + "/final/final.fflonk.zkey");
-    ParseString(config, "c12aCmPols", "C12A_CM_POLS", c12aCmPols, "");
     ParseString(config, "recursive1CmPols", "RECURSIVE1_CM_POLS", recursive1CmPols, "");
     ParseBool(config, "mapConstPolsFile", "MAP_CONST_POLS_FILE", mapConstPolsFile, false);
     ParseBool(config, "mapConstantsTreeFile", "MAP_CONSTANTS_TREE_FILE", mapConstantsTreeFile, false);
@@ -497,7 +497,7 @@ void Config::print(void)
     zklog.info("    c12aCmPols=" + c12aCmPols);
     zklog.info("    recursive1CmPols=" + recursive1CmPols);
     zklog.info("    blobInnerCmPols=" + blobInnerCmPols);
-    zklog.info("    blobInnerC12aCmPols=" + blobInnerC12aCmPols);
+    zklog.info("    blobInnerCompressorCmPols=" + blobInnerCompressorCmPols);
     zklog.info("    blobInnerRecursive1CmPols=" + blobInnerRecursive1CmPols);
     zklog.info("    blobOuterCmPols=" + blobOuterCmPols);
     zklog.info("    blobOuterRecursive2CmPols=" + blobOuterRecursive2CmPols);
@@ -506,7 +506,7 @@ void Config::print(void)
     zklog.info("    recursive1ConstPols=" + recursive1ConstPols);
     zklog.info("    recursive2ConstPols=" + recursive2ConstPols);
     zklog.info("    blobInnerConstPols=" + blobInnerConstPols);
-    zklog.info("    blobInnerC12aConstPols=" + blobInnerC12aConstPols);
+    zklog.info("    blobInnerCompressorConstPols=" + blobInnerCompressorConstPols);
     zklog.info("    blobInnerRecursive1ConstPols=" + blobInnerRecursive1ConstPols);
     zklog.info("    blobOuterConstPols=" + blobOuterConstPols);
     zklog.info("    blobOuterRecursive2ConstPols=" + blobOuterRecursive2ConstPols);
@@ -516,7 +516,7 @@ void Config::print(void)
     zklog.info("    recursive1ConstantsTree=" + recursive1ConstantsTree);
     zklog.info("    recursive2ConstantsTree=" + recursive2ConstantsTree);
     zklog.info("    blobInnerConstantsTree=" + blobInnerConstantsTree);
-    zklog.info("    blobInnerC12aConstantsTree=" + blobInnerC12aConstantsTree);
+    zklog.info("    blobInnerCompressorConstantsTree=" + blobInnerCompressorConstantsTree);
     zklog.info("    blobInnerRecursive1ConstantsTree=" + blobInnerRecursive1ConstantsTree);
     zklog.info("    blobOuterConstantsTree=" + blobOuterConstantsTree);
     zklog.info("    blobOuterRecursive2ConstantsTree=" + blobOuterRecursive2ConstantsTree);
@@ -530,7 +530,7 @@ void Config::print(void)
     zklog.info("    recursive2Verkey=" + recursive2Verkey);
     zklog.info("    blobInnerVerifier=" + blobInnerVerifier);
     zklog.info("    blobInnerVerkey=" + blobInnerVerkey);
-    zklog.info("    blobInnerC12aVerkey=" + blobInnerC12aVerkey);
+    zklog.info("    blobInnerCompressorVerkey=" + blobInnerCompressorVerkey);
     zklog.info("    blobInnerRecursive1Verifier=" + blobInnerRecursive1Verifier);
     zklog.info("    blobInnerRecursive1Verkey=" + blobInnerRecursive1Verkey);
     zklog.info("    blobOuterVerifier=" + blobOuterVerifier);
@@ -555,7 +555,7 @@ void Config::print(void)
     zklog.info("    recursive1StarkInfo=" + recursive1StarkInfo);
     zklog.info("    recursive2StarkInfo=" + recursive2StarkInfo);
     zklog.info("    blobInnerStarkInfo=" + blobInnerStarkInfo);
-    zklog.info("    blobInnerC12aStarkInfo=" + blobInnerC12aStarkInfo);
+    zklog.info("    blobInnerCompressorStarkInfo=" + blobInnerCompressorStarkInfo);
     zklog.info("    blobInnerRecursive1StarkInfo=" + blobInnerRecursive1StarkInfo);
     zklog.info("    blobOuterStarkInfo=" + blobOuterStarkInfo);
     zklog.info("    blobOuterRecursive2StarkInfo=" + blobOuterRecursive2StarkInfo);
@@ -630,9 +630,9 @@ bool Config::check (void)
             zklog.error("required file config.blobInnerConstPols=" + blobInnerConstPols + " does not exist");
             bError = true;
         }
-        if(!fileExists(blobInnerC12aConstPols))
+        if(!fileExists(blobInnerCompressorConstPols))
         {
-            zklog.error("required file config.blobInnerC12aConstPols=" + blobInnerC12aConstPols + " does not exist");
+            zklog.error("required file config.blobInnerCompressorConstPols=" + blobInnerCompressorConstPols + " does not exist");
             bError = true;
         }
         if(!fileExists(blobInnerRecursive1ConstPols))
@@ -675,9 +675,9 @@ bool Config::check (void)
             zklog.error("required file config.blobInnerConstantsTree=" + blobInnerConstantsTree + " does not exist");
             bError = true;
         }
-        if(!fileExists(blobInnerC12aConstantsTree))
+        if(!fileExists(blobInnerCompressorConstantsTree))
         {
-            zklog.error("required file config.blobInnerC12aConstantsTree=" + blobInnerC12aConstantsTree + " does not exist");
+            zklog.error("required file config.blobInnerCompressorConstantsTree=" + blobInnerCompressorConstantsTree + " does not exist");
             bError = true;
         }
         if(!fileExists(blobInnerRecursive1ConstantsTree))
@@ -751,9 +751,9 @@ bool Config::check (void)
             zklog.error("required file config.blobInnerVerkey=" + blobInnerVerkey + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerC12aVerkey))
+        if (!fileExists(blobInnerCompressorVerkey))
         {
-            zklog.error("required file config.blobInnerC12aVerkey=" + blobInnerC12aVerkey + " does not exist");
+            zklog.error("required file config.blobInnerCompressorVerkey=" + blobInnerCompressorVerkey + " does not exist");
             bError = true;
         }
         if (!fileExists(blobInnerRecursive1Verifier))
@@ -831,9 +831,9 @@ bool Config::check (void)
             zklog.error("required file config.blobInnerStarkInfo=" + blobInnerStarkInfo + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerC12aStarkInfo))
+        if (!fileExists(blobInnerCompressorStarkInfo))
         {
-            zklog.error("required file config.blobInnerC12aStarkInfo=" + blobInnerC12aStarkInfo + " does not exist");
+            zklog.error("required file config.blobInnerCompressorStarkInfo=" + blobInnerCompressorStarkInfo + " does not exist");
             bError = true;
         }
         if (!fileExists(blobInnerRecursive1StarkInfo))
@@ -876,9 +876,9 @@ bool Config::check (void)
             zklog.error("required file config.recursivefExec=" + recursivefExec + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerC12aExec))
+        if (!fileExists(blobInnerCompressorExec))
         {
-            zklog.error("required file config.blobInnerC12aExec=" + blobInnerC12aExec + " does not exist");
+            zklog.error("required file config.blobInnerCompressorExec=" + blobInnerCompressorExec + " does not exist");
             bError = true;
         }
         if (!fileExists(blobInnerRecursive1Exec))

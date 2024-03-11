@@ -36,7 +36,7 @@ class Prover
     Starks *starkBatchRecursive1;
     Starks *starkBatchRecursive2;
     Starks *starkBlobInner;
-    Starks *starkBlobInnerC12a;
+    Starks *starkBlobInnerCompression;
     Starks *starkBlobInnerRecursive1;
     Starks *starkBlobOuter;
     Starks *starkBlobOuterRecursive2;

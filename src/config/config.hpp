@@ -125,7 +125,7 @@ public:
     string c12aCmPols;
     string recursive1CmPols;
     string blobInnerCmPols;
-    string blobInnerC12aCmPols;
+    string blobInnerCompressorCmPols;
     string blobInnerRecursive1CmPols;
     string blobOuterCmPols;
     string blobOuterRecursive2CmPols;
@@ -136,7 +136,7 @@ public:
     string recursive2ConstPols;
     string recursivefConstPols;
     string blobInnerConstPols;
-    string blobInnerC12aConstPols;
+    string blobInnerCompressorConstPols;
     string blobInnerRecursive1ConstPols;
     string blobOuterConstPols;
     string blobOuterRecursive2ConstPols;
@@ -148,7 +148,7 @@ public:
     string recursive2ConstantsTree;
     string recursivefConstantsTree;
     string blobInnerConstantsTree;
-    string blobInnerC12aConstantsTree;
+    string blobInnerCompressorConstantsTree;
     string blobInnerRecursive1ConstantsTree;
     string blobOuterConstantsTree;
     string blobOuterRecursive2ConstantsTree;
@@ -170,7 +170,7 @@ public:
     string recursive2Verkey;
     string recursivefVerkey;
     string blobInnerVerkey;
-    string blobInnerC12aVerkey;
+    string blobInnerCompressorVerkey;
     string blobInnerRecursive1Verkey;
     string blobOuterVerkey;
     string blobOuterRecursive2Verkey;
@@ -179,7 +179,7 @@ public:
     string c12aExec;
     string recursive1Exec;
     string recursive2Exec;
-    string blobInnerC12aExec;
+    string blobInnerCompressorExec;
     string blobInnerRecursive1Exec;
     string blobOuterExec;
     string blobOuterRecursive2Exec;
@@ -203,7 +203,7 @@ public:
     string recursive2StarkInfo;
     string recursivefStarkInfo;
     string blobInnerStarkInfo;
-    string blobInnerC12aStarkInfo;
+    string blobInnerCompressorStarkInfo;
     string blobInnerRecursive1StarkInfo;
     string blobOuterStarkInfo;
     string blobOuterRecursive2StarkInfo;
