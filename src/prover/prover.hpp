@@ -77,11 +77,7 @@ public:
     ~Prover();
 
     void genBatchProof(ProverRequest *pProverRequest);
-    void genBlobInnerProof(ProverRequest *pProverRequest){
-            zklog.info("Prover::genBlobInnerProof() timestamp: " + pProverRequest->timestamp);
-            zklog.info("Prover::genBlobInnerProof() UUID: " + pProverRequest->uuid);
-            zklog.info("Prover::genBlobInnerProof() input file: " + pProverRequest->inputFile());
-    };
+    void genBlobInnerProof(ProverRequest *pProverRequest);
     void genBlobOuterProof(ProverRequest *pProverRequest){
             zklog.info("Prover::genBlobOuterProof() timestamp: " + pProverRequest->timestamp);
             zklog.info("Prover::genBlobOuterProof() UUID: " + pProverRequest->uuid);
