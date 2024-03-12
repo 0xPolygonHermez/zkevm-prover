@@ -6394,7 +6394,7 @@ class L1Data PROTOBUF_FINAL :
   enum : int {
     kSmtProofFieldNumber = 4,
     kGlobalExitRootFieldNumber = 1,
-    kBlockhashL1FieldNumber = 2,
+    kBlockHashL1FieldNumber = 2,
     kInitialHistoricRootFieldNumber = 5,
     kMinTimestampFieldNumber = 3,
   };
@@ -6447,29 +6447,29 @@ class L1Data PROTOBUF_FINAL :
   std::string* _internal_mutable_global_exit_root();
   public:
 
-  // bytes blockhash_l1 = 2;
-  void clear_blockhash_l1();
-  const std::string& blockhash_l1() const;
-  void set_blockhash_l1(const std::string& value);
-  void set_blockhash_l1(std::string&& value);
-  void set_blockhash_l1(const char* value);
-  void set_blockhash_l1(const void* value, size_t size);
-  std::string* mutable_blockhash_l1();
-  std::string* release_blockhash_l1();
-  void set_allocated_blockhash_l1(std::string* blockhash_l1);
+  // bytes block_hash_l1 = 2;
+  void clear_block_hash_l1();
+  const std::string& block_hash_l1() const;
+  void set_block_hash_l1(const std::string& value);
+  void set_block_hash_l1(std::string&& value);
+  void set_block_hash_l1(const char* value);
+  void set_block_hash_l1(const void* value, size_t size);
+  std::string* mutable_block_hash_l1();
+  std::string* release_block_hash_l1();
+  void set_allocated_block_hash_l1(std::string* block_hash_l1);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_blockhash_l1();
+  std::string* unsafe_arena_release_block_hash_l1();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_blockhash_l1(
-      std::string* blockhash_l1);
+  void unsafe_arena_set_allocated_block_hash_l1(
+      std::string* block_hash_l1);
   private:
-  const std::string& _internal_blockhash_l1() const;
-  void _internal_set_blockhash_l1(const std::string& value);
-  std::string* _internal_mutable_blockhash_l1();
+  const std::string& _internal_block_hash_l1() const;
+  void _internal_set_block_hash_l1(const std::string& value);
+  std::string* _internal_mutable_block_hash_l1();
   public:
 
   // bytes initial_historic_root = 5;
@@ -6515,7 +6515,7 @@ class L1Data PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> smt_proof_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr blockhash_l1_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr block_hash_l1_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr initial_historic_root_;
   ::PROTOBUF_NAMESPACE_ID::uint32 min_timestamp_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -14619,85 +14619,85 @@ inline void L1Data::unsafe_arena_set_allocated_global_exit_root(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.L1Data.global_exit_root)
 }
 
-// bytes blockhash_l1 = 2;
-inline void L1Data::clear_blockhash_l1() {
-  blockhash_l1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// bytes block_hash_l1 = 2;
+inline void L1Data::clear_block_hash_l1() {
+  block_hash_l1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& L1Data::blockhash_l1() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.L1Data.blockhash_l1)
-  return _internal_blockhash_l1();
+inline const std::string& L1Data::block_hash_l1() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.L1Data.block_hash_l1)
+  return _internal_block_hash_l1();
 }
-inline void L1Data::set_blockhash_l1(const std::string& value) {
-  _internal_set_blockhash_l1(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.L1Data.blockhash_l1)
+inline void L1Data::set_block_hash_l1(const std::string& value) {
+  _internal_set_block_hash_l1(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.L1Data.block_hash_l1)
 }
-inline std::string* L1Data::mutable_blockhash_l1() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.L1Data.blockhash_l1)
-  return _internal_mutable_blockhash_l1();
+inline std::string* L1Data::mutable_block_hash_l1() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.L1Data.block_hash_l1)
+  return _internal_mutable_block_hash_l1();
 }
-inline const std::string& L1Data::_internal_blockhash_l1() const {
-  return blockhash_l1_.Get();
+inline const std::string& L1Data::_internal_block_hash_l1() const {
+  return block_hash_l1_.Get();
 }
-inline void L1Data::_internal_set_blockhash_l1(const std::string& value) {
+inline void L1Data::_internal_set_block_hash_l1(const std::string& value) {
   
-  blockhash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  block_hash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void L1Data::set_blockhash_l1(std::string&& value) {
+inline void L1Data::set_block_hash_l1(std::string&& value) {
   
-  blockhash_l1_.Set(
+  block_hash_l1_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.L1Data.blockhash_l1)
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.L1Data.block_hash_l1)
 }
-inline void L1Data::set_blockhash_l1(const char* value) {
+inline void L1Data::set_block_hash_l1(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  blockhash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  block_hash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.L1Data.blockhash_l1)
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.L1Data.block_hash_l1)
 }
-inline void L1Data::set_blockhash_l1(const void* value,
+inline void L1Data::set_block_hash_l1(const void* value,
     size_t size) {
   
-  blockhash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  block_hash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.L1Data.blockhash_l1)
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.L1Data.block_hash_l1)
 }
-inline std::string* L1Data::_internal_mutable_blockhash_l1() {
+inline std::string* L1Data::_internal_mutable_block_hash_l1() {
   
-  return blockhash_l1_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return block_hash_l1_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* L1Data::release_blockhash_l1() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.L1Data.blockhash_l1)
-  return blockhash_l1_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* L1Data::release_block_hash_l1() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.L1Data.block_hash_l1)
+  return block_hash_l1_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void L1Data::set_allocated_blockhash_l1(std::string* blockhash_l1) {
-  if (blockhash_l1 != nullptr) {
+inline void L1Data::set_allocated_block_hash_l1(std::string* block_hash_l1) {
+  if (block_hash_l1 != nullptr) {
     
   } else {
     
   }
-  blockhash_l1_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), blockhash_l1,
+  block_hash_l1_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), block_hash_l1,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.L1Data.blockhash_l1)
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.L1Data.block_hash_l1)
 }
-inline std::string* L1Data::unsafe_arena_release_blockhash_l1() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.L1Data.blockhash_l1)
+inline std::string* L1Data::unsafe_arena_release_block_hash_l1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.L1Data.block_hash_l1)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return blockhash_l1_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return block_hash_l1_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void L1Data::unsafe_arena_set_allocated_blockhash_l1(
-    std::string* blockhash_l1) {
+inline void L1Data::unsafe_arena_set_allocated_block_hash_l1(
+    std::string* block_hash_l1) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (blockhash_l1 != nullptr) {
+  if (block_hash_l1 != nullptr) {
     
   } else {
     
   }
-  blockhash_l1_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      blockhash_l1, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.L1Data.blockhash_l1)
+  block_hash_l1_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      block_hash_l1, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.L1Data.block_hash_l1)
 }
 
 // uint32 min_timestamp = 3;

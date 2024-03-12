@@ -10,6 +10,31 @@
 using namespace std;
 using json = nlohmann::json;
 
+
+/*
+The proof generation process follows this schema:
+
+genBatchProof
+             \
+              > genAggregatedBatchProof
+             /    \
+genBatchProof      \
+                    \
+genBlobInnerProof -----> genBlobOuterProof
+                                          \
+                                           > genAggregatedBlobOuterProof --> genFinalProof
+                                          /
+                         genBlobOuterProof
+
+In other words:
+- batch + batch => aggregated batch
+- aggregated batch + batch => aggregated batch
+- blob inner + aggregated batch => blob outer
+- blob outer + blob outer => aggregated blob outer
+- aggregated blob outer => final
+*/
+
+
 AggregatorClient::AggregatorClient (Goldilocks &fr, const Config &config, Prover &prover) :
     fr(fr),
     config(config),
@@ -32,6 +57,10 @@ void AggregatorClient::waitForThread (void)
 {
     pthread_join(t, NULL);
 }
+
+/**************/
+/* GET STATUS */
+/**************/
 
 bool AggregatorClient::GetStatus (::aggregator::v1::GetStatusResponse &getStatusResponse)
 {
@@ -99,6 +128,10 @@ bool AggregatorClient::GetStatus (::aggregator::v1::GetStatusResponse &getStatus
     return true;
 }
 
+/*******************/
+/* GEN BATCH PROOF */
+/*******************/
+
 bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest &genBatchProofRequest, aggregator::v1::GenBatchProofResponse &genBatchProofResponse)
 {
 #ifdef LOG_SERVICE
@@ -133,6 +166,18 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         return false;
     }
     ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash, genBatchProofRequest.input().public_inputs().old_batch_acc_input_hash());
+
+    // Get previousL1InfoTreeRoot
+    if (genBatchProofRequest.input().public_inputs().previous_l1_info_tree_root().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBatchProof() got previousL1InfoTreeRoot too long, size=" + to_string(genBatchProofRequest.input().public_inputs().previous_l1_info_tree_root().size()));
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.previousL1InfoTreeRoot, genBatchProofRequest.input().public_inputs().previous_l1_info_tree_root());
+
+    // Get previousL1InfoTreeIndex
+    pProverRequest->input.publicInputsExtended.publicInputs.previousL1InfoTreeIndex = genBatchProofRequest.input().public_inputs().previous_l1_info_tree_index();
 
     // Get chain ID
     pProverRequest->input.publicInputsExtended.publicInputs.chainID = genBatchProofRequest.input().public_inputs().chain_id();
@@ -170,27 +215,6 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     }
     pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genBatchProofRequest.input().public_inputs().batch_l2_data();
 
-    // Get L1 info root
-    /*if (genBatchProofRequest.input().public_inputs().l1_info_root().size() > 32)
-    {
-        zklog.error("AggregatorClient::GenBatchProof() got l1_info_root too long, size=" + to_string(genBatchProofRequest.input().public_inputs().l1_info_root().size()));
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.l1InfoRoot, genBatchProofRequest.input().public_inputs().l1_info_root());
-
-    // Get timestamp
-    pProverRequest->input.publicInputsExtended.publicInputs.timestampLimit = genBatchProofRequest.input().public_inputs().timestamp_limit();
-
-    // Get forced blockhash L1
-    if (genBatchProofRequest.input().public_inputs().forced_blockhash_l1().size() > 32)
-    {
-        zklog.error("AggregatorClient::GenBatchProof() got forced_blockhash_l1 too long, size=" + to_string(genBatchProofRequest.input().public_inputs().forced_blockhash_l1().size()));
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.forcedBlockHashL1, genBatchProofRequest.input().public_inputs().forced_blockhash_l1());
-*/
     // Get sequencer address
     string auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().sequencer_addr());
     if (auxString.size() > 40)
@@ -207,6 +231,39 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     }
     pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
 
+    // Get type
+    pProverRequest->input.publicInputsExtended.publicInputs.type = genBatchProofRequest.input().public_inputs().type();
+
+    // Get forcedHashData
+    if (genBatchProofRequest.input().public_inputs().forced_hash_data().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBatchProof() got forcedHashData too long, size=" + to_string(genBatchProofRequest.input().public_inputs().forced_hash_data().size()));
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.forcedHashData, genBatchProofRequest.input().public_inputs().forced_hash_data());
+
+    // Get forced data global exit root
+    if (genBatchProofRequest.input().public_inputs().forced_data().global_exit_root().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBatchProof() got forced data global exit root too long, size=" + to_string(genBatchProofRequest.input().public_inputs().forced_data().global_exit_root().size()));
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.forcedData.globalExitRoot, genBatchProofRequest.input().public_inputs().forced_data().global_exit_root());
+
+    // Get forced data block hash L1
+    if (genBatchProofRequest.input().public_inputs().forced_data().block_hash_l1().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBatchProof() got forced data block hah L1 too long, size=" + to_string(genBatchProofRequest.input().public_inputs().forced_data().block_hash_l1().size()));
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.forcedData.blockHashL1, genBatchProofRequest.input().public_inputs().forced_data().block_hash_l1());
+
+    // Get forced data minimum timestamp
+    pProverRequest->input.publicInputsExtended.publicInputs.forcedData.minTimestamp = genBatchProofRequest.input().public_inputs().forced_data().min_timestamp();
+
     // Get aggregator address
     auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().aggregator_addr());
     if (auxString.size() > 40)
@@ -222,6 +279,56 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         return false;
     }
     pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.set_str(auxString, 16);
+
+    // Parse L1 info tree data
+    const google::protobuf::Map<google::protobuf::uint32, aggregator::v1::L1Data> &l1InfoTreeData = genBatchProofRequest.input().public_inputs().l1_info_tree_data();
+    google::protobuf::Map<google::protobuf::uint32, aggregator::v1::L1Data>::const_iterator itl;
+    for (itl=l1InfoTreeData.begin(); itl!=l1InfoTreeData.end(); itl++)
+    {
+        // Get index
+        uint64_t index = itl->first;
+
+        // Get L1 data
+        L1Data l1Data;
+        const aggregator::v1::L1Data &l1DataV3 = itl->second;
+        if (l1DataV3.global_exit_root().size() > 32)
+        {
+            zklog.error("AggregatorClient::GenBatchProof() got L1 Data global exit root too long, index=" + to_string(itl->first) + " size=" + to_string(l1DataV3.global_exit_root().size()));
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
+        ba2scalar(l1Data.globalExitRoot, l1DataV3.global_exit_root());
+        if (l1DataV3.block_hash_l1().size() > 32)
+        {
+            zklog.error("AggregatorClient::GenBatchProof() got L1 Data block hash L1 too long, index=" + to_string(itl->first) + " size=" + to_string(l1DataV3.block_hash_l1().size()));
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
+        ba2scalar(l1Data.blockHashL1, l1DataV3.block_hash_l1());
+        l1Data.minTimestamp = l1DataV3.min_timestamp();
+        for (int64_t i=0; i<l1DataV3.smt_proof_size(); i++)
+        {
+            mpz_class auxScalar;
+            if (l1DataV3.smt_proof(i).size() > 32)
+            {
+                zklog.error("AggregatorClient::GenBatchProof() got L1 Data SMT proof too long, index=" + to_string(itl->first) + " i=" + to_string(i) + " size=" + to_string(l1DataV3.smt_proof(i).size()));
+                genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+                return false;
+            }
+            ba2scalar(auxScalar, l1DataV3.smt_proof(i));
+            l1Data.smtProof.emplace_back(auxScalar);
+        }
+        if (l1DataV3.initial_historic_root().size() > 32)
+        {
+            zklog.error("AggregatorClient::GenBatchProof() got L1 Data initial historic root too long, index=" + to_string(itl->first) + " size=" + to_string(l1DataV3.initial_historic_root().size()));
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
+        ba2scalar(l1Data.initialHistoricRoot, l1DataV3.initial_historic_root());
+
+        // Store it
+        pProverRequest->input.l1InfoTreeData[index] = l1Data;
+    }
 
     // Parse keys map
     const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &db = genBatchProofRequest.input().db();
@@ -312,49 +419,6 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         pProverRequest->input.contractsBytecode[key] = dbValue;
     }
 
-    // Parse L1 info tree data
-    const google::protobuf::Map<google::protobuf::uint32, aggregator::v1::L1Data> &l1InfoTreeData = genBatchProofRequest.input().public_inputs().l1_info_tree_data();
-    google::protobuf::Map<google::protobuf::uint32, aggregator::v1::L1Data>::const_iterator itl;
-    for (itl=l1InfoTreeData.begin(); itl!=l1InfoTreeData.end(); itl++)
-    {
-        // Get index
-        uint64_t index = itl->first;
-
-        // Get L1 data
-        L1Data l1Data;
-        const aggregator::v1::L1Data &l1DataV2 = itl->second;
-        if (l1DataV2.global_exit_root().size() > 32)
-        {
-            zklog.error("AggregatorClient::GenBatchProof()() got l1DataV2.global_exit_root() too long, size=" + to_string(l1DataV2.global_exit_root().size()), &(pProverRequest->tags));
-            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-            return false;
-        }
-        ba2scalar(l1Data.globalExitRoot, l1DataV2.global_exit_root());
-        if (l1DataV2.blockhash_l1().size() > 32)
-        {
-            zklog.error("AggregatorClient::GenBatchProof()() got l1DataV2.block_hash_l1() too long, size=" + to_string(l1DataV2.blockhash_l1().size()), &(pProverRequest->tags));
-            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-            return false;
-        }
-        ba2scalar(l1Data.blockHashL1, l1DataV2.blockhash_l1());
-        l1Data.minTimestamp = l1DataV2.min_timestamp();
-        for (int64_t i=0; i<l1DataV2.smt_proof_size(); i++)
-        {
-            mpz_class auxScalar;
-            if (l1DataV2.smt_proof(i).size() > 32)
-            {
-                zklog.error("AggregatorClient::GenBatchProof()() got l1DataV2.smt_proof(i) too long, size=" + to_string(l1DataV2.smt_proof(i).size()), &(pProverRequest->tags));
-                genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-                return false;
-            }
-            ba2scalar(auxScalar, l1DataV2.smt_proof(i));
-            l1Data.smtProof.emplace_back(auxScalar);
-        }
-
-        // Store it
-        pProverRequest->input.l1InfoTreeData[index] = l1Data;
-    }
-
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
 
@@ -367,6 +431,10 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
 #endif
     return true;
 }
+
+/*****************************/
+/* GEN STATELESS BATCH PROOF */
+/*****************************/
 
 bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStatelessBatchProofRequest &genStatelessBatchProofRequest, aggregator::v1::GenBatchProofResponse &genBatchProofResponse)
 {
@@ -554,13 +622,13 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
             return false;
         }
         ba2scalar(l1Data.globalExitRoot, l1DataV2.global_exit_root());
-        if (l1DataV2.blockhash_l1().size() > 32)
+        if (l1DataV2.block_hash_l1().size() > 32)
         {
-            zklog.error("AggregatorClient::GenStatelessBatchProof()() got l1DataV2.block_hash_l1() too long, size=" + to_string(l1DataV2.blockhash_l1().size()), &(pProverRequest->tags));
+            zklog.error("AggregatorClient::GenStatelessBatchProof()() got l1DataV2.block_hash_l1() too long, size=" + to_string(l1DataV2.block_hash_l1().size()), &(pProverRequest->tags));
             genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
             return false;
         }
-        ba2scalar(l1Data.blockHashL1, l1DataV2.blockhash_l1());
+        ba2scalar(l1Data.blockHashL1, l1DataV2.block_hash_l1());
         l1Data.minTimestamp = l1DataV2.min_timestamp();
         for (int64_t i=0; i<l1DataV2.smt_proof_size(); i++)
         {
@@ -611,6 +679,10 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     return true;
 }
 
+/******************************/
+/* GEN AGGREGATED BATCH PROOF */
+/******************************/
+
 bool AggregatorClient::GenAggregatedBatchProof (const aggregator::v1::GenAggregatedBatchProofRequest &genAggregatedProofRequest, aggregator::v1::GenAggregatedBatchProofResponse &genAggregatedProofResponse)
 {
 #ifdef LOG_SERVICE
@@ -627,8 +699,8 @@ bool AggregatorClient::GenAggregatedBatchProof (const aggregator::v1::GenAggrega
 #endif
 
     // Set the 2 inputs
-    pProverRequest->aggregatedProofInput1 = json::parse(genAggregatedProofRequest.recursive_proof_1());
-    pProverRequest->aggregatedProofInput2 = json::parse(genAggregatedProofRequest.recursive_proof_2());
+    pProverRequest->aggregatedBatchProofInput1 = json::parse(genAggregatedProofRequest.recursive_proof_1());
+    pProverRequest->aggregatedBatchProofInput2 = json::parse(genAggregatedProofRequest.recursive_proof_2());
 
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
@@ -642,6 +714,241 @@ bool AggregatorClient::GenAggregatedBatchProof (const aggregator::v1::GenAggrega
 #endif
     return true;
 }
+
+/************************/
+/* GEN BLOB INNER PROOF */
+/************************/
+
+bool AggregatorClient::GenBlobInnerProof (const aggregator::v1::GenBlobInnerProofRequest &genBlobInnerProofRequest, aggregator::v1::GenBlobInnerProofResponse &genBlobInnerProofResponse)
+{
+#ifdef LOG_SERVICE
+    zklog.info("AggregatorClient::GenBlobInnerProof() called with request: " + genBlobOuterProofRequest.DebugString());
+#endif
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genBlobInnerProof);
+    if (pProverRequest == NULL)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() failed allocation a new ProveRequest");
+        exitProcess();
+    }
+#ifdef LOG_SERVICE
+    zklog.info("AggregatorClient::GenBlobInnerProof() created a new prover request: " + to_string((uint64_t)pProverRequest));
+#endif
+
+    // Get oldBlobStateRoot
+    if (genBlobInnerProofRequest.input().public_inputs().old_blob_state_root().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got oldBlobStateRoot too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().old_blob_state_root().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldBlobStateRoot, genBlobInnerProofRequest.input().public_inputs().old_blob_state_root());
+
+    // Get oldBlobAccInputHash
+    if (genBlobInnerProofRequest.input().public_inputs().old_blob_acc_input_hash().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got oldBlobAccInputHash too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().old_blob_acc_input_hash().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldBlobAccInputHash, genBlobInnerProofRequest.input().public_inputs().old_blob_acc_input_hash());
+
+    // Get oldBlobNum
+    pProverRequest->input.publicInputsExtended.publicInputs.oldBlobNum = genBlobInnerProofRequest.input().public_inputs().old_num_blob();
+
+    // Get oldStateRoot
+    if (genBlobInnerProofRequest.input().public_inputs().old_state_root().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got oldStateRoot too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().old_state_root().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot, genBlobInnerProofRequest.input().public_inputs().old_state_root());
+
+    // Get fork ID
+    pProverRequest->input.publicInputsExtended.publicInputs.forkID = genBlobInnerProofRequest.input().public_inputs().fork_id();
+    if (pProverRequest->input.publicInputsExtended.publicInputs.forkID < 9)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got oldStateRoot too long, size=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.forkID));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+
+    // Create full tracer based on fork ID
+    pProverRequest->CreateFullTracer();
+    if (pProverRequest->result != ZKR_SUCCESS)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() failed calling pProverRequest->CreateFullTracer() result=" + to_string(pProverRequest->result) + "=" + zkresult2string(pProverRequest->result));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+
+    // Get lastL1InfoTreeIndex
+    pProverRequest->input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex = genBlobInnerProofRequest.input().public_inputs().last_l1_info_tree_index();
+
+    // Get lastL1InfoTreeRoot
+    if (genBlobInnerProofRequest.input().public_inputs().last_l1_info_tree_root().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got lastL1InfoTreeRoot too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().last_l1_info_tree_root().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot, genBlobInnerProofRequest.input().public_inputs().last_l1_info_tree_root());
+
+    // Get sequencer address
+    string auxString = Remove0xIfPresent(genBlobInnerProofRequest.input().public_inputs().sequencer_addr());
+    if (auxString.size() > 40)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got sequencerAddr too long, size=" + to_string(auxString.size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    if (!stringIsHex(auxString))
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got sequencerAddr not hex, value=" + auxString);
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
+
+    // Get timestamp limit
+    pProverRequest->input.publicInputsExtended.publicInputs.timestampLimit = genBlobInnerProofRequest.input().public_inputs().timestamp_limit();
+
+    // Get zkGasLimit
+    if (genBlobInnerProofRequest.input().public_inputs().zk_gas_limit().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got zkGasLimit too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().zk_gas_limit().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.zkGasLimit, genBlobInnerProofRequest.input().public_inputs().zk_gas_limit());
+
+    // Get type
+    pProverRequest->input.publicInputsExtended.publicInputs.type = genBlobInnerProofRequest.input().public_inputs().type();
+
+    // Get pointZ
+    if (genBlobInnerProofRequest.input().public_inputs().point_z().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got pointZ too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().point_z().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.pointZ, genBlobInnerProofRequest.input().public_inputs().point_z());
+
+    // Get pointY
+    if (genBlobInnerProofRequest.input().public_inputs().point_y().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got pointY too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().point_y().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.pointY, genBlobInnerProofRequest.input().public_inputs().point_y());
+
+    // Get blobData
+    if (genBlobInnerProofRequest.input().public_inputs().blob_data().size() > MAX_BLOB_DATA_SIZE)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got blobData too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().blob_data().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    pProverRequest->input.publicInputsExtended.publicInputs.blobData = genBlobInnerProofRequest.input().public_inputs().blob_data();
+
+    // Get forcedHashData
+    if (genBlobInnerProofRequest.input().public_inputs().forced_hash_data().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got forcedHashData too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().forced_hash_data().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.forcedHashData, genBlobInnerProofRequest.input().public_inputs().forced_hash_data());
+
+    // Submit the prover request
+    string uuid = prover.submitRequest(pProverRequest);
+
+    // Build the response as Ok, returning the UUID assigned by the prover to this request
+    genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
+    genBlobInnerProofResponse.set_id(uuid.c_str());
+
+#ifdef LOG_SERVICE
+    zklog.info("AggregatorClient::GenBlobInnerProof() returns: " + genBlobInnerProofResponse.DebugString());
+#endif
+    return true;
+}
+
+/************************/
+/* GEN BLOB OUTER PROOF */
+/************************/
+
+bool AggregatorClient::GenBlobOuterProof (const aggregator::v1::GenBlobOuterProofRequest &genBlobOuterProofRequest, aggregator::v1::GenBlobOuterProofResponse &genBlobOuterProofResponse)
+{
+#ifdef LOG_SERVICE
+    zklog.info("AggregatorClient::GenBlobOuterProof() called with request: " + genBlobOuterProofRequest.DebugString());
+#endif
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genBlobOuterProof);
+    if (pProverRequest == NULL)
+    {
+        zklog.error("AggregatorClient::GenBlobOuterProof() failed allocation a new ProveRequest");
+        exitProcess();
+    }
+#ifdef LOG_SERVICE
+    zklog.info("AggregatorClient::GenBlobOuterProof() created a new prover request: " + to_string((uint64_t)pProverRequest));
+#endif
+
+    // Set the 2 inputs
+    pProverRequest->blobOuterProofInputBatch = json::parse(genBlobOuterProofRequest.batch_proof());
+    pProverRequest->blobOuterProofInputBlobInner = json::parse(genBlobOuterProofRequest.blob_inner_proof());
+
+    // Submit the prover request
+    string uuid = prover.submitRequest(pProverRequest);
+
+    // Build the response as Ok, returning the UUID assigned by the prover to this request
+    genBlobOuterProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
+    genBlobOuterProofResponse.set_id(uuid.c_str());
+
+#ifdef LOG_SERVICE
+    zklog.info("AggregatorClient::GenBlobOuterProof() returns: " + genAggregatedProofResponse.DebugString());
+#endif
+    return true;
+}
+
+/***********************************/
+/* GEN AGGREGATED BLOB OUTER PROOF */
+/***********************************/
+
+bool AggregatorClient::GenAggregatedBlobOuterProof (const aggregator::v1::GenAggregatedBlobOuterProofRequest &genAggregatedBlobOuterProofRequest, aggregator::v1::GenAggregatedBlobOuterProofResponse &genAggregatedBlobOuterProofResponse)
+{
+#ifdef LOG_SERVICE
+    zklog.info("AggregatorClient::GenAggregatedBlobOuterProof() called with request: " + genAggregatedBlobOuterProofRequest.DebugString());
+#endif
+    ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genAggregatedBlobOuterProof);
+    if (pProverRequest == NULL)
+    {
+        zklog.error("AggregatorClient::GenAggregatedBlobOuterProof() failed allocation a new ProveRequest");
+        exitProcess();
+    }
+#ifdef LOG_SERVICE
+    zklog.info("AggregatorClient::GenAggregatedBlobOuterProof() created a new prover request: " + to_string((uint64_t)pProverRequest));
+#endif
+
+    // Set the 2 inputs
+    pProverRequest->aggregatedBlobOuterProofInput1 = json::parse(genAggregatedBlobOuterProofRequest.recursive_proof_1());
+    pProverRequest->aggregatedBlobOuterProofInput2 = json::parse(genAggregatedBlobOuterProofRequest.recursive_proof_2());
+
+    // Submit the prover request
+    string uuid = prover.submitRequest(pProverRequest);
+
+    // Build the response as Ok, returning the UUID assigned by the prover to this request
+    genAggregatedBlobOuterProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
+    genAggregatedBlobOuterProofResponse.set_id(uuid.c_str());
+
+#ifdef LOG_SERVICE
+    zklog.info("AggregatorClient::GenAggregatedBlobOuterProof() returns: " + genAggregatedBlobOuterProofResponse.DebugString());
+#endif
+    return true;
+}
+
+/*******************/
+/* GEN FINAL PROOF */
+/*******************/
 
 bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest &genFinalProofRequest, aggregator::v1::GenFinalProofResponse &genFinalProofResponse)
 {
@@ -684,6 +991,10 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     return true;
 }
 
+/**********/
+/* CANCEL */
+/**********/
+
 bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelRequest, aggregator::v1::CancelResponse &cancelResponse)
 {
     // Get the cancel request UUID
@@ -724,6 +1035,10 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
 #endif
     return true;
 }
+
+/*************/
+/* GET PROOF */
+/*************/
 
 bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProofRequest, aggregator::v1::GetProofResponse &getProofResponse)
 {
@@ -818,7 +1133,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                 }
                 case prt_genAggregatedBatchProof:
                 {
-                    string recursiveProof = pProverRequest->aggregatedProofOutput.dump();
+                    string recursiveProof = pProverRequest->aggregatedBatchProofOutput.dump();
                     getProofResponse.set_recursive_proof(recursiveProof);
                     break;
                 }
@@ -838,6 +1153,10 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
 #endif
     return true;
 }
+
+/**********/
+/* THREAD */
+/**********/
 
 void* aggregatorClientThread(void* arg)
 {
@@ -884,12 +1203,21 @@ void* aggregatorClientThread(void* arg)
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
-                case aggregator::v1::AggregatorMessage::RequestCase::kGenStatelessBatchProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBlobInnerProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
                     zklog.info("aggregatorClientThread() got: " + aggregatorMessage.ShortDebugString());
                     break;
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenStatelessBatchProofRequest:
+                    zklog.info("aggregatorClientThread() got genStatelessBatchProof() request");
+                    break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedBatchProofRequest:
-                    zklog.info("aggregatorClientThread() got genAggregatedProof() request");
+                    zklog.info("aggregatorClientThread() got genAggregatedBatchProof() request");
+                    break;
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBlobOuterProofRequest:
+                    zklog.info("aggregatorClientThread() got genBlobOuter() request");
+                    break;
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedBlobOuterProofRequest:
+                    zklog.info("aggregatorClientThread() got genAggregatedBlobOuterProof() request");
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
                     zklog.info("aggregatorClientThread() got genFinalProof() request");
@@ -914,7 +1242,7 @@ void* aggregatorClientThread(void* arg)
                 {
                     // Allocate a new get status response
                     aggregator::v1::GetStatusResponse * pGetStatusResponse = new aggregator::v1::GetStatusResponse();
-                    zkassert(pGetStatusResponse != NULL);
+                    zkassertpermanent(pGetStatusResponse != NULL);
 
                     // Call GetStatus
                     pAggregatorClient->GetStatus(*pGetStatusResponse);
@@ -928,7 +1256,7 @@ void* aggregatorClientThread(void* arg)
                 {
                     // Allocate a new gen batch proof response
                     aggregator::v1::GenBatchProofResponse * pGenBatchProofResponse = new aggregator::v1::GenBatchProofResponse();
-                    zkassert(pGenBatchProofResponse != NULL);
+                    zkassertpermanent(pGenBatchProofResponse != NULL);
 
                     // Call GenBatchProof
                     pAggregatorClient->GenBatchProof(aggregatorMessage.gen_batch_proof_request(), *pGenBatchProofResponse);
@@ -942,7 +1270,7 @@ void* aggregatorClientThread(void* arg)
                 {
                     // Allocate a new gen batch proof response
                     aggregator::v1::GenBatchProofResponse * pGenBatchProofResponse = new aggregator::v1::GenBatchProofResponse();
-                    zkassert(pGenBatchProofResponse != NULL);
+                    zkassertpermanent(pGenBatchProofResponse != NULL);
 
                     // Call GenBatchProof
                     pAggregatorClient->GenStatelessBatchProof(aggregatorMessage.gen_stateless_batch_proof_request(), *pGenBatchProofResponse);
@@ -954,15 +1282,57 @@ void* aggregatorClientThread(void* arg)
 
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedBatchProofRequest:
                 {
-                    // Allocate a new gen aggregated proof response
+                    // Allocate a new gen aggregated batch proof response
                     aggregator::v1::GenAggregatedBatchProofResponse * pGenAggregatedBatchProofResponse = new aggregator::v1::GenAggregatedBatchProofResponse();
-                    zkassert(pGenAggregatedBatchProofResponse != NULL);
+                    zkassertpermanent(pGenAggregatedBatchProofResponse != NULL);
 
-                    // Call GenAggregatedProof
+                    // Call GenAggregatedBatchProof
                     pAggregatorClient->GenAggregatedBatchProof(aggregatorMessage.gen_aggregated_batch_proof_request(), *pGenAggregatedBatchProofResponse);
 
-                    // Set the gen aggregated proof response
+                    // Set the gen aggregated batch proof response
                     proverMessage.set_allocated_gen_aggregated_batch_proof_response(pGenAggregatedBatchProofResponse);
+                    break;
+                }
+
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBlobInnerProofRequest:
+                {
+                    // Allocate a new gen blob inner proof response
+                    aggregator::v1::GenBlobInnerProofResponse * pGenBlobInnerProofResponse = new aggregator::v1::GenBlobInnerProofResponse();
+                    zkassertpermanent(pGenBlobInnerProofResponse != NULL);
+
+                    // Call GenBlobInner
+                    pAggregatorClient->GenBlobInnerProof(aggregatorMessage.gen_blob_inner_proof_request(), *pGenBlobInnerProofResponse);
+
+                    // Set the gen batch proof response
+                    proverMessage.set_allocated_gen_blob_inner_proof_response(pGenBlobInnerProofResponse);
+                    break;
+                }
+
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBlobOuterProofRequest:
+                {
+                    // Allocate a new gen blob outer proof response
+                    aggregator::v1::GenBlobOuterProofResponse * pGenBlobOuterProofResponse = new aggregator::v1::GenBlobOuterProofResponse();
+                    zkassertpermanent(pGenBlobOuterProofResponse != NULL);
+
+                    // Call GenBlobOuter
+                    pAggregatorClient->GenBlobOuterProof(aggregatorMessage.gen_blob_outer_proof_request(), *pGenBlobOuterProofResponse);
+
+                    // Set the gen blob outer proof response
+                    proverMessage.set_allocated_gen_blob_outer_proof_response(pGenBlobOuterProofResponse);
+                    break;
+                }
+
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedBlobOuterProofRequest:
+                {
+                    // Allocate a new gen aggregated blob outer proof response
+                    aggregator::v1::GenAggregatedBlobOuterProofResponse * pGenAggregatedBlobOuterProofResponse = new aggregator::v1::GenAggregatedBlobOuterProofResponse();
+                    zkassertpermanent(pGenAggregatedBlobOuterProofResponse != NULL);
+
+                    // Call GenAggregatedBlobOuterProof
+                    pAggregatorClient->GenAggregatedBlobOuterProof(aggregatorMessage.gen_aggregated_blob_outer_proof_request(), *pGenAggregatedBlobOuterProofResponse);
+
+                    // Set the gen aggregated blob outer proof response
+                    proverMessage.set_allocated_gen_aggregated_blob_outer_proof_response(pGenAggregatedBlobOuterProofResponse);
                     break;
                 }
 
@@ -970,7 +1340,7 @@ void* aggregatorClientThread(void* arg)
                 {
                     // Allocate a new gen final proof response
                     aggregator::v1::GenFinalProofResponse * pGenFinalProofResponse = new aggregator::v1::GenFinalProofResponse();
-                    zkassert(pGenFinalProofResponse != NULL);
+                    zkassertpermanent(pGenFinalProofResponse != NULL);
 
                     // Call GenFinalProof
                     pAggregatorClient->GenFinalProof(aggregatorMessage.gen_final_proof_request(), *pGenFinalProofResponse);
@@ -984,7 +1354,7 @@ void* aggregatorClientThread(void* arg)
                 {
                     // Allocate a new cancel response
                     aggregator::v1::CancelResponse * pCancelResponse = new aggregator::v1::CancelResponse();
-                    zkassert(pCancelResponse != NULL);
+                    zkassertpermanent(pCancelResponse != NULL);
 
                     // Call Cancel
                     pAggregatorClient->Cancel(aggregatorMessage.cancel_request(), *pCancelResponse);
@@ -998,7 +1368,7 @@ void* aggregatorClientThread(void* arg)
                 {
                     // Allocate a new cancel response
                     aggregator::v1::GetProofResponse * pGetProofResponse = new aggregator::v1::GetProofResponse();
-                    zkassert(pGetProofResponse != NULL);
+                    zkassertpermanent(pGetProofResponse != NULL);
 
                     // Call GetProof
                     pAggregatorClient->GetProof(aggregatorMessage.get_proof_request(), *pGetProofResponse);

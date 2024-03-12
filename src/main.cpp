@@ -119,11 +119,11 @@ void runFileGenAggregatedBatchProof(Goldilocks fr, Prover &prover, Config &confi
     ProverRequest proverRequest(fr, config, prt_genAggregatedBatchProof);
     if (config.inputFile.size() > 0)
     {
-        file2json(config.inputFile, proverRequest.aggregatedProofInput1);
+        file2json(config.inputFile, proverRequest.aggregatedBatchProofInput1);
     }
     if (config.inputFile2.size() > 0)
     {
-        file2json(config.inputFile2, proverRequest.aggregatedProofInput2);
+        file2json(config.inputFile2, proverRequest.aggregatedBatchProofInput2);
     }
     TimerStopAndLog(INPUT_LOAD);
 

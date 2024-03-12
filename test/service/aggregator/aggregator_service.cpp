@@ -318,7 +318,7 @@ using grpc::Status;
     {
         aggregator::v1::L1Data l1Data;
         l1Data.set_global_exit_root(string2ba(itL1Data->second.globalExitRoot.get_str(16)));
-        l1Data.set_blockhash_l1(string2ba(itL1Data->second.blockHashL1.get_str(16)));
+        l1Data.set_block_hash_l1(string2ba(itL1Data->second.blockHashL1.get_str(16)));
         l1Data.set_min_timestamp(itL1Data->second.minTimestamp);
         for (uint64_t i=0; i<itL1Data->second.smtProof.size(); i++)
         {

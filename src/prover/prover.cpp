@@ -741,8 +741,8 @@ void Prover::genAggregatedBatchProof(ProverRequest *pProverRequest)
     // Save input to file
     if (config.saveInputToFile)
     {
-        json2file(pProverRequest->aggregatedProofInput1, pProverRequest->filePrefix + "aggregated_proof.input_1.json");
-        json2file(pProverRequest->aggregatedProofInput2, pProverRequest->filePrefix + "aggregated_proof.input_2.json");
+        json2file(pProverRequest->aggregatedBatchProofInput1, pProverRequest->filePrefix + "aggregated_proof.input_1.json");
+        json2file(pProverRequest->aggregatedBatchProofInput2, pProverRequest->filePrefix + "aggregated_proof.input_2.json");
     }
 
     // Input is pProverRequest->aggregatedProofInput1 and pProverRequest->aggregatedProofInput2 (of type json)
@@ -755,24 +755,24 @@ void Prover::genAggregatedBatchProof(ProverRequest *pProverRequest)
     // ----------------------------------------------
     // Check chainID
 
-    if (pProverRequest->aggregatedProofInput1["publics"][17] != pProverRequest->aggregatedProofInput2["publics"][17])
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][17] != pProverRequest->aggregatedBatchProofInput2["publics"][17])
     {
-        zklog.error("Prover::genAggregatedProof() Inputs has different chainId " + pProverRequest->aggregatedProofInput1["publics"][17].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][17].dump());
+        zklog.error("Prover::genAggregatedProof() Inputs has different chainId " + pProverRequest->aggregatedBatchProofInput1["publics"][17].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][17].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
-    if (pProverRequest->aggregatedProofInput1["publics"][18] != pProverRequest->aggregatedProofInput2["publics"][18])
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][18] != pProverRequest->aggregatedBatchProofInput2["publics"][18])
     {
-        zklog.error("Prover::genAggregatedProof() Inputs has different forkId " + pProverRequest->aggregatedProofInput1["publics"][18].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][18].dump());
+        zklog.error("Prover::genAggregatedProof() Inputs has different forkId " + pProverRequest->aggregatedBatchProofInput1["publics"][18].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][18].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     // Check midStateRoot
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedProofInput1["publics"][19 + i] != pProverRequest->aggregatedProofInput2["publics"][0 + i])
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][19 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][0 + i])
         {
-            zklog.error("Prover::genAggregatedProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedProofInput1["publics"][19 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][0 + i].dump());
+            zklog.error("Prover::genAggregatedProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedBatchProofInput1["publics"][19 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][0 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
@@ -780,22 +780,22 @@ void Prover::genAggregatedBatchProof(ProverRequest *pProverRequest)
     // Check midAccInputHash0
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedProofInput1["publics"][27 + i] != pProverRequest->aggregatedProofInput2["publics"][8 + i])
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][27 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][8 + i])
         {
-            zklog.error("Prover::genAggregatedProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][8 + i].dump());
+            zklog.error("Prover::genAggregatedProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][8 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
     }
     // Check batchNum
-    if (pProverRequest->aggregatedProofInput1["publics"][43] != pProverRequest->aggregatedProofInput2["publics"][16])
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][43] != pProverRequest->aggregatedBatchProofInput2["publics"][16])
     {
-        zklog.error("Prover::genAggregatedProof() newBatchNum and oldBatchNum are not consistent" + pProverRequest->aggregatedProofInput1["publics"][43].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][16].dump());
+        zklog.error("Prover::genAggregatedProof() newBatchNum and oldBatchNum are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][43].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][16].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
 
-    json zkinInputRecursive2 = joinzkin(pProverRequest->aggregatedProofInput1, pProverRequest->aggregatedProofInput2, verKey, starkBatchRecursive2->starkInfo.starkStruct.steps.size());
+    json zkinInputRecursive2 = joinzkin(pProverRequest->aggregatedBatchProofInput1, pProverRequest->aggregatedBatchProofInput2, verKey, starkBatchRecursive2->starkInfo.starkStruct.steps.size());
     json recursive2Verkey;
     file2json(config.recursive2Verkey, recursive2Verkey);
 
@@ -841,12 +841,12 @@ void Prover::genAggregatedBatchProof(ProverRequest *pProverRequest)
     zkinRecursive2["publics"] = zkinInputRecursive2["publics"];
 
     // Output is pProverRequest->aggregatedProofOutput (of type json)
-    pProverRequest->aggregatedProofOutput = zkinRecursive2;
+    pProverRequest->aggregatedBatchProofOutput = zkinRecursive2;
 
     // Save output to file
     if (config.saveOutputToFile)
     {
-        json2file(pProverRequest->aggregatedProofOutput, pProverRequest->filePrefix + "aggregated_proof.output.json");
+        json2file(pProverRequest->aggregatedBatchProofOutput, pProverRequest->filePrefix + "aggregated_proof.output.json");
     }
     // Save proof to file
     if (config.saveProofToFile)

@@ -428,7 +428,7 @@ message StatelessPublicInputs {
 */
 message L1Data {
     bytes global_exit_root = 1;
-    bytes blockhash_l1 = 2;
+    bytes block_hash_l1 = 2;
     uint32 min_timestamp = 3;
     repeated bytes smt_proof = 4;
     bytes initial_historic_root = 5;

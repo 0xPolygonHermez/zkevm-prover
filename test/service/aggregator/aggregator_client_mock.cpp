@@ -275,7 +275,7 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
                 pPublicInputs->set_aggregator_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
                 aggregator::v1::L1Data l1Data;
                 l1Data.set_global_exit_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
-                l1Data.set_blockhash_l1(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                l1Data.set_block_hash_l1(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 l1Data.set_min_timestamp(9999);
                 l1Data.add_smt_proof(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 l1Data.set_initial_historic_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));

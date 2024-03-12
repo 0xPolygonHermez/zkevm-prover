@@ -1028,7 +1028,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, global_exit_root_),
-  PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, blockhash_l1_),
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, block_hash_l1_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, min_timestamp_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, smt_proof_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, initial_historic_root_),
@@ -1290,35 +1290,36 @@ const char descriptor_table_protodef_aggregator_2eproto[] PROTOBUF_SECTION_VARIA
   "fo_tree_data\030\t \003(\01328.aggregator.v1.State"
   "lessPublicInputs.L1InfoTreeDataEntry\032L\n\023"
   "L1InfoTreeDataEntry\022\013\n\003key\030\001 \001(\r\022$\n\005valu"
-  "e\030\002 \001(\0132\025.aggregator.v1.L1Data:\0028\001\"\201\001\n\006L"
-  "1Data\022\030\n\020global_exit_root\030\001 \001(\014\022\024\n\014block"
-  "hash_l1\030\002 \001(\014\022\025\n\rmin_timestamp\030\003 \001(\r\022\021\n\t"
-  "smt_proof\030\004 \003(\014\022\035\n\025initial_historic_root"
-  "\030\005 \001(\014\"\245\002\n\013InputProver\0222\n\rpublic_inputs\030"
-  "\001 \001(\0132\033.aggregator.v1.PublicInputs\022.\n\002db"
-  "\030\004 \003(\0132\".aggregator.v1.InputProver.DbEnt"
-  "ry\022M\n\022contracts_bytecode\030\005 \003(\01321.aggrega"
-  "tor.v1.InputProver.ContractsBytecodeEntr"
-  "y\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t"
-  ":\0028\001\0328\n\026ContractsBytecodeEntry\022\013\n\003key\030\001 "
-  "\001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"S\n\024InputBlobInner"
-  "Prover\022;\n\rpublic_inputs\030\001 \001(\0132$.aggregat"
-  "or.v1.PublicBlobInnerInputs\"S\n\024Stateless"
-  "InputProver\022;\n\rpublic_inputs\030\001 \001(\0132$.agg"
-  "regator.v1.StatelessPublicInputs\"\204\002\n\024Pub"
-  "licInputsExtended\0222\n\rpublic_inputs\030\001 \001(\013"
-  "2\033.aggregator.v1.PublicInputs\022\026\n\016new_sta"
-  "te_root\030\002 \001(\014\022 \n\030new_batch_acc_input_has"
-  "h\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 \001(\014\022\032\n\022"
-  "new_last_timestamp\030\005 \001(\004\022!\n\031current_l1_i"
-  "nfo_tree_root\030\006 \001(\014\022\"\n\032current_l1_info_t"
-  "ree_index\030\007 \001(\r*\\\n\006Result\022\026\n\022RESULT_UNSP"
-  "ECIFIED\020\000\022\r\n\tRESULT_OK\020\001\022\020\n\014RESULT_ERROR"
-  "\020\002\022\031\n\025RESULT_INTERNAL_ERROR\020\0032d\n\021Aggrega"
-  "torService\022O\n\007Channel\022\034.aggregator.v1.Pr"
-  "overMessage\032 .aggregator.v1.AggregatorMe"
-  "ssage\"\000(\0010\001B;Z9github.com/0xPolygonHerme"
-  "z/zkevm-node/proverclient/proverb\006proto3"
+  "e\030\002 \001(\0132\025.aggregator.v1.L1Data:\0028\001\"\202\001\n\006L"
+  "1Data\022\030\n\020global_exit_root\030\001 \001(\014\022\025\n\rblock"
+  "_hash_l1\030\002 \001(\014\022\025\n\rmin_timestamp\030\003 \001(\r\022\021\n"
+  "\tsmt_proof\030\004 \003(\014\022\035\n\025initial_historic_roo"
+  "t\030\005 \001(\014\"\245\002\n\013InputProver\0222\n\rpublic_inputs"
+  "\030\001 \001(\0132\033.aggregator.v1.PublicInputs\022.\n\002d"
+  "b\030\004 \003(\0132\".aggregator.v1.InputProver.DbEn"
+  "try\022M\n\022contracts_bytecode\030\005 \003(\01321.aggreg"
+  "ator.v1.InputProver.ContractsBytecodeEnt"
+  "ry\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001("
+  "\t:\0028\001\0328\n\026ContractsBytecodeEntry\022\013\n\003key\030\001"
+  " \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"S\n\024InputBlobInne"
+  "rProver\022;\n\rpublic_inputs\030\001 \001(\0132$.aggrega"
+  "tor.v1.PublicBlobInnerInputs\"S\n\024Stateles"
+  "sInputProver\022;\n\rpublic_inputs\030\001 \001(\0132$.ag"
+  "gregator.v1.StatelessPublicInputs\"\204\002\n\024Pu"
+  "blicInputsExtended\0222\n\rpublic_inputs\030\001 \001("
+  "\0132\033.aggregator.v1.PublicInputs\022\026\n\016new_st"
+  "ate_root\030\002 \001(\014\022 \n\030new_batch_acc_input_ha"
+  "sh\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 \001(\014\022\032\n"
+  "\022new_last_timestamp\030\005 \001(\004\022!\n\031current_l1_"
+  "info_tree_root\030\006 \001(\014\022\"\n\032current_l1_info_"
+  "tree_index\030\007 \001(\r*\\\n\006Result\022\026\n\022RESULT_UNS"
+  "PECIFIED\020\000\022\r\n\tRESULT_OK\020\001\022\020\n\014RESULT_ERRO"
+  "R\020\002\022\031\n\025RESULT_INTERNAL_ERROR\020\0032d\n\021Aggreg"
+  "atorService\022O\n\007Channel\022\034.aggregator.v1.P"
+  "roverMessage\032 .aggregator.v1.AggregatorM"
+  "essage\"\000(\0010\001B;Z9github.com/0xPolygonHerm"
+  "ez/zkevm-node/proverclient/proverb\006proto"
+  "3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_aggregator_2eproto_deps[1] = {
 };
@@ -1362,7 +1363,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_agg
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_aggregator_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_aggregator_2eproto = {
-  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 6280,
+  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 6281,
   &descriptor_table_aggregator_2eproto_once, descriptor_table_aggregator_2eproto_sccs, descriptor_table_aggregator_2eproto_deps, 36, 0,
   schemas, file_default_instances, TableStruct_aggregator_2eproto::offsets,
   file_level_metadata_aggregator_2eproto, 36, file_level_enum_descriptors_aggregator_2eproto, file_level_service_descriptors_aggregator_2eproto,
@@ -10452,9 +10453,9 @@ L1Data::L1Data(const L1Data& from)
     global_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_global_exit_root(),
       GetArena());
   }
-  blockhash_l1_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_blockhash_l1().empty()) {
-    blockhash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_blockhash_l1(),
+  block_hash_l1_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_block_hash_l1().empty()) {
+    block_hash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_block_hash_l1(),
       GetArena());
   }
   initial_historic_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -10469,7 +10470,7 @@ L1Data::L1Data(const L1Data& from)
 void L1Data::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_L1Data_aggregator_2eproto.base);
   global_exit_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  blockhash_l1_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  block_hash_l1_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   initial_historic_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   min_timestamp_ = 0u;
 }
@@ -10483,7 +10484,7 @@ L1Data::~L1Data() {
 void L1Data::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   global_exit_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  blockhash_l1_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  block_hash_l1_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   initial_historic_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -10510,7 +10511,7 @@ void L1Data::Clear() {
 
   smt_proof_.Clear();
   global_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  blockhash_l1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  block_hash_l1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   initial_historic_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   min_timestamp_ = 0u;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -10532,10 +10533,10 @@ const char* L1Data::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bytes blockhash_l1 = 2;
+      // bytes block_hash_l1 = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
-          auto str = _internal_mutable_blockhash_l1();
+          auto str = _internal_mutable_block_hash_l1();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else goto handle_unusual;
@@ -10602,10 +10603,10 @@ failure:
         1, this->_internal_global_exit_root(), target);
   }
 
-  // bytes blockhash_l1 = 2;
-  if (this->blockhash_l1().size() > 0) {
+  // bytes block_hash_l1 = 2;
+  if (this->block_hash_l1().size() > 0) {
     target = stream->WriteBytesMaybeAliased(
-        2, this->_internal_blockhash_l1(), target);
+        2, this->_internal_block_hash_l1(), target);
   }
 
   // uint32 min_timestamp = 3;
@@ -10657,11 +10658,11 @@ size_t L1Data::ByteSizeLong() const {
         this->_internal_global_exit_root());
   }
 
-  // bytes blockhash_l1 = 2;
-  if (this->blockhash_l1().size() > 0) {
+  // bytes block_hash_l1 = 2;
+  if (this->block_hash_l1().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_blockhash_l1());
+        this->_internal_block_hash_l1());
   }
 
   // bytes initial_historic_root = 5;
@@ -10713,8 +10714,8 @@ void L1Data::MergeFrom(const L1Data& from) {
   if (from.global_exit_root().size() > 0) {
     _internal_set_global_exit_root(from._internal_global_exit_root());
   }
-  if (from.blockhash_l1().size() > 0) {
-    _internal_set_blockhash_l1(from._internal_blockhash_l1());
+  if (from.block_hash_l1().size() > 0) {
+    _internal_set_block_hash_l1(from._internal_block_hash_l1());
   }
   if (from.initial_historic_root().size() > 0) {
     _internal_set_initial_historic_root(from._internal_initial_historic_root());
@@ -10747,7 +10748,7 @@ void L1Data::InternalSwap(L1Data* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   smt_proof_.InternalSwap(&other->smt_proof_);
   global_exit_root_.Swap(&other->global_exit_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  blockhash_l1_.Swap(&other->blockhash_l1_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  block_hash_l1_.Swap(&other->block_hash_l1_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   initial_historic_root_.Swap(&other->initial_historic_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   swap(min_timestamp_, other->min_timestamp_);
 }
