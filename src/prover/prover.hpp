@@ -36,7 +36,7 @@ class Prover
     Starks *starkBatchRecursive1;
     Starks *starkBatchRecursive2;
     Starks *starkBlobInner;
-    Starks *starkBlobInnerCompression;
+    Starks *starkBlobInnerCompressor;
     Starks *starkBlobInnerRecursive1;
     Starks *starkBlobOuter;
     Starks *starkBlobOuterRecursive2;
@@ -50,10 +50,9 @@ class Prover
 
 public:
     unordered_map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
-
     vector<ProverRequest *> pendingRequests;   // Queue of pending requests
     ProverRequest *pCurrentRequest;            // Request currently being processed by the prover thread in server mode
-    vector<ProverRequest *> completedRequests; // Map uuid -> ProveRequest pointer
+    vector<ProverRequest *> completedRequests; // Completed requests
 
 private:
     pthread_t proverPthread;  // Prover thread

@@ -87,7 +87,6 @@ Prover::Prover(Goldilocks &fr,
             pthread_create(&proverPthread, NULL, proverThread, this);
             pthread_create(&cleanerPthread, NULL, cleanerThread, this);
 
-            //note: this part should be valid for both cases Batch and BlobInner
             StarkInfo _starkInfo(config, config.zkevmStarkInfo);
 
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
@@ -101,7 +100,7 @@ Prover::Prover(Goldilocks &fr,
                 uint64_t nttHelperSize = _starkInfo.mapSectionsN.section[string2section(currentSection)] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
                 uint64_t currentSectionStart = _starkInfo.mapOffsets.section[string2section(currentSection)] * sizeof(Goldilocks::Element);
                 if (i == 3 && currentSectionStart > nttHelperSize) optimizeMemoryNTT = true;
-                uint64_t nttHelperBufferStart = optimizeMemoryNTT ? 0 : _starkInfo.mapOffsets.section[string2section(nextSectionExtended)] * sizeof(Goldilocks::Element);
+                uint64_t nttHelperBufferStart = optimizeMemoryNTT && i==3 ? _starkInfo.mapOffsets.section[eSection::cm1_n] * sizeof(Goldilocks::Element) : _starkInfo.mapOffsets.section[string2section(nextSectionExtended)] * sizeof(Goldilocks::Element);
                 uint64_t totalMemSize = nttHelperBufferStart + nttHelperSize;
                 if(totalMemSize > polsSize) {
                     polsSize = totalMemSize;
@@ -140,7 +139,7 @@ Prover::Prover(Goldilocks &fr,
                 pAddress = calloc(polsSize, 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
+                    zklog.error("Prover::genBatchProof() failed calling calloc() of size " + to_string(polsSize));
                     exitProcess();
                 }
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
@@ -159,6 +158,11 @@ Prover::Prover(Goldilocks &fr,
             starkBatchRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, config.recursive1CHelpers}, pAddress);
             starkBatchRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, config.recursive2CHelpers}, pAddress);
             starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
+            starkBlobInner = new Starks(config, {config.blobInnerConstPols, config.mapConstPolsFile, config.blobInnerConstantsTree, config.blobInnerStarkInfo, config.blobInnerCHelpers}, pAddress);
+            starkBlobInnerCompressor = new Starks(config, {config.blobInnerCompressorConstPols, config.mapConstPolsFile, config.blobInnerCompressorConstantsTree, config.blobInnerCompressorStarkInfo, config.blobInnerCompressorCHelpers}, pAddress);
+            starkBlobInnerRecursive1 = new Starks(config, {config.blobInnerRecursive1ConstPols, config.mapConstPolsFile, config.blobInnerRecursive1ConstantsTree, config.blobInnerRecursive1StarkInfo, config.blobInnerRecursive1CHelpers}, pAddress);
+            starkBlobOuter = new Starks(config, {config.blobOuterConstPols, config.mapConstPolsFile, config.blobOuterConstantsTree, config.blobOuterStarkInfo, config.blobOuterCHelpers}, pAddress);
+            starkBlobOuterRecursive2 = new Starks(config, {config.blobOuterRecursive2ConstPols, config.mapConstPolsFile, config.blobOuterRecursive2ConstantsTree, config.blobOuterRecursive2StarkInfo, config.blobOuterRecursive2CHelpers}, pAddress);
         }
     }
     catch (std::exception &e)
@@ -207,7 +211,11 @@ Prover::~Prover()
         delete starkBatchRecursive1;
         delete starkBatchRecursive2;
         delete starksRecursiveF;
-
+        delete starkBlobInner;
+        delete starkBlobInnerCompressor;
+        delete starkBlobInnerRecursive1;
+        delete starkBlobOuter;
+        delete starkBlobOuterRecursive2;
     }
 }
 
