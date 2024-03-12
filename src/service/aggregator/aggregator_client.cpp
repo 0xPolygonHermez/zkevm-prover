@@ -126,16 +126,13 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot, genBatchProofRequest.input().public_inputs().old_state_root());
 
     // Get oldAccInputHash
-    if (genBatchProofRequest.input().public_inputs().old_acc_input_hash().size() > 32)
+    if (genBatchProofRequest.input().public_inputs().old_batch_acc_input_hash().size() > 32)
     {
-        zklog.error("AggregatorClient::GenBatchProof() got oldAccInputHash too long, size=" + to_string(genBatchProofRequest.input().public_inputs().old_acc_input_hash().size()));
+        zklog.error("AggregatorClient::GenBatchProof() got oldAccInputHash too long, size=" + to_string(genBatchProofRequest.input().public_inputs().old_batch_acc_input_hash().size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
-    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash, genBatchProofRequest.input().public_inputs().old_acc_input_hash());
-
-    // Get oldBatchNum
-    pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = genBatchProofRequest.input().public_inputs().old_batch_num();
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash, genBatchProofRequest.input().public_inputs().old_batch_acc_input_hash());
 
     // Get chain ID
     pProverRequest->input.publicInputsExtended.publicInputs.chainID = genBatchProofRequest.input().public_inputs().chain_id();
@@ -174,7 +171,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genBatchProofRequest.input().public_inputs().batch_l2_data();
 
     // Get L1 info root
-    if (genBatchProofRequest.input().public_inputs().l1_info_root().size() > 32)
+    /*if (genBatchProofRequest.input().public_inputs().l1_info_root().size() > 32)
     {
         zklog.error("AggregatorClient::GenBatchProof() got l1_info_root too long, size=" + to_string(genBatchProofRequest.input().public_inputs().l1_info_root().size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
@@ -193,7 +190,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         return false;
     }
     ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.forcedBlockHashL1, genBatchProofRequest.input().public_inputs().forced_blockhash_l1());
-
+*/
     // Get sequencer address
     string auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().sequencer_addr());
     if (auxString.size() > 40)
@@ -614,7 +611,7 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     return true;
 }
 
-bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedProofRequest &genAggregatedProofRequest, aggregator::v1::GenAggregatedProofResponse &genAggregatedProofResponse)
+bool AggregatorClient::GenAggregatedBatchProof (const aggregator::v1::GenAggregatedBatchProofRequest &genAggregatedProofRequest, aggregator::v1::GenAggregatedBatchProofResponse &genAggregatedProofResponse)
 {
 #ifdef LOG_SERVICE
     zklog.info("AggregatorClient::GenAggregatedProof() called with request: " + genAggregatedProofRequest.DebugString());
@@ -788,22 +785,25 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     // Set public inputs extended
                     aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
                     pPublicInputs->set_old_state_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot));
-                    pPublicInputs->set_old_acc_input_hash(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldAccInputHash));
-                    pPublicInputs->set_old_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.oldBatchNum);
+                    pPublicInputs->set_old_batch_acc_input_hash(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldAccInputHash));
+                    pPublicInputs->set_previous_l1_info_tree_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.previousL1InfoTreeRoot));
+                    pPublicInputs->set_previous_l1_info_tree_index(pProverRequest->proof.publicInputsExtended.publicInputs.previousL1InfoTreeIndex);
                     pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainID);
                     pPublicInputs->set_fork_id(pProverRequest->proof.publicInputsExtended.publicInputs.forkID);
                     pPublicInputs->set_batch_l2_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchL2Data);
-                    pPublicInputs->set_l1_info_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.l1InfoRoot));
-                    pPublicInputs->set_timestamp_limit(pProverRequest->proof.publicInputsExtended.publicInputs.timestampLimit);
-                    pPublicInputs->set_forced_blockhash_l1(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.forcedBlockHashL1));
+                    pPublicInputs->set_type(pProverRequest->proof.publicInputsExtended.publicInputs.type);
                     pPublicInputs->set_sequencer_addr(Add0xIfMissing(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
+                    pPublicInputs->set_forced_hash_data(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.forcedHashData));
+                    //ForcedData
                     pPublicInputs->set_aggregator_addr(Add0xIfMissing(pProverRequest->proof.publicInputsExtended.publicInputs.aggregatorAddress.get_str(16)));
+                    // L1InfoTreeData
                     aggregator::v1::PublicInputsExtended* pPublicInputsExtended = new(aggregator::v1::PublicInputsExtended);
                     pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
                     pPublicInputsExtended->set_new_state_root(scalar2ba(pProverRequest->proof.publicInputsExtended.newStateRoot));
-                    pPublicInputsExtended->set_new_acc_input_hash(scalar2ba(pProverRequest->proof.publicInputsExtended.newAccInputHash));
+                    pPublicInputsExtended->set_new_batch_acc_input_hash(scalar2ba(pProverRequest->proof.publicInputsExtended.newAccInputHash));
                     pPublicInputsExtended->set_new_local_exit_root(scalar2ba(pProverRequest->proof.publicInputsExtended.newLocalExitRoot));
-                    pPublicInputsExtended->set_new_batch_num(pProverRequest->proof.publicInputsExtended.newBatchNum);
+                    pPublicInputsExtended->set_current_l1_info_tree_root(scalar2ba(pProverRequest->proof.publicInputsExtended.currentL1InfoTreeRoot));
+                    pPublicInputsExtended->set_current_l1_info_tree_index(pProverRequest->proof.publicInputsExtended.currentL1InfoTreeIndex);
                     pFinalProof->set_allocated_public_(pPublicInputsExtended);
 
                     getProofResponse.set_allocated_final_proof(pFinalProof);
@@ -888,7 +888,7 @@ void* aggregatorClientThread(void* arg)
                 case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
                     zklog.info("aggregatorClientThread() got: " + aggregatorMessage.ShortDebugString());
                     break;
-                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedBatchProofRequest:
                     zklog.info("aggregatorClientThread() got genAggregatedProof() request");
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
@@ -952,17 +952,17 @@ void* aggregatorClientThread(void* arg)
                     break;
                 }
 
-                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedBatchProofRequest:
                 {
                     // Allocate a new gen aggregated proof response
-                    aggregator::v1::GenAggregatedProofResponse * pGenAggregatedProofResponse = new aggregator::v1::GenAggregatedProofResponse();
-                    zkassert(pGenAggregatedProofResponse != NULL);
+                    aggregator::v1::GenAggregatedBatchProofResponse * pGenAggregatedBatchProofResponse = new aggregator::v1::GenAggregatedBatchProofResponse();
+                    zkassert(pGenAggregatedBatchProofResponse != NULL);
 
                     // Call GenAggregatedProof
-                    pAggregatorClient->GenAggregatedProof(aggregatorMessage.gen_aggregated_proof_request(), *pGenAggregatedProofResponse);
+                    pAggregatorClient->GenAggregatedBatchProof(aggregatorMessage.gen_aggregated_batch_proof_request(), *pGenAggregatedBatchProofResponse);
 
                     // Set the gen aggregated proof response
-                    proverMessage.set_allocated_gen_aggregated_proof_response(pGenAggregatedProofResponse);
+                    proverMessage.set_allocated_gen_aggregated_batch_proof_response(pGenAggregatedBatchProofResponse);
                     break;
                 }
 
@@ -1030,9 +1030,12 @@ void* aggregatorClientThread(void* arg)
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenStatelessBatchProofRequest:
-                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedBatchProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBlobInnerProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBlobOuterProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedBlobOuterProofRequest:
                     zklog.info("aggregatorClientThread() sent: " + proverMessage.ShortDebugString());
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:

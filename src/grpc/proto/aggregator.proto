@@ -25,11 +25,14 @@ message AggregatorMessage
     {
         GetStatusRequest get_status_request = 2;
         GenBatchProofRequest gen_batch_proof_request = 3;
-        GenAggregatedProofRequest gen_aggregated_proof_request = 4;
-        GenFinalProofRequest gen_final_proof_request = 5;
-        CancelRequest cancel_request = 6;
-        GetProofRequest get_proof_request = 7;
-        GenStatelessBatchProofRequest gen_stateless_batch_proof_request = 8;
+        GenAggregatedBatchProofRequest gen_aggregated_batch_proof_request = 4;
+        GenBlobInnerProofRequest gen_blob_inner_proof_request = 5;
+        GenBlobOuterProofRequest gen_blob_outer_proof_request = 6;
+        GenAggregatedBlobOuterProofRequest gen_aggregated_blob_outer_proof_request = 7;
+        GenFinalProofRequest gen_final_proof_request = 8;
+        CancelRequest cancel_request = 9;
+        GetProofRequest get_proof_request = 10;
+        GenStatelessBatchProofRequest gen_stateless_batch_proof_request = 11;
     }
 }
 
@@ -40,10 +43,13 @@ message ProverMessage
     {
         GetStatusResponse get_status_response = 2;
         GenBatchProofResponse gen_batch_proof_response = 3;
-        GenAggregatedProofResponse gen_aggregated_proof_response = 4;
-        GenFinalProofResponse gen_final_proof_response = 5;
-        CancelResponse cancel_response = 6;
-        GetProofResponse get_proof_response = 7;
+        GenAggregatedBatchProofResponse gen_aggregated_batch_proof_response = 4;
+        GenBlobInnerProofResponse gen_blob_inner_proof_response = 5;
+        GenBlobOuterProofResponse gen_blob_outer_proof_response = 6;
+        GenAggregatedBlobOuterProofResponse gen_aggregated_blob_outer_proof_response = 7;
+        GenFinalProofResponse gen_final_proof_response = 8;
+        CancelResponse cancel_response = 9;
+        GetProofResponse get_proof_response = 10;
     }
 }
 
@@ -64,6 +70,10 @@ message GenBatchProofRequest {
     InputProver input = 1;
 }
 
+/**
+* @dev GenStatelessBatchProofRequest
+* @param {input} - stateless input prover
+*/
 message GenStatelessBatchProofRequest {
     StatelessInputProver input = 1;
 }
@@ -73,7 +83,34 @@ message GenStatelessBatchProofRequest {
  * @param {recursive_proof_1} - proof json of the first batch to aggregate
  * @param {recursive_proof_2} - proof json of the second batch to aggregate
  */
-message GenAggregatedProofRequest {
+message GenAggregatedBatchProofRequest {
+    string recursive_proof_1 = 1;
+    string recursive_proof_2 = 2;
+}
+
+/**
+ * @dev GenBlobInnerProofRequest
+ * @param {input} - input blob inner prover
+ */
+message GenBlobInnerProofRequest {
+    InputBlobInnerProver input = 1;
+}
+
+/**
+ * @dev GenBlobOuterProofRequest
+ * @param {input} - input blob outer prover
+ */
+message GenBlobOuterProofRequest {
+    string batch_proof = 1;
+    string blob_inner_proof = 2;
+}
+
+/**
+ * @dev GenAggregatedBlobOuterProofRequest
+ * @param {recursive_proof_1} - proof json of the first batch to aggregate
+ * @param {recursive_proof_2} - proof json of the second batch to aggregate
+ */
+message GenAggregatedBlobOuterProofRequest {
     string recursive_proof_1 = 1;
     string recursive_proof_2 = 2;
 }
@@ -182,13 +219,43 @@ message GenBatchProofResponse {
  * @param {id} - proof identifier, to be used in GetProofRequest()
  * @param {result} - request result
  */
-message GenAggregatedProofResponse {
+message GenAggregatedBatchProofResponse {
     string id = 1;
     Result result = 2;
 }
 
 /**
- * @dev Response GenFinalProof
+ * @dev GenBlobInnerProofResponse
+ * @param {id} - proof identifier, to be used in GetProofRequest()
+ * @param {result} - request result
+ */
+message GenBlobInnerProofResponse {
+    string id = 1;
+    Result result = 2;
+}
+
+/**
+ * @dev GenBlobOuterProofResponse
+ * @param {id} - proof identifier, to be used in GetProofRequest()
+ * @param {result} - request result
+ */
+message GenBlobOuterProofResponse {
+    string id = 1;
+    Result result = 2;
+}
+
+/**
+ * @dev GenAggregatedBlobOuterProofResponse
+ * @param {id} - proof identifier, to be used in GetProofRequest()
+ * @param {result} - request result
+ */
+message GenAggregatedBlobOuterProofResponse {
+    string id = 1;
+    Result result = 2;
+}
+
+/**
+ * @dev GenFinalProofResponse
  * @param {id} - proof identifier, to be used in GetProofRequest()
  * @param {result} - request result
  */
@@ -208,7 +275,7 @@ message CancelResponse {
 /**
  * @dev GetProofResponse
  * @param {id} - proof identifier
- * @param {final_proof} - groth16 proof + public circuit inputs
+ * @param {final_proof} - fflonk proof + public circuit inputs
  * @param {recursive_proof} - recursive proof json
  * @param {result} - proof result
  *  - COMPLETED_OK: proof has been computed successfully and it is valid
@@ -240,7 +307,7 @@ message GetProofResponse {
 
 /*
  * @dev FinalProof
- * @param {proof} - groth16 proof
+ * @param {proof} - fflonk proof
  * @param {public} - public circuit inputs
 */
 message FinalProof {
@@ -250,30 +317,95 @@ message FinalProof {
 
 /*
  * @dev PublicInputs
- * @param {old_state_root}
- * @param {old_acc_input_hash}
- * @param {old_batch_num}
- * @param {chain_id}
- * @param {batch_l2_data}
- * @param {global_exit_root}
- * @param {sequencer_addr}
- * @param {aggregator_addr}
- */
+* @param {old_state_root} - old state root
+* @param {old_batch_acc_input_hash} - old accumulate input hash
+* @param {previous_l1_info_tree_root} - previous l1 info tree root
+* @param {previous_l1_info_tree_index} - previous l1 info tree index
+* @param {chain_id} - chain id
+* @param {fork_id} - fork id
+* @param {batch_l2_data} - batch l2 data
+* @param {sequencer_addr} - sequencer address
+* @param {type} - type
+* @param {forced_hash_data} - forced hash data
+* @param {forced_data} - forced data
+* @param {aggregator_addr} - aggregator address
+* @param {l1_info_tree_data} - l1 info tree data
+*/
 message PublicInputs {
     bytes old_state_root = 1;
-    bytes old_acc_input_hash = 2;
-    uint64 old_batch_num = 3;
-    uint64 chain_id = 4;
-    uint64 fork_id = 5;
-    bytes batch_l2_data = 6;
-    bytes l1_info_root = 7;
-    uint64 timestamp_limit = 8;
-    string sequencer_addr = 9;
-    bytes forced_blockhash_l1 = 10;
+    bytes old_batch_acc_input_hash = 2;
+    bytes previous_l1_info_tree_root = 3;
+    uint32 previous_l1_info_tree_index  = 4;
+    uint64 chain_id = 5;
+    uint64 fork_id = 6;
+    bytes batch_l2_data = 7;
+    string sequencer_addr = 8;
+    uint32 type = 9;
+    bytes forced_hash_data = 10;
+    ForcedData forced_data = 11;
     string aggregator_addr = 12;
-    map<uint32, L1Data> l1_info_tree_data = 16;
+    map<uint32, L1Data> l1_info_tree_data = 13;
 }
 
+/**
+* @dev ForcedData
+* @param {global_exit_root} - global exit root
+* @param {block_hash_l1} - block hash l1
+* @param {min_timestamp} - min timestamp
+*/
+message ForcedData {
+    bytes global_exit_root = 1;
+    bytes block_hash_l1 = 2;
+    uint64 min_timestamp = 3;
+}
+/**
+* @dev PublicBlobInnerInputs
+* @param {old_blob_state_root} - old blob state root
+* @param {old_blob_acc_input_hash} - old blob accumulate input hash
+* @param {old_num_blob} - old num blob
+* @param {old_state_root} - old state root
+* @param {fork_id} - fork id
+* @param {last_l1_info_tree_index} - last l1 info tree index
+* @param {last_l1_info_tree_root} - last l1 info tree root
+* @param {sequencer_addr} - sequencer address
+* @param {timestamp_limit} - timestamp limit
+* @param {zk_gas_limit} - zk gas limit
+* @param {type} - type
+* @param {point_z} - point z
+* @param {point_y} - point y
+* @param {blob_data} - blob data
+* @param {forced_hash_data} - forced hash data
+*/
+message PublicBlobInnerInputs {
+    bytes old_blob_state_root = 1;
+    bytes old_blob_acc_input_hash = 2;
+    uint64 old_num_blob = 3;
+    bytes old_state_root = 4;
+    uint64 fork_id = 5;
+    uint32 last_l1_info_tree_index = 6;
+    bytes last_l1_info_tree_root = 7;
+    string sequencer_addr = 8;
+    uint64 timestamp_limit = 9;
+    bytes zk_gas_limit = 10;
+    uint32 type = 11;
+    bytes point_z = 12;
+    bytes point_y = 13;
+    bytes blob_data = 14;
+    bytes forced_hash_data = 15;
+}
+
+/**
+* @dev StatelessPublicInputs
+* @param {witness} - witness
+* @param {data_stream} - data stream
+* @param {old_acc_input_hash} - old accumulate input hash
+* @param {l1_info_root} - l1 info root
+* @param {timestamp_limit} - timestamp limit
+* @param {sequencer_addr} - sequencer address
+* @param {forced_blockhash_l1} - forced blockhash l1
+* @param {aggregator_addr} - aggregator address
+* @param {l1_info_tree_data} - l1 info tree data
+*/
 message StatelessPublicInputs {
     bytes witness = 1;
     bytes data_stream = 2;
@@ -286,12 +418,20 @@ message StatelessPublicInputs {
     map<uint32, L1Data> l1_info_tree_data = 9;
 }
 
-// l1InfoTree leaf values
+/**
+* @dev: l1InfoTree leaf values
+* @param {global_exit_root} - global exit root
+* @param {blockhash_l1} - blockhash l1
+* @param {min_timestamp} - min timestamp
+* @param {smt_proof} - smt proof
+* @param {initial_historic_root} - initial historic root
+*/
 message L1Data {
     bytes global_exit_root = 1;
     bytes blockhash_l1 = 2;
     uint32 min_timestamp = 3;
     repeated bytes smt_proof = 4;
+    bytes initial_historic_root = 5;
 }
 
 /**
@@ -306,6 +446,18 @@ message InputProver {
     map<string, string> contracts_bytecode = 5; // For debug/testing purpposes only. Don't fill this on production
 }
 
+/**
+ * @dev InputBlobInnerProver
+ * @param {public_inputs} - public inputs
+ */
+message InputBlobInnerProver {
+    PublicBlobInnerInputs public_inputs = 1;
+}
+
+/**
+* @dev StatelessInputProper
+* @param {public_inputs} - public inputs
+*/
 message StatelessInputProver {
     StatelessPublicInputs public_inputs = 1;
 }
@@ -314,14 +466,16 @@ message StatelessInputProver {
  * @dev PublicInputsExtended
  * @param {public_inputs} - public inputs
  * @param {new_state_root} - final state root. Used as a sanity check.
- * @param {new_acc_input_hash} - final accumulate input hash. Used as a sanity check.
+ * @param {new_batch_acc_input_hash} - final accumulate input hash. Used as a sanity check.
  * @param {new_local_exit_root} - new local exit root. Used as a sanity check.
- * @param {new_batch_num} - final num batch. Used as a sanity check.
+ * @param {new_last_timestamp} - timeatamp of the last block. Used as a sanity check.
  */
 message PublicInputsExtended {
     PublicInputs public_inputs = 1;
     bytes new_state_root = 2;
-    bytes new_acc_input_hash = 3;
+    bytes new_batch_acc_input_hash = 3;
     bytes new_local_exit_root = 4;
-    uint64 new_batch_num = 5;
+    uint64 new_last_timestamp = 5;
+    bytes current_l1_info_tree_root = 6;
+    uint32 current_l1_info_tree_index = 7;
 }

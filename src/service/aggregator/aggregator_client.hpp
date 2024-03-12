@@ -28,7 +28,7 @@ public:
     bool GetStatus (aggregator::v1::GetStatusResponse &getStatusResponse);
     bool GenBatchProof (const aggregator::v1::GenBatchProofRequest &genBatchProofRequest, aggregator::v1::GenBatchProofResponse &genBatchProofResponse);
     bool GenStatelessBatchProof (const aggregator::v1::GenStatelessBatchProofRequest &genStatelessBatchProofRequest, aggregator::v1::GenBatchProofResponse &genBatchProofResponse);
-    bool GenAggregatedProof (const aggregator::v1::GenAggregatedProofRequest &genAggregatedProofRequest, aggregator::v1::GenAggregatedProofResponse &genAggregatedProofResponse);
+    bool GenAggregatedBatchProof (const aggregator::v1::GenAggregatedBatchProofRequest &genAggregatedProofRequest, aggregator::v1::GenAggregatedBatchProofResponse &genAggregatedProofResponse);
     bool GenFinalProof (const aggregator::v1::GenFinalProofRequest &genFinalProofRequest, aggregator::v1::GenFinalProofResponse &genFinalProofResponse);
     bool Cancel (const aggregator::v1::CancelRequest &cancelRequest, aggregator::v1::CancelResponse &cancelResponse);
     bool GetProof (const aggregator::v1::GetProofRequest &getProofRequest, aggregator::v1::GetProofResponse &getProofResponse);
