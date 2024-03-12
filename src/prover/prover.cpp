@@ -824,7 +824,8 @@ void Prover::genAggregatedBatchProof(ProverRequest *pProverRequest)
         return;
     }
 
-    json zkinInputRecursive2 = joinzkin(pProverRequest->aggregatedBatchProofInput1, pProverRequest->aggregatedBatchProofInput2, verKey, starkBatchRecursive2->starkInfo.starkStruct.steps.size());
+    json zkinInputRecursive2 = joinzkinBatchRecursive2(pProverRequest->aggregatedBatchProofInput1, pProverRequest->aggregatedBatchProofInput2, verKey, starkBatchRecursive2->starkInfo.starkStruct.steps.size());
+
     json recursive2Verkey;
     file2json(config.recursive2Verkey, recursive2Verkey);
 
