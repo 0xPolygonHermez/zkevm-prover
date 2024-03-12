@@ -512,15 +512,9 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     TimerStart(EXECUTOR_EXECUTE_INITIALIZATION);
 
     PROVER_FORK_NAMESPACE::CommitPols cmPols(pAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
-    uint64_t num_threads = omp_get_max_threads();
-    uint64_t bytes_per_thread = cmPols.size() / num_threads;
-#pragma omp parallel for num_threads(num_threads)
-    for (uint64_t i = 0; i < cmPols.size(); i += bytes_per_thread) // Each iteration processes 64 bytes at a time
-    {
-        memset((uint8_t *)pAddress + i, 0, bytes_per_thread);
-    }
-
+    Goldilocks::parSetZero((Goldilocks::Element*)pAddress, cmPols.size()/sizeof(Goldilocks::Element), omp_get_max_threads()/2);
     TimerStopAndLog(EXECUTOR_EXECUTE_INITIALIZATION);
+
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_BATCH_PROOF);
     executor.executeBatch(*pProverRequest, cmPols);
@@ -528,16 +522,33 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     uint64_t lastN = cmPols.pilDegree() - 1;
 
+    // log old and new StateRoot
     zklog.info("Prover::genBatchProof() called executor.executeBatch() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
         " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root() +
-        " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
+        " pols.SR[0]=" + fea2string(fr, cmPols.Main.SR0[0], cmPols.Main.SR1[0], cmPols.Main.SR2[0], cmPols.Main.SR3[0], cmPols.Main.SR4[0], cmPols.Main.SR5[0], cmPols.Main.SR6[0], cmPols.Main.SR7[0]) +
         " pols.SR[lastN]=" + fea2string(fr, cmPols.Main.SR0[lastN], cmPols.Main.SR1[lastN], cmPols.Main.SR2[lastN], cmPols.Main.SR3[lastN], cmPols.Main.SR4[lastN], cmPols.Main.SR5[lastN], cmPols.Main.SR6[lastN], cmPols.Main.SR7[lastN]) +
         " lastN=" + to_string(lastN));
-    zklog.info("Prover::genBatchProof() called executor.executeBatch() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+
+    // log old and new BatchAccInputHash
+    // note: in the specs is not used AccInputHash, but BatchAccInputHash
+    zklog.info("Prover::genBatchProof() called executor.executeBatch() oldBatchAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
         " newAccInputHash=" + pProverRequest->pFullTracer->get_new_acc_input_hash() +
         " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
+        " pols.C[lastN]=" + fea2string(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
+        " lastN=" + to_string(lastN));
+
+    // log previous and current L1InfoTreeRoot
+    //note: missed function get_current_l1_info_tree_root()
+    zklog.info("Prover::genBatchProof() called executor.executeBatch() previousL1InfoTreeRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.previousL1InfoTreeRoot.get_str(16) +
+        " currentL1InfoTreeRoot=" /*pProverRequest->pFullTracer->get_current_l1_info_tree_root()*/ +
+        " pols.D[0]=" + fea2string(fr, cmPols.Main.D0[0], cmPols.Main.D1[0], cmPols.Main.D2[0], cmPols.Main.D3[0], cmPols.Main.D4[0], cmPols.Main.D5[0], cmPols.Main.D6[0], cmPols.Main.D7[0]) +
         " pols.D[lastN]=" + fea2string(fr, cmPols.Main.D0[lastN], cmPols.Main.D1[lastN], cmPols.Main.D2[lastN], cmPols.Main.D3[lastN], cmPols.Main.D4[lastN], cmPols.Main.D5[lastN], cmPols.Main.D6[lastN], cmPols.Main.D7[lastN]) +
         " lastN=" + to_string(lastN));
+    // log previous and current L1InfoTreeIndex
+    //note: missing function get_current_l1_info_tree_index()
+    zklog.info("Prover::genBatchProof() called executor.executeBatch() previousL1InfoTreeIndex=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.previousL1InfoTreeIndex) +
+        " currentL1InfoTreeIndex=" /*+ to_string(pProverRequest->pFullTracer->get_current_l1_info_tree_index()*/);
+
 
     // Save commit pols to file zkevm.commit
     if (config.zkevmCmPolsAfterExecutor != "")
@@ -583,18 +594,19 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         file2json(config.recursive2Verkey, recursive2Verkey);
 
         Goldilocks::Element publics[starkBatchRecursive1->starkInfo.nPublics];
+        zkassert(starkBatchRecursive1->starkInfo.nPublics == 64);
 
         // oldStateRoot
-        publics[0] = cmPols.Main.B0[0];
-        publics[1] = cmPols.Main.B1[0];
-        publics[2] = cmPols.Main.B2[0];
-        publics[3] = cmPols.Main.B3[0];
-        publics[4] = cmPols.Main.B4[0];
-        publics[5] = cmPols.Main.B5[0];
-        publics[6] = cmPols.Main.B6[0];
-        publics[7] = cmPols.Main.B7[0];
+        publics[0] = cmPols.Main.SR0[0];
+        publics[1] = cmPols.Main.SR1[0];
+        publics[2] = cmPols.Main.SR2[0];
+        publics[3] = cmPols.Main.SR3[0];
+        publics[4] = cmPols.Main.SR4[0];
+        publics[5] = cmPols.Main.SR5[0];
+        publics[6] = cmPols.Main.SR6[0];
+        publics[7] = cmPols.Main.SR7[0];
 
-        // oldAccInputHash
+        // oldBatchAccInputHash
         publics[8] = cmPols.Main.C0[0];
         publics[9] = cmPols.Main.C1[0];
         publics[10] = cmPols.Main.C2[0];
@@ -604,50 +616,75 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         publics[14] = cmPols.Main.C6[0];
         publics[15] = cmPols.Main.C7[0];
 
-        // oldBatchNum
-        publics[16] = cmPols.Main.SP[0];
+        // previousL1InfoTreeRoot
+        publics[16] = cmPols.Main.D0[0];
+        publics[17] = cmPols.Main.D1[0];
+        publics[18] = cmPols.Main.D2[0];
+        publics[19] = cmPols.Main.D3[0];
+        publics[20] = cmPols.Main.D4[0];
+        publics[21] = cmPols.Main.D5[0];
+        publics[22] = cmPols.Main.D6[0];
+        publics[23] = cmPols.Main.D7[0];
+
+        // previousL1InfoTreeIndex
+        publics[24] = cmPols.Main.RCX[0];
+
         // chainId
-        publics[17] = cmPols.Main.GAS[0];
+        publics[25] = cmPols.Main.GAS[0];
         // forkid
-        publics[18] = cmPols.Main.CTX[0];
+        publics[26] = cmPols.Main.CTX[0];
 
-        // newStateRoot
-        publics[19] = cmPols.Main.SR0[lastN];
-        publics[20] = cmPols.Main.SR1[lastN];
-        publics[21] = cmPols.Main.SR2[lastN];
-        publics[22] = cmPols.Main.SR3[lastN];
-        publics[23] = cmPols.Main.SR4[lastN];
-        publics[24] = cmPols.Main.SR5[lastN];
-        publics[25] = cmPols.Main.SR6[lastN];
-        publics[26] = cmPols.Main.SR7[lastN];
+        //newStateRoot
+        publics[27] = cmPols.Main.SR0[lastN];
+        publics[28] = cmPols.Main.SR1[lastN];
+        publics[29] = cmPols.Main.SR2[lastN];
+        publics[30] = cmPols.Main.SR3[lastN];
+        publics[31] = cmPols.Main.SR4[lastN];
+        publics[32] = cmPols.Main.SR5[lastN];
+        publics[33] = cmPols.Main.SR6[lastN];
+        publics[34] = cmPols.Main.SR7[lastN];
 
-        // newAccInputHash
-        publics[27] = cmPols.Main.D0[lastN];
-        publics[28] = cmPols.Main.D1[lastN];
-        publics[29] = cmPols.Main.D2[lastN];
-        publics[30] = cmPols.Main.D3[lastN];
-        publics[31] = cmPols.Main.D4[lastN];
-        publics[32] = cmPols.Main.D5[lastN];
-        publics[33] = cmPols.Main.D6[lastN];
-        publics[34] = cmPols.Main.D7[lastN];
+        //newBatchAccInputHash
+        publics[35] = cmPols.Main.C0[lastN];
+        publics[36] = cmPols.Main.C1[lastN];
+        publics[37] = cmPols.Main.C2[lastN];
+        publics[38] = cmPols.Main.C3[lastN];
+        publics[39] = cmPols.Main.C4[lastN];
+        publics[40] = cmPols.Main.C5[lastN];
+        publics[41] = cmPols.Main.C6[lastN];
+        publics[42] = cmPols.Main.C7[lastN];
 
-        // localExitRoot
-        publics[35] = cmPols.Main.E0[lastN];
-        publics[36] = cmPols.Main.E1[lastN];
-        publics[37] = cmPols.Main.E2[lastN];
-        publics[38] = cmPols.Main.E3[lastN];
-        publics[39] = cmPols.Main.E4[lastN];
-        publics[40] = cmPols.Main.E5[lastN];
-        publics[41] = cmPols.Main.E6[lastN];
-        publics[42] = cmPols.Main.E7[lastN];
+        //currentL1InfoTreeRoot
+        publics[43] = cmPols.Main.D0[lastN];
+        publics[44] = cmPols.Main.D1[lastN];
+        publics[45] = cmPols.Main.D2[lastN];
+        publics[46] = cmPols.Main.D3[lastN];
+        publics[47] = cmPols.Main.D4[lastN];
+        publics[48] = cmPols.Main.D5[lastN];
+        publics[49] = cmPols.Main.D6[lastN];
+        publics[50] = cmPols.Main.D7[lastN];
 
-        // newBatchNum
-        publics[43] = cmPols.Main.PC[lastN];
+        // currentL1InfoTreeIndex
+        publics[51] = cmPols.Main.RCX[lastN];
 
-        publics[44] = Goldilocks::fromU64(recursive2Verkey["constRoot"][0]);
-        publics[45] = Goldilocks::fromU64(recursive2Verkey["constRoot"][1]);
-        publics[46] = Goldilocks::fromU64(recursive2Verkey["constRoot"][2]);
-        publics[47] = Goldilocks::fromU64(recursive2Verkey["constRoot"][3]);
+        // newLocalExitRoot
+        publics[52] = cmPols.Main.E0[lastN];
+        publics[53] = cmPols.Main.E1[lastN];
+        publics[54] = cmPols.Main.E2[lastN];
+        publics[55] = cmPols.Main.E3[lastN];
+        publics[56] = cmPols.Main.E4[lastN];
+        publics[57] = cmPols.Main.E5[lastN];
+        publics[58] = cmPols.Main.E6[lastN];
+        publics[59] = cmPols.Main.E7[lastN];
+
+        // newLastTimeStamp
+        publics[60] = cmPols.Main.RR[lastN];
+
+
+        publics[61] = Goldilocks::fromU64(recursive2Verkey["constRoot"][0]);
+        publics[62] = Goldilocks::fromU64(recursive2Verkey["constRoot"][1]);
+        publics[63] = Goldilocks::fromU64(recursive2Verkey["constRoot"][2]);
+        publics[64] = Goldilocks::fromU64(recursive2Verkey["constRoot"][3]);
 
         for (uint64_t i = 0; i < starkBatch->starkInfo.nPublics; i++)
         {
@@ -782,7 +819,7 @@ void Prover::genAggregatedBatchProof(ProverRequest *pProverRequest)
         json2file(pProverRequest->aggregatedBatchProofInput2, pProverRequest->filePrefix + "aggregated_proof.input_2.json");
     }
 
-    // Input is pProverRequest->aggregatedProofInput1 and pProverRequest->aggregatedProofInput2 (of type json)
+    // Input is pProverRequest->aggregatedBatchProofInput1 and pProverRequest->aggregatedBatchProofInput2 (of type json)
 
     ordered_json verKey;
     file2json(config.recursive2Verkey, verKey);
@@ -790,44 +827,55 @@ void Prover::genAggregatedBatchProof(ProverRequest *pProverRequest)
     // ----------------------------------------------
     // CHECKS
     // ----------------------------------------------
+    
     // Check chainID
-
-    if (pProverRequest->aggregatedBatchProofInput1["publics"][17] != pProverRequest->aggregatedBatchProofInput2["publics"][17])
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][25] != pProverRequest->aggregatedBatchProofInput2["publics"][25])
     {
-        zklog.error("Prover::genAggregatedProof() Inputs has different chainId " + pProverRequest->aggregatedBatchProofInput1["publics"][17].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][17].dump());
+        zklog.error("Prover::genAggregatedBatchProof() Inputs has different chainId " + pProverRequest->aggregatedBatchProofInput1["publics"][25].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][25].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
-    if (pProverRequest->aggregatedBatchProofInput1["publics"][18] != pProverRequest->aggregatedBatchProofInput2["publics"][18])
+    // Check ForkID
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][26] != pProverRequest->aggregatedBatchProofInput2["publics"][26])
     {
-        zklog.error("Prover::genAggregatedProof() Inputs has different forkId " + pProverRequest->aggregatedBatchProofInput1["publics"][18].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][18].dump());
+        zklog.error("Prover::genAggregatedBatchProof() Inputs has different forkId " + pProverRequest->aggregatedBatchProofInput1["publics"][26].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][26].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     // Check midStateRoot
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedBatchProofInput1["publics"][19 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][0 + i])
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][27 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][0 + i])
         {
-            zklog.error("Prover::genAggregatedProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedBatchProofInput1["publics"][19 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][0 + i].dump());
+            zklog.error("Prover::genAggregatedBatchProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedBatchProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][0 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
     }
-    // Check midAccInputHash0
+    // Check midBatchAccInputHash0
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedBatchProofInput1["publics"][27 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][8 + i])
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][35 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][8 + i])
         {
-            zklog.error("Prover::genAggregatedProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][8 + i].dump());
+            zklog.error("Prover::genAggregatedBatchProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][35 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][8 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
     }
-    // Check batchNum
-    if (pProverRequest->aggregatedBatchProofInput1["publics"][43] != pProverRequest->aggregatedBatchProofInput2["publics"][16])
+    // Check midL1InfoTreeRoot
+    for (int i = 0; i < 8; i++)
     {
-        zklog.error("Prover::genAggregatedProof() newBatchNum and oldBatchNum are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][43].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][16].dump());
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][43 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][16 + i])
+        {
+            zklog.error("Prover::genAggregatedBatchProof() previousL1InfoTreeRoot and currentL1InfoTreeRoot are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][43 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][16 + i].dump());
+            pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
+            return;
+        }
+    }
+    // Check midL1InfoTreeIndex
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][51] != pProverRequest->aggregatedBatchProofInput2["publics"][24])
+    {
+        zklog.error("Prover::genAggregatedBatchProof() previousL1InfoTreeIndex and currentL1InfoTreeIndex are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][51].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][24].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
@@ -1304,3 +1352,5 @@ void Prover::executeBlobInner (ProverRequest *pProverRequest)
 
     TimerStopAndLog(PROVER_EXECUTE_BLOB_INNER);
 }
+
+
