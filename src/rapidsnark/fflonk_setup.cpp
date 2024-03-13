@@ -36,7 +36,6 @@ namespace Fflonk
         delete fft;
 
         polynomials.clear();
-        // delete[] constPolsCoefs;
     }
 
     void FflonkSetup::generateZkey(std::string r1csFilename, std::string pTauFilename, std::string zkeyFilename)
@@ -210,7 +209,7 @@ namespace Fflonk
             for (uint64_t j = 0; j < kArr.size(); j++) {
                 if (E.fr.eq(k, E.fr.mul(kArr[j], w))) return true;
             }
-            w = E.fr.mul(w, fft->root(settings.domainSize, settings.cirPower));
+            w = E.fr.mul(w, fft->root(settings.cirPower, 1));
         }
 
         return false;
