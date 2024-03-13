@@ -318,7 +318,8 @@ namespace Fflonk
         ss.str("");
         writeQMap(fdZKey, Zkey::ZKEY_FF_QC_SECTION, 7);
 
-        ss << "··· Writing Section " << Zkey::ZKEY_FF_SIGMA1_SECTION << ", " 
+        ss << "··· Writing Section " 
+            << Zkey::ZKEY_FF_SIGMA1_SECTION << ", " 
             << Zkey::ZKEY_FF_SIGMA2_SECTION << ", "
             << Zkey::ZKEY_FF_SIGMA3_SECTION << ". Sigma1, Sigma2 & Sigma 3";
         LOG_INFO(ss);
@@ -416,7 +417,7 @@ namespace Fflonk
         unordered_map<uint64_t, uint64_t> firstPos;
 
         memset(sigma, 0, settings.domainSize * 3 * sizeof(FrElement));
-
+cout << "1" << endl;
         FrElement w = E.fr.one();
         for (uint64_t i = 0; i < settings.domainSize; i++) {
             auto constraint = plonkConstraints[i];
@@ -437,7 +438,7 @@ namespace Fflonk
 
             w = E.fr.mul(w, fft->root(settings.cirPower, 1));
         }
-
+cout << "2" << endl;
         for (uint64_t i = 0; i < settings.nVars; i++) {
             if (firstPos.find(i) != firstPos.end()) {
                 sigma[firstPos[i]] = lastSeen[i];
@@ -445,19 +446,22 @@ namespace Fflonk
                 cout << "Variable not used" << endl;
             }
         }
-        
+cout << "3" << endl;        
         for (uint32_t i = 0; i < 3; i++) {
+cout << "4" << endl;        
             auto sectionId = i == 0 ? Zkey::ZKEY_FF_SIGMA1_SECTION : i == 1 ? Zkey::ZKEY_FF_SIGMA2_SECTION : Zkey::ZKEY_FF_SIGMA3_SECTION;
             auto name = "S" + to_string(i+1);
             
             FrElement* buffer_coefs = new FrElement[settings.domainSize];
             FrElement* buffer_evals = new FrElement[settings.domainSize * 4];
             memset(buffer_evals, 0, settings.domainSize * 4 * sizeof(FrElement));
+cout << "5" << endl;        
 
             polynomials[name] = Polynomial<AltBn128::Engine>::fromEvaluations(E, fft, &sigma[i * settings.domainSize], buffer_coefs, settings.domainSize);
             polynomials[name]->fixDegree();
             Evaluations<AltBn128::Engine>(E, fft, buffer_evals, *polynomials[name], settings.domainSize * 4);
 
+cout << "6" << endl;        
             zkeyFile.startWriteSection(sectionId);
             zkeyFile.write(buffer_coefs, settings.domainSize * sizeof(FrElement));
             zkeyFile.write(buffer_evals, settings.domainSize * 4 * sizeof(FrElement));
