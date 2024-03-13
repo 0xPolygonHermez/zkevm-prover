@@ -84,11 +84,7 @@ public:
             zklog.info("Prover::genBlobOuterProof() input file: " + pProverRequest->inputFile());
     };
     void genAggregatedBatchProof(ProverRequest *pProverRequest) ;
-    void genAggregatedBlobOuterProof(ProverRequest *pProverRequest){
-            zklog.info("Prover::genAggregatedBlobOuterProof() timestamp: " + pProverRequest->timestamp);
-            zklog.info("Prover::genAggregatedBlobOuterProof() UUID: " + pProverRequest->uuid);
-            zklog.info("Prover::genAggregatedBlobOuterProof() input file: " + pProverRequest->inputFile());
-    };
+    void genAggregatedBlobOuterProof(ProverRequest *pProverRequest);
     void genFinalProof(ProverRequest *pProverRequest);
     void processBatch(ProverRequest *pProverRequest);
     void executeBatch(ProverRequest *pProverRequest);
