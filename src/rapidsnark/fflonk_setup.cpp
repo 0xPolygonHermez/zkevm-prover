@@ -184,6 +184,10 @@ namespace Fflonk
             lc.push_back(R1cs::R1csConstraint(signal_id, value));
         }
 
+        std::sort(lc.begin(), lc.end(), [](const R1cs::R1csConstraint& a, const R1cs::R1csConstraint& b) {
+            return a.signal_id < b.signal_id;
+        });
+
         return lc;
     }
 

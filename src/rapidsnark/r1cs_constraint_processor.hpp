@@ -13,10 +13,10 @@ namespace R1cs
     using FrElement = typename AltBn128::Engine::FrElement;
 
     struct R1csConstraint {
-        uint32_t signal_id;
+        uint64_t signal_id;
         FrElement value;
 
-        R1csConstraint(uint32_t id, const FrElement val) : signal_id(id), value(val) {};
+        R1csConstraint(uint64_t id, const FrElement val) : signal_id(id), value(val) {};
     };
 
     struct ConstraintCoefficients {

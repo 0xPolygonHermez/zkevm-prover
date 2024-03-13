@@ -1,16 +1,5 @@
 #include "r1cs_constraint_processor.hpp"
-
-// #include "timer.hpp"
 #include <stdio.h>
-// #include <math.h>
-
-// #include <sys/mman.h>
-// #include <sys/stat.h>
-// #include <fcntl.h>
-// #include <unistd.h>
-
-// #include "thread_utils.hpp"
-// #include <omp.h>
 
 namespace R1cs
 {
