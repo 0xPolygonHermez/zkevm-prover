@@ -22,7 +22,7 @@ using namespace std;
 
 namespace R1cs {
     const int R1CS_HEADER_SECTION = 1;
-    const int R1CS_CONSTRAINTS_SECTION = 1;
+    const int R1CS_CONSTRAINTS_SECTION = 2;
 
     using FrElement = typename AltBn128::Engine::FrElement;
 
@@ -32,24 +32,24 @@ namespace R1cs {
         // Prime number
         mpz_t prime;
         // Number of wires in the circuit1
-        FrElement nVars;
+        uint64_t nVars;
         // Number of outputs
-        FrElement nOutputs;
+        uint64_t nOutputs;
         // Number of public inputs
-        FrElement nPubInputs;
+        uint64_t nPubInputs;
         // Number of private inputs
-        FrElement nPrvInputs;
+        uint64_t nPrvInputs;
         // Number of labels
-        FrElement nLabels;
+        uint64_t nLabels;
         // Number of constraints
-        FrElement nConstraints;
+        uint64_t nConstraints;
     };
 
     
-    class R1csBinfile
+    class R1csBinFile
     {
     public:
-        static R1csHeader readR1csHeader(Binfile &binfile);
+        static R1csHeader readR1csHeader(BinFileUtils::BinFile &binfile);
     };
 }
 

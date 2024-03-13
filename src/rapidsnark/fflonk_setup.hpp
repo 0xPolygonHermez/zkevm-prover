@@ -3,18 +3,29 @@
 
 #include <iostream>
 #include <string.h>
-#include <binfile_utils.hpp>
-#include <binfile_writer.hpp>
+#include "binfile_utils.hpp"
+#include "binfile_writer.hpp"
 #include <nlohmann/json.hpp>
-#include "compare_fe_fr.hpp"
+// #include "compare_fe_fr.hpp"
 #include <sodium.h>
 #include "zkey_fflonk.hpp"
 #include "polynomial/polynomial.hpp"
-#include "ntt_bn128.hpp"
+// #include "ntt_bn128.hpp"
+#include <iostream>
+#include <fstream>
+#include <string>
+// #include <gmpxx.h>
+#include <cstdio>
+#include <sys/stat.h>
+#include "../rapidsnark/fflonk_setup.hpp"
 #include <alt_bn128.hpp>
-#include "fft.hpp"
+#include <fft.hpp>
 #include "utils.hpp"
-
+#include <alt_bn128.hpp>
+#include "r1cs_binfile.hpp"
+#include "r1cs_constraint_processor.hpp"
+#include "fflonk_setup_settings.hpp"
+#include "polynomial/cpolynomial.c.hpp"
 
 using json = nlohmann::json;
 
@@ -27,13 +38,6 @@ namespace Fflonk
         Polynomial<AltBn128::Engine>* polynomial;
     };
     
-    struct FflonkSetupSettings {
-        uint64_t nVars;
-        uint64_t nPublics;
-        uint64_t cirPower;
-        uint64_t domainSize;
-    };
-
     class FflonkSetup
     {
         using FrElement = typename AltBn128::Engine::FrElement;
@@ -43,41 +47,47 @@ namespace Fflonk
 
         AltBn128::Engine &E;
 
+        // G1PointAffine *PTau;
+
         FFT<AltBn128::Engine::Fr> *fft = NULL;
-        NTT_AltBn128 *ntt;
-        NTT_AltBn128 *nttExtended;
+        FflonkSetupSettings settings;
 
-        G1PointAffine *PTau;
+        map<string, Polynomial<AltBn128::Engine>*> polynomials;
+        FrElement k1, k2;
+        FrElement w3, w4, w8, wr;
+        G1PointAffine* PTau;
 
-        // FflonkZkeyWriter::FflonkZkeyWriter* zkey;
-        // FflonkInfo::FflonkInfo* fflonkInfo;
+        std::vector<R1cs::ConstraintCoefficients> plonkConstraints;
+        std::vector<R1cs::AdditionCoefficients> plonkAdditions;
 
-        // void parseShKey(json shKeyJson);
-        // void parseFShKey(json shKeyJson);
-        // void parsePolsNamesStageShKey(json shKeyJson);
-        // void parseOmegasShKey(json shKeyJson);
+        void computeFFConstraints(BinFileUtils::BinFile &r1cs, R1cs::R1csHeader &r1csHeader);
 
-        // FrElement* constPolsEvals;
-        // uint64_t constPolsEvalsSize;
-        // FrElement* constPolsEvalsExt;
-        // uint64_t constPolsEvalsExtSize;
-        // FrElement* constPolsCoefs;
-        // uint64_t constPolsCoefsSize;
+        std::array<std::vector<R1cs::R1csConstraint>, 3> readR1csConstraint(R1cs::R1csHeader &r1csHeader, BinFileUtils::BinFile &r1cs);
+        vector<R1cs::R1csConstraint> readR1csConstraintLC(R1cs::R1csHeader &r1csHeader, BinFileUtils::BinFile &r1cs);
 
-        // FrElement* x_n;
-        // FrElement* x_2ns;
+        void computeK1K2();
+        bool isIncluded(FrElement k, vector<FrElement> &kArr);
+        FrElement computeW3();
+        FrElement computeW4();
+        FrElement computeW8();
+        FrElement getOmegaCubicRoot();
+        void writeZkeyFile(std::string &zkeyFilename, BinFileUtils::BinFile &ptauFile);
+        void writeZkeyHeader(BinFileUtils::BinFileWriter &zkeyFile);
+        void writeAdditions(BinFileUtils::BinFileWriter &zkeyFile);
+        void writeWitnessMap(BinFileUtils::BinFileWriter &zkeyFile, uint32_t sectionNum, uint32_t posConstraint);
+        void writeQMap(BinFileUtils::BinFileWriter &zkeyFile, uint32_t sectionNum, uint32_t posConstraint);
+        void writeSigma(BinFileUtils::BinFileWriter &zkeyFile);
+        void buildSigma(FrElement *sigma, FrElement w, unordered_map<uint64_t, FrElement> &lastSeen, unordered_map<uint64_t, uint64_t> &firstPos, uint64_t signalId, uint64_t idx);
+        void writeLagrangePolynomials(BinFileUtils::BinFileWriter &zkeyFile);
+        void writePtau(BinFileUtils::BinFileWriter &zkeyFile, BinFileUtils::BinFile &ptauFile);
+        void writeC0(BinFileUtils::BinFileWriter &zkeyFile);
+        void writeFflonkHeader(BinFileUtils::BinFileWriter &zkeyFile, BinFileUtils::BinFile &ptauFile);
 
-        // FrElement* polynomialFromMontgomery(Polynomial<AltBn128::Engine> *polynomial);
+        FrElement *polynomialFromMontgomery(Polynomial<AltBn128::Engine> *polynomial);
+        G1Point multiExponentiation(Polynomial<AltBn128::Engine> *polynomial, u_int32_t nx, u_int64_t x[]);
+        void scalar2bytes(mpz_class s, uint8_t (&bytes)[32]);
 
-        // G1Point multiExponentiation(Polynomial<AltBn128::Engine> *polynomial, u_int32_t nx, u_int64_t x[]);
-
-        // void computeFCommitments(FflonkZkeyWriter::FflonkZkeyWriter* zkey, uint64_t domainSize);
-
-        // u_int32_t findDegree(FflonkZkeyWriter::FflonkZkeyWriter* zkey, u_int32_t fIndex, std::string name);
-
-        // u_int32_t findPolId(FflonkZkeyWriter::FflonkZkeyWriter* zkey, u_int32_t stage, std::string name);
-
-        // int find(std::string* arr, u_int32_t n, std::string x);
+        void reset();
 
     public:
         FflonkSetup(AltBn128::Engine &_E) : E(_E) {};

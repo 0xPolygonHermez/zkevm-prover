@@ -8,6 +8,8 @@ TARGET_SETUP := fflonkSetup
 
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
+SETUP_DIRS := ./src/rapidsnark
+SETUP_DPNDS_DIR := src/ffiasm
 
 GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
 GRPCPP_LIBS := $(shell pkg-config grpc++ --libs) -lgrpc++_reflection
@@ -60,9 +62,15 @@ SRCS_TEST := $(shell find ./test/examples/ ./src/XKCP ./src/goldilocks/src ./src
 OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
 DEPS_TEST := $(OBJS_TEST:.o=.d)
 
-SRCS_FFSETUP := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
-OBJS_FFSETUP := $(SRCS_FFSETUP:%=$(BUILD_DIR)/%.o)
-DEPS_FFSETUP := $(OBJS_FFSETUP:.o=.d)
+SRCS_SETUP := $(shell find $(SETUP_DIRS) ! -path "./src/sm/*" ! -path "./src/main_sm/*" -name *.cpp)
+SRCS_SETUP += $(shell find src/XKCP -name *.cpp)
+SRCS_SETUP += $(shell find src/fflonk_setup -name fflonk_setup.cpp)
+SRCS_SETUP += $(addprefix $(SETUP_DPNDS_DIR)/, alt_bn128.cpp fr.cpp fq.cpp fnec.cpp fec.cpp misc.cpp naf.cpp splitparstr.cpp)
+SRCS_SETUP += $(shell find $(SETUP_DPNDS_DIR) -name *.asm)
+OBJS_SETUP := $(patsubst %,$(BUILD_DIR)/%.o,$(SRCS_SETUP))
+OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
+OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main_test.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
+DEPS_SETUP := $(OBJS_SETUP:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
@@ -119,9 +127,8 @@ $(BUILD_DIR)/$(TARGET_PLD): ./src/pols_diff/pols_diff.cpp
 
 fflonk_setup: $(BUILD_DIR)/$(TARGET_SETUP)
 
-$(BUILD_DIR)/$(TARGET_SETUP): ./src/fflonk_setup/fflonk_setup.cpp
-	$(MKDIR_P) $(BUILD_DIR)
-	g++ -g ./src/fflonk_setup/fflonk_setup.cpp $(CXXFLAGS) $(INC_FLAGS) -o $@ $(LDFLAGS)
+$(BUILD_DIR)/$(TARGET_SETUP): $(OBJS_SETUP)
+	$(CXX) $(OBJS_SETUP) $(CXXFLAGS) $(LDFLAGS) -o $@
 
 .PHONY: clean
 
@@ -130,6 +137,7 @@ clean:
 	find . -name main_exec_generated*pp -delete
 
 -include $(DEPS_ZKP)
+-include $(DEPS_SETUP)
 -include $(DEPS_BCT)
 
 MKDIR_P ?= mkdir -p

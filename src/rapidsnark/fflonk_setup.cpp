@@ -10,13 +10,14 @@
 
 #include "thread_utils.hpp"
 #include <omp.h>
-// /Improve
+#include <string>
 
 #include "fft.hpp"
 
 #include "r1cs_binfile.hpp"
-#include "r1cs_constraint_processor.hpp"
 #include "binfile_writer.hpp"
+#include "zkey.hpp"
+#include "polynomial/evaluations.hpp"
 
 namespace Fflonk
 {
@@ -27,69 +28,56 @@ namespace Fflonk
 
     FflonkSetup::~FflonkSetup()
     {
-        // TODO! Check
-        delete zkey;
-        delete fflonkInfo;
-        delete fft;
-        delete ntt;
-        delete nttExtended;
+        reset();
+    }
 
-        delete[] constPolsCoefs;
-        delete[] constPolsEvals;
-        delete[] constPolsEvalsExt;
-        delete[] PTau;
-        delete[] x_n;
-        delete[] x_2ns;
+    void FflonkSetup::reset()
+    {
+        delete fft;
+
+        polynomials.clear();
+        // delete[] constPolsCoefs;
     }
 
     void FflonkSetup::generateZkey(std::string r1csFilename, std::string pTauFilename, std::string zkeyFilename)
     {
-        zklog.info("FFLONK SETUP STARTED");
+        LOG_INFO("FFLONK SETUP STARTED");
 
         // STEP 1. Read PTau file
-        zklog.info("> Opening PTau file");
+        LOG_INFO("> Opening PTau file");
         auto fdPtau = BinFileUtils::openExisting(pTauFilename, "ptau", 1);
-        if (!BinFileUtils::sectionExists(12))
+        if (!fdPtau->sectionExists(12))
         {
             throw new runtime_error("Powers of Tau file is not well prepared. Section 12 missing.");
         }
 
         // STEP 2. Read r1cs file
-        zklog.info("> Opening r1cs file");
+        LOG_INFO("> Opening r1cs file");
         auto fdR1cs = BinFileUtils::openExisting(r1csFilename, "r1cs", 1);
 
         // Read r1cs header file
-        const auto r1csHeader = R1csBinFile::readHeader(fdR1cs);
+        auto r1csHeader = R1cs::R1csBinFile::readR1csHeader(*fdR1cs);
 
-        const auto sFr = curve.Fr.n8;
-        const auto sG1 = curve.G1.F.n8 * 2;
-        const auto sG2 = curve.G2.F.n8 * 2;
+        const auto sG1 = sizeof(G1PointAffine);
+        const auto sG2 = sizeof(G2PointAffine);
 
-        FflonkSetupSettings settings:
         settings.nVars = r1csHeader.nVars;
         settings.nPublics = r1csHeader.nOutputs + r1csHeader.nPubInputs;
 
-        //TODO!!!!!!!!
-        // let polynomials = {};
-        // let evaluations = {};
-        // let PTau;
-
-        std::vector<FrElement> plonkConstraints;
-        std::vector<FrElement> plonkAdditions;
-
         // Process constraints inside r1cs
-        zklog.info("> Processing FFlonk constraints");
-        this->computeFFConstraints(FflonkSetupSettings, fdR1cs, r1csHeader, plonkConstraints, plonkAdditions);
+        LOG_INFO("> Processing FFlonk constraints");
+        computeFFConstraints(*fdR1cs, r1csHeader);
 
         // As the t polynomial is n+5 whe need at least a power of 4
         //TODO check!!!!
         // NOTE : plonkConstraints + 2 = #constraints + blinding coefficients for each wire polynomial
-        const FF_T_POL_DEG_MIN = 3;
-
-        settings.cirPower = std::max(FF_T_POL_DEG_MIN, log2((plonkConstraints.length + 2) - 1) + 1);
+        double FF_T_POL_DEG_MIN = 3;
+        settings.cirPower = std::max(FF_T_POL_DEG_MIN, log2((plonkConstraints.size() + 2) - 1) + 1);
         settings.domainSize = 1 << settings.cirPower;
 
-        // TODO!!!!!
+        fft = new FFT<AltBn128::Engine::Fr>(settings.domainSize * 4);
+
+        // TODO!!!!! Is this + 18 correct?
         if (fdPtau->getSectionSize(2) < (settings.domainSize * 9 + 18) * sG1)
         {
             throw new runtime_error("Powers of Tau is not big enough for this circuit size. Section 2 too small.");
@@ -99,530 +87,517 @@ namespace Fflonk
             throw new runtime_error("Powers of Tau is not well prepared. Section 3 too small.");
         }
 
-        zklog.info("----------------------------");
-        zklog.info("  FFLONK SETUP SETTINGS");
-        zklog.info("  Curve:         BN128");
-        zklog.info("  Circuit power: " + string(settings.cirPower));
-        zklog.info("  Domain size:   " + string(settings.domainSize)));
-        zklog.info("  Vars:          " + string(settings.nVars));
-        zklog.info("  Public vars:   " + string(settings.nPublic));
-        zklog.info("  Constraints:   " + string(plonkConstraints.length));
-        zklog.info("  Additions:     " + string(plonkAdditions.length));
-        zklog.info("----------------------------");
+        std::ostringstream ss;
+        LOG_INFO("----------------------------");
+        LOG_INFO("  FFLONK SETUP SETTINGS");
+        LOG_INFO("  Curve:         BN128");
+        ss.str("");
+        ss << "  Circuit power: " << settings.cirPower;
+        LOG_INFO(ss);
+        ss.str("");
+        ss << "  Domain size:   " << settings.domainSize;
+        LOG_INFO(ss);
+        ss.str("");
+        ss << "  Vars:          " << settings.nVars;
+        LOG_INFO(ss);
+        ss.str("");
+        ss << "  Public vars:   " << settings.nPublics;
+        LOG_INFO(ss);
+        ss.str("");
+        ss << "  Constraints:   " << plonkConstraints.size();
+        LOG_INFO(ss);
+        ss.str("");
+        ss << "  Additions:     " << plonkAdditions.size();
+        LOG_INFO(ss);
+        ss.str("");
+        LOG_INFO("----------------------------");
 
         // Compute k1 and k2 to be used in the permutation checks
-        zklog.info("> computing k1 and k2");
-        FrElement k1, k2;
-        this->computeK1K2(settings, k1, k2);
+        LOG_INFO("> computing k1 and k2");
+        computeK1K2();
 
         // Compute omega 3 (w3) and omega 4 (w4) to be used in the prover and the verifier
         // w3^3 = 1 and  w4^4 = 1
-        zklog.info("> computing w3");
-        const auto w3 = computeW3();
-        zklog.info("> computing w4");
-        const auto w4 = computeW4();
-        zklog.info("> computing w8");
-        const auto w8 = computeW8();
-        zklog.info("> computing wr");
-        const auto wr = getOmegaCubicRoot(settings.cirPower, curve.Fr);
+        LOG_INFO("> computing w3");
+        w3 = computeW3();
+
+        LOG_INFO("> computing w4");
+        w4 = computeW4();
+
+        LOG_INFO("> computing w8");
+        w8 = computeW8();
+        
+        LOG_INFO("> computing wr");
+        wr = getOmegaCubicRoot();
 
         // Write output zkey file
-        this->writeZkeyFile(zkeyFilename);
+        writeZkeyFile(zkeyFilename, *fdPtau);
 
-        fdR1cs.close();
-        fdPTau.close();
-
-        zklog.info("FFLONK SETUP FINISHED");
-
-        return 0;
-
-
-//////////////////////////////////////////////
-        if (fdPtau->getSectionSize(2) < maxFiDegree * sizeof(G1PointAffine))
-        {
-            throw new runtime_error("Powers of Tau is not big enough for this circuit size. Section 2 too small.");
-        }
-
-        PTau = new G1PointAffine[maxFiDegree];
-
-        zklog.info("> Loading PTau data");
-        int nThreads = omp_get_max_threads() / 2;
-        if ((uint64_t)nThreads > maxFiDegree)
-            nThreads = 1;
-        ThreadUtils::parset(PTau, 0, maxFiDegree * sizeof(G1PointAffine), nThreads);
-        ThreadUtils::parcpy(PTau, fdPtau->getSectionData(2), maxFiDegree * sizeof(G1PointAffine), nThreads);
-
-        size_t sG2 = zkey->n8q * 4;
-        if (fdPtau->getSectionSize(3) < sG2)
-        {
-            throw new runtime_error("Powers of Tau is not well prepared. Section 3 too small.");
-        }
-        zkey->X2 = new G2PointAffine;
-        memcpy(zkey->X2, (G2PointAffine *)fdPtau->getSectionData(3) + 1, sG2);
-
-        auto nBits = zkey->power;
-        uint64_t domainSize = 1 << nBits;
-
-        zklog.info("> Loading const polynomials file");
-        u_int64_t constPolsBytes = fflonkInfo->nConstants * domainSize * sizeof(FrElement);
-
-        constPolsEvals = new FrElement[fflonkInfo->nConstants * domainSize];
-
-        if (constPolsBytes > 0)
-        {
-            auto pConstPolsAddress = copyFile(cnstPolsFilename, constPolsBytes);
-            zklog.info("PilFflonk::PilFflonk() successfully copied " + to_string(constPolsBytes) + " bytes from constant file " + cnstPolsFilename);
-
-            ThreadUtils::parcpy(constPolsEvals, (FrElement *)pConstPolsAddress, constPolsBytes, omp_get_num_threads() / 2);
-        }        
-
-        uint32_t extendBits = ceil(log2(fflonkInfo->qDeg + 1));
-        auto nBitsExt = zkey->power + extendBits + fflonkInfo->nBitsZK;
-
-        uint64_t domainSizeExt = 1 << nBitsExt;
-
-        fft = new FFT<AltBn128::Engine::Fr>(domainSizeExt);
-
-        constPolsCoefs = new FrElement[fflonkInfo->nConstants * domainSize];
-        constPolsEvalsExt = new FrElement[fflonkInfo->nConstants * domainSizeExt];
-
-        if (fflonkInfo->nConstants > 0)
-        {
-            ntt = new NTT_AltBn128(E, domainSize);
-            nttExtended = new NTT_AltBn128(E, domainSizeExt);
-
-            zklog.info("> Computing const polynomials ifft");
-            ntt->INTT(constPolsCoefs, constPolsEvals, domainSize, fflonkInfo->nConstants);
-
-            zklog.info("> Computing F commitments");
-            computeFCommitments(zkey, domainSize);
-
-            ThreadUtils::parset(constPolsEvalsExt, 0, domainSizeExt * fflonkInfo->nConstants * sizeof(AltBn128::FrElement), nThreads);
-            ThreadUtils::parcpy(constPolsEvalsExt, constPolsCoefs, domainSize * fflonkInfo->nConstants * sizeof(AltBn128::FrElement), nThreads);
-               
-            zklog.info("> Extending const polynomials fft");
-            nttExtended->NTT(constPolsEvalsExt, constPolsEvalsExt, domainSizeExt, fflonkInfo->nConstants);
-        }
-
-        // Precalculate x_n and x_2ns
-        x_n = new FrElement[domainSize];
-        x_2ns = new FrElement[domainSizeExt];
-
-        zklog.info("> Computing roots");
-        
-#pragma omp parallel for
-        for (uint64_t i = 0; i < domainSize; i++)
-        {
-            x_n[i] = fft->root(zkey->power, i);
-        }
-
-#pragma omp parallel for
-        for (uint64_t i = 0; i < domainSizeExt; i++)
-        {
-            x_2ns[i] = fft->root(nBitsExt, i);
-        }
-
-        zklog.info("> Writing zkey file");
-
-        FflonkZkeyWriter::writeFflonkZkeyWriter(zkey,
-                                          constPolsEvals, fflonkInfo->nConstants * domainSize,
-                                          constPolsEvalsExt, fflonkInfo->nConstants * domainSizeExt,
-                                          constPolsCoefs, fflonkInfo->nConstants * domainSize,
-                                          x_n, domainSize,
-                                          x_2ns, domainSizeExt,
-                                          zkeyFilename, PTau, maxFiDegree);
-
-        zklog.info("PILFFLONK SETUP FINISHED");
+        LOG_INFO("PILFFLONK SETUP FINISHED");
     }
 
-    FrElement FflonkSetup::getFFlonkConstantConstraint(uint64_t index) {
-        
-    }
-
-    void FflonkSetup::computeFFConstraints(R1csSettings &r1csSettings, Binfile &r1cs, R1csHeader &r1csHeader, std::vector<FrElement> &plonkConstraints, std::vector<FrElement> &plonkAdditions)
+    void FflonkSetup::computeFFConstraints(BinFileUtils::BinFile &r1cs, R1cs::R1csHeader &r1csHeader)
     {
-        // Add public inputs and outputs
-        for (let i = 0; i < r1csSettings.nPublics; i++) {
-            plonkConstraints.push_back(R1csConstraintProcessor::getFFlonkConstantConstraint(i + 1, Fr));
-        }
-
         // Create r1cs processor
-        const r1csProcessor = new r1csConstraintProcessor();
+        const auto r1csProcessor = new R1cs::R1csConstraintProcessor(E);
 
-        if(!r1cs.sectionExists(R1CS_CONSTRAINTS_SECTION)) {
-            throw new Error("R1CS file is not well prepared. Section 2 missing.");
+        // Add public inputs and outputs
+        for (uint64_t i = 0; i < settings.nPublics; i++) {
+            plonkConstraints.push_back(R1cs::R1csConstraintProcessor::getFflonkConstantConstraint(E, i + 1));
         }
 
+        if(!r1cs.sectionExists(R1cs::R1CS_CONSTRAINTS_SECTION)) {
+            throw new runtime_error("R1CS file is not well prepared. Section 2 missing.");
+        }
         // Start reading r1cs constraints section
-        r1cs.startReadSection(R1CS_CONSTRAINTS_SECTION);
+        r1cs.startReadSection(R1cs::R1CS_CONSTRAINTS_SECTION);
 
-        for (let i=0; i< r1csHeader.nConstraints; i++) {
-            auto lc = this->readR1csConstraint(r1csHeader, r1cs);
-            r1csProcessor.processR1csConstraints(r1csHeader, r1csSettings, lc[0], lc[1], lc[2], plonkConstraints, plonkAdditions);
+        for (uint64_t i=0; i< r1csHeader.nConstraints; i++) {
+            auto lc = readR1csConstraint(r1csHeader, r1cs);
+            r1csProcessor->processR1csConstraints(settings, lc[0], lc[1], lc[2], plonkConstraints, plonkAdditions);
         }
 
-        r1cs.endReadSection();
+        r1cs.endReadSection(false);
     }
 
-    void FflonkSetup::readR1csConstraint(BinFile &r1cs) {
-        vector<R1csConstraint> lc[3];
-        lc[0] = readConstraintLC(r1csHeader, r1cs);
-        lc[1] = readConstraintLC(r1csHeader, r1cs);
-        lc[2] = readConstraintLC(r1csHeader, r1cs);
+    std::array<std::vector<R1cs::R1csConstraint>, 3> FflonkSetup::readR1csConstraint(R1cs::R1csHeader &r1csHeader, BinFileUtils::BinFile &r1cs) {
+        std::array<vector<R1cs::R1csConstraint>, 3> lc;
+
+        lc[0] = readR1csConstraintLC(r1csHeader, r1cs);
+        lc[1] = readR1csConstraintLC(r1csHeader, r1cs);
+        lc[2] = readR1csConstraintLC(r1csHeader, r1cs);
 
         return lc;
     }
 
-    void FflonkSetup::readR1csConstraintLC(R1csHeader &r1csHeader, BinFile &r1cs) {
-        uint32_t n = binfile.readU32LE();
-        vector<R1csConstraint> lc(n);
+    vector<R1cs::R1csConstraint> FflonkSetup::readR1csConstraintLC(R1cs::R1csHeader &r1csHeader, BinFileUtils::BinFile &r1cs) {
+        uint32_t n = r1cs.readU32LE();
+        vector<R1cs::R1csConstraint> lc;
 
         for (uint32_t i = 0; i < n; i++) {
-            R1csContraint rc;
-            rc.signal_id = r1cs.readU32LE();
-            E.fr.copy(rc.value, r1cs.read(r1csHeader.n8));
+            uint32_t signal_id = r1cs.readU32LE();
 
-            lc.push_back(rc);
+            FrElement value;
+            E.fr.copy(value, *((FrElement*)r1cs.read(32)));
+            std::reverse((uint8_t *)&value, (uint8_t *)&value + 32);
+            E.fr.fromRprBE(value, (uint8_t *)&value, 32);
+
+            lc.push_back(R1cs::R1csConstraint(signal_id, value));
         }
 
         return lc;
     }
 
-    void FflonkSetup::computeK1K2(FflonkSetupSettings &settings, FrElement &k1, FrElement &k2) {
-        k1 = FrElement::fromUI(2);
+    void FflonkSetup::computeK1K2() {
+        E.fr.fromUI(k1, 2);
         vector<FrElement> kArr;
-        while (isIncluded(k1, kArr, settings)) {
-            k1 = E.fr.add(k1, FrElement::one());
+        while (isIncluded(k1, kArr)) {
+            k1 = E.fr.add(k1, E.fr.one());
         }
 
         kArr.push_back(k1);
-        k2 = E.fr.add(k1, FrElement::one());
-        while (isIncluded(k2, kArr, settings)) {
-            k2 = E.fr.add(k2, FrElement::one());
+        k2 = E.fr.add(k1, E.fr.one());
+        while (isIncluded(k2, kArr)) {
+            k2 = E.fr.add(k2, E.fr.one());
         }
     }
 
-    bool FflonkSetup::isIncluded(FrElement k, vector<FrElement> &kArr, FflonkSetupSettings &settings) {
-        auto w = FrElement::one();
+    bool FflonkSetup::isIncluded(FrElement k, vector<FrElement> &kArr) {
+        auto w = E.fr.one();
         for (uint64_t i = 0; i < settings.domainSize; i++) {
             if (E.fr.eq(k, w)) return true;
 
-            for (let j = 0; j < kArr.length; j++) {
+            for (uint64_t j = 0; j < kArr.size(); j++) {
                 if (E.fr.eq(k, E.fr.mul(kArr[j], w))) return true;
             }
-            w = E.fr.mul(w, E.fr.w(settings.cirPower));
+            w = E.fr.mul(w, fft->root(settings.domainSize, settings.cirPower));
         }
 
         return false;
     }
 
     FrElement FflonkSetup::computeW3() {
-        let generator = E.fr.fromUI(31624);
-
         // Exponent is order(r - 1) / 3
-        mpz_t orderRsub1, exponent;
-        mpz_init_set_str(orderRsub1, "3648040478639879203707734290876212514758060733402672390616367364429301415936", 10);
-        mpz_divexact_ui(exponent, orderRsub1, 3);
+        mpz_t result;
+        mpz_init_set_str(result, "21888242871839275217838484774961031246154997185409878258781734729429964517155", 10);
 
-        return E.fr.exp(generator, E.fr.fromMpz(exponent));
+        FrElement w3;
+        E.fr.fromMpz(w3, result);
+
+        return w3;
     }
 
     FrElement FflonkSetup::computeW4() {
-        return E.fr.w(2);
+        mpz_t result;
+        mpz_init_set_str(result, "21888242871839275217838484774961031246007050428528088939761107053157389710902", 10);
+
+        FrElement w4;
+        E.fr.fromMpz(w4, result);
+
+        return w4;
     }
 
     FrElement FflonkSetup::computeW8() {
-        return E.fr.w(3);
+        mpz_t result;
+        mpz_init_set_str(result, "19540430494807482326159819597004422086093766032135589407132600596362845576832", 10);
+
+        FrElement w4;
+        E.fr.fromMpz(w4, result);
+
+        return w4;
     }
 
-    FrElement FflonkSetup::getOmegaCubicRoot(power, Fr) {
+    FrElement FflonkSetup::getOmegaCubicRoot() {
         // Hardcorded 3th-root of Fr.w[28]
         mpz_t firstRoot;
         mpz_init_set_str(firstRoot, "467799165886069610036046866799264026481344299079011762026774533774345988080", 10);
 
-        return E.fr.exp(E.fr.fromMpz(firstRoot), 1 << (28 - power));
+        FrElement tmp;
+        E.fr.fromMpz(tmp, firstRoot);
+
+        uint64_t scalar = 1 << (28 - settings.cirPower);
+
+        FrElement result;
+        E.fr.exp(result, tmp, (uint8_t *) &scalar, sizeof(uint64_t));
+
+        return result;
     }
 
-    void FflonkSetup::writeZkeyFile(zkeyFilename) {
-        zklog.info("> Writing the zkey file");
+    void FflonkSetup::writeZkeyFile(string &zkeyFilename, BinFileUtils::BinFile &fdPtau) {
+        LOG_INFO("> Writing the zkey file");
 
-        BinFileUtils::BinFileWriter* binFile = new BinFileUtils::BinFileWriter(zkeyFilename, "zkey", 1, ZKEY_FF_NSECTIONS);
+        BinFileUtils::BinFileWriter fdZKey(zkeyFilename, "zkey", 1, Zkey::ZKEY_FF_NSECTIONS);
 
-        zklog.info("··· Writing Section " + string(HEADER_ZKEY_SECTION) + ". Zkey Header");
-        this->writeZkeyHeader(fdZKey);
+        std::ostringstream ss;
+        ss << "··· Writing Section " << Zkey::ZKEY_HEADER_SECTION << ". Zkey Header";
+        LOG_INFO(ss);
+        ss.str("");
+        writeZkeyHeader(fdZKey);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_ADDITIONS_SECTION) + ". Additions");
-        this->writeAdditions(fdZKey);
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_ADDITIONS_SECTION << ". Additions";
+        LOG_INFO(ss);
+        ss.str("");
+        writeAdditions(fdZKey);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_A_MAP_SECTION) + ". A Map");
-        // await writeWitnessMap(fdZKey, ZKEY_FF_A_MAP_SECTION, 0, "A map");
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_A_MAP_SECTION << ". A Map";
+        LOG_INFO(ss);
+        ss.str("");
+        writeWitnessMap(fdZKey, Zkey::ZKEY_FF_A_MAP_SECTION, 0);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_B_MAP_SECTION) + ". B Map");
-        // await writeWitnessMap(fdZKey, ZKEY_FF_B_MAP_SECTION, 1, "B map");
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_B_MAP_SECTION << ". B Map";
+        LOG_INFO(ss);
+        ss.str("");
+        writeWitnessMap(fdZKey, Zkey::ZKEY_FF_B_MAP_SECTION, 1);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_C_MAP_SECTION) + ". C Map");
-        // await writeWitnessMap(fdZKey, ZKEY_FF_C_MAP_SECTION, 2, "C map");
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_C_MAP_SECTION << ". C Map";
+        LOG_INFO(ss);
+        ss.str("");
+        writeWitnessMap(fdZKey, Zkey::ZKEY_FF_C_MAP_SECTION, 2);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_QL_SECTION) + ". QL");
-        // await writeQMap(fdZKey, ZKEY_FF_QL_SECTION, 3, "QL");
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_QL_SECTION << ". QL";
+        LOG_INFO(ss);
+        ss.str("");
+        writeQMap(fdZKey, Zkey::ZKEY_FF_QL_SECTION, 3);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_QR_SECTION) + ". QR");
-        // await writeQMap(fdZKey, ZKEY_FF_QR_SECTION, 4, "QR");
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_QR_SECTION << ". QR";
+        LOG_INFO(ss);
+        ss.str("");
+        writeQMap(fdZKey, Zkey::ZKEY_FF_QR_SECTION, 4);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_QM_SECTION) + ". QM");
-        // await writeQMap(fdZKey, ZKEY_FF_QM_SECTION, 5, "QM");
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_QM_SECTION << ". QM";
+        LOG_INFO(ss);
+        ss.str("");
+        writeQMap(fdZKey, Zkey::ZKEY_FF_QM_SECTION, 5);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_QO_SECTION) + ". QO");
-        // await writeQMap(fdZKey, ZKEY_FF_QO_SECTION, 6, "QO");
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_QO_SECTION << ". QO";
+        LOG_INFO(ss);
+        ss.str("");
+        writeQMap(fdZKey, Zkey::ZKEY_FF_QO_SECTION, 6);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_QC_SECTION) + ". QC");
-        // await writeQMap(fdZKey, ZKEY_FF_QC_SECTION, 7, "QC");
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_QC_SECTION << ". QC";
+        LOG_INFO(ss);
+        ss.str("");
+        writeQMap(fdZKey, Zkey::ZKEY_FF_QC_SECTION, 7);
 
-        zklog.info("··· Writing Sections " + string(ZKEY_FF_SIGMA1_SECTION) + ", " + string(ZKEY_FF_SIGMA2_SECTION) + ", " + string(ZKEY_FF_SIGMA3_SECTION) + ". Sigma1, Sigma2 & Sigma 3");
-        // await writeSigma(fdZKey);
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_SIGMA1_SECTION << ", " 
+            << Zkey::ZKEY_FF_SIGMA2_SECTION << ", "
+            << Zkey::ZKEY_FF_SIGMA3_SECTION << ". Sigma1, Sigma2 & Sigma 3";
+        LOG_INFO(ss);
+        ss.str("");
+        writeSigma(fdZKey);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_LAGRANGE_SECTION) + ". Lagrange Polynomials");
-        // await writeLagrangePolynomials(fdZKey);
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_LAGRANGE_SECTION << ". Lagrange Polynomials";
+        LOG_INFO(ss);
+        ss.str("");
+        writeLagrangePolynomials(fdZKey);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_PTAU_SECTION) + ". Powers of Tau");
-        // await writePtau(fdZKey);
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_PTAU_SECTION << ". Powers of Tau";
+        LOG_INFO(ss);
+        ss.str("");
+        writePtau(fdZKey, fdPtau);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_C0_SECTION) + ". C0");
-        // await writeC0(fdZKey);
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_C0_SECTION << ". C0";
+        LOG_INFO(ss);
+        ss.str("");
+        writeC0(fdZKey);
 
-        zklog.info("··· Writing Section " + string(ZKEY_FF_HEADER_SECTION) + ". FFlonk Header");
-        // await writeFFlonkHeader(fdZKey);
+        ss << "··· Writing Section " << Zkey::ZKEY_FF_HEADER_SECTION << ". FFlonk Header";
+        LOG_INFO(ss);
+        ss.str("");
+        writeFflonkHeader(fdZKey, fdPtau);
 
-        zklog.info("> Writing the zkey file finished");
-
-        await fdZKey.close();
+        LOG_INFO("> Writing the zkey file finished");
     }
 
-    void FflonkSetup::writeZkeyHeader(BinFileWriter &zkeyFile) {
-        zkeyFile.startWriteSection(HEADER_ZKEY_SECTION);
-        zkeyFile.writeU32LE(FFLONK_PROTOCOL_ID);
+    void FflonkSetup::writeZkeyHeader(BinFileUtils::BinFileWriter &zkeyFile) {
+        zkeyFile.startWriteSection(Zkey::ZKEY_HEADER_SECTION);
+        zkeyFile.writeU32LE(Zkey::FFLONK_PROTOCOL_ID);
         zkeyFile.endWriteSection();
     }
 
-    void FflonkSetup::writeAdditions(BinFileWriter &zkeyFile, std::vector<FrElement> &plonkAdditions) {
-        zkeyFile.startWriteSection(ZKEY_FF_ADDITIONS_SECTION);
+    void FflonkSetup::writeAdditions(BinFileUtils::BinFileWriter &zkeyFile) {
+        zkeyFile.startWriteSection(Zkey::ZKEY_FF_ADDITIONS_SECTION);
 
-        // Written values are 2 * 32 bit integers (2 * 4 bytes) + 2 field size values ( 2 * sFr bytes)
-        // const buffOut = new Uint8Array(8 + 2 * sFr);
-        // const buffOutV = new DataView(buffOut.buffer);
-
-        // for (let i = 0; i < plonkAdditions.length; i++) {
-        //     const addition = plonkAdditions[i];
-
-        //     buffOutV.setUint32(0, addition[0], true);
-        //     buffOutV.setUint32(4, addition[1], true);
-        //     buffOut.set(addition[2], 8);
-        //     buffOut.set(addition[3], 8 + sFr);
-
-        //     await fdZKey.write(buffOut);
-        // }
-
-        await endWriteSection(fdZKey);
-    }
-
-    // .................................................................
-    // .................................................................
-    // .................................................................
-
-
-    void FflonkSetup::parseShKey(json shKeyJson)
-    {
-        zkey->power = shKeyJson["power"];
-        zkey->powerW = shKeyJson["powerW"];
-        zkey->maxQDegree = shKeyJson["maxQDegree"];
-        zkey->nPublics = shKeyJson["nPublics"];
-
-        // These values are not in the file but we must initialize them
-        zkey->n8q = shKeyJson["n8q"];
-        mpz_init(zkey->qPrime);
-        std::string primeQStr = shKeyJson["primeQ"];
-        mpz_set_str(zkey->qPrime, primeQStr.c_str(), 10);
-
-        zkey->n8r = shKeyJson["n8r"];
-        mpz_init(zkey->rPrime);
-        std::string primeRStr = shKeyJson["primeR"];
-        mpz_set_str(zkey->rPrime, primeRStr.c_str(), 10);
-
-        parseFShKey(shKeyJson);
-
-        parsePolsNamesStageShKey(shKeyJson);
-
-        parseOmegasShKey(shKeyJson);
-
-    }
-
-    void FflonkSetup::parseFShKey(json shKeyJson)
-    {
-        auto f = shKeyJson["f"];
-
-        for (uint32_t i = 0; i < f.size(); i++)
-        {
-            FflonkZkeyWriter::ShPlonkPol *shPlonkPol = new FflonkZkeyWriter::ShPlonkPol();
-
-            auto index = f[i]["index"];
-            shPlonkPol->index = index;
-            shPlonkPol->degree = f[i]["degree"];
-
-            shPlonkPol->nOpeningPoints = f[i]["openingPoints"].size();
-            shPlonkPol->openingPoints = new uint32_t[shPlonkPol->nOpeningPoints];
-            for (uint32_t j = 0; j < shPlonkPol->nOpeningPoints; j++)
-            {
-                shPlonkPol->openingPoints[j] = f[i]["openingPoints"][j];
-            }
-
-            shPlonkPol->nPols = f[i]["pols"].size();
-            shPlonkPol->pols = new std::string[shPlonkPol->nPols];
-            for (uint32_t j = 0; j < shPlonkPol->nPols; j++)
-            {
-                shPlonkPol->pols[j] = f[i]["pols"][j];
-            }
-            shPlonkPol->nStages = f[i]["stages"].size();
-            shPlonkPol->stages = new FflonkZkeyWriter::ShPlonkStage[shPlonkPol->nStages];
-            for (uint32_t j = 0; j < shPlonkPol->nStages; j++)
-            {
-                shPlonkPol->stages[j].stage = f[i]["stages"][j]["stage"];
-                shPlonkPol->stages[j].nPols = f[i]["stages"][j]["pols"].size();
-                shPlonkPol->stages[j].pols = new FflonkZkeyWriter::ShPlonkStagePol[shPlonkPol->stages[j].nPols];
-                for (uint32_t k = 0; k < shPlonkPol->stages[j].nPols; k++)
-                {
-                    shPlonkPol->stages[j].pols[k].name = f[i]["stages"][j]["pols"][k]["name"];
-                    shPlonkPol->stages[j].pols[k].degree = f[i]["stages"][j]["pols"][k]["degree"];
-                }
-            }
-
-            zkey->f[index] = shPlonkPol;
+        for(uint64_t i = 0; i < plonkAdditions.size(); i++) {
+            auto addition = plonkAdditions[i];
+            zkeyFile.writeU32LE(addition.signal_a);
+            zkeyFile.writeU32LE(addition.signal_b);
+            zkeyFile.write((void *)&addition.value_a, sizeof(FrElement));
+            zkeyFile.write((void *)&addition.value_b, sizeof(FrElement));
         }
+
+        zkeyFile.endWriteSection();
     }
 
-    void FflonkSetup::parsePolsNamesStageShKey(json shKeyJson)
-    {
-        auto pns = shKeyJson["polsNamesStage"];
+    void FflonkSetup::writeWitnessMap(BinFileUtils::BinFileWriter &zkeyFile, uint32_t sectionNum, uint32_t posConstraint) {
+        if (posConstraint > 2) {
+            throw new runtime_error("Invalid constraint position during writing witness map");
+        }
 
-        for (auto &el : pns.items())
-        {
-            std::map<u_int32_t, std::string> *polsNamesStage = new std::map<u_int32_t, std::string>();
+        zkeyFile.startWriteSection(sectionNum);
 
-            auto value = el.value();
+        for(uint64_t i = 0; i < plonkConstraints.size(); i++) {
+            auto constraint = plonkConstraints[i];
+            auto value = posConstraint == 0 ? constraint.signal_a : posConstraint == 1 ? constraint.signal_b : constraint.signal_c;
+            zkeyFile.writeU32LE(value);
+        }
 
-            u_int32_t lenPolsStage = value.size();
+        zkeyFile.endWriteSection();
+    }
 
-            for (u_int32_t j = 0; j < lenPolsStage; ++j)
-            {
-                (*polsNamesStage)[j] = value[j];
+    void FflonkSetup::writeQMap(BinFileUtils::BinFileWriter &zkeyFile, uint32_t sectionNum, uint32_t posConstraint) {
+        if (posConstraint < 3 || posConstraint > 7) {
+            throw new runtime_error("Invalid constraint position during writing witness map");
+        }
+
+        auto name = posConstraint == 3 ? "QL" : posConstraint == 4 ? "QR" : posConstraint == 5 ? "QM" : posConstraint == 6 ? "QO" : "QC";
+
+        FrElement* buffer_coefs = new FrElement[settings.domainSize];
+        FrElement* buffer_evals = new FrElement[settings.domainSize * 4];
+        memset(buffer_evals, 0, settings.domainSize * 4 * sizeof(FrElement));
+        for(uint64_t i = 0; i < plonkConstraints.size(); i++) {
+            auto constraint = plonkConstraints[i];
+            auto value = posConstraint == 3 ? constraint.ql : posConstraint == 4 ? constraint.qr : posConstraint == 5 ? constraint.qm : posConstraint == 6 ? constraint.qo : constraint.qc;
+            buffer_evals[i] = value;
+        }
+
+        polynomials[name] = Polynomial<AltBn128::Engine>::fromEvaluations(E, fft, buffer_evals, buffer_coefs, settings.domainSize);
+        polynomials[name]->fixDegree();
+        Evaluations<AltBn128::Engine>(E, fft, buffer_evals, *polynomials[name], settings.domainSize * 4);
+
+        zkeyFile.startWriteSection(sectionNum);
+        zkeyFile.write(buffer_coefs, settings.domainSize * sizeof(FrElement));
+        zkeyFile.write(buffer_evals, settings.domainSize * 4 * sizeof(FrElement));
+        zkeyFile.endWriteSection();
+    }
+
+    void FflonkSetup::writeSigma(BinFileUtils::BinFileWriter &zkeyFile) {
+        FrElement sigma[settings.domainSize * 3];
+        unordered_map<uint64_t, FrElement> lastSeen;
+        unordered_map<uint64_t, uint64_t> firstPos;
+
+        memset(sigma, 0, settings.domainSize * 3 * sizeof(FrElement));
+
+        FrElement w = E.fr.one();
+        for (uint64_t i = 0; i < settings.domainSize; i++) {
+            auto constraint = plonkConstraints[i];
+
+            if(i < plonkConstraints.size()) {
+                buildSigma(sigma, w, lastSeen, firstPos, constraint.signal_a, i);
+                buildSigma(sigma, w, lastSeen, firstPos, constraint.signal_b, i + settings.domainSize);
+                buildSigma(sigma, w, lastSeen, firstPos, constraint.signal_c, i + settings.domainSize * 2);
+            } else if (i < settings.domainSize - 2) {
+                buildSigma(sigma, w, lastSeen, firstPos, 0, i);
+                buildSigma(sigma, w, lastSeen, firstPos, 0, i + settings.domainSize);
+                buildSigma(sigma, w, lastSeen, firstPos, 0, i + settings.domainSize * 2);
+            } else {
+                sigma[i] = w;
+                sigma[i + settings.domainSize] = E.fr.mul(w, k1);
+                sigma[i + settings.domainSize * 2] = E.fr.mul(w, k2);
             }
 
-            zkey->polsNamesStage[stoi(el.key())] = polsNamesStage;
+            w = E.fr.mul(w, fft->root(settings.cirPower, 1));
         }
-    }
 
-    void FflonkSetup::parseOmegasShKey(json shKeyJson)
-    {
-        auto omegas = shKeyJson.items();
-
-        for (auto &el : omegas)
-        {
-            auto key = el.key();
-            if (key.find("w") == 0)
-            {
-                FrElement omega;
-                E.fr.fromString(omega, el.value());
-                zkey->omegas[key] = omega;
+        for (uint64_t i = 0; i < settings.nVars; i++) {
+            if (firstPos.find(i) != firstPos.end()) {
+                sigma[firstPos[i]] = lastSeen[i];
+            } else {
+                cout << "Variable not used" << endl;
             }
         }
-    }
-
-    void FflonkSetup::computeFCommitments(FflonkZkeyWriter::FflonkZkeyWriter *zkey, uint64_t domainSize)
-    {
-        uint32_t stage = 0;
-        std::map<std::string, CommitmentAndPolynomial *> polynomialCommitments;
-        for (const auto& f : zkey->f) {
-            auto fIndex = f.first;
-            auto pol = f.second;
-
-            int stagePos = -1;
-            for (u_int32_t i = 0; i < pol->nStages; ++i)
-            {
-                if (pol->stages[i].stage == stage) {
-                    stagePos = i;
-                    break;
-                }
-            }
-            if (stagePos == -1) continue;
-
-            FflonkZkeyWriter::ShPlonkStage *stagePol = &pol->stages[stagePos];
-
-            u_int64_t *lengths = new u_int64_t[pol->nPols];
-            u_int64_t *polsIds = new u_int64_t[pol->nPols];
-
-            for (u_int32_t j = 0; j < stagePol->nPols; ++j)
-            {
-
-                std::string name = stagePol->pols[j].name;
-                int index = find(pol->pols, pol->nPols, name);
-                if (index == -1)
-                {
-                    throw std::runtime_error("Polynomial " + std::string(name) + " missing");
-                }
-
-                polsIds[j] = findPolId(zkey, stage, name);
-                lengths[index] = findDegree(zkey, fIndex, name);
-            }
-
-            std::string index = "f" + std::to_string(pol->index);
         
-            u_int32_t nPols = pol->nPols;
-            u_int32_t polDegree = pol->degree;
-
-            auto polynomial = new Polynomial<AltBn128::Engine>(E, polDegree + 1);
-
-            u_int32_t nPolsStage = fflonkInfo->nConstants;
+        for (uint32_t i = 0; i < 3; i++) {
+            auto sectionId = i == 0 ? Zkey::ZKEY_FF_SIGMA1_SECTION : i == 1 ? Zkey::ZKEY_FF_SIGMA2_SECTION : Zkey::ZKEY_FF_SIGMA3_SECTION;
+            auto name = "S" + to_string(i+1);
             
-            #pragma omp parallel for
-            for (u_int64_t i = 0; i < polDegree; i++) {
-                for (u_int32_t j = 0; j < nPols; j++) {
-                    if (lengths[j] >= 0 && i < lengths[j]) 
-                    {
-                            polynomial->coef[i * nPols + j] = constPolsCoefs[polsIds[j] + nPolsStage * i];
-                    }
-                }
-            }
+            FrElement* buffer_coefs = new FrElement[settings.domainSize];
+            FrElement* buffer_evals = new FrElement[settings.domainSize * 4];
+            memset(buffer_evals, 0, settings.domainSize * 4 * sizeof(FrElement));
 
-            polynomial->fixDegree();
-    
-            G1PointAffine commitAffine;
-            G1Point commit = multiExponentiation(polynomial, pol->nPols, lengths);
-            E.g1.copy(commitAffine, commit);
+            polynomials[name] = Polynomial<AltBn128::Engine>::fromEvaluations(E, fft, &sigma[i * settings.domainSize], buffer_coefs, settings.domainSize);
+            polynomials[name]->fixDegree();
+            Evaluations<AltBn128::Engine>(E, fft, buffer_evals, *polynomials[name], settings.domainSize * 4);
 
-            polynomialCommitments[index] = new CommitmentAndPolynomial{commitAffine, polynomial};
+            zkeyFile.startWriteSection(sectionId);
+            zkeyFile.write(buffer_coefs, settings.domainSize * sizeof(FrElement));
+            zkeyFile.write(buffer_evals, settings.domainSize * 4 * sizeof(FrElement));
+            zkeyFile.endWriteSection();
+        }
+    }
 
-            delete[] lengths;
-            delete[] polsIds;
+    void FflonkSetup::buildSigma(FrElement *sigma, FrElement w, unordered_map<uint64_t, FrElement> &lastSeen, unordered_map<uint64_t, uint64_t> &firstPos, uint64_t signalId, uint64_t idx) {
+        if(lastSeen.find(signalId) == lastSeen.end()) {
+            firstPos[signalId] = idx;
+        } else {
+            sigma[idx] = lastSeen[signalId];
         }
 
-        for (auto it = polynomialCommitments.begin(); it != polynomialCommitments.end(); ++it)
+        FrElement v;
+        if (idx < settings.domainSize) {
+            v = w;
+        } else if (idx < settings.domainSize * 2) {
+            v = E.fr.mul(w, k1);
+        } else {
+            v = E.fr.mul(w, k2);
+        }
+
+        lastSeen[signalId] = v;
+    }
+
+    void FflonkSetup::writeLagrangePolynomials(BinFileUtils::BinFileWriter &zkeyFile) {
+        auto l = max(settings.nPublics, (uint64_t)1);
+
+        FrElement* buffer_coefs = new FrElement[settings.domainSize];
+        FrElement* buffer_evals = new FrElement[settings.domainSize * 4];
+        
+        zkeyFile.startWriteSection(Zkey::ZKEY_FF_LAGRANGE_SECTION);
+
+        for (uint64_t i = 0; i < l; i++) {
+            memset(buffer_evals, 0, settings.domainSize * 4 * sizeof(FrElement));
+
+            buffer_evals[i] = E.fr.one();
+
+            auto pol = Polynomial<AltBn128::Engine>::fromEvaluations(E, fft, buffer_evals, buffer_coefs, settings.domainSize);
+            pol->fixDegree();
+            Evaluations<AltBn128::Engine>(E, fft, buffer_evals, *pol, settings.domainSize * 4);
+
+            zkeyFile.write(buffer_coefs, settings.domainSize * sizeof(FrElement));
+            zkeyFile.write(buffer_evals, settings.domainSize * 4 * sizeof(FrElement));
+        }
+        
+        zkeyFile.endWriteSection();
+    }
+
+    void FflonkSetup::writePtau(BinFileUtils::BinFileWriter &zkeyFile, BinFileUtils::BinFile &fdPtau) {
+        int nThreads = omp_get_max_threads() / 2;
+        PTau = new G1PointAffine[settings.domainSize * 9 + 18];
+
+        ThreadUtils::parset(PTau, 0, sizeof(G1PointAffine), nThreads);
+        ThreadUtils::parcpy(PTau, fdPtau.getSectionData(2), (settings.domainSize * 9 + 18)* sizeof(G1PointAffine), nThreads);
+
+        zkeyFile.startWriteSection(Zkey::ZKEY_FF_PTAU_SECTION);
+        zkeyFile.write(PTau, (settings.domainSize * 9 + 18) * sizeof(G1PointAffine));
+        zkeyFile.endWriteSection();
+    }
+
+    void FflonkSetup::writeC0(BinFileUtils::BinFileWriter &zkeyFile) {
+        CPolynomial<AltBn128::Engine> *C0 = new CPolynomial(E, 8);
+
+        C0->addPolynomial(0, polynomials["QL"]);
+        C0->addPolynomial(1, polynomials["QR"]);
+        C0->addPolynomial(2, polynomials["QO"]);
+        C0->addPolynomial(3, polynomials["QM"]);
+        C0->addPolynomial(4, polynomials["QC"]);
+        C0->addPolynomial(5, polynomials["S1"]);
+        C0->addPolynomial(6, polynomials["S2"]);
+        C0->addPolynomial(7, polynomials["S3"]);
+
+        FrElement* bufferC0 = new FrElement[settings.domainSize * 8];
+        memset(bufferC0, 0, settings.domainSize * 8 * sizeof(FrElement));
+
+        polynomials["C0"] = C0->getPolynomial(bufferC0);
+
+        // Check degree
+        if (polynomials["C0"]->getDegree() >= 8 * settings.domainSize)
         {
-            auto index = it->first;
-            auto commit = it->second->commitment;
-            auto pol = it->second->polynomial;
-
-            auto pos = index.find("_");
-            if (pos != std::string::npos)
-            {
-                index = index.substr(0, pos);
-            }
-
-            auto shPlonkCommitment = new FflonkZkeyWriter::ShPlonkCommitment{
-                index,
-                commit,
-                pol->getDegree() + 1,
-                pol->coef};
-            zkey->fCommitments[index] = shPlonkCommitment;
+            throw std::runtime_error("C0 Polynomial is not well calculated");
         }
+
+        zkeyFile.startWriteSection(Zkey::ZKEY_FF_C0_SECTION);
+        zkeyFile.write(bufferC0, settings.domainSize * 8 * sizeof(FrElement));
+        zkeyFile.endWriteSection();
+    }
+
+    void FflonkSetup::writeFflonkHeader(BinFileUtils::BinFileWriter &zkeyFile, BinFileUtils::BinFile &ptauFile) {
+        zkeyFile.startWriteSection(Zkey::ZKEY_FF_HEADER_SECTION);
+
+        auto n8q = 32;
+        uint8_t bytes[32];
+        mpz_class auxScalar;
+        auxScalar.set_str("21888242871839275222246405745257275088696311157297823662689037894645226208583", 10);
+        scalar2bytes(auxScalar, bytes);
+        zkeyFile.writeU32LE(n8q);
+        zkeyFile.write((void *)bytes, n8q);
+        
+        auto n8r = 32;
+        auxScalar.set_str("21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
+        scalar2bytes(auxScalar, bytes);
+        zkeyFile.writeU32LE(n8r);
+        zkeyFile.write((void *)bytes, n8r);
+
+        zkeyFile.writeU32LE(settings.nVars);
+        zkeyFile.writeU32LE(settings.nPublics);
+        zkeyFile.writeU32LE(settings.domainSize);
+        zkeyFile.writeU32LE(plonkAdditions.size());
+        zkeyFile.writeU32LE(plonkConstraints.size());
+
+        zkeyFile.write(&k1, sizeof(FrElement));
+        zkeyFile.write(&k2, sizeof(FrElement));
+
+        zkeyFile.write(&w3, sizeof(FrElement));
+        zkeyFile.write(&w4, sizeof(FrElement));
+        zkeyFile.write(&w8, sizeof(FrElement));
+        zkeyFile.write(&wr, sizeof(FrElement));
+
+        G2PointAffine bX_2;
+        memcpy(&bX_2, (G2PointAffine*)ptauFile.getSectionData(3) + 1, sizeof(G2PointAffine));
+        zkeyFile.write(&bX_2, sizeof(G2PointAffine));
+
+        u_int64_t lengths[8] = {polynomials["QL"]->getDegree() + 1,
+                                polynomials["QR"]->getDegree() + 1,
+                                polynomials["QO"]->getDegree() + 1,
+                                polynomials["QM"]->getDegree() + 1,
+                                polynomials["QC"]->getDegree() + 1,
+                                polynomials["S1"]->getDegree() + 1,
+                                polynomials["S2"]->getDegree() + 1,
+                                polynomials["S3"]->getDegree() + 1};
+        G1Point commitC0 = multiExponentiation(polynomials["C0"], 8, lengths);
+        G1PointAffine commitC0Affine;
+        E.g1.copy(commitC0Affine, commitC0);
+        zkeyFile.write(&commitC0Affine, sizeof(G1PointAffine));
+
+        zkeyFile.endWriteSection();
     }
 
     FrElement *FflonkSetup::polynomialFromMontgomery(Polynomial<AltBn128::Engine> *polynomial)
@@ -644,46 +619,27 @@ namespace Fflonk
 
     G1Point FflonkSetup::multiExponentiation(Polynomial<AltBn128::Engine> *polynomial, u_int32_t nx, u_int64_t x[])
     {
-        TimerStart(PILFFLONK_SETUP_CALCULATE_MSM);
         G1Point value;
-        FrElement *pol = this->polynomialFromMontgomery(polynomial);
+        FrElement *pol = polynomialFromMontgomery(polynomial);
         E.g1.multiMulByScalar(value, PTau, (uint8_t *)pol, sizeof(pol[0]), polynomial->getDegree() + 1, nx, x);
-        TimerStopAndLog(PILFFLONK_SETUP_CALCULATE_MSM);
         return value;
     }
 
-    u_int32_t FflonkSetup::findPolId(FflonkZkeyWriter::FflonkZkeyWriter *zkey, u_int32_t stage, std::string polName)
+    void FflonkSetup::scalar2bytes(mpz_class s, uint8_t (&bytes)[32])
     {
-        for (const auto &[index, name] : *zkey->polsNamesStage[stage])
+        mpz_class ScalarMask8   ("FF", 16);
+        mpz_class ScalarZero    ("0", 16);
+
+        for (uint64_t i=0; i<32; i++)
         {
-            if (name == polName)
-                return index;
+            mpz_class aux = s & ScalarMask8;
+            bytes[i] = aux.get_ui();
+            s = s >> 8;
         }
-        throw std::runtime_error("Polynomial name not found");
+        if (s != ScalarZero)
+        {
+            LOG_ERROR("scalar2bytes() run out of space of 32 bytes");
+            throw std::runtime_error("scalar2bytes() run out of space of 32 bytes");
+        }
     }
-
-    u_int32_t FflonkSetup::findDegree(FflonkZkeyWriter::FflonkZkeyWriter *zkey, u_int32_t fIndex, std::string name)
-    {
-        for (u_int32_t i = 0; i < zkey->f[fIndex]->stages[0].nPols; i++)
-        {
-            if (zkey->f[fIndex]->stages[0].pols[i].name == name)
-            {
-                return zkey->f[fIndex]->stages[0].pols[i].degree;
-            }
-        }
-        throw std::runtime_error("Polynomial name not found");
-    }
-
-    int FflonkSetup::find(std::string *arr, u_int32_t n, std::string x)
-    {
-        for (u_int32_t i = 0; i < n; ++i)
-        {
-            if (arr[i] == x)
-            {
-                return int(i);
-            }
-        }
-
-        return -1;
-    }        
 }

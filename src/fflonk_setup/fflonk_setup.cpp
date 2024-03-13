@@ -1,22 +1,19 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-// #include <gmpxx.h>
 #include <cstdio>
 #include <sys/stat.h>
+#include <alt_bn128.hpp>
 #include "../rapidsnark/fflonk_setup.hpp"
 
 using namespace std;
-// using namespace fork_8;
-
-// Fork namespace
-// const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
-
-#define min(a,b) ((a)<(b)?(a):(b))
 
 int main (int argc, char **argv)
 {
     cout << "Fflonk setup" << endl;
+
+    Logger::getInstance()->enableConsoleLogging();
+    Logger::getInstance()->updateLogLevel(LOG_LEVEL_DEBUG);
 
     // Check arguments list
     if (argc != 4)
@@ -60,8 +57,8 @@ int main (int argc, char **argv)
         return -1;
     }
 
-    auto fflonkSetup = new FflonkSetup(AltBn128::Engine::engine);
-    fflonkSetup.generateZKey(r1csFilename, ptauFilename, zkeyFilename);
+    auto fflonkSetup = new Fflonk::FflonkSetup(AltBn128::Engine::engine);
+    fflonkSetup->generateZkey(r1csFilename, ptauFilename, zkeyFilename);
 
     return 0;
 }
