@@ -697,6 +697,8 @@ using grpc::Status;
             pLog->set_tx_index(block_responses[block].logs[log].tx_index); // Index of the transaction in the block
             //pLog->set_batch_hash(string2ba(block_responses[block].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(block_responses[block].logs[log].index); // Index of the log in the block
+            pLog->set_block_hash(string2ba(block_responses[block].logs[log].block_hash));
+            pLog->set_block_number(block_responses[block].logs[log].block_number);
         }
 
         vector<ResponseV2> &responses = block_responses[block].responses;
@@ -746,6 +748,8 @@ using grpc::Status;
                 pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
                 //pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
                 pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
+                pLog->set_block_hash(string2ba(responses[tx].logs[log].block_hash));
+                pLog->set_block_number(responses[tx].logs[log].block_number);
             }
             if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateFullTrace == responses[tx].tx_hash))
             {
