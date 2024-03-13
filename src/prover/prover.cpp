@@ -1095,6 +1095,108 @@ void Prover::genBlobInnerProof(ProverRequest *pProverRequest){
     TimerStopAndLog(PROVER_BLOB_INNER_PROOF);
 }
 
+void Prover::genBlobOuterProof(ProverRequest *pProverRequest){
+
+    zkassert(config.generateProof());
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_genBlobOuterProof);
+
+    TimerStart(PROVER_BLOB_OUTER_PROOF);
+
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
+    // Save input to file
+    if (config.saveInputToFile)
+    {
+        json2file(pProverRequest->blobOuterProofInputBatch, pProverRequest->filePrefix + "blob_outer_proof.input_batch.json");
+        json2file(pProverRequest->blobOuterProofInputBlobInner, pProverRequest->filePrefix + "blob_outer_proof.input_blob_inner.json");
+    }
+
+    // Input is pProverRequest->aggregatedBatchProofInput1 and pProverRequest->aggregatedBatchProofInput2 (of type json)
+
+    
+
+    // ----------------------------------------------
+    // CHECKS
+    // ----------------------------------------------
+    
+    // Todo...
+
+    // ----------------------------------------------
+
+    ordered_json verKey;
+    file2json(config.blobOuterVerkey, verKey);
+    json zkinInputBlobOuter = joinzkinBlobOuter(pProverRequest->blobOuterProofInputBatch, pProverRequest->blobOuterProofInputBlobInner, verKey, pProverRequest->blobOuterProofInputBatch["chain_id"].dump(), starkBatchRecursive2->starkInfo.starkStruct.steps.size());    
+
+    json blobOuterVerkeyJson;
+    file2json(config.blobOuterVerkey, blobOuterVerkeyJson);
+
+    Goldilocks::Element blobOuterVerkeyValues[4];
+    blobOuterVerkeyValues[0] = Goldilocks::fromU64(blobOuterVerkeyJson["constRoot"][0]);
+    blobOuterVerkeyValues[1] = Goldilocks::fromU64(blobOuterVerkeyJson["constRoot"][1]);
+    blobOuterVerkeyValues[2] = Goldilocks::fromU64(blobOuterVerkeyJson["constRoot"][2]);
+    blobOuterVerkeyValues[3] = Goldilocks::fromU64(blobOuterVerkeyJson["constRoot"][3]);
+
+    Goldilocks::Element publics[starkBlobOuter->starkInfo.nPublics];
+
+    for (uint64_t i = 0; i < starkBlobOuter->starkInfo.nPublics; i++)
+    {
+        publics[i] = Goldilocks::fromString(zkinInputBlobOuter["publics"][i]);
+    }
+
+    CommitPolsStarks cmPolsBlobOuter(pAddress, (1 << starkBlobOuter->starkInfo.starkStruct.nBits), starkBlobOuter->starkInfo.nCm1);
+    CircomRecursive2::getCommitedPols(&cmPolsBlobOuter, config.blobOuterVerifier, config.blobOuterExec, zkinInputBlobOuter, (1 << starkBlobOuter->starkInfo.starkStruct.nBits), starkBlobOuter->starkInfo.nCm1);
+
+    // void *pointerCmRecursive2Pols = mapFile("config/recursive2/recursive2.commit", cmPolsRecursive2.size(), true);
+    // memcpy(pointerCmRecursive2Pols, cmPolsRecursive2.address(), cmPolsRecursive2.size());
+    // unmapFile(pointerCmRecursive2Pols, cmPolsRecursive2.size());
+
+    //-------------------------------------------
+    // Generate Recursive 2 proof
+    //-------------------------------------------
+
+    TimerStart(STARK_BLOB_OUTER_PROOF);
+    Recursive2Steps blobOuterChelpersSteps;
+    uint64_t polBitsBlobOuter = starkBlobOuter->starkInfo.starkStruct.steps[starkBlobOuter->starkInfo.starkStruct.steps.size() - 1].nBits;
+    FRIProof fproofBlobOuter((1 << polBitsBlobOuter), FIELD_EXTENSION, starkBlobOuter->starkInfo.starkStruct.steps.size(), starkBlobOuter->starkInfo.evMap.size(), starkBlobOuter->starkInfo.nPublics);
+    starkBlobOuter->genProof(fproofBlobOuter, publics, blobOuterVerkeyValues, &blobOuterChelpersSteps);
+    TimerStopAndLog(STARK_BLOB_OUTER_PROOF);
+
+    // Save the proof & zkinproof
+    nlohmann::ordered_json jProofBlobOuter = fproofBlobOuter.proofs.proof2json();
+    nlohmann::ordered_json zkinBlobOuter = proof2zkinStark(jProofBlobOuter);
+    zkinBlobOuter["publics"] = zkinInputBlobOuter["publics"];
+
+    // Output is pProverRequest->aggregatedProofOutput (of type json)
+    pProverRequest->aggregatedBatchProofOutput = zkinBlobOuter;
+
+    // Save output to file
+    if (config.saveOutputToFile)
+    {
+        json2file(pProverRequest->blobOuterProofOutput, pProverRequest->filePrefix + "blob_outer_proof.output.json");
+    }
+    // Save proof to file
+    if (config.saveProofToFile)
+    {
+        jProofBlobOuter["publics"] = zkinInputBlobOuter["publics"];
+        json2file(jProofBlobOuter, pProverRequest->filePrefix + "blob_outer_proof.proof.json");
+    }
+
+    // Add the recursive2 verification key
+    json publicsJson = json::array();
+    for (uint64_t i = 0; i < starkBlobOuter->starkInfo.nPublics; i++)
+    {
+        publicsJson[i] = zkinInputBlobOuter["publics"][i];
+    }
+    
+    json2file(publicsJson, pProverRequest->publicsOutputFile());
+
+    pProverRequest->result = ZKR_SUCCESS;
+
+    TimerStopAndLog(PROVER_BLOB_OUTER_PROOF);
+};
+
 void Prover::genAggregatedBatchProof(ProverRequest *pProverRequest)
 {
 

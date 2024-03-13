@@ -78,11 +78,7 @@ public:
 
     void genBatchProof(ProverRequest *pProverRequest);
     void genBlobInnerProof(ProverRequest *pProverRequest);
-    void genBlobOuterProof(ProverRequest *pProverRequest){
-            zklog.info("Prover::genBlobOuterProof() timestamp: " + pProverRequest->timestamp);
-            zklog.info("Prover::genBlobOuterProof() UUID: " + pProverRequest->uuid);
-            zklog.info("Prover::genBlobOuterProof() input file: " + pProverRequest->inputFile());
-    };
+    void genBlobOuterProof(ProverRequest *pProverRequest);
     void genAggregatedBatchProof(ProverRequest *pProverRequest) ;
     void genAggregatedBlobOuterProof(ProverRequest *pProverRequest);
     void genFinalProof(ProverRequest *pProverRequest);
