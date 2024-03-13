@@ -90,8 +90,13 @@ public:
     string submitRequest(ProverRequest *pProverRequest);                                          // returns UUID for this request
     ProverRequest *waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
 
-    void lock(void) { pthread_mutex_lock(&mutex); };
-    void unlock(void) { pthread_mutex_unlock(&mutex); };
+    inline void lock(void) { pthread_mutex_lock(&mutex); };
+    inline void unlock(void) { pthread_mutex_unlock(&mutex); };
+
+private:
+
+    void logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest);
+    void logBlobInnerExecutionInfo(PROVER_BLOB_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest);
 };
 
 void *proverThread(void *arg);
