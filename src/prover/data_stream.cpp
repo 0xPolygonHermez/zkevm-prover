@@ -655,15 +655,18 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
     string rBa;
     rBa = scalar2ba32(r);
     transcodedTx += rBa;
+    //zklog.info("r=" + ba2string(rBa));
 
     // Format s and concatenate to tx
     string sBa;
-    sBa = scalar2ba32(r);
+    sBa = scalar2ba32(s);
     transcodedTx += sBa;
+    //zklog.info("s=" + ba2string(sBa));
 
     // Concatenat v to tx
     uint8_t d = v;
     transcodedTx += d;
+    //zklog.info("v=" + to_string(v));
 
     return ZKR_SUCCESS;
 }
