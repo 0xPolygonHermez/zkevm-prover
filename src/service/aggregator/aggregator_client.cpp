@@ -389,8 +389,8 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     // Parse public inputs
     
     // Get witness
-    const string &witness = genStatelessBatchProofRequest.input().public_inputs().witness();
-    if (witness.empty())
+    pProverRequest->input.publicInputsExtended.publicInputs.witness = genStatelessBatchProofRequest.input().public_inputs().witness();
+    if (pProverRequest->input.publicInputsExtended.publicInputs.witness.empty())
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() got an empty witness", &pProverRequest->tags);
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
@@ -399,7 +399,7 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
 
     // Parse witness and get db, programs and old state root
     zkresult zkr;
-    zkr = witness2db(witness, pProverRequest->input.db, pProverRequest->input.contractsBytecode, pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot);
+    zkr = witness2db(pProverRequest->input.publicInputsExtended.publicInputs.witness, pProverRequest->input.db, pProverRequest->input.contractsBytecode, pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() failed calling witness2db() result=" + zkresult2string(zkr), &pProverRequest->tags);
@@ -408,8 +408,8 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     }
 
     // Get data stream
-    const string &dataStream = genStatelessBatchProofRequest.input().public_inputs().data_stream();
-    if (dataStream.empty())
+    pProverRequest->input.publicInputsExtended.publicInputs.dataStream = genStatelessBatchProofRequest.input().public_inputs().data_stream();
+    if (pProverRequest->input.publicInputsExtended.publicInputs.dataStream.empty())
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() got an empty data stream", &pProverRequest->tags);
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
@@ -418,7 +418,7 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
 
     // Parse data stream and get a binary structure
     DataStreamBatch batch;
-    zkr = dataStream2batch(dataStream, batch);
+    zkr = dataStream2batch(pProverRequest->input.publicInputsExtended.publicInputs.dataStream, batch);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() failed calling dataStream2batch() result=" + zkresult2string(zkr), &pProverRequest->tags);
