@@ -1030,7 +1030,7 @@ using grpc::Status;
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldBlobStateRoot, request->old_blob_state_root());
 
     // Get oldBlobAccInputHash
-    if (request->old_blob_state_root().size() > 32)
+    if (request->old_blob_acc_input_hash().size() > 32)
     {
         zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got oldBlobAccInputHash too long, size=" + to_string(request->old_blob_acc_input_hash().size()), &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_BLOB_ACC_INPUT_HASH);
@@ -1042,6 +1042,16 @@ using grpc::Status;
     // Get oldBlobNum
     proverRequest.input.publicInputsExtended.publicInputs.oldBlobNum = request->old_num_blob();
 
+    // Get fork ID
+    proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
+    if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 9)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID), &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
+
     // Get oldStateRoot
     if (request->old_state_root().size() > 32)
     {
@@ -1051,6 +1061,9 @@ using grpc::Status;
         return Status::OK;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, request->old_state_root());
+
+    // Get lastL1InfoTreeIndex
+    proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex = request->last_l1_info_tree_index();
 
     // Get lastL1InfoTreeRoot
     if (request->last_l1_info_tree_root().size() > 32)
@@ -1062,19 +1075,6 @@ using grpc::Status;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot, request->last_l1_info_tree_root());
 
-    // Get lastL1InfoTreeIndex
-    proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex = request->last_l1_info_tree_index();
-
-    // Get fork ID
-    proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
-    if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 9)
-    {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID), &proverRequest.tags);
-        response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
-        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::OK;
-    }
-
     // Create full tracer based on fork ID
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
@@ -1085,7 +1085,7 @@ using grpc::Status;
     }
 
     // Get last timestamp
-    proverRequest.input.publicInputsExtended.publicInputs.lastTimestamp = request->last_timestamp();
+    proverRequest.input.publicInputsExtended.publicInputs.timestampLimit = request->timestamp_limit();
 
     // Get sequencer address
     string auxString = Remove0xIfPresent(request->coinbase());

@@ -103,6 +103,9 @@ $(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/pols_generator/pols_generator.cpp -o $@ -lgmp
 
+pols: pols_generator
+	$(BUILD_DIR)/$(TARGET_PLG)
+
 pols_diff: $(BUILD_DIR)/$(TARGET_PLD)
 
 $(BUILD_DIR)/$(TARGET_PLD): ./src/pols_diff/pols_diff.cpp

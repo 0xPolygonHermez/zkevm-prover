@@ -1025,7 +1025,7 @@ message ProcessBlobInnerRequestV3 {
     // belong to blobAccInputHash
     uint32 last_l1_info_tree_index = 6;
     bytes last_l1_info_tree_root = 7;
-    uint64 last_timestamp = 8;
+    uint64 timestamp_limit = 8;
     string coinbase = 9;
     bytes zk_gas_limit = 10;
     uint32 type = 11;

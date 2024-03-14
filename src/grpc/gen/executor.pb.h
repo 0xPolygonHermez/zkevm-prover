@@ -11666,7 +11666,7 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
     kDebugFieldNumber = 17,
     kOldNumBlobFieldNumber = 3,
     kForkIdFieldNumber = 5,
-    kLastTimestampFieldNumber = 8,
+    kTimestampLimitFieldNumber = 8,
     kLastL1InfoTreeIndexFieldNumber = 6,
     kTypeFieldNumber = 11,
   };
@@ -11981,13 +11981,13 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
   void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 last_timestamp = 8;
-  void clear_last_timestamp();
-  ::PROTOBUF_NAMESPACE_ID::uint64 last_timestamp() const;
-  void set_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  // uint64 timestamp_limit = 8;
+  void clear_timestamp_limit();
+  ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit() const;
+  void set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_last_timestamp() const;
-  void _internal_set_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_timestamp_limit() const;
+  void _internal_set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // uint32 last_l1_info_tree_index = 6;
@@ -12029,7 +12029,7 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
   ::executor::v1::DebugV3* debug_;
   ::PROTOBUF_NAMESPACE_ID::uint64 old_num_blob_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 last_timestamp_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit_;
   ::PROTOBUF_NAMESPACE_ID::uint32 last_l1_info_tree_index_;
   ::PROTOBUF_NAMESPACE_ID::uint32 type_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -29449,24 +29449,24 @@ inline void ProcessBlobInnerRequestV3::unsafe_arena_set_allocated_last_l1_info_t
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBlobInnerRequestV3.last_l1_info_tree_root)
 }
 
-// uint64 last_timestamp = 8;
-inline void ProcessBlobInnerRequestV3::clear_last_timestamp() {
-  last_timestamp_ = PROTOBUF_ULONGLONG(0);
+// uint64 timestamp_limit = 8;
+inline void ProcessBlobInnerRequestV3::clear_timestamp_limit() {
+  timestamp_limit_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBlobInnerRequestV3::_internal_last_timestamp() const {
-  return last_timestamp_;
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBlobInnerRequestV3::_internal_timestamp_limit() const {
+  return timestamp_limit_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBlobInnerRequestV3::last_timestamp() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessBlobInnerRequestV3.last_timestamp)
-  return _internal_last_timestamp();
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBlobInnerRequestV3::timestamp_limit() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBlobInnerRequestV3.timestamp_limit)
+  return _internal_timestamp_limit();
 }
-inline void ProcessBlobInnerRequestV3::_internal_set_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void ProcessBlobInnerRequestV3::_internal_set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
-  last_timestamp_ = value;
+  timestamp_limit_ = value;
 }
-inline void ProcessBlobInnerRequestV3::set_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_last_timestamp(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBlobInnerRequestV3.last_timestamp)
+inline void ProcessBlobInnerRequestV3::set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_timestamp_limit(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBlobInnerRequestV3.timestamp_limit)
 }
 
 // string coinbase = 9;

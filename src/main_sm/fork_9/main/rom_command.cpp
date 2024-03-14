@@ -97,6 +97,12 @@ tFunction string2Function(string s)
     else if (s == "fp2InvBN254_x")                  return f_fp2InvBN254_x;
     else if (s == "fp2InvBN254_y")                  return f_fp2InvBN254_y;
     else if (s == "fpBN254inv")                     return f_fpBN254inv;
+    else if (s == "getBatchHashData")               return f_getBatchHashData;
+    else if (s == "getType")                        return f_getType;
+    else if (s == "getForcedGER")                   return f_getForcedGER;
+    else if (s == "getForcedTimestamp")             return f_getForcedTimestamp;
+    else if (s == "getL1HistoricRoot")              return f_getL1HistoricRoot;
+    else if (s == "getPendingRID")                  return f_getPendingRID;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -165,6 +171,12 @@ string function2String(tFunction f)
         case f_fp2InvBN254_x:                   return "fp2InvBN254_x";
         case f_fp2InvBN254_y:                   return "fp2InvBN254_y";
         case f_fpBN254inv:                      return "fpBN254inv";
+        case f_getBatchHashData:                return "getBatchHashData";
+        case f_getType:                         return "getType";
+        case f_getForcedGER:                    return "getForcedGER";
+        case f_getForcedTimestamp:              return "getForcedTimestamp";
+        case f_getL1HistoricRoot:               return "getL1HistoricRoot";
+        case f_getPendingRID:                   return "getPendingRID";
         case f_empty:                           return "";
         default:                                return "unknown";
     }
@@ -269,6 +281,8 @@ tReg string2reg(string s)
     else if (s == "CNT_POSEIDON_G") return reg_CNT_POSEIDON_G;
     else if (s == "STEP") return reg_STEP;
     else if (s == "HASHPOS") return reg_HASHPOS;
+    else if (s == "RCX") return reg_RCX;
+    else if (s == "RID") return reg_RID;
     else {
         zklog.error("string2Reg() invalid string = " + s);
         exitProcess();
@@ -301,6 +315,8 @@ string reg2string(tReg reg)
         case reg_CNT_POSEIDON_G:    return "CNT_POSEIDON_G";
         case reg_STEP:              return "STEP";
         case reg_HASHPOS:           return "HASHPOS";
+        case reg_RCX:               return "RCX";
+        case reg_RID:               return "RID";
         default:                    return "unknown";
     }
 }

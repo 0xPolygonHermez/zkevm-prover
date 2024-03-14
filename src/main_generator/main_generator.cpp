@@ -6506,7 +6506,7 @@ string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, c
         }
         code += "\n";
     }
-    else if ((forkID >= 7) && rom["labels"].contains("verifyMerkleProofEnd") && (zkPC == rom["labels"]["verifyMerkleProofEnd"]) && (reg=="C"))
+    else if ((forkID >= 7) && (forkID <=8) && rom["labels"].contains("verifyMerkleProofEnd") && (zkPC == rom["labels"]["verifyMerkleProofEnd"]) && (reg=="C"))
     {
         code += "    if (proverRequest.input.bSkipVerifyL1InfoRoot)\n";
         code += "    {\n";

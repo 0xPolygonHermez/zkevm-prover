@@ -1409,10 +1409,10 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     finalTrace.new_state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // New acc input hash
-    zkr = getVarFromCtx(ctx, true, ctx.rom.newAccInputHashOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.newBatchAccInputHashOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("FullTracer::onFinishBatch() failed calling getVarFromCtx(ctx.rom.newAccInputHashOffset)");
+        zklog.error("FullTracer::onFinishBatch() failed calling getVarFromCtx(ctx.rom.newBatchAccInputHashOffset)");
         return zkr;
     }
     finalTrace.new_acc_input_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);

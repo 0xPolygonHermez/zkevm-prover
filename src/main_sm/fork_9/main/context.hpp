@@ -139,6 +139,25 @@ public:
     ECRecoverPrecalcBuffer() : filled(false), pos(0), posUsed(0) {};
 };
 
+class Saved
+{
+public:
+    bool restored;
+    uint64_t restoredZKPC;
+    uint64_t restoredStep;
+    Goldilocks::Element op[8];
+    Goldilocks::Element B[8];
+    Goldilocks::Element C[8];
+    Goldilocks::Element D[8];
+    Goldilocks::Element E[8];
+    Goldilocks::Element RCX;
+    Goldilocks::Element RR;
+    Goldilocks::Element RID;
+    uint64_t savedZKPC;
+    uint64_t savedStep;
+    Saved() : restored(false) {};
+};
+
 class Context
 {
 public:
@@ -166,6 +185,8 @@ public:
     string   fileName; // From ROM JSON file instruction
     uint64_t line; // From ROM JSON file instruction
 #endif
+
+    map<uint64_t, Saved> saved;
 
     Context( Goldilocks &fr,
              const Config &config,
