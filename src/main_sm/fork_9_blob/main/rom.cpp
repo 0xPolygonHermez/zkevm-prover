@@ -31,9 +31,9 @@ void Rom::load(Goldilocks &fr, json &romJson)
     
     if (type == BATCH)
     {
-        labels.checkAndSaveFromLabel      = getLabel(string("checkAndSaveFrom"));
+        /*labels.checkAndSaveFromLabel      = getLabel(string("checkAndSaveFrom"));
         labels.ecrecoverStoreArgsLabel    = getLabel(string("ecrecover_store_args"));
-        /*labels.ecrecoverEndLabel          = getLabel(string("ecrecover_end"));
+        labels.ecrecoverEndLabel          = getLabel(string("ecrecover_end"));
         labels.checkFirstTxTypeLabel      = getLabel(string("checkFirstTxType"));
         labels.writeBlockInfoRootLabel    = getLabel(string("writeBlockInfoRoot"));
         labels.outOfCountersStepLabel     = getLabel(string("outOfCountersStep"));

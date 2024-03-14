@@ -327,7 +327,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 #endif
 
-        if ((zkPC == rom.labels.ecrecoverStoreArgsLabel) && config.ECRecoverPrecalc)
+        /*if ((zkPC == rom.labels.ecrecoverStoreArgsLabel) && config.ECRecoverPrecalc)
         {
             zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);
             mpz_class signature_, r_, s_, v_;
@@ -341,7 +341,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 ctx.ecRecoverPrecalcBuffer.filled = true;
             }
-        }
+        }*/
         /*if (zkPC == rom.labels.ecrecoverEndLabel)
         {
             if ( ctx.ecRecoverPrecalcBuffer.filled)
@@ -4901,12 +4901,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             zklog.info("setA A[nexti]=" + fea2string(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
 #endif
         }
-        else if (bUnsignedTransaction && (zkPC == rom.labels.checkAndSaveFromLabel))
+        /*else if (bUnsignedTransaction && (zkPC == rom.labels.checkAndSaveFromLabel))
         {
             // Set A register with input.from to process unsigned transactions
             mpz_class from(proverRequest.input.from);
             scalar2fea(fr, from, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti] );
-        }
+        }*/
         else
         {
             pols.A0[nexti] = pols.A0[i];

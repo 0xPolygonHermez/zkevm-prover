@@ -12,8 +12,8 @@ class RomLabels
 {
 public:
     uint64_t finalizeExecutionLabel;
-    uint64_t checkAndSaveFromLabel;
-    uint64_t ecrecoverStoreArgsLabel;
+    //uint64_t checkAndSaveFromLabel;
+    //uint64_t ecrecoverStoreArgsLabel;
     //uint64_t ecrecoverEndLabel;
     //uint64_t checkFirstTxTypeLabel;
     //uint64_t writeBlockInfoRootLabel;
@@ -28,9 +28,9 @@ public:
     //uint64_t invalidIntrinsicTxSenderCodeLabel;
 
     RomLabels() :
-        finalizeExecutionLabel(U64Mask64),
+        finalizeExecutionLabel(U64Mask64)/*,
         checkAndSaveFromLabel(U64Mask64),
-        ecrecoverStoreArgsLabel(U64Mask64)/*,
+        ecrecoverStoreArgsLabel(U64Mask64),
         ecrecoverEndLabel(U64Mask64),
         checkFirstTxTypeLabel(U64Mask64),
         writeBlockInfoRootLabel(U64Mask64),
