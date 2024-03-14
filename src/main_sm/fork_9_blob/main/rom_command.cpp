@@ -103,6 +103,16 @@ tFunction string2Function(string s)
     else if (s == "getForcedTimestamp")             return f_getForcedTimestamp;
     else if (s == "getL1HistoricRoot")              return f_getL1HistoricRoot;
     else if (s == "getPendingRID")                  return f_getPendingRID;
+    else if (s == "getZkGasLimit")                  return f_getZkGasLimit;
+    else if (s == "getZ")                           return f_getZ;
+    else if (s == "getY")                           return f_getY;
+    else if (s == "getBlobL2HashData")              return f_getBlobL2HashData;
+    else if (s == "getForcedHashData")              return f_getForcedHashData;
+    else if (s == "getBlobLen")                     return f_getBlobLen;
+    else if (s == "frBLS12_381inv")                 return f_frBLS12_381inv;
+    else if (s == "dump")                           return f_dump;
+    else if (s == "check4096Root")                  return f_check4096Root;
+    else if (s == "get4096RootIndex")               return f_get4096RootIndex;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -177,6 +187,16 @@ string function2String(tFunction f)
         case f_getForcedTimestamp:              return "getForcedTimestamp";
         case f_getL1HistoricRoot:               return "getL1HistoricRoot";
         case f_getPendingRID:                   return "getPendingRID";
+        case f_getZkGasLimit:                   return "getZkGasLimit";
+        case f_getZ:                            return "getZ";
+        case f_getY:                            return "getY";
+        case f_getBlobL2HashData:               return "getBlobL2HashData";
+        case f_getForcedHashData:               return "getForcedHashData";
+        case f_getBlobLen:                      return "getBlobLen";
+        case f_frBLS12_381inv:                  return "frBLS12_381inv";
+        case f_dump:                            return "dump";
+        case f_check4096Root:                   return "check4096Root";
+        case f_get4096RootIndex:                return "get4096RootIndex";
         case f_empty:                           return "";
         default:                                return "unknown";
     }

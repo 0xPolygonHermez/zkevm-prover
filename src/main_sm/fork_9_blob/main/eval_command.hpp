@@ -155,6 +155,17 @@ void eval_getForcedGER                (Context &ctx, const RomCommand &cmd, Comm
 void eval_getL1HistoricRoot           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getPendingRID               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
+// Feijoa (fork 9 blob) new methods:
+void eval_getZkGasLimit               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getZ                        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getY                        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getBlobL2HashData           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getForcedHashData           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getBlobLen                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_frBLS12_381inv              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_dump                        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_check4096Root               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_get4096RootIndex            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);
 

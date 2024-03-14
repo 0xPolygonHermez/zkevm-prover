@@ -77,6 +77,16 @@ typedef enum : int {
     f_getForcedTimestamp,
     f_getL1HistoricRoot,
     f_getPendingRID,
+    f_getZkGasLimit,
+    f_getZ,
+    f_getY,
+    f_getBlobL2HashData,
+    f_getForcedHashData,
+    f_getBlobLen,
+    f_frBLS12_381inv,
+    f_dump,
+    f_check4096Root,
+    f_get4096RootIndex,
 } tFunction;
 
 // ROM command (op)

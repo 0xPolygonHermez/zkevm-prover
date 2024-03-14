@@ -84,6 +84,18 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_getL1HistoricRoot:               return eval_getL1HistoricRoot(ctx, cmd, cr);
             case f_getPendingRID:                   return eval_getPendingRID(ctx, cmd, cr);
             
+            // Feijoa (fork 9 blob) new methods:
+            case f_getZkGasLimit:                   return eval_getZkGasLimit(ctx, cmd, cr);
+            case f_getZ:                            return eval_getZ(ctx, cmd, cr);
+            case f_getY:                            return eval_getY(ctx, cmd, cr);
+            case f_getBlobL2HashData:               return eval_getBlobL2HashData(ctx, cmd, cr);
+            case f_getForcedHashData:               return eval_getForcedHashData(ctx, cmd, cr);
+            case f_getBlobLen:                      return eval_getBlobLen(ctx, cmd, cr);
+            case f_frBLS12_381inv:                  return eval_frBLS12_381inv(ctx, cmd, cr);
+            case f_dump:                            return eval_dump(ctx, cmd, cr);
+            case f_check4096Root:                   return eval_check4096Root(ctx, cmd, cr);
+            case f_get4096RootIndex:                return eval_get4096RootIndex(ctx, cmd, cr);
+
             default:
                 zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
                 exitProcess();
@@ -3982,6 +3994,59 @@ void eval_getPendingRID (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea5 = fr.zero();
     cr.fea6 = fr.zero();
     cr.fea7 = fr.zero();
+}
+
+
+// Feijoa (fork 9 blob) new methods:
+
+void eval_getZkGasLimit (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_getZ (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_getY (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_getBlobL2HashData (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_getForcedHashData (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_getBlobLen (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_frBLS12_381inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_dump (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_check4096Root (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_get4096RootIndex (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
 }
 
 } // namespace

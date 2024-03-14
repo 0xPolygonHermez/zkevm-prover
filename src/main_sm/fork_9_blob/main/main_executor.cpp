@@ -342,14 +342,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.ecRecoverPrecalcBuffer.filled = true;
             }
         }
-        if (zkPC == rom.labels.ecrecoverEndLabel)
+        /*if (zkPC == rom.labels.ecrecoverEndLabel)
         {
             if ( ctx.ecRecoverPrecalcBuffer.filled)
             {
                 zkassert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);
                 ctx.ecRecoverPrecalcBuffer.filled = false;
             }
-        }
+        }*/
 
         // Consolidate the state and store it in SR, just before we save SR into SMT
         if (config.hashDB64 && bProcessBatch && (zkPC == consolidateStateRootZKPC))
@@ -2338,7 +2338,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // overwrite 'op' when hiting 'checkFirstTxType' label
-        if ((zkPC == rom.labels.checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
+        /*if ((zkPC == rom.labels.checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
         {
             op0 = fr.one();
             op1 = fr.one();
@@ -2348,10 +2348,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op5 = fr.one();
             op6 = fr.one();
             op7 = fr.one();
-        }
+        }*/
 
         // overwrite 'op' when hiting 'writeBlockInfoRoot' label
-        if ((zkPC == rom.labels.writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
+        /*if ((zkPC == rom.labels.writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
         {
             op0 = fr.zero();
             op1 = fr.zero();
@@ -2361,7 +2361,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op5 = fr.zero();
             op6 = fr.zero();
             op7 = fr.zero();
-        }
+        }*/
 
         // Storage read instruction
         if (rom.line[zkPC].sRD == 1)
@@ -5303,10 +5303,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         uint64_t elseAddr = (!fr.isZero(rom.line[zkPC].elseAddr) ? fr.toU64(rom.line[zkPC].elseAddr) : 0) + (rom.line[zkPC].elseUseAddrRel ? addrRel : 0);
 
         // Modify JMP 'elseAddr' to continue execution in case of an unsigned transaction
-        if (bUnsignedTransaction && (fr.toU64(rom.line[zkPC].elseAddr) == rom.labels.invalidIntrinsicTxSenderCodeLabel))
+        /*if (bUnsignedTransaction && (fr.toU64(rom.line[zkPC].elseAddr) == rom.labels.invalidIntrinsicTxSenderCodeLabel))
         {
             elseAddr = finalJmpAddr;
-        }
+        }*/
 
         // Log free0IsByte in pols
         if (!bProcessBatch && rom.line[zkPC].free0IsByte)
@@ -5343,7 +5343,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
             // Calculate reserved counters
-            if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersStepLabel))
+            /*if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersStepLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5414,7 +5414,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     reserve = 0;
                 }
                 proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, uint64_t(reserve));
-            }
+            }*/
 
             uint64_t jmpnCondValue = fr.toU64(op0);
 

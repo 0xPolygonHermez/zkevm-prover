@@ -33,7 +33,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     {
         labels.checkAndSaveFromLabel      = getLabel(string("checkAndSaveFrom"));
         labels.ecrecoverStoreArgsLabel    = getLabel(string("ecrecover_store_args"));
-        labels.ecrecoverEndLabel          = getLabel(string("ecrecover_end"));
+        /*labels.ecrecoverEndLabel          = getLabel(string("ecrecover_end"));
         labels.checkFirstTxTypeLabel      = getLabel(string("checkFirstTxType"));
         labels.writeBlockInfoRootLabel    = getLabel(string("writeBlockInfoRoot"));
         labels.outOfCountersStepLabel     = getLabel(string("outOfCountersStep"));
@@ -44,7 +44,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         labels.outOfCountersMemalignLabel = getLabel(string("outOfCountersMemalign"));
         labels.outOfCountersPoseidonLabel = getLabel(string("outOfCountersPoseidon"));
         labels.outOfCountersPaddingLabel  = getLabel(string("outOfCountersPadding"));
-        labels.invalidIntrinsicTxSenderCodeLabel = getLabel(string("invalidIntrinsicTxSenderCode"));
+        labels.invalidIntrinsicTxSenderCodeLabel = getLabel(string("invalidIntrinsicTxSenderCode"));*/
     }
 
     // Get labels offsets
