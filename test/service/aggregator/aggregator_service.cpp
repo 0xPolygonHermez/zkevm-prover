@@ -273,14 +273,14 @@ using grpc::Status;
     // Parse public inputs
     aggregator::v1::PublicInputs * pPublicInputs = new aggregator::v1::PublicInputs();
     pPublicInputs->set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
-    pPublicInputs->set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
-    pPublicInputs->set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
+    //pPublicInputs->set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
+    //pPublicInputs->set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
     pPublicInputs->set_chain_id(input.publicInputsExtended.publicInputs.chainID);
     pPublicInputs->set_fork_id(input.publicInputsExtended.publicInputs.forkID);
     pPublicInputs->set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
-    pPublicInputs->set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
-    pPublicInputs->set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
-    pPublicInputs->set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
+    //pPublicInputs->set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
+    //pPublicInputs->set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
+    //pPublicInputs->set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
     pPublicInputs->set_sequencer_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
     pPublicInputs->set_aggregator_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.aggregatorAddress.get_str(16)));
     pInputProver->set_allocated_public_inputs(pPublicInputs);
@@ -318,7 +318,7 @@ using grpc::Status;
     {
         aggregator::v1::L1Data l1Data;
         l1Data.set_global_exit_root(string2ba(itL1Data->second.globalExitRoot.get_str(16)));
-        l1Data.set_blockhash_l1(string2ba(itL1Data->second.blockHashL1.get_str(16)));
+        l1Data.set_block_hash_l1(string2ba(itL1Data->second.blockHashL1.get_str(16)));
         l1Data.set_min_timestamp(itL1Data->second.minTimestamp);
         for (uint64_t i=0; i<itL1Data->second.smtProof.size(); i++)
         {
@@ -372,7 +372,7 @@ using grpc::Status;
     return Status::OK;
 }
 
-::grpc::Status AggregatorServiceImpl::GenAggregatedProof(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::aggregator::v1::AggregatorMessage, ::aggregator::v1::ProverMessage>* stream, const string &inputFileA, const string &inputFileB, string &requestID)
+::grpc::Status AggregatorServiceImpl::GenAggregatedBatchProof(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::aggregator::v1::AggregatorMessage, ::aggregator::v1::ProverMessage>* stream, const string &inputFileA, const string &inputFileB, string &requestID)
 {
     aggregator::v1::AggregatorMessage aggregatorMessage;
     aggregator::v1::ProverMessage proverMessage;
@@ -383,33 +383,33 @@ using grpc::Status;
 
     if (inputFileA.size() == 0)
     {
-        cerr << "Error: AggregatorServiceImpl::GenAggregatedProof() found inputFileA empty" << endl;
+        cerr << "Error: AggregatorServiceImpl::GenAggregatedBatchProof() found inputFileA empty" << endl;
         exitProcess();
     }
     file2string(inputFileA, inputFileAContent);
 
     if (inputFileB.size() == 0)
     {
-        cerr << "Error: AggregatorServiceImpl::GenAggregatedProof() found inputFileB empty" << endl;
+        cerr << "Error: AggregatorServiceImpl::GenAggregatedBatchProof() found inputFileB empty" << endl;
         exitProcess();
     }
     file2string(inputFileB, inputFileBContent);
 
     // Allocate the aggregated batch request
-    aggregator::v1::GenAggregatedProofRequest *pGenAggregatedProofRequest = new aggregator::v1::GenAggregatedProofRequest();
-    zkassertpermanent(pGenAggregatedProofRequest != NULL );
-    pGenAggregatedProofRequest->set_recursive_proof_1(inputFileAContent);
-    pGenAggregatedProofRequest->set_recursive_proof_2(inputFileBContent);
+    aggregator::v1::GenAggregatedBatchProofRequest *pGenAggregatedBatchProofRequest = new aggregator::v1::GenAggregatedBatchProofRequest();
+    zkassertpermanent(pGenAggregatedBatchProofRequest != NULL );
+    pGenAggregatedBatchProofRequest->set_recursive_proof_1(inputFileAContent);
+    pGenAggregatedBatchProofRequest->set_recursive_proof_2(inputFileBContent);
 
     // Send the gen proof request
     aggregatorMessage.Clear();
     messageId++;
     aggregatorMessage.set_id(to_string(messageId));
-    aggregatorMessage.set_allocated_gen_aggregated_proof_request(pGenAggregatedProofRequest);
+    aggregatorMessage.set_allocated_gen_aggregated_batch_proof_request(pGenAggregatedBatchProofRequest);
     bResult = stream->Write(aggregatorMessage);
     if (!bResult)
     {
-        cerr << "Error: AggregatorServiceImpl::GenAggregatedProof() failed calling stream->Write(aggregatorMessage)" << endl;
+        cerr << "Error: AggregatorServiceImpl::GenAggregatedBatchProof() failed calling stream->Write(aggregatorMessage)" << endl;
         return Status::CANCELLED;
     }
 
@@ -418,25 +418,25 @@ using grpc::Status;
     bResult = stream->Read(&proverMessage);
     if (!bResult)
     {
-        cerr << "Error: AggregatorServiceImpl::GenAggregatedProof() failed calling stream->Read(proverMessage)" << endl;
+        cerr << "Error: AggregatorServiceImpl::GenAggregatedBatchProof() failed calling stream->Read(proverMessage)" << endl;
         return Status::CANCELLED;
     }
     
     // Check type
-    if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGenAggregatedProofResponse)
+    if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGenAggregatedBatchProofResponse)
     {
-        cerr << "Error: AggregatorServiceImpl::GenAggregatedProof() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GEN_AGGREGATED_PROOF_RESPONSE" << endl;
+        cerr << "Error: AggregatorServiceImpl::GenAggregatedBatchProof() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GEN_AGGREGATED_PROOF_RESPONSE" << endl;
         return Status::CANCELLED;
     }
 
     // Check id
     if (proverMessage.id() != aggregatorMessage.id())
     {
-        cerr << "Error: AggregatorServiceImpl::GenAggregatedProof() got proverMessage.id=" << proverMessage.id() << " instead of aggregatorMessage.id=" << aggregatorMessage.id() << endl;
+        cerr << "Error: AggregatorServiceImpl::GenAggregatedBatchProof() got proverMessage.id=" << proverMessage.id() << " instead of aggregatorMessage.id=" << aggregatorMessage.id() << endl;
         return Status::CANCELLED;
     }
 
-    requestID = proverMessage.gen_aggregated_proof_response().id();
+    requestID = proverMessage.gen_aggregated_batch_proof_response().id();
 
     return Status::OK;
 }
@@ -620,12 +620,12 @@ using grpc::Status;
     uint64_t i;
 
     // Generate batch proof 0
-    grpcStatus = GenAggregatedProof(context, stream, inputFileA, inputFileB, requestID);
+    grpcStatus = GenAggregatedBatchProof(context, stream, inputFileA, inputFileB, requestID);
     if (grpcStatus.error_code() != Status::OK.error_code())
     {
         return grpcStatus;
     }
-    cout << "AggregatorServiceImpl::GenAndGetAggregatedProof() called GenAggregatedProof() and got requestID=" << requestID << endl;
+    cout << "AggregatorServiceImpl::GenAndGetAggregatedProof() called GenAggregatedBatchProof() and got requestID=" << requestID << endl;
 
     // Get batch proof 0
     for (i=0; i<AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES; i++)
@@ -843,14 +843,14 @@ using grpc::Status;
         // Parse public inputs
         aggregator::v1::PublicInputs * pPublicInputs = new aggregator::v1::PublicInputs();
         pPublicInputs->set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
-        pPublicInputs->set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
-        pPublicInputs->set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
+        //pPublicInputs->set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
+        //pPublicInputs->set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
         pPublicInputs->set_chain_id(input.publicInputsExtended.publicInputs.chainID);
         pPublicInputs->set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         pPublicInputs->set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
-        pPublicInputs->set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
-        pPublicInputs->set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
-        pPublicInputs->set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
+        //pPublicInputs->set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
+        //pPublicInputs->set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
+        //pPublicInputs->set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
         pPublicInputs->set_sequencer_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
         pPublicInputs->set_aggregator_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.aggregatorAddress.get_str(16)));
         pInputProver->set_allocated_public_inputs(pPublicInputs);

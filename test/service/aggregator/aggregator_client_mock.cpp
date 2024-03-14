@@ -1,5 +1,6 @@
 
 #include <nlohmann/json.hpp>
+#include <stdio.h>
 #include "aggregator_client_mock.hpp"
 
 using namespace std;
@@ -93,7 +94,7 @@ bool AggregatorClientMock::GenBatchProof (const aggregator::v1::GenBatchProofReq
     return true;
 }
 
-bool AggregatorClientMock::GenAggregatedProof (const aggregator::v1::GenAggregatedProofRequest &genAggregatedProofRequest, aggregator::v1::GenAggregatedProofResponse &genAggregatedProofResponse)
+bool AggregatorClientMock::GenAggregatedBatchProof (const aggregator::v1::GenAggregatedBatchProofRequest &genAggregatedProofRequest, aggregator::v1::GenAggregatedBatchProofResponse &genAggregatedProofResponse)
 {
 #ifdef LOG_SERVICE
     cout << "AggregatorClientMock::GenAggregatedProof() called with request: " << genAggregatedProofRequest.DebugString() << endl;
@@ -128,6 +129,82 @@ bool AggregatorClientMock::GenFinalProof (const aggregator::v1::GenFinalProofReq
 
 #ifdef LOG_SERVICE
     cout << "AggregatorClientMock::GenFinalProof() returns: " << genFinalProofResponse.DebugString() << endl;
+#endif
+    return true;
+}
+
+bool AggregatorClientMock::GenBlobInnerProofRequest (const aggregator::v1::GenBlobInnerProofRequest &genBlobInnerProofRequest, aggregator::v1::GenBlobInnerProofResponse &genBlobInnerProofResponse)
+{
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenBlobInnerProofRequest() called with request: " << genBlobInnerProofRequest.DebugString() << endl;
+#endif
+    requestType = prt_genBlobInnerProof;
+
+    // Build the response as Ok, returning the UUID assigned by the prover to this request
+    genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
+    lastAggregatorUUID = getUUID();
+    genBlobInnerProofResponse.set_id(lastAggregatorUUID);
+    gettimeofday(&lastAggregatorGenProof,NULL);
+
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenBlobInnerProofRequest() returns: " << genBlobInnerProofResponse.DebugString() << endl;
+#endif
+    return true;
+}
+
+bool AggregatorClientMock::GenBlobOuterProofRequest (const aggregator::v1::GenBlobOuterProofRequest &genBlobOuterProofRequest, aggregator::v1::GenBlobOuterProofResponse &genBlobOuterProofResponse)
+{
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenBlobOuterProofRequest() called with request: " << genBlobOuterProofRequest.DebugString() << endl;
+#endif
+    requestType = prt_genBlobInnerProof;
+
+    // Build the response as Ok, returning the UUID assigned by the prover to this request
+    genBlobOuterProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
+    lastAggregatorUUID = getUUID();
+    genBlobOuterProofResponse.set_id(lastAggregatorUUID);
+    gettimeofday(&lastAggregatorGenProof,NULL);
+
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenBlobOuterProofRequest() returns: " << genBlobOuterProofResponse.DebugString() << endl;
+#endif
+    return true;
+}
+
+bool AggregatorClientMock::GenAggregatedBlobOuterProofRequest (const aggregator::v1::GenAggregatedBlobOuterProofRequest &genAggregatedBlobOuterProofRequest, aggregator::v1::GenAggregatedBlobOuterProofResponse &genAggregatedBlobOuterProofResponse)
+{
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenAggregatedBlobOuterProofRequest() called with request: " << genAggregatedBlobOuterProofRequest.DebugString() << endl;
+#endif
+    requestType = prt_genAggregatedBlobOuterProof;
+
+    // Build the response as Ok, returning the UUID assigned by the prover to this request
+    genAggregatedBlobOuterProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
+    lastAggregatorUUID = getUUID();
+    genAggregatedBlobOuterProofResponse.set_id(lastAggregatorUUID);
+    gettimeofday(&lastAggregatorGenProof,NULL);
+
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenAggregatedBlobOuterProofRequest() returns: " << genAggregatedBlobOuterProofResponse.DebugString() << endl;
+#endif
+    return true;
+}
+
+bool AggregatorClientMock::GenStatelessBatchProofRequest (const aggregator::v1::GenStatelessBatchProofRequest &genStatelessBatchProofRequest, aggregator::v1::GenBatchProofResponse &genBatchProofResponse)
+{
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenStatelessBatchProofRequest() called with request: " << genStatelessBatchProofRequest.DebugString() << endl;
+#endif
+    requestType = prt_genBatchProof;
+
+    // Build the response as Ok, returning the UUID assigned by the prover to this request
+    genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
+    lastAggregatorUUID = getUUID();
+    genBatchProofResponse.set_id(lastAggregatorUUID);
+    gettimeofday(&lastAggregatorGenProof,NULL);
+
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenStatelessBatchProofRequest() returns: " << genBatchProofResponse.DebugString() << endl;
 #endif
     return true;
 }
@@ -181,21 +258,37 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
                 // Set public inputs extended
                 aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
                 pPublicInputs->set_old_state_root(string2ba("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9"));
-                pPublicInputs->set_old_acc_input_hash(string2ba("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9"));
-                pPublicInputs->set_old_batch_num(1);
+                pPublicInputs->set_old_batch_acc_input_hash(string2ba("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9"));
+                pPublicInputs->set_previous_l1_info_tree_root(string2ba("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9"));
+                pPublicInputs->set_previous_l1_info_tree_index(3);
                 pPublicInputs->set_chain_id(1000);
+                pPublicInputs->set_fork_id(1);
                 pPublicInputs->set_batch_l2_data(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
-                pPublicInputs->set_l1_info_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
-                pPublicInputs->set_timestamp_limit(1000000);
-                pPublicInputs->set_forced_blockhash_l1(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 pPublicInputs->set_sequencer_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
+                pPublicInputs->set_type(1);
+                pPublicInputs->set_forced_hash_data(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                aggregator::v1::ForcedData * pForcedData = new aggregator::v1::ForcedData();
+                pForcedData->set_global_exit_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                pForcedData->set_block_hash_l1(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                pForcedData->set_min_timestamp(9999);
+                pPublicInputs->set_allocated_forced_data(pForcedData);
                 pPublicInputs->set_aggregator_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
+                aggregator::v1::L1Data l1Data;
+                l1Data.set_global_exit_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                l1Data.set_block_hash_l1(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                l1Data.set_min_timestamp(9999);
+                l1Data.add_smt_proof(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                l1Data.set_initial_historic_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                google::protobuf::Map<google::protobuf::uint32, aggregator::v1::L1Data> * pL1InfoTreeData = pPublicInputs->mutable_l1_info_tree_data();
+                (*pL1InfoTreeData)[3] = l1Data;
                 aggregator::v1::PublicInputsExtended* pPublicInputsExtended = new(aggregator::v1::PublicInputsExtended);
                 pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
-                pPublicInputsExtended->set_new_state_root("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9");
-                pPublicInputsExtended->set_new_acc_input_hash("0x1afd6eaf13538380d99a245c2acc4a25481b54556ae080cf07d1facc0638cd8e");
-                pPublicInputsExtended->set_new_local_exit_root("0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e");
-                pPublicInputsExtended->set_new_batch_num(2);
+                pPublicInputsExtended->set_new_state_root(string2ba("0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9"));
+                pPublicInputsExtended->set_new_batch_acc_input_hash(string2ba("0x1afd6eaf13538380d99a245c2acc4a25481b54556ae080cf07d1facc0638cd8e"));
+                pPublicInputsExtended->set_new_local_exit_root(string2ba("0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e"));
+                pPublicInputsExtended->set_new_last_timestamp(9999);
+                pPublicInputsExtended->set_current_l1_info_tree_root(string2ba("0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e"));
+                pPublicInputsExtended->set_current_l1_info_tree_index(3);
                 pFinalProof->set_allocated_public_(pPublicInputsExtended);
                 getProofResponse.set_allocated_final_proof(pFinalProof);
                 break; 
@@ -208,6 +301,21 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
             case prt_genAggregatedBatchProof:
             {
                 getProofResponse.set_recursive_proof("99999670604050723159190639550237390237901487387303122609079617855313706601738");
+                break;
+            }
+            case prt_genBlobInnerProof:
+            {
+                getProofResponse.set_recursive_proof("77779670604050723159190639550237390237901487387303122609079617855313706601738");
+                break;
+            }
+            case prt_genBlobOuterProof:
+            {
+                getProofResponse.set_recursive_proof("66669670604050723159190639550237390237901487387303122609079617855313706601738");
+                break;
+            }
+            case prt_genAggregatedBlobOuterProof:
+            {
+                getProofResponse.set_recursive_proof("55559670604050723159190639550237390237901487387303122609079617855313706601738");
                 break;
             }
             default:
@@ -226,7 +334,7 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
     }
     else
     {
-        // Request is being computed
+        // Request has failed
         getProofResponse.set_id(uuid);
         getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_ERROR);
         getProofResponse.set_result_string("pending");
@@ -304,17 +412,45 @@ void* aggregatorClientMockThread(void* arg)
                     break;
                 }
 
-                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedBatchProofRequest:
                 {
                     // Allocate a new gen aggregated proof response
-                    aggregator::v1::GenAggregatedProofResponse * pGenAggregatedProofResponse = new aggregator::v1::GenAggregatedProofResponse();
-                    zkassertpermanent(pGenAggregatedProofResponse != NULL);
+                    aggregator::v1::GenAggregatedBatchProofResponse * pGenAggregatedBatchProofResponse = new aggregator::v1::GenAggregatedBatchProofResponse();
+                    zkassertpermanent(pGenAggregatedBatchProofResponse != NULL);
 
                     // Call GenAggregatedProof
-                    pAggregatorClientMock->GenAggregatedProof(aggregatorMessage.gen_aggregated_proof_request(), *pGenAggregatedProofResponse);
+                    pAggregatorClientMock->GenAggregatedBatchProof(aggregatorMessage.gen_aggregated_batch_proof_request(), *pGenAggregatedBatchProofResponse);
 
                     // Set the gen aggregated proof response
-                    proverMessage.set_allocated_gen_aggregated_proof_response(pGenAggregatedProofResponse);
+                    proverMessage.set_allocated_gen_aggregated_batch_proof_response(pGenAggregatedBatchProofResponse);
+                    break;
+                }
+
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBlobInnerProofRequest:
+                {
+                    // Allocate a new blob inner proof response
+                    aggregator::v1::GenBlobInnerProofResponse * pGenBlobInnerProofResponse = new aggregator::v1::GenBlobInnerProofResponse();
+                    zkassertpermanent(pGenBlobInnerProofResponse != NULL);
+
+                    // Call GenBlobInnerProofRequest
+                    pAggregatorClientMock->GenBlobInnerProofRequest(aggregatorMessage.gen_blob_inner_proof_request(), *pGenBlobInnerProofResponse);
+
+                    // Set the blob inner proof response
+                    proverMessage.set_allocated_gen_blob_inner_proof_response(pGenBlobInnerProofResponse);
+                    break;
+                }
+
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBlobOuterProofRequest:
+                {
+                    // Allocate a new blob outer proof response
+                    aggregator::v1::GenBlobOuterProofResponse * pGenBlobOuterProofResponse = new aggregator::v1::GenBlobOuterProofResponse();
+                    zkassertpermanent(pGenBlobOuterProofResponse != NULL);
+
+                    // Call GenBlobOuterProofRequest
+                    pAggregatorClientMock->GenBlobOuterProofRequest(aggregatorMessage.gen_blob_outer_proof_request(), *pGenBlobOuterProofResponse);
+
+                    // Set the blob outer proof response
+                    proverMessage.set_allocated_gen_blob_outer_proof_response(pGenBlobOuterProofResponse);
                     break;
                 }
 
@@ -348,7 +484,7 @@ void* aggregatorClientMockThread(void* arg)
 
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
                 {
-                    // Allocate a new cancel response
+                    // Allocate a new get proof response
                     aggregator::v1::GetProofResponse * pGetProofResponse = new aggregator::v1::GetProofResponse();
                     zkassertpermanent(pGetProofResponse != NULL);
 
@@ -357,6 +493,20 @@ void* aggregatorClientMockThread(void* arg)
 
                     // Set the get proof response
                     proverMessage.set_allocated_get_proof_response(pGetProofResponse);
+                    break;
+                }
+
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenStatelessBatchProofRequest:
+                {
+                    // Allocate a new gen stateless batch response
+                    aggregator::v1::GenBatchProofResponse * pGenBatchProofResponse = new aggregator::v1::GenBatchProofResponse();
+                    zkassertpermanent(pGenBatchProofResponse != NULL);
+
+                    // Call GetProof
+                    pAggregatorClientMock->GenStatelessBatchProofRequest(aggregatorMessage.gen_stateless_batch_proof_request(), *pGenBatchProofResponse);
+
+                    // Set the gen stateless batch proof response
+                    proverMessage.set_allocated_gen_batch_proof_response(pGenBatchProofResponse);
                     break;
                 }
 

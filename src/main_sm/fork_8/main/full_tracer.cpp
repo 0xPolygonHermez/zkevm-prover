@@ -914,48 +914,31 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
     // Clear logs
     currentBlock.logs.clear();
 
-    // Order all logs (from all CTX) in order of index
     map<uint64_t, LogV2> auxLogs;
-    map<uint64_t, map<uint64_t, LogV2>>::iterator logIt;
-    map<uint64_t, LogV2>::const_iterator it;
-    for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
+
+    // Add blockhash to all logs on every tx, and add logs to block response
+    for (uint64_t r = 0; r < currentBlock.responses.size(); r++)
     {
-        for (it = logIt->second.begin(); it != logIt->second.end(); it++)
+        // Set block hash to all txs of block
+        currentBlock.responses[r].block_hash = currentBlock.block_hash;
+        currentBlock.responses[r].block_number = currentBlock.block_number;
+
+        for (uint64_t l = 0; l < currentBlock.responses[r].logs.size(); l++)
         {
-            auxLogs[it->second.index] = it->second;
+            currentBlock.responses[r].logs[l].block_hash = currentBlock.block_hash;
+
+            // Store all logs in auxLogs, in order of index
+            auxLogs[currentBlock.responses[r].logs[l].index] = currentBlock.responses[r].logs[l];
         }
     }
 
     // Append to response logs, overwriting log indexes to be sequential
-    //uint64_t logIndex = 0;
     map<uint64_t, LogV2>::iterator auxLogsIt;
     for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
     {
-        // Set log index
-        //auxLogsIt->second.index = logIndex;
-        //logIndex++;
-
-        // Set block hash
-        auxLogsIt->second.block_hash = currentBlock.block_hash;
-
         // Store block log
         currentBlock.logs.emplace_back(auxLogsIt->second);
-
-        // Store transaction log
-        if (auxLogsIt->second.tx_index >= currentBlock.responses.size())
-        {            
-            zklog.error("FullTracer::onFinishBlock() found log.tx_index=" + to_string(auxLogsIt->second.tx_index) + " >= currentBlock.responses.size=" + to_string(currentBlock.responses.size()));
-            exitProcess();
-        }
-        currentBlock.responses[auxLogsIt->second.tx_index].logs.emplace_back(auxLogsIt->second);
     }
-
-    // Set block hash to all txs of block
-    for (uint64_t tx=0; tx<currentBlock.responses.size(); tx++)
-    {
-        currentBlock.responses[tx].block_hash = currentBlock.block_hash;
-        currentBlock.responses[tx].block_number = currentBlock.block_number;
-    };
 
     // Append block to final trace
     finalTrace.block_responses.emplace_back(currentBlock);
@@ -1679,7 +1662,10 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     txIndex++;
 
     // Check TX status
-    if ((response.error.empty() && (response.status == 0)) || (!response.error.empty() && (response.status == 1)))
+    if ((responseErrors.find(response.error) == responseErrors.end()) &&
+        ( (response.error.empty() && (response.status == 0)) ||
+          (!response.error.empty() && (response.status == 1)) )
+       )
     {
         zklog.error("FullTracer::onFinishTx() invalid TX status-error error=" + response.error + " status=" + to_string(response.status));
         return ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR;
@@ -1692,6 +1678,30 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Reset opcodes counters
     numberOfOpcodesInThisTx = 0;
     lastErrorOpcode = 0;
+
+    // Order all logs (from all CTX) in order of index
+    map<uint64_t, LogV2> auxLogs;
+    map<uint64_t, map<uint64_t, LogV2>>::iterator logIt;
+    map<uint64_t, LogV2>::const_iterator it;
+    for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
+    {
+        for (it = logIt->second.begin(); it != logIt->second.end(); it++)
+        {
+            auxLogs[it->second.index] = it->second;
+        }
+    }
+
+    // Append to response logs, overwriting log indexes to be sequential
+    map<uint64_t, LogV2>::iterator auxLogsIt;
+    uint64_t lastTx = currentBlock.responses.size() - 1;
+    currentBlock.responses[lastTx].logs.clear();
+    for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
+    {
+        currentBlock.responses[lastTx].logs.push_back(auxLogsIt->second);
+    }
+
+    // Reset logs
+    logs.clear();
 
     // Call finishTx()
     ctx.pHashDB->finishTx(ctx.proverRequest.uuid, response.state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);

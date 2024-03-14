@@ -46,10 +46,23 @@ public:
     /* genBatchProof output */
     nlohmann::ordered_json batchProofOutput;
 
-    /* genAggregatedProof input and output */
-    nlohmann::ordered_json aggregatedProofInput1;
-    nlohmann::ordered_json aggregatedProofInput2;
-    nlohmann::ordered_json aggregatedProofOutput;
+    /* genAggregatedBatchProof input and output */
+    nlohmann::ordered_json aggregatedBatchProofInput1;
+    nlohmann::ordered_json aggregatedBatchProofInput2;
+    nlohmann::ordered_json aggregatedBatchProofOutput;
+
+    /* genBlobInnerProof output */
+    nlohmann::ordered_json blobInnerProofOutput;
+
+    /* genBlobOuterProof input and output */
+    nlohmann::ordered_json blobOuterProofInputBatch;
+    nlohmann::ordered_json blobOuterProofInputBlobInner;
+    nlohmann::ordered_json blobOuterProofOutput;
+
+    /* genAggregatedBlobOuterProof input and output */
+    nlohmann::ordered_json aggregatedBlobOuterProofInput1;
+    nlohmann::ordered_json aggregatedBlobOuterProofInput2;
+    nlohmann::ordered_json aggregatedBlobOuterProofOutput;
 
     /* genFinalProof input */
     nlohmann::ordered_json finalProofInput;
