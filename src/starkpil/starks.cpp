@@ -521,6 +521,10 @@ void Starks::evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomia
     for (int i = 0; i < num_threads; ++i)
     {
         evals_acc[i] = (Goldilocks::Element *)malloc(size_eval * FIELD_EXTENSION * sizeof(Goldilocks::Element));
+        if(evals_acc[i]== NULL){
+            zklog.error("Starks::evmap() failed calling malloc");
+            exitProcess();
+        }
     }
 #pragma omp parallel
     {

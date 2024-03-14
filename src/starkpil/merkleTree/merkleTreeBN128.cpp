@@ -1,17 +1,26 @@
 
 #include "merkleTreeBN128.hpp"
 #include <algorithm> // std::max
-#include <cassert>
+#include "zkassert.hpp"
 
 MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width)
 {
     source = (Goldilocks::Element *)malloc(_height * _width * sizeof(Goldilocks::Element));
+    if( source == NULL){
+        std::cout << "Error: MerkleTreeBN128() failed allocating memory size: " << _height * _width * sizeof(Goldilocks::Element) << std::endl;
+        exitProcess();
+    }
+    
     source_width = _width;
     isSourceAllocated = true;
     height = _height;
     (_width > GOLDILOCKS_ELEMENTS + 1) ? width = ceil((double)_width / GOLDILOCKS_ELEMENTS) : width = 0;
     numNodes = getNumNodes(height);
     nodes = (RawFr::Element *)calloc(numNodes, sizeof(RawFr::Element));
+    if( nodes == NULL){
+        std::cout << "Error: MerkleTreeBN128() failed allocating memory size: " << numNodes * sizeof(RawFr::Element) << std::endl;
+        exitProcess();
+    }
     isNodesAllocated = true;
 }
 
@@ -28,12 +37,21 @@ MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::
     if (source == NULL)
     {
         source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
+        if(source == NULL){
+            std::cout << "Error: MerkleTreeBN128() failed allocating memory size: " << height * width * sizeof(Goldilocks::Element) << std::endl;
+            exitProcess();
+        }
         isSourceAllocated = true;
     }
 
     (_width > GOLDILOCKS_ELEMENTS + 1) ? width = ceil((double)_width / GOLDILOCKS_ELEMENTS) : width = 0;
     numNodes = getNumNodes(height);
     nodes = (RawFr::Element *)calloc(numNodes, sizeof(RawFr::Element));
+    if (nodes == NULL)
+    {
+        std::cout << "Error: MerkleTreeBN128() failed allocating memory size: " << numNodes * sizeof(RawFr::Element) << std::endl;
+        exitProcess();
+    }
     isNodesAllocated = true;
     intialized = true;
 }
@@ -93,6 +111,10 @@ void MerkleTreeBN128::linearHash()
     {
         uint64_t widthRawFrElements = ceil((double)source_width / GOLDILOCKS_ELEMENTS);
         RawFr::Element *buff = (RawFr::Element *)calloc(height * widthRawFrElements, sizeof(RawFr::Element));
+        if(buff == NULL){
+            std::cout << "Error: linearHash() failed allocating memory size: " << height * widthRawFrElements * sizeof(RawFr::Element) << std::endl;
+            exitProcess();
+        }
 
 #pragma omp parallel for
         for (uint64_t i = 0; i < height; i++)
@@ -210,6 +232,10 @@ void MerkleTreeBN128::getGroupProof(void *res, uint64_t idx)
     void *resCursor = (uint8_t *)res + source_width * sizeof(Goldilocks::Element);
 
     RawFr::Element *mp = (RawFr::Element *)calloc(getMerkleProofSize(height), 1);
+    if(mp==NULL){
+        std::cout << "Error: getGroupProof() failed allocating memory size: " << getMerkleProofSize(height) << std::endl;
+        exitProcess();
+    }
     merkle_genMerkleProof(mp, idx, 0, height);
 
     std::memcpy(resCursor, &mp[0], getMerkleProofSize(height));
