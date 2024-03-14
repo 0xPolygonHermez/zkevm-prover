@@ -23,7 +23,6 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         {
             case f_getGlobalExitRoot:               return eval_getGlobalExitRoot(ctx, cmd, cr);
             case f_getSequencerAddr:                return eval_getSequencerAddr(ctx, cmd, cr);
-            case f_getTimestamp:                    return eval_getTimestamp(ctx, cmd, cr);
             case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);
             case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);
             case f_eventLog:                        return eval_eventLog(ctx, cmd, cr);
@@ -77,6 +76,13 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_fp2InvBN254_x:                   return eval_fp2InvBN254_x(ctx, cmd, cr);
             case f_fp2InvBN254_y:                   return eval_fp2InvBN254_y(ctx, cmd, cr);
             case f_fpBN254inv:                      return eval_fpBN254inv(ctx, cmd, cr);
+
+            // Feijoa (fork 9) new methods:
+            case f_getForcedTimestamp:              return eval_getForcedTimestamp(ctx, cmd, cr);
+            case f_getType:                         return eval_getType(ctx, cmd, cr);
+            case f_getForcedGER:                    return eval_getForcedGER(ctx, cmd, cr);
+            case f_getL1HistoricRoot:               return eval_getL1HistoricRoot(ctx, cmd, cr);
+            case f_getPendingRID:                   return eval_getPendingRID(ctx, cmd, cr);
             
             default:
                 zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
@@ -382,6 +388,14 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         case reg_HASHPOS:
             cr.type = crt_u64;
             cr.u64 = ctx.fr.toU64(ctx.pols.HASHPOS[*ctx.pStep]);
+            break;
+        case reg_RCX:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.RCX[*ctx.pStep]);
+            break;
+        case reg_RID:
+            cr.type = crt_u64;
+            cr.u64 = ctx.fr.toU64(ctx.pols.RID[*ctx.pStep]);
             break;
         default:
             zklog.error("eval_getReg() Invalid register: " + reg2string(cmd.reg) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
@@ -1263,7 +1277,7 @@ void eval_eventLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 #endif
 
-    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 9); // fork_9_blob
+    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 9); // fork_9
     cr.zkResult = ((fork_9_blob::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
@@ -1768,7 +1782,7 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 9); // fork_9_blob
+    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 9); // fork_9
     cr.zkResult = ((fork_9_blob::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
@@ -2512,7 +2526,7 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
 
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value)
 {
-    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 9); // fork_9_blob
+    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 9); // fork_9
     return ((fork_9_blob::FullTracer *)ctx.proverRequest.pFullTracer)->addReadWriteAddress(
         ctx.pols.A0[0], ctx.pols.A1[0], ctx.pols.A2[0], ctx.pols.A3[0], ctx.pols.A4[0], ctx.pols.A5[0], ctx.pols.A6[0], ctx.pols.A7[0],
         ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0],
@@ -2679,7 +2693,7 @@ void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResu
 #endif
 
     cr.type = crt_fea;
-    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.forcedBlockHashL1, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.forcedData.blockHashL1, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 mpz_class MOCK_VALUE_SMT_PROOF("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3");
@@ -3833,5 +3847,141 @@ void eval_fpBN254inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     fq.toMpz(cr.scalar.get_mpz_t(), aInv);
 }
 
+// Feijoa (fork 9) new methods:
+
+void eval_getForcedTimestamp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getForcedTimestamp() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    mpz_class timestampLimit = ctx.proverRequest.input.publicInputsExtended.publicInputs.forcedData.minTimestamp; // TODO: get min timestamp
+    scalar2fea(fr, timestampLimit, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_getType (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getType() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    mpz_class type = ctx.proverRequest.input.publicInputsExtended.publicInputs.type;
+    scalar2fea(fr, type, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_getForcedGER (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getForcedGER() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    mpz_class globalExitRoot = ctx.proverRequest.input.publicInputsExtended.publicInputs.forcedData.globalExitRoot;
+    scalar2fea(fr, globalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_getL1HistoricRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_getL1HistoricRoot() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get indexL1InfoTree by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getL1HistoricRoot() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    uint64_t indexL1InfoTree = cr.scalar.get_ui();
+
+    cr.type = crt_fea;
+    mpz_class historicRootL1InfoTree = ctx.proverRequest.input.l1InfoTreeData[indexL1InfoTree].initialHistoricRoot;
+    scalar2fea(fr, historicRootL1InfoTree, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_getPendingRID (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_getPendingRID() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get rid by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getPendingRID() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t rid = cr.scalar.get_ui();
+
+    // Find a saved context that is not equal to rid and has not been restored yet
+    int _rid = -1;
+    map<uint64_t, Saved>::const_iterator it;
+    for (it = ctx.saved.begin(); it != ctx.saved.end(); it++)
+    {
+        if (it->first == rid)
+        {
+            continue;
+        }
+        if (it->second.restored)
+        {
+            continue;
+        }
+        _rid = it->first;
+        break;
+    }
+
+    // Return _rid in fea0
+    cr.type = crt_fea;
+    cr.fea0 = fr.fromS64(_rid);
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
+}
 
 } // namespace

@@ -51,9 +51,7 @@ public:
     uint64_t retDataCTXOffset;
     uint64_t retDataOffsetOffset;
     uint64_t retDataLengthOffset;
-    uint64_t newAccInputHashOffset;
-    uint64_t oldNumBatchOffset;
-    uint64_t newNumBatchOffset;
+    uint64_t newBatchAccInputHashOffset;
     uint64_t newLocalExitRootOffset;
     uint64_t gasRefundOffset;
     uint64_t txSrcAddrOffset;
@@ -115,9 +113,7 @@ public:
             retDataCTXOffset(0),
             retDataOffsetOffset(0),
             retDataLengthOffset(0),
-            newAccInputHashOffset(0),
-            oldNumBatchOffset(0),
-            newNumBatchOffset(0),
+            newBatchAccInputHashOffset(0),
             newLocalExitRootOffset(0),
             gasRefundOffset(0),
             txSrcAddrOffset(0),

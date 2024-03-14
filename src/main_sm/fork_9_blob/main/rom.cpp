@@ -36,7 +36,6 @@ void Rom::load(Goldilocks &fr, json &romJson)
         labels.ecrecoverEndLabel          = getLabel(string("ecrecover_end"));
         labels.checkFirstTxTypeLabel      = getLabel(string("checkFirstTxType"));
         labels.writeBlockInfoRootLabel    = getLabel(string("writeBlockInfoRoot"));
-        labels.verifyMerkleProofEndLabel  = getLabel(string("verifyMerkleProofEnd"));
         labels.outOfCountersStepLabel     = getLabel(string("outOfCountersStep"));
         labels.outOfCountersArithLabel    = getLabel(string("outOfCountersArith"));
         labels.outOfCountersBinaryLabel   = getLabel(string("outOfCountersBinary"));
@@ -45,6 +44,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         labels.outOfCountersMemalignLabel = getLabel(string("outOfCountersMemalign"));
         labels.outOfCountersPoseidonLabel = getLabel(string("outOfCountersPoseidon"));
         labels.outOfCountersPaddingLabel  = getLabel(string("outOfCountersPadding"));
+        labels.invalidIntrinsicTxSenderCodeLabel = getLabel(string("invalidIntrinsicTxSenderCode"));
     }
 
     // Get labels offsets
@@ -66,9 +66,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         retDataCTXOffset             = getMemoryOffset("retDataCTX");
         retDataOffsetOffset          = getMemoryOffset("retDataOffset");
         retDataLengthOffset          = getMemoryOffset("retDataLength");
-        newAccInputHashOffset        = getMemoryOffset("newAccInputHash");
-        oldNumBatchOffset            = getMemoryOffset("oldNumBatch");
-        newNumBatchOffset            = getMemoryOffset("newNumBatch");
+        newBatchAccInputHashOffset   = getMemoryOffset("newBatchAccInputHash");
         newLocalExitRootOffset       = getMemoryOffset("newLocalExitRoot");
         gasRefundOffset              = getMemoryOffset("gasRefund");
         txSrcAddrOffset              = getMemoryOffset("txSrcAddr");
@@ -334,19 +332,22 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["inCntPaddingPG"].is_string()) fr.fromString(line[i].inCntPaddingPG, l["inCntPaddingPG"]); else line[i].inCntPaddingPG = fr.zero();
         if (l["inROTL_C"].is_string()) fr.fromString(line[i].inROTL_C, l["inROTL_C"]); else line[i].inROTL_C = fr.zero();
         if (l["inRCX"].is_string()) fr.fromString(line[i].inRCX, l["inRCX"]); else line[i].inRCX = fr.zero();
+        if (l["inRID"].is_string()) fr.fromString(line[i].inRID, l["inRID"]); else line[i].inRID = fr.zero();
+        if (l["elseUseAddrRel"].is_number_integer()) line[i].elseUseAddrRel = l["elseUseAddrRel"]; else line[i].elseUseAddrRel = 0;
 
         if (l["mOp"].is_number_integer()) line[i].mOp = l["mOp"]; else line[i].mOp = 0;
         if (l["mWR"].is_number_integer()) line[i].mWR = l["mWR"]; else line[i].mWR = 0;
+        if (l["memUseAddrRel"].is_number_integer()) line[i].memUseAddrRel = l["memUseAddrRel"]; else line[i].memUseAddrRel = 0;
+        if (l["assumeFree"].is_number_integer()) line[i].assumeFree = l["assumeFree"]; else line[i].assumeFree = 0;
+        if (l["hashBytes"].is_number_integer()) line[i].hashBytes = l["hashBytes"]; else line[i].hashBytes = 0;
+        if (l["hashBytesInD"].is_number_integer()) line[i].hashBytesInD = l["hashBytesInD"]; else line[i].hashBytesInD = 0;
         if (l["hashK"].is_number_integer()) line[i].hashK = l["hashK"]; else line[i].hashK = 0;
-        if (l["hashK1"].is_number_integer()) line[i].hashK1 = l["hashK1"]; else line[i].hashK1 = 0;
         if (l["hashKLen"].is_number_integer()) line[i].hashKLen = l["hashKLen"]; else line[i].hashKLen = 0;
         if (l["hashKDigest"].is_number_integer()) line[i].hashKDigest = l["hashKDigest"]; else line[i].hashKDigest = 0;
         if (l["hashP"].is_number_integer()) line[i].hashP = l["hashP"]; else line[i].hashP = 0;
-        if (l["hashP1"].is_number_integer()) line[i].hashP1 = l["hashP1"]; else line[i].hashP1 = 0;
         if (l["hashPLen"].is_number_integer()) line[i].hashPLen = l["hashPLen"]; else line[i].hashPLen = 0;
         if (l["hashPDigest"].is_number_integer()) line[i].hashPDigest = l["hashPDigest"]; else line[i].hashPDigest = 0;
         if (l["hashS"].is_number_integer()) line[i].hashS = l["hashS"]; else line[i].hashS = 0;
-        if (l["hashS1"].is_number_integer()) line[i].hashS1 = l["hashS1"]; else line[i].hashS1 = 0;
         if (l["hashSLen"].is_number_integer()) line[i].hashSLen = l["hashSLen"]; else line[i].hashSLen = 0;
         if (l["hashSDigest"].is_number_integer()) line[i].hashSDigest = l["hashSDigest"]; else line[i].hashSDigest = 0;
 
@@ -356,15 +357,18 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["JMPZ"].is_number_integer()) line[i].JMPZ = l["JMPZ"]; else line[i].JMPZ = 0;
         if (l["call"].is_number_integer()) line[i].call = l["call"]; else line[i].call = 0;
         if (l["return"].is_number_integer()) line[i].return_ = l["return"]; else line[i].return_ = 0;
-        if (l["useJmpAddr"].is_number_integer()) line[i].useJmpAddr = l["useJmpAddr"]; else line[i].useJmpAddr = 0;
+        if (l["save"].is_number_integer()) line[i].save = l["save"]; else line[i].save = 0;
+        if (l["restore"].is_number_integer()) line[i].restore = l["restore"]; else line[i].restore = 0;
+        if (l["jmpUseAddrRel"].is_number_integer()) line[i].jmpUseAddrRel = l["jmpUseAddrRel"]; else line[i].jmpUseAddrRel = 0;
         if (l["useElseAddr"].is_number_integer()) line[i].useElseAddr = l["useElseAddr"]; else line[i].useElseAddr = 0;
         if (l["useCTX"].is_number_integer()) line[i].useCTX = l["useCTX"]; else line[i].useCTX = 0;
         if (l["isStack"].is_number_integer()) line[i].isStack = l["isStack"]; else line[i].isStack = 0;
         if (l["isMem"].is_number_integer()) line[i].isMem = l["isMem"]; else line[i].isMem = 0;
 
         if (l["incStack"].is_number_integer()) line[i].incStack = l["incStack"]; else line[i].incStack = 0;
-        if (l["ind"].is_number_integer()) line[i].ind = l["ind"]; else line[i].ind = 0;
-        if (l["indRR"].is_number_integer()) line[i].indRR = l["indRR"]; else line[i].indRR = 0;
+        if (l["hashOffset"].is_number_integer()) line[i].hashOffset = l["hashOffset"]; else line[i].hashOffset = 0;
+        if (l["ind"].is_number_integer()) fr.fromS64(line[i].ind, l["ind"]); else line[i].ind = fr.zero();
+        if (l["indRR"].is_number_integer()) fr.fromS64(line[i].indRR, l["indRR"]); else line[i].indRR = fr.zero();
 
         if (l["assert"].is_number_integer()) line[i].assert = l["assert"]; else line[i].assert = 0;
         
@@ -382,6 +386,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["setRR"].is_number_integer()) line[i].setRR = l["setRR"]; else line[i].setRR = 0;
         if (l["setHASHPOS"].is_number_integer()) line[i].setHASHPOS = l["setHASHPOS"]; else line[i].setHASHPOS = 0;
         if (l["setRCX"].is_number_integer()) line[i].setRCX = l["setRCX"]; else line[i].setRCX = 0;
+        if (l["setRID"].is_number_integer()) line[i].setRID = l["setRID"]; else line[i].setRID = 0;
  
         if (l["sRD"].is_number_integer()) line[i].sRD = l["sRD"]; else line[i].sRD = 0;
         if (l["sWR"].is_number_integer()) line[i].sWR = l["sWR"]; else line[i].sWR = 0;
@@ -397,6 +402,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["memAlignWR"].is_number_integer()) line[i].memAlignWR = l["memAlignWR"]; else line[i].memAlignWR = 0;
         if (l["memAlignWR8"].is_number_integer()) line[i].memAlignWR8 = l["memAlignWR8"]; else line[i].memAlignWR8 = 0;
         if (l["repeat"].is_number_integer()) line[i].repeat = l["repeat"]; else line[i].repeat = 0;
+        if (l["free0IsByte"].is_number_integer()) line[i].free0IsByte = l["free0IsByte"]; else line[i].free0IsByte = 0;
     }
 }
 

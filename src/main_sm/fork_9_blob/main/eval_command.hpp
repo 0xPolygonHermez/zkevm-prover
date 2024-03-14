@@ -97,7 +97,6 @@ void eval_getSequencerAddr    (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_getTxs              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTxsLen           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_eventLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getTimestamp        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_inverseFpEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_inverseFnEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -148,6 +147,13 @@ void eval_ARITH_BN254_MULFP2_Y        (Context &ctx, const RomCommand &cmd, Comm
 void eval_fp2InvBN254_x               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_fp2InvBN254_y               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_fpBN254inv                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+
+// Feijoa (fork 9) new methods:
+void eval_getForcedTimestamp          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getType                     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getForcedGER                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getL1HistoricRoot           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getPendingRID               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);

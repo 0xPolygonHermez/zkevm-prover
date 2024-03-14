@@ -17,7 +17,6 @@ public:
     uint64_t ecrecoverEndLabel;
     uint64_t checkFirstTxTypeLabel;
     uint64_t writeBlockInfoRootLabel;
-    uint64_t verifyMerkleProofEndLabel;
     uint64_t outOfCountersStepLabel;
     uint64_t outOfCountersArithLabel;
     uint64_t outOfCountersBinaryLabel;
@@ -26,6 +25,7 @@ public:
     uint64_t outOfCountersMemalignLabel;
     uint64_t outOfCountersPoseidonLabel;
     uint64_t outOfCountersPaddingLabel;
+    uint64_t invalidIntrinsicTxSenderCodeLabel;
 
     RomLabels() :
         finalizeExecutionLabel(U64Mask64),
@@ -34,7 +34,6 @@ public:
         ecrecoverEndLabel(U64Mask64),
         checkFirstTxTypeLabel(U64Mask64),
         writeBlockInfoRootLabel(U64Mask64),
-        verifyMerkleProofEndLabel(U64Mask64),
         outOfCountersStepLabel(U64Mask64),
         outOfCountersArithLabel(U64Mask64),
         outOfCountersBinaryLabel(U64Mask64),
@@ -42,7 +41,8 @@ public:
         outOfCountersSha256Label(U64Mask64),
         outOfCountersMemalignLabel(U64Mask64),
         outOfCountersPoseidonLabel(U64Mask64),
-        outOfCountersPaddingLabel(U64Mask64)
+        outOfCountersPaddingLabel(U64Mask64),
+        invalidIntrinsicTxSenderCodeLabel(U64Mask64)
         {};
 };
 

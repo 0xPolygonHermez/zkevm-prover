@@ -15,7 +15,7 @@ private:
     uint64_t _index;
 public:
     CommitPol(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
-    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*751]; };
+    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*767]; };
     inline Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
     inline Goldilocks::Element * address (void) { return _pAddress; }
@@ -1420,6 +1420,8 @@ public:
     CommitPol indRR;
     CommitPol useCTX;
     CommitPol carry;
+    CommitPol assumeFree;
+    CommitPol free0IsByte;
     CommitPol mOp;
     CommitPol mWR;
     CommitPol sWR;
@@ -1434,17 +1436,17 @@ public:
     CommitPol memAlignWR;
     CommitPol memAlignWR8;
     CommitPol hashK;
-    CommitPol hashK1;
     CommitPol hashKLen;
     CommitPol hashKDigest;
     CommitPol hashP;
-    CommitPol hashP1;
     CommitPol hashPLen;
     CommitPol hashPDigest;
     CommitPol hashS;
-    CommitPol hashS1;
     CommitPol hashSLen;
     CommitPol hashSDigest;
+    CommitPol hashBytesInD;
+    CommitPol hashBytes;
+    CommitPol hashOffset;
     CommitPol bin;
     CommitPol binOpcode;
     CommitPol assert_pol;
@@ -1467,14 +1469,28 @@ public:
     CommitPol inCntPoseidonG;
     CommitPol inCntPaddingPG;
     CommitPol incCounter;
+    CommitPol inRID;
+    CommitPol RID;
+    CommitPol save;
+    CommitPol restore;
+    CommitPol setRID;
+    CommitPol op0;
+    CommitPol op1;
+    CommitPol op2;
+    CommitPol op3;
+    CommitPol op4;
+    CommitPol op5;
+    CommitPol op6;
+    CommitPol op7;
+    CommitPol memUseAddrRel;
     CommitPol lJmpnCondValue;
     CommitPol hJmpnCondValueBit[9];
     CommitPol RCXInv;
     CommitPol op0Inv;
     CommitPol jmpAddr;
     CommitPol elseAddr;
-    CommitPol useJmpAddr;
-    CommitPol useElseAddr;
+    CommitPol jmpUseAddrRel;
+    CommitPol elseUseAddrRel;
     CommitPol sKeyI[4];
     CommitPol sKey[4];
 private:
@@ -1597,93 +1613,109 @@ public:
         indRR((Goldilocks::Element *)((uint8_t *)pAddress + 5416), degree, 677),
         useCTX((Goldilocks::Element *)((uint8_t *)pAddress + 5424), degree, 678),
         carry((Goldilocks::Element *)((uint8_t *)pAddress + 5432), degree, 679),
-        mOp((Goldilocks::Element *)((uint8_t *)pAddress + 5440), degree, 680),
-        mWR((Goldilocks::Element *)((uint8_t *)pAddress + 5448), degree, 681),
-        sWR((Goldilocks::Element *)((uint8_t *)pAddress + 5456), degree, 682),
-        sRD((Goldilocks::Element *)((uint8_t *)pAddress + 5464), degree, 683),
-        arithEq0((Goldilocks::Element *)((uint8_t *)pAddress + 5472), degree, 684),
-        arithEq1((Goldilocks::Element *)((uint8_t *)pAddress + 5480), degree, 685),
-        arithEq2((Goldilocks::Element *)((uint8_t *)pAddress + 5488), degree, 686),
-        arithEq3((Goldilocks::Element *)((uint8_t *)pAddress + 5496), degree, 687),
-        arithEq4((Goldilocks::Element *)((uint8_t *)pAddress + 5504), degree, 688),
-        arithEq5((Goldilocks::Element *)((uint8_t *)pAddress + 5512), degree, 689),
-        memAlignRD((Goldilocks::Element *)((uint8_t *)pAddress + 5520), degree, 690),
-        memAlignWR((Goldilocks::Element *)((uint8_t *)pAddress + 5528), degree, 691),
-        memAlignWR8((Goldilocks::Element *)((uint8_t *)pAddress + 5536), degree, 692),
-        hashK((Goldilocks::Element *)((uint8_t *)pAddress + 5544), degree, 693),
-        hashK1((Goldilocks::Element *)((uint8_t *)pAddress + 5552), degree, 694),
-        hashKLen((Goldilocks::Element *)((uint8_t *)pAddress + 5560), degree, 695),
-        hashKDigest((Goldilocks::Element *)((uint8_t *)pAddress + 5568), degree, 696),
-        hashP((Goldilocks::Element *)((uint8_t *)pAddress + 5576), degree, 697),
-        hashP1((Goldilocks::Element *)((uint8_t *)pAddress + 5584), degree, 698),
+        assumeFree((Goldilocks::Element *)((uint8_t *)pAddress + 5440), degree, 680),
+        free0IsByte((Goldilocks::Element *)((uint8_t *)pAddress + 5448), degree, 681),
+        mOp((Goldilocks::Element *)((uint8_t *)pAddress + 5456), degree, 682),
+        mWR((Goldilocks::Element *)((uint8_t *)pAddress + 5464), degree, 683),
+        sWR((Goldilocks::Element *)((uint8_t *)pAddress + 5472), degree, 684),
+        sRD((Goldilocks::Element *)((uint8_t *)pAddress + 5480), degree, 685),
+        arithEq0((Goldilocks::Element *)((uint8_t *)pAddress + 5488), degree, 686),
+        arithEq1((Goldilocks::Element *)((uint8_t *)pAddress + 5496), degree, 687),
+        arithEq2((Goldilocks::Element *)((uint8_t *)pAddress + 5504), degree, 688),
+        arithEq3((Goldilocks::Element *)((uint8_t *)pAddress + 5512), degree, 689),
+        arithEq4((Goldilocks::Element *)((uint8_t *)pAddress + 5520), degree, 690),
+        arithEq5((Goldilocks::Element *)((uint8_t *)pAddress + 5528), degree, 691),
+        memAlignRD((Goldilocks::Element *)((uint8_t *)pAddress + 5536), degree, 692),
+        memAlignWR((Goldilocks::Element *)((uint8_t *)pAddress + 5544), degree, 693),
+        memAlignWR8((Goldilocks::Element *)((uint8_t *)pAddress + 5552), degree, 694),
+        hashK((Goldilocks::Element *)((uint8_t *)pAddress + 5560), degree, 695),
+        hashKLen((Goldilocks::Element *)((uint8_t *)pAddress + 5568), degree, 696),
+        hashKDigest((Goldilocks::Element *)((uint8_t *)pAddress + 5576), degree, 697),
+        hashP((Goldilocks::Element *)((uint8_t *)pAddress + 5584), degree, 698),
         hashPLen((Goldilocks::Element *)((uint8_t *)pAddress + 5592), degree, 699),
         hashPDigest((Goldilocks::Element *)((uint8_t *)pAddress + 5600), degree, 700),
         hashS((Goldilocks::Element *)((uint8_t *)pAddress + 5608), degree, 701),
-        hashS1((Goldilocks::Element *)((uint8_t *)pAddress + 5616), degree, 702),
-        hashSLen((Goldilocks::Element *)((uint8_t *)pAddress + 5624), degree, 703),
-        hashSDigest((Goldilocks::Element *)((uint8_t *)pAddress + 5632), degree, 704),
-        bin((Goldilocks::Element *)((uint8_t *)pAddress + 5640), degree, 705),
-        binOpcode((Goldilocks::Element *)((uint8_t *)pAddress + 5648), degree, 706),
-        assert_pol((Goldilocks::Element *)((uint8_t *)pAddress + 5656), degree, 707),
-        repeat((Goldilocks::Element *)((uint8_t *)pAddress + 5664), degree, 708),
-        call((Goldilocks::Element *)((uint8_t *)pAddress + 5672), degree, 709),
-        return_pol((Goldilocks::Element *)((uint8_t *)pAddress + 5680), degree, 710),
-        isNeg((Goldilocks::Element *)((uint8_t *)pAddress + 5688), degree, 711),
-        cntArith((Goldilocks::Element *)((uint8_t *)pAddress + 5696), degree, 712),
-        cntBinary((Goldilocks::Element *)((uint8_t *)pAddress + 5704), degree, 713),
-        cntMemAlign((Goldilocks::Element *)((uint8_t *)pAddress + 5712), degree, 714),
-        cntKeccakF((Goldilocks::Element *)((uint8_t *)pAddress + 5720), degree, 715),
-        cntSha256F((Goldilocks::Element *)((uint8_t *)pAddress + 5728), degree, 716),
-        cntPoseidonG((Goldilocks::Element *)((uint8_t *)pAddress + 5736), degree, 717),
-        cntPaddingPG((Goldilocks::Element *)((uint8_t *)pAddress + 5744), degree, 718),
-        inCntArith((Goldilocks::Element *)((uint8_t *)pAddress + 5752), degree, 719),
-        inCntBinary((Goldilocks::Element *)((uint8_t *)pAddress + 5760), degree, 720),
-        inCntMemAlign((Goldilocks::Element *)((uint8_t *)pAddress + 5768), degree, 721),
-        inCntKeccakF((Goldilocks::Element *)((uint8_t *)pAddress + 5776), degree, 722),
-        inCntSha256F((Goldilocks::Element *)((uint8_t *)pAddress + 5784), degree, 723),
-        inCntPoseidonG((Goldilocks::Element *)((uint8_t *)pAddress + 5792), degree, 724),
-        inCntPaddingPG((Goldilocks::Element *)((uint8_t *)pAddress + 5800), degree, 725),
-        incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 5808), degree, 726),
-        lJmpnCondValue((Goldilocks::Element *)((uint8_t *)pAddress + 5816), degree, 727),
+        hashSLen((Goldilocks::Element *)((uint8_t *)pAddress + 5616), degree, 702),
+        hashSDigest((Goldilocks::Element *)((uint8_t *)pAddress + 5624), degree, 703),
+        hashBytesInD((Goldilocks::Element *)((uint8_t *)pAddress + 5632), degree, 704),
+        hashBytes((Goldilocks::Element *)((uint8_t *)pAddress + 5640), degree, 705),
+        hashOffset((Goldilocks::Element *)((uint8_t *)pAddress + 5648), degree, 706),
+        bin((Goldilocks::Element *)((uint8_t *)pAddress + 5656), degree, 707),
+        binOpcode((Goldilocks::Element *)((uint8_t *)pAddress + 5664), degree, 708),
+        assert_pol((Goldilocks::Element *)((uint8_t *)pAddress + 5672), degree, 709),
+        repeat((Goldilocks::Element *)((uint8_t *)pAddress + 5680), degree, 710),
+        call((Goldilocks::Element *)((uint8_t *)pAddress + 5688), degree, 711),
+        return_pol((Goldilocks::Element *)((uint8_t *)pAddress + 5696), degree, 712),
+        isNeg((Goldilocks::Element *)((uint8_t *)pAddress + 5704), degree, 713),
+        cntArith((Goldilocks::Element *)((uint8_t *)pAddress + 5712), degree, 714),
+        cntBinary((Goldilocks::Element *)((uint8_t *)pAddress + 5720), degree, 715),
+        cntMemAlign((Goldilocks::Element *)((uint8_t *)pAddress + 5728), degree, 716),
+        cntKeccakF((Goldilocks::Element *)((uint8_t *)pAddress + 5736), degree, 717),
+        cntSha256F((Goldilocks::Element *)((uint8_t *)pAddress + 5744), degree, 718),
+        cntPoseidonG((Goldilocks::Element *)((uint8_t *)pAddress + 5752), degree, 719),
+        cntPaddingPG((Goldilocks::Element *)((uint8_t *)pAddress + 5760), degree, 720),
+        inCntArith((Goldilocks::Element *)((uint8_t *)pAddress + 5768), degree, 721),
+        inCntBinary((Goldilocks::Element *)((uint8_t *)pAddress + 5776), degree, 722),
+        inCntMemAlign((Goldilocks::Element *)((uint8_t *)pAddress + 5784), degree, 723),
+        inCntKeccakF((Goldilocks::Element *)((uint8_t *)pAddress + 5792), degree, 724),
+        inCntSha256F((Goldilocks::Element *)((uint8_t *)pAddress + 5800), degree, 725),
+        inCntPoseidonG((Goldilocks::Element *)((uint8_t *)pAddress + 5808), degree, 726),
+        inCntPaddingPG((Goldilocks::Element *)((uint8_t *)pAddress + 5816), degree, 727),
+        incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 5824), degree, 728),
+        inRID((Goldilocks::Element *)((uint8_t *)pAddress + 5832), degree, 729),
+        RID((Goldilocks::Element *)((uint8_t *)pAddress + 5840), degree, 730),
+        save((Goldilocks::Element *)((uint8_t *)pAddress + 5848), degree, 731),
+        restore((Goldilocks::Element *)((uint8_t *)pAddress + 5856), degree, 732),
+        setRID((Goldilocks::Element *)((uint8_t *)pAddress + 5864), degree, 733),
+        op0((Goldilocks::Element *)((uint8_t *)pAddress + 5872), degree, 734),
+        op1((Goldilocks::Element *)((uint8_t *)pAddress + 5880), degree, 735),
+        op2((Goldilocks::Element *)((uint8_t *)pAddress + 5888), degree, 736),
+        op3((Goldilocks::Element *)((uint8_t *)pAddress + 5896), degree, 737),
+        op4((Goldilocks::Element *)((uint8_t *)pAddress + 5904), degree, 738),
+        op5((Goldilocks::Element *)((uint8_t *)pAddress + 5912), degree, 739),
+        op6((Goldilocks::Element *)((uint8_t *)pAddress + 5920), degree, 740),
+        op7((Goldilocks::Element *)((uint8_t *)pAddress + 5928), degree, 741),
+        memUseAddrRel((Goldilocks::Element *)((uint8_t *)pAddress + 5936), degree, 742),
+        lJmpnCondValue((Goldilocks::Element *)((uint8_t *)pAddress + 5944), degree, 743),
         hJmpnCondValueBit{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5824), degree, 728),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5832), degree, 729),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5840), degree, 730),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5848), degree, 731),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5856), degree, 732),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5864), degree, 733),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5872), degree, 734),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5880), degree, 735),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5888), degree, 736)
-        },
-        RCXInv((Goldilocks::Element *)((uint8_t *)pAddress + 5896), degree, 737),
-        op0Inv((Goldilocks::Element *)((uint8_t *)pAddress + 5904), degree, 738),
-        jmpAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5912), degree, 739),
-        elseAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5920), degree, 740),
-        useJmpAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5928), degree, 741),
-        useElseAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5936), degree, 742),
-        sKeyI{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5944), degree, 743),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5952), degree, 744),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5960), degree, 745),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5968), degree, 746)
-        },
-        sKey{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5968), degree, 746),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5976), degree, 747),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5984), degree, 748),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5992), degree, 749),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6000), degree, 750)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6000), degree, 750),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6008), degree, 751),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6016), degree, 752)
+        },
+        RCXInv((Goldilocks::Element *)((uint8_t *)pAddress + 6024), degree, 753),
+        op0Inv((Goldilocks::Element *)((uint8_t *)pAddress + 6032), degree, 754),
+        jmpAddr((Goldilocks::Element *)((uint8_t *)pAddress + 6040), degree, 755),
+        elseAddr((Goldilocks::Element *)((uint8_t *)pAddress + 6048), degree, 756),
+        jmpUseAddrRel((Goldilocks::Element *)((uint8_t *)pAddress + 6056), degree, 757),
+        elseUseAddrRel((Goldilocks::Element *)((uint8_t *)pAddress + 6064), degree, 758),
+        sKeyI{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6072), degree, 759),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6080), degree, 760),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6088), degree, 761),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6096), degree, 762)
+        },
+        sKey{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6104), degree, 763),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6112), degree, 764),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6120), degree, 765),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6128), degree, 766)
         },
         _pAddress(pAddress),
         _degree(degree) {};
 
     inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 1480; }
-    inline static uint64_t numPols (void) { return 185; }
+    inline static uint64_t pilSize (void) { return 1608; }
+    inline static uint64_t numPols (void) { return 201; }
 
     inline void * address (void) { return _pAddress; }
     inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*185*sizeof(Goldilocks::Element); }
+    inline uint64_t size (void) { return _degree*201*sizeof(Goldilocks::Element); }
 };
 
 class CommitPols
@@ -1732,13 +1764,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {}
 
-    inline static uint64_t pilSize (void) { return 50398756864; }
+    inline static uint64_t pilSize (void) { return 51472498688; }
     inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t numPols (void) { return 751; }
+    inline static uint64_t numPols (void) { return 767; }
 
     inline void * address (void) { return _pAddress; }
     inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*751*sizeof(Goldilocks::Element); }
+    inline uint64_t size (void) { return _degree*767*sizeof(Goldilocks::Element); }
 
     inline Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
     {
@@ -2428,77 +2460,93 @@ inline const char * address2CommitPolName (uint64_t address)
     if ((address >= 5416) && (address <= 5423)) return "Main.indRR";
     if ((address >= 5424) && (address <= 5431)) return "Main.useCTX";
     if ((address >= 5432) && (address <= 5439)) return "Main.carry";
-    if ((address >= 5440) && (address <= 5447)) return "Main.mOp";
-    if ((address >= 5448) && (address <= 5455)) return "Main.mWR";
-    if ((address >= 5456) && (address <= 5463)) return "Main.sWR";
-    if ((address >= 5464) && (address <= 5471)) return "Main.sRD";
-    if ((address >= 5472) && (address <= 5479)) return "Main.arithEq0";
-    if ((address >= 5480) && (address <= 5487)) return "Main.arithEq1";
-    if ((address >= 5488) && (address <= 5495)) return "Main.arithEq2";
-    if ((address >= 5496) && (address <= 5503)) return "Main.arithEq3";
-    if ((address >= 5504) && (address <= 5511)) return "Main.arithEq4";
-    if ((address >= 5512) && (address <= 5519)) return "Main.arithEq5";
-    if ((address >= 5520) && (address <= 5527)) return "Main.memAlignRD";
-    if ((address >= 5528) && (address <= 5535)) return "Main.memAlignWR";
-    if ((address >= 5536) && (address <= 5543)) return "Main.memAlignWR8";
-    if ((address >= 5544) && (address <= 5551)) return "Main.hashK";
-    if ((address >= 5552) && (address <= 5559)) return "Main.hashK1";
-    if ((address >= 5560) && (address <= 5567)) return "Main.hashKLen";
-    if ((address >= 5568) && (address <= 5575)) return "Main.hashKDigest";
-    if ((address >= 5576) && (address <= 5583)) return "Main.hashP";
-    if ((address >= 5584) && (address <= 5591)) return "Main.hashP1";
+    if ((address >= 5440) && (address <= 5447)) return "Main.assumeFree";
+    if ((address >= 5448) && (address <= 5455)) return "Main.free0IsByte";
+    if ((address >= 5456) && (address <= 5463)) return "Main.mOp";
+    if ((address >= 5464) && (address <= 5471)) return "Main.mWR";
+    if ((address >= 5472) && (address <= 5479)) return "Main.sWR";
+    if ((address >= 5480) && (address <= 5487)) return "Main.sRD";
+    if ((address >= 5488) && (address <= 5495)) return "Main.arithEq0";
+    if ((address >= 5496) && (address <= 5503)) return "Main.arithEq1";
+    if ((address >= 5504) && (address <= 5511)) return "Main.arithEq2";
+    if ((address >= 5512) && (address <= 5519)) return "Main.arithEq3";
+    if ((address >= 5520) && (address <= 5527)) return "Main.arithEq4";
+    if ((address >= 5528) && (address <= 5535)) return "Main.arithEq5";
+    if ((address >= 5536) && (address <= 5543)) return "Main.memAlignRD";
+    if ((address >= 5544) && (address <= 5551)) return "Main.memAlignWR";
+    if ((address >= 5552) && (address <= 5559)) return "Main.memAlignWR8";
+    if ((address >= 5560) && (address <= 5567)) return "Main.hashK";
+    if ((address >= 5568) && (address <= 5575)) return "Main.hashKLen";
+    if ((address >= 5576) && (address <= 5583)) return "Main.hashKDigest";
+    if ((address >= 5584) && (address <= 5591)) return "Main.hashP";
     if ((address >= 5592) && (address <= 5599)) return "Main.hashPLen";
     if ((address >= 5600) && (address <= 5607)) return "Main.hashPDigest";
     if ((address >= 5608) && (address <= 5615)) return "Main.hashS";
-    if ((address >= 5616) && (address <= 5623)) return "Main.hashS1";
-    if ((address >= 5624) && (address <= 5631)) return "Main.hashSLen";
-    if ((address >= 5632) && (address <= 5639)) return "Main.hashSDigest";
-    if ((address >= 5640) && (address <= 5647)) return "Main.bin";
-    if ((address >= 5648) && (address <= 5655)) return "Main.binOpcode";
-    if ((address >= 5656) && (address <= 5663)) return "Main.assert_pol";
-    if ((address >= 5664) && (address <= 5671)) return "Main.repeat";
-    if ((address >= 5672) && (address <= 5679)) return "Main.call";
-    if ((address >= 5680) && (address <= 5687)) return "Main.return_pol";
-    if ((address >= 5688) && (address <= 5695)) return "Main.isNeg";
-    if ((address >= 5696) && (address <= 5703)) return "Main.cntArith";
-    if ((address >= 5704) && (address <= 5711)) return "Main.cntBinary";
-    if ((address >= 5712) && (address <= 5719)) return "Main.cntMemAlign";
-    if ((address >= 5720) && (address <= 5727)) return "Main.cntKeccakF";
-    if ((address >= 5728) && (address <= 5735)) return "Main.cntSha256F";
-    if ((address >= 5736) && (address <= 5743)) return "Main.cntPoseidonG";
-    if ((address >= 5744) && (address <= 5751)) return "Main.cntPaddingPG";
-    if ((address >= 5752) && (address <= 5759)) return "Main.inCntArith";
-    if ((address >= 5760) && (address <= 5767)) return "Main.inCntBinary";
-    if ((address >= 5768) && (address <= 5775)) return "Main.inCntMemAlign";
-    if ((address >= 5776) && (address <= 5783)) return "Main.inCntKeccakF";
-    if ((address >= 5784) && (address <= 5791)) return "Main.inCntSha256F";
-    if ((address >= 5792) && (address <= 5799)) return "Main.inCntPoseidonG";
-    if ((address >= 5800) && (address <= 5807)) return "Main.inCntPaddingPG";
-    if ((address >= 5808) && (address <= 5815)) return "Main.incCounter";
-    if ((address >= 5816) && (address <= 5823)) return "Main.lJmpnCondValue";
-    if ((address >= 5824) && (address <= 5831)) return "Main.hJmpnCondValueBit[0]";
-    if ((address >= 5832) && (address <= 5839)) return "Main.hJmpnCondValueBit[1]";
-    if ((address >= 5840) && (address <= 5847)) return "Main.hJmpnCondValueBit[2]";
-    if ((address >= 5848) && (address <= 5855)) return "Main.hJmpnCondValueBit[3]";
-    if ((address >= 5856) && (address <= 5863)) return "Main.hJmpnCondValueBit[4]";
-    if ((address >= 5864) && (address <= 5871)) return "Main.hJmpnCondValueBit[5]";
-    if ((address >= 5872) && (address <= 5879)) return "Main.hJmpnCondValueBit[6]";
-    if ((address >= 5880) && (address <= 5887)) return "Main.hJmpnCondValueBit[7]";
-    if ((address >= 5888) && (address <= 5895)) return "Main.hJmpnCondValueBit[8]";
-    if ((address >= 5896) && (address <= 5903)) return "Main.RCXInv";
-    if ((address >= 5904) && (address <= 5911)) return "Main.op0Inv";
-    if ((address >= 5912) && (address <= 5919)) return "Main.jmpAddr";
-    if ((address >= 5920) && (address <= 5927)) return "Main.elseAddr";
-    if ((address >= 5928) && (address <= 5935)) return "Main.useJmpAddr";
-    if ((address >= 5936) && (address <= 5943)) return "Main.useElseAddr";
-    if ((address >= 5944) && (address <= 5951)) return "Main.sKeyI[0]";
-    if ((address >= 5952) && (address <= 5959)) return "Main.sKeyI[1]";
-    if ((address >= 5960) && (address <= 5967)) return "Main.sKeyI[2]";
-    if ((address >= 5968) && (address <= 5975)) return "Main.sKeyI[3]";
-    if ((address >= 5976) && (address <= 5983)) return "Main.sKey[0]";
-    if ((address >= 5984) && (address <= 5991)) return "Main.sKey[1]";
-    if ((address >= 5992) && (address <= 5999)) return "Main.sKey[2]";
-    if ((address >= 6000) && (address <= 6007)) return "Main.sKey[3]";
+    if ((address >= 5616) && (address <= 5623)) return "Main.hashSLen";
+    if ((address >= 5624) && (address <= 5631)) return "Main.hashSDigest";
+    if ((address >= 5632) && (address <= 5639)) return "Main.hashBytesInD";
+    if ((address >= 5640) && (address <= 5647)) return "Main.hashBytes";
+    if ((address >= 5648) && (address <= 5655)) return "Main.hashOffset";
+    if ((address >= 5656) && (address <= 5663)) return "Main.bin";
+    if ((address >= 5664) && (address <= 5671)) return "Main.binOpcode";
+    if ((address >= 5672) && (address <= 5679)) return "Main.assert_pol";
+    if ((address >= 5680) && (address <= 5687)) return "Main.repeat";
+    if ((address >= 5688) && (address <= 5695)) return "Main.call";
+    if ((address >= 5696) && (address <= 5703)) return "Main.return_pol";
+    if ((address >= 5704) && (address <= 5711)) return "Main.isNeg";
+    if ((address >= 5712) && (address <= 5719)) return "Main.cntArith";
+    if ((address >= 5720) && (address <= 5727)) return "Main.cntBinary";
+    if ((address >= 5728) && (address <= 5735)) return "Main.cntMemAlign";
+    if ((address >= 5736) && (address <= 5743)) return "Main.cntKeccakF";
+    if ((address >= 5744) && (address <= 5751)) return "Main.cntSha256F";
+    if ((address >= 5752) && (address <= 5759)) return "Main.cntPoseidonG";
+    if ((address >= 5760) && (address <= 5767)) return "Main.cntPaddingPG";
+    if ((address >= 5768) && (address <= 5775)) return "Main.inCntArith";
+    if ((address >= 5776) && (address <= 5783)) return "Main.inCntBinary";
+    if ((address >= 5784) && (address <= 5791)) return "Main.inCntMemAlign";
+    if ((address >= 5792) && (address <= 5799)) return "Main.inCntKeccakF";
+    if ((address >= 5800) && (address <= 5807)) return "Main.inCntSha256F";
+    if ((address >= 5808) && (address <= 5815)) return "Main.inCntPoseidonG";
+    if ((address >= 5816) && (address <= 5823)) return "Main.inCntPaddingPG";
+    if ((address >= 5824) && (address <= 5831)) return "Main.incCounter";
+    if ((address >= 5832) && (address <= 5839)) return "Main.inRID";
+    if ((address >= 5840) && (address <= 5847)) return "Main.RID";
+    if ((address >= 5848) && (address <= 5855)) return "Main.save";
+    if ((address >= 5856) && (address <= 5863)) return "Main.restore";
+    if ((address >= 5864) && (address <= 5871)) return "Main.setRID";
+    if ((address >= 5872) && (address <= 5879)) return "Main.op0";
+    if ((address >= 5880) && (address <= 5887)) return "Main.op1";
+    if ((address >= 5888) && (address <= 5895)) return "Main.op2";
+    if ((address >= 5896) && (address <= 5903)) return "Main.op3";
+    if ((address >= 5904) && (address <= 5911)) return "Main.op4";
+    if ((address >= 5912) && (address <= 5919)) return "Main.op5";
+    if ((address >= 5920) && (address <= 5927)) return "Main.op6";
+    if ((address >= 5928) && (address <= 5935)) return "Main.op7";
+    if ((address >= 5936) && (address <= 5943)) return "Main.memUseAddrRel";
+    if ((address >= 5944) && (address <= 5951)) return "Main.lJmpnCondValue";
+    if ((address >= 5952) && (address <= 5959)) return "Main.hJmpnCondValueBit[0]";
+    if ((address >= 5960) && (address <= 5967)) return "Main.hJmpnCondValueBit[1]";
+    if ((address >= 5968) && (address <= 5975)) return "Main.hJmpnCondValueBit[2]";
+    if ((address >= 5976) && (address <= 5983)) return "Main.hJmpnCondValueBit[3]";
+    if ((address >= 5984) && (address <= 5991)) return "Main.hJmpnCondValueBit[4]";
+    if ((address >= 5992) && (address <= 5999)) return "Main.hJmpnCondValueBit[5]";
+    if ((address >= 6000) && (address <= 6007)) return "Main.hJmpnCondValueBit[6]";
+    if ((address >= 6008) && (address <= 6015)) return "Main.hJmpnCondValueBit[7]";
+    if ((address >= 6016) && (address <= 6023)) return "Main.hJmpnCondValueBit[8]";
+    if ((address >= 6024) && (address <= 6031)) return "Main.RCXInv";
+    if ((address >= 6032) && (address <= 6039)) return "Main.op0Inv";
+    if ((address >= 6040) && (address <= 6047)) return "Main.jmpAddr";
+    if ((address >= 6048) && (address <= 6055)) return "Main.elseAddr";
+    if ((address >= 6056) && (address <= 6063)) return "Main.jmpUseAddrRel";
+    if ((address >= 6064) && (address <= 6071)) return "Main.elseUseAddrRel";
+    if ((address >= 6072) && (address <= 6079)) return "Main.sKeyI[0]";
+    if ((address >= 6080) && (address <= 6087)) return "Main.sKeyI[1]";
+    if ((address >= 6088) && (address <= 6095)) return "Main.sKeyI[2]";
+    if ((address >= 6096) && (address <= 6103)) return "Main.sKeyI[3]";
+    if ((address >= 6104) && (address <= 6111)) return "Main.sKey[0]";
+    if ((address >= 6112) && (address <= 6119)) return "Main.sKey[1]";
+    if ((address >= 6120) && (address <= 6127)) return "Main.sKey[2]";
+    if ((address >= 6128) && (address <= 6135)) return "Main.sKey[3]";
     return "ERROR_NOT_FOUND";
 }
 
