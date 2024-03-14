@@ -207,11 +207,18 @@ public:
     string blobInnerRecursive1StarkInfo;
     string blobOuterStarkInfo;
     string blobOuterRecursive2StarkInfo;
+
     string zkevmCHelpers;
     string c12aCHelpers;
     string recursive1CHelpers;
     string recursive2CHelpers;
     string recursivefCHelpers;
+    string blobInnerCHelpers;
+    string blobInnerCompressorCHelpers;
+    string blobInnerRecursive1CHelpers;
+    string blobOuterCHelpers;
+    string blobOuterRecursive2CHelpers;
+    
 
     // Database
     string databaseURL;

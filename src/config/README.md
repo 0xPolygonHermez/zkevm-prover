@@ -183,6 +183,11 @@ The configuration parameters can be of different uses:
 |`c12aCHelpers`|production|string|C12a STARK chelpers binary file|config + "/c12a/c12a.chelpers.bin"|C12A_CHELPERS|
 |`recursive1CHelpers`|production|string|Recursive1 STARK chelpers binary file|config + "/recursive1/recursive1.chelpers.bin"|RECURSIVE1_CHELPERS|
 |`recursive2CHelpers`|production|string|Recursive2 STARK chelpers binary file|config + "/recursive2/recursive2.chelpers.bin"|RECURSIVE2_CHELPERS|
+|`blobInnerCHelpers`|production|string|blobInner STARK chelpers binary file|config + "/blob_inner/blob_inner.chelpers.bin"|BLOB_INNER_CHELPERS|
+|`blobInnerCompressorCHelpers`|production|string| blobInnerCompressor STARK chelpers binary file|config + "/blob_inner_compressor/blob_inner_compressor.chelpers.bin"|BLOB_INNER_COMPRESSOR_CHELPERS|
+|`blobInnerRecursive1CHelpers`|production|string| blobInnerRecursive1 STARK chelpers binary file|config + "/blob_inner_recursive1/blob_inner_recursive1.chelpers.bin"|BLOB_INNER_RECURSIVE1_CHELPERS|
+|`blobOuterCHelpers`|production|string|blobOuter STARK chelpers binary file|config + "/blob_outer/blob_outer.chelpers.bin"|BLOB_OUTER_CHELPERS|
+|`blobOuterRecursive2CHelpers`|production|string|blobOuterRecursive2 STARK chelpers binary file|config + "/blob_outer_recursive2/blob_outer_recursive2.chelpers.bin"|BLOB_OUTER_CHELPERS|
 |`recursivefCHelpers`|production|string|RecursiveF STARK chelpers binary file|config + "/recursivef/recursivef.chelpers.bin"|RECURSIVEF_CHELPERS|
 |`storageRomFile`|production|string|Storage ROM file|config + "/scripts/storage_sm_rom.json"|STORAGE_ROM_FILE|
 |`recursivefConstantsTree`|production|string|Recursive final contant polynomials tree file|config + "/recursivef/recursivef.consttree"|RECURSIVE1_CONSTANTS_TREE|

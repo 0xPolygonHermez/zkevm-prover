@@ -36,7 +36,7 @@ class Prover
     Starks *starkBatchRecursive1;
     Starks *starkBatchRecursive2;
     Starks *starkBlobInner;
-    Starks *starkBlobInnerCompression;
+    Starks *starkBlobInnerCompressor;
     Starks *starkBlobInnerRecursive1;
     Starks *starkBlobOuter;
     Starks *starkBlobOuterRecursive2;
@@ -50,10 +50,9 @@ class Prover
 
 public:
     unordered_map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
-
     vector<ProverRequest *> pendingRequests;   // Queue of pending requests
     ProverRequest *pCurrentRequest;            // Request currently being processed by the prover thread in server mode
-    vector<ProverRequest *> completedRequests; // Map uuid -> ProveRequest pointer
+    vector<ProverRequest *> completedRequests; // Completed requests
 
 private:
     pthread_t proverPthread;  // Prover thread
@@ -78,22 +77,10 @@ public:
     ~Prover();
 
     void genBatchProof(ProverRequest *pProverRequest);
-    void genBlobInnerProof(ProverRequest *pProverRequest){
-            zklog.info("Prover::genBlobInnerProof() timestamp: " + pProverRequest->timestamp);
-            zklog.info("Prover::genBlobInnerProof() UUID: " + pProverRequest->uuid);
-            zklog.info("Prover::genBlobInnerProof() input file: " + pProverRequest->inputFile());
-    };
-    void genBlobOuterProof(ProverRequest *pProverRequest){
-            zklog.info("Prover::genBlobOuterProof() timestamp: " + pProverRequest->timestamp);
-            zklog.info("Prover::genBlobOuterProof() UUID: " + pProverRequest->uuid);
-            zklog.info("Prover::genBlobOuterProof() input file: " + pProverRequest->inputFile());
-    };
+    void genBlobInnerProof(ProverRequest *pProverRequest);
+    void genBlobOuterProof(ProverRequest *pProverRequest);
     void genAggregatedBatchProof(ProverRequest *pProverRequest) ;
-    void genAggregatedBlobOuterProof(ProverRequest *pProverRequest){
-            zklog.info("Prover::genAggregatedBlobOuterProof() timestamp: " + pProverRequest->timestamp);
-            zklog.info("Prover::genAggregatedBlobOuterProof() UUID: " + pProverRequest->uuid);
-            zklog.info("Prover::genAggregatedBlobOuterProof() input file: " + pProverRequest->inputFile());
-    };
+    void genAggregatedBlobOuterProof(ProverRequest *pProverRequest);
     void genFinalProof(ProverRequest *pProverRequest);
     void processBatch(ProverRequest *pProverRequest);
     void executeBatch(ProverRequest *pProverRequest);
@@ -103,8 +90,13 @@ public:
     string submitRequest(ProverRequest *pProverRequest);                                          // returns UUID for this request
     ProverRequest *waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
 
-    void lock(void) { pthread_mutex_lock(&mutex); };
-    void unlock(void) { pthread_mutex_unlock(&mutex); };
+    inline void lock(void) { pthread_mutex_lock(&mutex); };
+    inline void unlock(void) { pthread_mutex_unlock(&mutex); };
+
+private:
+
+    void logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest);
+    void logBlobInnerExecutionInfo(PROVER_BLOB_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest);
 };
 
 void *proverThread(void *arg);

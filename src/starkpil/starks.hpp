@@ -252,6 +252,9 @@ public:
     Polinomial *transposeZColumns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
     void transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
     void evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomial &LpEv);
+    inline uint64_t getPolBits() const{
+        return starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
+    }
 };
 
 #endif // STARKS_H
