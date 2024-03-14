@@ -1,10 +1,11 @@
 #ifndef R1CS_CONSTRAINT_PROCESOR_HPP
 #define R1CS_CONSTRAINT_PROCESOR_HPP
 
-#include <binfile_utils.hpp>
-#include <binfile_writer.hpp>
-#include "fflonk_setup_settings.hpp"
+#include <stdio.h>
 #include <alt_bn128.hpp>
+#include <binfile_utils.hpp>
+
+#include "fflonk_setup_settings.hpp"
 
 using namespace std;
 
