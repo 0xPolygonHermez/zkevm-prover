@@ -27,11 +27,15 @@ private:
     // Data
     unordered_map<string, TimeMetric> map;
 
+    // Start time
+    timeval startTime;
+
 public:
 
     TimeMetricStorage()
     {
         pthread_mutex_init(&mutex, NULL);
+        gettimeofday(&startTime, NULL);
     }
     
     void add(const char * pChar, uint64_t time, uint64_t times=1)

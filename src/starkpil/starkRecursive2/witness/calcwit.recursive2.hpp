@@ -10,7 +10,7 @@
 #include "circom.recursive2.hpp"
 #include "fr_goldilocks.hpp"
 
-#define NMUTEXES 32 // 512
+#define NMUTEXES 160
 
 namespace CircomRecursive2
 {

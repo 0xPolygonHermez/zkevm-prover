@@ -9,6 +9,8 @@
 #include "goldilocks_base_field.hpp"
 #include "polinomial.hpp"
 #include "merklehash_goldilocks.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -157,8 +159,8 @@ public:
         else if (s == "q") type = q;
         else
         {
-            cerr << "Error: EvMap::setType() found invalid type: " << s << endl;
-            exit(-1);
+            zklog.error("EvMap::setType() found invalid type: " + s);
+            exitProcess();
         }
     }
 };
@@ -220,8 +222,8 @@ public:
         else if (s == "f") type = f;
         else
         {
-            cerr << "Error: StepType::setType() found invalid type: " << s << endl;
-            exit(-1);
+            zklog.error("StepType::setType() found invalid type: " + s);
+            exitProcess();
         }
     }
 };
@@ -249,8 +251,8 @@ public:
         else if (s == "copy") op = copy;
         else
         {
-            cerr << "Error: StepOperation::setOperation() found invalid type: " << s << endl;
-            exit(-1);
+            zklog.error("StepOperation::setOperation() found invalid type: " + s);
+            exitProcess();
         }
     }
 };

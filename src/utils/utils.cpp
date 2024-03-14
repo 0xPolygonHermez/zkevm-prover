@@ -18,30 +18,31 @@
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <arpa/inet.h>
+#include "zklog.hpp"
 
 using namespace std;
 using namespace std::filesystem;
 
 void printBa(uint8_t *pData, uint64_t dataSize, string name)
 {
-    cout << name << " = ";
+    string s = name + " = ";
     for (uint64_t k = 0; k < dataSize; k++)
     {
-        cout << byte2string(pData[k]) << ":";
+        s += byte2string(pData[k]) + ":";
     }
-    cout << endl;
+    zklog.info(s);
 }
 
 void printBits(uint8_t *pData, uint64_t dataSize, string name)
 {
-    cout << name << " = ";
+    string s = name + " = ";
     for (uint64_t k = 0; k < dataSize / 8; k++)
     {
         uint8_t byte;
         bits2byte(pData + k * 8, byte);
-        cout << byte2string(byte) << ":";
+        s += byte2string(byte) + ":";
     }
-    cout << endl;
+    zklog.info(s);
 }
 
 void printCallStack(void)
@@ -49,10 +50,10 @@ void printCallStack(void)
     void *callStack[100];
     size_t callStackSize = backtrace(callStack, 100);
     char **callStackSymbols = backtrace_symbols(callStack, callStackSize);
-    cout << "CALL STACK" << endl;
+    zklog.info("CALL STACK");
     for (uint64_t i = 0; i < callStackSize; i++)
     {
-        cout << i << ": call=" << callStackSymbols[i] << endl;
+        zklog.info(to_string(i) + ": call=" + callStackSymbols[i]);
     }
     free(callStackSymbols);
 }
@@ -64,7 +65,7 @@ void getMemoryInfo(MemoryInfo &info)
     ifstream meminfo = ifstream{"/proc/meminfo"};
     if (!meminfo.good())
     {
-        cout << "Failed to get memory info" << endl;
+        zklog.error("Failed to get memory info");
     }
 
     string line, label;
@@ -88,39 +89,58 @@ void getMemoryInfo(MemoryInfo &info)
     meminfo.close();
 }
 
-void printMemoryInfo(bool compact)
+void parseProcSelfStat (double &vm, double &rss)
 {
-    string endLine = (compact ? ", " : "\n");
+    string aux;
+    ifstream ifs("/proc/self/stat", ios_base::in);
+    ifs >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> vm >> rss;
+}
 
-    cout << "MEMORY INFO" << endLine;
+void printMemoryInfo(bool compact, const char * pMessage)
+{
+    string s;
+
+    string endLine = (compact ? ", " : "\n");
+    string tab = (compact ? "" : "    ");
+
+    s = "MEMORY INFO " + (pMessage==NULL?"":string(pMessage)) + endLine;
 
     constexpr double factorMB = 1024;
 
     MemoryInfo info;
     getMemoryInfo(info);
 
-    int tab = (compact ? 0 : 15);
+    double vm, rss;
+    parseProcSelfStat(vm, rss);
+    vm /= 1024*1024;
+    rss /= 1024*1024;
 
-    cout << left << setw(tab) << "MemTotal: " << right << setw(tab) << (info.total / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "MemFree: " << right << setw(tab) << (info.free / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "MemAvailable: " << right << setw(tab) << (info.available / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "Buffers: " << right << setw(tab) << (info.buffers / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "Cached: " << right << setw(tab) << (info.cached / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "SwapCached: " << right << setw(tab) << (info.swapCached / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "SwapTotal: " << right << setw(tab) << (info.swapTotal / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "SwapFree: " << right << setw(tab) << (info.swapFree / factorMB) << " MB" << endl;
+    s += tab + "MemTotal: "+ to_string(info.total / factorMB) + " MB" + endLine;
+    s += tab + "MemFree: " + to_string(info.free / factorMB) + " MB" + endLine;
+    s += tab + "MemAvailable: " + to_string(info.available / factorMB) + " MB" + endLine;
+    s += tab + "Buffers: " + to_string(info.buffers / factorMB) + " MB" + endLine;
+    s += tab + "Cached: " + to_string(info.cached / factorMB) + " MB" + endLine;
+    s += tab + "SwapCached: " + to_string(info.swapCached / factorMB) + " MB" + endLine;
+    s += tab + "SwapTotal: " + to_string(info.swapTotal / factorMB) + " MB" + endLine;
+    s += tab + "SwapFree: " + to_string(info.swapFree / factorMB) + " MB" + endLine;
+    s += tab + "VM: " + to_string(vm) + " MB" + endLine;
+    s += tab + "RSS: " + to_string(rss) + " MB";
+
+    zklog.info(s);
 }
 
 void printProcessInfo(bool compact)
 {
     string endLine = (compact ? ", " : "\n");
+    string tab = (compact ? "" : "    ");
 
-    cout << "PROCESS INFO" << endLine;
+    string s = "PROCESS INFO" + endLine;
 
     ifstream stat("/proc/self/stat", ios_base::in);
     if (!stat.good())
     {
-        cout << "Failed to get process stat info" << endl;
+        zklog.error("printProcessInfo() failed to get process stat info");
+        return;
     }
 
     string comm, state, ppid, pgrp, session, tty_nr;
@@ -136,14 +156,14 @@ void printProcessInfo(bool compact)
 
     stat.close();
 
-    int tab = (compact ? 0 : 15);
+    s += tab + "Pid: " + to_string(pid) + endLine;
+    s += tab + "User time: " + to_string((double)utime / sysconf(_SC_CLK_TCK)) + " s" + endLine;
+    s += tab + "Kernel time: " + to_string((double)stime / sysconf(_SC_CLK_TCK)) + " s" + endLine;
+    s += tab + "Total time: " + to_string((double)utime / sysconf(_SC_CLK_TCK) + (double)stime / sysconf(_SC_CLK_TCK)) + " s" + endLine;
+    s += tab + "Num threads: " + to_string(numthreads) + endLine;
+    s += tab + "Virtual mem: " + to_string(vsize / 1024 / 1024) + " MB";
 
-    cout << left << setw(tab) << "Pid: " << right << setw(tab) << pid << endLine;
-    cout << left << setw(tab) << "User time: " << right << setw(tab) << (double)utime / sysconf(_SC_CLK_TCK) << " s" << endLine;
-    cout << left << setw(tab) << "Kernel time: " << right << setw(tab) << (double)stime / sysconf(_SC_CLK_TCK) << " s" << endLine;
-    cout << left << setw(tab) << "Total time: " << right << setw(tab) << (double)utime / sysconf(_SC_CLK_TCK) + (double)stime / sysconf(_SC_CLK_TCK) << " s" << endLine;
-    cout << left << setw(tab) << "Num threads: " << right << setw(tab) << numthreads << endLine;
-    cout << left << setw(tab) << "Virtual mem: " << right << setw(tab) << vsize / 1024 / 1024 << " MB" << endl;
+    zklog.info(s);
 }
 
 string getTimestamp(void)
@@ -185,7 +205,7 @@ void json2file(const json &j, const string &fileName)
     ofstream outputStream(fileName);
     if (!outputStream.good())
     {
-        cerr << "Error: json2file() failed creating output JSON file " << fileName << endl;
+        zklog.error("json2file() failed creating output JSON file " + fileName);
         exitProcess();
     }
     outputStream << setw(4) << j << endl;
@@ -197,7 +217,7 @@ void file2json(const string &fileName, json &j)
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
-        cerr << "Error: file2json() failed loading input JSON file " << fileName << endl;
+        zklog.error("file2json() failed loading input JSON file " + fileName + "; does this file exist?");
         exitProcess();
     }
     try
@@ -206,7 +226,7 @@ void file2json(const string &fileName, json &j)
     }
     catch (exception &e)
     {
-        cerr << "Error: file2json() failed parsing input JSON file " << fileName << " exception=" << e.what() << endl;
+        zklog.error("file2json() failed parsing input JSON file " + fileName + " exception=" + e.what());
         exitProcess();
     }
     inputStream.close();
@@ -217,7 +237,7 @@ void file2json(const string &fileName, ordered_json &j)
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
-        cerr << "Error: file2json() failed loading input JSON file " << fileName << endl;
+        zklog.error("file2json() failed loading input JSON file " + fileName);
         exitProcess();
     }
     try
@@ -226,7 +246,7 @@ void file2json(const string &fileName, ordered_json &j)
     }
     catch (exception &e)
     {
-        cerr << "Error: file2json() failed parsing input JSON file " << fileName << " exception=" << e.what() << endl;
+        zklog.error("file2json() failed parsing input JSON file " + fileName + " exception=" + e.what());
         exitProcess();
     }
     inputStream.close();
@@ -245,7 +265,7 @@ void ensureDirectoryExists (const string &fileName)
     int iResult = system(command.c_str());
     if (iResult != 0)
     {
-        cerr << "Error: ensureDirectoryExists() system() returned: " << to_string(iResult) << endl;
+        zklog.error("ensureDirectoryExists() system() returned: " + to_string(iResult));
         exitProcess();
     }
 }
@@ -260,7 +280,7 @@ uint64_t getNumberOfFileDescriptors (void)
         {
             result++;
         }
-        //cout << "getNumberOfFileDescriptors() i=" << i << " file=" << i.path() << endl;
+        //zklog.info("getNumberOfFileDescriptors() i=" + to_string(i) + " file=" + i.path());
     }
     return result;
 }
@@ -273,12 +293,12 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
         struct stat sb;
         if (lstat(fileName.c_str(), &sb) == -1)
         {
-            cerr << "Error: mapFile() failed calling lstat() of file " << fileName << endl;
+            zklog.error("mapFile() failed calling lstat() of file " + fileName);
             exitProcess();
         }
         if ((uint64_t)sb.st_size != size)
         {
-            cerr << "Error: mapFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << size << " B" << endl;
+            zklog.error("mapFile() found size of file " + fileName + " to be " + to_string(sb.st_size) + " B instead of " + to_string(size) + " B");
             exitProcess();
         }
     }
@@ -292,7 +312,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
     int fd = open(fileName.c_str(), oflags, 0666);
     if (fd < 0)
     {
-        cerr << "Error: mapFile() failed opening file: " << fileName << endl;
+        zklog.error("mapFile() failed opening file: " + fileName);
         exitProcess();
     }
 
@@ -303,7 +323,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
         int result = lseek(fd, size - 1, SEEK_SET);
         if (result == -1)
         {
-            cerr << "Error: mapFile() failed calling lseek() of file: " << fileName << endl;
+            zklog.error("mapFile() failed calling lseek() of file: " + fileName);
             exitProcess();
         }
 
@@ -311,7 +331,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
         result = write(fd, "", 1);
         if (result < 0)
         {
-            cerr << "Error: mapFile() failed calling write() of file: " << fileName << endl;
+            zklog.error("mapFile() failed calling write() of file: " + fileName);
             exitProcess();
         }
     }
@@ -321,7 +341,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
     pAddress = (uint8_t *)mmap(NULL, size, bOutput ? (PROT_READ | PROT_WRITE) : PROT_READ, MAP_SHARED, fd, 0);
     if (pAddress == MAP_FAILED)
     {
-        cerr << "Error: mapFile() failed calling mmap() of file: " << fileName << endl;
+        zklog.error("mapFile() failed calling mmap() of file: " + fileName);
         exitProcess();
     }
     close(fd);
@@ -334,7 +354,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
     void *pMemAddress = malloc(size);
     if (pMemAddress == NULL)
     {
-        cerr << "Error: mapFile() failed calling malloc() of size: " << size << endl;
+        zklog.error("mapFile() failed calling malloc() of size: " + to_string(size));
         exitProcess();
     }
 
@@ -362,7 +382,7 @@ void unmapFile(void *pAddress, uint64_t size)
     int err = munmap(pAddress, size);
     if (err != 0)
     {
-        cerr << "Error: unmapFile() failed calling munmap() of address=" << pAddress << " size=" << size << endl;
+        zklog.error("unmapFile() failed calling munmap() of address=" + to_string(uint64_t(pAddress)) + " size=" + to_string(size));
         exitProcess();
     }
 }
@@ -442,7 +462,7 @@ bool octal2hex (const string &octalString, string &hexString)
         }
         if (octalStringSize - i < 3)
         {
-            cerr << "Error: octal2hex() found an invalid octal sequence at position i=" << i << " rest=" << octalString.substr(i) << endl;
+            zklog.error("octal2hex() found an invalid octal sequence at position i=" + to_string(i) + " rest=" + octalString.substr(i));
             return false;
         }
         i++;
@@ -477,7 +497,7 @@ bool octalText2hexText (const string &octalText, string &hexText)
         stringEnd = octalText.find('"', stringBegin + 1);
         if (stringEnd == string::npos)
         {
-            cerr << "Error: octalText2hexText() could not find the ending \"" << endl;
+            zklog.error("octalText2hexText() could not find the ending \"");
             hexText = octalText; // Copy it as it is
             return false;
         }
@@ -502,7 +522,7 @@ void getIPAddress (string &ipAddress)
     int iResult = getifaddrs(&pIfaddrs);
     if (iResult != 0)
     {
-        cerr << "Error: getNetworkInfo() failed calling getifaddrs() iResult=" << iResult << "=" << strerror(iResult) << endl;
+        zklog.error("getNetworkInfo() failed calling getifaddrs() iResult=" + to_string(iResult) + "=" + strerror(iResult));
         return;
     }
 
@@ -514,12 +534,11 @@ void getIPAddress (string &ipAddress)
         {
             continue;
         }
-        sa_family_t address_family = pEntry->ifa_addr->sa_family;
 
-        // Report IPv4 addresses
-        if (address_family == AF_INET)
+        if (pEntry->ifa_addr != NULL)
         {
-            if (pEntry->ifa_addr != NULL)
+            sa_family_t address_family = pEntry->ifa_addr->sa_family;
+            if (address_family == AF_INET) 
             {
                 char buffer[INET_ADDRSTRLEN] = {0};
                 inet_ntop(address_family, &((struct sockaddr_in*)(pEntry->ifa_addr))->sin_addr, buffer, INET_ADDRSTRLEN);
@@ -527,22 +546,92 @@ void getIPAddress (string &ipAddress)
                 {
                     ipAddress += ",";
                 }
-                ipAddress += buffer;
+                ipAddress += buffer;    // Code for IPv4 address handling
             }
-        }
-
-        // Report IPv6 addresses
-        /*else if (address_family == AF_INET6)
-        {
-            if ( pEntry->ifa_addr != nullptr )
+            /*else if (address_family == AF_INET6) 
             {
-                char buffer[INET6_ADDRSTRLEN] = {0};
-                inet_ntop(address_family, &((struct sockaddr_in6*)(pEntry->ifa_addr))->sin6_addr, buffer, INET6_ADDRSTRLEN);
-                ipAddress += buffer;
-                ipAddress += " ";
-            }
-        }*/
+                if ( pEntry->ifa_addr != nullptr )
+                {
+                    char buffer[INET6_ADDRSTRLEN] = {0};
+                    inet_ntop(address_family, &((struct sockaddr_in6*)(pEntry->ifa_addr))->sin6_addr, buffer, INET6_ADDRSTRLEN);
+                    ipAddress += buffer;
+                    ipAddress += " ";
+                }
+            }*/
+        }
     }
 
     freeifaddrs(pIfaddrs);
 }
+
+void getStringIncrement(const string &oldString, const string &newString, uint64_t &offset, uint64_t &length)
+{
+    // If new string is shorter, return it all
+    if (oldString.size() > newString.size())
+    {
+        offset = 0;
+        length = newString.size();
+        return;
+    }
+    
+    // Find first different char, and assign it to offset
+    int64_t i = 0;
+    for (; i < (int64_t)oldString.size(); i++)
+    {
+        if (oldString[i] != newString[i])
+        {
+            break;
+        }
+    }
+    if (i == (int64_t)oldString.size())
+    {
+        if (oldString.size() == newString.size()) // Identical strings
+        {
+            offset = 0;
+            length = 0;
+            return;
+        }
+        for (; i < (int64_t)newString.size(); i++)
+        {
+            if (newString[i] != 0)
+            {
+                break;
+            }
+        }
+        if (i == (int64_t)newString.size()) // new string is all zeros
+        {
+            offset = 0;
+            length = 0;
+            return;
+        }
+    }
+    offset = i;
+
+    // If new string is longer, find last non-zero byte, if any
+    if (newString.size() > oldString.size())
+    {
+        for (i = (int64_t)newString.size()-1; i >= (int64_t)oldString.size(); i--)
+        {
+            if (newString[i] != 0)
+            {
+                length = i + 1 - offset;
+                return;
+            }
+        }     
+    }
+
+
+    // Find last different char, and calculate length
+    for (i = (int64_t)oldString.size() - 1; i >= 0; i--)
+    {
+        if (oldString[i] != newString[i])
+        {
+            length = i + 1 - offset;
+            return;
+        }
+    }
+
+    length = 0;
+}
+
+string emptyString;

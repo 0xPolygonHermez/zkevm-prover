@@ -6,6 +6,7 @@
 #include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "exit_process.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -16,6 +17,7 @@ extern mpz_class ScalarMask16;
 extern mpz_class ScalarMask20;
 extern mpz_class ScalarMask32;
 extern mpz_class ScalarMask64;
+extern mpz_class ScalarMask160;
 extern mpz_class ScalarMask256;
 extern mpz_class ScalarTwoTo8;
 extern mpz_class ScalarTwoTo16;
@@ -42,7 +44,7 @@ inline void scalar2fe  (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Ele
 {
     if ( !scalar.fits_ulong_p() )
     {
-        cerr << "Error: scalar2fe() found scalar out of u64 range:" << scalar.get_str(16) << endl;
+        zklog.error("scalar2fe() found scalar out of u64 range:" + scalar.get_str(16));
         exitProcess();
     }
     fe = fr.fromU64(scalar.get_ui());
@@ -61,22 +63,22 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     scalar += fr.toU64(fea[0]);
 }
 
-inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3, const Goldilocks::Element &fe4, const Goldilocks::Element &fe5, const Goldilocks::Element &fe6, const Goldilocks::Element &fe7)
+inline bool fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3, const Goldilocks::Element &fe4, const Goldilocks::Element &fe5, const Goldilocks::Element &fe6, const Goldilocks::Element &fe7)
 {
     // Add field element 7
     uint64_t auxH = fr.toU64(fe7);
     if (auxH >= 0x100000000)
     {
-        cerr << "Error: fea2scalar() found element 7 has a too high value=" << fr.toString(fe7, 16) << endl;
-        exitProcess();
+        zklog.error("fea2scalar() found element 7 has a too high value=" + fr.toString(fe7, 16));
+        return false;
     }
 
     // Add field element 6
     uint64_t auxL = fr.toU64(fe6);
     if (auxL >= 0x100000000)
     {
-        cerr << "Error: fea2scalar() found element 6 has a too high value=" << fr.toString(fe6, 16) << endl;
-        exitProcess();
+        zklog.error("fea2scalar() found element 6 has a too high value=" + fr.toString(fe6, 16));
+        return false;
     }
 
     scalar = (auxH<<32) + auxL;
@@ -86,16 +88,16 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     auxH = fr.toU64(fe5);
     if (auxH >= 0x100000000)
     {
-        cerr << "Error: fea2scalar() found element 5 has a too high value=" << fr.toString(fe5, 16) << endl;
-        exitProcess();
+        zklog.error("fea2scalar() found element 5 has a too high value=" + fr.toString(fe5, 16));
+        return false;
     }
 
     // Add field element 4
     auxL = fr.toU64(fe4);
     if (auxL >= 0x100000000)
     {
-        cerr << "Error: fea2scalar() found element 4 has a too high value=" << fr.toString(fe4, 16) << endl;
-        exitProcess();
+        zklog.error("fea2scalar() found element 4 has a too high value=" + fr.toString(fe4, 16));
+        return false;
     }
     
     scalar += (auxH<<32) + auxL;
@@ -105,16 +107,16 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     auxH = fr.toU64(fe3);
     if (auxH >= 0x100000000)
     {
-        cerr << "Error: fea2scalar() found element 3 has a too high value=" << fr.toString(fe3, 16) << endl;
-        exitProcess();
+        zklog.error("fea2scalar() found element 3 has a too high value=" + fr.toString(fe3, 16));
+        return false;
     }
 
     // Add field element 2
     auxL = fr.toU64(fe2);
     if (auxL >= 0x100000000)
     {
-        cerr << "Error: fea2scalar() found element 2 has a too high value=" << fr.toString(fe2, 16) << endl;
-        exitProcess();
+        zklog.error("fea2scalar() found element 2 has a too high value=" + fr.toString(fe2, 16));
+        return false;
     }
     
     scalar += (auxH<<32) + auxL;
@@ -124,24 +126,25 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     auxH = fr.toU64(fe1);
     if (auxH >= 0x100000000)
     {
-        cerr << "Error: fea2scalar() found element 1 has a too high value=" << fr.toString(fe1, 16) << endl;
-        exitProcess();
+        zklog.error("fea2scalar() found element 1 has a too high value=" + fr.toString(fe1, 16));
+        return false;
     }
 
     // Add field element 0
     auxL = fr.toU64(fe0);
     if (auxL >= 0x100000000)
     {
-        cerr << "Error: fea2scalar() found element 0 has a too high value=" << fr.toString(fe0, 16) << endl;
-        exitProcess();
+        zklog.error("fea2scalar() found element 0 has a too high value=" + fr.toString(fe0, 16));
+        return false;
     }
     
     scalar += (auxH<<32) + auxL;
+    return true;
 }
 
-inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
+inline bool fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
 {
-   fea2scalar(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
+   return fea2scalar(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
 }
 
 inline void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element (&fea)[4])
@@ -150,7 +153,7 @@ inline void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Ele
 
     if (aux >= ScalarGoldilocksPrime)
     {
-        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
+        zklog.error("scalar2fea() found value higher than prime: " + aux.get_str(16));
         exitProcess();
     }
 
@@ -159,7 +162,7 @@ inline void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Ele
 
     if (aux >= ScalarGoldilocksPrime)
     {
-        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
+        zklog.error("scalar2fea() found value higher than prime: " + aux.get_str(16));
         exitProcess();
     }
 
@@ -168,7 +171,7 @@ inline void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Ele
 
     if (aux >= ScalarGoldilocksPrime)
     {
-        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
+        zklog.error("scalar2fea() found value higher than prime: " + aux.get_str(16));
         exitProcess();
     }
 
@@ -177,7 +180,7 @@ inline void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Ele
 
     if (aux >= ScalarGoldilocksPrime)
     {
-        cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
+        zklog.error("scalar2fea() found value higher than prime: " + aux.get_str(16));
         exitProcess();
     }
 
@@ -215,18 +218,36 @@ void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4]);
 
 /* Hexa string to/from field element (array) conversion */
 void string2fe  (Goldilocks &fr, const string &s, Goldilocks::Element &fe);
-void string2fea (Goldilocks &fr, const string os, vector<Goldilocks::Element> &fea);
+void string2fea (Goldilocks &fr, const string& os, vector<Goldilocks::Element> &fea);
+void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3);
+string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7);
 
 /* Normalized strings */
 string Remove0xIfPresent      (const string &s);
+void   Remove0xIfPresentNoCopy(      string &s);
 string Add0xIfMissing         (const string &s);
 string PrependZeros           (const string &s, uint64_t n);
-void   PrependZeros           (      string &s, uint64_t n);
+void   PrependZerosNoCopy     (      string &s, uint64_t n);
 string NormalizeTo0xNFormat   (const string &s, uint64_t n);
 string NormalizeToNFormat     (const string &s, uint64_t n);
 string stringToLower          (const string &s);
+
+// Check that a char is an hex character
+inline bool charIsHex (char c)
+{
+    if ( (c >= '0') && (c <= '9') ) return true;
+    if ( (c >= 'a') && (c <= 'f') ) return true;
+    if ( (c >= 'A') && (c <= 'F') ) return true;
+    return false;
+}
+
+// Check that the string contains only hex characters
+bool stringIsHex (const string &s);
+
+// Check that the string contains only 0x + hex characters
+bool stringIs0xHex (const string &s);
 
 /* Keccak */
 void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize);
@@ -303,6 +324,8 @@ inline void ba2fea (Goldilocks &fr, const uint8_t * pData, uint64_t len, Goldilo
 void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s);
 void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s);
 void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32]);
+void scalar2bytesBE(mpz_class &s, uint8_t *pBytes); // pBytes must be a 32-bytes array
+
 
 /* Scalar to byte array string conversion */
 string scalar2ba(const mpz_class &s);

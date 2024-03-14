@@ -3,8 +3,8 @@
     "runExecutorClient": false,
     "runExecutorClientMultithread": false,
 
-    "runStateDBServer": true,
-    "runStateDBTest": false,
+    "runHashDBServer": true,
+    "runHashDBTest": false,
 
     "runAggregatorServer": false,
     "runAggregatorClient": false,
@@ -23,6 +23,7 @@
     "runMemAlignSMTest": false,
     "runSHA256Test": false,
     "runBlakeTest": false,
+    "runECRecoverTest": false,
 
     "executeInParallel": false,
     "useMainExecGenerated": true,
@@ -38,11 +39,14 @@
     
     "loadDBToMemCache": true,
     "loadDBToMemCacheInParallel": false,
+    "loadDBToMemTimeout": 30000000,
     "dbMTCacheSize": 16384,
     "dbProgramCacheSize": 16384,
 
     "opcodeTracer": false,
     "logRemoteDbReads": false,
+    "logExecutorServerInput": false,
+    "logExecutorServerInputGasThreshold": 0,
     "logExecutorServerResponses": false,
     "logExecutorServerTxs": true,
 
@@ -51,14 +55,17 @@
     "executorTimeStatistics": false,
     "executorClientPort": 50071,
     "executorClientHost": "127.0.0.1",
+    "executorClientLoops": 1,
 
-    "stateDBServerPort": 50061,
-    "stateDBURL": "local",
+    "hashDBServerPort": 50061,
+    "hashDBURL": "local",
+    "dbCacheSynchURL_disabled": "127.0.0.1:50061",
 
     "aggregatorServerPort": 50081,
     "aggregatorClientPort": 50081,
     "aggregatorClientHost": "127.0.0.1",
     "aggregatorClientMockTimeout": 10000000,
+    "aggregatorClientWatchdogTimeout": 60000000,
 
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
@@ -85,12 +92,17 @@
     "dbNodesTableName": "state.nodes",
     "dbProgramTableName": "state.program",
     "dbMultiWrite": true,
-    "dbFlushInParallel": true,
     "dbConnectionsPool": false,
     "dbNumberOfPoolConnections": 25,
+    "dbMetrics": false,
+    "dbClearCache": false,
+    "dbGetTree": false,
+    "dbReadRetryDelay": 100000,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,
     "maxProverThreads": 8,
-    "maxStateDBThreads": 8
+    "maxStateDBThreads": 8,
+
+    "fullTracerTraceReserveSize": 262144
 }

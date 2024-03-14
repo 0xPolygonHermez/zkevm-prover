@@ -5,8 +5,10 @@
 
 using namespace std;
 
-void BinarySMTest (Goldilocks &fr, Config &config)
+uint64_t BinarySMTest (Goldilocks &fr, const Config &config)
 {
+    uint64_t numberOfErrors = 0;
+
     BinaryExecutor binaryExecutor(fr, config);
 
     vector<BinaryAction> list;
@@ -290,4 +292,6 @@ void BinarySMTest (Goldilocks &fr, Config &config)
     list.push_back(action);
 
     binaryExecutor.execute(list);
+
+    return numberOfErrors;
 }

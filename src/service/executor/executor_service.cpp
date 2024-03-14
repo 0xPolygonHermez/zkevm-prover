@@ -2,8 +2,10 @@
 #include "executor_service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
-
+#include "zklog.hpp"
 #include <grpcpp/grpcpp.h>
+#include "exit_process.hpp"
+#include "utils.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -12,10 +14,16 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     TimerStart(EXECUTOR_PROCESS_BATCH);
 
 #ifdef LOG_SERVICE
-    cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
+    zklog.info("ExecutorServiceImpl::ProcessBatch() got request:\n" + request->DebugString());
 #endif
 
 #ifdef LOG_TIME
@@ -37,29 +45,28 @@ using grpc::Status;
         string2file(request->DebugString(), proverRequest.filePrefix + "executor_request.txt");
     }
 
+    // Get external request ID
+    proverRequest.externalRequestId = request->external_request_id();
+
     // PUBLIC INPUTS
 
-    string auxString;
-
     // Get oldStateRoot
-    auxString = ba2string(request->old_state_root());
-    if (auxString.size() > 64)
+    if (request->old_state_root().size() > 32)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << auxString.size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" + to_string(request->old_state_root().size()));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
-    proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, request->old_state_root());
 
     // Get oldAccInputHash
-    auxString = ba2string(request->old_acc_input_hash());
-    if (auxString.size() > 64)
+    if (request->old_acc_input_hash().size() > 32)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" << auxString.size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" + to_string(request->old_acc_input_hash().size()));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
-    proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, request->old_acc_input_hash());
 
     // Get batchNum
     proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = request->old_batch_num();
@@ -68,7 +75,7 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
     if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got chainID = 0" << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got chainID = 0");
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -86,20 +93,18 @@ using grpc::Status;
     }
 
     // Get batchL2Data
-    proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = request->batch_l2_data();
-
-    // Check the batchL2Data length
-    if (proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
+    if (request->batch_l2_data().size() > MAX_BATCH_L2_DATA_SIZE)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" + to_string(request->batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
+    proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = request->batch_l2_data();
 
     // Get globalExitRoot
     if (request->global_exit_root().size() > 32)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << request->global_exit_root().size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" + to_string(request->global_exit_root().size()));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -108,11 +113,17 @@ using grpc::Status;
     // Get timestamp
     proverRequest.input.publicInputsExtended.publicInputs.timestamp = request->eth_timestamp();
 
-    // Get sequencerAddr
-    auxString = Remove0xIfPresent(request->coinbase());
+    // Get sequencer address
+    string auxString = Remove0xIfPresent(request->coinbase());
     if (auxString.size() > 40)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << auxString.size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" + to_string(auxString.size()));
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::CANCELLED;
+    }
+    if (!stringIsHex(auxString))
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got sequencer address not hex, coinbase=" + auxString);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -124,7 +135,13 @@ using grpc::Status;
     proverRequest.input.from = Add0xIfMissing(request->from());
     if (proverRequest.input.from.size() > (2 + 40))
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got from too long, size=" << proverRequest.input.from.size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got from too long, size=" + to_string(proverRequest.input.from.size()));
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::CANCELLED;
+    }
+    if (!stringIs0xHex(proverRequest.input.from))
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got from not hex, size=" + proverRequest.input.from);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -153,34 +170,16 @@ using grpc::Status;
         {
             proverRequest.input.traceConfig.bEnableReturnData = true;
         }
-        string auxString;
-        auxString = ba2string(traceConfig.tx_hash_to_generate_execute_trace());
-        if (auxString != "")
+        if (traceConfig.tx_hash_to_generate_execute_trace().size() > 0)
         {
-            proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(auxString);
+            proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(ba2string(traceConfig.tx_hash_to_generate_execute_trace()));
         }
-        auxString = ba2string(traceConfig.tx_hash_to_generate_call_trace());
-        if (auxString != "")
+        if (traceConfig.tx_hash_to_generate_call_trace().size() > 0)
         {
-            proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(auxString);
+            proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(ba2string(traceConfig.tx_hash_to_generate_call_trace()));
         }
         proverRequest.input.traceConfig.calculateFlags();
     }
-    /*string tx_hash_to_generate_execute_trace = ba2string(request->tx_hash_to_generate_execute_trace());
-    string tx_hash_to_generate_call_trace = ba2string(request->tx_hash_to_generate_call_trace());
-    if ( (tx_hash_to_generate_execute_trace.size() > 0) || (tx_hash_to_generate_call_trace.size() > 0) )
-    {
-        proverRequest.input.traceConfig.bEnabled = true;
-        if (tx_hash_to_generate_execute_trace.size() > 0)
-        {
-            proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(tx_hash_to_generate_execute_trace);
-        }
-        if (tx_hash_to_generate_call_trace.size() > 0)
-        {
-            proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(tx_hash_to_generate_call_trace);
-        }
-        proverRequest.input.traceConfig.calculateFlags();
-    }*/
 
     // Default values
     proverRequest.input.publicInputsExtended.newStateRoot = "0x0";
@@ -189,22 +188,40 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.newBatchNum = 0;
 
     // Parse db map
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
-    db = request->db();
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &db = request->db();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator it;
+    string key;
     for (it=db.begin(); it!=db.end(); it++)
     {
-        if (it->first.size() > (64))
+        // Get key
+        key = it->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > 64)
         {
-            cerr << "Error: ExecutorServiceImpl::ProcessBatch() got db key too long, size=" << it->first.size() << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got db key too long, size=" + to_string(key.size()));
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::CANCELLED;
         }
+        if (!stringIsHex(key))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got db key not hex, key=" + key);
+            TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::CANCELLED;
+        }
+        PrependZerosNoCopy(key, 64);
+
+        // Get value
         vector<Goldilocks::Element> dbValue;
         string concatenatedValues = it->second;
+        if (!stringIsHex(concatenatedValues))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBatch() found db value not hex: " + concatenatedValues);
+            TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::CANCELLED;
+        }
         if (concatenatedValues.size()%16!=0)
         {
-            cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatch() found invalid db value size: " + to_string(concatenatedValues.size()));
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::CANCELLED;
         }
@@ -214,29 +231,56 @@ using grpc::Status;
             string2fe(fr, concatenatedValues.substr(i, 16), fe);
             dbValue.push_back(fe);
         }
-        Goldilocks::Element fe;
-        string2fe(fr, it->first, fe);
-        proverRequest.input.db[it->first] = dbValue;
+        
+        // Save key-value
+        proverRequest.input.db[key] = dbValue;
+
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-        //cout << "input.db[" << it->first << "]: " << proverRequest.input.db[it->first] << endl;
+        //zklog.info("input.db[" + key + "]: " + proverRequest.input.db[key]);
 #endif
     }
 
     // Parse contracts data
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > contractsBytecode;
-    contractsBytecode = request->contracts_bytecode();
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator itp;
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &contractsBytecode = request->contracts_bytecode();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator itp;
     for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
     {
+        // Get key
+        key = itp->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > (64))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts key too long, size=" + to_string(key.size()));
+            TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::CANCELLED;
+        }
+        if (!stringIsHex(key))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts key not hex, key=" + key);
+            TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::CANCELLED;
+        }
+        PrependZerosNoCopy(key, 64);
+
+        // Get value
+        if (!stringIsHex(Remove0xIfPresent(itp->second)))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts value not hex, value=" + itp->second);
+            TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::CANCELLED;
+        }
         vector<uint8_t> dbValue;
         string contractValue = string2ba(itp->second);
         for (uint64_t i=0; i<contractValue.size(); i++)
         {
             dbValue.push_back(contractValue.at(i));
         }
-        proverRequest.input.contractsBytecode[itp->first] = dbValue;
+
+        // Save key-value
+        proverRequest.input.contractsBytecode[key] = dbValue;
+
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-        //cout << "proverRequest.input.contractsBytecode[" << itp->first << "]: " << itp->second << endl;
+        //zklog.info("proverRequest.input.contractsBytecode[" + itp->first + "]: " + itp->second);
 #endif
     }
 
@@ -244,29 +288,39 @@ using grpc::Status;
     proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)
-        << " batchL2DataLength=" << request->batch_l2_data().size()
-        << " batchL2Data=0x" << ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) << "..." << ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size()))
-        << " oldStateRoot=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16)
-        << " oldAccInputHash=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16)
-        << " oldBatchNum=" << proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum
-        << " chainId=" << proverRequest.input.publicInputsExtended.publicInputs.chainID
-        << " forkId=" << proverRequest.input.publicInputsExtended.publicInputs.forkID
-        << " globalExitRoot=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16)
-        << " timestamp=" << proverRequest.input.publicInputsExtended.publicInputs.timestamp
+    zklog.info("ExecutorServiceImpl::ProcessBatch() got externalRequestId=" + proverRequest.externalRequestId +
+        " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
+        " batchL2DataLength=" + to_string(request->batch_l2_data().size()) +
+        " batchL2Data=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())) +
+        " oldStateRoot=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+        " oldAccInputHash=" + proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+        " oldBatchNum=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
+        " chainId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.chainID) +
+        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
+        " globalExitRoot=" + proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16) +
+        " timestamp=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestamp) +
 
-        << " from=" << proverRequest.input.from
-        << " bUpdateMerkleTree=" << proverRequest.input.bUpdateMerkleTree
-        << " bNoCounters=" << proverRequest.input.bNoCounters
-        << " traceConfig=" << proverRequest.input.traceConfig.toString()
-        << endl;
+        " from=" + proverRequest.input.from +
+        " bUpdateMerkleTree=" + to_string(proverRequest.input.bUpdateMerkleTree) +
+        " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
+        " traceConfig=" + proverRequest.input.traceConfig.toString());
 #endif
+
+    if (config.logExecutorServerInputJson)
+    {
+        // Log the input file content
+        json inputJson;
+        proverRequest.input.save(inputJson);
+        zklog.info("ExecutorServiceImpl::ProcessBatch() Input=" + inputJson.dump());
+    }
 
     prover.processBatch(&proverRequest);
 
+    //TimerStart(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
+
     if (proverRequest.result != ZKR_SUCCESS)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
     }
     
     response->set_error(zkresult2error(proverRequest.result));
@@ -281,6 +335,9 @@ using grpc::Status;
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
     response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
+    response->set_flush_id(proverRequest.flushId);
+    response->set_stored_flush_id(proverRequest.lastSentFlushId);
+    response->set_prover_id(config.proverID);
     
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
@@ -296,9 +353,12 @@ using grpc::Status;
         }
     }
 
-    vector<Response> &responses(proverRequest.pFullTracer->get_responses());
+    vector<Response> &responses = proverRequest.pFullTracer->get_responses();
     for (uint64_t tx=0; tx<responses.size(); tx++)
     {
+        // Remember the previous memory sent for each TX, and send only increments
+        string previousMemory;
+
         executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
         pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
         pProcessTransactionResponse->set_rlp_tx(responses[tx].rlp_tx);
@@ -310,6 +370,8 @@ using grpc::Status;
         pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
         pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
         pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+        pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
+        pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
         for (uint64_t log=0; log<responses[tx].logs.size(); log++)
         {
             executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
@@ -335,13 +397,18 @@ using grpc::Status;
             {
                 executor::v1::ExecutionTraceStep * pExecutionTraceStep = pProcessTransactionResponse->add_execution_trace();
                 pExecutionTraceStep->set_pc(responses[tx].execution_trace[step].pc); // Program Counter
-                pExecutionTraceStep->set_op(responses[tx].execution_trace[step].opcode); // OpCode
+                // opcode can be null if bNoCounters=true
+                if (responses[tx].execution_trace[step].opcode != NULL)
+                {
+                    pExecutionTraceStep->set_op(responses[tx].execution_trace[step].opcode); // OpCode
+                }
                 pExecutionTraceStep->set_remaining_gas(responses[tx].execution_trace[step].gas);
                 pExecutionTraceStep->set_gas_cost(responses[tx].execution_trace[step].gas_cost); // Gas cost of the operation
-                pExecutionTraceStep->set_memory(string2ba(responses[tx].execution_trace[step].memory)); // Content of memory
                 pExecutionTraceStep->set_memory_size(responses[tx].execution_trace[step].memory_size);
+                pExecutionTraceStep->set_memory_offset(responses[tx].execution_trace[step].memory_offset);
+                pExecutionTraceStep->set_memory(responses[tx].execution_trace[step].memory);
                 for (uint64_t stack=0; stack<responses[tx].execution_trace[step].stack.size() ; stack++)
-                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].execution_trace[step].stack[stack].get_str(16), 64)); // Content of the stack
+                    pExecutionTraceStep->add_stack(responses[tx].execution_trace[step].stack[stack].get_str(16)); // Content of the stack
                 string dataConcatenated;
                 for (uint64_t data=0; data<responses[tx].execution_trace[step].return_data.size(); data++)
                     dataConcatenated += responses[tx].execution_trace[step].return_data[data];
@@ -382,8 +449,10 @@ using grpc::Status;
                 pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund); // Gas refunded during the operation
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
-                    pTransactionStep->add_stack(PrependZeros(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
-                pTransactionStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of the memory
+                    pTransactionStep->add_stack(responses[tx].call_trace.steps[step].stack[stack].get_str(16)); // Content of the stack
+                pTransactionStep->set_memory_size(responses[tx].call_trace.steps[step].memory_size);
+                pTransactionStep->set_memory_offset(responses[tx].call_trace.steps[step].memory_offset);
+                pTransactionStep->set_memory(responses[tx].call_trace.steps[step].memory);
                 string dataConcatenated;
                 for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
                     dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
@@ -394,6 +463,7 @@ using grpc::Status;
                 pContract->set_value(Add0xIfMissing(responses[tx].call_trace.steps[step].contract.value.get_str(16)));
                 pContract->set_data(string2ba(responses[tx].call_trace.steps[step].contract.data));
                 pContract->set_gas(responses[tx].call_trace.steps[step].contract.gas);
+                pContract->set_type(responses[tx].call_trace.steps[step].contract.type);
                 pTransactionStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
             pProcessTransactionResponse->set_allocated_call_trace(pCallTrace);
@@ -401,53 +471,64 @@ using grpc::Status;
     }
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() returns"
-         << " error=" << response->error()
-         << " new_state_root=" << proverRequest.pFullTracer->get_new_state_root()
-         << " new_acc_input_hash=" << proverRequest.pFullTracer->get_new_acc_input_hash()
-         << " new_local_exit_root=" << proverRequest.pFullTracer->get_new_local_exit_root()
-         //<< " new_batch_num=" << proverRequest.fullTracer.finalTrace.new_batch_num
-         << " steps=" << proverRequest.counters.steps
-         << " gasUsed=" << proverRequest.pFullTracer->get_cumulative_gas_used()
-         << " counters.keccakF=" << proverRequest.counters.keccakF
-         << " counters.poseidonG=" << proverRequest.counters.poseidonG
-         << " counters.paddingPG=" << proverRequest.counters.paddingPG
-         << " counters.memAlign=" << proverRequest.counters.memAlign
-         << " counters.arith=" << proverRequest.counters.arith
-         << " counters.binary=" << proverRequest.counters.binary
-         << " nTxs=" << responses.size();
+    {
+        string s = "ExecutorServiceImpl::ProcessBatch() returns result=" + to_string(response->error()) +
+            " old_state_root=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+            " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
+            " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
+            " new_local_exit_root=" + proverRequest.pFullTracer->get_new_local_exit_root() +
+            " old_batch_num=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
+            " steps=" + to_string(proverRequest.counters.steps) +
+            " gasUsed=" + to_string(proverRequest.pFullTracer->get_cumulative_gas_used()) +
+            " counters.keccakF=" + to_string(proverRequest.counters.keccakF) +
+            " counters.poseidonG=" + to_string(proverRequest.counters.poseidonG) +
+            " counters.paddingPG=" + to_string(proverRequest.counters.paddingPG) +
+            " counters.memAlign=" + to_string(proverRequest.counters.memAlign) +
+            " counters.arith=" + to_string(proverRequest.counters.arith) +
+            " counters.binary=" + to_string(proverRequest.counters.binary) +
+            " flush_id=" + to_string(proverRequest.flushId) +
+            " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
+            " externalRequestId=" + proverRequest.externalRequestId +
+            " nTxs=" + to_string(responses.size());
          if (config.logExecutorServerTxs)
          {
             for (uint64_t tx=0; tx<responses.size(); tx++)
             {
-                cout << " tx[" << tx << "].hash=" << responses[tx].tx_hash
-                    << " gasUsed=" << responses[tx].gas_used
-                    << " gasLeft=" << responses[tx].gas_left
-                    << " gasUsed+gasLeft=" << (responses[tx].gas_used + responses[tx].gas_left)
-                    << " gasRefunded=" << responses[tx].gas_refunded
-                    << " error=" << responses[tx].error;
+                s += " tx[" + to_string(tx) + "].hash=" + responses[tx].tx_hash +
+                    " stateRoot=" + responses[tx].state_root +
+                    " gasUsed=" + to_string(responses[tx].gas_used) +
+                    " gasLeft=" + to_string(responses[tx].gas_left) +
+                    " gasUsed+gasLeft=" + to_string(responses[tx].gas_used + responses[tx].gas_left) +
+                    " gasRefunded=" + to_string(responses[tx].gas_refunded) +
+                    " result=" + responses[tx].error;
             }
          }
-        cout << endl;
+        zklog.info(s);
+    }
 #endif
 
     if (config.logExecutorServerResponses)
     {
-        cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
+        zklog.info("ExecutorServiceImpl::ProcessBatch() returns:\n" + response->DebugString());
     }
 
+    //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
+    
     TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
 
     if (config.saveResponseToFile)
     {
+        //TimerStart(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
+        //zklog.info("ExecutorServiceImpl::ProcessBatch() returns response of size=" + to_string(response->ByteSizeLong()));
         string2file(response->DebugString(), proverRequest.filePrefix + "executor_response.txt");
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
     }
 
     if (config.opcodeTracer)
     {
         map<uint8_t, vector<Opcode>> opcodeMap;
         vector<Opcode> &info(proverRequest.pFullTracer->get_info());
-        cout << "Received " << info.size() << " opcodes:" << endl;
+        zklog.info("Received " + to_string(info.size()) + " opcodes:");
         for (uint64_t i=0; i<info.size(); i++)
         {
             if (opcodeMap.find(info[i].op) == opcodeMap.end())
@@ -457,29 +538,31 @@ using grpc::Status;
             }
             opcodeMap[info[i].op].push_back(info[i]);
         }
+        string s;
         map<uint8_t, vector<Opcode>>::iterator opcodeMapIt;
         for (opcodeMapIt = opcodeMap.begin(); opcodeMapIt != opcodeMap.end(); opcodeMapIt++)
         {
-            cout << "    0x" << byte2string(opcodeMapIt->first) << "=" << opcodeMapIt->second[0].opcode << " called " << opcodeMapIt->second.size() << " times";
+            s += "    0x" + byte2string(opcodeMapIt->first) + "=" + opcodeMapIt->second[0].opcode + " called " + to_string(opcodeMapIt->second.size()) + " times";
 
             uint64_t opcodeTotalGas = 0;
-            cout << " gas=";
+            s += " gas=";
             for (uint64_t i=0; i<opcodeMapIt->second.size(); i++)
             {
-                cout << opcodeMapIt->second[i].gas_cost << ",";
+                s += to_string(opcodeMapIt->second[i].gas_cost) + ",";
                 opcodeTotalGas += opcodeMapIt->second[i].gas_cost;
             }
 
             uint64_t opcodeTotalDuration = 0;
-            cout << " duration=";
+            s += " duration=";
             for (uint64_t i=0; i<opcodeMapIt->second.size(); i++)
             {
-                cout << opcodeMapIt->second[i].duration << ",";
+                s += to_string(opcodeMapIt->second[i].duration) + ",";
                 opcodeTotalDuration += opcodeMapIt->second[i].duration;
             }
 
-            cout << " TP=" << (double(opcodeTotalGas)*1000000)/double(opcodeTotalDuration) << "gas/s" << endl;
+            s += " TP=" + to_string((double(opcodeTotalGas)*1000000)/double(opcodeTotalDuration)) + "gas/s";
         }
+        zklog.info(s);
     }
 
     // Calculate the throughput, for this ProcessBatch call, and for all calls
@@ -514,15 +597,53 @@ using grpc::Status;
     
     uint64_t nfd = getNumberOfFileDescriptors();
 
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime
-         << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B" 
-         << " totalTP(10s)=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/zkmax(1,totalTPB) << "gas/B"
-         << " totalTP(ever)=" << TPB << "B/s=" << TPTX << "TX/s=" << TPG << "gas/s=" << TPG/zkmax(1,TPB) << "gas/B"
-         << " totalTime=" << totalTime
-         << " filedesc=" << nfd
-         << endl;
+    zklog.info("ExecutorServiceImpl::ProcessBatch() done counter=" + to_string(counter) + " B=" + to_string(execBytes) + " TX=" + to_string(execTX) + " gas=" + to_string(execGas) + " time=" + to_string(execTime) +
+        " TP=" + to_string(double(execBytes)/execTime) + "B/s=" + to_string(double(execTX)/execTime) + "TX/s=" + to_string(double(execGas)/execTime) + "gas/s=" + to_string(double(execGas)/double(execBytes)) + "gas/B" +
+        " totalTP(10s)=" + to_string(totalTPB) + "B/s=" + to_string(totalTPTX) + "TX/s=" + to_string(totalTPG) + "gas/s=" + to_string(totalTPG/zkmax(1,totalTPB)) + "gas/B" +
+        " totalTP(ever)=" + to_string(TPB) + "B/s=" + to_string(TPTX) + "TX/s=" + to_string(TPG) + "gas/s=" + to_string(TPG/zkmax(1,TPB)) + "gas/B" +
+        " totalTime=" + to_string(totalTime) +
+        " filedesc=" + to_string(nfd));
+    
+    // If the TP in gas/s is < threshold, log the input, unless it has been done before
+    if (!config.logExecutorServerInput && (config.logExecutorServerInputGasThreshold > 0) && ((double(execGas)/execTime) < config.logExecutorServerInputGasThreshold))
+    {
+        json inputJson;
+        proverRequest.input.save(inputJson);
+        zklog.info("TP=" + to_string(double(execGas)/execTime) + "gas/s Input=" + inputJson.dump());
+    }
     unlock();
 #endif
+
+    return Status::OK;
+}
+
+::grpc::Status ExecutorServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response)
+{
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
+    uint64_t storedFlushId;
+    uint64_t storingFlushId;
+    uint64_t lastFlushId;
+    uint64_t pendingToFlushNodes;
+    uint64_t pendingToFlushProgram;
+    uint64_t storingNodes;
+    uint64_t storingProgram;
+    string proverId;
+
+    pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+    
+    response->set_stored_flush_id(storedFlushId);
+    response->set_storing_flush_id(storingFlushId);
+    response->set_last_flush_id(lastFlushId);
+    response->set_pending_to_flush_nodes(pendingToFlushNodes);
+    response->set_pending_to_flush_program(pendingToFlushProgram);
+    response->set_storing_nodes(storingNodes);
+    response->set_storing_program(storingProgram);
+    response->set_prover_id(proverId);
 
     return Status::OK;
 }
@@ -531,10 +652,16 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     TimerStart(PROCESS_BATCH_STREAM);
 
 #ifdef LOG_SERVICE
-    cout << "ExecutorServiceImpl::ProcessBatchStream() stream starts" << endl;
+    zklog.info("ExecutorServiceImpl::ProcessBatchStream() stream starts");
 #endif
     executor::v1::ProcessBatchRequest processBatchRequest;
     executor::v1::ProcessBatchResponse processBatchResponse;
@@ -552,7 +679,7 @@ using grpc::Status;
         bResult = stream->Read(&processBatchRequest);
         if (!bResult)
         {
-            cerr << "ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Read(processBatchRequest) numberOfRequests=" << numberOfRequests << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Read(processBatchRequest) numberOfRequests=" + to_string(numberOfRequests));
             TimerStopAndLog(PROCESS_BATCH_STREAM);
             return Status::CANCELLED;
         }
@@ -561,7 +688,7 @@ using grpc::Status;
         grpcStatus = ProcessBatch(context, &processBatchRequest, &processBatchResponse);
         if (!grpcStatus.ok())
         {
-            cerr << "ExecutorServiceImpl::ProcessBatchStream() failed calling ProcessBatch() numberOfRequests=" << numberOfRequests << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatchStream() failed calling ProcessBatch() numberOfRequests=" + to_string(numberOfRequests));
             TimerStopAndLog(PROCESS_BATCH_STREAM);
             return grpcStatus;
         }
@@ -570,7 +697,7 @@ using grpc::Status;
         bResult = stream->Write(processBatchResponse);
         if (!bResult)
         {
-            cerr << "ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Write(processBatchResponse) numberOfRequests=" << numberOfRequests << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Write(processBatchResponse) numberOfRequests=" + to_string(numberOfRequests));
             TimerStopAndLog(PROCESS_BATCH_STREAM);
             return Status::CANCELLED;
         }
@@ -603,6 +730,7 @@ using grpc::Status;
     if (errorString == "intrinsic_invalid_balance"        ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_BALANCE;
     if (errorString == "intrinsic_invalid_batch_gas_limit") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT;
     if (errorString == "intrinsic_invalid_sender_code"    ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SENDER_CODE;
+    if (errorString == "invalidRLP"                       ) return ::executor::v1::ROM_ERROR_INVALID_RLP;
     if (errorString == "invalidJump"                      ) return ::executor::v1::ROM_ERROR_INVALID_JUMP;
     if (errorString == "invalidOpcode"                    ) return ::executor::v1::ROM_ERROR_INVALID_OPCODE;
     if (errorString == "invalidAddressCollision"          ) return ::executor::v1::ROM_ERROR_CONTRACT_ADDRESS_COLLISION;
@@ -611,21 +739,84 @@ using grpc::Status;
     if (errorString == "invalidCodeStartsEF"              ) return ::executor::v1::ROM_ERROR_INVALID_BYTECODE_STARTS_EF;
     if (errorString == "invalid_fork_id"                  ) return ::executor::v1::ROM_ERROR_UNSUPPORTED_FORK_ID;
     if (errorString == ""                                 ) return ::executor::v1::ROM_ERROR_NO_ERROR;
-    cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
+    zklog.error("ExecutorServiceImpl::string2error() found invalid error string=" + errorString);
     exitProcess();
     return ::executor::v1::ROM_ERROR_UNSPECIFIED;
 }
 
 ::executor::v1::ExecutorError ExecutorServiceImpl::zkresult2error (zkresult &result)
 {
-    if (result == ZKR_SUCCESS                 ) return ::executor::v1::EXECUTOR_ERROR_NO_ERROR;
-    if (result == ZKR_SM_MAIN_OOC_ARITH       ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_ARITH;
-    if (result == ZKR_SM_MAIN_OOC_BINARY      ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_BINARY;
-    if (result == ZKR_SM_MAIN_OOC_KECCAK_F    ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_KECCAK;
-    if (result == ZKR_SM_MAIN_OOC_MEM_ALIGN   ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_MEM;
-    if (result == ZKR_SM_MAIN_OOC_PADDING_PG  ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING;
-    if (result == ZKR_SM_MAIN_OOC_POSEIDON_G  ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
-    if (result == ZKR_SM_MAIN_INVALID_FORK_ID ) return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
-    if (result == ZKR_SM_MAIN_BALANCE_MISMATCH) return ::executor::v1::EXECUTOR_ERROR_BALANCE_MISMATCH;
-    return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
+    switch (result)
+    {
+    case ZKR_SUCCESS:                                       return ::executor::v1::EXECUTOR_ERROR_NO_ERROR;
+    case ZKR_SM_MAIN_OOC_ARITH:                             return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_ARITH;
+    case ZKR_SM_MAIN_OOC_BINARY:                            return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_BINARY;
+    case ZKR_SM_MAIN_OOC_KECCAK_F:                          return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_KECCAK;
+    case ZKR_SM_MAIN_OOC_MEM_ALIGN:                         return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_MEM;
+    case ZKR_SM_MAIN_OOC_PADDING_PG:                        return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_PADDING;
+    case ZKR_SM_MAIN_OOC_POSEIDON_G:                        return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_POSEIDON;
+    case ZKR_SM_MAIN_INVALID_FORK_ID:                       return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
+    case ZKR_SM_MAIN_BALANCE_MISMATCH:                      return ::executor::v1::EXECUTOR_ERROR_BALANCE_MISMATCH;
+    case ZKR_SM_MAIN_FEA2SCALAR:                            return ::executor::v1::EXECUTOR_ERROR_FEA2SCALAR;
+    case ZKR_SM_MAIN_TOS32:                                 return ::executor::v1::EXECUTOR_ERROR_TOS32;
+    case ZKR_DB_ERROR:                                      return ::executor::v1::EXECUTOR_ERROR_DB_ERROR;
+    case ZKR_SM_MAIN_INVALID_UNSIGNED_TX:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_INVALID_UNSIGNED_TX;
+    case ZKR_SM_MAIN_INVALID_NO_COUNTERS:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_INVALID_NO_COUNTERS;
+    case ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO:        return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO;
+    case ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE:                  return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_ADDRESS_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_ADDRESS_NEGATIVE:                      return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_ADDRESS_NEGATIVE;
+    case ZKR_SM_MAIN_STORAGE_INVALID_KEY:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_STORAGE_INVALID_KEY;
+    case ZKR_SM_MAIN_HASHK:                                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK;
+    case ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_POSITION_NEGATIVE;
+    case ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE: return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND:         return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND;
+    case ZKR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED:             return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED;
+    case ZKR_SM_MAIN_HASHP:                                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP;
+    case ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_POSITION_NEGATIVE;
+    case ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE: return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND:         return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND;
+    case ZKR_SM_MAIN_HASHPDIGEST_NOT_COMPLETED:             return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHPDIGEST_NOT_COMPLETED;
+    case ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE:          return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_MULTIPLE_FREEIN:                       return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_MULTIPLE_FREEIN;
+    case ZKR_SM_MAIN_ASSERT:                                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_ASSERT;
+    case ZKR_SM_MAIN_MEMORY:                                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_MEMORY;
+    case ZKR_SM_MAIN_STORAGE_READ_MISMATCH:                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_STORAGE_READ_MISMATCH;
+    case ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH:                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_STORAGE_WRITE_MISMATCH;
+    case ZKR_SM_MAIN_HASHK_VALUE_MISMATCH:                  return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_VALUE_MISMATCH;
+    case ZKR_SM_MAIN_HASHK_PADDING_MISMATCH:                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_PADDING_MISMATCH;
+    case ZKR_SM_MAIN_HASHK_SIZE_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_SIZE_MISMATCH;
+    case ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
+    case ZKR_SM_MAIN_HASHKLEN_CALLED_TWICE:                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKLEN_CALLED_TWICE;
+    case ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND:                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_NOT_FOUND;
+    case ZKR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH:           return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH;
+    case ZKR_SM_MAIN_HASHKDIGEST_CALLED_TWICE:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_CALLED_TWICE;
+    case ZKR_SM_MAIN_HASHP_VALUE_MISMATCH:                  return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_VALUE_MISMATCH;
+    case ZKR_SM_MAIN_HASHP_PADDING_MISMATCH:                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_PADDING_MISMATCH;
+    case ZKR_SM_MAIN_HASHP_SIZE_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_SIZE_MISMATCH;
+    case ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;
+    case ZKR_SM_MAIN_HASHPLEN_CALLED_TWICE:                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHPLEN_CALLED_TWICE;
+    case ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH:           return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;
+    case ZKR_SM_MAIN_HASHPDIGEST_CALLED_TWICE:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHPDIGEST_CALLED_TWICE;
+    case ZKR_SM_MAIN_ARITH_MISMATCH:                        return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_ARITH_MISMATCH;
+    case ZKR_SM_MAIN_ARITH_ECRECOVER_MISMATCH:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_ARITH_ECRECOVER_MISMATCH;
+    case ZKR_SM_MAIN_BINARY_ADD_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_ADD_MISMATCH;
+    case ZKR_SM_MAIN_BINARY_SUB_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_SUB_MISMATCH;
+    case ZKR_SM_MAIN_BINARY_LT_MISMATCH:                    return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_LT_MISMATCH;
+    case ZKR_SM_MAIN_BINARY_SLT_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_SLT_MISMATCH;
+    case ZKR_SM_MAIN_BINARY_EQ_MISMATCH:                    return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_EQ_MISMATCH;
+    case ZKR_SM_MAIN_BINARY_AND_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_AND_MISMATCH;
+    case ZKR_SM_MAIN_BINARY_OR_MISMATCH:                    return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_OR_MISMATCH;
+    case ZKR_SM_MAIN_BINARY_XOR_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_XOR_MISMATCH;
+    case ZKR_SM_MAIN_MEMALIGN_WRITE_MISMATCH:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_MEMALIGN_WRITE_MISMATCH;
+    case ZKR_SM_MAIN_MEMALIGN_WRITE8_MISMATCH:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_MEMALIGN_WRITE8_MISMATCH;
+    case ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH:                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_MEMALIGN_READ_MISMATCH;
+    case ZKR_SM_MAIN_S33:                                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_JMPN_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_OUT_OF_STEPS:                          return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_STEPS;
+    case ZKR_SM_MAIN_HASHK_READ_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_READ_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_HASHP_READ_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_READ_OUT_OF_RANGE;
+
+    default:                                                return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
+    }
 }

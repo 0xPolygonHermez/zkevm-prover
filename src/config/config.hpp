@@ -17,8 +17,8 @@ public:
     bool runExecutorServer;
     bool runExecutorClient;
     bool runExecutorClientMultithread;
-    bool runStateDBServer;
-    bool runStateDBTest;
+    bool runHashDBServer;
+    bool runHashDBTest;
     bool runAggregatorServer;
     bool runAggregatorClient;
     bool runAggregatorClientMock;    
@@ -37,9 +37,17 @@ public:
     bool runMemAlignSMTest;
     bool runSHA256Test;
     bool runBlakeTest;
+    bool runECRecoverTest;
+    bool runDatabaseCacheTest;
+    bool runDatabaseAssociativeCacheTest;
+    bool runCheckTreeTest;
+    string checkTreeRoot;
+    bool runDatabasePerformanceTest;
+    bool runUnitTest;
     
     bool executeInParallel;
     bool useMainExecGenerated;
+    bool useMainExecC;
 
     bool saveRequestToFile; // Saves the grpc service request, in text format
     bool saveInputToFile; // Saves the grpc input data, in json format
@@ -52,10 +60,18 @@ public:
 
     bool loadDBToMemCache;
     bool loadDBToMemCacheInParallel;
+    uint64_t loadDBToMemTimeout;
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
+    bool useAssociativeCache; // Use the associative cache for MT records?
+    int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 97 bytes
+    int64_t log2DbMTAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indices. Note index entry = 4 bytes
+
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;
     bool logRemoteDbReads;
+    bool logExecutorServerInput; // Logs all inputs, before processing 
+    bool logExecutorServerInputJson; // Logs all inputs in input.json format, before processing
+    uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
     bool logExecutorServerResponses;
     bool logExecutorServerTxs;
     bool dontLoadRomOffsets;
@@ -65,14 +81,20 @@ public:
     bool executorTimeStatistics;
     uint16_t executorClientPort;
     string executorClientHost;
+    uint64_t executorClientLoops;
+    bool executorClientCheckNewStateRoot;
 
-    uint16_t stateDBServerPort;
-    string stateDBURL;
+    uint16_t hashDBServerPort;
+    string hashDBURL;
+    bool hashDB64;
+    string dbCacheSynchURL;
 
     uint16_t aggregatorServerPort;
     uint16_t aggregatorClientPort;
     string aggregatorClientHost;
     uint64_t aggregatorClientMockTimeout;
+    uint64_t aggregatorClientWatchdogTimeout;
+    uint64_t aggregatorClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
 
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
@@ -122,15 +144,29 @@ public:
     string dbNodesTableName;
     string dbProgramTableName;
     bool dbMultiWrite;
-    bool dbFlushInParallel;
+    uint64_t dbMultiWriteSingleQuerySize;
     bool dbConnectionsPool;
     uint64_t dbNumberOfPoolConnections;
+    bool dbMetrics;
+    bool dbClearCache;
+    bool dbGetTree;
+    bool dbReadOnly;
+    uint64_t dbReadRetryCounter;
+    uint64_t dbReadRetryDelay;
+    bool stateManager;
+    bool stateManagerPurge;
+    bool stateManagerPurgeTxs;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
     uint64_t maxProverThreads;
-    uint64_t maxStateDBThreads;
+    uint64_t maxHashDBThreads;
     string proverName;
+
+    uint64_t fullTracerTraceReserveSize;
+    bool ECRecoverPrecalc;
+    uint64_t ECRecoverPrecalcNThreads;
+
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);

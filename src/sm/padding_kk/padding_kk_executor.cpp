@@ -3,6 +3,7 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "goldilocks_precomputed.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ uint64_t PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
             // Make sure we got an even number of characters
             if ((input[i].data.length()%2) != 0)
             {
-                cerr << "Error: PaddingKKExecutor::prepareInput() detected at entry i=" << i << " a odd data string length=" << input[i].data.length() << endl;
+                zklog.error("PaddingKKExecutor::prepareInput() detected at entry i=" + to_string(i) + " a odd data string length=" + to_string(input[i].data.length()));
                 exitProcess();
             }
 
@@ -52,7 +53,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
     // Check input size
     if (totalInputBytes > (44*bytesPerBlock*(N/blockSize)))
     {
-        cerr << "Error: PaddingKKExecutor::execute() Too many entries input.size()=" << input.size() << " totalInputBytes=" << totalInputBytes << " > 44*bytesPerBlock*(N/blockSize)=" << 44*bytesPerBlock*(N/blockSize) << endl;
+        zklog.error("PaddingKKExecutor::execute() Too many entries input.size()=" + to_string(input.size()) + " totalInputBytes=" + to_string(totalInputBytes) + " > 44*bytesPerBlock*(N/blockSize)=" + to_string(44*bytesPerBlock*(N/blockSize)));
         exitProcess();
     }
 
@@ -189,7 +190,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
 
     if (nUsedBlocks > nTotalBlocks)
     {
-        cerr << "Error: PaddingKKExecutor::execute() Too many keccak blocks nUsedBlocks=" << nUsedBlocks << " > nTotalBlocks=" << nTotalBlocks << " BlockSize=" << blockSize << endl;
+        zklog.error("PaddingKKExecutor::execute() Too many keccak blocks nUsedBlocks=" + to_string(nUsedBlocks) + " > nTotalBlocks=" + to_string(nTotalBlocks) + " BlockSize=" + to_string(blockSize));
         exitProcess();
     }
 
@@ -283,5 +284,5 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
         p += 1;
     }
 
-    cout << "PaddingKKExecutor successfully processed " << input.size() << " Keccak hashes p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
+    zklog.info("PaddingKKExecutor successfully processed " + to_string(input.size()) + " Keccak hashes p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
 }

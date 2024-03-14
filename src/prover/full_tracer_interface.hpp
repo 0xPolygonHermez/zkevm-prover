@@ -18,6 +18,7 @@ public:
     mpz_class value;
     string data;
     uint64_t gas;
+    string type;
     OpcodeContract() : value(0), gas(0) {};
 };
 
@@ -37,11 +38,12 @@ public:
     vector<mpz_class> stack;
     string memory;
     uint64_t memory_size;
+    uint64_t memory_offset;
     unordered_map<string,string> storage;
     vector<string> return_data;
     struct timeval startTime;
     uint64_t duration;
-    Opcode() : gas(0), gas_cost(0), depth(0), pc(0), op(0), gas_refund(0), memory_size(0), startTime({0,0}), duration(0) {};
+    Opcode() : gas(0), gas_cost(0), depth(0), pc(0), op(0), opcode(NULL), gas_refund(0), memory_size(0), memory_offset(0), startTime({0,0}), duration(0) {};
 };
 
 class Log
@@ -102,7 +104,9 @@ public:
     string state_root;
     vector<Log> logs;
     vector<Opcode> execution_trace;
-    Response() : type(0), gas_left(0), gas_used(0), gas_refunded(0) {};
+    string effective_gas_price;
+    uint32_t effective_percentage;
+    Response() : type(0), gas_left(0), gas_used(0), gas_refunded(0), effective_percentage(0) {};
 };
 
 class FinalTrace
@@ -134,6 +138,16 @@ public:
     uint64_t remaining;
 };
 
+class ReturnFromCreate
+{
+public:
+    bool enabled;
+    uint64_t originCTX;
+    uint64_t createCTX;
+    vector<string> returnValue;
+    ReturnFromCreate() : enabled(false), originCTX(0), createCTX(0) {};
+};
+
 class FullTracerInterface
 {
 public:
@@ -145,6 +159,7 @@ public:
     virtual unordered_map<string, InfoReadWrite> * get_read_write_addresses(void) = 0;
     virtual vector<Response> & get_responses(void) = 0;
     virtual vector<Opcode> & get_info(void) = 0;
+    virtual uint64_t get_tx_number(void) = 0; // tx number = 0, 1, 2...
 };
 
 #endif

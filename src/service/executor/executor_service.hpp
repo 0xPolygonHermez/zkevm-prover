@@ -15,6 +15,7 @@ class ExecutorServiceImpl final : public executor::v1::ExecutorService::Service
     Goldilocks &fr;
     Config &config;
     Prover &prover;
+    HashDBInterface *pHashDB;
 
     // These attributes are used to measure the throughput of the executor
     // process batch service, in gas per second
@@ -38,6 +39,7 @@ public:
         fr(fr),
         config(config),
         prover(prover),
+        pHashDB(NULL),
         counter(0),
         totalGas(0),
         totalBytes(0),
@@ -53,10 +55,23 @@ public:
         pthread_mutex_init(&mutex, NULL);
         lastTotalTime = {0,0};
         firstTotalTime = {0, 0};
+
+        /* Get a HashDBInterface interface, according to the configuration */
+        pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDB == NULL)
+        {
+            zklog.error("ExecutorServiceImpl::ExecutorServiceImpl() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
     };
+    ~ExecutorServiceImpl()
+    {
+        HashDBClientFactory::freeHashDBClient(pHashDB);
+    }
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
     ::grpc::Status ProcessBatch (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response) override;
+    ::grpc::Status GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response) override;
 #ifdef PROCESS_BATCH_STREAM
     ::grpc::Status ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream) override;
 #endif    

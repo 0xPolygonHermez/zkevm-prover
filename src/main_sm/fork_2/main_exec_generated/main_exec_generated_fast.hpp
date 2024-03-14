@@ -1,3 +1,5 @@
+#if 0
+
 #ifndef MAIN_EXEC_GENERATED_FAST_HPP_fork_2
 #define MAIN_EXEC_GENERATED_FAST_HPP_fork_2
 
@@ -11,3 +13,4 @@ void main_exec_generated_fast (fork_2::MainExecutor &mainExecutor, ProverRequest
 
 #endif
 
+#endif

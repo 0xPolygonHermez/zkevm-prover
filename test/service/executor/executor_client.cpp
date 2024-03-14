@@ -1,6 +1,10 @@
 
 #include <nlohmann/json.hpp>
 #include "executor_client.hpp"
+#include "hashdb_singleton.hpp"
+#include "zkmax.hpp"
+#include "check_tree.hpp"
+#include "check_tree_64.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -9,8 +13,12 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     fr(fr),
     config(config)
 {
+    // Set channel option to receive large messages
+    grpc::ChannelArguments channelArguments;
+    channelArguments.SetMaxReceiveMessageSize(1024*1024*1024);
+
     // Create channel
-    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc::Channel> channel = grpc::CreateCustomChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new executor::v1::ExecutorService::Stub(channel);
@@ -62,7 +70,6 @@ bool ExecutorClient::ProcessBatch (void)
         cerr << "Error: ExecutorClient::ProcessBatch() found config.inputFile empty" << endl;
         exit(-1);
     }
-    ::grpc::ClientContext context;
     ::executor::v1::ProcessBatchRequest request;
     Input input(fr);
     json inputJson;
@@ -130,17 +137,102 @@ bool ExecutorClient::ProcessBatch (void)
         (*request.mutable_contracts_bytecode())[key] = value;
     }
 
-    ::executor::v1::ProcessBatchResponse response;
-    std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
-    ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &response);
-    if (grpcStatus.error_code() != grpc::StatusCode::OK)
+    ::executor::v1::ProcessBatchResponse processBatchResponse;
+    string newStateRoot;
+    for (uint64_t i=0; i<config.executorClientLoops; i++)
     {
-        cerr << "Error: ExecutorClient::ProcessBatch() failed calling server" << endl;
-    }
+        if (i == 1)
+        {
+            request.clear_db();
+            request.clear_contracts_bytecode();
+        }
+        ::grpc::ClientContext context;
+        ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &processBatchResponse);
+        if (grpcStatus.error_code() != grpc::StatusCode::OK)
+        {
+            cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
+            break;
+        }
+        newStateRoot = ba2string(processBatchResponse.new_state_root());
 
 #ifdef LOG_SERVICE
-    cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+        cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
 #endif
+    }
+
+    if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+    {
+        executor::v1::GetFlushStatusResponse getFlushStatusResponse;
+        do
+        {
+            sleep(1);
+            google::protobuf::Empty request;
+            ::grpc::ClientContext context;
+            ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
+            if (grpcStatus.error_code() != grpc::StatusCode::OK)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
+                break;
+            }
+        } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
+        zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
+        
+    }
+
+    if (config.executorClientCheckNewStateRoot)
+    {
+        TimerStart(CHECK_NEW_STATE_ROOT);
+
+        if (newStateRoot.size() == 0)
+        {
+            zklog.error("ExecutorClient::ProcessBatch() found newStateRoot emty");
+            return false;
+        }
+
+        HashDB &hashDB = *hashDBSingleton.get();
+
+        if (config.hashDB64)
+        {
+            Database64 &db = hashDB.db64;
+            db.clearCache();
+
+            CheckTreeCounters64 checkTreeCounters;
+
+            zkresult result = CheckTree64(db, newStateRoot, 0, checkTreeCounters);
+            if (result != ZKR_SUCCESS)
+            {
+                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree64() result=" + zkresult2string(result));
+                return false;
+            }
+
+            zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
+            zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
+            zklog.info("values=" + to_string(checkTreeCounters.values));
+            zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+        }
+        else
+        {
+            Database &db = hashDB.db;
+            db.clearCache();
+
+            CheckTreeCounters checkTreeCounters;
+
+            zkresult result = CheckTree(db, newStateRoot, 0, checkTreeCounters);
+            if (result != ZKR_SUCCESS)
+            {
+                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree() result=" + zkresult2string(result));
+                return false;
+            }
+
+            zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
+            zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
+            zklog.info("values=" + to_string(checkTreeCounters.values));
+            zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+        }
+
+        TimerStopAndLog(CHECK_NEW_STATE_ROOT);
+
+    }
 
     TimerStopAndLog(EXECUTOR_CLIENT_PROCESS_BATCH);
 

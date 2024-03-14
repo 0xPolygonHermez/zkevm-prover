@@ -1,6 +1,8 @@
 #include "definitions.hpp"
 #include "starks.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -53,7 +55,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     treesGL[0]->merkelize();
     treesGL[0]->getRoot(root0.address());
     TimerStopAndLog(STARK_STEP_1_MERKLETREE);
-    std::cout << "MerkleTree rootGL 0: [ " << root0.toString(4) << " ]" << std::endl;
+    zklog.info("MerkleTree rootGL 0: [ " + root0.toString(4) + " ]");
     transcript.put(root0.address(), HASH_SIZE);
     TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
     TimerStopAndLog(STARK_STEP_1);
@@ -64,23 +66,28 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_2);
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
-    TimerStart(STARK_STEP_2_CALCULATE_EXPS);
-
-    // Calculate exps
-    if (nrowsStepBatch > 1)
+    if (nrowsStepBatch == 4)
     {
+        TimerStart(STARK_STEP_2_CALCULATE_EXPS_AVX);
         steps->step2prev_parser_first_avx(params, N, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS_AVX);
+    }
+    else if (nrowsStepBatch == 8)
+    {
+        TimerStart(STARK_STEP_2_CALCULATE_EXPS_AVX512);
+        steps->step2prev_parser_first_avx512(params, N, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS_AVX512);
     }
     else
     {
+        TimerStart(STARK_STEP_2_CALCULATE_EXPS);
 #pragma omp parallel for
         for (uint64_t i = 0; i < N; i++)
         {
             steps->step2prev_first(params, i);
         }
+        TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
     }
-    TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
-
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
     Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited, pBuffer);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
@@ -129,7 +136,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     treesGL[1]->merkelize();
     treesGL[1]->getRoot(root1.address());
     TimerStopAndLog(STARK_STEP_2_MERKLETREE);
-    std::cout << "MerkleTree rootGL 1: [ " << root1.toString(4) << " ]" << std::endl;
+    zklog.info("MerkleTree rootGL 1: [ " + root1.toString(4) + " ]");
     transcript.put(root1.address(), HASH_SIZE);
 
     TimerStopAndLog(STARK_STEP_2_LDE_AND_MERKLETREE);
@@ -141,22 +148,28 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_3);
     transcript.getField(challenges[2]); // gamma
     transcript.getField(challenges[3]); // betta
-    TimerStart(STARK_STEP_3_CALCULATE_EXPS);
-
-    if (nrowsStepBatch > 1)
+    if (nrowsStepBatch == 4)
     {
+        TimerStart(STARK_STEP_3_CALCULATE_EXPS_AVX);
         steps->step3prev_parser_first_avx(params, N, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_AVX);
+    }
+    else if (nrowsStepBatch == 8)
+    {
+        TimerStart(STARK_STEP_3_CALCULATE_EXPS_AVX512);
+        steps->step3prev_parser_first_avx512(params, N, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_AVX512);
     }
     else
     {
+        TimerStart(STARK_STEP_3_CALCULATE_EXPS);
 #pragma omp parallel for
         for (uint64_t i = 0; i < N; i++)
         {
             steps->step3prev_first(params, i);
         }
+        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
     }
-    TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
-
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
     Polinomial *newpols_ = transposeZColumns(pAddress, numCommited, pBuffer);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
@@ -173,23 +186,29 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
     transposeZRows(pAddress, numCommited, newpols_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
-    TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
-
-    // Calculate exps
-    if (nrowsStepBatch > 1)
+    if (nrowsStepBatch == 4)
     {
+        TimerStart(STARK_STEP_3_CALCULATE_EXPS_2_AVX);
         steps->step3_parser_first_avx(params, N, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2_AVX);
+    }
+    else if (nrowsStepBatch == 8)
+    {
+        TimerStart(STARK_STEP_3_CALCULATE_EXPS_2_AVX512);
+        steps->step3_parser_first_avx512(params, N, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2_AVX512);
     }
     else
     {
+        TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
 #pragma omp parallel for
         for (uint64_t i = 0; i < N; i++)
         {
             steps->step3_first(params, i);
         }
+        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
     }
 
-    TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
     TimerStart(STARK_STEP_3_LDE);
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
@@ -198,7 +217,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     treesGL[2]->merkelize();
     treesGL[2]->getRoot(root2.address());
     TimerStopAndLog(STARK_STEP_3_MERKLETREE);
-    std::cout << "MerkleTree rootGL 2: [ " << root2.toString(4) << " ]" << std::endl;
+    zklog.info("MerkleTree rootGL 2: [ " + root2.toString(4) + " ]");
     transcript.put(root2.address(), HASH_SIZE);
     TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
     TimerStopAndLog(STARK_STEP_3);
@@ -215,22 +234,28 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
 
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
     TimerStopAndLog(STARK_STEP_4_INIT);
-    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
-
-    if (nrowsStepBatch > 1)
+    if (nrowsStepBatch == 4)
     {
+        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX);
         steps->step42ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX);
+    }
+    else if (nrowsStepBatch == 8)
+    {
+        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX512);
+        steps->step42ns_parser_first_avx512(params, NExtended, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX512);
     }
     else
     {
+        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
 #pragma omp parallel for
         for (uint64_t i = 0; i < NExtended; i++)
         {
             steps->step42ns_first(params, i);
         }
+        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
     }
-
-    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
     nttExtended.INTT(qq1.address(), p_q_2ns, NExtended, starkInfo.qDim, NULL, 2, 1);
@@ -263,7 +288,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
 
     treesGL[3]->merkelize();
     treesGL[3]->getRoot(root3.address());
-    std::cout << "MerkleTree rootGL 3: [ " << root3.toString(4) << " ]" << std::endl;
+    zklog.info("MerkleTree rootGL 3: [ " + root3.toString(4) + " ]");
     transcript.put(root3.address(), HASH_SIZE);
 
     TimerStopAndLog(STARK_STEP_4_MERKLETREE);
@@ -299,6 +324,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     }
     ntt.INTT(LEv.address(), LEv.address(), N, 3);
     ntt.INTT(LpEv.address(), LpEv.address(), N, 3);
+
     TimerStopAndLog(STARK_STEP_5_LEv_LpEv);
 
     TimerStart(STARK_STEP_5_EVMAP);
@@ -338,21 +364,29 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
         Polinomial::mulElement(xDivXSubWXi, k, xDivXSubWXi, k, x, k);
     }
     TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
-    TimerStart(STARK_STEP_5_CALCULATE_EXPS);
-    if (nrowsStepBatch > 1)
+    if (nrowsStepBatch == 4)
     {
+        TimerStart(STARK_STEP_5_CALCULATE_EXPS_AVX);
         steps->step52ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS_AVX);
+    }
+    else if (nrowsStepBatch == 8)
+    {
+        TimerStart(STARK_STEP_5_CALCULATE_EXPS_AVX512);
+        steps->step52ns_parser_first_avx512(params, NExtended, nrowsStepBatch);
+        TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS_AVX512);
     }
     else
     {
+        TimerStart(STARK_STEP_5_CALCULATE_EXPS);
 #pragma omp parallel for
         for (uint64_t i = 0; i < NExtended; i++)
         {
             steps->step52ns_first(params, i);
         }
+        TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);
     }
 
-    TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);
     TimerStopAndLog(STARK_STEP_5);
     TimerStart(STARK_STEP_FRI);
 
@@ -431,8 +465,8 @@ Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited, Gol
 
     if (pBuffer == NULL || newpols_ == NULL)
     {
-        cout << "memory problems!" << endl;
-        exit(1);
+        zklog.error("Starks::transposeZColumns() failed calling new Polinomial[" + to_string(tot_pols) + "]");
+        exitProcess();
     }
 
     // #pragma omp parallel for (better without)
@@ -631,4 +665,35 @@ void Starks::evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomia
         free(evals_acc[i]);
     }
     free(evals_acc);
+}
+
+void Starks::merkelizeMemory()
+{
+    uint64_t polsSize = starkInfo.mapTotalN + starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << starkInfo.starkStruct.nBitsExt);
+    uint64_t nrowsDGB = 2;
+    for (uint64_t k = 0; k < polsSize; ++k)
+    {
+        if (polsSize % (nrowsDGB * 2) == 0)
+        {
+            nrowsDGB *= 2;
+        }
+    }
+    uint64_t ncolsDGB = polsSize / nrowsDGB;
+    assert(nrowsDGB * ncolsDGB == polsSize);
+    uint64_t numElementsTreeDBG = MerklehashGoldilocks::getTreeNumElements(nrowsDGB);
+    Goldilocks::Element *treeDBG = new Goldilocks::Element[numElementsTreeDBG];
+    Goldilocks::Element rootDBG[4];
+#ifdef __AVX512__
+    PoseidonGoldilocks::merkletree_avx512(treeDBG, (Goldilocks::Element *)pAddress, ncolsDGB,
+                                          nrowsDGB);
+#else
+    PoseidonGoldilocks::merkletree_avx(treeDBG, (Goldilocks::Element *)pAddress, ncolsDGB,
+                                       nrowsDGB);
+#endif
+    MerklehashGoldilocks::root(&(rootDBG[0]), treeDBG, numElementsTreeDBG);
+    std::cout << "rootDBG[0]: [ " << Goldilocks::toU64(rootDBG[0]) << " ]" << std::endl;
+    std::cout << "rootDBG[1]: [ " << Goldilocks::toU64(rootDBG[1]) << " ]" << std::endl;
+    std::cout << "rootDBG[2]: [ " << Goldilocks::toU64(rootDBG[2]) << " ]" << std::endl;
+    std::cout << "rootDBG[3]: [ " << Goldilocks::toU64(rootDBG[3]) << " ]" << std::endl;
+    delete[] treeDBG;
 }

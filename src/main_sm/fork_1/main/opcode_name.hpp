@@ -12,9 +12,10 @@ typedef struct
 {
     uint8_t      codeID;
     const char * pName;
+    uint64_t     gas;
 } OpcodeInfo;
 
-extern OpcodeInfo opcodeName[256];
+extern OpcodeInfo opcodeInfo[256];
 
 } // namespace
 

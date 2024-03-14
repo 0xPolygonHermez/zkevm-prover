@@ -3,6 +3,7 @@
 #include "main_sm/fork_1/main/rom_command.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
+#include "zklog.hpp"
 
 namespace fork_1
 {
@@ -12,7 +13,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     // Load ROM program
     if (!romJson.contains("program"))
     {
-        cerr << "Error: Rom::load() could not find program in rom json" << endl;
+        zklog.error("Rom::load() could not find program in rom json");
         exitProcess();
     }
     loadProgram(fr, romJson["program"]);
@@ -40,6 +41,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         txSOffset              = getMemoryOffset("txS");
         txVOffset              = getMemoryOffset("txV");
         txSrcOriginAddrOffset  = getMemoryOffset("txSrcOriginAddr");
+        retDataCTXOffset       = getMemoryOffset("retDataCTX");
         retDataOffsetOffset    = getMemoryOffset("retDataOffset");
         retDataLengthOffset    = getMemoryOffset("retDataLength");
         newAccInputHashOffset  = getMemoryOffset("newAccInputHash");
@@ -55,7 +57,9 @@ void Rom::load(Goldilocks &fr, json &romJson)
         storageAddrOffset      = getMemoryOffset("storageAddr");
         bytecodeLengthOffset   = getMemoryOffset("bytecodeLength");
         originCTXOffset        = getMemoryOffset("originCTX");
+        currentCTXOffset       = getMemoryOffset("currentCTX");
         gasCTXOffset           = getMemoryOffset("gasCTX");
+        isCreateOffset         = getMemoryOffset("isCreate");
     }
 
     // Load ROM constants
@@ -151,6 +155,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         {
             line[i].bElseAddrPresent = true;
             line[i].elseAddr = fr.fromU64(l["elseAddr"]);
+            line[i].elseAddrLabel = l["elseAddrLabel"];
         }
         else
         {

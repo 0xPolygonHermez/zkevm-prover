@@ -15,7 +15,7 @@ endif
 
 CXX := g++
 AS := nasm
-CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-Wfatal-errors
+CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-march=native
 LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid $(GRPCPP_LIBS)
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
@@ -26,6 +26,14 @@ ifeq ($(dbg),1)
 else
       CXXFLAGS += -O3
 endif
+
+# Verify if AVX-512 is supported
+# for now disabled, to enable it, you only need to uncomment these lines
+#AVX512_SUPPORTED := $(shell cat /proc/cpuinfo | grep -E 'avx512' -m 1)
+
+#ifneq ($(AVX512_SUPPORTED),)
+#	CXXFLAGS += -mavx512f -D__AVX512__
+#endif
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 

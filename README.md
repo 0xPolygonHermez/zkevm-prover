@@ -50,8 +50,8 @@ To download the files needed to run the prover, you have to execute the followin
 ```sh
 $ wget https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/v1.1.0-rc.1-fork.4.tgz
 $ tar -xzvf v1.1.0-rc.1-fork.4.tgz
-$ rm config
-$ mv v1.1.0-rc.1-fork.4.tgz/config .
+$ rm -rf config
+$ mv v1.1.0-rc.1-fork.4/config .
 ```
 
 Run `make` to compile the project

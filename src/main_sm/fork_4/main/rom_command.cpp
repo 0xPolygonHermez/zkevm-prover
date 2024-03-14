@@ -4,6 +4,7 @@
 #include "main_sm/fork_4/main/rom_command.hpp"
 #include "utils.hpp"
 #include "exit_process.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -62,7 +63,6 @@ tFunction string2Function(string s)
     else if (s == "f_comp_gt")                      return f_comp_gt;
     else if (s == "f_comp_eq")                      return f_comp_eq;
     else if (s == "loadScalar")                     return f_loadScalar;
-    else if (s == "getGlobalExitRootManagerAddr")   return f_getGlobalExitRootManagerAddr;
     else if (s == "log")                            return f_log;
     else if (s == "exp")                            return f_exp;
     else if (s == "storeLog")                       return f_storeLog;
@@ -73,7 +73,7 @@ tFunction string2Function(string s)
     else if (s == "onUpdateStorage")                return f_onUpdateStorage;
     else if (s == "")                               return f_empty;
     else {
-        cerr << "Error: string2function() invalid string = " << s << endl;
+        zklog.error("string2function() invalid string = " + s);
         exitProcess();
         return f_empty;
     }
@@ -106,7 +106,6 @@ string function2String(tFunction f)
         case f_comp_gt:                         return "comp_gt";
         case f_comp_eq:                         return "comp_eq";
         case f_loadScalar:                      return "loadScalar";
-        case f_getGlobalExitRootManagerAddr:    return "getGlobalExitRootManagerAddr";
         case f_log:                             return "log";
         case f_exp:                             return "exp";
         case f_storeLog:                        return "storeLog";
@@ -153,7 +152,7 @@ tOp string2Op(string s)
     else if (s == "getMemValue")     return op_getMemValue;
     else if (s == "")                return op_empty;
     else {
-        cerr << "Error: string2op() invalid string = " << s << endl;
+        zklog.error("string2op() invalid string = " + s);
         exitProcess();
         return op_empty;
     }
@@ -220,7 +219,7 @@ tReg string2reg(string s)
     else if (s == "STEP") return reg_STEP;
     else if (s == "HASHPOS") return reg_HASHPOS;
     else {
-        cerr << "Error: string2Reg() invalid string = " << s << endl;
+        zklog.error("string2Reg() invalid string = " + s);
         exitProcess();
         return reg_A;
     }
@@ -258,15 +257,17 @@ string reg2string(tReg reg)
 void parseRomCommand (RomCommand &cmd, json tag)
 {
     // Skipt if not present
-    if (tag.is_null()) {
+    if (tag.is_null())
+    {
         cmd.isPresent = false;
         return;
     }
     cmd.isPresent = true;
 
     // This must be a ROM command, not an array of them
-    if (tag.is_array()) {
-        cerr << "Error: parseRomCommand() found tag is an array: " << tag << endl;
+    if (tag.is_array())
+    {
+        zklog.error("parseRomCommand() found tag is an array: " + tag.dump());
         exitProcess();
     }
 
@@ -281,21 +282,29 @@ void parseRomCommand (RomCommand &cmd, json tag)
     if (tag.contains("offset") && tag["offset"].is_number()) { cmd.offset = tag["offset"]; }
     if (tag.contains("values")) parseRomCommandArray(cmd.values, tag["values"]);
     if (tag.contains("params")) parseRomCommandArray(cmd.params, tag["params"]);
+
+    // Build opAndVar string to be used in time statistics
+    cmd.opAndFunction = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
 }
 
 void parseRomCommandArray (vector<RomCommand *> &values, json tag)
 {
     // Skip if not present
-    if (tag.is_null()) return;
+    if (tag.is_null())
+    {
+        return;
+    }
 
     // This must be a ROM command array, not one of them
-    if (!tag.is_array()) {
-        cerr << "Error: parseRomCommandArray() found tag is not an array: " << tag << endl;
+    if (!tag.is_array())
+    {
+        zklog.error("parseRomCommandArray() found tag is not an array: " + tag.dump());
         exitProcess();
     }
 
     // Parse every command in the array
-    for (uint64_t i=0; i<tag.size(); i++) {
+    for (uint64_t i=0; i<tag.size(); i++)
+    {
         RomCommand *pRomCommand = new RomCommand();
         parseRomCommand(*pRomCommand, tag[i]);
         values.push_back(pRomCommand);
@@ -312,7 +321,8 @@ void freeRomCommand (RomCommand &cmd)
 void freeRomCommandArray (vector<RomCommand *> &array)
 {
     // Free all ROM commands
-    for (vector<class RomCommand *>::iterator it = array.begin(); it != array.end(); it++ ) {
+    for (vector<class RomCommand *>::iterator it = array.begin(); it != array.end(); it++ )
+    {
         freeRomCommand(**it);
         delete(*it);
     }

@@ -7,6 +7,7 @@
 #include "XKCP/Keccak-more-compact.hpp"
 #include "config.hpp"
 #include "utils.hpp"
+#include "zklog.hpp"
 
 /* Global scalar variables */
 
@@ -16,6 +17,7 @@ mpz_class ScalarMask16  ("FFFF", 16);
 mpz_class ScalarMask20  ("FFFFF", 16);
 mpz_class ScalarMask32  ("FFFFFFFF", 16);
 mpz_class ScalarMask64  ("FFFFFFFFFFFFFFFF", 16);
+mpz_class ScalarMask160 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
 mpz_class ScalarMask256 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
 mpz_class ScalarTwoTo8  ("100", 16);
 mpz_class ScalarTwoTo16 ("10000", 16);
@@ -60,18 +62,34 @@ void string2fe (Goldilocks &fr, const string &s, Goldilocks::Element &fe)
     fr.fromString(fe, Remove0xIfPresent(s), 16);
 }
 
-void string2fea(Goldilocks &fr, const string os, vector<Goldilocks::Element> &fea)
+void string2fea(Goldilocks &fr, const string&os, vector<Goldilocks::Element> &fea)
 {
     Goldilocks::Element fe;
     for (uint64_t i = 0; i < os.size(); i += 16)
     {
         if (i + 16 > os.size())
         {
-            cerr << "Error: Database::string2fea() found incorrect DATA column size: " << os.size() << endl;
+            zklog.error("Database::string2fea() found incorrect DATA column size: " + to_string(os.size()));
             exitProcess();
         }
         string2fe(fr, os.substr(i, 16), fe);
         fea.push_back(fe);
+    }
+}
+void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
+{
+    Goldilocks::Element fe;
+    if (os.size() != 64)
+    {
+        zklog.error("Database::string2fea() found incorrect DATA column size: " + to_string(os.size()));
+        exitProcess();
+    }
+    int ii=0;
+    for (uint64_t i = 0; i < 64; i += 16)
+    {  
+        string2fe(fr, os.substr(i, 16), fe);
+        fea[3-ii]=fe;
+        ++ii;
     }
 }
 
@@ -88,12 +106,24 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
     return fea2string(fr, fea);
 }
 
+string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7)
+{
+    mpz_class auxScalar;
+    fea2scalar(fr, auxScalar, fea0, fea1, fea2, fea3, fea4, fea5, fea6, fea7);
+    return auxScalar.get_str(16);
+}
+
 /* Normalized strings */
 
 string Remove0xIfPresent(const string &s)
 {
     if ( (s.size() >= 2) && (s.at(1) == 'x') && (s.at(0) == '0') ) return s.substr(2);
     return s;
+}
+
+void Remove0xIfPresentNoCopy(string &s)
+{
+    if ( (s.size() >= 2) && (s.at(1) == 'x') && (s.at(0) == '0') ) s = s.substr(2);
 }
 
 string Add0xIfMissing(const string &s)
@@ -176,14 +206,14 @@ string PrependZeros (const string &s, uint64_t n)
     // Check that n is not too big
     if (n > 64)
     {
-        cerr << "Error: PrependZeros() called with an that is too big n=" << n << endl;
+        zklog.error("PrependZeros() called with an that is too big n=" + to_string(n));
         exitProcess();
     }
     // Check that string size is not too big
     uint64_t stringSize = s.size();
     if ( (stringSize > n) || (stringSize > 64) )
     {
-        cerr << "Error: PrependZeros() called with a string with too large s.size=" << stringSize << " n=" << n << endl;
+        zklog.error("PrependZeros() called with a string with too large s.size=" + to_string(stringSize) + " n=" + to_string(n));
         exitProcess();
     }
 
@@ -193,19 +223,19 @@ string PrependZeros (const string &s, uint64_t n)
     return s;
 }
 
-void PrependZeros (string &s, uint64_t n)
+void PrependZerosNoCopy (string &s, uint64_t n)
 {
     // Check that n is not too big
     if (n > 64)
     {
-        cerr << "Error: PrependZeros() called with an n that is too big n=" << n << endl;
+        zklog.error("PrependZerosNoCopy() called with an n that is too big n=" + to_string(n));
         exitProcess();
     }
     // Check that string size is not too big
     uint64_t stringSize = s.size();
     if ( (stringSize > n) || (stringSize > 64) )
     {
-        cerr << "Error: PrependZeros() called with a string with too large s.size=" << stringSize << " n=" << n << endl;
+        zklog.error("PrependZerosNoCopy() called with a string with too large s.size=" + to_string(stringSize) + " n=" + to_string(n));
         exitProcess();
     }
 
@@ -228,6 +258,36 @@ string stringToLower (const string &s)
     string result = s;
     transform(result.begin(), result.end(), result.begin(), ::tolower);
     return result;
+}
+
+bool stringIsHex (const string &s)
+{
+    for (uint64_t i=0; i<s.size(); i++)
+    {
+        if (!charIsHex(s.at(i))) return false;
+    }
+    return true;
+}
+
+bool stringIs0xHex (const string &s)
+{
+    if (s.size() < 2)
+    {
+        return false;
+    }
+    if (s.at(0) != '0')
+    {
+        return false;
+    }
+    if (s.at(1) != 'x')
+    {
+        return false;
+    }
+    for (uint64_t i=2; i<s.size(); i++)
+    {
+        if (!charIsHex(s.at(i))) return false;
+    }
+    return true;
 }
 
 /* Keccak */
@@ -277,7 +337,7 @@ uint8_t char2byte (char c)
     if (c >= '0' && c <= '9') return c - '0';
     if (c >= 'A' && c <= 'F') return c - 'A' + 10;
     if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-    cerr << "Error: char2byte() called with an invalid, non-hex char: " << c << endl;
+    zklog.error("char2byte() called with an invalid, non-hex char: " + to_string(c));
     exitProcess();
     return 0;
 }
@@ -286,7 +346,7 @@ char byte2char (uint8_t b)
 {
     if (b < 10) return '0' + b;
     if (b < 16) return 'a' + b - 10;
-    cerr << "Error: byte2char() called with an invalid byte: " << b << endl;
+    zklog.error("byte2char() called with an invalid byte: " + to_string(b));
     exitProcess();
     return 0;
 }
@@ -315,7 +375,7 @@ uint64_t string2ba (const string &os, uint8_t *pData, uint64_t &dataSize)
     uint64_t dsize = s.size()/2;
     if (dsize > dataSize)
     {
-        cerr << "Error: string2ba() called with a too short buffer: " << dsize << ">" << dataSize << endl;
+        zklog.error("string2ba() called with a too short buffer: " + to_string(dsize) + ">" + to_string(dataSize));
         exitProcess();
     }
 
@@ -445,7 +505,7 @@ void scalar2ba (uint8_t *pData, uint64_t &dataSize, mpz_class s)
     }
     if (s != ScalarZero)
     {
-        cerr << "Error: scalar2ba() run out of buffer of " << dataSize << " bytes" << endl;
+        zklog.error("scalar2ba() run out of buffer of " + to_string(dataSize) + " bytes");
         exitProcess();
     }
     dataSize = i+1;
@@ -469,7 +529,7 @@ void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
     }
     if (s > ScalarMask4)
     {
-        cerr << "Error: scalar2ba16() run out of buffer of " << dataSize << " bytes" << endl;
+        zklog.error("scalar2ba16() run out of buffer of " + to_string(dataSize) + " bytes");
         exitProcess();
     }
     dataSize = i+1;
@@ -485,7 +545,22 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
     }
     if (s != ScalarZero)
     {
-        cerr << "Error: scalar2bytes() run out of space of 32 bytes" << endl;
+        zklog.error("scalar2bytes() run out of space of 32 bytes");
+        exitProcess();
+    }
+}
+
+void scalar2bytesBE(mpz_class &s, uint8_t *pBytes)
+{
+    for (uint64_t i=0; i<32; i++)
+    {
+        mpz_class aux = s & ScalarMask8;
+        pBytes[31 - i] = aux.get_ui();
+        s = s >> 8;
+    }
+    if (s != ScalarZero)
+    {
+        zklog.error("scalar2bytesBE() run out of space of 32 bytes");
         exitProcess();
     }
 }
@@ -497,7 +572,7 @@ string scalar2ba(const mpz_class &s)
     uint64_t size = mpz_sizeinbase(s.get_mpz_t(), 256);
     if (size > 32)
     {
-        cerr << "Error: scalar2ba() failed, size=" << size << " is > 32" << endl;
+        zklog.error("scalar2ba() failed, size=" + to_string(size) + " is > 32");
         exitProcess();
     }
 
@@ -550,7 +625,7 @@ uint32_t bits2u32(const vector<uint8_t> &bits)
 {
     if (bits.size() != 32)
     {
-        cerr << "Error: bits2u32() got invalid bits size=" << bits.size() << endl;
+        zklog.error("bits2u32() got invalid bits size=" + to_string(bits.size()));
         exitProcess();
     }
     uint32_t result = 0;
@@ -565,7 +640,7 @@ uint32_t bits2u32(const vector<uint8_t> &bits)
                 result += 1;
                 break;
             default:
-                cerr << "Error: bits2u32() got invalid bit i=" << i << " value=" << bits[i] << endl;
+                zklog.error("bits2u32() got invalid bit i=" + to_string(i) + " value=" + to_string(bits[i]));
                 exitProcess();
                 break;
         }
@@ -592,7 +667,7 @@ uint64_t bits2u64(const vector<uint8_t> &bits)
 {
     if (bits.size() != 64)
     {
-        cerr << "Error: bits2u64() got invalid bits size=" << bits.size() << endl;
+        zklog.error("bits2u64() got invalid bits size=" + to_string(bits.size()));
         exitProcess();
     }
     uint64_t result = 0;
@@ -607,7 +682,7 @@ uint64_t bits2u64(const vector<uint8_t> &bits)
                 result += 1;
                 break;
             default:
-                cerr << "Error: bits2u64() got invalid bit i=" << i << " value=" << bits[i] << endl;
+                zklog.error("bits2u64() got invalid bit i=" + to_string(i) + " value=" + to_string(bits[i]));
                 exitProcess();
                 break;
         }

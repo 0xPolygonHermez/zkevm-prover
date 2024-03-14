@@ -305,7 +305,7 @@ int RawFr::toRprBE(const Element &element, uint8_t *data, int bytes)
   
     toMpz(r, element);
     
-    mpz_export(data, NULL, 1, 8, 1, 0, r);
+    mpz_export(data, NULL, 1, bytes, 1, 0, r);
   
     return Fr_N64 * 8;
 }

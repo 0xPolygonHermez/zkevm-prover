@@ -29,8 +29,14 @@
 #include "c12aSteps.hpp"
 #include "recursive1Steps.hpp"
 #include "recursive2Steps.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
-#define NROWS_STEPS_ 4 // if AVX is used this must be 4
+#ifndef __AVX512__
+#define NROWS_STEPS_ 4
+#else
+#define NROWS_STEPS_ 8
+#endif
 
 Prover::Prover(Goldilocks &fr,
                PoseidonGoldilocks &poseidon,
@@ -100,17 +106,17 @@ Prover::Prover(Goldilocks &fr,
             if (config.zkevmCmPols.size() > 0)
             {
                 pAddress = mapFile(config.zkevmCmPols, polsSize, true);
-                cout << "Prover::genBatchProof() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
+                zklog.info("Prover::genBatchProof() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
             }
             else
             {
                 pAddress = calloc(polsSize, 1);
                 if (pAddress == NULL)
                 {
-                    cerr << "Error: Prover::genBatchProof() failed calling malloc() of size " << polsSize << endl;
+                    zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
                     exitProcess();
                 }
-                cout << "Prover::genBatchProof() successfully allocated " << polsSize << " bytes" << endl;
+                zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
@@ -129,13 +135,15 @@ Prover::Prover(Goldilocks &fr,
     }
     catch (std::exception &e)
     {
-        cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
+        zklog.error("Prover::Prover() got an exception: " + string(e.what()));
         exitProcess();
     }
 }
 
 Prover::~Prover()
 {
+    mpz_clear(altBbn128r);
+
     if (config.generateProof())
     {
         Groth16::Prover<AltBn128::Engine> *pGroth16 = groth16Prover.release();
@@ -152,8 +160,6 @@ Prover::~Prover()
         delete pGroth16;
         delete pZkey;
         delete pZkeyHeader;
-
-        mpz_clear(altBbn128r);
 
         uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
 
@@ -174,13 +180,14 @@ Prover::~Prover()
         delete starksC12a;
         delete starksRecursive1;
         delete starksRecursive2;
+        delete starksRecursiveF;
     }
 }
 
 void *proverThread(void *arg)
 {
     Prover *pProver = (Prover *)arg;
-    cout << "proverThread() started" << endl;
+    zklog.info("proverThread() started");
 
     zkassert(pProver->config.generateProof());
 
@@ -199,7 +206,7 @@ void *proverThread(void *arg)
         if (pProver->pendingRequests.size() == 0)
         {
             pProver->unlock();
-            cout << "proverThread() found pending requests queue empty, so ignoring" << endl;
+            zklog.info("proverThread() found pending requests queue empty, so ignoring");
             continue;
         }
 
@@ -208,7 +215,7 @@ void *proverThread(void *arg)
         pProver->pCurrentRequest->startTime = time(NULL);
         pProver->pendingRequests.erase(pProver->pendingRequests.begin());
 
-        cout << "proverThread() starting to process request with UUID: " << pProver->pCurrentRequest->uuid << endl;
+        zklog.info("proverThread() starting to process request with UUID: " + pProver->pCurrentRequest->uuid);
 
         pProver->unlock();
 
@@ -228,7 +235,7 @@ void *proverThread(void *arg)
             pProver->execute(pProver->pCurrentRequest);
             break;
         default:
-            cerr << "Error: proverThread() got an invalid prover request type=" << pProver->pCurrentRequest->type << endl;
+            zklog.error("proverThread() got an invalid prover request type=" + to_string(pProver->pCurrentRequest->type));
             exitProcess();
         }
 
@@ -243,19 +250,19 @@ void *proverThread(void *arg)
         pProver->pCurrentRequest = NULL;
         pProver->unlock();
 
-        cout << "proverThread() done processing request with UUID: " << pProverRequest->uuid << endl;
+        zklog.info("proverThread() done processing request with UUID: " + pProverRequest->uuid);
 
         // Release the prove request semaphore to notify any blocked waiting call
         pProverRequest->notifyCompleted();
     }
-    cout << "proverThread() done" << endl;
+    zklog.info("proverThread() done");
     return NULL;
 }
 
 void *cleanerThread(void *arg)
 {
     Prover *pProver = (Prover *)arg;
-    cout << "cleanerThread() started" << endl;
+    zklog.info("cleanerThread() started");
 
     zkassert(pProver->config.generateProof());
 
@@ -277,7 +284,7 @@ void *cleanerThread(void *arg)
             {
                 if (now - pProver->completedRequests[i]->endTime > (int64_t)pProver->config.requestsPersistence)
                 {
-                    cout << "cleanerThread() deleting request with uuid: " << pProver->completedRequests[i]->uuid << endl;
+                    zklog.info("cleanerThread() deleting request with uuid: " + pProver->completedRequests[i]->uuid);
                     ProverRequest *pProverRequest = pProver->completedRequests[i];
                     pProver->completedRequests.erase(pProver->completedRequests.begin() + i);
                     pProver->requestsMap.erase(pProverRequest->uuid);
@@ -291,7 +298,7 @@ void *cleanerThread(void *arg)
         // Unlock the prover
         pProver->unlock();
     }
-    cout << "cleanerThread() done" << endl;
+    zklog.info("cleanerThread() done");
     return NULL;
 }
 
@@ -300,7 +307,7 @@ string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for 
     zkassert(config.generateProof());
     zkassert(pProverRequest != NULL);
 
-    cout << "Prover::submitRequest() started type=" << pProverRequest->type << endl;
+    zklog.info("Prover::submitRequest() started type=" + to_string(pProverRequest->type));
 
     // Get the prover request UUID
     string uuid = pProverRequest->uuid;
@@ -312,7 +319,7 @@ string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for 
     sem_post(&pendingRequestSem);
     unlock();
 
-    cout << "Prover::submitRequest() returns UUID: " << uuid << endl;
+    zklog.info("Prover::submitRequest() returns UUID: " + uuid);
     return uuid;
 }
 
@@ -320,7 +327,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
 {
     zkassert(config.generateProof());
     zkassert(uuid.size() > 0);
-    cout << "Prover::waitForRequestToComplete() waiting for request with UUID: " << uuid << endl;
+    zklog.info("Prover::waitForRequestToComplete() waiting for request with UUID: " + uuid);
 
     // We will store here the address of the prove request corresponding to this UUID
     ProverRequest *pProverRequest = NULL;
@@ -331,7 +338,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
     std::unordered_map<std::string, ProverRequest *>::iterator it = requestsMap.find(uuid);
     if (it == requestsMap.end())
     {
-        cerr << "Error: Prover::waitForRequestToComplete() unknown uuid: " << uuid << endl;
+        zklog.error("Prover::waitForRequestToComplete() unknown uuid: " + uuid);
         unlock();
         return NULL;
     }
@@ -340,7 +347,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
     pProverRequest = it->second;
     unlock();
     pProverRequest->waitForCompleted(timeoutInSeconds);
-    cout << "Prover::waitForRequestToComplete() done waiting for request with UUID: " << uuid << endl;
+    zklog.info("Prover::waitForRequestToComplete() done waiting for request with UUID: " + uuid);
 
     // Return the request pointer
     return pProverRequest;
@@ -352,7 +359,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     zkassert(pProverRequest != NULL);
     zkassert(pProverRequest->type == prt_processBatch);
 
-    cout << "Prover::processBatch() timestamp=" << pProverRequest->timestamp << " UUID=" << pProverRequest->uuid << endl;
+    zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -360,6 +367,14 @@ void Prover::processBatch(ProverRequest *pProverRequest)
         json inputJson;
         pProverRequest->input.save(inputJson);
         json2file(inputJson, pProverRequest->inputFile());
+    }
+
+    // Log input if requested
+    if (config.logExecutorServerInput)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        zklog.info("Input=" + inputJson.dump());
     }
 
     // Execute the program, in the process batch way
@@ -388,11 +403,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     zkassert(pProverRequest != NULL);
 
-    cout << "Prover::genBatchProof() timestamp: " << pProverRequest->timestamp << endl;
-    cout << "Prover::genBatchProof() UUID: " << pProverRequest->uuid << endl;
-    cout << "Prover::genBatchProof() input file: " << pProverRequest->inputFile() << endl;
-    // cout << "Prover::genBatchProof() public file: " << pProverRequest->publicsOutputFile() << endl;
-    // cout << "Prover::genBatchProof() proof file: " << pProverRequest->proofFile() << endl;
+    zklog.info("Prover::genBatchProof() timestamp: " + pProverRequest->timestamp);
+    zklog.info("Prover::genBatchProof() UUID: " + pProverRequest->uuid);
+    zklog.info("Prover::genBatchProof() input file: " + pProverRequest->inputFile());
+    // zklog.info("Prover::genBatchProof() public file: " + pProverRequest->publicsOutputFile());
+    // zklog.info("Prover::genBatchProof() proof file: " + pProverRequest->proofFile());
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -529,7 +544,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         starkZkevm->genProof(fproof, &publics[0], &zkevmSteps);
 
         TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
-
+        TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF);
 
         nlohmann::ordered_json jProof = fproof.proofs.proof2json();
@@ -540,13 +555,18 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
         TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF);
 
-        CommitPolsStarks cmPols12a(pAddress, (1 << starksC12a->starkInfo.starkStruct.nBits));
+        CommitPolsStarks cmPols12a(pAddress, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
 
-        Circom::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits));
+        Circom::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
+
+        // void *pointerCm12aPols = mapFile("config/c12a/c12a.commit", cmPols12a.size(), true);
+        // memcpy(pointerCm12aPols, cmPols12a.address(), cmPols12a.size());
+        // unmapFile(pointerCm12aPols, cmPols12a.size());
 
         //-------------------------------------------
         /* Generate C12a stark proof             */
         //-------------------------------------------
+        TimerStopAndLog(STARK_GEN_AND_CALC_WITNESS_C12A);
         TimerStart(STARK_C12_A_PROOF_BATCH_PROOF);
         uint64_t polBitsC12 = starksC12a->starkInfo.starkStruct.steps[starksC12a->starkInfo.starkStruct.steps.size() - 1].nBits;
         FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starksC12a->starkInfo.starkStruct.steps.size(), starksC12a->starkInfo.evMap.size(), starksC12a->starkInfo.nPublics);
@@ -573,8 +593,12 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         zkinC12a["rootC"] = rootC;
         TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
-        CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starksRecursive1->starkInfo.starkStruct.nBits));
-        CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starksRecursive1->starkInfo.starkStruct.nBits));
+        CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.nCm1);
+        CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.nCm1);
+
+        // void *pointerCmRecursive1Pols = mapFile("config/recursive1/recursive1.commit", cmPolsRecursive1.size(), true);
+        // memcpy(pointerCmRecursive1Pols, cmPolsRecursive1.address(), cmPolsRecursive1.size());
+        // unmapFile(pointerCmRecursive1Pols, cmPolsRecursive1.size());
 
         //-------------------------------------------
         /* Generate Recursive 1 proof            */
@@ -596,7 +620,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
         pProverRequest->batchProofOutput = zkinRecursive1;
 
-        // save publics to file
+        // save publics to filestarks
         json2file(publicStarkJson, pProverRequest->publicsOutputFile());
 
         // Save output to file
@@ -647,15 +671,13 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     if (pProverRequest->aggregatedProofInput1["publics"][17] != pProverRequest->aggregatedProofInput2["publics"][17])
     {
-        std::cerr << "Error: Inputs has different chainId" << std::endl;
-        std::cerr << pProverRequest->aggregatedProofInput1["publics"][17] << "!=" << pProverRequest->aggregatedProofInput2["publics"][17] << std::endl;
+        zklog.error("Prover::genAggregatedProof() Inputs has different chainId " + pProverRequest->aggregatedProofInput1["publics"][17].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][17].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     if (pProverRequest->aggregatedProofInput1["publics"][18] != pProverRequest->aggregatedProofInput2["publics"][18])
     {
-        std::cerr << "Error: Inputs has different forkId" << std::endl;
-        std::cerr << pProverRequest->aggregatedProofInput1["publics"][18] << "!=" << pProverRequest->aggregatedProofInput2["publics"][18] << std::endl;
+        zklog.error("Prover::genAggregatedProof() Inputs has different forkId " + pProverRequest->aggregatedProofInput1["publics"][18].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][18].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
@@ -664,8 +686,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         if (pProverRequest->aggregatedProofInput1["publics"][19 + i] != pProverRequest->aggregatedProofInput2["publics"][0 + i])
         {
-            std::cerr << "Error: The newStateRoot and the oldStateRoot are not consistent" << std::endl;
-            std::cerr << pProverRequest->aggregatedProofInput1["publics"][19 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][0 + i] << std::endl;
+            zklog.error("Prover::genAggregatedProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedProofInput1["publics"][19 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][0 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
@@ -675,8 +696,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         if (pProverRequest->aggregatedProofInput1["publics"][27 + i] != pProverRequest->aggregatedProofInput2["publics"][8 + i])
         {
-            std::cerr << "Error: newAccInputHash and oldAccInputHash are not consistent" << std::endl;
-            std::cerr << pProverRequest->aggregatedProofInput1["publics"][27 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][8 + i] << std::endl;
+            zklog.error("Prover::genAggregatedProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][8 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
@@ -684,13 +704,12 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     // Check batchNum
     if (pProverRequest->aggregatedProofInput1["publics"][43] != pProverRequest->aggregatedProofInput2["publics"][16])
     {
-        std::cerr << "Error: newBatchNum and oldBatchNum are not consistent" << std::endl;
-        std::cerr << pProverRequest->aggregatedProofInput1["publics"][43] << "!=" << pProverRequest->aggregatedProofInput2["publics"][16] << std::endl;
+        zklog.error("Prover::genAggregatedProof() newBatchNum and oldBatchNum are not consistent" + pProverRequest->aggregatedProofInput1["publics"][43].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][16].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
 
-    json zkinInputRecursive2 = joinzkin(pProverRequest->aggregatedProofInput1, pProverRequest->aggregatedProofInput2, verKey);
+    json zkinInputRecursive2 = joinzkin(pProverRequest->aggregatedProofInput1, pProverRequest->aggregatedProofInput2, verKey, starksRecursive2->starkInfo.starkStruct.steps.size());
     json recursive2Verkey;
     file2json(config.recursive2Verkey, recursive2Verkey);
 
@@ -706,8 +725,12 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
         publics[starkZkevm->starkInfo.nPublics + i] = Goldilocks::fromU64(recursive2Verkey["constRoot"][i]);
     }
 
-    CommitPolsStarks cmPolsRecursive2(pAddress, (1 << starksRecursive2->starkInfo.starkStruct.nBits));
-    CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2, (1 << starksRecursive2->starkInfo.starkStruct.nBits));
+    CommitPolsStarks cmPolsRecursive2(pAddress, (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.nCm1);
+    CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2, (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.nCm1);
+
+    // void *pointerCmRecursive2Pols = mapFile("config/recursive2/recursive2.commit", cmPolsRecursive2.size(), true);
+    // memcpy(pointerCmRecursive2Pols, cmPolsRecursive2.address(), cmPolsRecursive2.size());
+    // unmapFile(pointerCmRecursive2Pols, cmPolsRecursive2.size());
 
     //-------------------------------------------
     // Generate Recursive 2 proof
@@ -792,8 +815,12 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
         publics[i] = Goldilocks::fromString(zkinFinal["publics"][i]);
     }
 
-    CommitPolsStarks cmPolsRecursive2(pAddressStarksRecursiveF, (1 << starksRecursiveF->starkInfo.starkStruct.nBits));
-    CircomRecursiveF::getCommitedPols(&cmPolsRecursive2, config.recursivefVerifier, config.recursivefExec, zkinFinal, (1 << starksRecursiveF->starkInfo.starkStruct.nBits));
+    CommitPolsStarks cmPolsRecursiveF(pAddressStarksRecursiveF, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.nCm1);
+    CircomRecursiveF::getCommitedPols(&cmPolsRecursiveF, config.recursivefVerifier, config.recursivefExec, zkinFinal, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.nCm1);
+
+    // void *pointercmPolsRecursiveF = mapFile("config/recursivef/recursivef.commit", cmPolsRecursiveF.size(), true);
+    // memcpy(pointercmPolsRecursiveF, cmPolsRecursiveF.address(), cmPolsRecursiveF.size());
+    // unmapFile(pointercmPolsRecursiveF, cmPolsRecursiveF.size());
 
     //  ----------------------------------------------
     //  Generate Recursive Final proof
@@ -803,12 +830,22 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     uint64_t polBitsRecursiveF = starksRecursiveF->starkInfo.starkStruct.steps[starksRecursiveF->starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
     starksRecursiveF->genProof(fproofRecursiveF, publics);
+    TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
     nlohmann::ordered_json jProofRecursiveF = fproofRecursiveF.proofs.proof2json();
     json zkinRecursiveF = proof2zkinStark(jProofRecursiveF);
     zkinRecursiveF["publics"] = zkinFinal["publics"];
     zkinRecursiveF["aggregatorAddr"] = strAddress10;
+
+    // Save proof to file
+    if (config.saveProofToFile)
+    {
+        json2file(zkinRecursiveF["publics"], pProverRequest->filePrefix + "publics.json");
+
+        jProofRecursiveF["publics"] = zkinRecursiveF["publics"];
+        json2file(jProofRecursiveF, pProverRequest->filePrefix + "recursivef.proof.json");
+    }
 
     //  ----------------------------------------------
     //  Verifier final
@@ -824,7 +861,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     CircomFinal::loadJsonImpl(ctxFinal, zkinRecursiveF);
     if (ctxFinal->getRemaingInputsToBeSet() != 0)
     {
-        cerr << "Error: Prover::genProof() Not all inputs have been set. Only " << CircomFinal::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet() << " out of " << CircomFinal::get_main_input_signal_no() << endl;
+        zklog.error("Prover::genProof() Not all inputs have been set. Only " + to_string(CircomFinal::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet()) + " out of " + to_string(CircomFinal::get_main_input_signal_no()));
         exitProcess();
     }
     TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
@@ -869,7 +906,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
         }
         catch (std::exception &e)
         {
-            cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
+            zklog.error("Prover::genProof() got exception in rapid SNARK:" + string(e.what()));
             exitProcess();
         }
     }
@@ -885,7 +922,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
         }
         catch (std::exception &e)
         {
-            cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
+            zklog.error("Prover::genProof() got exception in rapid SNARK:" + string(e.what()));
             exitProcess();
         }
         TimerStopAndLog(RAPID_SNARK);
@@ -908,7 +945,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     /***********/
     free(pWitnessFinal);
 
-    TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
     TimerStopAndLog(PROVER_FINAL_PROOF);
 }
 
@@ -924,11 +960,11 @@ void Prover::execute(ProverRequest *pProverRequest)
 
     zkassert(pProverRequest != NULL);
 
-    cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
-    cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
-    cout << "Prover::execute() input file: " << pProverRequest->inputFile() << endl;
-    // cout << "Prover::execute() public file: " << pProverRequest->publicsOutputFile() << endl;
-    // cout << "Prover::execute() proof file: " << pProverRequest->proofFile() << endl;
+    zklog.info("Prover::execute() timestamp: " + pProverRequest->timestamp);
+    zklog.info("Prover::execute() UUID: " + pProverRequest->uuid);
+    zklog.info("Prover::execute() input file: " + pProverRequest->inputFile());
+    // zklog.info("Prover::execute() public file: " + pProverRequest->publicsOutputFile());
+    // zklog.info("Prover::execute() proof file: " + pProverRequest->proofFile());
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -950,17 +986,17 @@ void Prover::execute(ProverRequest *pProverRequest)
     if (config.zkevmCmPols.size() > 0)
     {
         pExecuteAddress = mapFile(config.zkevmCmPols, polsSize, true);
-        cout << "Prover::execute() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
+        zklog.info("Prover::execute() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
     }
     else
     {
         pExecuteAddress = calloc(polsSize, 1);
         if (pExecuteAddress == NULL)
         {
-            cerr << "Error: Prover::execute() failed calling malloc() of size " << polsSize << endl;
+            zklog.error("Prover::execute() failed calling malloc() of size " + to_string(polsSize));
             exitProcess();
         }
-        cout << "Prover::execute() successfully allocated " << polsSize << " bytes" << endl;
+        zklog.info("Prover::execute() successfully allocated " + to_string(polsSize) + " bytes");
     }
 
     /************/
