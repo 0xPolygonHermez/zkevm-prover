@@ -60,8 +60,7 @@ void FflonkSetup::generateZkey(string r1csFilename, string pTauFilename, string 
 
     fft = new FFT<AltBn128::Engine::Fr>(settings.domainSize * 4);
 
-    // TODO!!!!! Remove this +18 I think it is not needed
-    if (fdPtau->getSectionSize(2) < (settings.domainSize * 9 + 18) * sG1) {
+    if (fdPtau->getSectionSize(2) < settings.domainSize * 9 * sG1) {
         throw new runtime_error("Powers of Tau is not big enough for this circuit size. Section 2 too small.");
     }
     if (fdPtau->getSectionSize(3) < sG2) {
@@ -503,13 +502,13 @@ void FflonkSetup::writeLagrangePolynomials(BinFileWriter &zkeyFile) {
 
 void FflonkSetup::writePtau(BinFileWriter &zkeyFile, BinFile &fdPtau) {
     int nThreads = omp_get_max_threads() / 2;
-    PTau = new G1PointAffine[settings.domainSize * 9 + 18];
+    PTau = new G1PointAffine[settings.domainSize * 9];
 
     ThreadUtils::parset(PTau, 0, sizeof(G1PointAffine), nThreads);
-    ThreadUtils::parcpy(PTau, fdPtau.getSectionData(2), (settings.domainSize * 9 + 18) * sizeof(G1PointAffine), nThreads);
+    ThreadUtils::parcpy(PTau, fdPtau.getSectionData(2), (settings.domainSize * 9) * sizeof(G1PointAffine), nThreads);
 
     zkeyFile.startWriteSection(Zkey::ZKEY_FF_PTAU_SECTION);
-    zkeyFile.write(PTau, (settings.domainSize * 9 + 18) * sizeof(G1PointAffine));
+    zkeyFile.write(PTau, (settings.domainSize * 9) * sizeof(G1PointAffine));
     zkeyFile.endWriteSection();
 }
 
