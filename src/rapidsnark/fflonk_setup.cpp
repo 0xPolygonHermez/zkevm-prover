@@ -158,9 +158,7 @@ vector<R1csConstraint> FflonkSetup::readR1csConstraintLC(R1csHeader &r1csHeader,
         uint32_t signal_id = r1cs.readU32LE();
 
         FrElement value;
-        E.fr.copy(value, *((FrElement *)r1cs.read(32)));
-        reverse((uint8_t *)&value, (uint8_t *)&value + 32);
-        E.fr.fromRprBE(value, (uint8_t *)&value, 32);
+        E.fr.fromRprLE(value, (uint8_t *)r1cs.read(E.fr.bytes()), E.fr.bytes());
 
         lc.push_back(R1csConstraint(signal_id, value));
     }
