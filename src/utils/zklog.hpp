@@ -2,6 +2,7 @@
 #define ZKLOG_HPP
 
 #include <string>
+#include <pthread.h>
 
 using namespace std;
 

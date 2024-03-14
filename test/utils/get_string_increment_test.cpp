@@ -1,4 +1,6 @@
 #include <vector>
+#include <cstdint>
+
 #include "get_string_increment_test.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"

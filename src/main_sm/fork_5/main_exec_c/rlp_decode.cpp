@@ -1,3 +1,5 @@
+#include <cstdint>
+
 #include "rlp_decode.hpp"
 #include "scalar.hpp"
 #include "zklog.hpp"
