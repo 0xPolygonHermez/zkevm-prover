@@ -114,7 +114,7 @@ void FflonkSetup::generateZkey(string r1csFilename, string pTauFilename, string 
     // Write output zkey file
     writeZkeyFile(zkeyFilename, *fdPtau);
 
-    LOG_INFO("PILFFLONK SETUP FINISHED");
+    LOG_INFO("FFLONK SETUP FINISHED");
 }
 
 void FflonkSetup::computeFFConstraints(BinFile &r1cs, R1csHeader &r1csHeader) {
