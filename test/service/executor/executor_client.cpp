@@ -2,7 +2,6 @@
 #include <nlohmann/json.hpp>
 #include "executor_client.hpp"
 #include "hashdb_singleton.hpp"
-#include "zkmax.hpp"
 #include "check_tree.hpp"
 #include "check_tree_64.hpp"
 
