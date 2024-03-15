@@ -49,9 +49,9 @@ template <typename Engine>
 std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement *wtns) {
 
     LOG_TRACE("Start Initializing a b c A");
-    auto a = new typename Engine::FrElement[domainSize];
-    auto b = new typename Engine::FrElement[domainSize];
-    auto c = new typename Engine::FrElement[domainSize];
+    std::vector<typename Engine::FrElement> a(domainSize);
+    std::vector<typename Engine::FrElement> b(domainSize);
+    std::vector<typename Engine::FrElement> c(domainSize);
 
     #pragma omp parallel for
     for (u_int32_t i=0; i<domainSize; i++) {
@@ -65,7 +65,7 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
     for (int i=0; i<NLOCKS; i++) omp_init_lock(&locks[i]);
     #pragma omp parallel for 
     for (u_int64_t i=0; i<nCoefs; i++) {
-        typename Engine::FrElement *ab = (coefs[i].m == 0) ? a : b;
+        typename Engine::FrElement *ab = (coefs[i].m == 0) ? a.data() : b.data();
         typename Engine::FrElement aux;
 
         E.fr.mul(
@@ -99,7 +99,7 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
     u_int32_t domainPower = fft->log2(domainSize);
 
     LOG_TRACE("Start iFFT A");
-    fft->ifft(a, domainSize);
+    fft->ifft(a.data(), domainSize);
     LOG_TRACE("a After ifft:");
     LOG_DEBUG(E.fr.toString(a[0]).c_str());
     LOG_DEBUG(E.fr.toString(a[1]).c_str());
@@ -112,12 +112,12 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
     LOG_DEBUG(E.fr.toString(a[0]).c_str());
     LOG_DEBUG(E.fr.toString(a[1]).c_str());
     LOG_TRACE("Start FFT A");
-    fft->fft(a, domainSize);
+    fft->fft(a.data(), domainSize);
     LOG_TRACE("a After fft:");
     LOG_DEBUG(E.fr.toString(a[0]).c_str());
     LOG_DEBUG(E.fr.toString(a[1]).c_str());
     LOG_TRACE("Start iFFT B");
-    fft->ifft(b, domainSize);
+    fft->ifft(b.data(), domainSize);
     LOG_TRACE("b After ifft:");
     LOG_DEBUG(E.fr.toString(b[0]).c_str());
     LOG_DEBUG(E.fr.toString(b[1]).c_str());
@@ -130,13 +130,13 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
     LOG_DEBUG(E.fr.toString(b[0]).c_str());
     LOG_DEBUG(E.fr.toString(b[1]).c_str());
     LOG_TRACE("Start FFT B");
-    fft->fft(b, domainSize);
+    fft->fft(b.data(), domainSize);
     LOG_TRACE("b After fft:");
     LOG_DEBUG(E.fr.toString(b[0]).c_str());
     LOG_DEBUG(E.fr.toString(b[1]).c_str());
 
     LOG_TRACE("Start iFFT C");
-    fft->ifft(c, domainSize);
+    fft->ifft(c.data(), domainSize);
     LOG_TRACE("c After ifft:");
     LOG_DEBUG(E.fr.toString(c[0]).c_str());
     LOG_DEBUG(E.fr.toString(c[1]).c_str());
@@ -149,7 +149,7 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
     LOG_DEBUG(E.fr.toString(c[0]).c_str());
     LOG_DEBUG(E.fr.toString(c[1]).c_str());
     LOG_TRACE("Start FFT C");
-    fft->fft(c, domainSize);
+    fft->fft(c.data(), domainSize);
     LOG_TRACE("c After fft:");
     LOG_DEBUG(E.fr.toString(c[0]).c_str());
     LOG_DEBUG(E.fr.toString(c[1]).c_str());
@@ -165,17 +165,17 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
     LOG_DEBUG(E.fr.toString(a[0]).c_str());
     LOG_DEBUG(E.fr.toString(a[1]).c_str());
 
-    delete b;
-    delete c;
+    b.clear();
+    c.clear();
 
     LOG_TRACE("Start Multiexp H");
     typename Engine::G1Point pih;
-    E.g1.multiMulByScalar(pih, pointsH, (uint8_t *)a, sizeof(a[0]), domainSize);
+    E.g1.multiMulByScalar(pih, pointsH, (uint8_t *)a.data(), sizeof(a[0]), domainSize);
     std::ostringstream ss1;
     ss1 << "pih: " << E.g1.toString(pih);
     LOG_DEBUG(ss1);
 
-    delete a;
+    a.clear();
 
     LOG_TRACE("Start Multiexp A");
     uint32_t sW = sizeof(wtns[0]);

@@ -765,8 +765,8 @@ void ZkevmSteps::step42ns_parser_first(StepsParams &params, uint64_t nrows, uint
      for (uint64_t i = 0; i < nrows; i += nrowsBatch)
      {
           int i_args = 0;
-          Goldilocks::Element *tmp1 = new Goldilocks::Element[AVX_SIZE_ * 20000];
-          Goldilocks3::Element *tmp3 = new Goldilocks3::Element[AVX_SIZE_ * 20000];
+          std::vector<Goldilocks::Element> tmp1(AVX_SIZE_ * 20000);
+          std::vector<Goldilocks3::Element> tmp3(AVX_SIZE_ * 20000);
           uint64_t offsets1[4], offsets2[4];
           uint64_t numpols = params.pConstPols2ns->numPols();
 
@@ -1434,8 +1434,6 @@ void ZkevmSteps::step42ns_parser_first(StepsParams &params, uint64_t nrows, uint
                }
           }
           assert(i_args == NARGS_);
-          delete (tmp1);
-          delete (tmp3);
      }
 }
 

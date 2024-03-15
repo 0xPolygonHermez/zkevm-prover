@@ -17,7 +17,7 @@ void PerformanceTest (void)
 {
     cout << "PerformanceTest" << endl;
 
-    uint64_t *randomValues = new uint64_t[PERFORMANCE_TEST_LENGTH];
+    std::vector<uint64_t> randomValues(PERFORMANCE_TEST_LENGTH);
     zkassert(randomValues);
     for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
     {
@@ -49,8 +49,6 @@ void PerformanceTest (void)
         aux &= randomValues[i];
     }
     TimerStopAndLog(AND_OPERATION);
-
-    delete(randomValues);
 }
 
 void PerformanceTestFE (void)
@@ -58,14 +56,14 @@ void PerformanceTestFE (void)
     cout << "PerformanceTestFE" << endl;
 
     Goldilocks fr;
-    Goldilocks::Element *randomValuesFE = new Goldilocks::Element[PERFORMANCE_TEST_LENGTH];
+    std::vector<Goldilocks::Element> randomValuesFE(PERFORMANCE_TEST_LENGTH);
     zkassert(randomValuesFE);
     for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
     {
         randomValuesFE[i] = fr.fromU64(rand());
     }
 
-    uint64_t *randomValues = new uint64_t[PERFORMANCE_TEST_LENGTH];
+    std::vector<uint64_t> randomValues(PERFORMANCE_TEST_LENGTH);
     zkassert(randomValues);
     for (uint64_t i=0; i<PERFORMANCE_TEST_LENGTH; i++)
     {
@@ -105,9 +103,6 @@ void PerformanceTestFE (void)
         aux = fr.fromU64( fr.toU64(aux) ^ randomValues[i] );
     }
     TimerStopAndLog(XOR_OPERATION_2);
-
-    delete(randomValuesFE);
-    delete(randomValues);
 }
 
 /********/
