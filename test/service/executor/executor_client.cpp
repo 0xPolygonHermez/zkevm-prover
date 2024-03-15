@@ -189,9 +189,9 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             }
             newStateRoot = ba2string(processBatchResponse.new_state_root());
 
-    #ifdef LOG_SERVICE
+#ifdef LOG_SERVICE
             cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
-    #endif
+#endif
         }
 
         // Wait until the returned flush ID has been stored to database
@@ -213,7 +213,9 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
         }
     }
-    else if (input.publicInputsExtended.publicInputs.witness.empty())
+    else if ((input.publicInputsExtended.publicInputs.forkID >= 7) &&
+             (input.publicInputsExtended.publicInputs.forkID <= 8) &&
+             (input.publicInputsExtended.publicInputs.witness.empty()))
     {
         ::executor::v1::ProcessBatchRequestV2 request;
         request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
@@ -273,7 +275,6 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         if( pDebug != NULL ){
             request.set_allocated_debug(pDebug);
         }
-
 
         unordered_map<uint64_t, L1Data>::const_iterator itL1Data;
         for (itL1Data = input.l1InfoTreeData.begin(); itL1Data != input.l1InfoTreeData.end(); itL1Data++)
@@ -383,7 +384,9 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
         }
     }
-    else if (!input.publicInputsExtended.publicInputs.witness.empty()) // Stateless
+    else if ((input.publicInputsExtended.publicInputs.forkID >= 7) &&
+             (input.publicInputsExtended.publicInputs.forkID <= 8) &&
+             (!input.publicInputsExtended.publicInputs.witness.empty())) // Stateless
     {
         ::executor::v1::ProcessStatelessBatchRequestV2 request;
         request.set_witness(input.publicInputsExtended.publicInputs.witness);
@@ -449,6 +452,295 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
             zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
         }
+    }
+    else if ((input.publicInputsExtended.publicInputs.forkID >= 9) &&
+             (!input.publicInputsExtended.publicInputs.batchL2Data.empty())) // Batch
+    {
+        ::executor::v1::ProcessBatchRequestV3 request;
+        request.set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
+        request.set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
+        request.set_previous_l1_info_tree_root(scalar2ba(input.publicInputsExtended.publicInputs.previousL1InfoTreeRoot));
+        request.set_previous_l1_info_tree_index(input.publicInputsExtended.publicInputs.previousL1InfoTreeIndex);
+        request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
+        request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
+        request.set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
+        request.set_type(input.publicInputsExtended.publicInputs.type);
+        request.set_forced_hash_data(scalar2ba(input.publicInputsExtended.publicInputs.forcedHashData));
+        executor::v1::ForcedData * pForcedData = new executor::v1::ForcedData();
+        zkassertpermanent(pForcedData != NULL);
+        pForcedData->set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.forcedData.globalExitRoot));
+        pForcedData->set_block_hash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedData.blockHashL1));
+        pForcedData->set_min_timestamp(input.publicInputsExtended.publicInputs.forcedData.minTimestamp);
+        request.set_allocated_forced_data(pForcedData);
+        request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
+        request.set_update_merkle_tree(update_merkle_tree);
+        request.set_no_counters(no_counters);
+        request.set_from(input.from);
+        request.set_skip_first_change_l2_block(input.bSkipFirstChangeL2Block);
+        request.set_skip_write_block_info_root(input.bSkipWriteBlockInfoRoot);
+
+        unordered_map<uint64_t, L1Data>::const_iterator itL1Data;
+        for (itL1Data = input.l1InfoTreeData.begin(); itL1Data != input.l1InfoTreeData.end(); itL1Data++)
+        {
+            executor::v1::L1DataV3 l1Data;
+            l1Data.set_global_exit_root(string2ba(itL1Data->second.globalExitRoot.get_str(16)));
+            l1Data.set_block_hash_l1(string2ba(itL1Data->second.blockHashL1.get_str(16)));
+            l1Data.set_min_timestamp(itL1Data->second.minTimestamp);
+            for (uint64_t i=0; i<itL1Data->second.smtProof.size(); i++)
+            {
+                l1Data.add_smt_proof(string2ba(itL1Data->second.smtProof[i].get_str(16)));
+            }
+            l1Data.set_initial_historic_root(string2ba(itL1Data->second.initialHistoricRoot.get_str(16)));
+            (*request.mutable_l1_info_tree_data())[itL1Data->first] = l1Data;
+        }
+
+        // Parse keys map
+        DatabaseMap::MTMap::const_iterator it;
+        for (it=input.db.begin(); it!=input.db.end(); it++)
+        {
+            string key = NormalizeToNFormat(it->first, 64);
+            string value;
+            vector<Goldilocks::Element> dbValue = it->second;
+            for (uint64_t i=0; i<dbValue.size(); i++)
+            {
+                value += NormalizeToNFormat(fr.toString(dbValue[i], 16), 16);
+            }
+            (*request.mutable_db())[key] = value;
+        }
+
+        // Parse contracts data
+        DatabaseMap::ProgramMap::const_iterator itp;
+        for (itp=input.contractsBytecode.begin(); itp!=input.contractsBytecode.end(); itp++)
+        {
+            string key = NormalizeToNFormat(itp->first, 64);
+            string value;
+            vector<uint8_t> contractValue = itp->second;
+            for (uint64_t i=0; i<contractValue.size(); i++)
+            {
+                value += byte2string(contractValue[i]);
+            }
+            (*request.mutable_contracts_bytecode())[key] = value;
+        }
+        if (input.traceConfig.bEnabled)
+        {
+            executor::v1::TraceConfigV2 * pTraceConfig = request.mutable_trace_config();
+            pTraceConfig->set_disable_storage(input.traceConfig.bDisableStorage);
+            pTraceConfig->set_disable_stack(input.traceConfig.bDisableStack);
+            pTraceConfig->set_enable_memory(input.traceConfig.bEnableMemory);
+            pTraceConfig->set_enable_return_data(input.traceConfig.bEnableReturnData);
+            pTraceConfig->set_tx_hash_to_generate_full_trace(string2ba(input.traceConfig.txHashToGenerateFullTrace));
+        }
+
+        request.set_get_keys(get_keys);
+
+        executor::v1::DebugV2 *pDebug = NULL;
+        if (input.publicInputsExtended.newStateRoot != 0)
+        {
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
+            pDebug->set_new_state_root(scalar2ba(input.publicInputsExtended.newStateRoot));
+        }
+        if (input.publicInputsExtended.newAccInputHash != 0){
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
+            pDebug->set_new_acc_input_hash(scalar2ba(input.publicInputsExtended.newAccInputHash));
+        }
+        if (input.publicInputsExtended.newLocalExitRoot != 0){
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
+            pDebug->set_new_local_exit_root(scalar2ba(input.publicInputsExtended.newLocalExitRoot));
+        }
+        if (input.publicInputsExtended.newBatchNum != 0){
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
+            pDebug->set_new_batch_num(input.publicInputsExtended.newBatchNum);
+        }
+        if (input.debug.gasLimit != 0)
+        {
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
+            pDebug->set_gas_limit(input.debug.gasLimit);
+        }
+        if( pDebug != NULL ){
+            request.set_allocated_debug(pDebug);
+        }
+
+        ::executor::v1::ProcessBatchResponseV3 processBatchResponse;
+        for (uint64_t i=0; i<config.executorClientLoops; i++)
+        {
+            if (config.executorClientResetDB)
+            {
+                pHashDB->resetDB();
+            }
+            else if (i == 1)
+            {
+                request.clear_db();
+                request.clear_contracts_bytecode();
+            }
+            ::grpc::ClientContext context;
+            ::grpc::Status grpcStatus = stub->ProcessBatchV3(&context, request, &processBatchResponse);
+            if (grpcStatus.error_code() != grpc::StatusCode::OK)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
+                break;
+            }
+            if (processBatchResponse.error() != executor::v1::EXECUTOR_ERROR_NO_ERROR)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed i=" << i << " error=" << processBatchResponse.error() << endl;
+                return false;
+            }
+            newStateRoot = ba2string(processBatchResponse.new_state_root());
+
+    #ifdef LOG_SERVICE
+            cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+    #endif
+        }
+
+        // Store the hash at the end of each block
+        for (int64_t b=0; b < processBatchResponse.block_responses().size(); b++)
+        {
+            blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
+        }
+
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
+        {
+            executor::v1::GetFlushStatusResponse getFlushStatusResponse;
+            do
+            {
+                usleep(10000);
+                google::protobuf::Empty request;
+                ::grpc::ClientContext context;
+                ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
+                if (grpcStatus.error_code() != grpc::StatusCode::OK)
+                {
+                    cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
+                    break;
+                }
+            } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
+            zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
+        }    
+    }
+    else if ((input.publicInputsExtended.publicInputs.forkID >= 9) &&
+             (!input.publicInputsExtended.publicInputs.blobData.empty())) // Blob
+    {
+        /*
+        
+
+
+    bytes blob_data = 14;
+    bytes forced_hash_data = 15;
+    string context_id = 16;
+    DebugV3 debug = 17;
+        */
+        ::executor::v1::ProcessBlobInnerRequestV3 request;
+        request.set_old_blob_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldBlobStateRoot));
+        request.set_old_blob_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldBlobAccInputHash));
+        request.set_old_num_blob(input.publicInputsExtended.publicInputs.oldBlobNum);
+        request.set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
+        request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
+        request.set_last_l1_info_tree_index(input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex);
+        request.set_last_l1_info_tree_root(scalar2ba(input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot));
+        request.set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
+        request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
+        request.set_zk_gas_limit(scalar2ba(input.publicInputsExtended.publicInputs.zkGasLimit));
+        request.set_type(input.publicInputsExtended.publicInputs.type);
+        request.set_point_z(scalar2ba(input.publicInputsExtended.publicInputs.pointZ));
+        request.set_point_y(scalar2ba(input.publicInputsExtended.publicInputs.pointY));
+        request.set_blob_data(input.publicInputsExtended.publicInputs.blobData);
+        request.set_forced_hash_data(scalar2ba(input.publicInputsExtended.publicInputs.forcedHashData));
+
+        executor::v1::DebugV3 *pDebug = NULL;
+        if (input.publicInputsExtended.newBlobStateRoot != 0)
+        {
+            if (pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV3();
+            }
+            pDebug->set_new_blob_state_root(scalar2ba(input.publicInputsExtended.newBlobStateRoot));
+        }
+        if (input.publicInputsExtended.newBlobAccInputHash != 0)
+        {
+            if (pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV3();
+            }
+            pDebug->set_new_blob_acc_input_hash(scalar2ba(input.publicInputsExtended.newBlobAccInputHash));
+        }
+        if (input.publicInputsExtended.newBlobNum != 0)
+        {
+            if (pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV3();
+            }
+            pDebug->set_new_blob_num(input.publicInputsExtended.newBlobNum);
+        }
+        if (pDebug != NULL)
+        {
+            request.set_allocated_debug(pDebug);
+        }
+
+        ::executor::v1::ProcessBlobInnerResponseV3 processBlobInnerResponse;
+        for (uint64_t i=0; i<config.executorClientLoops; i++)
+        {
+            ::grpc::ClientContext context;
+            ::grpc::Status grpcStatus = stub->ProcessBlobInnerV3(&context, request, &processBlobInnerResponse);
+            if (grpcStatus.error_code() != grpc::StatusCode::OK)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
+                break;
+            }
+            if (processBlobInnerResponse.error() != executor::v1::EXECUTOR_ERROR_NO_ERROR)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed i=" << i << " error=" << processBlobInnerResponse.error() << endl;
+                return false;
+            }
+            newStateRoot = ba2string(processBlobInnerResponse.new_blob_state_root());
+
+    #ifdef LOG_SERVICE
+            cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+    #endif
+        }
+
+        // Store the hash at the end of each block
+        /*for (int64_t b=0; b < processBatchResponse.block_responses().size(); b++)
+        {
+            blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
+        }
+
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
+        {
+            executor::v1::GetFlushStatusResponse getFlushStatusResponse;
+            do
+            {
+                usleep(10000);
+                google::protobuf::Empty request;
+                ::grpc::ClientContext context;
+                ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
+                if (grpcStatus.error_code() != grpc::StatusCode::OK)
+                {
+                    cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
+                    break;
+                }
+            } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
+            zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
+        }*/
+    }
+    else
+    {
+        zklog.error("ExecutorClient::ProcessBatch() unrecognized input category");
+        return false;
     }
 
     if (!config.loadCollectionRom && (input.publicInputsExtended.newStateRoot != 0))
