@@ -15,24 +15,31 @@ endif
 
 CXX := g++
 AS := nasm
-CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-march=native
-LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid $(GRPCPP_LIBS)
+CXXFLAGS := -std=c++17 -Wall -pthread -Wno-unused-label -fopenmp $(GRPCPP_FLAGS)
+LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -rdynamic $(GRPCPP_LIBS)
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
 
 # Debug build flags
 ifeq ($(dbg),1)
-      CXXFLAGS += -g -D DEBUG
+      CFLAGS += -g -D DEBUG
 else
-      CXXFLAGS += -O3
+      CFLAGS += -O3 -flto=auto -fno-fat-lto-objects
+
+      # Optimizing to run locally. A distributable binary
+      # should use a more general setting.
+      $(info "Optimizing to run locally.")
+      $(info "The binary might not work in a processor with a different set of extensions.")
+      CFLAGS += -march=native -mtune=native
 endif
+
 
 # Verify if AVX-512 is supported
 # for now disabled, to enable it, you only need to uncomment these lines
 #AVX512_SUPPORTED := $(shell cat /proc/cpuinfo | grep -E 'avx512' -m 1)
 
 #ifneq ($(AVX512_SUPPORTED),)
-#	CXXFLAGS += -mavx512f -D__AVX512__
+#	CFLAGS += -mavx512f -D__AVX512__
 #endif
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
@@ -70,13 +77,13 @@ bctree: $(BUILD_DIR)/$(TARGET_BCT)
 test: $(BUILD_DIR)/$(TARGET_TEST)
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
-	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) $(OBJS_ZKP) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 $(BUILD_DIR)/$(TARGET_BCT): $(OBJS_BCT)
-	$(CXX) $(OBJS_BCT) $(CXXFLAGS) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) $(OBJS_BCT) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 $(BUILD_DIR)/$(TARGET_TEST): $(OBJS_TEST)
-	$(CXX) $(OBJS_TEST) $(CXXFLAGS) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) $(OBJS_TEST) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 # protobuf
 $(BUILD_DIR)/gen/%.pb.cc $(BUILD_DIR)/gen/%.pb.h $(BUILD_DIR)/gen/%.grpc.pb.cc $(BUILD_DIR)/gen/%.grpc.pb.h &: %.proto
