@@ -1,6 +1,7 @@
 #include "friProve.hpp"
-#include "timer.hpp"
 #include "zklog.hpp"
+#include <algorithm>
+#include <cstddef>
 
 void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo)
 {
@@ -222,7 +223,9 @@ void FRIProve::queryPol(FRIProof &fproof, MerkleTreeGL *treesGL[5], uint64_t idx
     for (uint i = 0; i < 5; i++)
     {
         MerkleTreeGL *treesGLTmp = treesGL[i];
-        Goldilocks::Element buff[treesGLTmp->width + treesGLTmp->MerkleProofSize() * HASH_SIZE] = {Goldilocks::zero()};
+        const size_t lenght = treesGLTmp->width + treesGLTmp->MerkleProofSize() * HASH_SIZE;
+        Goldilocks::Element buff[lenght];
+        std::fill_n(buff, lenght, Goldilocks::zero());
 
         treesGLTmp->getGroupProof(&buff[0], idx);
 
@@ -238,7 +241,9 @@ void FRIProve::queryPol(FRIProof &fproof, MerkleTreeGL *treeGL, uint64_t idx, ui
 {
     vector<MerkleProof> vMkProof;
 
-    Goldilocks::Element buff[treeGL->width * treeGL->width + treeGL->MerkleProofSize() * HASH_SIZE] = {Goldilocks::zero()};
+    const size_t length = treeGL->width * treeGL->width + treeGL->MerkleProofSize() * HASH_SIZE;
+    Goldilocks::Element buff[length];
+    std::fill_n(buff, length, Goldilocks::zero());
     treeGL->getGroupProof(&buff[0], idx);
 
     MerkleProof mkProof(treeGL->width, treeGL->MerkleProofSize(), &buff[0]);
