@@ -85,14 +85,9 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    // Input JSON file must contain a chainID key at the root level (it is mandatory)
-    if ( !input.contains("chainID") ||
-         !input["chainID"].is_number_unsigned() )
-    {
-        zklog.error("Input::loadGlobals() chainID key not found in input JSON file");
-        exitProcess();
-    }
-    else
+    // Parse chainID
+    if ( input.contains("chainID") &&
+         input["chainID"].is_number_unsigned() )
     {
         publicInputsExtended.publicInputs.chainID = input["chainID"];
     }
@@ -132,7 +127,7 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    if (publicInputsExtended.publicInputs.forkID >= 7)
+    if ((publicInputsExtended.publicInputs.forkID >= 7) && (publicInputsExtended.publicInputs.forkID <= 8))
     {
         // Input JSON file must contain a l1InfoRoot key at the root level
         if ( !input.contains("l1InfoRoot") ||
@@ -147,7 +142,7 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    if (publicInputsExtended.publicInputs.forkID >= 7)
+    if ((publicInputsExtended.publicInputs.forkID >= 7) && (publicInputsExtended.publicInputs.forkID <= 8))
     {
         // Input JSON file must contain a forcedBlockHashL1 key at the root level
         if ( !input.contains("forcedBlockHashL1") ||
@@ -599,6 +594,310 @@ void Input::loadGlobals (json &input)
 
     // Calculate the trace configuration flags
     traceConfig.calculateFlags();
+
+    // fork 9 (Feijoa) input parameters
+
+    if (publicInputsExtended.publicInputs.forkID >= 9)
+    {
+        // Parse old blob state root
+        if ( input.contains("oldBlobStateRoot") &&
+                input["oldBlobStateRoot"].is_string() )
+        {
+            string oldBlobStateRootString = input["oldBlobStateRoot"];
+            oldBlobStateRootString = Remove0xIfPresent(oldBlobStateRootString);
+            if (!stringIsHex(oldBlobStateRootString))
+            {
+                zklog.error("Input::loadGlobals() oldBlobStateRoot found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (oldBlobStateRootString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() oldBlobStateRoot found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.oldBlobStateRoot.set_str(oldBlobStateRootString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): oldBlobStateRoot=" + publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16));
+#endif
+        }
+
+        // Parse old blob acc input hash
+        if ( input.contains("oldBlobAccInputHash") &&
+                input["oldBlobAccInputHash"].is_string() )
+        {
+            string oldBlobAccInputHashString = input["oldBlobAccInputHash"];
+            oldBlobAccInputHashString = Remove0xIfPresent(oldBlobAccInputHashString);
+            if (!stringIsHex(oldBlobAccInputHashString))
+            {
+                zklog.error("Input::loadGlobals() oldBlobAccInputHash found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (oldBlobAccInputHashString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() oldBlobAccInputHash found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.oldBlobAccInputHash.set_str(oldBlobAccInputHashString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): oldBlobAccInputHash=" + publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16));
+#endif
+        }
+
+        // Parse old blob number
+        if ( input.contains("oldNumBlob") &&
+            input["oldNumBlob"].is_number_unsigned() )
+        {
+            publicInputsExtended.publicInputs.oldBlobNum = input["oldNumBlob"];
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): oldBlobNum=" + to_string(publicInputsExtended.publicInputs.oldBlobNum));
+#endif
+        }
+
+        // Parse lastL1InfoTreeIndex
+        if ( input.contains("lastL1InfoTreeIndex") &&
+            input["lastL1InfoTreeIndex"].is_number_unsigned() )
+        {
+            publicInputsExtended.publicInputs.oldBlobNum = input["lastL1InfoTreeIndex"];
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): lastL1InfoTreeIndex=" + to_string(lpublicInputsExtended.publicInputs.lastL1InfoTreeIndex));
+#endif
+        }
+
+        // Parse lastL1InfoTreeRoot
+        if ( input.contains("lastL1InfoTreeRoot") &&
+                input["lastL1InfoTreeRoot"].is_string() )
+        {
+            string lastL1InfoTreeRootString = input["lastL1InfoTreeRoot"];
+            lastL1InfoTreeRootString = Remove0xIfPresent(lastL1InfoTreeRootString);
+            if (!stringIsHex(lastL1InfoTreeRootString))
+            {
+                zklog.error("Input::loadGlobals() lastL1InfoTreeRoot found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (lastL1InfoTreeRootString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() lastL1InfoTreeRoot found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.lastL1InfoTreeRoot.set_str(lastL1InfoTreeRootString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): lastL1InfoTreeRoot=" + publicInputsExtended.publicInputs.lastL1InfoTreeRoot.get_str(16));
+#endif
+        }
+
+        // Parse zkGasLimit
+        if ( input.contains("zkGasLimit") &&
+                input["zkGasLimit"].is_string() )
+        {
+            string zkGasLimitString = input["zkGasLimit"];
+            zkGasLimitString = Remove0xIfPresent(zkGasLimitString);
+            if (!stringIsHex(zkGasLimitString))
+            {
+                zklog.error("Input::loadGlobals() zkGasLimit found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (zkGasLimitString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() zkGasLimit found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.zkGasLimit.set_str(zkGasLimitString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): zkGasLimit=" + publicInputsExtended.publicInputs.zkGasLimit.get_str(16));
+#endif
+        }
+
+        // Parse pointZ
+        if ( input.contains("pointZ") &&
+                input["pointZ"].is_string() )
+        {
+            string pointZString = input["pointZ"];
+            pointZString = Remove0xIfPresent(pointZString);
+            if (!stringIsHex(pointZString))
+            {
+                zklog.error("Input::loadGlobals() pointZ found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (pointZString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() pointZ found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.zkGasLimit.set_str(pointZString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): pointZ=" + publicInputsExtended.publicInputs.pointZ.get_str(16));
+#endif
+        }
+
+        // Parse pointY
+        if ( input.contains("pointY") &&
+                input["pointY"].is_string() )
+        {
+            string pointYString = input["pointY"];
+            pointYString = Remove0xIfPresent(pointYString);
+            if (!stringIsHex(pointYString))
+            {
+                zklog.error("Input::loadGlobals() pointY found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (pointYString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() pointY found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.pointY.set_str(pointYString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): pointY=" + publicInputsExtended.publicInputs.pointY.get_str(16));
+#endif
+        }
+
+        // Parse blobData
+        if ( input.contains("blobData") &&
+            input["blobData"].is_string() )
+        {
+            publicInputsExtended.publicInputs.blobData = string2ba(input["blobData"]);
+        }
+
+        // Parse currentL1InfoTreeRoot
+        if ( input.contains("currentL1InfoTreeRoot") &&
+                input["currentL1InfoTreeRoot"].is_string() )
+        {
+            string currentL1InfoTreeRootString = input["currentL1InfoTreeRoot"];
+            currentL1InfoTreeRootString = Remove0xIfPresent(currentL1InfoTreeRootString);
+            if (!stringIsHex(currentL1InfoTreeRootString))
+            {
+                zklog.error("Input::loadGlobals() currentL1InfoTreeRoot found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (currentL1InfoTreeRootString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() currentL1InfoTreeRoot found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.currentL1InfoTreeRoot.set_str(currentL1InfoTreeRootString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): currentL1InfoTreeRoot=" + publicInputsExtended.currentL1InfoTreeRoot.get_str(16));
+#endif
+        }
+
+        // Parse currentL1InfoTreeIndex
+        if ( input.contains("currentL1InfoTreeIndex") &&
+            input["currentL1InfoTreeIndex"].is_number_unsigned() )
+        {
+            publicInputsExtended.currentL1InfoTreeIndex = input["currentL1InfoTreeIndex"];
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): currentL1InfoTreeIndex=" + to_string(lpublicInputsExtended.currentL1InfoTreeIndex));
+#endif
+        }
+
+        // Parse newBlobStateRoot
+        if ( input.contains("newBlobStateRoot") &&
+                input["newBlobStateRoot"].is_string() )
+        {
+            string newBlobStateRootString = input["newBlobStateRoot"];
+            newBlobStateRootString = Remove0xIfPresent(newBlobStateRootString);
+            if (!stringIsHex(newBlobStateRootString))
+            {
+                zklog.error("Input::loadGlobals() newBlobStateRoot found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (newBlobStateRootString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() newBlobStateRoot found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.newBlobStateRoot.set_str(newBlobStateRootString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): newBlobStateRoot=" + publicInputsExtended.newBlobStateRoot.get_str(16));
+#endif
+        }
+
+        // Parse newBlobAccInputHash
+        if ( input.contains("newBlobAccInputHash") &&
+                input["newBlobAccInputHash"].is_string() )
+        {
+            string newBlobAccInputHashString = input["newBlobAccInputHash"];
+            newBlobAccInputHashString = Remove0xIfPresent(newBlobAccInputHashString);
+            if (!stringIsHex(newBlobAccInputHashString))
+            {
+                zklog.error("Input::loadGlobals() newBlobAccInputHash found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (newBlobAccInputHashString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() newBlobAccInputHash found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.newBlobStateRoot.set_str(newBlobAccInputHashString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): newBlobAccInputHash=" + publicInputsExtended.newBlobAccInputHash.get_str(16));
+#endif
+        }
+
+        // Parse newBlobNum
+        if ( input.contains("newBlobNum") &&
+            input["newBlobNum"].is_number_unsigned() )
+        {
+            publicInputsExtended.newBlobNum = input["newBlobNum"];
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): newBlobNum=" + to_string(lpublicInputsExtended.newBlobNum));
+#endif
+        }
+
+        // Parse finalAccBatchHashData
+        if ( input.contains("finalAccBatchHashData") &&
+                input["finalAccBatchHashData"].is_string() )
+        {
+            string finalAccBatchHashDataString = input["finalAccBatchHashData"];
+            finalAccBatchHashDataString = Remove0xIfPresent(finalAccBatchHashDataString);
+            if (!stringIsHex(finalAccBatchHashDataString))
+            {
+                zklog.error("Input::loadGlobals() finalAccBatchHashData found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (finalAccBatchHashDataString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() finalAccBatchHashData found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.newBlobStateRoot.set_str(finalAccBatchHashDataString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): finalAccBatchHashData=" + publicInputsExtended.finalAccBatchHashData.get_str(16));
+#endif
+        }
+
+        // Parse localExitRootFromBlob
+        if ( input.contains("localExitRootFromBlob") &&
+                input["localExitRootFromBlob"].is_string() )
+        {
+            string localExitRootFromBlobString = input["localExitRootFromBlob"];
+            localExitRootFromBlobString = Remove0xIfPresent(localExitRootFromBlobString);
+            if (!stringIsHex(localExitRootFromBlobString))
+            {
+                zklog.error("Input::loadGlobals() localExitRootFromBlob found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (localExitRootFromBlobString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() localExitRootFromBlob found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.newBlobStateRoot.set_str(localExitRootFromBlobString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): localExitRootFromBlob=" + publicInputsExtended.localExitRootFromBlob.get_str(16));
+#endif
+        }
+
+        // Parse isInvalid
+        if ( input.contains("isInvalid") &&
+            input["isInvalid"].is_boolean() )
+        {
+            publicInputsExtended.isInvalid = input["isInvalid"];
+    #ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals() isInvalid=" + to_string(publicInputsExtended.isInvalid));
+    #endif
+        }
+    }
 }
 
 void Input::saveGlobals (json &input) const
@@ -707,6 +1006,78 @@ void Input::saveGlobals (json &input) const
         input["enableMemory"] = traceConfig.bEnableMemory;
         input["enableReturnData"] = traceConfig.bEnableReturnData;
         input["txHashToGenerateFullTrace"] = traceConfig.txHashToGenerateFullTrace;
+    }
+
+    if (publicInputsExtended.publicInputs.forkID >= 9)
+    {
+        if (publicInputsExtended.publicInputs.oldBlobStateRoot != 0)
+        {
+            input["oldBlobStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16), 64);
+        }
+        if (publicInputsExtended.publicInputs.oldBlobAccInputHash != 0)
+        {
+            input["oldBlobAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16), 64);
+        }
+        if (publicInputsExtended.publicInputs.oldBlobNum != 0)
+        {
+            input["oldNumBlob"] = publicInputsExtended.publicInputs.oldBlobNum;
+        }
+        if (publicInputsExtended.publicInputs.lastL1InfoTreeIndex != 0)
+        {
+            input["lastL1InfoTreeIndex"] = publicInputsExtended.publicInputs.lastL1InfoTreeIndex;
+        }
+        if (publicInputsExtended.publicInputs.lastL1InfoTreeRoot != 0)
+        {
+            input["lastL1InfoTreeRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.lastL1InfoTreeRoot.get_str(16), 64);
+        }
+        if (publicInputsExtended.publicInputs.zkGasLimit != 0)
+        {
+            input["zkGasLimit"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.zkGasLimit.get_str(16), 64);
+        }
+        if (publicInputsExtended.publicInputs.pointZ != 0)
+        {
+            input["pointZ"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.pointZ.get_str(16), 64);
+        }
+        if (publicInputsExtended.publicInputs.pointY != 0)
+        {
+            input["pointY"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.pointY.get_str(16), 64);
+        }
+        if (!publicInputsExtended.publicInputs.blobData.empty())
+        {
+            input["blobData"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.blobData));
+        }
+        if (publicInputsExtended.currentL1InfoTreeRoot != 0)
+        {
+            input["currentL1InfoTreeRoot"] = NormalizeTo0xNFormat(publicInputsExtended.currentL1InfoTreeRoot.get_str(16), 64);
+        }
+        if (publicInputsExtended.currentL1InfoTreeIndex != 0)
+        {
+            input["currentL1InfoTreeIndex"] = publicInputsExtended.currentL1InfoTreeIndex;
+        }
+        if (publicInputsExtended.newBlobStateRoot != 0)
+        {
+            input["newBlobStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.newBlobStateRoot.get_str(16), 64);
+        }
+        if (publicInputsExtended.newBlobAccInputHash != 0)
+        {
+            input["newBlobAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.newBlobAccInputHash.get_str(16), 64);
+        }
+        if (publicInputsExtended.newBlobNum != 0)
+        {
+            input["newBlobNum"] = publicInputsExtended.newBlobNum;
+        }
+        if (publicInputsExtended.finalAccBatchHashData != 0)
+        {
+            input["finalAccBatchHashData"] = NormalizeTo0xNFormat(publicInputsExtended.finalAccBatchHashData.get_str(16), 64);
+        }
+        if (publicInputsExtended.localExitRootFromBlob != 0)
+        {
+            input["localExitRootFromBlob"] = NormalizeTo0xNFormat(publicInputsExtended.localExitRootFromBlob.get_str(16), 64);
+        }
+        if (publicInputsExtended.isInvalid)
+        {
+            input["isInvalid"] = publicInputsExtended.isInvalid;
+        }
     }
 }
 

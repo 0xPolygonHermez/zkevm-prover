@@ -2689,8 +2689,14 @@ void eval_getTimestampLimit (Context &ctx, const RomCommand &cmd, CommandResult 
 #endif
 
     cr.type = crt_fea;
-    mpz_class timestampLimit = ctx.proverRequest.input.publicInputsExtended.publicInputs.timestampLimit;
-    scalar2fea(fr, timestampLimit, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    cr.fea0 = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.timestampLimit);
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
 }
 
 void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -3889,8 +3895,14 @@ void eval_getType (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     cr.type = crt_fea;
-    mpz_class type = ctx.proverRequest.input.publicInputsExtended.publicInputs.type;
-    scalar2fea(fr, type, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    cr.fea0 = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.type);
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
 }
 
 void eval_getForcedGER (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -4001,52 +4013,125 @@ void eval_getPendingRID (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_getZkGasLimit (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getZkGasLimit() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    cr.type = crt_fea;
+    mpz_class zkGasLimit = ctx.proverRequest.input.publicInputsExtended.publicInputs.zkGasLimit;
+    scalar2fea(fr, zkGasLimit, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getZ (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getZ() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    cr.type = crt_fea;
+    mpz_class pointZ = ctx.proverRequest.input.publicInputsExtended.publicInputs.pointZ;
+    scalar2fea(fr, pointZ, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getY (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getY() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    cr.type = crt_fea;
+    mpz_class pointY = ctx.proverRequest.input.publicInputsExtended.publicInputs.pointY;
+    scalar2fea(fr, pointY, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getBlobL2HashData (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getBlobL2HashData() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    cr.type = crt_fea;
+    scalar2fea(fr, ctx.blobL2HashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getForcedHashData (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getForcedHashData() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    mpz_class forcedHashData = ctx.proverRequest.input.publicInputsExtended.publicInputs.forcedHashData;
+    scalar2fea(fr, forcedHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 
 }
 
 void eval_getBlobLen (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getBlobLen() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    cr.type = crt_fea;
+    cr.fea0 = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.blobData.size());
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
 }
 
 void eval_frBLS12_381inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-
+    zklog.error("eval_frBLS12_381inv() not implemented");
 }
 
 void eval_dump (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-
+    zklog.error("eval_dump() not implemented");
 }
 
 void eval_check4096Root (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-
+    zklog.error("eval_check4096Root() not implemented");
 }
 
 void eval_get4096RootIndex (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-
+    zklog.error("eval_get4096RootIndex() not implemented");
 }
+
 
 } // namespace

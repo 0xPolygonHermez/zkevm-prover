@@ -5998,7 +5998,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 // Initialize the first evaluation
 void MainExecutor::initState(Context &ctx)
 {
-    // Set oldStateRoot to register B
+    // Set oldStateRoot to register SR
     scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, ctx.pols.SR0[0], ctx.pols.SR1[0], ctx.pols.SR2[0], ctx.pols.SR3[0], ctx.pols.SR4[0], ctx.pols.SR5[0], ctx.pols.SR6[0], ctx.pols.SR7[0]);
 
     // Set oldAccInputHash to register C

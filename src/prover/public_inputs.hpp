@@ -45,7 +45,6 @@ public:
     uint64_t   oldBlobNum;
     uint32_t   lastL1InfoTreeIndex;
     mpz_class  lastL1InfoTreeRoot;
-    uint64_t   lastTimestamp;
     mpz_class  zkGasLimit;
     mpz_class  pointZ;
     mpz_class  pointY;
@@ -60,8 +59,7 @@ public:
         timestamp(0),
         timestampLimit(0),
         oldBlobNum(0),
-        lastL1InfoTreeIndex(0),
-        lastTimestamp(0)
+        lastL1InfoTreeIndex(0)
     {
         aggregatorAddress.set_str("f39fd6e51aad88f6f4ce6ab8827279cfffb92266", 16); // Default aggregator address
     }
