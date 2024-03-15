@@ -578,7 +578,7 @@ void Starks::evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomia
         }
         else
         {
-            throw std::invalid_argument("Invalid ev type: " + ev.type);
+            throw std::invalid_argument("Invalid ev type: " + std::to_string(ev.type));
         }
     }
     Polinomial *ordPols = new Polinomial[size_eval];

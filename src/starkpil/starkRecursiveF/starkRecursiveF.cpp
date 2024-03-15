@@ -474,7 +474,7 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
         }
         else
         {
-            throw std::invalid_argument("Invalid ev type: " + ev.type);
+            throw std::invalid_argument("Invalid ev type: " + std::to_string(ev.type));
         }
     }
     // join subsets 1 and 2 in 1

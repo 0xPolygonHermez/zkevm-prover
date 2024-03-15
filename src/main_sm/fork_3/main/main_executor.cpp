@@ -3316,7 +3316,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                logError(ctx, "Invalid binary operation opcode=" + rom.line[zkPC].binOpcode);
+                logError(ctx, "Invalid binary operation opcode=" + std::to_string(rom.line[zkPC].binOpcode));
                 exitProcess();
             }
             pols.bin[i] = fr.one();
