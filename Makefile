@@ -15,9 +15,9 @@ endif
 
 CXX := g++
 AS := nasm
-CXXFLAGS := -std=c++17 -Wall -pthread -Wno-unused-label -fopenmp $(GRPCPP_FLAGS)
+CXXFLAGS := -std=c++17 $(GRPCPP_FLAGS)
 LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -rdynamic $(GRPCPP_LIBS)
-CFLAGS := -fopenmp -mavx2
+CFLAGS := -fopenmp -Wall -pthread -Wno-unused-label -fopenmp -mavx2
 ASFLAGS := -felf64
 
 # Debug build flags
