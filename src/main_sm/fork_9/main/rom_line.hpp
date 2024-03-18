@@ -106,12 +106,8 @@ public:
     uint8_t setRID;
     uint8_t sRD;
     uint8_t sWR;
-    uint8_t arithEq0;
-    uint8_t arithEq1;
-    uint8_t arithEq2;
-    uint8_t arithEq3;
-    uint8_t arithEq4;
-    uint8_t arithEq5;
+    uint8_t arith;
+    uint8_t arithEquation;
     uint8_t bin;
     uint8_t binOpcode;
     vector<RomCommand *> cmdAfter;

@@ -1,4 +1,5 @@
 #include "main_sm/fork_9/main/rom_line.hpp"
+#include "main_sm/fork_9/main/main_definitions.hpp"
 
 namespace fork_9
 {
@@ -53,9 +54,11 @@ string RomLine::toString(Goldilocks &fr)
     if (hashP != 0) result += " hashP=" + to_string(hashP);
     if (hashPLen != 0) result += " hashPLen=" + to_string(hashPLen);
     if (hashPDigest != 0) result += " hashPDigest=" + to_string(hashPDigest);
+#ifdef SUPPORT_SHA256
     if (hashS != 0) result += " hashS=" + to_string(hashS);
     if (hashSLen != 0) result += " hashSLen=" + to_string(hashSLen);
     if (hashSDigest != 0) result += " hashSDigest=" + to_string(hashSDigest);
+#endif
     if (JMP != 0) result += " JMP=" + to_string(JMP);
     if (JMPC != 0) result += " JMPC=" + to_string(JMPC);
     if (JMPN != 0) result += " JMPN=" + to_string(JMPN);
@@ -95,12 +98,8 @@ string RomLine::toString(Goldilocks &fr)
 
     if (sRD != 0) result += " sRD=" + to_string(sRD);
     if (sWR != 0) result += " sWR=" + to_string(sWR);
-    if (arithEq0 != 0) result += " arithEq0=" + to_string(arithEq0);
-    if (arithEq1 != 0) result += " arithEq1=" + to_string(arithEq1);
-    if (arithEq2 != 0) result += " arithEq2=" + to_string(arithEq2);
-    if (arithEq3 != 0) result += " arithEq3=" + to_string(arithEq3);
-    if (arithEq4 != 0) result += " arithEq4=" + to_string(arithEq4);
-    if (arithEq5 != 0) result += " arithEq5=" + to_string(arithEq5);
+    if (arith != 0) result += " arith=" + to_string(arith);
+    if (arithEquation != 0) result += " arithEquation=" + to_string(arithEquation);
     if (bin != 0) result += " bin=" + to_string(bin);
     if (binOpcode != 0) result += " binOpcode=" + to_string(binOpcode);
     if (memAlignRD != 0) result += " memAlignRD=" + to_string(memAlignRD);

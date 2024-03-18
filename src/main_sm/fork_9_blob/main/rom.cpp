@@ -1,6 +1,7 @@
 #include <iostream>
 #include "main_sm/fork_9_blob/main/rom.hpp"
 #include "main_sm/fork_9_blob/main/rom_command.hpp"
+#include "main_sm/fork_9_blob/main/main_definitions.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "zklog.hpp"
@@ -348,9 +349,15 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["hashP"].is_number_integer()) line[i].hashP = l["hashP"]; else line[i].hashP = 0;
         if (l["hashPLen"].is_number_integer()) line[i].hashPLen = l["hashPLen"]; else line[i].hashPLen = 0;
         if (l["hashPDigest"].is_number_integer()) line[i].hashPDigest = l["hashPDigest"]; else line[i].hashPDigest = 0;
+#ifdef SUPPORT_SHA256
         if (l["hashS"].is_number_integer()) line[i].hashS = l["hashS"]; else line[i].hashS = 0;
         if (l["hashSLen"].is_number_integer()) line[i].hashSLen = l["hashSLen"]; else line[i].hashSLen = 0;
         if (l["hashSDigest"].is_number_integer()) line[i].hashSDigest = l["hashSDigest"]; else line[i].hashSDigest = 0;
+#else
+        line[i].hashS = 0;
+        line[i].hashSLen = 0;
+        line[i].hashSDigest = 0;
+#endif
 
         if (l["JMP"].is_number_integer()) line[i].JMP = l["JMP"]; else line[i].JMP = 0;
         if (l["JMPC"].is_number_integer()) line[i].JMPC = l["JMPC"]; else line[i].JMPC = 0;
@@ -391,12 +398,8 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
  
         if (l["sRD"].is_number_integer()) line[i].sRD = l["sRD"]; else line[i].sRD = 0;
         if (l["sWR"].is_number_integer()) line[i].sWR = l["sWR"]; else line[i].sWR = 0;
-        if (l["arithEq0"].is_number_integer()) line[i].arithEq0 = l["arithEq0"]; else line[i].arithEq0 = 0;
-        if (l["arithEq1"].is_number_integer()) line[i].arithEq1 = l["arithEq1"]; else line[i].arithEq1 = 0;
-        if (l["arithEq2"].is_number_integer()) line[i].arithEq2 = l["arithEq2"]; else line[i].arithEq2 = 0;
-        if (l["arithEq3"].is_number_integer()) line[i].arithEq3 = l["arithEq3"]; else line[i].arithEq3 = 0;
-        if (l["arithEq4"].is_number_integer()) line[i].arithEq4 = l["arithEq4"]; else line[i].arithEq4 = 0;
-        if (l["arithEq5"].is_number_integer()) line[i].arithEq5 = l["arithEq5"]; else line[i].arithEq5 = 0;
+        if (l["arith"].is_number_integer()) line[i].arith = l["arith"]; else line[i].arith = 0;
+        if (l["arithEquation"].is_number_integer()) line[i].arithEquation = l["arithEquation"]; else line[i].arithEquation = 0;
         if (l["bin"].is_number_integer()) line[i].bin = l["bin"]; else line[i].bin = 0;
         if (l["binOpcode"].is_number_integer()) line[i].binOpcode = l["binOpcode"]; else line[i].binOpcode = 0;
         if (l["memAlignRD"].is_number_integer()) line[i].memAlignRD = l["memAlignRD"]; else line[i].memAlignRD = 0;

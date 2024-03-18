@@ -17,6 +17,7 @@
 #include "main_sm/fork_9_blob/main/rom.hpp"
 #include "main_sm/fork_9_blob/main/context.hpp"
 #include "main_sm/fork_9_blob/main/eval_command.hpp"
+#include "main_sm/fork_9_blob/main/main_definitions.hpp"
 #include "utils/time_metric.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
@@ -52,10 +53,12 @@ namespace fork_9_blob
 #define FrFirst32Negative ( 0xFFFFFFFF00000001 - 0xFFFFFFFF )
 #define FrLast32Positive 0xFFFFFFFF
 
+#ifndef BLOB_INNER
 #ifdef DEBUG
 #define CHECK_MAX_CNT_ASAP
 #endif
 #define CHECK_MAX_CNT_AT_THE_END
+#endif
 
 //#define LOG_COMPLETED_STEPS_TO_FILE
 //#define LOG_COMPLETED_STEPS
@@ -65,7 +68,11 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
+#ifdef BLOB_INNER
     romBatch(config, BLOB),
+#else
+    romBatch(config, BATCH),
+#endif
     romCollection(config, COLLECTION),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
@@ -165,7 +172,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
     // Init execution flags
-    bool bProcessBatch = (proverRequest.type == prt_processBatch);
+    bool bProcessBatch = (proverRequest.type == prt_processBatch) || (proverRequest.type == prt_processBlobInner);
     bool bUnsignedTransaction = (proverRequest.input.from != "") && (proverRequest.input.from != "0x");
 
     // Unsigned transactions (from!=empty) are intended to be used to "estimage gas" (or "call")
@@ -213,8 +220,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
     }
 
-    // Calculate blobL2HashData
-    keccak256((const uint8_t *)proverRequest.input.publicInputsExtended.publicInputs.blobData.c_str(), proverRequest.input.publicInputsExtended.publicInputs.blobData.size(), ctx.blobL2HashData);
+#ifdef BLOB_INNER
+        // Calculate blobL2HashData
+        keccak256((const uint8_t *)proverRequest.input.publicInputsExtended.publicInputs.blobData.c_str(), proverRequest.input.publicInputsExtended.publicInputs.blobData.size(), ctx.blobL2HashData);
+#endif
 
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
@@ -330,7 +339,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 #endif
 
-        /*if ((zkPC == rom.labels.ecrecoverStoreArgsLabel) && config.ECRecoverPrecalc)
+#ifndef BLOB_INNER
+        if ((zkPC == rom.labels.ecrecoverStoreArgsLabel) && config.ECRecoverPrecalc)
         {
             zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);
             mpz_class signature_, r_, s_, v_;
@@ -344,15 +354,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 ctx.ecRecoverPrecalcBuffer.filled = true;
             }
-        }*/
-        /*if (zkPC == rom.labels.ecrecoverEndLabel)
+        }
+        if (zkPC == rom.labels.ecrecoverEndLabel)
         {
             if ( ctx.ecRecoverPrecalcBuffer.filled)
             {
                 zkassert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);
                 ctx.ecRecoverPrecalcBuffer.filled = false;
             }
-        }*/
+        }
+#endif
 
         // Consolidate the state and store it in SR, just before we save SR into SMT
         if (config.hashDB64 && bProcessBatch && (zkPC == consolidateStateRootZKPC))
@@ -665,6 +676,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
+#ifdef SUPPORT_SHA256
         // If inCntSha256F, op = op + inCntSha256F*cntSha256F
         if (!fr.isZero(rom.line[zkPC].inCntSha256F))
         {
@@ -674,6 +686,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             zklog.info("inCntSha256F op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
+#endif
 
         // If inCntPoseidonG, op = op + inCntPoseidonG*cntPoseidonG
         if (!fr.isZero(rom.line[zkPC].inCntPoseidonG))
@@ -876,15 +889,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         bool anyHash =
+#ifdef SUPPORT_SHA256
+            rom.line[zkPC].hashS ||
+            rom.line[zkPC].hashSDigest ||
+            rom.line[zkPC].hashSLen ||
+#endif
             rom.line[zkPC].hashP ||
             rom.line[zkPC].hashK ||
-            rom.line[zkPC].hashS ||
             rom.line[zkPC].hashPDigest ||
             rom.line[zkPC].hashKDigest ||
-            rom.line[zkPC].hashSDigest ||
             rom.line[zkPC].hashPLen ||
-            rom.line[zkPC].hashKLen ||
-            rom.line[zkPC].hashSLen;
+            rom.line[zkPC].hashKLen;
         int32_t memAddr = addr + (rom.line[zkPC].memUseAddrRel ? addrRel : 0);
         int32_t hashAddr = anyHash ? ( rom.line[zkPC].hashOffset + fr.toS64(pols.E0[i]) ) : 0;
 
@@ -1693,6 +1708,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
                 }
 
+#ifdef SUPPORT_SHA256
+
                 // HashS free in
                 if (rom.line[zkPC].hashS == 1)
                 {
@@ -1796,6 +1813,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     zklog.info("hashSDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " digest=" + ctx.hashS[hashAddr].digest.get_str(16));
 #endif
                 }
+
+#endif // SUPPORT_SHA256
 
                 // Binary free in
                 if (rom.line[zkPC].bin == 1)
@@ -2340,8 +2359,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
+#ifndef BLOB_INNER
+
         // overwrite 'op' when hiting 'checkFirstTxType' label
-        /*if ((zkPC == rom.labels.checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
+        if ((zkPC == rom.labels.checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
         {
             op0 = fr.one();
             op1 = fr.one();
@@ -2351,10 +2372,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op5 = fr.one();
             op6 = fr.one();
             op7 = fr.one();
-        }*/
+        }
 
         // overwrite 'op' when hiting 'writeBlockInfoRoot' label
-        /*if ((zkPC == rom.labels.writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
+        if ((zkPC == rom.labels.writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
         {
             op0 = fr.zero();
             op1 = fr.zero();
@@ -2364,7 +2385,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op5 = fr.zero();
             op6 = fr.zero();
             op7 = fr.zero();
-        }*/
+        }
+
+#endif
 
         // Storage read instruction
         if (rom.line[zkPC].sRD == 1)
@@ -3364,6 +3387,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
+#ifdef SUPPORT_SHA256
+
         // HashS instruction
         if (rom.line[zkPC].hashS == 1)
         {
@@ -3628,6 +3653,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
+#endif // SUPPORT_SHA256
+
         // HashP or Storage write instructions, required data
         if (!bProcessBatch && (rom.line[zkPC].hashPDigest || rom.line[zkPC].sWR))
         {
@@ -3651,10 +3678,23 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // Arith instruction
-        if (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1)
+        if (rom.line[zkPC].arith == 1)
         {
+            if (!bProcessBatch)
+            {
+                pols.arith[i] = fr.one();
+                if (rom.line[zkPC].arithEquation != 3)
+                {
+                    pols.arithSame12[i] = fr.one();
+                }
+                if ((rom.line[zkPC].arithEquation != 1) && (rom.line[zkPC].arithEquation != 7))
+                {
+                    pols.arithUseE[i] = fr.one();
+                }
+            }
+            
             // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
-            if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
+            if (rom.line[zkPC].arithEquation == 1)
             {
                 // Convert to scalar
                 mpz_class A, B, C, D, op;
@@ -3709,7 +3749,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arithEq0[i] = fr.one();
+                    pols.arithEquation[i] = fr.one();
 
                     ArithAction arithAction;
                     arithAction.x1 = A;
@@ -3729,7 +3769,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
             }
             // Arithmetic FP2 multiplication
-            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==1 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
+            else if (rom.line[zkPC].arithEquation == 4)
             {
                 // Convert to scalar
                 mpz_class x1, y1, x2, y2, x3, y3;
@@ -3806,7 +3846,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arithEq3[i] = fr.one();
+                    pols.arithEquation[i] = fr.fromU64(4);
 
                     ArithAction arithAction;
                     arithAction.x1 = x1;
@@ -3818,15 +3858,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq0 = 0;
                     arithAction.selEq1 = 0;
                     arithAction.selEq2 = 0;
-                    arithAction.selEq3 = 0;
-                    arithAction.selEq4 = 1;
+                    arithAction.selEq3 = 1;
+                    arithAction.selEq4 = 0;
                     arithAction.selEq5 = 0;
                     arithAction.selEq6 = 0;
                     required.Arith.push_back(arithAction);
                 }
             }
             // Arithmetic FP2 addition
-            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==1 && rom.line[zkPC].arithEq5==0)
+            else if (rom.line[zkPC].arithEquation == 5)
             {
                 // Convert to scalar
                 mpz_class x1, y1, x2, y2, x3, y3;
@@ -3903,7 +3943,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arithEq4[i] = fr.one();
+                    pols.arithEquation[i] = fr.fromU64(5);
 
                     ArithAction arithAction;
                     arithAction.x1 = x1;
@@ -3916,14 +3956,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq1 = 0;
                     arithAction.selEq2 = 0;
                     arithAction.selEq3 = 0;
-                    arithAction.selEq4 = 0;
-                    arithAction.selEq5 = 1;
+                    arithAction.selEq4 = 1;
+                    arithAction.selEq5 = 0;
                     arithAction.selEq6 = 0;
                     required.Arith.push_back(arithAction);
                 }
             }
             // Arithmetic FP2 subtraction
-            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==1)
+            else if (rom.line[zkPC].arithEquation == 6)
             {
                 // Convert to scalar
                 mpz_class x1, y1, x2, y2, x3, y3;
@@ -4000,7 +4040,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arithEq5[i] = fr.one();
+                    pols.arithEquation[i] = fr.fromU64(6);
 
                     ArithAction arithAction;
                     arithAction.x1 = x1;
@@ -4014,11 +4054,94 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq2 = 0;
                     arithAction.selEq3 = 0;
                     arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 1;
+                    arithAction.selEq6 = 0;
+                    required.Arith.push_back(arithAction);
+                }
+            }
+            else if (rom.line[zkPC].arithEquation == 7)
+            {
+                // Convert to scalar
+                mpz_class A, B, C, D, op;
+                if (!fea2scalar(fr, A, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, B, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, C, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, D, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Check that D is not zero
+                if (D == 0)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
+                    logError(ctx, "Arithmetic does not match: D=0 in modular arithmetic");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                // A(x1) * B(y1) + C(x2) = op(y3) (mod D(y2))
+                mpz_class left = A*B + C;
+                mpz_class right = op % D;
+                if (left != right)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
+                    logError(ctx, "Arithmetic does not match: (A*B) + C = " + left.get_str(16) + ", op mod D = " + right.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Store the arith action to execute it later with the arith SM
+                if (!bProcessBatch)
+                {
+                    // Copy ROM flags into the polynomials
+                    pols.arithEquation[i] = fr.fromU64(7);
+
+                    ArithAction arithAction;
+                    arithAction.x1 = A;
+                    arithAction.y1 = B;
+                    arithAction.x2 = C;
+                    arithAction.y2 = D;
+                    arithAction.x3 = 0;
+                    arithAction.y3 = op;
+                    arithAction.selEq0 = 0;
+                    arithAction.selEq1 = 0;
+                    arithAction.selEq2 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 0;
                     arithAction.selEq5 = 0;
                     arithAction.selEq6 = 1;
                     required.Arith.push_back(arithAction);
                 }
             }
+
             // Arith instruction: check curve points
             else
             {
@@ -4076,11 +4199,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 // Check if this is a double operation
                 bool dbl = false;
-                if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
+                if (rom.line[zkPC].arithEquation == 2)
                 {
                     dbl = false;
                 }
-                else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==1 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
+                else if (rom.line[zkPC].arithEquation == 3)
                 {
                     dbl = true;
                 }
@@ -4128,9 +4251,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (!bProcessBatch)
                 {
-                    pols.arithEq0[i] = fr.fromU64(rom.line[zkPC].arithEq0);
-                    pols.arithEq1[i] = fr.fromU64(rom.line[zkPC].arithEq1);
-                    pols.arithEq2[i] = fr.fromU64(rom.line[zkPC].arithEq2);
+                    pols.arithEquation[i] = dbl ? fr.fromU64(3) : fr.fromU64(2);
 
                     // Store the arith action to execute it later with the arith SM
                     ArithAction arithAction;
@@ -4143,8 +4264,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq0 = 0;
                     arithAction.selEq1 = dbl ? 0 : 1;
                     arithAction.selEq2 = dbl ? 1 : 0;
-                    arithAction.selEq3 = 1;
-                    arithAction.selEq4 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 1;
                     arithAction.selEq5 = 0;
                     arithAction.selEq6 = 0;
                     required.Arith.push_back(arithAction);
@@ -4904,12 +5025,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             zklog.info("setA A[nexti]=" + fea2string(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
 #endif
         }
-        /*else if (bUnsignedTransaction && (zkPC == rom.labels.checkAndSaveFromLabel))
+#ifndef BLOB_INNER
+        else if (bUnsignedTransaction && (zkPC == rom.labels.checkAndSaveFromLabel))
         {
             // Set A register with input.from to process unsigned transactions
             mpz_class from(proverRequest.input.from);
             scalar2fea(fr, from, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti] );
-        }*/
+        }
+#endif
         else
         {
             pols.A0[nexti] = pols.A0[i];
@@ -5170,7 +5293,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If arith, increment pols.cntArith
-        if (!proverRequest.input.bNoCounters && (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1) )
+        if (!proverRequest.input.bNoCounters && (rom.line[zkPC].arith == 1))
         {
             pols.cntArith[nexti] = fr.inc(pols.cntArith[i]);
 #ifdef CHECK_MAX_CNT_ASAP
@@ -5305,11 +5428,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
         uint64_t elseAddr = (!fr.isZero(rom.line[zkPC].elseAddr) ? fr.toU64(rom.line[zkPC].elseAddr) : 0) + (rom.line[zkPC].elseUseAddrRel ? addrRel : 0);
 
+#ifndef BLOB_INNER
         // Modify JMP 'elseAddr' to continue execution in case of an unsigned transaction
-        /*if (bUnsignedTransaction && (fr.toU64(rom.line[zkPC].elseAddr) == rom.labels.invalidIntrinsicTxSenderCodeLabel))
+        if (bUnsignedTransaction && (fr.toU64(rom.line[zkPC].elseAddr) == rom.labels.invalidIntrinsicTxSenderCodeLabel))
         {
             elseAddr = finalJmpAddr;
-        }*/
+        }
+#endif
 
         // Log free0IsByte in pols
         if (!bProcessBatch && rom.line[zkPC].free0IsByte)
@@ -5345,8 +5470,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
 
+#ifndef BLOB_INNER
             // Calculate reserved counters
-            /*if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersStepLabel))
+            if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersStepLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5417,7 +5543,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     reserve = 0;
                 }
                 proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, uint64_t(reserve));
-            }*/
+            }
+#endif
 
             uint64_t jmpnCondValue = fr.toU64(op0);
 
@@ -5550,7 +5677,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
-        if (rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashKDigest || rom.line[zkPC].hashPDigest || rom.line[zkPC].hashSDigest)
+        if (
+#ifdef SUPPORT_SHA256
+            rom.line[zkPC].hashSDigest ||
+#endif
+            rom.line[zkPC].sRD ||
+            rom.line[zkPC].sWR ||
+            rom.line[zkPC].hashKDigest ||
+            rom.line[zkPC].hashPDigest )
         {
             pols.incCounter[i] = fr.fromU64(incCounter);
         }
@@ -5599,6 +5733,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntPaddingPG[nexti] = pols.cntPaddingPG[i];
         }
 
+#ifdef SUPPORT_SHA256
+
         if (rom.line[zkPC].hashSDigest && !proverRequest.input.bNoCounters)
         {
             pols.cntSha256F[nexti] = fr.add(pols.cntSha256F[i], fr.fromU64(incCounter));
@@ -5620,6 +5756,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.cntSha256F[nexti] = pols.cntSha256F[i];
         }
+
+#endif // SUPPORT_SHA256
 
         if ((rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest) && !proverRequest.input.bNoCounters)
         {
@@ -5721,7 +5859,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.memAlign = fr.toU64(pols.cntMemAlign[0]);
     proverRequest.counters.paddingPG = fr.toU64(pols.cntPaddingPG[0]);
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
+#ifdef SUPPORT_SHA256
     proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);
+#endif
     proverRequest.counters.steps = ctx.lastStep;
     proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, proverRequest.counters.arith);
     proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, proverRequest.counters.binary);
@@ -5810,6 +5950,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
     }
+#ifdef SUPPORT_SHA256
     if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntSha256F[0]) > rom.constants.MAX_CNT_SHA256_F_LIMIT))
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_SHA256_F;
@@ -5819,6 +5960,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
     }
+#endif // SUPPORT_SHA256
 #endif
 
     //printRegs(ctx);

@@ -15,7 +15,7 @@ private:
     uint64_t _index;
 public:
     ConstantPol(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
-    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*239]; };
+    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*199]; };
     inline Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
     inline Goldilocks::Element * address (void) { return _pAddress; }
@@ -142,13 +142,13 @@ public:
     ConstantPol inCntMemAlign;
     ConstantPol inCntPaddingPG;
     ConstantPol inCntPoseidonG;
-    ConstantPol inCntSha256F;
     ConstantPol incStack;
     ConstantPol binOpcode;
     ConstantPol jmpAddr;
     ConstantPol elseAddr;
     ConstantPol ind;
     ConstantPol indRR;
+    ConstantPol arithEquation;
     ConstantPol line;
     ConstantPol operations;
 private:
@@ -192,13 +192,13 @@ public:
         inCntMemAlign((Goldilocks::Element *)((uint8_t *)pAddress + 632), degree, 79),
         inCntPaddingPG((Goldilocks::Element *)((uint8_t *)pAddress + 640), degree, 80),
         inCntPoseidonG((Goldilocks::Element *)((uint8_t *)pAddress + 648), degree, 81),
-        inCntSha256F((Goldilocks::Element *)((uint8_t *)pAddress + 656), degree, 82),
-        incStack((Goldilocks::Element *)((uint8_t *)pAddress + 664), degree, 83),
-        binOpcode((Goldilocks::Element *)((uint8_t *)pAddress + 672), degree, 84),
-        jmpAddr((Goldilocks::Element *)((uint8_t *)pAddress + 680), degree, 85),
-        elseAddr((Goldilocks::Element *)((uint8_t *)pAddress + 688), degree, 86),
-        ind((Goldilocks::Element *)((uint8_t *)pAddress + 696), degree, 87),
-        indRR((Goldilocks::Element *)((uint8_t *)pAddress + 704), degree, 88),
+        incStack((Goldilocks::Element *)((uint8_t *)pAddress + 656), degree, 82),
+        binOpcode((Goldilocks::Element *)((uint8_t *)pAddress + 664), degree, 83),
+        jmpAddr((Goldilocks::Element *)((uint8_t *)pAddress + 672), degree, 84),
+        elseAddr((Goldilocks::Element *)((uint8_t *)pAddress + 680), degree, 85),
+        ind((Goldilocks::Element *)((uint8_t *)pAddress + 688), degree, 86),
+        indRR((Goldilocks::Element *)((uint8_t *)pAddress + 696), degree, 87),
+        arithEquation((Goldilocks::Element *)((uint8_t *)pAddress + 704), degree, 88),
         line((Goldilocks::Element *)((uint8_t *)pAddress + 712), degree, 89),
         operations((Goldilocks::Element *)((uint8_t *)pAddress + 720), degree, 90),
         _pAddress(pAddress),
@@ -631,169 +631,6 @@ public:
     inline uint64_t size (void) { return _degree*6*sizeof(Goldilocks::Element); }
 };
 
-class Sha256FConstantPols
-{
-public:
-    ConstantPol kGateType;
-    ConstantPol kA;
-    ConstantPol kB;
-    ConstantPol kC;
-    ConstantPol kOut;
-    ConstantPol kCarryOut;
-    ConstantPol Conn[4];
-    ConstantPol GATE_TYPE;
-    ConstantPol CARRY_ENABLED;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    Sha256FConstantPols (void * pAddress, uint64_t degree) :
-        kGateType((Goldilocks::Element *)((uint8_t *)pAddress + 1592), degree, 199),
-        kA((Goldilocks::Element *)((uint8_t *)pAddress + 1600), degree, 200),
-        kB((Goldilocks::Element *)((uint8_t *)pAddress + 1608), degree, 201),
-        kC((Goldilocks::Element *)((uint8_t *)pAddress + 1616), degree, 202),
-        kOut((Goldilocks::Element *)((uint8_t *)pAddress + 1624), degree, 203),
-        kCarryOut((Goldilocks::Element *)((uint8_t *)pAddress + 1632), degree, 204),
-        Conn{
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1640), degree, 205),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1648), degree, 206),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1656), degree, 207),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1664), degree, 208)
-        },
-        GATE_TYPE((Goldilocks::Element *)((uint8_t *)pAddress + 1672), degree, 209),
-        CARRY_ENABLED((Goldilocks::Element *)((uint8_t *)pAddress + 1680), degree, 210),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 96; }
-    inline static uint64_t numPols (void) { return 12; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*12*sizeof(Goldilocks::Element); }
-};
-
-class Bits2FieldSha256ConstantPols
-{
-public:
-    ConstantPol FieldLatch;
-    ConstantPol Factor;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    Bits2FieldSha256ConstantPols (void * pAddress, uint64_t degree) :
-        FieldLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1688), degree, 211),
-        Factor((Goldilocks::Element *)((uint8_t *)pAddress + 1696), degree, 212),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 16; }
-    inline static uint64_t numPols (void) { return 2; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*2*sizeof(Goldilocks::Element); }
-};
-
-class PaddingSha256BitConstantPols
-{
-public:
-    ConstantPol r8Id;
-    ConstantPol sOutId;
-    ConstantPol latchR8;
-    ConstantPol Fr8;
-    ConstantPol latchSOut;
-    ConstantPol FSOut0;
-    ConstantPol FSOut1;
-    ConstantPol FSOut2;
-    ConstantPol FSOut3;
-    ConstantPol FSOut4;
-    ConstantPol FSOut5;
-    ConstantPol FSOut6;
-    ConstantPol FSOut7;
-    ConstantPol HIn;
-    ConstantPol DoConnect;
-    ConstantPol ConnS1;
-    ConstantPol ConnS2;
-    ConstantPol ConnBits2FieldBit;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    PaddingSha256BitConstantPols (void * pAddress, uint64_t degree) :
-        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1704), degree, 213),
-        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1712), degree, 214),
-        latchR8((Goldilocks::Element *)((uint8_t *)pAddress + 1720), degree, 215),
-        Fr8((Goldilocks::Element *)((uint8_t *)pAddress + 1728), degree, 216),
-        latchSOut((Goldilocks::Element *)((uint8_t *)pAddress + 1736), degree, 217),
-        FSOut0((Goldilocks::Element *)((uint8_t *)pAddress + 1744), degree, 218),
-        FSOut1((Goldilocks::Element *)((uint8_t *)pAddress + 1752), degree, 219),
-        FSOut2((Goldilocks::Element *)((uint8_t *)pAddress + 1760), degree, 220),
-        FSOut3((Goldilocks::Element *)((uint8_t *)pAddress + 1768), degree, 221),
-        FSOut4((Goldilocks::Element *)((uint8_t *)pAddress + 1776), degree, 222),
-        FSOut5((Goldilocks::Element *)((uint8_t *)pAddress + 1784), degree, 223),
-        FSOut6((Goldilocks::Element *)((uint8_t *)pAddress + 1792), degree, 224),
-        FSOut7((Goldilocks::Element *)((uint8_t *)pAddress + 1800), degree, 225),
-        HIn((Goldilocks::Element *)((uint8_t *)pAddress + 1808), degree, 226),
-        DoConnect((Goldilocks::Element *)((uint8_t *)pAddress + 1816), degree, 227),
-        ConnS1((Goldilocks::Element *)((uint8_t *)pAddress + 1824), degree, 228),
-        ConnS2((Goldilocks::Element *)((uint8_t *)pAddress + 1832), degree, 229),
-        ConnBits2FieldBit((Goldilocks::Element *)((uint8_t *)pAddress + 1840), degree, 230),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 144; }
-    inline static uint64_t numPols (void) { return 18; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*18*sizeof(Goldilocks::Element); }
-};
-
-class PaddingSha256ConstantPols
-{
-public:
-    ConstantPol r8Id;
-    ConstantPol lastBlock;
-    ConstantPol lastBlockLatch;
-    ConstantPol r8valid;
-    ConstantPol PrevLengthSection;
-    ConstantPol LengthWeight;
-    ConstantPol sOutId;
-    ConstantPol forceLastHash;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    PaddingSha256ConstantPols (void * pAddress, uint64_t degree) :
-        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1848), degree, 231),
-        lastBlock((Goldilocks::Element *)((uint8_t *)pAddress + 1856), degree, 232),
-        lastBlockLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1864), degree, 233),
-        r8valid((Goldilocks::Element *)((uint8_t *)pAddress + 1872), degree, 234),
-        PrevLengthSection((Goldilocks::Element *)((uint8_t *)pAddress + 1880), degree, 235),
-        LengthWeight((Goldilocks::Element *)((uint8_t *)pAddress + 1888), degree, 236),
-        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1896), degree, 237),
-        forceLastHash((Goldilocks::Element *)((uint8_t *)pAddress + 1904), degree, 238),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 64; }
-    inline static uint64_t numPols (void) { return 8; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*8*sizeof(Goldilocks::Element); }
-};
-
 class ConstantPols
 {
 public:
@@ -810,10 +647,6 @@ public:
     Bits2FieldConstantPols Bits2Field;
     PaddingKKBitConstantPols PaddingKKBit;
     PaddingKKConstantPols PaddingKK;
-    Sha256FConstantPols Sha256F;
-    Bits2FieldSha256ConstantPols Bits2FieldSha256;
-    PaddingSha256BitConstantPols PaddingSha256Bit;
-    PaddingSha256ConstantPols PaddingSha256;
 private:
     void * _pAddress;
     uint64_t _degree;
@@ -833,20 +666,16 @@ public:
         Bits2Field(pAddress, degree),
         PaddingKKBit(pAddress, degree),
         PaddingKK(pAddress, degree),
-        Sha256F(pAddress, degree),
-        Bits2FieldSha256(pAddress, degree),
-        PaddingSha256Bit(pAddress, degree),
-        PaddingSha256(pAddress, degree),
         _pAddress(pAddress),
         _degree(degree) {}
 
-    inline static uint64_t pilSize (void) { return 16039018496; }
+    inline static uint64_t pilSize (void) { return 13354663936; }
     inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t numPols (void) { return 239; }
+    inline static uint64_t numPols (void) { return 199; }
 
     inline void * address (void) { return _pAddress; }
     inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*239*sizeof(Goldilocks::Element); }
+    inline uint64_t size (void) { return _degree*199*sizeof(Goldilocks::Element); }
 
     inline Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
     {
@@ -938,13 +767,13 @@ inline const char * address2ConstantPolName (uint64_t address)
     if ((address >= 632) && (address <= 639)) return "Rom.inCntMemAlign";
     if ((address >= 640) && (address <= 647)) return "Rom.inCntPaddingPG";
     if ((address >= 648) && (address <= 655)) return "Rom.inCntPoseidonG";
-    if ((address >= 656) && (address <= 663)) return "Rom.inCntSha256F";
-    if ((address >= 664) && (address <= 671)) return "Rom.incStack";
-    if ((address >= 672) && (address <= 679)) return "Rom.binOpcode";
-    if ((address >= 680) && (address <= 687)) return "Rom.jmpAddr";
-    if ((address >= 688) && (address <= 695)) return "Rom.elseAddr";
-    if ((address >= 696) && (address <= 703)) return "Rom.ind";
-    if ((address >= 704) && (address <= 711)) return "Rom.indRR";
+    if ((address >= 656) && (address <= 663)) return "Rom.incStack";
+    if ((address >= 664) && (address <= 671)) return "Rom.binOpcode";
+    if ((address >= 672) && (address <= 679)) return "Rom.jmpAddr";
+    if ((address >= 680) && (address <= 687)) return "Rom.elseAddr";
+    if ((address >= 688) && (address <= 695)) return "Rom.ind";
+    if ((address >= 696) && (address <= 703)) return "Rom.indRR";
+    if ((address >= 704) && (address <= 711)) return "Rom.arithEquation";
     if ((address >= 712) && (address <= 719)) return "Rom.line";
     if ((address >= 720) && (address <= 727)) return "Rom.operations";
     if ((address >= 728) && (address <= 735)) return "MemAlign.BYTE_C4096";
@@ -1055,46 +884,6 @@ inline const char * address2ConstantPolName (uint64_t address)
     if ((address >= 1568) && (address <= 1575)) return "PaddingKK.r8valid";
     if ((address >= 1576) && (address <= 1583)) return "PaddingKK.sOutId";
     if ((address >= 1584) && (address <= 1591)) return "PaddingKK.forceLastHash";
-    if ((address >= 1592) && (address <= 1599)) return "Sha256F.kGateType";
-    if ((address >= 1600) && (address <= 1607)) return "Sha256F.kA";
-    if ((address >= 1608) && (address <= 1615)) return "Sha256F.kB";
-    if ((address >= 1616) && (address <= 1623)) return "Sha256F.kC";
-    if ((address >= 1624) && (address <= 1631)) return "Sha256F.kOut";
-    if ((address >= 1632) && (address <= 1639)) return "Sha256F.kCarryOut";
-    if ((address >= 1640) && (address <= 1647)) return "Sha256F.Conn[0]";
-    if ((address >= 1648) && (address <= 1655)) return "Sha256F.Conn[1]";
-    if ((address >= 1656) && (address <= 1663)) return "Sha256F.Conn[2]";
-    if ((address >= 1664) && (address <= 1671)) return "Sha256F.Conn[3]";
-    if ((address >= 1672) && (address <= 1679)) return "Sha256F.GATE_TYPE";
-    if ((address >= 1680) && (address <= 1687)) return "Sha256F.CARRY_ENABLED";
-    if ((address >= 1688) && (address <= 1695)) return "Bits2FieldSha256.FieldLatch";
-    if ((address >= 1696) && (address <= 1703)) return "Bits2FieldSha256.Factor";
-    if ((address >= 1704) && (address <= 1711)) return "PaddingSha256Bit.r8Id";
-    if ((address >= 1712) && (address <= 1719)) return "PaddingSha256Bit.sOutId";
-    if ((address >= 1720) && (address <= 1727)) return "PaddingSha256Bit.latchR8";
-    if ((address >= 1728) && (address <= 1735)) return "PaddingSha256Bit.Fr8";
-    if ((address >= 1736) && (address <= 1743)) return "PaddingSha256Bit.latchSOut";
-    if ((address >= 1744) && (address <= 1751)) return "PaddingSha256Bit.FSOut0";
-    if ((address >= 1752) && (address <= 1759)) return "PaddingSha256Bit.FSOut1";
-    if ((address >= 1760) && (address <= 1767)) return "PaddingSha256Bit.FSOut2";
-    if ((address >= 1768) && (address <= 1775)) return "PaddingSha256Bit.FSOut3";
-    if ((address >= 1776) && (address <= 1783)) return "PaddingSha256Bit.FSOut4";
-    if ((address >= 1784) && (address <= 1791)) return "PaddingSha256Bit.FSOut5";
-    if ((address >= 1792) && (address <= 1799)) return "PaddingSha256Bit.FSOut6";
-    if ((address >= 1800) && (address <= 1807)) return "PaddingSha256Bit.FSOut7";
-    if ((address >= 1808) && (address <= 1815)) return "PaddingSha256Bit.HIn";
-    if ((address >= 1816) && (address <= 1823)) return "PaddingSha256Bit.DoConnect";
-    if ((address >= 1824) && (address <= 1831)) return "PaddingSha256Bit.ConnS1";
-    if ((address >= 1832) && (address <= 1839)) return "PaddingSha256Bit.ConnS2";
-    if ((address >= 1840) && (address <= 1847)) return "PaddingSha256Bit.ConnBits2FieldBit";
-    if ((address >= 1848) && (address <= 1855)) return "PaddingSha256.r8Id";
-    if ((address >= 1856) && (address <= 1863)) return "PaddingSha256.lastBlock";
-    if ((address >= 1864) && (address <= 1871)) return "PaddingSha256.lastBlockLatch";
-    if ((address >= 1872) && (address <= 1879)) return "PaddingSha256.r8valid";
-    if ((address >= 1880) && (address <= 1887)) return "PaddingSha256.PrevLengthSection";
-    if ((address >= 1888) && (address <= 1895)) return "PaddingSha256.LengthWeight";
-    if ((address >= 1896) && (address <= 1903)) return "PaddingSha256.sOutId";
-    if ((address >= 1904) && (address <= 1911)) return "PaddingSha256.forceLastHash";
     return "ERROR_NOT_FOUND";
 }
 
