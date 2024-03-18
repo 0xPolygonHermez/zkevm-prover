@@ -327,18 +327,18 @@ void Executor::processBlobInner (ProverRequest &proverRequest)
                 //zklog.info("Executor::processBlobInner() fork 9 native");
 
                 // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_9::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                void * pAddress = calloc(fork_9_blob::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBlobInner() failed calling calloc(" + to_string(fork_9::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBlobInner() failed calling calloc(" + to_string(fork_9_blob::CommitPols::pilSize()) + ")");
                     exitProcess();
                 }
-                fork_9::CommitPols commitPols(pAddress,1);
+                fork_9_blob::CommitPols commitPols(pAddress,1);
 
                 // This instance will store all data required to execute the rest of State Machines
-                fork_9::MainExecRequired required;
+                fork_9_blob::MainExecRequired required;
 
-                mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_9_blob.execute(proverRequest, commitPols.Main, required);
 
                 // Free committed polynomials address space
                 free(pAddress);

@@ -26,8 +26,11 @@ public:
     mpz_class newBlobStateRoot;
     mpz_class newBlobAccInputHash;
     uint64_t  newBlobNum;
+    mpz_class finalAccBatchHashData;
+    mpz_class localExitRootFromBlob;
+    bool      isInvalid;
     
-    PublicInputsExtended() : newBatchNum(0), currentL1InfoTreeIndex(0), newBlobNum(0) {};
+    PublicInputsExtended() : newBatchNum(0), currentL1InfoTreeIndex(0), newBlobNum(0), isInvalid(false) {};
 
     bool operator==(PublicInputsExtended &publicInputsExtended)
     {

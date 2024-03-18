@@ -186,7 +186,9 @@ public:
     uint64_t line; // From ROM JSON file instruction
 #endif
 
+    // Fork 9 attributes
     map<uint64_t, Saved> saved;
+    mpz_class blobL2HashData;
 
     Context( Goldilocks &fr,
              const Config &config,

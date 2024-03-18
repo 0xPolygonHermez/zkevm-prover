@@ -1201,7 +1201,7 @@ using grpc::Status;
         " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
         " lastL1InfoTreeIndex=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex) +
         " lastL1InfoTreeRoot=" + proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot.get_str(16) +
-        " lastTimestamp=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.lastTimestamp) +
+        " timestampLimit=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestampLimit) +
         " zkGasLimit=" + proverRequest.input.publicInputsExtended.publicInputs.zkGasLimit.get_str(16) +
         " type=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.type) +
         " pointZ=" + proverRequest.input.publicInputsExtended.publicInputs.pointZ.get_str(16) +
