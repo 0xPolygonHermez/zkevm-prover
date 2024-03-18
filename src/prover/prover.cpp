@@ -418,7 +418,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     if (config.saveWitness)
     {
         TimerStopAndLog(PROVER_BATCH_PROOF);
-        return
+        return;
     }
 
     /************/
@@ -705,7 +705,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     if (config.saveWitness)
     {
         TimerStopAndLog(PROVER_AGGREGATED_PROOF);
-        return
+        return;
     }
 
     // Input is pProverRequest->aggregatedProofInput1 and pProverRequest->aggregatedProofInput2 (of type json)
@@ -860,7 +860,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     if (config.saveWitness)
     {
         TimerStopAndLog(PROVER_FINAL_PROOF);
-        return
+        return;
     }
 
     // Input is pProverRequest->finalProofInput (of type json)
