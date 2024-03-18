@@ -415,6 +415,12 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         json2file(inputJson, pProverRequest->inputFile());
     }
 
+    if (config.saveWitness)
+    {
+        TimerStopAndLog(PROVER_BATCH_PROOF);
+        return
+    }
+
     /************/
     /* Executor */
     /************/
@@ -696,6 +702,12 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
         json2file(pProverRequest->aggregatedProofInput2, pProverRequest->filePrefix + "aggregated_proof.input_2.json");
     }
 
+    if (config.saveWitness)
+    {
+        TimerStopAndLog(PROVER_AGGREGATED_PROOF);
+        return
+    }
+
     // Input is pProverRequest->aggregatedProofInput1 and pProverRequest->aggregatedProofInput2 (of type json)
 
     ordered_json verKey;
@@ -843,6 +855,12 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     if (config.saveInputToFile)
     {
         json2file(pProverRequest->finalProofInput, pProverRequest->filePrefix + "final_proof.input.json");
+    }
+
+    if (config.saveWitness)
+    {
+        TimerStopAndLog(PROVER_FINAL_PROOF);
+        return
     }
 
     // Input is pProverRequest->finalProofInput (of type json)

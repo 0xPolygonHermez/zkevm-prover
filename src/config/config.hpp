@@ -61,6 +61,7 @@ public:
     bool saveProofToFile; // Saves the proof, in json format
     bool saveResponseToFile; // Saves the grpc service response, in text format
     bool saveFilesInSubfolders; // Saves output files in folders per hour, e.g. output/2023/01/10/18
+    bool saveWitness; // 1) does saveInputToFile, 2) prevents creation of provers, 3) exits proof after saving
 
     bool loadDBToMemCache;
     bool loadDBToMemCacheInParallel;
