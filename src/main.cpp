@@ -304,7 +304,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
 void* compute(const struct Task* task) {
   printf("Received zkProver task with id: %s\n", task->id);
 
-  printf("Args: \n");
+  printf("compute Args: \n");
   const char ** args = (const char**)task->args;
   while ((args != NULL) && (*args != NULL)) {
     printf("\t%s\n", *args);
@@ -326,9 +326,13 @@ void* compute(const struct Task* task) {
 }
 
 
-int main()
+int main(int argc, char **argv)
 {
-  printf("Starting example C program in Gevulot...\n");
+  printf("Starting example C program in Gevulot..., argc %d\n", argc);
+  printf("main Args: \n");
+  for (int i = 0; i < argc; i++)
+    printf("\t%d %s\n", i, argv[i]);
+  }
   run(compute);
   printf("Example program finished. Terminating...\n");
   return 0;
