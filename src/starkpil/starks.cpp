@@ -187,8 +187,6 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams& params,
     Goldilocks::Element* pBuffExtended = &params.pols[starkInfo.mapOffsets.section[string2section(sectionExtended)]];
     Goldilocks::Element* pBuffHelper = &params.pols[starkInfo.mapOffsets.section[string2section(nttBufferHelperSectionStart)]];
       
-    // printPolRoot(step, params);
-
     ntt.extendPol(pBuffExtended, pBuff, NExtended, N, nCols, pBuffHelper);
     TimerStopAndLogStep(STARK_LDE, step);
     TimerStartStep(STARK_MERKLETREE, step);
