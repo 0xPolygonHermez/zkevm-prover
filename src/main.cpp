@@ -14,7 +14,6 @@
 #include "circom.hpp"
 #include "main.hpp"
 #include "prover.hpp"
-#include "shim.h"
 #include "service/executor/executor_server.hpp"
 #include "service/executor/executor_client.hpp"
 #include "service/aggregator/aggregator_server.hpp"
@@ -55,6 +54,10 @@
 // #ifdef GEVULOT_SHIM
 // #include "shim.h"
 // #endif
+
+extern "C" {
+  #include "shim.h"
+}
 
 using namespace std;
 using json = nlohmann::json;
