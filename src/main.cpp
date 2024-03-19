@@ -14,6 +14,7 @@
 #include "circom.hpp"
 #include "main.hpp"
 #include "prover.hpp"
+#include "shim.h"
 #include "service/executor/executor_server.hpp"
 #include "service/executor/executor_client.hpp"
 #include "service/aggregator/aggregator_server.hpp"
@@ -49,6 +50,11 @@
 #include "page_manager_test.hpp"
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
+
+// #define GEVULOT_SHIM
+// #ifdef GEVULOT_SHIM
+// #include "shim.h"
+// #endif
 
 using namespace std;
 using json = nlohmann::json;
@@ -290,9 +296,78 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     prover.execute(&proverRequest);
 }
 
+// #ifdef GEVULOT_SHIM
+
+void* compute(const struct Task* task) {
+  printf("Received zkProver task with id: %s\n", task->id);
+
+  printf("Args: \n");
+  const char ** args = (const char**)task->args;
+  while ((args != NULL) && (*args != NULL)) {
+    printf("\t%s\n", *args);
+    args++;
+  }
+
+  printf("Files: \n");
+  const char **files = (const char**)task->files;
+  while ((files != NULL) && (*files != NULL)) {
+    printf("\t%s\n", *files);
+    files++;
+  }
+
+  // do_main();
+
+  printf("Done with the task.\n");
+
+  return new_task_result(NULL, 0);
+}
+
+
+int main()
+{
+  printf("Starting example C program in Gevulot...\n");
+  run(compute);
+  printf("Example program finished. Terminating...\n");
+  return 0;
+    // if (argc == 2)
+    // {
+    //     if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
+    //     {
+    //         // If requested to only print the version, then exit the program
+    //         return 0;
+    //     }
+    // }
+
+    // // Parse the name of the configuration file
+    // char *pConfigFile = (char *)"config/config.json";
+    // bool isGevulot = false;
+
+    // if (argc == 3 || argc == 5)
+    // {
+    //     if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
+    //     {
+    //         pConfigFile = argv[2];
+    //     }
+    // }
+    // if (argc == 5)
+    // {
+    //     if (strcmp(argv[1], "-g") == 0)
+    //     {
+    //         isGevulot = true;
+    //     }
+    // }
+
+    // int result = do_main(pConfigFile);
+
+}
+
+#if 0
+
 int main(int argc, char **argv)
 {
     /* CONFIG */
+    auto tasksize = new_main(argc, argv);
+    zklog.info("tasksize=" + tasksize);
 
     if (argc == 2)
     {
@@ -312,6 +387,14 @@ int main(int argc, char **argv)
             pConfigFile = argv[2];
         }
     }
+
+    do_main(pConfigFile);
+}
+
+#endif
+
+int do_main(char *pConfigFile)
+{
 
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
