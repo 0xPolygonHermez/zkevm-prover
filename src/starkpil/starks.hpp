@@ -33,8 +33,9 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
-    bool optimizeMemoryNTT = false;
     bool debug = false;
+    bool optimizeMemoryNTT = false;
+    bool optimizeMemoryNTTCommitPols = false;
     
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
@@ -77,6 +78,7 @@ private:
     CHelpers chelpers;
 
 void merkelizeMemory(); // function for DBG purposes
+void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
 
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
@@ -220,7 +222,19 @@ public:
         }
         TimerStopAndLog(CHELPERS_ALLOCATION);
 
-        constsCalculated.resize(starkInfo.nConstants, true);
+        if(starkInfo.pil2) {
+            constsCalculated.resize(starkInfo.nConstants, true);
+        }
+        
+        if(starkInfo.mapOffsets.section[eSection::cm1_2ns] < starkInfo.mapOffsets.section[eSection::tmpExp_n]) {
+            optimizeMemoryNTTCommitPols = true;
+        }
+
+        uint64_t currentSectionStart = starkInfo.mapOffsets.section[string2section("cm" + to_string(starkInfo.nStages) + "_n")] * sizeof(Goldilocks::Element);
+        uint64_t nttHelperSize = starkInfo.mapSectionsN.section[string2section("cm" + to_string(starkInfo.nStages) + "_n")] * NExtended * sizeof(Goldilocks::Element);
+        if(currentSectionStart > nttHelperSize) {
+            optimizeMemoryNTT = true;
+        }
     };
     ~Starks()
     {
@@ -264,7 +278,7 @@ public:
     };
 
     uint64_t getConstTreeSize()
-    {
+    {   
         uint n_tmp = 1 << starkInfo.starkStruct.nBitsExt;
         uint64_t nextN = floor(((double)(n_tmp - 1) / merkleTreeArity) + 1);
         uint64_t acc = nextN * merkleTreeArity;

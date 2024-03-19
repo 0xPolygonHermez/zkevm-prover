@@ -1,7 +1,7 @@
 #include "chelpers.hpp"
 
 void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
-
+    pil2_ = pil2;
     cHelpersBin->startReadSection(CHELPERS_HEADER_SECTION);
 
     uint32_t nOps = cHelpersBin->readU32LE();
@@ -56,9 +56,36 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
     }
     
     cHelpersBin->endReadSection();
+    
+    cHelpersBin->startReadSection(CHELPERS_BUFFERS_SECTION);
 
-    if(pil2) {
-        cHelpersBin->startReadSection(CHELPERS_EXPRESSIONS_PIL2_SECTION);
+    for(uint64_t j = 0; j < nOps; ++j) {
+        cHelpersArgs.ops[j] = cHelpersBin->readU8LE();
+    }
+    for(uint64_t j = 0; j < nArgs; ++j) {
+        cHelpersArgs.args[j] = cHelpersBin->readU16LE();
+    }
+    for(uint64_t j = 0; j < nNumbers; ++j) {
+        cHelpersArgs.numbers[j] = cHelpersBin->readU64LE();
+    }
+
+    cHelpersBin->endReadSection();
+
+     if(pil2) {
+        cHelpersBin->startReadSection(CHELPERS_EXPRESSIONS_SECTION);
+
+        uint32_t nOpsExpressions = cHelpersBin->readU32LE();
+        uint32_t nArgsExpressions = cHelpersBin->readU32LE();
+        uint32_t nNumbersExpressions = cHelpersBin->readU32LE();
+        uint32_t nConstPolsIdsExpressions = cHelpersBin->readU32LE();
+        uint32_t nCmPolsIdsExpressions = cHelpersBin->readU32LE();
+
+    
+        cHelpersArgsExpressions.ops = new uint8_t[nOpsExpressions];
+        cHelpersArgsExpressions.args = new uint16_t[nArgsExpressions];
+        cHelpersArgsExpressions.numbers = new uint64_t[nNumbersExpressions];
+        cHelpersArgsExpressions.constPolsIds = new uint16_t[nConstPolsIdsExpressions];
+        cHelpersArgsExpressions.cmPolsIds = new uint16_t[nCmPolsIdsExpressions];
 
         uint64_t nExpressions = cHelpersBin->readU32LE();
 
@@ -66,6 +93,7 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
             ParserParams parserParamsExpression;
 
             uint32_t expId = cHelpersBin->readU32LE();
+            
             parserParamsExpression.expId = expId;
             parserParamsExpression.stage = cHelpersBin->readU32LE();
 
@@ -90,29 +118,27 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
             expressionsInfo[expId] = parserParamsExpression;
         }
 
+        for(uint64_t j = 0; j < nOpsExpressions; ++j) {
+            cHelpersArgsExpressions.ops[j] = cHelpersBin->readU8LE();
+        }
+        for(uint64_t j = 0; j < nArgsExpressions; ++j) {
+            cHelpersArgsExpressions.args[j] = cHelpersBin->readU16LE();
+        }
+        for(uint64_t j = 0; j < nNumbersExpressions; ++j) {
+            cHelpersArgsExpressions.numbers[j] = cHelpersBin->readU64LE();
+        }
+
+        for(uint64_t j = 0; j < nConstPolsIdsExpressions; ++j) {
+            cHelpersArgsExpressions.constPolsIds[j] = cHelpersBin->readU16LE();
+        }
+
+        for(uint64_t j = 0; j < nCmPolsIdsExpressions; ++j) {
+            cHelpersArgsExpressions.cmPolsIds[j] = cHelpersBin->readU16LE();
+        }
+
         cHelpersBin->endReadSection();
-    }
 
-    if(pil2) {
-        cHelpersBin->startReadSection(CHELPERS_BUFFERS_PIL2_SECTION);
-    } else {
-        cHelpersBin->startReadSection(CHELPERS_BUFFERS_PIL1_SECTION);
-    }
-
-    for(uint64_t j = 0; j < nOps; ++j) {
-        cHelpersArgs.ops[j] = cHelpersBin->readU8LE();
-    }
-    for(uint64_t j = 0; j < nArgs; ++j) {
-        cHelpersArgs.args[j] = cHelpersBin->readU16LE();
-    }
-    for(uint64_t j = 0; j < nNumbers; ++j) {
-        cHelpersArgs.numbers[j] = cHelpersBin->readU64LE();
-    }
-
-    cHelpersBin->endReadSection();
-
-     if(pil2) {
-        cHelpersBin->startReadSection(CHELPERS_SYMBOLS_PIL2_SECTION);
+        cHelpersBin->startReadSection(CHELPERS_SYMBOLS_SECTION);
 
         uint32_t nConstPolsIds = cHelpersBin->readU32LE();
         uint32_t nCmPolsIds = cHelpersBin->readU32LE();
@@ -129,10 +155,8 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2) {
         }
 
         cHelpersBin->endReadSection();
-    }
 
-    if(pil2) {
-        cHelpersBin->startReadSection(CHELPERS_CONSTRAINTS_DEBUG_PIL2_SECTION);
+        cHelpersBin->startReadSection(CHELPERS_CONSTRAINTS_DEBUG_SECTION);
 
         uint32_t nOpsDebug = cHelpersBin->readU32LE();
         uint32_t nArgsDebug = cHelpersBin->readU32LE();

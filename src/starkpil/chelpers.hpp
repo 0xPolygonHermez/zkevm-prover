@@ -16,13 +16,10 @@
 
 const int CHELPERS_HEADER_SECTION = 2;
 const int CHELPERS_STAGES_SECTION = 3;
-
-const int CHELPERS_BUFFERS_PIL1_SECTION = 4;
-
-const int CHELPERS_EXPRESSIONS_PIL2_SECTION = 4;
-const int CHELPERS_BUFFERS_PIL2_SECTION = 5;
-const int CHELPERS_SYMBOLS_PIL2_SECTION = 6;
-const int CHELPERS_CONSTRAINTS_DEBUG_PIL2_SECTION = 7;
+const int CHELPERS_BUFFERS_SECTION = 4;
+const int CHELPERS_EXPRESSIONS_SECTION = 5;
+const int CHELPERS_SYMBOLS_SECTION = 6;
+const int CHELPERS_CONSTRAINTS_DEBUG_SECTION = 7;
 
 
 struct ParserParams
@@ -58,6 +55,7 @@ struct ParserArgs
 class CHelpers
 {
 public:
+    bool pil2_;
     std::map<string, ParserParams> stagesInfo;
     std::map<uint64_t, ParserParams> expressionsInfo;
 
@@ -67,19 +65,34 @@ public:
 
     ParserArgs cHelpersArgsDebug;
 
+    ParserArgs cHelpersArgsExpressions;
+
     ~CHelpers() {
         delete[] cHelpersArgs.ops;
         delete[] cHelpersArgs.args;
         delete[] cHelpersArgs.numbers;
-        delete[] cHelpersArgs.constPolsIds;
-        delete[] cHelpersArgs.cmPolsIds;
+        
 
-        delete[] cHelpersArgsDebug.ops;
-        delete[] cHelpersArgsDebug.args;
-        delete[] cHelpersArgsDebug.numbers;
-        delete[] cHelpersArgsDebug.constPolsIds;
-        delete[] cHelpersArgsDebug.cmPolsIds;
+        if(pil2_) {
+            delete[] cHelpersArgs.constPolsIds;
+            delete[] cHelpersArgs.cmPolsIds;
 
+            delete[] cHelpersArgsExpressions.ops;
+            delete[] cHelpersArgsExpressions.args;
+            delete[] cHelpersArgsExpressions.numbers;
+            delete[] cHelpersArgsExpressions.constPolsIds;
+            delete[] cHelpersArgsExpressions.cmPolsIds;
+
+            delete[] cHelpersArgsDebug.ops;
+            delete[] cHelpersArgsDebug.args;
+            delete[] cHelpersArgsDebug.numbers;
+            delete[] cHelpersArgsDebug.constPolsIds;
+            delete[] cHelpersArgsDebug.cmPolsIds;
+
+            constraintsInfoDebug.clear();
+            expressionsInfo.clear();
+        }
+        
         stagesInfo.clear();
     };
 

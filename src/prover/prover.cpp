@@ -93,17 +93,37 @@ Prover::Prover(Goldilocks &fr,
             // and create them using the allocated address
 
             polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element);
+            if( _starkInfo.mapOffsets.section[eSection::cm1_2ns] < _starkInfo.mapOffsets.section[eSection::tmpExp_n]) optimizeMemoryNTTCommitPols = true;
             for(uint64_t i = 1; i <= _starkInfo.nStages; ++i) {
                 std::string currentSection = "cm" + to_string(i) + "_n";
-                std::string nextSectionExtended = "cm" + to_string(i + 1) + "_2ns";
+                std::string nextSectionExtended = i == 1 && optimizeMemoryNTTCommitPols ? "tmpExp_n" : "cm" + to_string(i + 1) + "_2ns";
                 uint64_t nttHelperSize = _starkInfo.mapSectionsN.section[string2section(currentSection)] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
                 uint64_t currentSectionStart = _starkInfo.mapOffsets.section[string2section(currentSection)] * sizeof(Goldilocks::Element);
                 if (i == _starkInfo.nStages && currentSectionStart > nttHelperSize) optimizeMemoryNTT = true;
-                uint64_t nttHelperBufferStart = optimizeMemoryNTT ? 0 : _starkInfo.mapOffsets.section[string2section(nextSectionExtended)] * sizeof(Goldilocks::Element);
+                uint64_t nttHelperBufferStart = optimizeMemoryNTT && i == _starkInfo.nStages 
+                    ? _starkInfo.mapOffsets.section[eSection::cm1_n] 
+                    : _starkInfo.mapOffsets.section[string2section(nextSectionExtended)] * sizeof(Goldilocks::Element);
                 uint64_t totalMemSize = nttHelperBufferStart + nttHelperSize;
                 if(totalMemSize > polsSize) {
                     polsSize = totalMemSize;
                 }
+            }
+
+            // Check that we have enough memory for stage2 H1H2 helpers (if not add memory)
+            uint64_t stage2Start = _starkInfo.mapOffsets.section[cm2_2ns] * sizeof(Goldilocks::Element);
+            uint64_t buffTransposedH1H2Size = 4 * _starkInfo.puCtx.size() * ((1 << _starkInfo.starkStruct.nBits) * FIELD_EXTENSION + 8);
+            uint64_t buffHelperH1H2Size = (1 << _starkInfo.starkStruct.nBits) * _starkInfo.puCtx.size();
+            uint64_t buffStage2HelperSize = (buffTransposedH1H2Size + buffHelperH1H2Size)*sizeof(Goldilocks::Element);
+            if(stage2Start + buffStage2HelperSize > polsSize) {
+                polsSize = stage2Start + buffStage2HelperSize;
+            }
+            
+            // Check that we have enough memory for stage3 (Z) helpers (if not add memory)
+            uint64_t stage3Start = _starkInfo.mapOffsets.section[cm3_2ns] * sizeof(Goldilocks::Element);
+            uint64_t tot_pols = 3 * (_starkInfo.puCtx.size() + _starkInfo.peCtx.size() + _starkInfo.ciCtx.size());
+            uint64_t buffStage3HelperSize = (tot_pols*((1 << _starkInfo.starkStruct.nBits) * FIELD_EXTENSION + 8)) * sizeof(Goldilocks::Element);
+            if(stage3Start + buffStage3HelperSize > polsSize) {
+                polsSize = stage3Start + buffStage3HelperSize;
             }
 
             zkassert(_starkInfo.mapSectionsN.section[eSection::cm1_2ns] * sizeof(Goldilocks::Element) <= polsSize - _starkInfo.mapSectionsN.section[eSection::cm2_2ns] * sizeof(Goldilocks::Element));
@@ -132,7 +152,7 @@ Prover::Prover(Goldilocks &fr,
                     }
                 }
 
-                zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
+            zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
 #ifndef __LIB__
@@ -1024,23 +1044,23 @@ void Prover::execute(ProverRequest *pProverRequest)
 
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
-    uint64_t polsSize = PROVER_FORK_NAMESPACE::CommitPols::pilSize();
+    uint64_t commitPolsSize = PROVER_FORK_NAMESPACE::CommitPols::pilSize();
     void *pExecuteAddress = NULL;
 
     if (config.zkevmCmPols.size() > 0)
     {
-        pExecuteAddress = mapFile(config.zkevmCmPols, polsSize, true);
-        zklog.info("Prover::execute() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
+        pExecuteAddress = mapFile(config.zkevmCmPols, commitPolsSize, true);
+        zklog.info("Prover::execute() successfully mapped " + to_string(commitPolsSize) + " bytes to file " + config.zkevmCmPols);
     }
     else
     {
-        pExecuteAddress = calloc(polsSize, 1);
+        pExecuteAddress = calloc(commitPolsSize, 1);
         if (pExecuteAddress == NULL)
         {
-            zklog.error("Prover::execute() failed calling malloc() of size " + to_string(polsSize));
+            zklog.error("Prover::execute() failed calling malloc() of size " + to_string(commitPolsSize));
             exitProcess();
         }
-        zklog.info("Prover::execute() successfully allocated " + to_string(polsSize) + " bytes");
+        zklog.info("Prover::execute() successfully allocated " + to_string(commitPolsSize) + " bytes");
     }
 
     /************/
@@ -1091,7 +1111,7 @@ void Prover::execute(ProverRequest *pProverRequest)
     // Unmap committed polynomials address
     if (config.zkevmCmPols.size() > 0)
     {
-        unmapFile(pExecuteAddress, polsSize);
+        unmapFile(pExecuteAddress, commitPolsSize);
     }
     else
     {
