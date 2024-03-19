@@ -429,12 +429,12 @@ void* Sha256Thread (void* arg)
 // Full version: all polynomials are evaluated, in all evaluations
 void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols, void** pSMRequests, void* pSMRequestsOut)
 {
+    // This instance will store all data required to execute the rest of State Machines
+    PROVER_FORK_NAMESPACE::MainExecRequired*  required = new PROVER_FORK_NAMESPACE::MainExecRequired();
+    if(pSMRequests != NULL) *pSMRequests = (void*)required; 
+
     if (!config.executeInParallel)
     {
-        // This instance will store all data required to execute the rest of State Machines
-        PROVER_FORK_NAMESPACE::MainExecRequired*  required = new PROVER_FORK_NAMESPACE::MainExecRequired();
-        *pSMRequests = (void*)required; 
-
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (proverRequest.input.publicInputsExtended.publicInputs.forkID == PROVER_FORK_ID)
@@ -574,12 +574,10 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
     }
     else
     {
-        // This instance will store all data required to execute the rest of State Machines
-        PROVER_FORK_NAMESPACE::MainExecRequired required;
         ExecutorContext executorContext;
         executorContext.pExecutor = this;
         executorContext.pCommitPols = &commitPols;
-        executorContext.pRequired = &required;
+        executorContext.pRequired = &(*required);
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
@@ -591,7 +589,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         else
 #endif
         {
-            mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_7.execute(proverRequest, commitPols.Main, *required);
         }
 
         // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -667,9 +665,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_join(climbKeyThread, NULL);
 
     }
-    #ifndef __ZKEVM_SM__
-        if((*pSMRequests)!=NULL){
-            delete (PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests;
-        }
+    #ifndef __ZKEVM_SM__   
+        delete required;  
     #endif
 }
