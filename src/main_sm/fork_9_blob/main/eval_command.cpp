@@ -7,6 +7,7 @@
 #include "zkassert.hpp"
 #include "zklog.hpp"
 #include "zkglobals.hpp"
+#include "BLS12_381_utils.hpp"
 
 namespace fork_9_blob
 {
@@ -95,6 +96,8 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_dump:                            return eval_dump(ctx, cmd, cr);
             case f_check4096Root:                   return eval_check4096Root(ctx, cmd, cr);
             case f_get4096RootIndex:                return eval_get4096RootIndex(ctx, cmd, cr);
+            case f_getLastL1InfoTreeRoot:           return eval_getLastL1InfoTreeRoot(ctx, cmd, cr);
+            case f_getLastL1InfoTreeIndex:          return eval_getLastL1InfoTreeIndex(ctx, cmd, cr);
 
             default:
                 zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
@@ -4113,25 +4116,222 @@ void eval_getBlobLen (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.fea7 = fr.zero();
 }
 
+// Computes the inverse of the given element of the BLS12-381 scalar field
 void eval_frBLS12_381inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    zklog.error("eval_frBLS12_381inv() not implemented");
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_frBLS12_381inv() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get scalar to invert by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_frBLS12_381inv() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    mpz_class aScalar = cr.scalar;
+
+    // Call BLS12-381 inverse function
+    RawBLS12_381::Element a, r;
+    bls12_381.fromMpz(a, aScalar.get_mpz_t());    
+    bls12_381.inv(r, a);
+    mpz_class rScalar;
+    bls12_381.toMpz(rScalar.get_mpz_t(), r);
+
+    // Return result
+    cr.type = crt_fea;
+    scalar2fea(fr, rScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_dump (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    zklog.error("eval_dump() not implemented");
+    //zklog.error("eval_dump() not implemented");
 }
 
+// Checks if the given element of the BLS12-381 scalar field is a 4096-th root of unity
 void eval_check4096Root (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    zklog.error("eval_check4096Root() not implemented");
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_check4096Root() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get rid by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_check4096Root() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    mpz_class z = cr.scalar;
+    for (uint64_t i = 0; i < 4096; i++)
+    {
+        if (z == BLS12_381_4096thRootsOfUnity[i])
+        {
+            ctx.BLS512_381root.z = z;
+            ctx.BLS512_381root.index = i;
+
+            cr.type = crt_fea;
+            cr.fea0 = fr.one();
+            cr.fea1 = fr.zero();
+            cr.fea2 = fr.zero();
+            cr.fea3 = fr.zero();
+            cr.fea4 = fr.zero();
+            cr.fea5 = fr.zero();
+            cr.fea6 = fr.zero();
+            cr.fea7 = fr.zero();
+
+            return;
+        }
+    }
+
+    cr.type = crt_fea;
+    cr.fea0 = fr.zero();
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
 }
 
+// Returns the index of the given element of the BLS12-381 scalar field if it is a 4096-th root of unity
 void eval_get4096RootIndex (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    zklog.error("eval_get4096RootIndex() not implemented");
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_get4096RootIndex() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get rid by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_get4096RootIndex() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    mpz_class z = cr.scalar;
+
+    if (ctx.BLS512_381root.z == z)
+    {
+
+            cr.type = crt_fea;
+            cr.fea0 = fr.fromU64(ctx.BLS512_381root.index);
+            cr.fea1 = fr.zero();
+            cr.fea2 = fr.zero();
+            cr.fea3 = fr.zero();
+            cr.fea4 = fr.zero();
+            cr.fea5 = fr.zero();
+            cr.fea6 = fr.zero();
+            cr.fea7 = fr.zero();
+
+            return;
+    }
+
+    for (uint64_t i = 0; i < 4096; i++)
+    {
+        if (z == BLS12_381_4096thRootsOfUnity[i])
+        {
+            ctx.BLS512_381root.z = z;
+            ctx.BLS512_381root.index = i;
+
+            cr.type = crt_fea;
+            cr.fea0 = fr.one();
+            cr.fea1 = fr.zero();
+            cr.fea2 = fr.zero();
+            cr.fea3 = fr.zero();
+            cr.fea4 = fr.zero();
+            cr.fea5 = fr.zero();
+            cr.fea6 = fr.zero();
+            cr.fea7 = fr.zero();
+
+            return;
+        }
+    }
+
+    zklog.error("eval_get4096RootIndex() root not found z=" + z.get_str(16));
+    cr.zkResult = ZKR_SM_MAIN_ASSERT;
+
+    cr.type = crt_fea;
+    cr.fea0 = fr.zero();
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
 }
 
+void eval_getLastL1InfoTreeRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getLastL1InfoTreeRoot() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    mpz_class lastL1InfoTreeIndex = ctx.proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex;
+    scalar2fea(fr, lastL1InfoTreeIndex, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_getLastL1InfoTreeIndex (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getLastL1InfoTreeIndex() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    cr.fea0 = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex);
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
+}
 
 } // namespace

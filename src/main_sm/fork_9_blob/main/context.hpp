@@ -158,6 +158,14 @@ public:
     Saved() : restored(false) {};
 };
 
+class BLS12_381Root
+{
+public:
+    mpz_class z;
+    uint64_t index;
+    BLS12_381Root() : index(0) {};
+};
+
 class Context
 {
 public:
@@ -189,6 +197,7 @@ public:
     // Fork 9 attributes
     map<uint64_t, Saved> saved;
     mpz_class blobL2HashData;
+    BLS12_381Root BLS512_381root;
 
     Context( Goldilocks &fr,
              const Config &config,

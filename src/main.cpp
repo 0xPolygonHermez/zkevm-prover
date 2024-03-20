@@ -49,6 +49,7 @@
 #include "page_manager_test.hpp"
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
+#include "BLS12_381_utils.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -360,11 +361,15 @@ int main(int argc, char **argv)
     PoseidonGoldilocks poseidon;
 
 #ifdef DEBUG
-    zklog.info("BN128 p-1 =" + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
-    zklog.info("FQ    p-1 =" + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));
-    zklog.info("FEC   p-1 =" + fec.toString(fec.negOne(),16) + " = " + fec.toString(fec.negOne(),10));
-    zklog.info("FNEC  p-1 =" + fnec.toString(fnec.negOne(),16) + " = " + fnec.toString(fnec.negOne(),10));
+    zklog.info("BN128      p-1 =" + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
+    zklog.info("FQ         p-1 =" + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));
+    zklog.info("FEC        p-1 =" + fec.toString(fec.negOne(),16) + " = " + fec.toString(fec.negOne(),10));
+    zklog.info("FNEC       p-1 =" + fnec.toString(fnec.negOne(),16) + " = " + fnec.toString(fnec.negOne(),10));
+    zklog.info("BLS12-381  p-1 =" + bls12_381.toString(bls12_381.negOne(),16) + " = " + bls12_381.toString(bls12_381.negOne(),10));
 #endif
+
+    // Init BLS12-381 4096th roots of unity
+    BLS12_381_4096thRootsOfUnity_init();
 
     // Generate account zero keys
     fork_8::Account::GenerateZeroKey(fr, poseidon);

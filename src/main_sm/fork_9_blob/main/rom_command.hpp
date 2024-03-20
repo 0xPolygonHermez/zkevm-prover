@@ -87,6 +87,8 @@ typedef enum : int {
     f_dump,
     f_check4096Root,
     f_get4096RootIndex,
+    f_getLastL1InfoTreeRoot,
+    f_getLastL1InfoTreeIndex,
 } tFunction;
 
 // ROM command (op)

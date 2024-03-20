@@ -113,6 +113,8 @@ tFunction string2Function(string s)
     else if (s == "dump")                           return f_dump;
     else if (s == "check4096Root")                  return f_check4096Root;
     else if (s == "get4096RootIndex")               return f_get4096RootIndex;
+    else if (s == "getLastL1InfoTreeRoot")          return f_getLastL1InfoTreeRoot;
+    else if (s == "getLastL1InfoTreeIndex")         return f_getLastL1InfoTreeIndex;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -197,6 +199,8 @@ string function2String(tFunction f)
         case f_dump:                            return "dump";
         case f_check4096Root:                   return "check4096Root";
         case f_get4096RootIndex:                return "get4096RootIndex";
+        case f_getLastL1InfoTreeRoot:           return "getLastL1InfoTreeRoot";
+        case f_getLastL1InfoTreeIndex:          return "getLastL1InfoTreeIndex";
         case f_empty:                           return "";
         default:                                return "unknown";
     }
