@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <stdint.h>
 
 std::string GetPolsIdentityConstant(uint64_t parity);
 

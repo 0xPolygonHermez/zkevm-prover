@@ -10,6 +10,9 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
+#include "hashdb64_workflow_test.hpp"
+#include "hashdb64_simple_workflow_test.hpp"
+#include "hashdb_program_test.hpp"
 
 uint64_t HashDBTest (const Config& config)
 {
@@ -22,7 +25,10 @@ uint64_t HashDBTest (const Config& config)
     //runHashDBPerfTest(config);
     //runHashDBBigTree(config);
     
-    numberOfFailedTests += HashDBTestMultiWrite(config);
+    //numberOfFailedTests += HashDBTestMultiWrite(config);
+    //numberOfFailedTests += HashDBProgramTest(config);
+    numberOfFailedTests += HashDB64WorkflowTest(config);
+    //numberOfFailedTests += HashDB64SimpleWorkflowTest(config);
     return numberOfFailedTests;
 }
 

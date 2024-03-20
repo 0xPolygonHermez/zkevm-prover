@@ -13,6 +13,7 @@ uint64_t HashDBTestMultiWrite (const Config& config)
     uint64_t numberOfFailedTests = 0;
 
     string uuid = getUUID();
+    uint64_t block = 0;
     uint64_t tx = 0;
     Goldilocks fr;
     PoseidonGoldilocks poseidon;
@@ -77,7 +78,7 @@ uint64_t HashDBTestMultiWrite (const Config& config)
 
             // Set the value
             //zklog.info("HashDBTestMultiWrite() tree=" + to_string(tree) + " i=" + to_string(i) + " calling pHashDB->set with root=" + fea2string(fr, root) + " key=" + fea2string(fr,key));
-            zkresult zkr = pHashDB->set(uuid, tx, root, key, value, PERSISTENCE_DATABASE, root, NULL, NULL );
+            zkresult zkr = pHashDB->set(uuid, block, tx, root, key, value, PERSISTENCE_DATABASE, root, NULL, NULL );
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("HashDBTestMultiWrite() set tree=" + to_string(tree) + " i=" + to_string(i) + " result=" + zkresult2string(zkr));

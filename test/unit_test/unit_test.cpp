@@ -6,36 +6,43 @@
 #include "mem_align_test.hpp"
 #include "binary_test.hpp"
 #include "storage_test.hpp"
+#include "climb_key_test.hpp"
 #include "keccak_executor_test.hpp"
 #include "get_string_increment_test.hpp"
 #include "database_cache_test.hpp"
 #include "hashdb_test.hpp"
+#include "key_utils_unit_tests.hpp"
+
 
 uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config)
 {
     TimerStart(UNIT_TEST);
 
     uint64_t numberOfErrors = 0;
-    
+
     TimerStart(UNIT_TEST_BLAKE2B256);
     numberOfErrors += Blake2b256_Test(fr, config);
     TimerStopAndLog(UNIT_TEST_BLAKE2B256);
-    
+
     TimerStart(UNIT_TEST_SHA256);
     numberOfErrors += SHA256Test(fr, config);
     TimerStopAndLog(UNIT_TEST_SHA256);
-    
+
     //TimerStart(UNIT_TEST_MEMALIGN);
     //numberOfErrors += MemAlignSMTest(fr, config);
     //TimerStopAndLog(UNIT_TEST_MEMALIGN);
-    
+
     TimerStart(UNIT_TEST_BINARY);
     numberOfErrors += BinarySMTest(fr, config);
     TimerStopAndLog(UNIT_TEST_BINARY);
-    
+
     //TimerStart(UNIT_TEST_STORAGESM);
     //numberOfErrors += StorageSMTest(fr, poseidon, config);
     //TimerStopAndLog(UNIT_TEST_STORAGESM);
+
+    //TimerStart(UNIT_TEST_CLIMBKEYSM);
+    //numberOfErrors += ClimbKeySMTest(fr, config);
+    //TimerStopAndLog(UNIT_TEST_CLIMBKEYSM);
 
     //TimerStart(UNIT_TEST_KECCAKSM);
     //numberOfErrors += KeccakSMExecutorTest(fr, config);
@@ -52,9 +59,13 @@ uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &c
     TimerStart(UNIT_TEST_HASH_DB);
     numberOfErrors += HashDBTest(config);
     TimerStopAndLog(UNIT_TEST_HASH_DB);
-    
+
+    TimerStart(SPLITKEY9_UNIT_TEST);
+    splitKey9Test();
+    TimerStopAndLog(SPLITKEY9_UNIT_TEST);
+
     TimerStopAndLog(UNIT_TEST);
-    
+
     if (numberOfErrors == 0)
     {
         zklog.info("UnitTest() successfully completed without errors");
@@ -65,6 +76,6 @@ uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &c
         sleep(1);
         exit(-1);
     }
-    
+
     return numberOfErrors;
 }

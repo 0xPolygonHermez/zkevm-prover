@@ -2,6 +2,7 @@ TARGET_ZKP := zkProver
 TARGET_BCT := bctree
 TARGET_MNG += mainGenerator
 TARGET_PLG += polsGenerator
+TARGET_PLD += polsDiff
 TARGET_TEST := zkProverTest
 
 BUILD_DIR := ./build
@@ -15,8 +16,8 @@ endif
 
 CXX := g++
 AS := nasm
-CXXFLAGS := -std=c++17 $(GRPCPP_FLAGS)
-LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -rdynamic $(GRPCPP_LIBS)
+CXXFLAGS := -std=c++17 $(GRPCPP_FLAGS) #-Wfatal-errors
+LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -liomp5 $(GRPCPP_LIBS)
 CFLAGS := -fopenmp -Wall -pthread -Wno-unused-label -fopenmp -mavx2
 ASFLAGS := -felf64
 
@@ -45,9 +46,6 @@ endif
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 PROTOC = protoc
-GRPC_CPP_PLUGIN = grpc_cpp_plugin
-GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
-
 PROTOS_PATH = ./src/grpc
 
 PROTO_SRCS := $(shell find $(PROTOS_PATH) -name *.proto)
@@ -55,18 +53,21 @@ PROTO_CC   := $(PROTO_SRCS:%.proto=$(BUILD_DIR)/gen/%.pb.cc) $(PROTO_SRCS:%.prot
 PROTO_H    := $(PROTO_SRCS:%.proto=$(BUILD_DIR)/gen/%.pb.h) $(PROTO_SRCS:%.proto=$(BUILD_DIR)/gen/%.grpc.pb.h)
 PROTO_OBJS := $(PROTO_CC:%=$(BUILD_DIR)/%.o)
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d) $(sort $(dir $(PROTO_H)))
+GRPC_CPP_PLUGIN = grpc_cpp_plugin
+GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d) $(sort $(dir))
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
-OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o) $(PROTO_OBJS)
+SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./test/examples/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
-SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_BCT := ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree/main.cpp ./src/goldilocks/src/goldilocks_base_field.cpp ./src/ffiasm/fr.cpp ./src/ffiasm/fr.asm ./src/starkpil/merkleTree/merkleTreeBN128.cpp ./src/poseidon_opt/poseidon_opt.cpp ./src/goldilocks/src/poseidon_goldilocks.cpp
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o) $(PROTO_OBJS)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
-SRCS_TEST := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_TEST := $(shell find ./test/examples/ ./src/XKCP ./src/goldilocks/src ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/merkleTreeGL.* ./src/starkpil/transcript/transcript.* ./src/starkpil/fri ./src/ffiasm ./src/utils ! -path "./src/starkpil/fri/friProveC12.*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o) $(PROTO_OBJS)
 DEPS_TEST := $(OBJS_TEST:.o=.d)
 
@@ -116,16 +117,29 @@ $(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/main_generator/main_generator.cpp -o $@ -lgmp
 
+generate: main_generator
+	$(BUILD_DIR)/$(TARGET_MNG) all
+
 pols_generator: $(BUILD_DIR)/$(TARGET_PLG)
 
 $(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/pols_generator/pols_generator.cpp -o $@ -lgmp
 
+pols: pols_generator
+	$(BUILD_DIR)/$(TARGET_PLG)
+
+pols_diff: $(BUILD_DIR)/$(TARGET_PLD)
+
+$(BUILD_DIR)/$(TARGET_PLD): ./src/pols_diff/pols_diff.cpp
+	$(MKDIR_P) $(BUILD_DIR)
+	g++ -g ./src/pols_diff/pols_diff.cpp $(CXXFLAGS) $(INC_FLAGS) -o $@ $(LDFLAGS) 
+
 .PHONY: clean
 
 clean:
 	$(RM) -r $(BUILD_DIR)
+	find . -name main_exec_generated*pp -delete
 
 -include $(DEPS_ZKP)
 -include $(DEPS_BCT)

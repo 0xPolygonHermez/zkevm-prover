@@ -3,8 +3,11 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 #include <gmp.h>
 #include <gmpxx.h>
+
+using namespace std;
 
 namespace rlp {
 
@@ -140,6 +143,15 @@ inline bool encodeHexData(string &data, const string &hex)
     encodeLen(data, len);
     return encodeHexValue(data, hex);
 }
+
+// As per https://ethereum.org/developers/docs/data-structures-and-encoding/rlp
+// Where BA = batch array, equivalent to a binary string
+bool decodeLength (const string &input, uint64_t &p, uint64_t &length, bool &list);
+bool decodeBa     (const string &input, uint64_t &p, string &output, bool &list);
+bool decodeList   (const string &input, std::vector<string> &output);
+bool encodeLength (uint64_t length, bool list, string &output);
+bool encodeBa     (const string &input, string &output);
+bool encodeList   (const std::vector<string> &input, string &output);
 
 }
 #endif

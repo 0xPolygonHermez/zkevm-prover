@@ -3,7 +3,6 @@
 
 #include "stark_info.hpp"
 #include "transcriptBN128.hpp"
-#include "zhInv.hpp"
 #include "merklehash_goldilocks.hpp"
 #include "polinomial.hpp"
 #include "ntt_goldilocks.hpp"
@@ -18,8 +17,8 @@
 #include "constant_pols_starks.hpp"
 #include "commit_pols_starks.hpp"
 #include "steps.hpp"
+#include "chelpers.hpp"
 
-#define BN128_ARITY 16
 #define STARK_RECURSIVE_F_NUM_TREES 5
 
 class StarkRecursiveF
@@ -35,15 +34,17 @@ private:
     ConstantPolsStarks *pConstPols;
     ConstantPolsStarks *pConstPols2ns;
     void *pConstTreeAddress;
-    ZhInv zi;
     uint64_t N;
     uint64_t NExtended;
     NTT_Goldilocks ntt;
     NTT_Goldilocks nttExtended;
     Polinomial x_n;
     Polinomial x_2ns;
+    Polinomial zi;
     uint64_t constPolsSize;
     uint64_t constPolsDegree;
+
+    Polinomial x;
 
     Goldilocks::Element *mem;
 
@@ -59,6 +60,9 @@ private:
 
     Goldilocks::Element *pBuffer;
 
+    std::unique_ptr<BinFileUtils::BinFile> cHelpersBinFile;
+    CHelpers chelpers;
+    
     void *pAddress;
 
 public:
@@ -68,16 +72,16 @@ public:
     uint64_t getConstTreeSize(uint64_t n, uint64_t pol)
     {
         uint n_tmp = n;
-        uint64_t nextN = floor(((double)(n_tmp - 1) / BN128_ARITY) + 1);
-        uint64_t acc = nextN * BN128_ARITY;
+        uint64_t nextN = floor(((double)(n_tmp - 1) / MT_BN128_ARITY) + 1);
+        uint64_t acc = nextN * MT_BN128_ARITY;
         while (n_tmp > 1)
         {
             // FIll with zeros if n nodes in the leve is not even
             n_tmp = nextN;
-            nextN = floor((n_tmp - 1) / BN128_ARITY) + 1;
+            nextN = floor((n_tmp - 1) / MT_BN128_ARITY) + 1;
             if (n_tmp > 1)
             {
-                acc += nextN * 16;
+                acc += nextN * MT_BN128_ARITY;
             }
             else
             {
@@ -93,16 +97,16 @@ public:
     uint64_t getTreeSize(uint64_t n, uint64_t pol)
     {
         uint n_tmp = n;
-        uint64_t nextN = floor(((double)(n_tmp - 1) / BN128_ARITY) + 1);
-        uint64_t acc = nextN * BN128_ARITY;
+        uint64_t nextN = floor(((double)(n_tmp - 1) / MT_BN128_ARITY) + 1);
+        uint64_t acc = nextN * MT_BN128_ARITY;
         while (n_tmp > 1)
         {
             // FIll with zeros if n nodes in the leve is not even
             n_tmp = nextN;
-            nextN = floor((n_tmp - 1) / BN128_ARITY) + 1;
+            nextN = floor((n_tmp - 1) / MT_BN128_ARITY) + 1;
             if (n_tmp > 1)
             {
-                acc += nextN * 16;
+                acc += nextN * MT_BN128_ARITY;
             }
             else
             {

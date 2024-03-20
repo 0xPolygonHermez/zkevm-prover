@@ -28,13 +28,13 @@ public:
 
     // Mono-thread
     void runThread (void);
-    void waitForThread (void);
+    int64_t waitForThread (void);
 
     // Multi-thread
     void runThreads (void);
-    void waitForThreads (void);
+    int64_t waitForThreads (void);
 
-    bool ProcessBatch (void);
+    bool ProcessBatch (const string &inputFile);
 };
 
 void* executorClientThread  (void* arg); // One process batch

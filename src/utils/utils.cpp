@@ -176,6 +176,15 @@ string getTimestamp(void)
     return buf;
 }
 
+string getTimestampWithPeriod(void)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    char buf[256];
+    snprintf(buf, sizeof(buf), "%ld.%06ld", tv.tv_sec, tv.tv_usec);
+    return buf;
+}
+
 void getTimestampWithSlashes(string &timestamp, string &folder, string &file)
 {
     struct timeval tv;
@@ -214,6 +223,8 @@ void json2file(const json &j, const string &fileName)
 
 void file2json(const string &fileName, json &j)
 {
+    j.clear();
+    zklog.info("file2json() loading JSON file " + fileName);
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
@@ -234,10 +245,12 @@ void file2json(const string &fileName, json &j)
 
 void file2json(const string &fileName, ordered_json &j)
 {
+    j.clear();
+    zklog.info("file2json() (ordered) loading JSON file " + fileName);
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
-        zklog.error("file2json() failed loading input JSON file " + fileName);
+        zklog.error("file2json() failed loading input JSON file " + fileName + "; does this file exist?");
         exitProcess();
     }
     try
@@ -257,6 +270,33 @@ bool fileExists (const string &fileName)
     struct stat fileStat;
     int iResult = stat( fileName.c_str(), &fileStat);
     return (iResult == 0);
+}
+
+uint64_t fileSize (const string &fileName)
+{
+    struct stat fileStat;
+    int iResult = stat( fileName.c_str(), &fileStat);
+    if (iResult != 0)
+    {
+        zklog.error("fileSize() could not find file " + fileName);
+        exitProcess();
+    }
+    return fileStat.st_size;
+}
+
+bool fileIsDirectory (const string &fileName)
+{
+    struct stat fileStat;
+    int iResult = stat( fileName.c_str(), &fileStat);
+    if (iResult != 0)
+    {
+        return false;
+    }
+    if ((fileStat.st_mode & S_IFMT) == S_IFDIR)
+    {
+        return true;
+    }
+    return false;
 }
 
 void ensureDirectoryExists (const string &fileName)
@@ -635,3 +675,40 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
 }
 
 string emptyString;
+
+void poseidonLinearHash (const vector<uint8_t> &_data, Goldilocks::Element (&result)[4])
+{
+    // Get a local copy of the bytes vector
+    vector<uint8_t> data = _data;
+
+    // Add padding = 0b1000...00001  up to a length of 56xN (7x8xN)
+    data.push_back(0x01);
+    while((data.size() % 56) != 0) data.push_back(0);
+    data[data.size()-1] |= 0x80;
+
+    // Create a FE buffer to store the transformed bytes into fe
+    uint64_t bufferSize = data.size()/7;
+    Goldilocks::Element * pBuffer = new Goldilocks::Element[bufferSize];
+    if (pBuffer == NULL)
+    {
+        zklog.error("poseidonLinearHash() failed allocating memory of " + to_string(bufferSize) + " field elements");
+        exitProcess();
+    }
+
+    // Init to zero
+    for (uint64_t j=0; j<bufferSize; j++) pBuffer[j] = fr.zero();
+
+    // Copy the bytes into the fe lower 7 sections
+    for (uint64_t j=0; j<data.size(); j++)
+    {
+        uint64_t fePos = j/7;
+        uint64_t shifted = uint64_t(data[j]) << ((j%7)*8);
+        pBuffer[fePos] = fr.add(pBuffer[fePos], fr.fromU64(shifted));
+    }
+
+    // Call poseidon linear hash
+    poseidon.linear_hash(result, pBuffer, bufferSize);
+
+    // Free allocated memory
+    delete[] pBuffer;
+}

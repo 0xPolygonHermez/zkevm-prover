@@ -6,6 +6,10 @@
 #include "main_sm/fork_3/main/full_tracer.hpp"
 #include "main_sm/fork_4/main/full_tracer.hpp"
 #include "main_sm/fork_5/main/full_tracer.hpp"
+#include "main_sm/fork_6/main/full_tracer.hpp"
+#include "main_sm/fork_7/main/full_tracer.hpp"
+#include "main_sm/fork_8/main/full_tracer.hpp"
+#include "main_sm/fork_9/main/full_tracer.hpp"
 #include "zklog.hpp"
 
 ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type) :
@@ -123,6 +127,50 @@ void ProverRequest::CreateFullTracer(void)
             result = ZKR_SUCCESS;
             return;
         }
+        case 6: // fork_6
+        {
+            pFullTracer = new fork_6::FullTracer(fr);
+            if (pFullTracer == NULL)
+            {
+                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_6::FullTracer()");
+                exitProcess();
+            }
+            result = ZKR_SUCCESS;
+            return;
+        }
+        case 7: // fork_7
+        {
+            pFullTracer = new fork_7::FullTracer(fr);
+            if (pFullTracer == NULL)
+            {
+                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_7::FullTracer()");
+                exitProcess();
+            }
+            result = ZKR_SUCCESS;
+            return;
+        }
+        case 8: // fork_8
+        {
+            pFullTracer = new fork_8::FullTracer(fr);
+            if (pFullTracer == NULL)
+            {
+                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_8::FullTracer()");
+                exitProcess();
+            }
+            result = ZKR_SUCCESS;
+            return;
+        }
+        case 9: // fork_9
+        {
+            pFullTracer = new fork_9::FullTracer(fr);
+            if (pFullTracer == NULL)
+            {
+                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_9::FullTracer()");
+                exitProcess();
+            }
+            result = ZKR_SUCCESS;
+            return;
+        }
         default:
         {
             zklog.error("ProverRequest::CreateFullTracer() failed calling invalid fork ID=" + to_string(input.publicInputsExtended.publicInputs.forkID));
@@ -166,6 +214,30 @@ void ProverRequest::DestroyFullTracer(void)
             break;
         }
         case 5: // fork_5
+        {
+            delete pFullTracer;
+            pFullTracer = NULL; 
+            break;
+        }
+        case 6: // fork_6
+        {
+            delete pFullTracer;
+            pFullTracer = NULL; 
+            break;
+        }
+        case 7: // fork_7
+        {
+            delete pFullTracer;
+            pFullTracer = NULL; 
+            break;
+        }
+        case 8: // fork_8
+        {
+            delete pFullTracer;
+            pFullTracer = NULL; 
+            break;
+        }
+        case 9: // fork_9
         {
             delete pFullTracer;
             pFullTracer = NULL; 

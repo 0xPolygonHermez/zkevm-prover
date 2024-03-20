@@ -1,10 +1,11 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
-#define PROVER_FORK_ID 5
-#define PROVER_FORK_NAMESPACE fork_5
-#define PROVER_FORK_NAMESPACE_STRING "fork_5"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_5
+#define PROVER_FORK_ID 9
+#define PROVER_FORK_NAMESPACE fork_9
+#define PROVER_FORK_NAMESPACE_STRING "fork_9"
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_9
+#define PROVER_BLOB_FORK_NAMESPACE fork_9_blob
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
@@ -27,8 +28,8 @@
 //#define LOG_TIME_STATISTICS // If defined, generates main executor statistics for main operations
 //#define LOG_TIME_STATISTICS_STATEDB_REMOTE // If defined, generates remote statedb statistics
 //#define LOG_TIME_STATISTICS_STATEDB // If defined, generates statedb statistics
-#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
-#define LOG_TIME_STATISTICS_STATE_MANAGER
+//#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
+//#define LOG_TIME_STATISTICS_STATE_MANAGER
 //#define TIME_METRIC_TABLE
 //#define LOG_TXS
 //#define LOG_SERVICE
@@ -71,5 +72,11 @@
 //#define HASHDB_LOCK // If defined, the HashDB class will use a lock in all its methods, i.e. they will be serialized
 //#define DATABASE_COMMIT // If defined, the Database class can be configured to autocommit, or explicitly commit(); used for testing only
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
+#define USE_NEW_KVTREE
+
+//#define MAIN_SM_EXECUTOR_GENERATED_CODE
+
+//#define MULTI_ROM_TEST
+
 
 #endif

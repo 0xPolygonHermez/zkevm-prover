@@ -26,41 +26,38 @@ void Rom::load(Goldilocks &fr, json &romJson)
     loadLabels(fr, romJson["labels"]);
 
     // Get labels offsets
-    if (config.dontLoadRomOffsets == false)
-    {
-        memLengthOffset        = getMemoryOffset("memLength");
-        txDestAddrOffset       = getMemoryOffset("txDestAddr");
-        txCalldataLenOffset    = getMemoryOffset("txCalldataLen");
-        txGasLimitOffset       = getMemoryOffset("txGasLimit");
-        txValueOffset          = getMemoryOffset("txValue");
-        txNonceOffset          = getMemoryOffset("txNonce");
-        txGasPriceRLPOffset    = getMemoryOffset("txGasPriceRLP");
-        txChainIdOffset        = getMemoryOffset("txChainId");
-        txROffset              = getMemoryOffset("txR");
-        txSOffset              = getMemoryOffset("txS");
-        txVOffset              = getMemoryOffset("txV");
-        txSrcOriginAddrOffset  = getMemoryOffset("txSrcOriginAddr");
-        retDataCTXOffset       = getMemoryOffset("retDataCTX");
-        retDataOffsetOffset    = getMemoryOffset("retDataOffset");
-        retDataLengthOffset    = getMemoryOffset("retDataLength");
-        newAccInputHashOffset  = getMemoryOffset("newAccInputHash");
-        oldNumBatchOffset      = getMemoryOffset("oldNumBatch");
-        newNumBatchOffset      = getMemoryOffset("newNumBatch");
-        newLocalExitRootOffset = getMemoryOffset("newLocalExitRoot");
-        depthOffset            = getMemoryOffset("depth");
-        gasRefundOffset        = getMemoryOffset("gasRefund");
-        txSrcAddrOffset        = getMemoryOffset("txSrcAddr");
-        gasCallOffset          = getMemoryOffset("gasCall");
-        isPreEIP155Offset      = getMemoryOffset("isPreEIP155");
-        isCreateContractOffset = getMemoryOffset("isCreateContract");
-        storageAddrOffset      = getMemoryOffset("storageAddr");
-        bytecodeLengthOffset   = getMemoryOffset("bytecodeLength");
-        originCTXOffset        = getMemoryOffset("originCTX");
-        currentCTXOffset       = getMemoryOffset("currentCTX");
-        gasCTXOffset           = getMemoryOffset("gasCTX");
-        lastCtxUsedOffset      = getMemoryOffset("lastCtxUsed");
-        isCreateOffset         = getMemoryOffset("isCreate");
-    }
+    memLengthOffset        = getMemoryOffset("memLength");
+    txDestAddrOffset       = getMemoryOffset("txDestAddr");
+    txCalldataLenOffset    = getMemoryOffset("txCalldataLen");
+    txGasLimitOffset       = getMemoryOffset("txGasLimit");
+    txValueOffset          = getMemoryOffset("txValue");
+    txNonceOffset          = getMemoryOffset("txNonce");
+    txGasPriceRLPOffset    = getMemoryOffset("txGasPriceRLP");
+    txChainIdOffset        = getMemoryOffset("txChainId");
+    txROffset              = getMemoryOffset("txR");
+    txSOffset              = getMemoryOffset("txS");
+    txVOffset              = getMemoryOffset("txV");
+    txSrcOriginAddrOffset  = getMemoryOffset("txSrcOriginAddr");
+    retDataCTXOffset       = getMemoryOffset("retDataCTX");
+    retDataOffsetOffset    = getMemoryOffset("retDataOffset");
+    retDataLengthOffset    = getMemoryOffset("retDataLength");
+    newAccInputHashOffset  = getMemoryOffset("newAccInputHash");
+    oldNumBatchOffset      = getMemoryOffset("oldNumBatch");
+    newNumBatchOffset      = getMemoryOffset("newNumBatch");
+    newLocalExitRootOffset = getMemoryOffset("newLocalExitRoot");
+    depthOffset            = getMemoryOffset("depth");
+    gasRefundOffset        = getMemoryOffset("gasRefund");
+    txSrcAddrOffset        = getMemoryOffset("txSrcAddr");
+    gasCallOffset          = getMemoryOffset("gasCall");
+    isPreEIP155Offset      = getMemoryOffset("isPreEIP155");
+    isCreateContractOffset = getMemoryOffset("isCreateContract");
+    storageAddrOffset      = getMemoryOffset("storageAddr");
+    bytecodeLengthOffset   = getMemoryOffset("bytecodeLength");
+    originCTXOffset        = getMemoryOffset("originCTX");
+    currentCTXOffset       = getMemoryOffset("currentCTX");
+    gasCTXOffset           = getMemoryOffset("gasCTX");
+    lastCtxUsedOffset      = getMemoryOffset("lastCtxUsed");
+    isCreateOffset         = getMemoryOffset("isCreate");
 
     // Load ROM constants
     MAX_CNT_STEPS_LIMIT      = getConstant(romJson, "MAX_CNT_STEPS_LIMIT");
@@ -70,6 +67,11 @@ void Rom::load(Goldilocks &fr, json &romJson)
     MAX_CNT_KECCAK_F_LIMIT   = getConstant(romJson, "MAX_CNT_KECCAK_F_LIMIT");
     MAX_CNT_PADDING_PG_LIMIT = getConstant(romJson, "MAX_CNT_PADDING_PG_LIMIT");
     MAX_CNT_POSEIDON_G_LIMIT = getConstant(romJson, "MAX_CNT_POSEIDON_G_LIMIT");
+    SMT_KEY_BALANCE          = getConstant(romJson, "SMT_KEY_BALANCE");
+    SMT_KEY_NONCE            = getConstant(romJson, "SMT_KEY_NONCE");
+    SMT_KEY_SC_CODE          = getConstant(romJson, "SMT_KEY_SC_CODE");
+    SMT_KEY_SC_LENGTH        = getConstant(romJson, "SMT_KEY_SC_LENGTH");
+    SMT_KEY_SC_STORAGE       = getConstant(romJson, "SMT_KEY_SC_STORAGE");
 }
 
 void Rom::loadProgram(Goldilocks &fr, json &romJson)
@@ -88,7 +90,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         exitProcess();
     }
     size = romJson.size();
-    cout << "ROM size: " << size << " lines" << endl;
+    zklog.info("ROM size: " + to_string(size) + " lines");
 
     // Allocate romSize tRomLine's
     line = (RomLine *)new RomLine[size];

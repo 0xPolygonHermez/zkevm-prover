@@ -19,7 +19,7 @@ struct ECRecoverTestVector
     ECRecoverResult result;
     string address;
 };
-#define NTESTS 46
+#define NTESTS 47
 #define REPETITIONS 1
 #define BENCHMARK_MODE 0 // 0: test mode, 1: benchmark mode
 
@@ -306,7 +306,13 @@ ECRecoverTestVector ecrecoverTestVectors[] = {
      "9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
      "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364142",
      "1c", false, ECR_S_IS_TOO_BIG,
-     "0000000000000000000000000000000000000000"}};
+     "0000000000000000000000000000000000000000"},
+     // 46 tests jacobian comparison
+     {"362C64CAC78B18F0528AA9D9270116CB12F14B1C3920465855FA6EE0FC35BEB8",
+     "C6047F9441ED7D6D3045406E95C07CD85C778E4B8CEF3CA7ABAC09B95C709EE5",
+     "4296A072F8ADB4A62ABAE833A1B15350196EB00AE7C5260098628C6C68D95392",
+     "1b", false, ECR_NO_ERROR,
+     "f39Fd6e51aad88F6F4ce6aB8827279cffFb92266"}};
 
 void ECRecoverTest(void)
 {
@@ -338,6 +344,22 @@ void ECRecoverTest(void)
             {
                 zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " address=" + address.get_str(16) + " expectedAddress=" + ecrecoverTestVectors[i].address);
                 failed = true;
+            }
+            RawFec::Element buffer[1026];
+            int precres = ECRecoverPrecalc(signature, r, s, v, ecrecoverTestVectors[i].precompiled, buffer, 2);
+            if(result != ECR_NO_ERROR )
+            {   
+                if(precres != -1)
+                {
+                    zklog.error("ECRecoverPrecalc() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " result=" + to_string(precres) + " expectedResult= -1" );
+                    failed = true;
+                }
+            }else{
+                if(precres < 1)
+                {
+                    zklog.error("ECRecoverPrecalc() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " result=" + to_string(precres) + " expectedResult > 0" );
+                    failed = true;
+                }
             }
             if (failed)
                 failedTests++;

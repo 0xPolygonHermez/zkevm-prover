@@ -2,6 +2,7 @@
 #define PROVER_REQUEST_HPP
 
 #include <semaphore.h>
+#include <unordered_set>
 #include "input.hpp"
 #include "proof_fflonk.hpp"
 #include "counters.hpp"
@@ -23,7 +24,8 @@ private:
 public:
     /* IDs */
     string uuid;
-    string externalRequestId;
+    string contextId; // Externally provided context ID
+    vector<LogTag> tags; // Tags used in logs
     string timestamp; // Timestamp, when requested, used as a prefix in the output files
     time_t startTime; // Time when the request started being processed
     time_t endTime; // Time when the request ended
@@ -44,10 +46,23 @@ public:
     /* genBatchProof output */
     nlohmann::ordered_json batchProofOutput;
 
-    /* genAggregatedProof input and output */
-    nlohmann::ordered_json aggregatedProofInput1;
-    nlohmann::ordered_json aggregatedProofInput2;
-    nlohmann::ordered_json aggregatedProofOutput;
+    /* genAggregatedBatchProof input and output */
+    nlohmann::ordered_json aggregatedBatchProofInput1;
+    nlohmann::ordered_json aggregatedBatchProofInput2;
+    nlohmann::ordered_json aggregatedBatchProofOutput;
+
+    /* genBlobInnerProof output */
+    nlohmann::ordered_json blobInnerProofOutput;
+
+    /* genBlobOuterProof input and output */
+    nlohmann::ordered_json blobOuterProofInputBatch;
+    nlohmann::ordered_json blobOuterProofInputBlobInner;
+    nlohmann::ordered_json blobOuterProofOutput;
+
+    /* genAggregatedBlobOuterProof input and output */
+    nlohmann::ordered_json aggregatedBlobOuterProofInput1;
+    nlohmann::ordered_json aggregatedBlobOuterProofInput2;
+    nlohmann::ordered_json aggregatedBlobOuterProofOutput;
 
     /* genFinalProof input */
     nlohmann::ordered_json finalProofInput;
@@ -57,6 +72,7 @@ public:
 
     /* Execution generated data */
     Counters counters; // Counters of the batch execution
+    Counters counters_reserve; // Counters reserve of the batch execution
     DatabaseMap *dbReadLog; // Database reads logs done during the execution (if enabled)
     FullTracerInterface * pFullTracer; // Execution traces interface
 
@@ -70,6 +86,10 @@ public:
     /* Executor EVM events */
     vector<string> receipts;
     vector<string> logs;
+
+    /* Keys */
+    unordered_set<string> nodesKeys;
+    unordered_set<string> programKeys;
 
     /* Constructor */
     ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);

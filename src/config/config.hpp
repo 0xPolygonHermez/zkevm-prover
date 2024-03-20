@@ -21,7 +21,7 @@ public:
     bool runHashDBTest;
     bool runAggregatorServer;
     bool runAggregatorClient;
-    bool runAggregatorClientMock;    
+    bool runAggregatorClientMock;
 
     bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a + Recursive1
     bool runFileGenAggregatedProof;         // Proof of 2 batches = Recursive2 (of the 2 batches StarkC12a)
@@ -31,20 +31,24 @@ public:
     bool runFileExecute;                    // Executor (all SMs)
 
     bool runKeccakScriptGenerator;
+    bool runSHA256ScriptGenerator;
     bool runKeccakTest;
     bool runStorageSMTest;
+    bool runClimbKeySMTest;
     bool runBinarySMTest;
     bool runMemAlignSMTest;
     bool runSHA256Test;
     bool runBlakeTest;
     bool runECRecoverTest;
     bool runDatabaseCacheTest;
-    bool runDatabaseAssociativeCacheTest;
     bool runCheckTreeTest;
     string checkTreeRoot;
     bool runDatabasePerformanceTest;
+    bool runPageManagerTest;
+    bool runKeyValueTreeTest;
+    bool runSMT64Test;
     bool runUnitTest;
-    
+
     bool executeInParallel;
     bool useMainExecGenerated;
     bool useMainExecC;
@@ -63,32 +67,34 @@ public:
     uint64_t loadDBToMemTimeout;
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
     bool useAssociativeCache; // Use the associative cache for MT records?
-    int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 97 bytes
-    int64_t log2DbMTAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indices. Note index entry = 4 bytes
-
+    int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 128 bytes
+    int64_t log2DbMTAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indexes. Note index entry = 4 bytes
+    int64_t log2DbKVAssociativeCacheSize; // log2 of the size in entries of the DatabaseKVAssociativeCache. Note 1 cache entry = 80 bytes
+    int64_t log2DbKVAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseKVAssociativeCache indexes. Note index entry = 4 bytes
+    int64_t log2DbVersionsAssociativeCacheSize; // log2 of the size in entries of the DatabaseVersionsAssociativeCache. Note 1 cache entry = 40 bytes
+    int64_t log2DbVersionsAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseVersionsAssociativeCache indexes. Note index entry = 4 bytes
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
-    bool opcodeTracer;
-    bool logRemoteDbReads;
-    bool logExecutorServerInput; // Logs all inputs, before processing 
-    bool logExecutorServerInputJson; // Logs all inputs in input.json format, before processing
-    uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
-    bool logExecutorServerResponses;
-    bool logExecutorServerTxs;
-    bool dontLoadRomOffsets;
 
+    // Executor service
     uint16_t executorServerPort;
-    bool executorROMLineTraces;
-    bool executorTimeStatistics;
     uint16_t executorClientPort;
     string executorClientHost;
     uint64_t executorClientLoops;
     bool executorClientCheckNewStateRoot;
+    bool executorClientResetDB;
+    bool executorClientClearCache;
 
+    // HashDB service
     uint16_t hashDBServerPort;
     string hashDBURL;
     bool hashDB64;
+    uint64_t kvDBMaxVersions;
     string dbCacheSynchURL;
+    string hashDBFileName;
+    uint64_t hashDBFileSize;
+    string hashDBFolder;
 
+    // Aggregator service (client)
     uint16_t aggregatorServerPort;
     uint16_t aggregatorClientPort;
     string aggregatorClientHost;
@@ -96,50 +102,125 @@ public:
     uint64_t aggregatorClientWatchdogTimeout;
     uint64_t aggregatorClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
 
+    // Executor debugging
+    bool executorROMLineTraces;
+    bool executorTimeStatistics;
+    bool opcodeTracer;
+    bool logRemoteDbReads;
+    bool logExecutorServerInput; // Logs all inputs, before processing
+    bool logExecutorServerInputJson; // Logs all inputs in input.json format, before processing
+    uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
+    bool logExecutorServerResponses;
+    bool logExecutorServerTxs;
+    bool loadCollectionRom;
+
+    // Files
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
     string configPath;
-    string rom;
+    
     string zkevmCmPols; // Maps commit pols memory into file, which slows down a bit the executor
     string zkevmCmPolsAfterExecutor; // Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning
     string c12aCmPols;
     string recursive1CmPols;
+    string blobInnerCmPols;
+    string blobInnerCompressorCmPols;
+    string blobInnerRecursive1CmPols;
+    string blobOuterCmPols;
+    string blobOuterRecursive2CmPols;
+
     string zkevmConstPols;
     string c12aConstPols;
     string recursive1ConstPols;
     string recursive2ConstPols;
     string recursivefConstPols;
+    string blobInnerConstPols;
+    string blobInnerCompressorConstPols;
+    string blobInnerRecursive1ConstPols;
+    string blobOuterConstPols;
+    string blobOuterRecursive2ConstPols;
     bool mapConstPolsFile;
+
     string zkevmConstantsTree;
     string c12aConstantsTree;
     string recursive1ConstantsTree;
     string recursive2ConstantsTree;
     string recursivefConstantsTree;
+    string blobInnerConstantsTree;
+    string blobInnerCompressorConstantsTree;
+    string blobInnerRecursive1ConstantsTree;
+    string blobOuterConstantsTree;
+    string blobOuterRecursive2ConstantsTree;
     bool mapConstantsTreeFile;
-    string finalVerkey;
+    
     string zkevmVerifier;
     string recursive1Verifier;
     string recursive2Verifier;
     string recursivefVerifier;
-    string recursive2Verkey;    
+    string blobInnerVerifier;
+    string blobInnerRecursive1Verifier;
+    string blobOuterVerifier;
+    string blobOuterRecursive2Verifier;
     string finalVerifier;
+
+    string zkevmVerkey;
+    string c12aVerkey;
+    string recursive1Verkey;
+    string recursive2Verkey;
+    string recursivefVerkey;
+    string blobInnerVerkey;
+    string blobInnerCompressorVerkey;
+    string blobInnerRecursive1Verkey;
+    string blobOuterVerkey;
+    string blobOuterRecursive2Verkey;
+    string finalVerkey;
+    
     string c12aExec;
     string recursive1Exec;
     string recursive2Exec;
+    string blobInnerCompressorExec;
+    string blobInnerRecursive1Exec;
+    string blobOuterExec;
+    string blobOuterRecursive2Exec;
     string recursivefExec;
+    
     string finalStarkZkey;
+    
     string publicsOutput;
     string proofFile;
     string keccakScriptFile;
+    string sha256ScriptFile;
     string keccakPolsFile;
+    string sha256PolsFile;
     string keccakConnectionsFile;
+    string sha256ConnectionsFile;
     string storageRomFile;
+    
     string zkevmStarkInfo;
     string c12aStarkInfo;
     string recursive1StarkInfo;
     string recursive2StarkInfo;
     string recursivefStarkInfo;
+    string blobInnerStarkInfo;
+    string blobInnerCompressorStarkInfo;
+    string blobInnerRecursive1StarkInfo;
+    string blobOuterStarkInfo;
+    string blobOuterRecursive2StarkInfo;
+
+    string zkevmCHelpers;
+    string c12aCHelpers;
+    string recursive1CHelpers;
+    string recursive2CHelpers;
+    string recursivefCHelpers;
+    string blobInnerCHelpers;
+    string blobInnerCompressorCHelpers;
+    string blobInnerRecursive1CHelpers;
+    string blobOuterCHelpers;
+    string blobOuterRecursive2CHelpers;
+    
+
+    // Database
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;
@@ -153,23 +234,31 @@ public:
     bool dbReadOnly;
     uint64_t dbReadRetryCounter;
     uint64_t dbReadRetryDelay;
+
+    // State manager
     bool stateManager;
     bool stateManagerPurge;
-    bool stateManagerPurgeTxs;
+
+    // Infrastructure
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
     uint64_t maxProverThreads;
     uint64_t maxHashDBThreads;
     string proverName;
-
     uint64_t fullTracerTraceReserveSize;
+
+    // EC Recover
     bool ECRecoverPrecalc;
     uint64_t ECRecoverPrecalcNThreads;
+
+    // Logs format
+    bool jsonLogs;
 
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
+    bool check(void); // Checks that the loaded configuration is correct; returns true if there is at least one error
 };
 
 #endif

@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-VERSION=v2.0.0-RC4-fork.5
+VERSION=v5.0.0-rc.4-fork.8
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 
@@ -18,15 +18,17 @@ RECURSIVEFINAL_CPP=./src/starkpil/recursivefinal/final.verifier.cpp
 #Sync the config directory
 rsync -avz --progress ${CONFIG_DIR}/scripts/ config/scripts/
 rsync -avz --progress ${CONFIG_DIR}/ config/
+rm config/scripts/rom.json
+rm config/scripts/metadata-rom.txt
 
 #Uncomment the following line if you want to generate source code the first time after the release files generation
 
 #Copy the chelpers files
-cp ${C_FILES}/zkevm.chelpers/*.step* ./src/starkpil/zkevm/chelpers/
-cp ${C_FILES}/c12a.chelpers/*.step* ./src/starkpil/starkC12a/chelpers/
-cp ${C_FILES}/recursive1.chelpers/*.step* ./src/starkpil/starkRecursive1/chelpers/
-cp ${C_FILES}/recursive2.chelpers/*.step* ./src/starkpil/starkRecursive2/chelpers/
-cp ${C_FILES}/recursivef.chelpers/*.step* ./src/starkpil/starkRecursiveF/chelpers/
+cp ${C_FILES}/zkevm.chelpers/ZkevmSteps.hpp ./src/starkpil/zkevm/chelpers/ZkevmSteps.hpp
+cp ${C_FILES}/c12a.chelpers/C12aSteps.hpp ./src/starkpil/starkC12a/chelpers/C12aSteps.hpp
+cp ${C_FILES}/recursive1.chelpers/Recursive1Steps.hpp ./src/starkpil/starkRecursive1/chelpers/Recursive1Steps.hpp
+cp ${C_FILES}/recursive2.chelpers/Recursive2Steps.hpp ./src/starkpil/starkRecursive2/chelpers/Recursive2Steps.hpp
+cp ${C_FILES}/recursivef.chelpers/RecursiveFSteps.hpp ./src/starkpil/starkRecursiveF/chelpers/RecursiveFSteps.hpp
 
 # Generate the zkevm.verifier.cpp
 cp ${C_FILES}/zkevm.verifier_cpp/zkevm.verifier.cpp ${ZKEVM_VERIFIER_CPP}
@@ -68,14 +70,13 @@ sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEFINAL_CPP}
 echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEFINAL_CPP}
 
 #Copy pols_generated files
-cp -r ${CONFIG_DIR}/scripts/* ./src/main_sm/$FORK_ID/scripts/
+cp ${CONFIG_DIR}/scripts/rom.json ./src/main_sm/$FORK_ID/scripts/
+cp ${CONFIG_DIR}/scripts/metadata-rom.txt ./src/main_sm/$FORK_ID/scripts/
 cp ${WORKING_DIR}/pil/zkevm/main.pil.json  ./src/main_sm/$FORK_ID/scripts/
 
 #main generator files
-make main_generator
+make generate
 
-./build/mainGenerator
-
+#pols generator files
 make pols_generator
-
 ./build/polsGenerator

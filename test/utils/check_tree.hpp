@@ -16,6 +16,6 @@ public:
     CheckTreeCounters() : intermediateNodes(0), leafNodes(0), values(0), maxLevel(0) {};
 };
 
-zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCounters &checkTreeCounters);
+zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCounters &checkTreeCounters, const string &prefix);
 
 #endif

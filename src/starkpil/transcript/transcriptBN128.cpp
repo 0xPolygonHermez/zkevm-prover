@@ -25,7 +25,7 @@ void TranscriptBN128::_add1(RawFr::Element input)
 {
     pending.push_back(input);
     out.clear();
-    if (pending.size() == 16)
+    if (pending.size() == TRANSCRIPT_BN128_ARITY)
     {
         _updateState();
     }
@@ -76,7 +76,7 @@ uint64_t TranscriptBN128::getFields1()
 
 void TranscriptBN128::_updateState()
 {
-    while (pending.size() < 16)
+    while (pending.size() < TRANSCRIPT_BN128_ARITY)
     {
         pending.push_back(RawFr::field.zero());
     }
@@ -108,18 +108,24 @@ void TranscriptBN128::getPermutations(uint64_t *res, uint64_t n, uint64_t nBits)
 
     uint64_t curField = 0;
     uint64_t curBit = 0;
+
     for (uint64_t i = 0; i < n; i++)
     {
         uint64_t a = 0;
         for (uint64_t j = 0; j < nBits; j++)
         {
-            mpz_t n;
-            mpz_init(n);
-            RawFr::field.toMpz(n, fields[curField]);
-            uint64_t bit = mpz_tstbit(n, curBit);
-            if (bit)
+            mpz_t n2;
+            mpz_init(n2);
+            RawFr::field.toMpz(n2, fields[curField]);
+            uint64_t bit = mpz_tstbit(n2, curBit);
+            mpz_clear(n2);
+
+            if (bit) {
                 a = a + (1 << j);
+            }
+
             curBit++;
+
             if (curBit == 253)
             {
                 curBit = 0;

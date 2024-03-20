@@ -25,18 +25,14 @@
 #include <openssl/sha.h>
 
 #include "commit_pols_starks.hpp"
-#include "zkevmSteps.hpp"
-#include "c12aSteps.hpp"
-#include "recursive1Steps.hpp"
-#include "recursive2Steps.hpp"
+#include "ZkevmSteps.hpp"
+#include "C12aSteps.hpp"
+#include "Recursive1Steps.hpp"
+#include "Recursive2Steps.hpp"
+#include "chelpers_steps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
-#ifndef __AVX512__
-#define NROWS_STEPS_ 4
-#else
-#define NROWS_STEPS_ 8
-#endif
 
 Prover::Prover(Goldilocks &fr,
                PoseidonGoldilocks &poseidon,
@@ -96,7 +92,38 @@ Prover::Prover(Goldilocks &fr,
 
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
             // and create them using the allocated address
-            uint64_t polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element) + _starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
+
+            polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element);
+            if( _starkInfo.mapOffsets.section[eSection::cm1_2ns] < _starkInfo.mapOffsets.section[eSection::tmpExp_n]) optimizeMemoryNTTCommitPols = true;
+            for(uint64_t i = 1; i <= 3; ++i) {
+                std::string currentSection = "cm" + to_string(i) + "_n";
+                std::string nextSectionExtended = i == 1 && optimizeMemoryNTTCommitPols ? "tmpExp_n" : "cm" + to_string(i + 1) + "_2ns";
+                uint64_t nttHelperSize = _starkInfo.mapSectionsN.section[string2section(currentSection)] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
+                uint64_t currentSectionStart = _starkInfo.mapOffsets.section[string2section(currentSection)] * sizeof(Goldilocks::Element);
+                if (i == 3 && currentSectionStart > nttHelperSize) optimizeMemoryNTT = true;
+                uint64_t nttHelperBufferStart = optimizeMemoryNTT && i==3 ? _starkInfo.mapOffsets.section[eSection::cm1_n] * sizeof(Goldilocks::Element) : _starkInfo.mapOffsets.section[string2section(nextSectionExtended)] * sizeof(Goldilocks::Element);
+                uint64_t totalMemSize = nttHelperBufferStart + nttHelperSize;
+                if(totalMemSize > polsSize) {
+                    polsSize = totalMemSize;
+                }
+            }
+
+            // Check that we have enough memory for stage2 H1H2 helpers (if not add memory)
+            uint64_t stage2Start = _starkInfo.mapOffsets.section[cm2_2ns] * sizeof(Goldilocks::Element);
+            uint64_t buffTransposedH1H2Size = 4 * _starkInfo.puCtx.size() * ((1 << _starkInfo.starkStruct.nBits) * FIELD_EXTENSION + 8);
+            uint64_t buffHelperH1H2Size = (1 << _starkInfo.starkStruct.nBits) * _starkInfo.puCtx.size();
+            uint64_t buffStage2HelperSize = (buffTransposedH1H2Size + buffHelperH1H2Size)*sizeof(Goldilocks::Element);
+            if(stage2Start + buffStage2HelperSize > polsSize) {
+                polsSize = stage2Start + buffStage2HelperSize;
+            }
+            
+            // Check that we have enough memory for stage3 (Z) helpers (if not add memory)
+            uint64_t stage3Start = _starkInfo.mapOffsets.section[cm3_2ns] * sizeof(Goldilocks::Element);
+            uint64_t tot_pols = 3 * (_starkInfo.puCtx.size() + _starkInfo.peCtx.size() + _starkInfo.ciCtx.size());
+            uint64_t buffStage3HelperSize = (tot_pols*((1 << _starkInfo.starkStruct.nBits) * FIELD_EXTENSION + 8)) * sizeof(Goldilocks::Element);
+            if(stage3Start + buffStage3HelperSize > polsSize) {
+                polsSize = stage3Start + buffStage3HelperSize;
+            }
 
             zkassert(_starkInfo.mapSectionsN.section[eSection::cm1_2ns] * sizeof(Goldilocks::Element) <= polsSize - _starkInfo.mapSectionsN.section[eSection::cm2_2ns] * sizeof(Goldilocks::Element));
 
@@ -113,7 +140,7 @@ Prover::Prover(Goldilocks &fr,
                 pAddress = calloc(polsSize, 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
+                    zklog.error("Prover::genBatchProof() failed calling calloc() of size " + to_string(polsSize));
                     exitProcess();
                 }
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
@@ -124,13 +151,23 @@ Prover::Prover(Goldilocks &fr,
 
             StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
+            if (pAddressStarksRecursiveF == NULL){
+                zklog.error("Prover::Prover() failed calling malloc() of size " + to_string(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element)));
+                exitProcess();
+            }
 
-            starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
-            starkZkevm->nrowsStepBatch = NROWS_STEPS_;
-            starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
-            starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
-            starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
+            starkBatch = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, config.zkevmCHelpers}, pAddress);
+            if(optimizeMemoryNTT) starkBatch->optimizeMemoryNTT = true;
+            if(optimizeMemoryNTTCommitPols) starkBatch->optimizeMemoryNTTCommitPols = true;
+            starkBatchC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, config.c12aCHelpers}, pAddress);
+            starkBatchRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, config.recursive1CHelpers}, pAddress);
+            starkBatchRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, config.recursive2CHelpers}, pAddress);
             starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
+            starkBlobInner = new Starks(config, {config.blobInnerConstPols, config.mapConstPolsFile, config.blobInnerConstantsTree, config.blobInnerStarkInfo, config.blobInnerCHelpers}, pAddress);
+            starkBlobInnerCompressor = new Starks(config, {config.blobInnerCompressorConstPols, config.mapConstPolsFile, config.blobInnerCompressorConstantsTree, config.blobInnerCompressorStarkInfo, config.blobInnerCompressorCHelpers}, pAddress);
+            starkBlobInnerRecursive1 = new Starks(config, {config.blobInnerRecursive1ConstPols, config.mapConstPolsFile, config.blobInnerRecursive1ConstantsTree, config.blobInnerRecursive1StarkInfo, config.blobInnerRecursive1CHelpers}, pAddress);
+            starkBlobOuter = new Starks(config, {config.blobOuterConstPols, config.mapConstPolsFile, config.blobOuterConstantsTree, config.blobOuterStarkInfo, config.blobOuterCHelpers}, pAddress);
+            starkBlobOuterRecursive2 = new Starks(config, {config.blobOuterRecursive2ConstPols, config.mapConstPolsFile, config.blobOuterRecursive2ConstantsTree, config.blobOuterRecursive2StarkInfo, config.blobOuterRecursive2CHelpers}, pAddress);
         }
     }
     catch (std::exception &e)
@@ -161,8 +198,6 @@ Prover::~Prover()
         delete pZkey;
         delete pZkeyHeader;
 
-        uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
-
         // Unmap committed polynomials address
         if (config.zkevmCmPols.size() > 0)
         {
@@ -176,11 +211,16 @@ Prover::~Prover()
 
         delete prover;
 
-        delete starkZkevm;
-        delete starksC12a;
-        delete starksRecursive1;
-        delete starksRecursive2;
+        delete starkBatch;
+        delete starkBatchC12a;
+        delete starkBatchRecursive1;
+        delete starkBatchRecursive2;
         delete starksRecursiveF;
+        delete starkBlobInner;
+        delete starkBlobInnerCompressor;
+        delete starkBlobInnerRecursive1;
+        delete starkBlobOuter;
+        delete starkBlobOuterRecursive2;
     }
 }
 
@@ -225,14 +265,32 @@ void *proverThread(void *arg)
         case prt_genBatchProof:
             pProver->genBatchProof(pProver->pCurrentRequest);
             break;
-        case prt_genAggregatedProof:
-            pProver->genAggregatedProof(pProver->pCurrentRequest);
+        case prt_genAggregatedBatchProof:
+            pProver->genAggregatedBatchProof(pProver->pCurrentRequest);
+            break;
+        case prt_genBlobInnerProof:
+            pProver->genBlobInnerProof(pProver->pCurrentRequest);
+            break;
+        case prt_genBlobOuterProof:
+            pProver->genBlobOuterProof(pProver->pCurrentRequest);
+            break;
+        case prt_genAggregatedBlobOuterProof:
+            pProver->genAggregatedBlobOuterProof(pProver->pCurrentRequest);
             break;
         case prt_genFinalProof:
             pProver->genFinalProof(pProver->pCurrentRequest);
             break;
-        case prt_execute:
-            pProver->execute(pProver->pCurrentRequest);
+        case prt_processBatch:
+            pProver->processBatch(pProver->pCurrentRequest);
+            break;
+        case prt_executeBatch:
+            pProver->executeBatch(pProver->pCurrentRequest);
+            break;
+        case prt_processBlobInner:
+            pProver->processBlobInner(pProver->pCurrentRequest);
+            break;
+        case prt_executeBlobInner:
+            pProver->executeBlobInner(pProver->pCurrentRequest);
             break;
         default:
             zklog.error("proverThread() got an invalid prover request type=" + to_string(pProver->pCurrentRequest->type));
@@ -302,7 +360,8 @@ void *cleanerThread(void *arg)
     return NULL;
 }
 
-string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for this request
+// returns UUID for this request
+string Prover::submitRequest(ProverRequest *pProverRequest) 
 {
     zkassert(config.generateProof());
     zkassert(pProverRequest != NULL);
@@ -323,7 +382,8 @@ string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for 
     return uuid;
 }
 
-ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds) // wait for the request with this UUID to complete; returns NULL if UUID is invalid
+// wait for the request with this UUID to complete; returns NULL if UUID is invalid
+ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds) 
 {
     zkassert(config.generateProof());
     zkassert(uuid.size() > 0);
@@ -353,13 +413,16 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
     return pProverRequest;
 }
 
-void Prover::processBatch(ProverRequest *pProverRequest)
+void Prover::processBatch (ProverRequest *pProverRequest)
 {
-    TimerStart(PROVER_PROCESS_BATCH);
+    //TimerStart(PROVER_PROCESS_BATCH);
     zkassert(pProverRequest != NULL);
     zkassert(pProverRequest->type == prt_processBatch);
 
-    zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    if (config.runAggregatorClient)
+    {
+        zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    }
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -378,7 +441,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     }
 
     // Execute the program, in the process batch way
-    executor.process_batch(*pProverRequest);
+    executor.processBatch(*pProverRequest);
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
     if (config.saveDbReadsToFile)
@@ -388,20 +451,53 @@ void Prover::processBatch(ProverRequest *pProverRequest)
         json2file(inputJsonEx, pProverRequest->inputDbFile());
     }
 
-    TimerStopAndLog(PROVER_PROCESS_BATCH);
+    //TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
-void Prover::genBatchProof(ProverRequest *pProverRequest)
+void Prover::processBlobInner (ProverRequest *pProverRequest)
+{
+    //TimerStart(PROVER_PROCESS_BLOB_INNER);
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_processBlobInner);
+
+    if (config.runAggregatorClient)
+    {
+        zklog.info("Prover::processBlobInner() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    }
+
+    // Save input to <timestamp>.input.json, as provided by client
+    if (config.saveInputToFile)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        json2file(inputJson, pProverRequest->inputFile());
+    }
+
+    // Log input if requested
+    if (config.logExecutorServerInput)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        zklog.info("Input=" + inputJson.dump());
+    }
+
+    // Execute the program, in the process batch way
+    executor.processBlobInner(*pProverRequest);
+
+    //TimerStopAndLog(PROVER_PROCESS_BLOB_INNER);
+}
+
+void Prover::genBatchProof (ProverRequest *pProverRequest)
 {
     zkassert(config.generateProof());
     zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_genBatchProof);
+
 
     TimerStart(PROVER_BATCH_PROOF);
 
     printMemoryInfo(true);
     printProcessInfo(true);
-
-    zkassert(pProverRequest != NULL);
 
     zklog.info("Prover::genBatchProof() timestamp: " + pProverRequest->timestamp);
     zklog.info("Prover::genBatchProof() UUID: " + pProverRequest->uuid);
@@ -421,20 +517,15 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     /* Executor */
     /************/
     TimerStart(EXECUTOR_EXECUTE_INITIALIZATION);
-
     PROVER_FORK_NAMESPACE::CommitPols cmPols(pAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
-    uint64_t num_threads = omp_get_max_threads();
-    uint64_t bytes_per_thread = cmPols.size() / num_threads;
-#pragma omp parallel for num_threads(num_threads)
-    for (uint64_t i = 0; i < cmPols.size(); i += bytes_per_thread) // Each iteration processes 64 bytes at a time
-    {
-        memset((uint8_t *)pAddress + i, 0, bytes_per_thread);
-    }
-
+    Goldilocks::parSetZero((Goldilocks::Element*)pAddress, cmPols.size()/sizeof(Goldilocks::Element), omp_get_max_threads()/2);
+    uint64_t lastN = cmPols.pilDegree() - 1;
     TimerStopAndLog(EXECUTOR_EXECUTE_INITIALIZATION);
+
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_BATCH_PROOF);
-    executor.execute(*pProverRequest, cmPols);
+    executor.executeBatch(*pProverRequest, cmPols);
+    logBatchExecutionInfo(cmPols, pProverRequest);
     TimerStopAndLog(EXECUTOR_EXECUTE_BATCH_PROOF);
 
     // Save commit pols to file zkevm.commit
@@ -451,26 +542,45 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*  Generate publics input           */
         /*************************************/
         TimerStart(SAVE_PUBLICS_JSON_BATCH_PROOF);
-        json publicStarkJson;
 
-        uint64_t lastN = cmPols.pilDegree() - 1;
+        json zkevmVerkeyJson;
+        file2json(config.zkevmVerkey, zkevmVerkeyJson);
+        Goldilocks::Element zkevmVerkey[4];
+        zkevmVerkey[0] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][0]);
+        zkevmVerkey[1] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][1]);
+        zkevmVerkey[2] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][2]);
+        zkevmVerkey[3] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][3]);
 
-        json recursive2Verkey;
-        file2json(config.recursive2Verkey, recursive2Verkey);
+        json c12aVerkeyJson;
+        file2json(config.c12aVerkey, c12aVerkeyJson);
+        Goldilocks::Element c12aVerkey[4];
+        c12aVerkey[0] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][0]);
+        c12aVerkey[1] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][1]);
+        c12aVerkey[2] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][2]);
+        c12aVerkey[3] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][3]);
 
-        Goldilocks::Element publics[starksRecursive1->starkInfo.nPublics];
+        json recursive1VerkeyJson;
+        file2json(config.recursive1Verkey, recursive1VerkeyJson);
+        Goldilocks::Element recursive1Verkey[4];
+        recursive1Verkey[0] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][0]);
+        recursive1Verkey[1] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][1]);
+        recursive1Verkey[2] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][2]);
+        recursive1Verkey[3] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][3]);
+
+        Goldilocks::Element publics[starkBatchRecursive1->starkInfo.nPublics];
+        zkassert(starkBatchRecursive1->starkInfo.nPublics == 65);
 
         // oldStateRoot
-        publics[0] = cmPols.Main.B0[0];
-        publics[1] = cmPols.Main.B1[0];
-        publics[2] = cmPols.Main.B2[0];
-        publics[3] = cmPols.Main.B3[0];
-        publics[4] = cmPols.Main.B4[0];
-        publics[5] = cmPols.Main.B5[0];
-        publics[6] = cmPols.Main.B6[0];
-        publics[7] = cmPols.Main.B7[0];
+        publics[0] = cmPols.Main.SR0[0];
+        publics[1] = cmPols.Main.SR1[0];
+        publics[2] = cmPols.Main.SR2[0];
+        publics[3] = cmPols.Main.SR3[0];
+        publics[4] = cmPols.Main.SR4[0];
+        publics[5] = cmPols.Main.SR5[0];
+        publics[6] = cmPols.Main.SR6[0];
+        publics[7] = cmPols.Main.SR7[0];
 
-        // oldAccInputHash
+        // oldBatchAccInputHash
         publics[8] = cmPols.Main.C0[0];
         publics[9] = cmPols.Main.C1[0];
         publics[10] = cmPols.Main.C2[0];
@@ -480,52 +590,80 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         publics[14] = cmPols.Main.C6[0];
         publics[15] = cmPols.Main.C7[0];
 
-        // oldBatchNum
-        publics[16] = cmPols.Main.SP[0];
+        // previousL1InfoTreeRoot
+        publics[16] = cmPols.Main.D0[0];
+        publics[17] = cmPols.Main.D1[0];
+        publics[18] = cmPols.Main.D2[0];
+        publics[19] = cmPols.Main.D3[0];
+        publics[20] = cmPols.Main.D4[0];
+        publics[21] = cmPols.Main.D5[0];
+        publics[22] = cmPols.Main.D6[0];
+        publics[23] = cmPols.Main.D7[0];
+
+        // previousL1InfoTreeIndex
+        publics[24] = cmPols.Main.RCX[0];
+
         // chainId
-        publics[17] = cmPols.Main.GAS[0];
+        publics[25] = cmPols.Main.GAS[0];
+
         // forkid
-        publics[18] = cmPols.Main.CTX[0];
+        publics[26] = cmPols.Main.CTX[0];
 
-        // newStateRoot
-        publics[19] = cmPols.Main.SR0[lastN];
-        publics[20] = cmPols.Main.SR1[lastN];
-        publics[21] = cmPols.Main.SR2[lastN];
-        publics[22] = cmPols.Main.SR3[lastN];
-        publics[23] = cmPols.Main.SR4[lastN];
-        publics[24] = cmPols.Main.SR5[lastN];
-        publics[25] = cmPols.Main.SR6[lastN];
-        publics[26] = cmPols.Main.SR7[lastN];
+        //newStateRoot
+        publics[27] = cmPols.Main.SR0[lastN];
+        publics[28] = cmPols.Main.SR1[lastN];
+        publics[29] = cmPols.Main.SR2[lastN];
+        publics[30] = cmPols.Main.SR3[lastN];
+        publics[31] = cmPols.Main.SR4[lastN];
+        publics[32] = cmPols.Main.SR5[lastN];
+        publics[33] = cmPols.Main.SR6[lastN];
+        publics[34] = cmPols.Main.SR7[lastN];
 
-        // newAccInputHash
-        publics[27] = cmPols.Main.D0[lastN];
-        publics[28] = cmPols.Main.D1[lastN];
-        publics[29] = cmPols.Main.D2[lastN];
-        publics[30] = cmPols.Main.D3[lastN];
-        publics[31] = cmPols.Main.D4[lastN];
-        publics[32] = cmPols.Main.D5[lastN];
-        publics[33] = cmPols.Main.D6[lastN];
-        publics[34] = cmPols.Main.D7[lastN];
+        //newBatchAccInputHash
+        publics[35] = cmPols.Main.C0[lastN];
+        publics[36] = cmPols.Main.C1[lastN];
+        publics[37] = cmPols.Main.C2[lastN];
+        publics[38] = cmPols.Main.C3[lastN];
+        publics[39] = cmPols.Main.C4[lastN];
+        publics[40] = cmPols.Main.C5[lastN];
+        publics[41] = cmPols.Main.C6[lastN];
+        publics[42] = cmPols.Main.C7[lastN];
 
-        // localExitRoot
-        publics[35] = cmPols.Main.E0[lastN];
-        publics[36] = cmPols.Main.E1[lastN];
-        publics[37] = cmPols.Main.E2[lastN];
-        publics[38] = cmPols.Main.E3[lastN];
-        publics[39] = cmPols.Main.E4[lastN];
-        publics[40] = cmPols.Main.E5[lastN];
-        publics[41] = cmPols.Main.E6[lastN];
-        publics[42] = cmPols.Main.E7[lastN];
+        //currentL1InfoTreeRoot
+        publics[43] = cmPols.Main.D0[lastN];
+        publics[44] = cmPols.Main.D1[lastN];
+        publics[45] = cmPols.Main.D2[lastN];
+        publics[46] = cmPols.Main.D3[lastN];
+        publics[47] = cmPols.Main.D4[lastN];
+        publics[48] = cmPols.Main.D5[lastN];
+        publics[49] = cmPols.Main.D6[lastN];
+        publics[50] = cmPols.Main.D7[lastN];
 
-        // newBatchNum
-        publics[43] = cmPols.Main.PC[lastN];
+        // currentL1InfoTreeIndex
+        publics[51] = cmPols.Main.RCX[lastN];
 
-        publics[44] = Goldilocks::fromU64(recursive2Verkey["constRoot"][0]);
-        publics[45] = Goldilocks::fromU64(recursive2Verkey["constRoot"][1]);
-        publics[46] = Goldilocks::fromU64(recursive2Verkey["constRoot"][2]);
-        publics[47] = Goldilocks::fromU64(recursive2Verkey["constRoot"][3]);
+        // newLocalExitRoot
+        publics[52] = cmPols.Main.E0[lastN];
+        publics[53] = cmPols.Main.E1[lastN];
+        publics[54] = cmPols.Main.E2[lastN];
+        publics[55] = cmPols.Main.E3[lastN];
+        publics[56] = cmPols.Main.E4[lastN];
+        publics[57] = cmPols.Main.E5[lastN];
+        publics[58] = cmPols.Main.E6[lastN];
+        publics[59] = cmPols.Main.E7[lastN];
 
-        for (uint64_t i = 0; i < starkZkevm->starkInfo.nPublics; i++)
+        // newLastTimeStamp
+        publics[60] = cmPols.Main.RR[lastN];
+
+        json recursive2VerkeyJson;
+        file2json(config.recursive2Verkey, recursive2VerkeyJson);
+        publics[61] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][0]);
+        publics[62] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][1]);
+        publics[63] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][2]);
+        publics[64] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][3]);
+
+        json publicStarkJson;
+        for (uint64_t i = 0; i < starkBatch->starkInfo.nPublics; i++)
         {
             publicStarkJson[i] = Goldilocks::toString(publics[i]);
         }
@@ -537,44 +675,41 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*************************************/
 
         TimerStart(STARK_PROOF_BATCH_PROOF);
-
-        ZkevmSteps zkevmSteps;
-        uint64_t polBits = starkZkevm->starkInfo.starkStruct.steps[starkZkevm->starkInfo.starkStruct.steps.size() - 1].nBits;
-        FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkZkevm->starkInfo.starkStruct.steps.size(), starkZkevm->starkInfo.evMap.size(), starkZkevm->starkInfo.nPublics);
-        starkZkevm->genProof(fproof, &publics[0], &zkevmSteps);
-
+        ZkevmSteps zkevmChelpersSteps;
+        uint64_t polBits = starkBatch->getPolBits();
+        FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkBatch->starkInfo.starkStruct.steps.size(), starkBatch->starkInfo.evMap.size(), starkBatch->starkInfo.nPublics);
+        starkBatch->genProof(fproof, &publics[0], zkevmVerkey, &zkevmChelpersSteps);
         TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
+
         TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF);
 
         nlohmann::ordered_json jProof = fproof.proofs.proof2json();
         nlohmann::json zkin = proof2zkinStark(jProof);
         // Generate publics
-        jProof["publics"] = publicStarkJson;
         zkin["publics"] = publicStarkJson;
 
         TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF);
 
-        CommitPolsStarks cmPols12a(pAddress, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
+        CommitPolsStarks cmPolsC12a(pAddress, (1 << starkBatchC12a->starkInfo.starkStruct.nBits), starkBatchC12a->starkInfo.nCm1);
 
-        Circom::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
+        Circom::getCommitedPols(&cmPolsC12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starkBatchC12a->starkInfo.starkStruct.nBits), starkBatchC12a->starkInfo.nCm1);
 
-        // void *pointerCm12aPols = mapFile("config/c12a/c12a.commit", cmPols12a.size(), true);
-        // memcpy(pointerCm12aPols, cmPols12a.address(), cmPols12a.size());
-        // unmapFile(pointerCm12aPols, cmPols12a.size());
+        // void *pointerCm12aPols = mapFile("config/c12a/c12a.commit", cmPolsC12a.size(), true);
+        // memcpy(pointerCm12aPols, cmPolsC12a.address(), cmPolsC12a.size());
+        // unmapFile(pointerCm12aPols, cmPolsC12a.size());
 
         //-------------------------------------------
         /* Generate C12a stark proof             */
         //-------------------------------------------
         TimerStopAndLog(STARK_GEN_AND_CALC_WITNESS_C12A);
         TimerStart(STARK_C12_A_PROOF_BATCH_PROOF);
-        uint64_t polBitsC12 = starksC12a->starkInfo.starkStruct.steps[starksC12a->starkInfo.starkStruct.steps.size() - 1].nBits;
-        FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starksC12a->starkInfo.starkStruct.steps.size(), starksC12a->starkInfo.evMap.size(), starksC12a->starkInfo.nPublics);
+        C12aSteps c12aChelpersSteps;
+        uint64_t polBitsC12 = starkBatchC12a->getPolBits();
+        FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starkBatchC12a->starkInfo.starkStruct.steps.size(), starkBatchC12a->starkInfo.evMap.size(), starkBatchC12a->starkInfo.nPublics);
 
         // Generate the proof
-        C12aSteps c12aSteps;
-
-        starksC12a->genProof(fproofC12a, publics, &c12aSteps);
+        starkBatchC12a->genProof(fproofC12a, publics, c12aVerkey, &c12aChelpersSteps);
 
         TimerStopAndLog(STARK_C12_A_PROOF_BATCH_PROOF);
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
@@ -585,16 +720,16 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
         // Add the recursive2 verification key
         json rootC;
-        rootC[0] = to_string(recursive2Verkey["constRoot"][0]);
-        rootC[1] = to_string(recursive2Verkey["constRoot"][1]);
-        rootC[2] = to_string(recursive2Verkey["constRoot"][2]);
-        rootC[3] = to_string(recursive2Verkey["constRoot"][3]);
+        rootC[0] = to_string(recursive2VerkeyJson["constRoot"][0]);
+        rootC[1] = to_string(recursive2VerkeyJson["constRoot"][1]);
+        rootC[2] = to_string(recursive2VerkeyJson["constRoot"][2]);
+        rootC[3] = to_string(recursive2VerkeyJson["constRoot"][3]);
         zkinC12a["publics"] = publicStarkJson;
         zkinC12a["rootC"] = rootC;
         TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
-        CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.nCm1);
-        CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.nCm1);
+        CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starkBatchRecursive1->starkInfo.starkStruct.nBits), starkBatchRecursive1->starkInfo.nCm1);
+        CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starkBatchRecursive1->starkInfo.starkStruct.nBits), starkBatchRecursive1->starkInfo.nCm1);
 
         // void *pointerCmRecursive1Pols = mapFile("config/recursive1/recursive1.commit", cmPolsRecursive1.size(), true);
         // memcpy(pointerCmRecursive1Pols, cmPolsRecursive1.address(), cmPolsRecursive1.size());
@@ -605,10 +740,10 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         //-------------------------------------------
 
         TimerStart(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
-        uint64_t polBitsRecursive1 = starksRecursive1->starkInfo.starkStruct.steps[starksRecursive1->starkInfo.starkStruct.steps.size() - 1].nBits;
-        FRIProof fproofRecursive1((1 << polBitsRecursive1), FIELD_EXTENSION, starksRecursive1->starkInfo.starkStruct.steps.size(), starksRecursive1->starkInfo.evMap.size(), starksRecursive1->starkInfo.nPublics);
-        Recursive1Steps recursive1Steps;
-        starksRecursive1->genProof(fproofRecursive1, publics, &recursive1Steps);
+        Recursive1Steps recursive1ChelpersSteps;
+        uint64_t polBitsRecursive1 = starkBatchRecursive1->getPolBits();
+        FRIProof fproofRecursive1((1 << polBitsRecursive1), FIELD_EXTENSION, starkBatchRecursive1->starkInfo.starkStruct.steps.size(), starkBatchRecursive1->starkInfo.evMap.size(), starkBatchRecursive1->starkInfo.nPublics);
+        starkBatchRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1ChelpersSteps);
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
 
         // Save the proof & zkinproof
@@ -640,14 +775,289 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     TimerStopAndLog(PROVER_BATCH_PROOF);
 }
 
-void Prover::genAggregatedProof(ProverRequest *pProverRequest)
-{
+void Prover::genBlobInnerProof (ProverRequest *pProverRequest){
 
     zkassert(config.generateProof());
     zkassert(pProverRequest != NULL);
-    zkassert(pProverRequest->type == prt_genAggregatedProof);
+    zkassert(pProverRequest->type == prt_genBlobInnerProof);
 
-    TimerStart(PROVER_AGGREGATED_PROOF);
+
+    TimerStart(PROVER_BLOB_INNER_PROOF);
+
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
+    zklog.info("Prover::genBlobInnerProof() timestamp: " + pProverRequest->timestamp);
+    zklog.info("Prover::genBlobInnerProof() UUID: " + pProverRequest->uuid);
+    zklog.info("Prover::genBlobInnerProof() input file: " + pProverRequest->inputFile());
+    // zklog.info("Prover::genBlobInnerProof() public file: " + pProverRequest->publicsOutputFile());
+    // zklog.info("Prover::genBlobInnerProof() proof file: " + pProverRequest->proofFile());
+
+    // Save input to <timestamp>.input.json, as provided by client
+    if (config.saveInputToFile)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        json2file(inputJson, pProverRequest->inputFile());
+    }
+
+    /************/
+    /* Executor */
+    /************/
+    TimerStart(EXECUTOR_EXECUTE_BLOB_INITIALIZATION);
+    PROVER_BLOB_FORK_NAMESPACE::CommitPols cmPols(pAddress, PROVER_BLOB_FORK_NAMESPACE::CommitPols::pilDegree());
+    Goldilocks::parSetZero((Goldilocks::Element*)pAddress, cmPols.size()/sizeof(Goldilocks::Element), omp_get_max_threads()/2);
+    uint64_t lastN = cmPols.pilDegree() - 1;
+    TimerStopAndLog(EXECUTOR_EXECUTE_BLOB_INITIALIZATION);
+
+    // Execute all the State Machines
+    TimerStart(EXECUTOR_EXECUTE_BLOB_INNER_PROOF);
+    executor.executeBlobInner(*pProverRequest, cmPols);
+    logBlobInnerExecutionInfo(cmPols,pProverRequest);
+    TimerStopAndLog(EXECUTOR_EXECUTE_BLOB_INNER_PROOF);
+
+    if (pProverRequest->result == ZKR_SUCCESS)
+    {
+        /*************************************/
+        /*  Generate publics input           */
+        /*************************************/
+        TimerStart(SAVE_PUBLICS_JSON_BLOB_INNER_PROOF);
+
+        json blobInnerVerkeyJson;
+        file2json(config.blobInnerVerkey, blobInnerVerkeyJson);
+        Goldilocks::Element blobInnerVerkey[4];
+        blobInnerVerkey[0] = Goldilocks::fromU64(blobInnerVerkeyJson["constRoot"][0]);
+        blobInnerVerkey[1] = Goldilocks::fromU64(blobInnerVerkeyJson["constRoot"][1]);
+        blobInnerVerkey[2] = Goldilocks::fromU64(blobInnerVerkeyJson["constRoot"][2]);
+        blobInnerVerkey[3] = Goldilocks::fromU64(blobInnerVerkeyJson["constRoot"][3]);
+
+        json compressorVerkeyJson;
+        file2json(config.blobInnerCompressorVerkey, compressorVerkeyJson);
+        Goldilocks::Element compressorVerkey[4];
+        compressorVerkey[0] = Goldilocks::fromU64(compressorVerkeyJson["constRoot"][0]);
+        compressorVerkey[1] = Goldilocks::fromU64(compressorVerkeyJson["constRoot"][1]);
+        compressorVerkey[2] = Goldilocks::fromU64(compressorVerkeyJson["constRoot"][2]);
+        compressorVerkey[3] = Goldilocks::fromU64(compressorVerkeyJson["constRoot"][3]);
+
+        json recursive1VerkeyJson;
+        file2json(config.blobInnerRecursive1Verkey, recursive1VerkeyJson);
+        Goldilocks::Element recursive1Verkey[4];
+        recursive1Verkey[0] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][0]);
+        recursive1Verkey[1] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][1]);
+        recursive1Verkey[2] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][2]);
+        recursive1Verkey[3] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][3]);
+
+        Goldilocks::Element publics[starkBlobInner->starkInfo.nPublics];
+        zkassert(starkBlobInner->starkInfo.nPublics == 70);
+
+        // oldBlobStateRoot
+        publics[0] = cmPols.Main.B0[0];
+        publics[1] = cmPols.Main.B1[0];
+        publics[2] = cmPols.Main.B2[0];
+        publics[3] = cmPols.Main.B3[0];
+        publics[4] = cmPols.Main.B4[0];
+        publics[5] = cmPols.Main.B5[0];
+        publics[6] = cmPols.Main.B6[0];
+        publics[7] = cmPols.Main.B7[0];
+
+        // oldBlobAccInputHash
+        publics[8] = cmPols.Main.C0[0];
+        publics[9] = cmPols.Main.C1[0];
+        publics[10] = cmPols.Main.C2[0];
+        publics[11] = cmPols.Main.C3[0];
+        publics[12] = cmPols.Main.C4[0];
+        publics[13] = cmPols.Main.C5[0];
+        publics[14] = cmPols.Main.C6[0];
+        publics[15] = cmPols.Main.C7[0];
+
+        // oldNumBlob
+        publics[16] = cmPols.Main.RR[0];
+
+        // oldStateRoot
+        publics[17] = cmPols.Main.SR0[0];
+        publics[18] = cmPols.Main.SR1[0];
+        publics[19] = cmPols.Main.SR2[0];
+        publics[20] = cmPols.Main.SR3[0];
+        publics[21] = cmPols.Main.SR4[0];
+        publics[22] = cmPols.Main.SR5[0];
+        publics[23] = cmPols.Main.SR6[0];
+        publics[24] = cmPols.Main.SR7[0];
+
+        // forkID
+        publics[25] = cmPols.Main.RCX[0];
+
+        // newBlobStateRoot
+        publics[26] = cmPols.Main.B0[lastN];
+        publics[27] = cmPols.Main.B1[lastN];
+        publics[28] = cmPols.Main.B2[lastN];
+        publics[29] = cmPols.Main.B3[lastN];
+        publics[30] = cmPols.Main.B4[lastN];
+        publics[31] = cmPols.Main.B5[lastN];
+        publics[32] = cmPols.Main.B6[lastN];
+        publics[33] = cmPols.Main.B7[lastN];
+
+        // newBlobAccInputHash
+        publics[34] = cmPols.Main.C0[lastN];
+        publics[35] = cmPols.Main.C1[lastN];
+        publics[36] = cmPols.Main.C2[lastN];
+        publics[37] = cmPols.Main.C3[lastN];
+        publics[38] = cmPols.Main.C4[lastN];
+        publics[39] = cmPols.Main.C5[lastN];
+        publics[40] = cmPols.Main.C6[lastN];
+        publics[41] = cmPols.Main.C7[lastN];
+        
+        // newNumBlob
+        publics[42] = cmPols.Main.GAS[lastN];
+
+        // finalAccBatchHashData
+        publics[43] = cmPols.Main.A0[lastN];
+        publics[44] = cmPols.Main.A1[lastN];
+        publics[45] = cmPols.Main.A2[lastN];
+        publics[46] = cmPols.Main.A3[lastN];
+        publics[47] = cmPols.Main.A4[lastN];
+        publics[48] = cmPols.Main.A5[lastN];
+        publics[49] = cmPols.Main.A6[lastN];
+        publics[50] = cmPols.Main.A7[lastN];
+
+        // localExitRootFromBlob
+        publics[51] = cmPols.Main.E0[lastN];
+        publics[52] = cmPols.Main.E1[lastN];
+        publics[53] = cmPols.Main.E2[lastN];
+        publics[54] = cmPols.Main.E3[lastN];
+        publics[55] = cmPols.Main.E4[lastN];
+        publics[56] = cmPols.Main.E5[lastN];
+        publics[57] = cmPols.Main.E6[lastN];
+        publics[58] = cmPols.Main.E7[lastN];
+
+        // isInvalid
+        publics[59] = cmPols.Main.CTX[lastN];
+
+        // timestampLimit
+        publics[60] = cmPols.Main.RR[lastN];
+
+        // lastL1InfoTreeRoot
+        publics[61] = cmPols.Main.D0[lastN];
+        publics[62] = cmPols.Main.D1[lastN];
+        publics[63] = cmPols.Main.D2[lastN];
+        publics[64] = cmPols.Main.D3[lastN];
+        publics[65] = cmPols.Main.D4[lastN];
+        publics[66] = cmPols.Main.D5[lastN];
+        publics[67] = cmPols.Main.D6[lastN];
+        publics[68] = cmPols.Main.D7[lastN];
+
+        // lastL1InfoTreeIndex
+        publics[69] = cmPols.Main.RCX[lastN];
+
+        json publicStarkJson;
+        for (uint64_t i = 0; i < starkBlobInner->starkInfo.nPublics; i++)
+        {
+            publicStarkJson[i] = Goldilocks::toString(publics[i]);
+        }
+
+        TimerStopAndLog(SAVE_PUBLICS_JSON_BLOB_INNER_PROOF);
+
+        /*************************************/
+        /*  Generate stark proof            */
+        /*************************************/
+
+        TimerStart(STARK_PROOF_BLOB_INNER_PROOF);
+        BlobInnerSteps blobInnerChelpersSteps;
+        uint64_t polBits = starkBlobInner->getPolBits();
+        FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkBlobInner->starkInfo.starkStruct.steps.size(), starkBlobInner->starkInfo.evMap.size(), starkBlobInner->starkInfo.nPublics);
+        starkBlobInner->genProof(fproof, &publics[0], blobInnerVerkey, &blobInnerChelpersSteps);
+        TimerStopAndLog(STARK_PROOF_BLOB_INNER_PROOF);
+
+        TimerStart(STARK_GEN_AND_CALC_WITNESS_COMPRESSOR);
+
+        TimerStart(STARK_JSON_GENERATION_BLOB_INNER_PROOF);
+        nlohmann::ordered_json jProof = fproof.proofs.proof2json();
+        nlohmann::json zkin = proof2zkinStark(jProof);
+        // Generate publics
+        zkin["publics"] = publicStarkJson;
+        TimerStopAndLog(STARK_JSON_GENERATION_BLOB_INNER_PROOF);
+
+        CommitPolsStarks cmPolsCompressor(pAddress, (1 << starkBlobInnerCompressor->starkInfo.starkStruct.nBits), starkBlobInnerCompressor->starkInfo.nCm1);
+        Circom::getCommitedPols(&cmPolsCompressor, config.blobInnerVerifier, config.blobInnerCompressorExec, zkin, (1 << starkBlobInnerCompressor->starkInfo.starkStruct.nBits), starkBlobInnerCompressor->starkInfo.nCm1);
+
+        // void *pointerCmCompressorPols = mapFile("config/blob_inner_compressor/blob_inner_compressor.commit", cmPolsCompressor.size(), true);
+        // memcpy(pointerCmCompressorPols, cmPolsCompressor.address(), cmPolsCompressor.size());
+        // unmapFile(pointerCmCompressorPols, cmPolsCompressor.size());
+
+        //-----------------------------------------------
+        /* Generate Compressor stark proof             */
+        //-----------------------------------------------
+        TimerStopAndLog(STARK_GEN_AND_CALC_WITNESS_COMPRESSOR);
+        
+        TimerStart(STARKCOMPRESSOR_PROOF_BLOB_INNNER_PROOF);
+        BlobInnerCompressorSteps compressorChelpersSteps;
+        uint64_t polBitsCompressor = starkBlobInnerCompressor->getPolBits();
+        FRIProof fproofCompressor((1 << polBitsCompressor), FIELD_EXTENSION, starkBlobInnerCompressor->starkInfo.starkStruct.steps.size(), starkBlobInnerCompressor->starkInfo.evMap.size(), starkBlobInnerCompressor->starkInfo.nPublics);
+
+        // Generate the proof
+        starkBlobInnerCompressor->genProof(fproofCompressor, publics, compressorVerkey, &compressorChelpersSteps);
+        TimerStopAndLog(STARKCOMPRESSOR_PROOF_BLOB_INNNER_PROOF);
+
+        TimerStart(STARK_JSON_GENERATION_BLOB_INNER_PROOF_COMPRESSOR);
+        // Save the proof & zkinproof
+        nlohmann::ordered_json jProofCompressor = fproofCompressor.proofs.proof2json();
+        nlohmann::json zkinCompressor = proof2zkinStark(jProofCompressor);
+        zkinCompressor["publics"] = publicStarkJson;
+        TimerStopAndLog(STARK_JSON_GENERATION_BLOB_INNER_PROOF_COMPRESSOR);
+
+        CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starkBlobInnerRecursive1->starkInfo.starkStruct.nBits), starkBlobInnerRecursive1->starkInfo.nCm1);
+        CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.blobInnerRecursive1Verifier, config.blobInnerRecursive1Exec, zkinCompressor, (1 << starkBlobInnerRecursive1->starkInfo.starkStruct.nBits), starkBlobInnerRecursive1->starkInfo.nCm1);
+
+        // void *pointerCmRecursive1Pols = mapFile("config/blob_inner_recursive1/blob_inner_recursive1.commit", cmPolsRecursive1.size(), true);
+        // memcpy(pointerCmRecursive1Pols, cmPolsRecursive1.address(), cmPolsRecursive1.size());
+        // unmapFile(pointerCmRecursive1Pols, cmPolsRecursive1.size());
+
+        //-------------------------------------------
+        /* Generate Recursive 1 proof            */
+        //-------------------------------------------
+
+        TimerStart(STARK_RECURSIVE_1_PROOF_BLOB_INNER_PROOF);
+        BlobInnerRecursive1Steps recursive1ChelpersSteps;
+        uint64_t polBitsRecursive1 = starkBlobInnerRecursive1->getPolBits();
+        FRIProof fproofRecursive1((1 << polBitsRecursive1), FIELD_EXTENSION, starkBlobInnerRecursive1->starkInfo.starkStruct.steps.size(), starkBlobInnerRecursive1->starkInfo.evMap.size(), starkBlobInnerRecursive1->starkInfo.nPublics);
+        starkBlobInnerRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1ChelpersSteps);
+        TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BLOB_INNER_PROOF);
+
+        // Save the proof & zkinproof
+        TimerStart(SAVE_PROOF);
+
+        nlohmann::ordered_json jProofRecursive1 = fproofRecursive1.proofs.proof2json();
+        nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
+        zkinRecursive1["publics"] = publicStarkJson;
+
+        pProverRequest->blobInnerProofOutput = zkinRecursive1;
+
+        // save publics to filestarks
+        json2file(publicStarkJson, pProverRequest->publicsOutputFile());
+
+        // Save output to file
+        if (config.saveOutputToFile)
+        {
+            json2file(pProverRequest->blobInnerProofOutput, pProverRequest->filePrefix + "blob_inner_proof.output.json");
+        }
+        // Save proof to file
+        if (config.saveProofToFile)
+        {
+            jProofRecursive1["publics"] = publicStarkJson;
+            json2file(jProofRecursive1, pProverRequest->filePrefix + "blob_inner_proof.proof.json");
+        }
+        TimerStopAndLog(SAVE_PROOF);
+    }
+
+    TimerStopAndLog(PROVER_BLOB_INNER_PROOF);
+}
+
+void Prover::genBlobOuterProof (ProverRequest *pProverRequest){
+
+    zkassert(config.generateProof());
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_genBlobOuterProof);
+
+    TimerStart(PROVER_BLOB_OUTER_PROOF);
 
     printMemoryInfo(true);
     printProcessInfo(true);
@@ -655,78 +1065,186 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     // Save input to file
     if (config.saveInputToFile)
     {
-        json2file(pProverRequest->aggregatedProofInput1, pProverRequest->filePrefix + "aggregated_proof.input_1.json");
-        json2file(pProverRequest->aggregatedProofInput2, pProverRequest->filePrefix + "aggregated_proof.input_2.json");
+        json2file(pProverRequest->blobOuterProofInputBatch, pProverRequest->filePrefix + "blob_outer_proof.input_batch.json");
+        json2file(pProverRequest->blobOuterProofInputBlobInner, pProverRequest->filePrefix + "blob_outer_proof.input_blob_inner.json");
     }
-
-    // Input is pProverRequest->aggregatedProofInput1 and pProverRequest->aggregatedProofInput2 (of type json)
-
-    ordered_json verKey;
-    file2json(config.recursive2Verkey, verKey);
 
     // ----------------------------------------------
     // CHECKS
     // ----------------------------------------------
-    // Check chainID
+    
+    // Todo...
 
-    if (pProverRequest->aggregatedProofInput1["publics"][17] != pProverRequest->aggregatedProofInput2["publics"][17])
+    // ----------------------------------------------
+    // JOIN PUBLICS AND GET COMMITED POLS
+    // ----------------------------------------------
+    ordered_json blobOuterVerkeyJson;
+    file2json(config.blobOuterVerkey, blobOuterVerkeyJson);
+
+    json zkinInputBlobOuter = joinzkinBlobOuter(pProverRequest->blobOuterProofInputBatch, pProverRequest->blobOuterProofInputBlobInner, blobOuterVerkeyJson, pProverRequest->blobOuterProofInputBatch["chain_id"].dump(), starkBlobOuter->starkInfo.starkStruct.steps.size());    
+
+    Goldilocks::Element blobOuterVerkey[4];
+    blobOuterVerkey[0] = Goldilocks::fromU64(blobOuterVerkeyJson["constRoot"][0]);
+    blobOuterVerkey[1] = Goldilocks::fromU64(blobOuterVerkeyJson["constRoot"][1]);
+    blobOuterVerkey[2] = Goldilocks::fromU64(blobOuterVerkeyJson["constRoot"][2]);
+    blobOuterVerkey[3] = Goldilocks::fromU64(blobOuterVerkeyJson["constRoot"][3]);
+
+    Goldilocks::Element publics[starkBlobOuter->starkInfo.nPublics];
+    for (uint64_t i = 0; i < starkBlobOuter->starkInfo.nPublics; i++)
     {
-        zklog.error("Prover::genAggregatedProof() Inputs has different chainId " + pProverRequest->aggregatedProofInput1["publics"][17].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][17].dump());
+        publics[i] = Goldilocks::fromString(zkinInputBlobOuter["publics"][i]);
+    }
+
+    CommitPolsStarks cmPolsBlobOuter(pAddress, (1 << starkBlobOuter->starkInfo.starkStruct.nBits), starkBlobOuter->starkInfo.nCm1);
+    //note: this must be changed by CircomBlobOuter::getCommitedPols
+    CircomRecursive2::getCommitedPols(&cmPolsBlobOuter, config.blobOuterVerifier, config.blobOuterExec, zkinInputBlobOuter, (1 << starkBlobOuter->starkInfo.starkStruct.nBits), starkBlobOuter->starkInfo.nCm1);
+
+    // void *pointerCmBlobOuterPols = mapFile("config/blob_outer/blob_outer.commit", cmPolsBlobOuter.size(), true);
+    // memcpy(pointerCmBlobOuterPols, cmPolsBlobOuter.address(), cmPolsBlobOuter.size());
+    // unmapFile(pointerCmBlobOuterPols, cmPolsBlobOuter.size());
+
+    //-------------------------------------------
+    // Generate Blob Outer  proof
+    //-------------------------------------------
+
+    TimerStart(STARK_BLOB_OUTER_PROOF);
+    Recursive2Steps blobOuterChelpersSteps;
+    uint64_t polBitsBlobOuter = starkBlobOuter->getPolBits();
+    FRIProof fproofBlobOuter((1 << polBitsBlobOuter), FIELD_EXTENSION, starkBlobOuter->starkInfo.starkStruct.steps.size(), starkBlobOuter->starkInfo.evMap.size(), starkBlobOuter->starkInfo.nPublics);
+    starkBlobOuter->genProof(fproofBlobOuter, publics, blobOuterVerkey, &blobOuterChelpersSteps);
+    TimerStopAndLog(STARK_BLOB_OUTER_PROOF);
+
+    // Save the proof & zkinproof
+    nlohmann::ordered_json jProofBlobOuter = fproofBlobOuter.proofs.proof2json();
+    nlohmann::ordered_json zkinBlobOuter = proof2zkinStark(jProofBlobOuter);
+    zkinBlobOuter["publics"] = zkinInputBlobOuter["publics"];
+
+    // Output is pProverRequest->blobOuterProofOutput (of type json)
+    pProverRequest->blobOuterProofOutput = zkinBlobOuter;
+
+    // Save output to file
+    if (config.saveOutputToFile)
+    {
+        json2file(pProverRequest->blobOuterProofOutput, pProverRequest->filePrefix + "blob_outer_proof.output.json");
+    }
+    // Save proof to file
+    if (config.saveProofToFile)
+    {
+        jProofBlobOuter["publics"] = zkinInputBlobOuter["publics"];
+        json2file(jProofBlobOuter, pProverRequest->filePrefix + "blob_outer_proof.proof.json");
+    }
+
+
+    json2file(zkinInputBlobOuter["publics"], pProverRequest->publicsOutputFile());
+    
+    pProverRequest->result = ZKR_SUCCESS;
+
+    TimerStopAndLog(PROVER_BLOB_OUTER_PROOF);
+};
+
+void Prover::genAggregatedBatchProof (ProverRequest *pProverRequest)
+{
+
+    zkassert(config.generateProof());
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_genAggregatedBatchProof);
+
+    TimerStart(PROVER_AGGREGATED_BATCH_PROOF);
+
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
+    // Save input to file
+    if (config.saveInputToFile)
+    {
+        json2file(pProverRequest->aggregatedBatchProofInput1, pProverRequest->filePrefix + "aggregated_batch_proof.input_1.json");
+        json2file(pProverRequest->aggregatedBatchProofInput2, pProverRequest->filePrefix + "aggregated_batch_proof.input_2.json");
+    }
+
+    // ----------------------------------------------
+    // CHECKS
+    // ----------------------------------------------
+    
+    // Check chainID
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][25] != pProverRequest->aggregatedBatchProofInput2["publics"][25])
+    {
+        zklog.error("Prover::genAggregatedBatchProof() Inputs has different chainId " + pProverRequest->aggregatedBatchProofInput1["publics"][25].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][25].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
-    if (pProverRequest->aggregatedProofInput1["publics"][18] != pProverRequest->aggregatedProofInput2["publics"][18])
+    // Check ForkID
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][26] != pProverRequest->aggregatedBatchProofInput2["publics"][26])
     {
-        zklog.error("Prover::genAggregatedProof() Inputs has different forkId " + pProverRequest->aggregatedProofInput1["publics"][18].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][18].dump());
+        zklog.error("Prover::genAggregatedBatchProof() Inputs has different forkId " + pProverRequest->aggregatedBatchProofInput1["publics"][26].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][26].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     // Check midStateRoot
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedProofInput1["publics"][19 + i] != pProverRequest->aggregatedProofInput2["publics"][0 + i])
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][27 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][0 + i])
         {
-            zklog.error("Prover::genAggregatedProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedProofInput1["publics"][19 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][0 + i].dump());
+            zklog.error("Prover::genAggregatedBatchProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedBatchProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][0 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
     }
-    // Check midAccInputHash0
+    // Check midBatchAccInputHash0
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedProofInput1["publics"][27 + i] != pProverRequest->aggregatedProofInput2["publics"][8 + i])
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][35 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][8 + i])
         {
-            zklog.error("Prover::genAggregatedProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][8 + i].dump());
+            zklog.error("Prover::genAggregatedBatchProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][35 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][8 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
     }
-    // Check batchNum
-    if (pProverRequest->aggregatedProofInput1["publics"][43] != pProverRequest->aggregatedProofInput2["publics"][16])
+    // Check midL1InfoTreeRoot
+    for (int i = 0; i < 8; i++)
     {
-        zklog.error("Prover::genAggregatedProof() newBatchNum and oldBatchNum are not consistent" + pProverRequest->aggregatedProofInput1["publics"][43].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][16].dump());
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][43 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][16 + i])
+        {
+            zklog.error("Prover::genAggregatedBatchProof() previousL1InfoTreeRoot and currentL1InfoTreeRoot are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][43 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][16 + i].dump());
+            pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
+            return;
+        }
+    }
+    // Check midL1InfoTreeIndex
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][51] != pProverRequest->aggregatedBatchProofInput2["publics"][24])
+    {
+        zklog.error("Prover::genAggregatedBatchProof() previousL1InfoTreeIndex and currentL1InfoTreeIndex are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][51].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][24].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
 
-    json zkinInputRecursive2 = joinzkin(pProverRequest->aggregatedProofInput1, pProverRequest->aggregatedProofInput2, verKey, starksRecursive2->starkInfo.starkStruct.steps.size());
-    json recursive2Verkey;
-    file2json(config.recursive2Verkey, recursive2Verkey);
+    // ----------------------------------------------
+    // JOIN PUBLICS AND GET COMMITED POLS
+    // ----------------------------------------------
+    ordered_json recursive2VerkeyJson;
+    file2json(config.recursive2Verkey, recursive2VerkeyJson);
 
-    Goldilocks::Element publics[starksRecursive2->starkInfo.nPublics];
+    json zkinInputRecursive2 = joinzkinBatchRecursive2(pProverRequest->aggregatedBatchProofInput1, pProverRequest->aggregatedBatchProofInput2, recursive2VerkeyJson, starkBatchRecursive2->starkInfo.starkStruct.steps.size());
 
-    for (uint64_t i = 0; i < starkZkevm->starkInfo.nPublics; i++)
+    Goldilocks::Element recursive2Verkey[4];
+    recursive2Verkey[0] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][0]);
+    recursive2Verkey[1] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][1]);
+    recursive2Verkey[2] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][2]);
+    recursive2Verkey[3] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][3]);
+
+    Goldilocks::Element publics[starkBatchRecursive2->starkInfo.nPublics];
+
+    for (uint64_t i = 0; i < starkBatch->starkInfo.nPublics; i++)
     {
         publics[i] = Goldilocks::fromString(zkinInputRecursive2["publics"][i]);
     }
 
-    for (uint64_t i = 0; i < recursive2Verkey["constRoot"].size(); i++)
+    for (uint64_t i = 0; i < recursive2VerkeyJson["constRoot"].size(); i++)
     {
-        publics[starkZkevm->starkInfo.nPublics + i] = Goldilocks::fromU64(recursive2Verkey["constRoot"][i]);
+        publics[starkBatch->starkInfo.nPublics + i] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][i]);
     }
 
-    CommitPolsStarks cmPolsRecursive2(pAddress, (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.nCm1);
-    CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2, (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.nCm1);
+    CommitPolsStarks cmPolsRecursive2(pAddress, (1 << starkBatchRecursive2->starkInfo.starkStruct.nBits), starkBatchRecursive2->starkInfo.nCm1);
+    CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2, (1 << starkBatchRecursive2->starkInfo.starkStruct.nBits), starkBatchRecursive2->starkInfo.nCm1);
 
     // void *pointerCmRecursive2Pols = mapFile("config/recursive2/recursive2.commit", cmPolsRecursive2.size(), true);
     // memcpy(pointerCmRecursive2Pols, cmPolsRecursive2.address(), cmPolsRecursive2.size());
@@ -737,10 +1255,10 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     //-------------------------------------------
 
     TimerStart(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
-    uint64_t polBitsRecursive2 = starksRecursive2->starkInfo.starkStruct.steps[starksRecursive2->starkInfo.starkStruct.steps.size() - 1].nBits;
-    FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starksRecursive2->starkInfo.starkStruct.steps.size(), starksRecursive2->starkInfo.evMap.size(), starksRecursive2->starkInfo.nPublics);
-    Recursive2Steps recursive2Steps;
-    starksRecursive2->genProof(fproofRecursive2, publics, &recursive2Steps);
+    Recursive2Steps recursive2ChelpersSteps;
+    uint64_t polBitsRecursive2 = starkBatchRecursive2->getPolBits();
+    FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starkBatchRecursive2->starkInfo.starkStruct.steps.size(), starkBatchRecursive2->starkInfo.evMap.size(), starkBatchRecursive2->starkInfo.nPublics);
+    starkBatchRecursive2->genProof(fproofRecursive2, publics, recursive2Verkey, &recursive2ChelpersSteps);
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
@@ -748,44 +1266,199 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     nlohmann::ordered_json zkinRecursive2 = proof2zkinStark(jProofRecursive2);
     zkinRecursive2["publics"] = zkinInputRecursive2["publics"];
 
-    // Output is pProverRequest->aggregatedProofOutput (of type json)
-    pProverRequest->aggregatedProofOutput = zkinRecursive2;
+    // Output is pProverRequest->aggregatedBatchProofOutput (of type json)
+    pProverRequest->aggregatedBatchProofOutput = zkinRecursive2;
 
     // Save output to file
     if (config.saveOutputToFile)
     {
-        json2file(pProverRequest->aggregatedProofOutput, pProverRequest->filePrefix + "aggregated_proof.output.json");
+        json2file(pProverRequest->aggregatedBatchProofOutput, pProverRequest->filePrefix + "aggregated_batch_proof.output.json");
     }
     // Save proof to file
     if (config.saveProofToFile)
     {
         jProofRecursive2["publics"] = zkinInputRecursive2["publics"];
-        json2file(jProofRecursive2, pProverRequest->filePrefix + "aggregated_proof.proof.json");
+        json2file(jProofRecursive2, pProverRequest->filePrefix + "aggregated_batch_proof.proof.json");
     }
 
     // Add the recursive2 verification key
     json publicsJson = json::array();
-
-    file2json(config.recursive2Verkey, recursive2Verkey);
-
-    for (uint64_t i = 0; i < starkZkevm->starkInfo.nPublics; i++)
+    for (uint64_t i = 0; i < starkBatch->starkInfo.nPublics; i++)
     {
         publicsJson[i] = zkinInputRecursive2["publics"][i];
     }
     // Add the recursive2 verification key
-    publicsJson[44] = to_string(recursive2Verkey["constRoot"][0]);
-    publicsJson[45] = to_string(recursive2Verkey["constRoot"][1]);
-    publicsJson[46] = to_string(recursive2Verkey["constRoot"][2]);
-    publicsJson[47] = to_string(recursive2Verkey["constRoot"][3]);
+    publicsJson[61] = to_string(recursive2VerkeyJson["constRoot"][0]);
+    publicsJson[62] = to_string(recursive2VerkeyJson["constRoot"][1]);
+    publicsJson[63] = to_string(recursive2VerkeyJson["constRoot"][2]);
+    publicsJson[64] = to_string(recursive2VerkeyJson["constRoot"][3]);
 
     json2file(publicsJson, pProverRequest->publicsOutputFile());
 
     pProverRequest->result = ZKR_SUCCESS;
 
-    TimerStopAndLog(PROVER_AGGREGATED_PROOF);
+    TimerStopAndLog(PROVER_AGGREGATED_BATCH_PROOF);
 }
 
-void Prover::genFinalProof(ProverRequest *pProverRequest)
+void Prover::genAggregatedBlobOuterProof (ProverRequest *pProverRequest){
+    
+    zkassert(config.generateProof());
+    zkassert(pProverRequest != NULL);
+    zkassert(pProverRequest->type == prt_genAggregatedBlobOuterProof);
+
+    TimerStart(PROVER_AGGREGATED_BLOB_OUTER_PROOF);
+
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
+    // Save input to file
+    if (config.saveInputToFile)
+    {
+        json2file(pProverRequest->aggregatedBlobOuterProofInput1, pProverRequest->filePrefix + "aggregated_blob_outer_proof.input_1.json");
+        json2file(pProverRequest->aggregatedBlobOuterProofInput2, pProverRequest->filePrefix + "aggregated_blob_outer_proof.input_2.json");
+    }
+
+    // ----------------------------------------------
+    // CHECKS
+    // ----------------------------------------------
+    
+    // Check chainID
+    if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][25] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][25])
+    {
+        zklog.error("Prover::genAggregatedBlobOuterProof() Inputs has different chainId " + pProverRequest->aggregatedBlobOuterProofInput1["publics"][26].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][26].dump());
+        pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
+        return;
+    }
+    // Check ForkID
+    if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][26] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][26])
+    {
+        zklog.error("Prover::genAggregatedBlobOuterProof() Inputs has different forkId " + pProverRequest->aggregatedBlobOuterProofInput1["publics"][27].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][27].dump());
+        pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
+        return;
+    }
+    // Check midStateRoot
+    for (int i = 0; i < 8; i++)
+    {
+        if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][27 + i] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][0 + i])
+        {
+            zklog.error("Prover::genAggregatedBlobOuterProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedBlobOuterProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][0 + i].dump());
+            pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
+            return;
+        }
+       
+    }
+    // Check midBlobStateRoot
+    for (int i = 0; i < 8; i++)
+    {
+        if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][35 + i] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][8 + i])
+        {
+            zklog.error("Prover::genAggregatedBlobOuterProof() newBlobStateRoot and oldBlobStateRoot are not consistent" + pProverRequest->aggregatedBlobOuterProofInput1["publics"][35 + i].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][8 + i].dump());
+            pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
+            return;
+        }
+    }
+    // Check midBlobAccInputHash
+    for (int i = 0; i < 8; i++)
+    {
+        if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][43 + i] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][16 + i])
+        {
+            zklog.error("Prover::genAggregatedBlobOuterProof() newBlobAccInputHash and oldBlobAccInputHash are not consistent" + pProverRequest->aggregatedBlobOuterProofInput1["publics"][43 + i].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][16 + i].dump());
+            pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
+            return;
+        }
+    }
+    // Check midNumBlob
+    if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][51] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][24])
+    {
+        zklog.error("Prover::genAggregatedBlobOuterProof() newNumBlob and oldNumBlob are not consistent" + pProverRequest->aggregatedBlobOuterProofInput1["publics"][51].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][24].dump());
+        pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
+        return;
+    }
+
+    // ----------------------------------------------
+    // JOIN PUBLICS AND GET COMMITED POLS
+    // ----------------------------------------------
+    ordered_json recursive2VerkeyJson;
+    file2json(config.blobOuterRecursive2Verkey, recursive2VerkeyJson);
+
+    json zkinInputRecursive2 = joinzkinBlobOuterRecursive2(pProverRequest->aggregatedBlobOuterProofInput1, pProverRequest->aggregatedBlobOuterProofInput2, recursive2VerkeyJson, starkBlobOuterRecursive2->starkInfo.starkStruct.steps.size());
+
+    Goldilocks::Element recursive2Verkey[4];
+    recursive2Verkey[0] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][0]);
+    recursive2Verkey[1] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][1]);
+    recursive2Verkey[2] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][2]);
+    recursive2Verkey[3] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][3]);
+
+    Goldilocks::Element publics[starkBlobOuterRecursive2->starkInfo.nPublics];
+
+    for (uint64_t i = 0; i < starkBlobOuter->starkInfo.nPublics; i++)
+    {
+        publics[i] = Goldilocks::fromString(zkinInputRecursive2["publics"][i]);
+    }
+
+    for (uint64_t i = 0; i < recursive2VerkeyJson["constRoot"].size(); i++)
+    {
+        publics[starkBlobOuter->starkInfo.nPublics + i] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][i]);
+    }
+
+    CommitPolsStarks cmPolsRecursive2(pAddress, (1 << starkBlobOuterRecursive2->starkInfo.starkStruct.nBits), starkBlobOuterRecursive2->starkInfo.nCm1);
+    CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.blobOuterRecursive2Verkey, config.blobOuterRecursive2Exec, zkinInputRecursive2, (1 << starkBlobOuterRecursive2->starkInfo.starkStruct.nBits), starkBlobOuterRecursive2->starkInfo.nCm1);
+
+    // void *pointerCmRecursive2Pols = mapFile("config/blob_outer_recursive2/blob_outer_recursive2.commit", cmPolsRecursive2.size(), true);
+    // memcpy(pointerCmRecursive2Pols, cmPolsRecursive2.address(), cmPolsRecursive2.size());
+    // unmapFile(pointerCmRecursive2Pols, cmPolsRecursive2.size());
+
+    //-------------------------------------------
+    // Generate Recursive 2 proof
+    //-------------------------------------------
+
+    TimerStart(STARK_RECURSIVE_2_PROOF_BLOB_OUTER_PROOF);
+    Recursive2Steps blobOuterRecursive2ChelpersSteps;
+    uint64_t polBitsRecursive2 = starkBlobOuterRecursive2->getPolBits();
+    FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starkBlobOuterRecursive2->starkInfo.starkStruct.steps.size(), starkBlobOuterRecursive2->starkInfo.evMap.size(), starkBlobOuterRecursive2->starkInfo.nPublics);
+    starkBlobOuterRecursive2->genProof(fproofRecursive2, publics, recursive2Verkey, &blobOuterRecursive2ChelpersSteps);
+    TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BLOB_OUTER_PROOF);
+
+    // Save the proof & zkinproof
+    nlohmann::ordered_json jProofRecursive2 = fproofRecursive2.proofs.proof2json();
+    nlohmann::ordered_json zkinRecursive2 = proof2zkinStark(jProofRecursive2);
+    zkinRecursive2["publics"] = zkinInputRecursive2["publics"];
+
+    // Output is pProverRequest->aggregatedBlobOuterProofOutput (of type json)
+    pProverRequest->aggregatedBlobOuterProofOutput = zkinRecursive2;
+
+    // Save output to file
+    if (config.saveOutputToFile)
+    {
+        json2file(pProverRequest->aggregatedBlobOuterProofOutput, pProverRequest->filePrefix + "aggregated_blob_outer_proof.output.json");
+    }
+    // Save proof to file
+    if (config.saveProofToFile)
+    {
+        jProofRecursive2["publics"] = zkinInputRecursive2["publics"];
+        json2file(jProofRecursive2, pProverRequest->filePrefix + "aggregated_blob_outer_proof.proof.json");
+    }
+
+    // Add the recursive2 verification key
+    json publicsJson = json::array();
+    for (uint64_t i = 0; i < starkBlobOuter->starkInfo.nPublics; i++)
+    {
+        publicsJson[i] = zkinInputRecursive2["publics"][i];
+    }
+    // Add the recursive2 verification key
+    publicsJson[60] = to_string(recursive2VerkeyJson["constRoot"][0]);
+    publicsJson[61] = to_string(recursive2VerkeyJson["constRoot"][1]);
+    publicsJson[62] = to_string(recursive2VerkeyJson["constRoot"][2]);
+    publicsJson[63] = to_string(recursive2VerkeyJson["constRoot"][3]);
+
+    json2file(publicsJson, pProverRequest->publicsOutputFile());
+
+    pProverRequest->result = ZKR_SUCCESS;
+
+    TimerStopAndLog(PROVER_AGGREGATED_BLOB_OUTER_PROOF);
+};
+
+void Prover::genFinalProof (ProverRequest *pProverRequest)
 {
     zkassert(config.generateProof());
     zkassert(pProverRequest != NULL);
@@ -809,7 +1482,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     json zkinFinal = pProverRequest->finalProofInput;
 
     Goldilocks::Element publics[starksRecursiveF->starkInfo.nPublics];
-
     for (uint64_t i = 0; i < starksRecursiveF->starkInfo.nPublics; i++)
     {
         publics[i] = Goldilocks::fromString(zkinFinal["publics"][i]);
@@ -948,23 +1620,26 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     TimerStopAndLog(PROVER_FINAL_PROOF);
 }
 
-void Prover::execute(ProverRequest *pProverRequest)
+void Prover::executeBatch (ProverRequest *pProverRequest)
 {
     zkassert(!config.generateProof());
     zkassert(pProverRequest != NULL);
 
-    TimerStart(PROVER_EXECUTE);
+    TimerStart(PROVER_EXECUTE_BATCH);
 
     printMemoryInfo(true);
     printProcessInfo(true);
 
-    zkassert(pProverRequest != NULL);
+    zklog.info("Prover::executeBatch() timestamp: " + pProverRequest->timestamp);
+    zklog.info("Prover::executeBatch() UUID: " + pProverRequest->uuid);
+    zklog.info("Prover::executeBatch() input file: " + pProverRequest->inputFile());
 
-    zklog.info("Prover::execute() timestamp: " + pProverRequest->timestamp);
-    zklog.info("Prover::execute() UUID: " + pProverRequest->uuid);
-    zklog.info("Prover::execute() input file: " + pProverRequest->inputFile());
-    // zklog.info("Prover::execute() public file: " + pProverRequest->publicsOutputFile());
-    // zklog.info("Prover::execute() proof file: " + pProverRequest->proofFile());
+    // In proof-generation executions we can only process the exact number of steps
+    if (pProverRequest->input.stepsN > 0)
+    {
+        zklog.error("Prover::executeBatch() called with input.stepsN=" + to_string(pProverRequest->input.stepsN));
+        exitProcess();
+    }
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -980,23 +1655,23 @@ void Prover::execute(ProverRequest *pProverRequest)
 
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
-    uint64_t polsSize = PROVER_FORK_NAMESPACE::CommitPols::pilSize();
+    uint64_t commitPolsSize = PROVER_FORK_NAMESPACE::CommitPols::pilSize();
     void *pExecuteAddress = NULL;
 
     if (config.zkevmCmPols.size() > 0)
     {
-        pExecuteAddress = mapFile(config.zkevmCmPols, polsSize, true);
-        zklog.info("Prover::execute() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
+        pExecuteAddress = mapFile(config.zkevmCmPols, commitPolsSize, true);
+        zklog.info("Prover::executeBatch() successfully mapped " + to_string(commitPolsSize) + " bytes to file " + config.zkevmCmPols);
     }
     else
     {
-        pExecuteAddress = calloc(polsSize, 1);
+        pExecuteAddress = calloc(commitPolsSize, 1);
         if (pExecuteAddress == NULL)
         {
-            zklog.error("Prover::execute() failed calling malloc() of size " + to_string(polsSize));
+            zklog.error("Prover::executeBatch() failed calling calloc() of size " + to_string(commitPolsSize));
             exitProcess();
         }
-        zklog.info("Prover::execute() successfully allocated " + to_string(polsSize) + " bytes");
+        zklog.info("Prover::executeBatch() successfully allocated " + to_string(commitPolsSize) + " bytes");
     }
 
     /************/
@@ -1006,9 +1681,11 @@ void Prover::execute(ProverRequest *pProverRequest)
     PROVER_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
 
     // Execute all the State Machines
-    TimerStart(EXECUTOR_EXECUTE_EXECUTE);
-    executor.execute(*pProverRequest, cmPols);
-    TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE);
+    TimerStart(EXECUTOR_EXECUTE_EXECUTE_BATCH);
+    executor.executeBatch(*pProverRequest, cmPols);
+    TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE_BATCH);
+
+    logBatchExecutionInfo(cmPols, pProverRequest);
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
     if (config.saveDbReadsToFile)
@@ -1035,12 +1712,139 @@ void Prover::execute(ProverRequest *pProverRequest)
     // Unmap committed polynomials address
     if (config.zkevmCmPols.size() > 0)
     {
-        unmapFile(pExecuteAddress, polsSize);
+        unmapFile(pExecuteAddress, commitPolsSize);
     }
     else
     {
         free(pExecuteAddress);
     }
 
-    TimerStopAndLog(PROVER_EXECUTE);
+    TimerStopAndLog(PROVER_EXECUTE_BATCH);
+}
+
+void Prover::executeBlobInner (ProverRequest *pProverRequest)
+{
+    zkassert(!config.generateProof());
+    zkassert(pProverRequest != NULL);
+
+    TimerStart(PROVER_EXECUTE_BLOB_INNER);
+
+    printMemoryInfo(true);
+    printProcessInfo(true);
+
+    zkassert(pProverRequest != NULL);
+
+    zklog.info("Prover::executeBlobInner() timestamp: " + pProverRequest->timestamp);
+    zklog.info("Prover::executeBlobInner() UUID: " + pProverRequest->uuid);
+    zklog.info("Prover::executeBlobInner() input file: " + pProverRequest->inputFile());
+
+    // In proof-generation executions we can only process the exact number of steps
+    if (pProverRequest->input.stepsN > 0)
+    {
+        zklog.error("Prover::executeBlobInner() called with input.stepsN=" + to_string(pProverRequest->input.stepsN));
+        exitProcess();
+    }
+
+    // Save input to <timestamp>.input.json, as provided by client
+    if (config.saveInputToFile)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        json2file(inputJson, pProverRequest->inputFile());
+    }
+
+    /*******************/
+    /* Allocate memory */
+    /*******************/
+
+    // Allocate an area of memory, mapped to file, to store all the committed polynomials,
+    // and create them using the allocated address
+    uint64_t blobInnerCmPolsSize = PROVER_BLOB_FORK_NAMESPACE::CommitPols::pilSize();
+    void *pExecuteAddress = NULL;
+
+    if (config.blobInnerCmPols.size() > 0)
+    {
+        pExecuteAddress = mapFile(config.blobInnerCmPols, blobInnerCmPolsSize, true);
+        zklog.info("Prover::executeBlobInner() successfully mapped " + to_string(blobInnerCmPolsSize) + " bytes to file " + config.blobInnerCmPols);
+    }
+    else
+    {
+        pExecuteAddress = calloc(blobInnerCmPolsSize, 1);
+        if (pExecuteAddress == NULL)
+        {
+            zklog.error("Prover::executeBlobInner() failed calling calloc() of size " + to_string(blobInnerCmPolsSize));
+            exitProcess();
+        }
+        zklog.info("Prover::executeBlobInner() successfully allocated " + to_string(blobInnerCmPolsSize) + " bytes");
+    }
+
+    /************/
+    /* Executor */
+    /************/
+
+    PROVER_BLOB_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, PROVER_BLOB_FORK_NAMESPACE::CommitPols::pilDegree());
+
+    // Execute all the State Machines
+    TimerStart(EXECUTOR_EXECUTE_EXECUTE_BLOB_INNER);
+    executor.executeBlobInner(*pProverRequest, cmPols);
+    TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE_BLOB_INNER);
+
+    logBlobInnerExecutionInfo(cmPols, pProverRequest);
+
+    /***************/
+    /* Free memory */
+    /***************/
+
+    // Unmap committed polynomials address
+    if (config.blobInnerCmPols.size() > 0)
+    {
+        unmapFile(pExecuteAddress, blobInnerCmPolsSize);
+    }
+    else
+    {
+        free(pExecuteAddress);
+    }
+
+    TimerStopAndLog(PROVER_EXECUTE_BLOB_INNER);
+}
+
+void Prover::logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest)
+{
+    zkassert(pProverRequest != NULL);
+    uint64_t lastN = cmPols.pilDegree() - 1;
+    // log old and new BlobStateRoot
+    // note: we need /*pProverRequest->pFullTracer->get_blob_new_state_root()*/
+    zklog.info("Prover::genBlobInnerProof() called executor.executeBlobInner() oldBlobStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16) +
+        " newBlobStateRoot=" /*+ pProverRequest->pFullTracer->get_blob_new_state_root()*/ +
+        " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
+        " pols.B[lastN]=" + fea2string(fr, cmPols.Main.B0[lastN], cmPols.Main.B1[lastN], cmPols.Main.B2[lastN], cmPols.Main.B3[lastN], cmPols.Main.B4[lastN], cmPols.Main.B5[lastN], cmPols.Main.B6[lastN], cmPols.Main.B7[lastN]) +
+        " lastN=" + to_string(lastN));
+
+    // log old and new BlobAccInputHash
+    // note: we need /*pProverRequest->pFullTracer->get_new_blob_acc_input_hash() */
+    zklog.info("Prover::genBlobInnerProof() called executor.executeBlobInner() oldBlobAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16) +
+        " newBlobAccInputHash=" /* + pProverRequest->pFullTracer->get_new_blob_acc_input_hash()*/ +
+        " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
+        " pols.C[lastN]=" + fea2string(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
+        " lastN=" + to_string(lastN));   
+}
+
+void Prover::logBlobInnerExecutionInfo(PROVER_BLOB_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest)
+{
+    uint64_t lastN = cmPols.pilDegree() - 1;
+    // log old and new BlobStateRoot
+    // note: we need /*pProverRequest->pFullTracer->get_blob_new_state_root()*/
+    zklog.info("Prover::genBlobInnerProof() called executor.executeBlobInner() oldBlobStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16) +
+        " newBlobStateRoot=" /*+ pProverRequest->pFullTracer->get_blob_new_state_root()*/ +
+        " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
+        " pols.B[lastN]=" + fea2string(fr, cmPols.Main.B0[lastN], cmPols.Main.B1[lastN], cmPols.Main.B2[lastN], cmPols.Main.B3[lastN], cmPols.Main.B4[lastN], cmPols.Main.B5[lastN], cmPols.Main.B6[lastN], cmPols.Main.B7[lastN]) +
+        " lastN=" + to_string(lastN));
+
+    // log old and new BlobAccInputHash
+    // note: we need /*pProverRequest->pFullTracer->get_new_blob_acc_input_hash() */
+    zklog.info("Prover::genBlobInnerProof() called executor.executeBlobInner() oldBlobAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16) +
+        " newBlobAccInputHash=" /* + pProverRequest->pFullTracer->get_new_blob_acc_input_hash()*/ +
+        " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
+        " pols.C[lastN]=" + fea2string(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
+        " lastN=" + to_string(lastN));
 }

@@ -21,12 +21,14 @@ public:
     Database &db;
     bool bUseStateManager;
     const string &batchUUID;
+    uint64_t block;
     uint64_t tx;
     const Persistence persistence;
-    SmtContext(Database &db, bool bUseStateManager, const string &batchUUID, uint64_t tx, const Persistence persistence) :
+    SmtContext(Database &db, bool bUseStateManager, const string &batchUUID, uint64_t block, uint64_t tx, const Persistence persistence) :
         db(db),
         bUseStateManager(bUseStateManager),
         batchUUID(batchUUID),
+        block(block),
         tx(tx),
         persistence(persistence) {};
 };
@@ -51,11 +53,8 @@ public:
         capacityOne[2] = fr.zero();
         capacityOne[3] = fr.zero();
     }
-    zkresult set(const string &batchUUID, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
+    zkresult set(const string &batchUUID, uint64_t block, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult get(const string &batchUUID, Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
-    void splitKey(const Goldilocks::Element (&key)[4], bool (&result)[256]);
-    void joinKey(const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4]);
-    void removeKeyBits(const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4]);
     zkresult hashSave(const SmtContext &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4]);
 
     // Consolidate value and capacity

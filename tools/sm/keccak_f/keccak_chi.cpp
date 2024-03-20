@@ -1,5 +1,6 @@
-#include "keccak_state.hpp"
+#include "keccak.hpp"
 #include "keccak_rc.hpp"
+#include "gate_state.hpp"
 
 /*
 Keccak-f Chi permutation.
@@ -9,7 +10,7 @@ Steps:
 2. Return A′
 */
 
-void KeccakChi (KeccakState &S, uint64_t ir)
+void KeccakChi (GateState &S, uint64_t ir)
 {
     // Init KeccakRC, if required
     KeccakRCInit();

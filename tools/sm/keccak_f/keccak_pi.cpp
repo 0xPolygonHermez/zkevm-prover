@@ -1,4 +1,5 @@
-#include "keccak_state.hpp"
+#include "gate_state.hpp"
+#include "keccak.hpp"
 
 /*
 Keccak-f Pi permutation.
@@ -8,7 +9,7 @@ A′[x, y, z]= A[(x + 3y) mod 5, x, z].
 2. Return A′.
 */
 
-void KeccakPi (KeccakState &S)
+void KeccakPi (GateState &S)
 {
     // A′[x, y, z]= A[(x + 3y) mod 5, x, z]
     for (uint64_t x=0; x<5; x++)

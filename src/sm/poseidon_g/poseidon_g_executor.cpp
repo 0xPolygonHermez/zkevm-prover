@@ -104,123 +104,151 @@ Goldilocks::Element C[] = {
     0, 0, 0, 0
 };
 
-void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 17>> &input, PoseidonGCommitPols &pols)
+void PoseidonGExecutor::execute (   vector<array<Goldilocks::Element, 17>> &inputMain,
+                                    vector<array<Goldilocks::Element, 17>> &inputPadding, 
+                                    vector<array<Goldilocks::Element, 17>> &inputStorage, 
+                                    PoseidonGCommitPols &pols)
 {
+    uint64_t sizeMain = inputMain.size();
+    uint64_t sizePadding = inputPadding.size();
+    uint64_t sizeStorage = inputStorage.size();
+    uint64_t size = sizeMain + sizePadding + sizeStorage;
+
     // Check input size
-    if (input.size() > maxHashes)
+    if (size > maxHashes)
     {
-        zklog.error("PoseidonGExecutor::execute() Not enough Poseidon slots input.size()=" + to_string(input.size()) + " > maxHashes=" + to_string(maxHashes));
+        zklog.error("PoseidonGExecutor::execute() Not enough Poseidon slots inputs size=" + to_string(size) + " > maxHashes=" + to_string(maxHashes));
         exitProcess();
     }
 
     uint64_t p = 0;
     uint64_t pDone = 0;
 
-    for (uint64_t i=0; i<input.size(); i++)
-    {
-        pols.in0[p] = input[i][0];
-        pols.in1[p] = input[i][1];
-        pols.in2[p] = input[i][2];
-        pols.in3[p] = input[i][3];
-        pols.in4[p] = input[i][4];
-        pols.in5[p] = input[i][5];
-        pols.in6[p] = input[i][6];
-        pols.in7[p] = input[i][7];
-        pols.hashType[p] = input[i][8];
-        pols.cap1[p] = input[i][9];
-        pols.cap2[p] = input[i][10];
-        pols.cap3[p] = input[i][11];
-        pols.hash0[p] = input[i][12];
-        pols.hash1[p] = input[i][13];
-        pols.hash2[p] = input[i][14];
-        pols.hash3[p] = input[i][15];
-        uint64_t permutation = fr.toU64(input[i][16]);
-        switch (permutation)
-        {
-            case POSEIDONG_PERMUTATION1_ID:
-                pols.result1[p] = fr.one();
-                break;
-            case POSEIDONG_PERMUTATION2_ID:
-                pols.result2[p] = fr.one();
-                break;
-            case POSEIDONG_PERMUTATION3_ID:
-                pols.result3[p] = fr.one();
-                break;
-            case POSEIDONG_PERMUTATION4_ID:
-                // pols.result4[p] = fr.one();
-                break;
-            default:
-                zklog.error("PoseidonGExecutor::execute() got an invalid permutation=" + to_string(permutation) + " at input i=" + to_string(i));
-                exitProcess();
-                break;
-        }
+    vector<array<Goldilocks::Element, 17>> * input = NULL;
+    uint64_t sizeIn=0;
 
-        p += 1;
+    for(int k=0; k<3; k++){
         
-        array<Goldilocks::Element,12> state= {
-            pols.in0[p-1], 
-            pols.in1[p-1], 
-            pols.in2[p-1], 
-            pols.in3[p-1], 
-            pols.in4[p-1], 
-            pols.in5[p-1], 
-            pols.in6[p-1], 
-            pols.in7[p-1], 
-            pols.hashType[p-1], 
-            pols.cap1[p-1], 
-            pols.cap2[p-1], 
-            pols.cap3[p-1] };
-
-        for (uint64_t r=0; r < nRoundsF + nRoundsP; r++)
+        //Select input
+        if(k==0){
+            input = &inputMain;
+            sizeIn = sizeMain;
+        } else if(k==1){
+            input = &inputPadding;
+            sizeIn = sizePadding;
+        } else if(k==2){
+            input = &inputStorage;
+            sizeIn = sizeStorage;
+        }
+        
+        //Execute
+        for (uint64_t i=0; i<sizeIn; i++)
         {
-            for (uint64_t s=0; s<12; s++)
+            
+            pols.in0[p] = (*input)[i][0];
+            pols.in1[p] = (*input)[i][1];
+            pols.in2[p] = (*input)[i][2];
+            pols.in3[p] = (*input)[i][3];
+            pols.in4[p] = (*input)[i][4];
+            pols.in5[p] = (*input)[i][5];
+            pols.in6[p] = (*input)[i][6];
+            pols.in7[p] = (*input)[i][7];
+            pols.hashType[p] = (*input)[i][8];
+            pols.cap1[p] = (*input)[i][9];
+            pols.cap2[p] = (*input)[i][10];
+            pols.cap3[p] = (*input)[i][11];
+            pols.hash0[p] = (*input)[i][12];
+            pols.hash1[p] = (*input)[i][13];
+            pols.hash2[p] = (*input)[i][14];
+            pols.hash3[p] = (*input)[i][15];
+            uint64_t permutation = fr.toU64((*input)[i][16]);
+            switch (permutation)
             {
-                state[s] = fr.add(state[s], C[r*t + s]);
+                case POSEIDONG_PERMUTATION1_ID:
+                    pols.result1[p] = fr.one();
+                    break;
+                case POSEIDONG_PERMUTATION2_ID:
+                    pols.result2[p] = fr.one();
+                    break;
+                case POSEIDONG_PERMUTATION3_ID:
+                    pols.result3[p] = fr.one();
+                    break;
+                case POSEIDONG_PERMUTATION4_ID:
+                    // pols.result4[p] = fr.one();
+                    break;
+                default:
+                    zklog.error("PoseidonGExecutor::execute() got an invalid permutation=" + to_string(permutation) + " at input k=" + to_string(k) + " i=" + to_string(i));
+                    exitProcess();
+                    break;
             }
 
-            if ( (r < (nRoundsF/2)) || (r >= ((nRoundsF/2) + nRoundsP)) )
+            p += 1;
+            
+            array<Goldilocks::Element,12> state= {
+                pols.in0[p-1], 
+                pols.in1[p-1], 
+                pols.in2[p-1], 
+                pols.in3[p-1], 
+                pols.in4[p-1], 
+                pols.in5[p-1], 
+                pols.in6[p-1], 
+                pols.in7[p-1], 
+                pols.hashType[p-1], 
+                pols.cap1[p-1], 
+                pols.cap2[p-1], 
+                pols.cap3[p-1] };
+
+            for (uint64_t r=0; r < nRoundsF + nRoundsP; r++)
             {
                 for (uint64_t s=0; s<12; s++)
                 {
-                    state[s] = pow7(state[s]);
+                    state[s] = fr.add(state[s], C[r*t + s]);
                 }
-            }
-            else
-            {
-                state[0] = pow7(state[0]);
-            }
 
-            Goldilocks::Element acc[12];
-            for (uint64_t x=0; x<state.size(); x++)
-            {
-                acc[x] = fr.zero();
-                for (uint64_t y=0; y<state.size(); y++)
+                if ( (r < (nRoundsF/2)) || (r >= ((nRoundsF/2) + nRoundsP)) )
                 {
-                    acc[x] = fr.add(acc[x], fr.mul(state[y], M[x][y]));
+                    for (uint64_t s=0; s<12; s++)
+                    {
+                        state[s] = pow7(state[s]);
+                    }
                 }
-            }
-            for (uint64_t x=0; x<state.size(); x++)
-            {
-                state[x] = acc[x];
-            }
+                else
+                {
+                    state[0] = pow7(state[0]);
+                }
 
-            pols.in0[p] = state[0];
-            pols.in1[p] = state[1];
-            pols.in2[p] = state[2];
-            pols.in3[p] = state[3];
-            pols.in4[p] = state[4];
-            pols.in5[p] = state[5];
-            pols.in6[p] = state[6];
-            pols.in7[p] = state[7];
-            pols.hashType[p] = state[8];
-            pols.cap1[p] = state[9];
-            pols.cap2[p] = state[10];
-            pols.cap3[p] = state[11];
-            pols.hash0[p] = input[i][12];
-            pols.hash1[p] = input[i][13];
-            pols.hash2[p] = input[i][14];
-            pols.hash3[p] = input[i][15];
-            p+=1;
+                Goldilocks::Element acc[12];
+                for (uint64_t x=0; x<state.size(); x++)
+                {
+                    acc[x] = fr.zero();
+                    for (uint64_t y=0; y<state.size(); y++)
+                    {
+                        acc[x] = fr.add(acc[x], fr.mul(state[y], M[x][y]));
+                    }
+                }
+                for (uint64_t x=0; x<state.size(); x++)
+                {
+                    state[x] = acc[x];
+                }
+
+                pols.in0[p] = state[0];
+                pols.in1[p] = state[1];
+                pols.in2[p] = state[2];
+                pols.in3[p] = state[3];
+                pols.in4[p] = state[4];
+                pols.in5[p] = state[5];
+                pols.in6[p] = state[6];
+                pols.in7[p] = state[7];
+                pols.hashType[p] = state[8];
+                pols.cap1[p] = state[9];
+                pols.cap2[p] = state[10];
+                pols.cap3[p] = state[11];
+                pols.hash0[p] = (*input)[i][12];
+                pols.hash1[p] = (*input)[i][13];
+                pols.hash2[p] = (*input)[i][14];
+                pols.hash3[p] = (*input)[i][15];
+                p+=1;
+            }
         }
     }
 
@@ -291,7 +319,7 @@ void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 17>> &input, 
         p+=1;
     }
 
-    zklog.info("PoseidonGExecutor successfully processed " + to_string(input.size()) + " Poseidon hashes p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
+    zklog.info("PoseidonGExecutor successfully processed " + to_string(size) + " Poseidon hashes p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
 }
 
 Goldilocks::Element PoseidonGExecutor::pow7 (Goldilocks::Element &a)

@@ -7,6 +7,7 @@
 void runHashDBTestBigTree (const Config& config)
 {
     string uuid = getUUID();
+    uint64_t block = 0;
     uint64_t tx = 0;
     Goldilocks fr;
     HashDBInterface * pHashDB = HashDBClientFactory::createHashDBClient(fr,config);
@@ -31,7 +32,7 @@ void runHashDBTestBigTree (const Config& config)
         //key[2] = fr.fromU64(uint64_t(random())*uint64_t(random()));
         //key[3] = fr.fromU64(uint64_t(random())*uint64_t(random()));
 
-        zkresult zkr = pHashDB->set(uuid, tx, root, key, value, PERSISTENCE_DATABASE, root, NULL, NULL );
+        zkresult zkr = pHashDB->set(uuid, block, tx, root, key, value, PERSISTENCE_DATABASE, root, NULL, NULL );
         if (zkr != ZKR_SUCCESS)
         {
             cerr << "Error: i=" << i << " zkr=" << zkr << "=" << zkresult2string(zkr) << endl;

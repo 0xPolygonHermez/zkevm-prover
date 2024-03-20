@@ -58,12 +58,6 @@ public:
     uint64_t section[eSectionMax];
 };
 
-class PolsSectionsVector
-{
-public:
-    vector<uint64_t> section[eSectionMax];
-};
-
 class VarPolMap
 {
 public:
@@ -165,107 +159,6 @@ public:
     }
 };
 
-class StepType
-{
-public:
-    typedef enum
-    {
-        tmp = 0,
-        exp = 1,
-        eval = 2,
-        challenge = 3,
-        tree1 = 4,
-        tree2 = 5,
-        tree3 = 6,
-        tree4 = 7,
-        number = 8,
-        x = 9,
-        Z = 10,
-        _public = 11,
-        xDivXSubXi = 12,
-        xDivXSubWXi = 13,
-        cm = 14,
-        _const = 15,
-        q = 16,
-        Zi = 17,
-        tmpExp = 18,
-        f = 19
-    } eType;
-
-    eType type;
-    uint64_t id;
-    bool prime;
-    uint64_t p;
-    string value;
-
-    void setType (string s)
-    {
-        if (s == "tmp") type = tmp;
-        else if (s == "exp") type = exp;
-        else if (s == "eval") type = eval;
-        else if (s == "challenge") type = challenge;
-        else if (s == "tree1") type = tree1;
-        else if (s == "tree2") type = tree2;
-        else if (s == "tree3") type = tree3;
-        else if (s == "tree4") type = tree4;
-        else if (s == "number") type = number;
-        else if (s == "x") type = x;
-        else if (s == "Z") type = Z;
-        else if (s == "public") type = _public;
-        else if (s == "xDivXSubXi") type = xDivXSubXi;
-        else if (s == "xDivXSubWXi") type = xDivXSubWXi;
-        else if (s == "cm") type = cm;
-        else if (s == "const") type = _const;
-        else if (s == "q") type = q;
-        else if (s == "Zi") type = Zi;
-        else if (s == "tmpExp") type = tmpExp;
-        else if (s == "f") type = f;
-        else
-        {
-            zklog.error("StepType::setType() found invalid type: " + s);
-            exitProcess();
-        }
-    }
-};
-
-class StepOperation
-{
-public:
-    typedef enum
-    {
-        add = 0,
-        sub = 1,
-        mul = 2,
-        copy = 3
-    } eOperation;
-
-    eOperation op;
-    StepType dest;
-    vector<StepType> src;
-
-    void setOperation (string s)
-    {
-        if (s == "add") op = add;
-        else if (s == "sub") op = sub;
-        else if (s == "mul") op = mul;
-        else if (s == "copy") op = copy;
-        else
-        {
-            zklog.error("StepOperation::setOperation() found invalid type: " + s);
-            exitProcess();
-        }
-    }
-};
-
-class Step
-{
-public:
-    vector<StepOperation> first;
-    vector<StepOperation> i;
-    vector<StepOperation> last;
-    uint64_t tmpUsed;
-};
-
 class StarkInfo
 {
     const Config &config;
@@ -286,10 +179,7 @@ public:
 
     PolsSections mapDeg;
     PolsSections mapOffsets;
-    PolsSectionsVector mapSections;
     PolsSections mapSectionsN;
-    PolsSections mapSectionsN1;
-    PolsSections mapSectionsN3;
     vector<VarPolMap> varPolMap;
     vector<uint64_t> qs;
     vector<uint64_t> cm_n;
@@ -298,16 +188,6 @@ public:
     vector<PuCtx> puCtx;
     vector<CiCtx> ciCtx;
     vector<EvMap> evMap;
-    Step step2prev;
-    Step step3prev;
-    Step step3;
-    Step step42ns;
-    Step step52ns;
-    vector<uint64_t> exps_n;
-    vector<uint64_t> q_2nsVector;
-    vector<uint64_t> cm4_nVector;
-    vector<uint64_t> cm4_2nsVector;
-    vector<uint64_t> tmpExp_n;
     map<string,uint64_t> exp2pol;
     
     /* Constructor */

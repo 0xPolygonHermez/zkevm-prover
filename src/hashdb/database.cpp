@@ -333,7 +333,7 @@ zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, co
         if(usingAssociativeCache()){
             Goldilocks::Element vkeyf[4];
             if(vkey == NULL){
-                string2key(fr, _key, vkeyf);
+                string2fea(fr, key, vkeyf);
             }else{
                 vkeyf[0] = vkey[0];
                 vkeyf[1] = vkey[1];
@@ -586,13 +586,13 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
             exitProcess();
         }
 
-        pqxx::row const row = rows[0];
+        const pqxx::row& row = rows[0];
         if (row.size() != 2)
         {
             zklog.error("Database::readRemote() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()));
             exitProcess();
         }
-        pqxx::field const fieldData = row[1];
+        const pqxx::field& fieldData = row[1];
         value = removeBSXIfExists(fieldData.c_str());
     }
     catch (const std::exception &e)
@@ -699,7 +699,7 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
                 if(usingAssociativeCache()){
                     Goldilocks::Element vhash[4];
-                    string2key(fr, hash, vhash);   
+                    string2fea(fr, hash, vhash);   
                     dbMTACache.addKeyValue(vhash, value, false);
                 }else{
                     dbMTCache.add(hash, value, false);
@@ -1350,6 +1350,17 @@ zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlus
 
 zkresult Database::sendData (void)
 {
+    // If we have read-only access to database, just pretend to have sent all data
+    if (config.dbReadOnly)
+    {
+        // If we succeeded, update last sent batch
+        multiWrite.Lock();
+        multiWrite.storedFlushId = multiWrite.storingFlushId;
+        multiWrite.Unlock();
+
+        return ZKR_SUCCESS;
+    }
+
     zkresult zkr = ZKR_SUCCESS;
     
     // Time calculation variables
@@ -1649,7 +1660,7 @@ void Database::printTree(const string &root, string prefix)
     string key = root;
     vector<Goldilocks::Element> value;
     Goldilocks::Element vKey[4];
-    if(Database::useAssociativeCache) string2key(fr, key, vKey);  
+    if(Database::useAssociativeCache) string2fea(fr, key, vKey);  
     read(key,vKey,value, NULL);
 
     if (value.size() != 12)
@@ -1740,6 +1751,7 @@ void Database::clearCache (void)
 {
     dbMTCache.clear();
     dbProgramCache.clear();
+    dbMTACache.clear();
 }
 
 void *dbSenderThread (void *arg)
@@ -2039,7 +2051,8 @@ void loadDb2MemCache(const Config &config)
             hash = treeMapIterator->second[i];
             dbValue.clear();
             Goldilocks::Element vhash[4];
-            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
+            string hashNorm = NormalizeToNFormat(hash, 64);
+            if(pHashDB->db.usingAssociativeCache()) string2fea(fr, hashNorm, vhash);
             zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)
@@ -2111,4 +2124,88 @@ void loadDb2MemCache(const Config &config)
     TimerStopAndLog(LOAD_DB_TO_CACHE);
 
 #endif
+}
+
+zkresult Database::resetDB(void)
+{
+#ifdef DEBUG
+
+    zkresult result = ZKR_SUCCESS;
+
+    // Check that it has  been initialized before
+    if (!bInitialized)
+    {
+        zklog.error("Database::resetDB() called uninitialized");
+        exitProcess();
+    }
+
+    if (useRemoteDB)
+    {
+        // Reset multi write
+        if (config.dbMultiWrite)
+        {
+            multiWrite.Lock();
+            multiWrite.data[0].Reset();
+            multiWrite.data[1].Reset();
+            multiWrite.data[2].Reset();
+            multiWrite.Unlock();
+        }
+    
+        // Reset the remote database
+        string query = "DELETE FROM " + config.dbNodesTableName + "; DELETE FROM " + config.dbProgramTableName + ";";
+        DatabaseConnection * pDatabaseConnection = getConnection();
+        try
+        {        
+
+#ifdef DATABASE_COMMIT
+            if (autoCommit)
+#endif
+            {
+                pqxx::work w(*(pDatabaseConnection->pConnection));
+                pqxx::result res = w.exec(query);
+                w.commit();
+            }
+#ifdef DATABASE_COMMIT
+            else
+            {
+                if (transaction == NULL)
+                    transaction = new pqxx::work{*pConnectionWrite};
+                pqxx::result res = transaction->exec(query);
+            }
+#endif
+        }
+        catch (const std::exception &e)
+        {
+            zklog.error("Database::resetDB() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+            result = ZKR_DB_ERROR;
+            queryFailed();
+        }
+
+        disposeConnection(pDatabaseConnection);
+    }
+
+#ifdef DATABASE_USE_CACHE
+    // Reset the caches
+    if (dbMTCache.enabled())
+    {
+        dbMTCache.clear();
+    }
+    if (dbMTACache.enabled() && usingAssociativeCache())
+    {
+        dbMTACache.clear();
+    }
+#endif
+
+#ifdef LOG_DB
+    zklog.info("Database::resetDB()");
+#endif
+
+    return result;
+
+#else // DEBUG
+
+    zklog.error("Database::resetDB() called while not in debug mode");
+    return ZKR_DB_ERROR;
+
+#endif // DEBUG
 }
