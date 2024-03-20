@@ -316,15 +316,15 @@ namespace CircomRecursive1
     inStream.close();
     loadJsonImpl(ctx, j);
   }
-  void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin, uint64_t N, uint64_t nCols)
+  void getCommitedPols(CommitPolsStarks *commitPols, const std::string recursive1Circuit, const std::string execFile, nlohmann::json &zkin, uint64_t N, uint64_t nCols)
   {
     //-------------------------------------------
     // Verifier stark proof
     //-------------------------------------------
-    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE1);
-    Circom_Circuit *circuit = loadCircuit(zkevmVerifier);
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE1);
-    TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF);
+    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_RECURSIVE_1_PROOF);
+    Circom_Circuit *circuit = loadCircuit(recursive1Circuit);
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_RECURSIVE_1_PROOF);
+    TimerStart(CIRCOM_LOAD_JSON_BATCH_RECURSIVE_1_PROOF);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
 
     loadJsonImpl(ctx, zkin);
@@ -333,12 +333,12 @@ namespace CircomRecursive1
       zklog.error("Prover::genBatchProof() Not all inputs have been set. Only " + to_string(get_main_input_signal_no() - ctx->getRemaingInputsToBeSet()) + " out of " + to_string(get_main_input_signal_no()));
       exitProcess();
     }
-    TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF);
+    TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_RECURSIVE_1_PROOF);
 
     //-------------------------------------------
     // Compute witness and commited pols
     //-------------------------------------------
-    TimerStart(STARK_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
+    TimerStart(STARK_WITNESS_AND_COMMITED_POLS_BATCH_RECURSIVE_1_PROOF);
  
     ExecFile exec(execFile, nCols);
     uint64_t sizeWitness = get_size_of_witness();
@@ -394,7 +394,7 @@ namespace CircomRecursive1
     }
     delete[] tmp;
     freeCircuit(circuit);
-    TimerStopAndLog(STARK_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
+    TimerStopAndLog(STARK_WITNESS_AND_COMMITED_POLS_BATCH_RECURSIVE_1_PROOF);
   }
 
 }

@@ -1008,6 +1008,7 @@ using grpc::Status;
     case ZKR_SM_MAIN_UNRESTORED_SAVED_CONTEXT:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_UNRESTORED_SAVED_CONTEXT;
 
     case ZKR_AGGREGATED_PROOF_INVALID_INPUT: // Only returned when generating a proof
+    case ZKR_BLOB_OUTER_PROOF_INVALID_INPUT: // Only returned when generating a proof
     case ZKR_DB_VERSION_NOT_FOUND_KVDB: // To be mapped to an executor error when HashDB64 is operative
     case ZKR_DB_VERSION_NOT_FOUND_GLOBAL: // To be mapped to an executor error when HashDB64 is operative
     default:

@@ -8,6 +8,10 @@
 #include "main.hpp"
 #include "main.recursive1.hpp"
 #include "main.recursive2.hpp"
+#include "main.blob_inner.hpp"
+#include "main.blob_inner_recursive1.hpp"
+#include "main.blob_outer.hpp"
+#include "main.blob_outer_recursive2.hpp"
 #include "main.recursiveF.hpp"
 #include "main.final.hpp"
 #include "binfile_utils.hpp"
@@ -30,6 +34,11 @@
 #include "Recursive1Steps.hpp"
 #include "Recursive2Steps.hpp"
 #include "RecursiveFSteps.hpp"
+#include "BlobInnerSteps.hpp"
+#include "BlobInnerCompressorSteps.hpp"
+#include "BlobInnerRecursive1Steps.hpp"
+#include "BlobOuterSteps.hpp"
+#include "BlobOuterRecursive2Steps.hpp"
 #include "chelpers_steps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
@@ -750,7 +759,7 @@ void Prover::genBatchProof (ProverRequest *pProverRequest)
         TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
         CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starkBatchRecursive1->starkInfo.starkStruct.nBits), starkBatchRecursive1->starkInfo.nCm1);
-        CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starkBatchRecursive1->starkInfo.starkStruct.nBits), starkBatchRecursive1->starkInfo.nCm1);
+        CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Circuit, config.recursive1Exec, zkinC12a, (1 << starkBatchRecursive1->starkInfo.starkStruct.nBits), starkBatchRecursive1->starkInfo.nCm1);
 
         // void *pointerCmRecursive1Pols = mapFile("config/recursive1/recursive1.commit", cmPolsRecursive1.size(), true);
         // memcpy(pointerCmRecursive1Pols, cmPolsRecursive1.address(), cmPolsRecursive1.size());
@@ -777,6 +786,7 @@ void Prover::genBatchProof (ProverRequest *pProverRequest)
 
         nlohmann::ordered_json jProofRecursive1 = fproofRecursive1.proofs.proof2json();
         nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
+        zkinRecursive1["isAggregatedCircuit"] = "0";
         zkinRecursive1["publics"] = publicStarkJson;
 
         pProverRequest->batchProofOutput = zkinRecursive1;
@@ -900,14 +910,14 @@ void Prover::genBlobInnerProof (ProverRequest *pProverRequest){
         publics[16] = cmPols.Main.RR[0];
 
         // oldStateRoot
-        publics[17] = cmPols.Main.SR0[0];
-        publics[18] = cmPols.Main.SR1[0];
-        publics[19] = cmPols.Main.SR2[0];
-        publics[20] = cmPols.Main.SR3[0];
-        publics[21] = cmPols.Main.SR4[0];
-        publics[22] = cmPols.Main.SR5[0];
-        publics[23] = cmPols.Main.SR6[0];
-        publics[24] = cmPols.Main.SR7[0];
+        publics[17] = cmPols.Main.D0[0];
+        publics[18] = cmPols.Main.D1[0];
+        publics[19] = cmPols.Main.D2[0];
+        publics[20] = cmPols.Main.D3[0];
+        publics[21] = cmPols.Main.D4[0];
+        publics[22] = cmPols.Main.D5[0];
+        publics[23] = cmPols.Main.D6[0];
+        publics[24] = cmPols.Main.D7[0];
 
         // forkID
         publics[25] = cmPols.Main.RCX[0];
@@ -1010,7 +1020,7 @@ void Prover::genBlobInnerProof (ProverRequest *pProverRequest){
         TimerStopAndLog(STARK_JSON_GENERATION_BLOB_INNER_PROOF);
 
         CommitPolsStarks cmPolsCompressor(pAddress, (1 << starkBlobInnerCompressor->starkInfo.starkStruct.nBits), starkBlobInnerCompressor->starkInfo.nCm1);
-        Circom::getCommitedPols(&cmPolsCompressor, config.blobInnerVerifier, config.blobInnerCompressorExec, zkin, (1 << starkBlobInnerCompressor->starkInfo.starkStruct.nBits), starkBlobInnerCompressor->starkInfo.nCm1);
+        CircomBlobInner::getCommitedPols(&cmPolsCompressor, config.blobInnerVerifier, config.blobInnerCompressorExec, zkin, (1 << starkBlobInnerCompressor->starkInfo.starkStruct.nBits), starkBlobInnerCompressor->starkInfo.nCm1);
 
         // void *pointerCmCompressorPols = mapFile("config/blob_inner_compressor/blob_inner_compressor.commit", cmPolsCompressor.size(), true);
         // memcpy(pointerCmCompressorPols, cmPolsCompressor.address(), cmPolsCompressor.size());
@@ -1042,7 +1052,7 @@ void Prover::genBlobInnerProof (ProverRequest *pProverRequest){
         TimerStopAndLog(STARK_JSON_GENERATION_BLOB_INNER_PROOF_COMPRESSOR);
 
         CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starkBlobInnerRecursive1->starkInfo.starkStruct.nBits), starkBlobInnerRecursive1->starkInfo.nCm1);
-        CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.blobInnerRecursive1Verifier, config.blobInnerRecursive1Exec, zkinCompressor, (1 << starkBlobInnerRecursive1->starkInfo.starkStruct.nBits), starkBlobInnerRecursive1->starkInfo.nCm1);
+        CircomBlobInnerRecursive1::getCommitedPols(&cmPolsRecursive1, config.blobInnerRecursive1Circuit, config.blobInnerRecursive1Exec, zkinCompressor, (1 << starkBlobInnerRecursive1->starkInfo.starkStruct.nBits), starkBlobInnerRecursive1->starkInfo.nCm1);
 
         // void *pointerCmRecursive1Pols = mapFile("config/blob_inner_recursive1/blob_inner_recursive1.commit", cmPolsRecursive1.size(), true);
         // memcpy(pointerCmRecursive1Pols, cmPolsRecursive1.address(), cmPolsRecursive1.size());
@@ -1115,15 +1125,58 @@ void Prover::genBlobOuterProof (ProverRequest *pProverRequest){
     // CHECKS
     // ----------------------------------------------
     
-    // Todo...
+    BatchPublics batchPublics;
+    BlobInnerPublics blobInnerPublics;
+
+    bool isInvalidFinalAccBatchHashData = true;
+    for(int i = 0; i < 8; i++) 
+    {
+        if(pProverRequest->blobOuterProofInputBlobInner["publics"][blobInnerPublics.finalAccBatchHashDataPos + i] != to_string(0)) {
+            isInvalidFinalAccBatchHashData = false;
+            break;
+        }
+    }
+
+    bool isInvalidBlob = pProverRequest->blobOuterProofInputBlobInner["publics"][blobInnerPublics.isInvalidPos] == to_string(1);
+
+    if( !isInvalidBlob && !isInvalidFinalAccBatchHashData) {
+        // Check that final acc batch data is the same as the new batch acc input hash
+        for (int i = 0; i < 8; i++)
+        {
+            if (pProverRequest->blobOuterProofInputBatch["publics"][batchPublics.newBatchAccInputHashPos + i] != pProverRequest->blobOuterProofInputBlobInner["publics"][blobInnerPublics.finalAccBatchHashDataPos + i])
+            {
+                zklog.error("Prover::genBlobOuterProof() newBatchAccInputHashPos (batch) and finalAccBatchHashDataPos (blob inner) are not consistent" + pProverRequest->blobOuterProofInputBatch["publics"][batchPublics.newBatchAccInputHashPos + i].dump() + "!=" + pProverRequest->blobOuterProofInputBlobInner["publics"][blobInnerPublics.finalAccBatchHashDataPos + i].dump());
+                pProverRequest->result = ZKR_BLOB_OUTER_PROOF_INVALID_INPUT;
+                return;
+            }
+        }
+
+        // If L1InfoTreeIndex is correct, check that the L1InfoTreeRoot matches
+        bool isInvalidL1InfoTreeIndex = pProverRequest->blobOuterProofInputBatch["publics"][batchPublics.currentL1InfoTreeIndexPos] != pProverRequest->blobOuterProofInputBlobInner["publics"][blobInnerPublics.lastL1InfoTreeIndexPos];
+
+        if (!isInvalidL1InfoTreeIndex) {
+            for (int i = 0; i < 8; i++)
+            {
+                if (pProverRequest->blobOuterProofInputBatch["publics"][batchPublics.currentL1InfoTreeRootPos + i] != pProverRequest->blobOuterProofInputBlobInner["publics"][blobInnerPublics.lastL1InfoTreeRootPos + i])
+                {
+                    zklog.error("Prover::genBlobOuterProof() currentL1InfoTreeRootPos (batch) and lastL1InfoTreeRootPos (blob inner) are not consistent" + pProverRequest->blobOuterProofInputBatch["publics"][batchPublics.currentL1InfoTreeRootPos + i].dump() + "!=" + pProverRequest->blobOuterProofInputBlobInner["publics"][blobInnerPublics.lastL1InfoTreeRootPos + i].dump());
+                    pProverRequest->result = ZKR_BLOB_OUTER_PROOF_INVALID_INPUT;
+                    return;
+                }
+            }
+        }
+    }
 
     // ----------------------------------------------
     // JOIN PUBLICS AND GET COMMITED POLS
     // ----------------------------------------------
+    ordered_json blobOuterRecursive2VerkeyJson;
+    file2json(config.blobOuterRecursive2Verkey, blobOuterRecursive2VerkeyJson);
+
+    json zkinInputBlobOuter = joinzkinBlobOuter(pProverRequest->blobOuterProofInputBatch, pProverRequest->blobOuterProofInputBlobInner, blobOuterRecursive2VerkeyJson, pProverRequest->blobOuterProofInputBatch["chain_id"].dump(), starkBlobOuter->starkInfo.starkStruct.steps.size());    
+
     ordered_json blobOuterVerkeyJson;
     file2json(config.blobOuterVerkey, blobOuterVerkeyJson);
-
-    json zkinInputBlobOuter = joinzkinBlobOuter(pProverRequest->blobOuterProofInputBatch, pProverRequest->blobOuterProofInputBlobInner, blobOuterVerkeyJson, pProverRequest->blobOuterProofInputBatch["chain_id"].dump(), starkBlobOuter->starkInfo.starkStruct.steps.size());    
 
     Goldilocks::Element blobOuterVerkey[4];
     blobOuterVerkey[0] = Goldilocks::fromU64(blobOuterVerkeyJson["constRoot"][0]);
@@ -1138,8 +1191,7 @@ void Prover::genBlobOuterProof (ProverRequest *pProverRequest){
     }
 
     CommitPolsStarks cmPolsBlobOuter(pAddress, (1 << starkBlobOuter->starkInfo.starkStruct.nBits), starkBlobOuter->starkInfo.nCm1);
-    //note: this must be changed by CircomBlobOuter::getCommitedPols
-    CircomRecursive2::getCommitedPols(&cmPolsBlobOuter, config.blobOuterVerifier, config.blobOuterExec, zkinInputBlobOuter, (1 << starkBlobOuter->starkInfo.starkStruct.nBits), starkBlobOuter->starkInfo.nCm1);
+    CircomBlobOuter::getCommitedPols(&cmPolsBlobOuter, config.blobOuterCircuit, config.blobOuterExec, zkinInputBlobOuter, (1 << starkBlobOuter->starkInfo.starkStruct.nBits), starkBlobOuter->starkInfo.nCm1);
 
     // void *pointerCmBlobOuterPols = mapFile("config/blob_outer/blob_outer.commit", cmPolsBlobOuter.size(), true);
     // memcpy(pointerCmBlobOuterPols, cmPolsBlobOuter.address(), cmPolsBlobOuter.size());
@@ -1213,26 +1265,28 @@ void Prover::genAggregatedBatchProof (ProverRequest *pProverRequest)
     // CHECKS
     // ----------------------------------------------
     
+    BatchPublics batchPublics;
+
     // Check chainID
-    if (pProverRequest->aggregatedBatchProofInput1["publics"][25] != pProverRequest->aggregatedBatchProofInput2["publics"][25])
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.chainIdPos] != pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.chainIdPos])
     {
-        zklog.error("Prover::genAggregatedBatchProof() Inputs has different chainId " + pProverRequest->aggregatedBatchProofInput1["publics"][25].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][25].dump());
+        zklog.error("Prover::genAggregatedBatchProof() Inputs has different chainId " + pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.chainIdPos].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.chainIdPos].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     // Check ForkID
-    if (pProverRequest->aggregatedBatchProofInput1["publics"][26] != pProverRequest->aggregatedBatchProofInput2["publics"][26])
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.forkIdPos] != pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.forkIdPos])
     {
-        zklog.error("Prover::genAggregatedBatchProof() Inputs has different forkId " + pProverRequest->aggregatedBatchProofInput1["publics"][26].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][26].dump());
+        zklog.error("Prover::genAggregatedBatchProof() Inputs has different forkId " + pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.forkIdPos].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.forkIdPos].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     // Check midStateRoot
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedBatchProofInput1["publics"][27 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][0 + i])
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.newStateRootPos + i] != pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.oldStateRootPos + i])
         {
-            zklog.error("Prover::genAggregatedBatchProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedBatchProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][0 + i].dump());
+            zklog.error("Prover::genAggregatedBatchProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.newStateRootPos + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.oldStateRootPos + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
@@ -1240,9 +1294,9 @@ void Prover::genAggregatedBatchProof (ProverRequest *pProverRequest)
     // Check midBatchAccInputHash0
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedBatchProofInput1["publics"][35 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][8 + i])
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.newBatchAccInputHashPos + i] != pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.oldBatchAccInputHashPos + i])
         {
-            zklog.error("Prover::genAggregatedBatchProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][35 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][8 + i].dump());
+            zklog.error("Prover::genAggregatedBatchProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.newBatchAccInputHashPos + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.oldBatchAccInputHashPos + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
@@ -1250,17 +1304,17 @@ void Prover::genAggregatedBatchProof (ProverRequest *pProverRequest)
     // Check midL1InfoTreeRoot
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedBatchProofInput1["publics"][43 + i] != pProverRequest->aggregatedBatchProofInput2["publics"][16 + i])
+        if (pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.currentL1InfoTreeRootPos + i] != pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.previousL1InfoTreeRootPos + i])
         {
-            zklog.error("Prover::genAggregatedBatchProof() previousL1InfoTreeRoot and currentL1InfoTreeRoot are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][43 + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][16 + i].dump());
+            zklog.error("Prover::genAggregatedBatchProof() previousL1InfoTreeRoot and currentL1InfoTreeRoot are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.currentL1InfoTreeRootPos + i].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.previousL1InfoTreeRootPos + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
     }
     // Check midL1InfoTreeIndex
-    if (pProverRequest->aggregatedBatchProofInput1["publics"][51] != pProverRequest->aggregatedBatchProofInput2["publics"][24])
+    if (pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.currentL1InfoTreeIndexPos] != pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.previousL1InfoTreeIndexPos])
     {
-        zklog.error("Prover::genAggregatedBatchProof() previousL1InfoTreeIndex and currentL1InfoTreeIndex are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][51].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][24].dump());
+        zklog.error("Prover::genAggregatedBatchProof() previousL1InfoTreeIndex and currentL1InfoTreeIndex are not consistent" + pProverRequest->aggregatedBatchProofInput1["publics"][batchPublics.currentL1InfoTreeIndexPos].dump() + "!=" + pProverRequest->aggregatedBatchProofInput2["publics"][batchPublics.previousL1InfoTreeIndexPos].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
@@ -1292,7 +1346,7 @@ void Prover::genAggregatedBatchProof (ProverRequest *pProverRequest)
     }
 
     CommitPolsStarks cmPolsRecursive2(pAddress, (1 << starkBatchRecursive2->starkInfo.starkStruct.nBits), starkBatchRecursive2->starkInfo.nCm1);
-    CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2, (1 << starkBatchRecursive2->starkInfo.starkStruct.nBits), starkBatchRecursive2->starkInfo.nCm1);
+    CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.recursive2Circuit, config.recursive2Exec, zkinInputRecursive2, (1 << starkBatchRecursive2->starkInfo.starkStruct.nBits), starkBatchRecursive2->starkInfo.nCm1);
 
     // void *pointerCmRecursive2Pols = mapFile("config/recursive2/recursive2.commit", cmPolsRecursive2.size(), true);
     // memcpy(pointerCmRecursive2Pols, cmPolsRecursive2.address(), cmPolsRecursive2.size());
@@ -1318,6 +1372,7 @@ void Prover::genAggregatedBatchProof (ProverRequest *pProverRequest)
     // Save the proof & zkinproof
     nlohmann::ordered_json jProofRecursive2 = fproofRecursive2.proofs.proof2json();
     nlohmann::ordered_json zkinRecursive2 = proof2zkinStark(jProofRecursive2);
+    zkinRecursive2["isAggregatedCircuit"] = "1";
     zkinRecursive2["publics"] = zkinInputRecursive2["publics"];
 
     // Output is pProverRequest->aggregatedBatchProofOutput (of type json)
@@ -1342,10 +1397,10 @@ void Prover::genAggregatedBatchProof (ProverRequest *pProverRequest)
         publicsJson[i] = zkinInputRecursive2["publics"][i];
     }
     // Add the recursive2 verification key
-    publicsJson[61] = to_string(recursive2VerkeyJson["constRoot"][0]);
-    publicsJson[62] = to_string(recursive2VerkeyJson["constRoot"][1]);
-    publicsJson[63] = to_string(recursive2VerkeyJson["constRoot"][2]);
-    publicsJson[64] = to_string(recursive2VerkeyJson["constRoot"][3]);
+    publicsJson[starkBatch->starkInfo.nPublics] = to_string(recursive2VerkeyJson["constRoot"][0]);
+    publicsJson[starkBatch->starkInfo.nPublics + 1] = to_string(recursive2VerkeyJson["constRoot"][1]);
+    publicsJson[starkBatch->starkInfo.nPublics + 2] = to_string(recursive2VerkeyJson["constRoot"][2]);
+    publicsJson[starkBatch->starkInfo.nPublics + 3] = to_string(recursive2VerkeyJson["constRoot"][3]);
 
     json2file(publicsJson, pProverRequest->publicsOutputFile());
 
@@ -1376,26 +1431,28 @@ void Prover::genAggregatedBlobOuterProof (ProverRequest *pProverRequest){
     // CHECKS
     // ----------------------------------------------
     
+    BlobOuterPublics blobOuterPublics;
+
     // Check chainID
-    if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][25] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][25])
+    if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.chainIdPos] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.chainIdPos])
     {
-        zklog.error("Prover::genAggregatedBlobOuterProof() Inputs has different chainId " + pProverRequest->aggregatedBlobOuterProofInput1["publics"][26].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][26].dump());
+        zklog.error("Prover::genAggregatedBlobOuterProof() Inputs has different chainId " + pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.chainIdPos].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.chainIdPos].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     // Check ForkID
-    if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][26] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][26])
+    if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.forkIdPos] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.forkIdPos])
     {
-        zklog.error("Prover::genAggregatedBlobOuterProof() Inputs has different forkId " + pProverRequest->aggregatedBlobOuterProofInput1["publics"][27].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][27].dump());
+        zklog.error("Prover::genAggregatedBlobOuterProof() Inputs has different forkId " + pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.forkIdPos].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.forkIdPos].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     // Check midStateRoot
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][27 + i] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][0 + i])
+        if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.newStateRootPos + i] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.oldStateRootPos + i])
         {
-            zklog.error("Prover::genAggregatedBlobOuterProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedBlobOuterProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][0 + i].dump());
+            zklog.error("Prover::genAggregatedBlobOuterProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.newStateRootPos + i].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.oldStateRootPos + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
@@ -1404,9 +1461,9 @@ void Prover::genAggregatedBlobOuterProof (ProverRequest *pProverRequest){
     // Check midBlobStateRoot
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][35 + i] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][8 + i])
+        if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.newBlobStateRootPos + i] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.oldBlobStateRootPos + i])
         {
-            zklog.error("Prover::genAggregatedBlobOuterProof() newBlobStateRoot and oldBlobStateRoot are not consistent" + pProverRequest->aggregatedBlobOuterProofInput1["publics"][35 + i].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][8 + i].dump());
+            zklog.error("Prover::genAggregatedBlobOuterProof() newBlobStateRoot and oldBlobStateRoot are not consistent" + pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.newBlobStateRootPos + i].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.oldBlobStateRootPos + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
@@ -1414,17 +1471,17 @@ void Prover::genAggregatedBlobOuterProof (ProverRequest *pProverRequest){
     // Check midBlobAccInputHash
     for (int i = 0; i < 8; i++)
     {
-        if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][43 + i] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][16 + i])
+        if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.newBlobAccInputHashPos + i] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.oldBlobAccInputHashPos + i])
         {
-            zklog.error("Prover::genAggregatedBlobOuterProof() newBlobAccInputHash and oldBlobAccInputHash are not consistent" + pProverRequest->aggregatedBlobOuterProofInput1["publics"][43 + i].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][16 + i].dump());
+            zklog.error("Prover::genAggregatedBlobOuterProof() newBlobAccInputHash and oldBlobAccInputHash are not consistent" + pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.newBlobAccInputHashPos + i].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.oldBlobAccInputHashPos + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
     }
     // Check midNumBlob
-    if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][51] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][24])
+    if (pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.newBlobNumPos] != pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.oldBlobNumPos])
     {
-        zklog.error("Prover::genAggregatedBlobOuterProof() newNumBlob and oldNumBlob are not consistent" + pProverRequest->aggregatedBlobOuterProofInput1["publics"][51].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][24].dump());
+        zklog.error("Prover::genAggregatedBlobOuterProof() newNumBlob and oldNumBlob are not consistent" + pProverRequest->aggregatedBlobOuterProofInput1["publics"][blobOuterPublics.newBlobNumPos].dump() + "!=" + pProverRequest->aggregatedBlobOuterProofInput2["publics"][blobOuterPublics.oldBlobNumPos].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
@@ -1432,16 +1489,16 @@ void Prover::genAggregatedBlobOuterProof (ProverRequest *pProverRequest){
     // ----------------------------------------------
     // JOIN PUBLICS AND GET COMMITED POLS
     // ----------------------------------------------
-    ordered_json recursive2VerkeyJson;
-    file2json(config.blobOuterRecursive2Verkey, recursive2VerkeyJson);
+    ordered_json blobOuterRecursive2VerkeyJson;
+    file2json(config.blobOuterRecursive2Verkey, blobOuterRecursive2VerkeyJson);
 
-    json zkinInputRecursive2 = joinzkinBlobOuterRecursive2(pProverRequest->aggregatedBlobOuterProofInput1, pProverRequest->aggregatedBlobOuterProofInput2, recursive2VerkeyJson, starkBlobOuterRecursive2->starkInfo.starkStruct.steps.size());
+    json zkinInputRecursive2 = joinzkinBlobOuterRecursive2(pProverRequest->aggregatedBlobOuterProofInput1, pProverRequest->aggregatedBlobOuterProofInput2, blobOuterRecursive2VerkeyJson, starkBlobOuterRecursive2->starkInfo.starkStruct.steps.size());
 
     Goldilocks::Element recursive2Verkey[4];
-    recursive2Verkey[0] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][0]);
-    recursive2Verkey[1] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][1]);
-    recursive2Verkey[2] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][2]);
-    recursive2Verkey[3] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][3]);
+    recursive2Verkey[0] = Goldilocks::fromU64(blobOuterRecursive2VerkeyJson["constRoot"][0]);
+    recursive2Verkey[1] = Goldilocks::fromU64(blobOuterRecursive2VerkeyJson["constRoot"][1]);
+    recursive2Verkey[2] = Goldilocks::fromU64(blobOuterRecursive2VerkeyJson["constRoot"][2]);
+    recursive2Verkey[3] = Goldilocks::fromU64(blobOuterRecursive2VerkeyJson["constRoot"][3]);
 
     Goldilocks::Element publics[starkBlobOuterRecursive2->starkInfo.nPublics];
 
@@ -1450,13 +1507,13 @@ void Prover::genAggregatedBlobOuterProof (ProverRequest *pProverRequest){
         publics[i] = Goldilocks::fromString(zkinInputRecursive2["publics"][i]);
     }
 
-    for (uint64_t i = 0; i < recursive2VerkeyJson["constRoot"].size(); i++)
+    for (uint64_t i = 0; i < blobOuterRecursive2VerkeyJson["constRoot"].size(); i++)
     {
-        publics[starkBlobOuter->starkInfo.nPublics + i] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][i]);
+        publics[starkBlobOuter->starkInfo.nPublics + i] = Goldilocks::fromU64(blobOuterRecursive2VerkeyJson["constRoot"][i]);
     }
 
     CommitPolsStarks cmPolsRecursive2(pAddress, (1 << starkBlobOuterRecursive2->starkInfo.starkStruct.nBits), starkBlobOuterRecursive2->starkInfo.nCm1);
-    CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.blobOuterRecursive2Verkey, config.blobOuterRecursive2Exec, zkinInputRecursive2, (1 << starkBlobOuterRecursive2->starkInfo.starkStruct.nBits), starkBlobOuterRecursive2->starkInfo.nCm1);
+    CircomBlobOuterRecursive2::getCommitedPols(&cmPolsRecursive2, config.blobOuterRecursive2Verkey, config.blobOuterRecursive2Exec, zkinInputRecursive2, (1 << starkBlobOuterRecursive2->starkInfo.starkStruct.nBits), starkBlobOuterRecursive2->starkInfo.nCm1);
 
     // void *pointerCmRecursive2Pols = mapFile("config/blob_outer_recursive2/blob_outer_recursive2.commit", cmPolsRecursive2.size(), true);
     // memcpy(pointerCmRecursive2Pols, cmPolsRecursive2.address(), cmPolsRecursive2.size());
@@ -1506,10 +1563,10 @@ void Prover::genAggregatedBlobOuterProof (ProverRequest *pProverRequest){
         publicsJson[i] = zkinInputRecursive2["publics"][i];
     }
     // Add the recursive2 verification key
-    publicsJson[60] = to_string(recursive2VerkeyJson["constRoot"][0]);
-    publicsJson[61] = to_string(recursive2VerkeyJson["constRoot"][1]);
-    publicsJson[62] = to_string(recursive2VerkeyJson["constRoot"][2]);
-    publicsJson[63] = to_string(recursive2VerkeyJson["constRoot"][3]);
+    publicsJson[starkBlobOuter->starkInfo.nPublics ] = to_string(blobOuterRecursive2VerkeyJson["constRoot"][0]);
+    publicsJson[starkBlobOuter->starkInfo.nPublics + 1] = to_string(blobOuterRecursive2VerkeyJson["constRoot"][1]);
+    publicsJson[starkBlobOuter->starkInfo.nPublics + 2] = to_string(blobOuterRecursive2VerkeyJson["constRoot"][2]);
+    publicsJson[starkBlobOuter->starkInfo.nPublics + 3] = to_string(blobOuterRecursive2VerkeyJson["constRoot"][3]);
 
     json2file(publicsJson, pProverRequest->publicsOutputFile());
 
@@ -1548,7 +1605,7 @@ void Prover::genFinalProof (ProverRequest *pProverRequest)
     }
 
     CommitPolsStarks cmPolsRecursiveF(pAddressStarksRecursiveF, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.nCm1);
-    CircomRecursiveF::getCommitedPols(&cmPolsRecursiveF, config.recursivefVerifier, config.recursivefExec, zkinFinal, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.nCm1);
+    CircomRecursiveF::getCommitedPols(&cmPolsRecursiveF, config.recursivefCircuit, config.recursivefExec, zkinFinal, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.nCm1);
 
     // void *pointercmPolsRecursiveF = mapFile("config/recursivef/recursivef.commit", cmPolsRecursiveF.size(), true);
     // memcpy(pointercmPolsRecursiveF, cmPolsRecursiveF.address(), cmPolsRecursiveF.size());
@@ -1586,11 +1643,11 @@ void Prover::genFinalProof (ProverRequest *pProverRequest)
     }
 
     //  ----------------------------------------------
-    //  Verifier final
+    //  Final proof
     //  ----------------------------------------------
 
     TimerStart(CIRCOM_LOAD_CIRCUIT_FINAL);
-    CircomFinal::Circom_Circuit *circuitFinal = CircomFinal::loadCircuit(config.finalVerifier);
+    CircomFinal::Circom_Circuit *circuitFinal = CircomFinal::loadCircuit(config.finalCircuit);
     TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_FINAL);
 
     TimerStart(CIRCOM_FINAL_LOAD_JSON);
@@ -1874,7 +1931,7 @@ void Prover::executeBlobInner (ProverRequest *pProverRequest)
     TimerStopAndLog(PROVER_EXECUTE_BLOB_INNER);
 }
 
-void Prover::logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest)
+void Prover::logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols &cmPols, ProverRequest *pProverRequest)
 {
     zkassert(pProverRequest != NULL);
     uint64_t lastN = cmPols.pilDegree() - 1;
@@ -1895,7 +1952,7 @@ void Prover::logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, Pr
         " lastN=" + to_string(lastN));   
 }
 
-void Prover::logBlobInnerExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest)
+void Prover::logBlobInnerExecutionInfo(PROVER_BLOB_FORK_NAMESPACE::CommitPols &cmPols, ProverRequest *pProverRequest)
 {
     uint64_t lastN = cmPols.pilDegree() - 1;
     // log old and new BlobStateRoot

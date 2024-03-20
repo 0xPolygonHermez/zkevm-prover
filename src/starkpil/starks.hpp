@@ -216,6 +216,16 @@ public:
             chelpers.loadCHelpers(cHelpersBinFile.get());
         }
         TimerStopAndLog(CHELPERS_ALLOCATION);
+
+        if(starkInfo.mapOffsets.section[eSection::cm1_2ns] < starkInfo.mapOffsets.section[eSection::tmpExp_n]) {
+            optimizeMemoryNTTCommitPols = true;
+        }
+
+        uint64_t currentSectionStart = starkInfo.mapOffsets.section[eSection::cm3_n] * sizeof(Goldilocks::Element);
+        uint64_t nttHelperSize = starkInfo.mapSectionsN.section[eSection::cm3_n] * NExtended * sizeof(Goldilocks::Element);
+        if(currentSectionStart > nttHelperSize) {
+            optimizeMemoryNTT = true;
+        }
     };
     ~Starks()
     {
