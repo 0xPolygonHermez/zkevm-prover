@@ -18,7 +18,6 @@
 #include "sm/pols_generated/constant_pols.hpp"
 
 
-#include "starkRecursiveF.hpp"
 #include "starkpil/stark_info.hpp"
 #include "starks.hpp"
 #include "constant_pols_starks.hpp"
@@ -29,18 +28,20 @@ class Prover
     PoseidonGoldilocks &poseidon;
     Executor executor;
 
-    StarkRecursiveF *starksRecursiveF;
+    Starks<RawFr::Element> *starksRecursiveF;
 
-    Starks *starkZkevm;
-    Starks *starksC12a;
-    Starks *starksRecursive1;
-    Starks *starksRecursive2;
+    Starks<Goldilocks::Element> *starkZkevm;
+    Starks<Goldilocks::Element> *starksC12a;
+    Starks<Goldilocks::Element> *starksRecursive1;
+    Starks<Goldilocks::Element> *starksRecursive2;
 
     Fflonk::FflonkProver<AltBn128::Engine> *prover;
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
     std::unique_ptr<ZKeyUtils::Header> zkeyHeader;
     mpz_t altBbn128r;
+
+    uint64_t polsSize;
 
 public:
     unordered_map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
@@ -54,21 +55,26 @@ private:
     pthread_t cleanerPthread; // Garbage collector
     pthread_mutex_t mutex;    // Mutex to protect the requests queues
     void *pAddress = NULL;
+    bool externalAllocated;
     void *pAddressStarksRecursiveF = NULL;
     int protocolId;
+    bool optimizeMemoryNTT = false;
+    bool optimizeMemoryNTTCommitPols = false;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
     string lastComputedRequestId;
     uint64_t lastComputedRequestEndTime;
-
+    
     Prover(Goldilocks &fr,
            PoseidonGoldilocks &poseidon,
-           const Config &config);
+           const Config &config,
+           void *pAddress = NULL);
 
     ~Prover();
 
     void genBatchProof(ProverRequest *pProverRequest);
+    void genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t lastN, ProverRequest *pProverRequest);
     void genAggregatedProof(ProverRequest *pProverRequest);
     void genFinalProof(ProverRequest *pProverRequest);
     void processBatch(ProverRequest *pProverRequest);
@@ -79,6 +85,13 @@ public:
 
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
+
+    // pMainRequests used to pass requests to transfer requets to Rust proof manager
+    inline void setMainSMRequestsPointer(void *pMainSMRequests_){pMainSMRequests= pMainSMRequests_;};
+    private:
+    void *pMainSMRequests;
+
+
 };
 
 void *proverThread(void *arg);

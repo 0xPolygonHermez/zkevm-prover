@@ -4,42 +4,48 @@
 #include <math.h>
 #include "fr.hpp"
 #include "goldilocks_base_field.hpp"
+#include "goldilocks_cubic_extension.hpp"
 #include "poseidon_opt.hpp"
-
-#define MT_BN128_ARITY 16
-#define GOLDILOCKS_ELEMENTS 3
-#define HASH_SIZE 4
+#include "zklog.hpp"
 
 class MerkleTreeBN128
 {
 private:
-    void fromGoldilocksToBN128(Goldilocks::Element *source);
     void linearHash();
 
+    Goldilocks::Element getElement(uint64_t idx, uint64_t subIdx);
+    void genMerkleProof(RawFr::Element *proof, uint64_t idx, uint64_t offset, uint64_t n);
+
 public:
-    RawFr::Element *nodes;
-    Goldilocks::Element *source;
+    MerkleTreeBN128(){};
+    MerkleTreeBN128(Goldilocks::Element *tree);
+    MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *source);
+    ~MerkleTreeBN128();
+
     uint64_t numNodes;
     uint64_t height;
     uint64_t width;
-    uint64_t source_width;
-    bool intialized = false;
+
+    RawFr::Element *nodes;
+    Goldilocks::Element *source;
+
     bool isSourceAllocated = false;
     bool isNodesAllocated = false;
-    MerkleTreeBN128(){};
-    MerkleTreeBN128(uint64_t _height, uint64_t _width);
-    MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *source);
-    MerkleTreeBN128(void *source);
-    ~MerkleTreeBN128();
+
+    uint64_t arity = 16;
+    uint64_t elementSize = 1;
+
+    uint64_t getNumSiblings();
+    uint64_t getMerkleTreeWidth();
+    uint64_t getMerkleProofSize();
+    uint64_t getMerkleProofLength();
+
+    uint64_t getNumNodes(uint64_t height);
     void getRoot(RawFr::Element *root);
-    static uint64_t getNumNodes(uint64_t n);
-    static uint64_t getMerkleProofLength(uint64_t n);
-    static uint64_t getMerkleProofSize(uint64_t n);
-    RawFr::Element *address() { return nodes; };
-    void getGroupProof(void *res, uint64_t idx);
-    Goldilocks::Element getElement(uint64_t idx, uint64_t subIdx);
-    void merkle_genMerkleProof(RawFr::Element *proof, uint64_t idx, uint64_t offset, uint64_t n);
-    void initialize(Goldilocks::Element *source);
+    void copySource(Goldilocks::Element *source);
+
+    void getGroupProof(RawFr::Element *proof, uint64_t idx);
+    
     void merkelize();
 };
 #endif

@@ -73,22 +73,8 @@
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
 #define USE_NEW_KVTREE
 
-#define MAIN_SM_EXECUTOR_GENERATED_CODE
+// #define MAIN_SM_EXECUTOR_GENERATED_CODE
 
 //#define MULTI_ROM_TEST
-
-#define USE_CHELPERS_PARSER
-
-/* chelpers defines */
-#ifdef USE_CHELPERS_PARSER
-    #ifndef __AVX512__
-        #define NROWS_STEPS_ 4
-    #else
-        #define NROWS_STEPS_ 8
-    #endif
-#else
-#define NROWS_STEPS_ 1
-#endif
-
 
 #endif

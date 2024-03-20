@@ -13,6 +13,9 @@
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
+#ifdef __ZKEVM_SM__
+#include "zkevm_sm.h"
+#endif
 
 // Reduced version: only 1 evaluation is allocated, and some asserts are disabled
 void Executor::process_batch (ProverRequest &proverRequest)
@@ -450,7 +453,7 @@ void* Sha256Thread (void* arg)
 }
 
 // Full version: all polynomials are evaluated, in all evaluations
-void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols)
+void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols, void* pMainSMRequests)
 {
     if (!config.executeInParallel)
     {
@@ -486,6 +489,14 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
+
+#ifdef __ZKEVM_SM__
+        if(pMainSMRequests!=NULL){
+            TimerStart(MAIN_SM_REQUESTS_COPY);
+            add_binary_inputs((void *)pMainSMRequests, (void *)required.Binary.data(), required.Binary.size());
+            TimerStopAndLog(MAIN_SM_REQUESTS_COPY);
+        }
+#endif
 
         if (proverRequest.result != ZKR_SUCCESS)
         {

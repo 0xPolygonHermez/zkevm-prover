@@ -6095,7 +6095,8 @@ code += "    #endif\n";
     }
 
     code += "    // Set the error (all previous errors generated a return)\n";
-    code += "    proverRequest.result = ZKR_SUCCESS;\n";
+    code += "    if (proverRequest.result != ZKR_SM_MAIN_CLOSE_BATCH)\n";
+    code += "        proverRequest.result = ZKR_SUCCESS;\n";
 
     code += "    // Check that we did not run out of steps during the execution\n";
     code += "    if (ctx.lastStep == 0)\n";

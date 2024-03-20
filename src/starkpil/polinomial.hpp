@@ -6,6 +6,7 @@
 #include "compare_fe.hpp"
 #include <math.h> /* log2 */
 #include "zklog.hpp"
+#include "zkassert.hpp"
 #include "exit_process.hpp"
 
 class Polinomial
@@ -107,7 +108,7 @@ public:
         return res;
     }
 
-    static void copy(Polinomial &a, Polinomial &b, uint64_t size = 0)
+    static void copy(Polinomial &a, Polinomial &b)
     {
         assert(a.dim() == b.dim());
         assert(a.degree() == b.degree());
@@ -205,6 +206,12 @@ public:
             out[idx_out][2] = B - G;
         }
     };
+
+    static inline void divElement(Polinomial &out, uint64_t idx_out, Goldilocks::Element &a, Polinomial &in_b, uint64_t idx_b)
+    {
+        Polinomial polA(&a, 1, 1);
+        divElement(out, idx_out, polA, 0, in_b, idx_b);
+    }
 
     static inline void divElement(Polinomial &out, uint64_t idx_out, Polinomial &in_a, uint64_t idx_a, Goldilocks::Element &b)
     {
@@ -346,7 +353,7 @@ public:
         }
     }
 
-    static void calculateH1H2_opt1(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys, uint64_t size_values)
+    static void calculateH1H2_opt1(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys)
     {
         vector<int> counter(tPol.degree(), 1);  // this 1 is important, space of the original buffer could be used
         vector<bool> touched(size_keys, false); // faster use this than initialize buffer, bitmask could be used
@@ -462,7 +469,7 @@ public:
         // std::cout << "holu: " << id << " " << pos << " times: " << time2 - time1 << " " << time3 - time2 << " " << time4 - time3 << " " << h2.dim() << std::endl;
     }
 
-    static void calculateH1H2_opt3(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys, uint64_t size_values)
+    static void calculateH1H2_opt3(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys)
     {
         vector<int> counter(tPol.degree(), 1);  // this 1 is important, space of the original buffer could be used
         vector<bool> touched(size_keys, false); // faster use this than initialize buffer, bitmask could be used
@@ -606,6 +613,29 @@ public:
         zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));
     }
 
+    static void calculateS(Polinomial &s, Polinomial &num, Polinomial &den)
+    {
+        uint64_t size = num.degree();
+
+        Polinomial denI(size, 3);
+        Polinomial checkVal(1, 3);
+        Goldilocks::Element *pS = s[0];
+        Goldilocks3::copy((Goldilocks3::Element *)&pS[0], &Goldilocks3::zero());
+
+        batchInverse(denI, den);
+        for (uint64_t i = 1; i < size; i++)
+        {
+            Polinomial tmp(1, 3);
+            Polinomial::mulElement(tmp, 0, num, i - 1, denI, i - 1);
+            Polinomial::addElement(s, i, s, i - 1, tmp, 0);
+        }
+        Polinomial tmp(1, 3);
+        Polinomial::mulElement(tmp, 0, num, size - 1, denI, size - 1);
+        Polinomial::addElement(checkVal, 0, s, size - 1, tmp, 0);
+
+        zkassert(Goldilocks3::isZero((Goldilocks3::Element &)*checkVal[0]));
+    }
+
     // compute the multiplications of the polynomials in src in parallel with partitions of size partitionSize
     // Every thread computes a partition of size partitionSize / (2 * nThreadsPartition)
     // after every computation the size of the partition is doubled until it reaches partitionSize
@@ -719,7 +749,7 @@ public:
         Polinomial::copyElement(res, 0, z, 0);
     }
 
-    static inline void mulAddElement_adim3(Goldilocks::Element *out, Goldilocks::Element *in_a, Polinomial &in_b, uint64_t idx_b)
+    static inline void mulAddElement_adim3(Goldilocks::Element *out, Goldilocks::Element *in_a, Goldilocks::Element *in_a_helpers, Polinomial &in_b, uint64_t idx_b)
     {
         if (in_b.dim() == 1)
         {
@@ -729,7 +759,7 @@ public:
         }
         else
         {
-            Goldilocks::Element A = (in_a[0] + in_a[1]) * (in_b[idx_b][0] + in_b[idx_b][1]);
+            Goldilocks::Element A = in_a_helpers[0] * (in_b[idx_b][0] + in_b[idx_b][1]);
             Goldilocks::Element B = (in_a[0] + in_a[2]) * (in_b[idx_b][0] + in_b[idx_b][2]);
             Goldilocks::Element C = (in_a[1] + in_a[2]) * (in_b[idx_b][1] + in_b[idx_b][2]);
             Goldilocks::Element D = in_a[0] * in_b[idx_b][0];
@@ -740,6 +770,25 @@ public:
             out[1] = out[1] + ((((A + C) - E) - E) - D);
             out[2] = out[2] + B - G;
         }
+    }
+
+    static void buildZHInv(Polinomial& zi, uint64_t nBits, uint64_t nBitsExt) {
+        uint64_t extendBits = nBitsExt - nBits;
+        uint64_t extend = (1 << extendBits);
+        uint64_t NExtended = (1 << nBitsExt);
+
+        Goldilocks::Element w = Goldilocks::one();
+        Goldilocks::Element sn = Goldilocks::shift();
+
+        for (uint64_t i = 0; i < nBits; i++) Goldilocks::square(sn, sn);
+
+        for (uint64_t i=0; i<extend; i++) {
+            Goldilocks::inv(*zi[i], (sn * w) - Goldilocks::one());
+            Goldilocks::mul(w, w, Goldilocks::w(extendBits));
+        }
+
+        #pragma omp parallel for
+        for (uint64_t i=extend; i<NExtended; i++) *zi[i] = zi[i % extend][0];
     }
 };
 #endif

@@ -4,7 +4,7 @@ VERSION=v5.0.0-rc.4-fork.8
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 
-WORKING_DIR=/releases/${VERSION}
+WORKING_DIR=../test_pil2
 CONFIG_DIR=${WORKING_DIR}/config/
 C_FILES=${WORKING_DIR}/c_files
 CIRCOM_HEADER="#pragma GCC diagnostic push\n#pragma GCC diagnostic ignored \"-Wunused-variable\"\n#pragma GCC push_options\n#pragma GCC optimize (\"O0\")\n#include <stdio.h>\n#include <iostream>\n#include <assert.h>\n#include <cassert>\n"
@@ -24,11 +24,11 @@ rm config/scripts/metadata-rom.txt
 #Uncomment the following line if you want to generate source code the first time after the release files generation
 
 #Copy the chelpers files
-cp ${C_FILES}/zkevm.chelpers/*.step* ./src/starkpil/zkevm/chelpers/
-cp ${C_FILES}/c12a.chelpers/*.step* ./src/starkpil/starkC12a/chelpers/
-cp ${C_FILES}/recursive1.chelpers/*.step* ./src/starkpil/starkRecursive1/chelpers/
-cp ${C_FILES}/recursive2.chelpers/*.step* ./src/starkpil/starkRecursive2/chelpers/
-cp ${C_FILES}/recursivef.chelpers/*.step* ./src/starkpil/starkRecursiveF/chelpers/
+cp ${C_FILES}/zkevm.chelpers/* ./src/starkpil/zkevm/chelpers/
+cp ${C_FILES}/c12a.chelpers/* ./src/starkpil/starkC12a/chelpers/
+cp ${C_FILES}/recursive1.chelpers/* ./src/starkpil/starkRecursive1/chelpers/
+cp ${C_FILES}/recursive2.chelpers/* ./src/starkpil/starkRecursive2/chelpers/
+cp ${C_FILES}/recursivef.chelpers/* ./src/starkpil/starkRecursiveF/chelpers/
 
 # Generate the zkevm.verifier.cpp
 cp ${C_FILES}/zkevm.verifier_cpp/zkevm.verifier.cpp ${ZKEVM_VERIFIER_CPP}

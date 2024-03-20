@@ -59,8 +59,8 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/batchProof/input_executor_3.json",
-    "inputFile2": "testvectors/batchProof/input_executor_1.json",
+    "inputFile": "testvectors/batchProof_fork7/",
+    "inputFile2": "testvectors/batchProof_fork7/",
 
     "outputPath": "runtime/output",
     "configPath": "config",
