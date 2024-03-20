@@ -1104,7 +1104,7 @@ void Prover::genBlobOuterProof (ProverRequest *pProverRequest){
     // unmapFile(pointerCmBlobOuterPols, cmPolsBlobOuter.size());
 
     //-------------------------------------------
-    // Generate Recursive 2 proof
+    // Generate Blob Outer  proof
     //-------------------------------------------
 
     TimerStart(STARK_BLOB_OUTER_PROOF);
