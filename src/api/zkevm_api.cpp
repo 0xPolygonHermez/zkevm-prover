@@ -1041,6 +1041,22 @@ void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* f
     starks->computeFRIQueries(*(FRIProof<Goldilocks::Element>*)pProof, *(Polinomial*)pFriPol, friQueries);
 }
 
+void *get_vector_pointer(void *pStarks, char *name) {
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    return starks->ffi_get_vector_pointer(name);   
+}
+
+void resize_vector(void *pVector, uint64_t newSize, bool value)
+{
+    std::vector<bool> *vector = (std::vector<bool> *)pVector;
+    vector->resize(newSize, value);
+}
+
+void set_bool_vector_value(void *pVector, uint64_t index, bool value) {
+    std::vector<bool> *vector = (std::vector<bool> *)pVector;
+    vector->at(index) = value;
+}
+
 void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols) {
     return new CommitPolsStarks(pAddress, degree, nCommitedPols);
 }

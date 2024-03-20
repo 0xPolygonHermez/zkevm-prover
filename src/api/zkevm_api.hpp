@@ -61,6 +61,10 @@
     void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* friQueries);
 
+    void* get_vector_pointer(void *pStarks, char* name);
+    void resize_vector(void *pVector, uint64_t newSize, bool value);
+    void set_bool_vector_value(void *pVector, uint64_t index, bool value);
+
     // CommitPolsStarks
     // ========================================================================================
     void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols);

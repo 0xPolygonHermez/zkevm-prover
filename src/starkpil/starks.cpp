@@ -833,3 +833,30 @@ void Starks<ElementType>::ffi_treesGL_get_root(uint64_t index, ElementType *dst)
     treesGL[index]->getRoot(dst);
 }
 
+template <typename ElementType>
+void *Starks<ElementType>::ffi_get_vector_pointer(char *name) {
+    if (strcmp(name, "publicsCalculated") == 0)
+    {
+        return &this->publicsCalculated;
+    }
+    else if (strcmp(name, "constsCalculated") == 0)
+    {
+        return &this->constsCalculated;
+    }
+    else if (strcmp(name, "witnessCalculated") == 0)
+    {
+        return &this->witnessCalculated;
+    }
+    else if (strcmp(name, "subProofValuesCalculated") == 0)
+    {
+        return &this->subProofValuesCalculated;
+    }
+    else if (strcmp(name, "challengesCalculated") == 0)
+    {
+        return &this->challengesCalculated;
+    }
+    else
+    {
+        return NULL;
+    }
+}

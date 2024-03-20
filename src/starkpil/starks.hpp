@@ -347,6 +347,8 @@ public:
     void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial* pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
     void ffi_extend_and_merkelize(uint64_t step, StepsParams* params, FRIProof<ElementType>* proof);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
+
+    void *ffi_get_vector_pointer(char *name);
 };
 
 template class Starks<Goldilocks::Element>;
