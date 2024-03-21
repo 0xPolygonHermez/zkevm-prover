@@ -10,6 +10,7 @@ SRC_DIRS := ./src ./test ./tools
 
 GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
 GRPCPP_LIBS := $(shell pkg-config grpc++ --libs) -lgrpc++_reflection
+GEVULOT_LIBS := -lgevulot_shim_ffi -L./src/gevulot
 ifndef GRPCPP_LIBS
 $(error gRPC++ could not be found via pkg-config, you need to install them)
 endif
@@ -17,7 +18,8 @@ endif
 CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-Wfatal-errors
-LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -fopenmp -liomp5 -lgevulot_shim_ffi $(GRPCPP_LIBS)
+LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -fopenmp -liomp5 $(GRPCPP_LIBS) $(GEVULOT_LIBS)
+CFLAGS := -fopenmp
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
 
