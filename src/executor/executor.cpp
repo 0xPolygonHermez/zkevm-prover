@@ -327,16 +327,16 @@ void Executor::processBlobInner (ProverRequest &proverRequest)
                 //zklog.info("Executor::processBlobInner() fork 9 native");
 
                 // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_9_blob::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                void * pAddress = calloc(fork_9::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBlobInner() failed calling calloc(" + to_string(fork_9_blob::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBlobInner() failed calling calloc(" + to_string(fork_9::CommitPols::pilSize()) + ")");
                     exitProcess();
                 }
-                fork_9_blob::CommitPols commitPols(pAddress,1);
+                fork_9::CommitPols commitPols(pAddress,1);
 
                 // This instance will store all data required to execute the rest of State Machines
-                fork_9_blob::MainExecRequired required;
+                fork_9::MainExecRequired required;
 
                 mainExecutor_fork_9_blob.execute(proverRequest, commitPols.Main, required);
 
@@ -743,12 +743,12 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
 }
 
 // Full version: all polynomials are evaluated, in all evaluations
-void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_BLOB_FORK_NAMESPACE::CommitPols & commitPols)
+void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols)
 {
     if (!config.executeInParallel)
     {
         // This instance will store all data required to execute the rest of State Machines
-        PROVER_BLOB_FORK_NAMESPACE::MainExecRequired required;
+        fork_9::MainExecRequired required;
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
@@ -778,7 +778,7 @@ void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_BLOB_FORK_
         }
 
         // Execute the Padding PG State Machine
-        /*TimerStart(PADDING_PG_SM_EXECUTE);
+        TimerStart(PADDING_PG_SM_EXECUTE);
         paddingPGExecutor.execute(required.PaddingPG, commitPols.PaddingPG, required.PoseidonGFromPG);
         TimerStopAndLog(PADDING_PG_SM_EXECUTE);
 
@@ -855,16 +855,16 @@ void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_BLOB_FORK_
         // Execute the ClimbKey State Machine
         TimerStart(CLIMB_KEY_SM_EXECUTE);
         climbKeyExecutor.execute(required.ClimbKey, commitPols.ClimbKey);
-        TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);*/
+        TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);
     }
     else
     {
         // This instance will store all data required to execute the rest of State Machines
-        PROVER_BLOB_FORK_NAMESPACE::MainExecRequired required;
-        /*ExecutorContext executorContext;
+        fork_9::MainExecRequired required;
+        ExecutorContext executorContext;
         executorContext.pExecutor = this;
         executorContext.pCommitPols = &commitPols;
-        executorContext.pRequired = &required;*/
+        executorContext.pRequired = &required;
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
@@ -887,7 +887,7 @@ void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_BLOB_FORK_
         }
 
         // Execute the Storage State Machines
-        /*pthread_t storageThread;
+        pthread_t storageThread;
         pthread_create(&storageThread, NULL, StorageThread, &executorContext);
 
         // Execute the Padding PG
@@ -940,6 +940,6 @@ void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_BLOB_FORK_
         pthread_join(poseidonThread, NULL);
         pthread_join(keccakThread, NULL);
         pthread_join(sha256Thread, NULL);
-        pthread_join(climbKeyThread, NULL);*/
+        pthread_join(climbKeyThread, NULL);
     }
 }

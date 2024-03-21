@@ -8,7 +8,7 @@
 #include <gmpxx.h>
 #include "main_sm/fork_9_blob/main/rom.hpp"
 #include "main_sm/fork_9_blob/main/rom_command.hpp"
-#include "main_sm/fork_9_blob/pols_generated/commit_pols.hpp"
+#include "main_sm/fork_9/pols_generated/commit_pols.hpp"
 #include "main_sm/fork_9_blob/main/full_tracer.hpp"
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
@@ -22,6 +22,7 @@
 
 using namespace std;
 using json = nlohmann::json;
+using namespace fork_9;
 
 namespace fork_9_blob
 {

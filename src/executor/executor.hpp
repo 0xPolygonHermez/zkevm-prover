@@ -105,7 +105,7 @@ public:
     void processBatch (ProverRequest &proverRequest);
 
     // Full version: all polynomials are evaluated, in all evaluations
-    void executeBlobInner (ProverRequest &proverRequest, PROVER_BLOB_FORK_NAMESPACE::CommitPols & commitPols);
+    void executeBlobInner (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols);
 
     // Reduced version: only 2 evaluations are allocated, and assert is disabled
     void processBlobInner (ProverRequest &proverRequest);

@@ -264,18 +264,29 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
+
     // Create and init an empty prover request
     ProverRequest proverRequest(fr, config, prt_executeBatch);
-    if (config.inputFile.size() > 0)
+
+    // Load and parse input JSON file
+    if (config.inputFile.empty())
     {
-        json inputJson;
-        file2json(config.inputFile, inputJson);
-        zkresult zkResult = proverRequest.input.load(inputJson);
-        if (zkResult != ZKR_SUCCESS)
-        {
-            zklog.error("runFileExecute() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
-            exitProcess();
-        }
+        zklog.error("runFileExecute() found config.inputFile empty");
+        exitProcess();
+    }
+
+    json inputJson;
+    file2json(config.inputFile, inputJson);
+    zkresult zkResult = proverRequest.input.load(inputJson);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        zklog.error("runFileExecute() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
+        exitProcess();
+    }
+
+    if (!proverRequest.input.publicInputsExtended.publicInputs.blobData.empty())
+    {
+        proverRequest.type = prt_executeBlobInner;
     }
     TimerStopAndLog(INPUT_LOAD);
 
@@ -288,7 +299,24 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     }
 
     // Call the prover
-    prover.executeBatch(&proverRequest);
+    switch (proverRequest.type)
+    {
+        case prt_executeBlobInner:
+        {
+            prover.executeBlobInner(&proverRequest);
+            break;
+        }
+        case prt_executeBatch:
+        {
+            prover.executeBatch(&proverRequest);
+            break;
+        }
+        default:
+        {
+            zklog.error("runFileExecute() found invalid prover request type=" + to_string(proverRequest.type) + "=" + proverRequestType2string(proverRequest.type));
+            break;
+        }
+    }
 }
 
 int main(int argc, char **argv)

@@ -96,7 +96,7 @@ public:
 private:
 
     void logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest);
-    void logBlobInnerExecutionInfo(PROVER_BLOB_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest);
+    void logBlobInnerExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest);
 };
 
 void *proverThread(void *arg);

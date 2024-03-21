@@ -805,7 +805,7 @@ void Prover::genBlobInnerProof (ProverRequest *pProverRequest){
     /* Executor */
     /************/
     TimerStart(EXECUTOR_EXECUTE_BLOB_INITIALIZATION);
-    PROVER_BLOB_FORK_NAMESPACE::CommitPols cmPols(pAddress, PROVER_BLOB_FORK_NAMESPACE::CommitPols::pilDegree());
+    PROVER_FORK_NAMESPACE::CommitPols cmPols(pAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
     Goldilocks::parSetZero((Goldilocks::Element*)pAddress, cmPols.size()/sizeof(Goldilocks::Element), omp_get_max_threads()/2);
     uint64_t lastN = cmPols.pilDegree() - 1;
     TimerStopAndLog(EXECUTOR_EXECUTE_BLOB_INITIALIZATION);
@@ -1759,7 +1759,7 @@ void Prover::executeBlobInner (ProverRequest *pProverRequest)
 
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
-    uint64_t blobInnerCmPolsSize = PROVER_BLOB_FORK_NAMESPACE::CommitPols::pilSize();
+    uint64_t blobInnerCmPolsSize = PROVER_FORK_NAMESPACE::CommitPols::pilSize();
     void *pExecuteAddress = NULL;
 
     if (config.blobInnerCmPols.size() > 0)
@@ -1782,7 +1782,7 @@ void Prover::executeBlobInner (ProverRequest *pProverRequest)
     /* Executor */
     /************/
 
-    PROVER_BLOB_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, PROVER_BLOB_FORK_NAMESPACE::CommitPols::pilDegree());
+    PROVER_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_EXECUTE_BLOB_INNER);
@@ -1829,7 +1829,7 @@ void Prover::logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, Pr
         " lastN=" + to_string(lastN));   
 }
 
-void Prover::logBlobInnerExecutionInfo(PROVER_BLOB_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest)
+void Prover::logBlobInnerExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest)
 {
     uint64_t lastN = cmPols.pilDegree() - 1;
     // log old and new BlobStateRoot
