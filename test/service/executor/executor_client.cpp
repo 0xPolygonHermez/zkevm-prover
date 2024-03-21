@@ -91,7 +91,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     zkresult zkResult = input.load(inputJson);
     if (zkResult != ZKR_SUCCESS)
     {
-        cerr << "Error: ProverClient::GenProof() failed calling input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+        cerr << "Error: ExecutorClient::ProcessBatch() failed calling input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
         exit(-1);
     }
 

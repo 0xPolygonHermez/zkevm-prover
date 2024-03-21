@@ -1356,7 +1356,8 @@ using grpc::Status;
     response->set_fork_id(proverRequest.input.publicInputsExtended.publicInputs.forkID);
     response->set_error_rom(string2error(proverRequest.pFullTracer->get_error()));
     response->set_invalid_batch(proverRequest.pFullTracer->get_invalid_batch());
-    
+    response->set_old_state_root(string2ba(NormalizeToNFormat(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64)));
+
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
     {
@@ -1367,6 +1368,15 @@ using grpc::Status;
             google::protobuf::Map<std::string, executor::v1::InfoReadWriteV2> * pReadWriteAddresses = response->mutable_read_write_addresses();
             infoReadWrite.set_balance(itRWA->second.balance);
             infoReadWrite.set_nonce(itRWA->second.nonce);
+            infoReadWrite.set_sc_code(itRWA->second.sc_code);
+            infoReadWrite.set_sc_length(itRWA->second.sc_length);
+            google::protobuf::Map<std::string, std::string> * pStorage = infoReadWrite.mutable_sc_storage();
+            zkassertpermanent(pStorage != NULL);
+            unordered_map<string, string>::const_iterator itStorage;
+            for (itStorage = itRWA->second.sc_storage.begin(); itStorage != itRWA->second.sc_storage.end(); itStorage++)
+            {
+                (*pStorage)[itStorage->first] = itStorage->second;
+            }
             (*pReadWriteAddresses)[itRWA->first] = infoReadWrite;
         }
     }
@@ -1907,6 +1917,34 @@ using grpc::Status;
     proverRequest.input.bSkipFirstChangeL2Block = false;
     proverRequest.input.bSkipWriteBlockInfoRoot = false;
 
+    // Trace config
+    if (request->has_trace_config())
+    {
+        proverRequest.input.traceConfig.bEnabled = true;
+        const executor::v1::TraceConfigV2 & traceConfig = request->trace_config();
+        if (traceConfig.disable_storage())
+        {
+            proverRequest.input.traceConfig.bDisableStorage = true;
+        }
+        if (traceConfig.disable_stack())
+        {
+            proverRequest.input.traceConfig.bDisableStack = true;
+        }
+        if (traceConfig.enable_memory())
+        {
+            proverRequest.input.traceConfig.bEnableMemory = true;
+        }
+        if (traceConfig.enable_return_data())
+        {
+            proverRequest.input.traceConfig.bEnableReturnData = true;
+        }
+        if (traceConfig.tx_hash_to_generate_full_trace().size() > 0)
+        {
+            proverRequest.input.traceConfig.txHashToGenerateFullTrace = Add0xIfMissing(ba2string(traceConfig.tx_hash_to_generate_full_trace()));
+        }
+        proverRequest.input.traceConfig.calculateFlags();
+    }
+
     // Default values
     proverRequest.input.publicInputsExtended.newStateRoot = "0x0";
     proverRequest.input.publicInputsExtended.newAccInputHash = "0x0";
@@ -2000,6 +2038,7 @@ using grpc::Status;
     response->set_fork_id(proverRequest.input.publicInputsExtended.publicInputs.forkID);
     response->set_error_rom(string2error(proverRequest.pFullTracer->get_error()));
     response->set_invalid_batch(proverRequest.pFullTracer->get_invalid_batch());
+    response->set_old_state_root(string2ba(NormalizeToNFormat(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64)));
     
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
@@ -2011,6 +2050,15 @@ using grpc::Status;
             google::protobuf::Map<std::string, executor::v1::InfoReadWriteV2> * pReadWriteAddresses = response->mutable_read_write_addresses();
             infoReadWrite.set_balance(itRWA->second.balance);
             infoReadWrite.set_nonce(itRWA->second.nonce);
+            infoReadWrite.set_sc_code(itRWA->second.sc_code);
+            infoReadWrite.set_sc_length(itRWA->second.sc_length);
+            google::protobuf::Map<std::string, std::string> * pStorage = infoReadWrite.mutable_sc_storage();
+            zkassertpermanent(pStorage != NULL);
+            unordered_map<string, string>::const_iterator itStorage;
+            for (itStorage = itRWA->second.sc_storage.begin(); itStorage != itRWA->second.sc_storage.end(); itStorage++)
+            {
+                (*pStorage)[itStorage->first] = itStorage->second;
+            }
             (*pReadWriteAddresses)[itRWA->first] = infoReadWrite;
         }
     }

@@ -241,6 +241,9 @@ class InfoReadWrite
 public:
     string nonce;
     string balance;
+    string sc_code;
+    unordered_map<string, string> sc_storage;
+    string sc_length;
 };
 
 class TxGAS
