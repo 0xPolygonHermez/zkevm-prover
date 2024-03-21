@@ -50,10 +50,6 @@
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
 
-// #define GEVULOT_SHIM
-// #ifdef GEVULOT_SHIM
-// #include "shim.h"
-// #endif
 
 extern "C" {
   #include "shim.h"
@@ -299,108 +295,8 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     prover.execute(&proverRequest);
 }
 
-// #ifdef GEVULOT_SHIM
 
-void* compute(const struct Task* task) {
-  printf("Received zkProver task with id: %s\n", task->id);
-
-  printf("compute Args: \n");
-  const char ** args = (const char**)task->args;
-  while ((args != NULL) && (*args != NULL)) {
-    printf("\t%s\n", *args);
-    args++;
-  }
-
-  printf("Files: \n");
-  const char **files = (const char**)task->files;
-  while ((files != NULL) && (*files != NULL)) {
-    printf("\t%s\n", *files);
-    files++;
-  }
-
-  // do_main();
-
-  printf("Done with the task.\n");
-
-  return new_task_result(NULL, 0);
-}
-
-
-int main(int argc, char **argv)
-{
-  printf("Starting example C program in Gevulot..., argc %d\n", argc);
-  printf("main Args: \n");
-  for (int i = 0; i < argc; i++)
-    printf("\t%d %s\n", i, argv[i]);
-  }
-  run(compute);
-  printf("Example program finished. Terminating...\n");
-  return 0;
-    // if (argc == 2)
-    // {
-    //     if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
-    //     {
-    //         // If requested to only print the version, then exit the program
-    //         return 0;
-    //     }
-    // }
-
-    // // Parse the name of the configuration file
-    // char *pConfigFile = (char *)"config/config.json";
-    // bool isGevulot = false;
-
-    // if (argc == 3 || argc == 5)
-    // {
-    //     if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
-    //     {
-    //         pConfigFile = argv[2];
-    //     }
-    // }
-    // if (argc == 5)
-    // {
-    //     if (strcmp(argv[1], "-g") == 0)
-    //     {
-    //         isGevulot = true;
-    //     }
-    // }
-
-    // int result = do_main(pConfigFile);
-
-}
-
-#if 0
-
-int main(int argc, char **argv)
-{
-    /* CONFIG */
-    auto tasksize = new_main(argc, argv);
-    zklog.info("tasksize=" + tasksize);
-
-    if (argc == 2)
-    {
-        if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
-        {
-            // If requested to only print the version, then exit the program
-            return 0;
-        }
-    }
-
-    // Parse the name of the configuration file
-    char *pConfigFile = (char *)"config/config.json";
-    if (argc == 3)
-    {
-        if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
-        {
-            pConfigFile = argv[2];
-        }
-    }
-
-    do_main(pConfigFile);
-}
-
-#endif
-
-int do_main(char *pConfigFile)
+int run_main(char *pConfigFile)
 {
 
     // Create one instance of Config based on the contents of the file config.json
@@ -931,4 +827,76 @@ int do_main(char *pConfigFile)
     TimerStopAndLog(WHOLE_PROCESS);
 
     zklog.info("Done");
+}
+
+
+void* run_gevulot(const struct Task* task) {
+    printf("run_gevulot: Received zkProver task with id: %s\n", task->id);
+    printf("run_gevulot: Args: \n");
+    char ** args = (char**)task->args;
+    int n = 0;
+    while ((args != NULL) && (*args != NULL)) 
+    {
+        printf("  %s\n", *args);
+        args++;
+        n++;
+    }
+    printf("run_gevulot: num arguments = %d \n", n);
+    printf("run_gevulot: Files: \n");
+    const char **files = (const char**)task->files;
+    while ((files != NULL) && (*files != NULL)) 
+    {
+        printf("  %s\n", *files);
+        files++;
+    }
+    args = (char**)task->args;
+    if (strcmp(args[0],"-c") != 0) {
+        printf("incorrect first arg, should be -c. Exiting");
+        return new_task_result(NULL, 0);
+    }
+    run_main(args[1]);
+
+    printf("run_gevulot: Done with the task.\n");
+
+    return new_task_result(NULL, 0);
+}
+
+
+int main(int argc, char **argv)
+{
+    printf("zkProver main(): argc %d\n", argc);
+    printf("  Args: \n");
+    for (int i = 0; i < argc; i++) 
+    {
+        printf("    %d, %s\n", i, argv[i]);
+    }
+
+    if (argc == 1) 
+    {
+        // Do gevulot proof
+        run(run_gevulot);
+        printf("run_gevulot finished. Terminating...\n");
+        return 0;
+    } 
+
+
+    if (argc == 2)
+    {
+        if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
+        {
+            // If requested to only print the version, then exit the program
+            return 0;
+        }
+    }
+
+    // Parse the name of the configuration file
+    char *pConfigFile = (char *)"config/config.json";
+    if (argc == 3)
+    {
+        if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
+        {
+            pConfigFile = argv[2];
+        }
+    }
+    run_main(pConfigFile);
 }
