@@ -78,6 +78,7 @@ public:
     zkresult onOpcode (Context &ctx, const RomCommand &cmd);
     zkresult addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
                                    const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
+                                   const Goldilocks::Element &storageKey0, const Goldilocks::Element &storageKey1, const Goldilocks::Element &storageKey2, const Goldilocks::Element &storageKey3, const Goldilocks::Element &storageKey4, const Goldilocks::Element &storageKey5, const Goldilocks::Element &storageKey6, const Goldilocks::Element &storageKey7,
                                    const mpz_class &value );
 
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), prevCTX(0), initGas(0), txTime(0), accBatchGas(0), numberOfOpcodesInThisTx(0), lastErrorOpcode(0), hasGaspriceOpcode(false), hasBalanceOpcode(false), txIndex(0), isForced(false) { };

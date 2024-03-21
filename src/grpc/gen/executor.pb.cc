@@ -22,7 +22,8 @@ extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::intern
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FullTrace_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FullTraceV2_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_InfoReadWrite_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_InfoReadWriteV2_executor_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_InfoReadWriteV2_executor_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_InfoReadWriteV2_ScStorageEntry_DoNotUse_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_L1DataV2_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_L1DataV3_executor_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Log_executor_2eproto;
@@ -192,6 +193,10 @@ class OverrideAccountV2DefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<OverrideAccountV2> _instance;
 } _OverrideAccountV2_default_instance_;
+class InfoReadWriteV2_ScStorageEntry_DoNotUseDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<InfoReadWriteV2_ScStorageEntry_DoNotUse> _instance;
+} _InfoReadWriteV2_ScStorageEntry_DoNotUse_default_instance_;
 class InfoReadWriteV2DefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<InfoReadWriteV2> _instance;
@@ -419,8 +424,22 @@ static void InitDefaultsscc_info_InfoReadWriteV2_executor_2eproto() {
   ::executor::v1::InfoReadWriteV2::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_InfoReadWriteV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_InfoReadWriteV2_executor_2eproto}, {}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_InfoReadWriteV2_executor_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_InfoReadWriteV2_executor_2eproto}, {
+      &scc_info_InfoReadWriteV2_ScStorageEntry_DoNotUse_executor_2eproto.base,}};
+
+static void InitDefaultsscc_info_InfoReadWriteV2_ScStorageEntry_DoNotUse_executor_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::executor::v1::_InfoReadWriteV2_ScStorageEntry_DoNotUse_default_instance_;
+    new (ptr) ::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse();
+  }
+  ::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_InfoReadWriteV2_ScStorageEntry_DoNotUse_executor_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_InfoReadWriteV2_ScStorageEntry_DoNotUse_executor_2eproto}, {}};
 
 static void InitDefaultsscc_info_L1DataV2_executor_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -915,8 +934,9 @@ static void InitDefaultsscc_info_ProcessStatelessBatchRequestV2_executor_2eproto
   ::executor::v1::ProcessStatelessBatchRequestV2::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessStatelessBatchRequestV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_ProcessStatelessBatchRequestV2_executor_2eproto}, {}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessStatelessBatchRequestV2_executor_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ProcessStatelessBatchRequestV2_executor_2eproto}, {
+      &scc_info_TraceConfigV2_executor_2eproto.base,}};
 
 static void InitDefaultsscc_info_ProcessTransactionResponse_executor_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -1064,7 +1084,7 @@ static void InitDefaultsscc_info_TransactionStepV2_StorageEntry_DoNotUse_executo
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto}, {}};
 
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_executor_2eproto[54];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_executor_2eproto[55];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_executor_2eproto[2];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_executor_2eproto = nullptr;
 
@@ -1385,6 +1405,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessStatelessBatchRequestV2, timestamp_limit_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessStatelessBatchRequestV2, forced_blockhash_l1_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessStatelessBatchRequestV2, context_id_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessStatelessBatchRequestV2, trace_config_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1450,6 +1471,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV2, cnt_reserve_binaries_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV2, cnt_reserve_steps_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV2, cnt_reserve_sha256_hashes_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV2, old_state_root_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::executor::v1::TraceConfigV2, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1488,6 +1510,15 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::OverrideAccountV2, code_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::OverrideAccountV2, state_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::OverrideAccountV2, state_diff_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse, key_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse, value_),
+  0,
+  1,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1495,6 +1526,9 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2, nonce_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2, balance_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2, sc_code_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2, sc_storage_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::InfoReadWriteV2, sc_length_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::executor::v1::FullTraceV2, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1743,6 +1777,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV3, cnt_reserve_binaries_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV3, cnt_reserve_steps_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV3, cnt_reserve_sha256_hashes_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV3, old_state_root_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::executor::v1::ForcedData, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1821,35 +1856,36 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 265, 272, sizeof(::executor::v1::ProcessBatchRequestV2_StateOverrideEntry_DoNotUse)},
   { 274, -1, sizeof(::executor::v1::ProcessBatchRequestV2)},
   { 303, -1, sizeof(::executor::v1::ProcessStatelessBatchRequestV2)},
-  { 316, -1, sizeof(::executor::v1::L1DataV2)},
-  { 325, -1, sizeof(::executor::v1::DebugV2)},
-  { 335, 342, sizeof(::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse)},
-  { 344, -1, sizeof(::executor::v1::ProcessBatchResponseV2)},
-  { 381, -1, sizeof(::executor::v1::TraceConfigV2)},
-  { 391, 398, sizeof(::executor::v1::OverrideAccountV2_StateEntry_DoNotUse)},
-  { 400, 407, sizeof(::executor::v1::OverrideAccountV2_StateDiffEntry_DoNotUse)},
-  { 409, -1, sizeof(::executor::v1::OverrideAccountV2)},
-  { 419, -1, sizeof(::executor::v1::InfoReadWriteV2)},
-  { 426, -1, sizeof(::executor::v1::FullTraceV2)},
-  { 433, -1, sizeof(::executor::v1::TransactionContextV2)},
-  { 453, 460, sizeof(::executor::v1::TransactionStepV2_StorageEntry_DoNotUse)},
-  { 462, -1, sizeof(::executor::v1::TransactionStepV2)},
-  { 482, -1, sizeof(::executor::v1::ContractV2)},
-  { 493, -1, sizeof(::executor::v1::ProcessBlockResponseV2)},
-  { 511, -1, sizeof(::executor::v1::ProcessTransactionResponseV2)},
-  { 537, -1, sizeof(::executor::v1::LogV2)},
-  { 551, 558, sizeof(::executor::v1::ProcessBatchRequestV3_L1InfoTreeDataEntry_DoNotUse)},
-  { 560, 567, sizeof(::executor::v1::ProcessBatchRequestV3_DbEntry_DoNotUse)},
-  { 569, 576, sizeof(::executor::v1::ProcessBatchRequestV3_ContractsBytecodeEntry_DoNotUse)},
-  { 578, 585, sizeof(::executor::v1::ProcessBatchRequestV3_StateOverrideEntry_DoNotUse)},
-  { 587, -1, sizeof(::executor::v1::ProcessBatchRequestV3)},
-  { 616, -1, sizeof(::executor::v1::L1DataV3)},
-  { 626, 633, sizeof(::executor::v1::ProcessBatchResponseV3_ReadWriteAddressesEntry_DoNotUse)},
-  { 635, -1, sizeof(::executor::v1::ProcessBatchResponseV3)},
-  { 674, -1, sizeof(::executor::v1::ForcedData)},
-  { 682, -1, sizeof(::executor::v1::ProcessBlobInnerRequestV3)},
-  { 704, -1, sizeof(::executor::v1::DebugV3)},
-  { 712, -1, sizeof(::executor::v1::ProcessBlobInnerResponseV3)},
+  { 317, -1, sizeof(::executor::v1::L1DataV2)},
+  { 326, -1, sizeof(::executor::v1::DebugV2)},
+  { 336, 343, sizeof(::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse)},
+  { 345, -1, sizeof(::executor::v1::ProcessBatchResponseV2)},
+  { 383, -1, sizeof(::executor::v1::TraceConfigV2)},
+  { 393, 400, sizeof(::executor::v1::OverrideAccountV2_StateEntry_DoNotUse)},
+  { 402, 409, sizeof(::executor::v1::OverrideAccountV2_StateDiffEntry_DoNotUse)},
+  { 411, -1, sizeof(::executor::v1::OverrideAccountV2)},
+  { 421, 428, sizeof(::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse)},
+  { 430, -1, sizeof(::executor::v1::InfoReadWriteV2)},
+  { 440, -1, sizeof(::executor::v1::FullTraceV2)},
+  { 447, -1, sizeof(::executor::v1::TransactionContextV2)},
+  { 467, 474, sizeof(::executor::v1::TransactionStepV2_StorageEntry_DoNotUse)},
+  { 476, -1, sizeof(::executor::v1::TransactionStepV2)},
+  { 496, -1, sizeof(::executor::v1::ContractV2)},
+  { 507, -1, sizeof(::executor::v1::ProcessBlockResponseV2)},
+  { 525, -1, sizeof(::executor::v1::ProcessTransactionResponseV2)},
+  { 551, -1, sizeof(::executor::v1::LogV2)},
+  { 565, 572, sizeof(::executor::v1::ProcessBatchRequestV3_L1InfoTreeDataEntry_DoNotUse)},
+  { 574, 581, sizeof(::executor::v1::ProcessBatchRequestV3_DbEntry_DoNotUse)},
+  { 583, 590, sizeof(::executor::v1::ProcessBatchRequestV3_ContractsBytecodeEntry_DoNotUse)},
+  { 592, 599, sizeof(::executor::v1::ProcessBatchRequestV3_StateOverrideEntry_DoNotUse)},
+  { 601, -1, sizeof(::executor::v1::ProcessBatchRequestV3)},
+  { 630, -1, sizeof(::executor::v1::L1DataV3)},
+  { 640, 647, sizeof(::executor::v1::ProcessBatchResponseV3_ReadWriteAddressesEntry_DoNotUse)},
+  { 649, -1, sizeof(::executor::v1::ProcessBatchResponseV3)},
+  { 689, -1, sizeof(::executor::v1::ForcedData)},
+  { 697, -1, sizeof(::executor::v1::ProcessBlobInnerRequestV3)},
+  { 719, -1, sizeof(::executor::v1::DebugV3)},
+  { 727, -1, sizeof(::executor::v1::ProcessBlobInnerResponseV3)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -1886,6 +1922,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_OverrideAccountV2_StateEntry_DoNotUse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_OverrideAccountV2_StateDiffEntry_DoNotUse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_OverrideAccountV2_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_InfoReadWriteV2_ScStorageEntry_DoNotUse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_InfoReadWriteV2_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_FullTraceV2_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_TransactionContextV2_default_instance_),
@@ -2029,403 +2066,409 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "codeEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028"
   "\001\032T\n\022StateOverrideEntry\022\013\n\003key\030\001 \001(\t\022-\n\005"
   "value\030\002 \001(\0132\036.executor.v1.OverrideAccoun"
-  "tV2:\0028\001\"\324\001\n\036ProcessStatelessBatchRequest"
+  "tV2:\0028\001\"\206\002\n\036ProcessStatelessBatchRequest"
   "V2\022\017\n\007witness\030\001 \001(\014\022\023\n\013data_stream\030\002 \001(\014"
   "\022\020\n\010coinbase\030\003 \001(\t\022\032\n\022old_acc_input_hash"
   "\030\004 \001(\014\022\024\n\014l1_info_root\030\005 \001(\014\022\027\n\017timestam"
   "p_limit\030\006 \001(\004\022\033\n\023forced_blockhash_l1\030\007 \001"
-  "(\014\022\022\n\ncontext_id\030\010 \001(\t\"e\n\010L1DataV2\022\030\n\020gl"
-  "obal_exit_root\030\001 \001(\014\022\025\n\rblock_hash_l1\030\002 "
-  "\001(\014\022\025\n\rmin_timestamp\030\003 \001(\004\022\021\n\tsmt_proof\030"
-  "\004 \003(\014\"\204\001\n\007DebugV2\022\021\n\tgas_limit\030\001 \001(\004\022\026\n\016"
-  "new_state_root\030\002 \001(\014\022\032\n\022new_acc_input_ha"
-  "sh\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 \001(\014\022\025\n"
-  "\rnew_batch_num\030\005 \001(\004\"\277\010\n\026ProcessBatchRes"
-  "ponseV2\022\026\n\016new_state_root\030\001 \001(\014\022\032\n\022new_a"
-  "cc_input_hash\030\002 \001(\014\022\033\n\023new_local_exit_ro"
-  "ot\030\003 \001(\014\022\025\n\rnew_batch_num\030\004 \001(\004\022\031\n\021cnt_k"
-  "eccak_hashes\030\005 \001(\r\022\033\n\023cnt_poseidon_hashe"
-  "s\030\006 \001(\r\022\035\n\025cnt_poseidon_paddings\030\007 \001(\r\022\026"
-  "\n\016cnt_mem_aligns\030\010 \001(\r\022\027\n\017cnt_arithmetic"
-  "s\030\t \001(\r\022\024\n\014cnt_binaries\030\n \001(\r\022\021\n\tcnt_ste"
-  "ps\030\013 \001(\r\022\031\n\021cnt_sha256_hashes\030\014 \001(\r\022<\n\017b"
-  "lock_responses\030\r \003(\0132#.executor.v1.Proce"
-  "ssBlockResponseV2\022)\n\005error\030\016 \001(\0162\032.execu"
-  "tor.v1.ExecutorError\022Y\n\024read_write_addre"
-  "sses\030\017 \003(\0132;.executor.v1.ProcessBatchRes"
-  "ponseV2.ReadWriteAddressesEntry\022\020\n\010flush"
-  "_id\030\020 \001(\004\022\027\n\017stored_flush_id\030\021 \001(\004\022\021\n\tpr"
-  "over_id\030\022 \001(\t\022\020\n\010gas_used\030\023 \001(\004\022\020\n\010smt_k"
-  "eys\030\024 \003(\014\022\024\n\014program_keys\030\025 \003(\014\022\017\n\007fork_"
-  "id\030\026 \001(\004\022\025\n\rinvalid_batch\030\027 \001(\r\022(\n\terror"
-  "_rom\030\030 \001(\0162\025.executor.v1.RomError\022!\n\031cnt"
-  "_reserve_keccak_hashes\030\031 \001(\r\022#\n\033cnt_rese"
-  "rve_poseidon_hashes\030\032 \001(\r\022%\n\035cnt_reserve"
-  "_poseidon_paddings\030\033 \001(\r\022\036\n\026cnt_reserve_"
-  "mem_aligns\030\034 \001(\r\022\037\n\027cnt_reserve_arithmet"
-  "ics\030\035 \001(\r\022\034\n\024cnt_reserve_binaries\030\036 \001(\r\022"
-  "\031\n\021cnt_reserve_steps\030\037 \001(\r\022!\n\031cnt_reserv"
-  "e_sha256_hashes\030  \001(\r\032W\n\027ReadWriteAddres"
-  "sesEntry\022\013\n\003key\030\001 \001(\t\022+\n\005value\030\002 \001(\0132\034.e"
-  "xecutor.v1.InfoReadWriteV2:\0028\001\"\232\001\n\rTrace"
-  "ConfigV2\022\027\n\017disable_storage\030\001 \001(\r\022\025\n\rdis"
-  "able_stack\030\002 \001(\r\022\025\n\renable_memory\030\003 \001(\r\022"
-  "\032\n\022enable_return_data\030\004 \001(\r\022&\n\036tx_hash_t"
-  "o_generate_full_trace\030\005 \001(\014\"\236\002\n\021Override"
-  "AccountV2\022\017\n\007balance\030\001 \001(\014\022\r\n\005nonce\030\002 \001("
-  "\004\022\014\n\004code\030\003 \001(\014\0228\n\005state\030\004 \003(\0132).executo"
-  "r.v1.OverrideAccountV2.StateEntry\022A\n\nsta"
-  "te_diff\030\005 \003(\0132-.executor.v1.OverrideAcco"
-  "untV2.StateDiffEntry\032,\n\nStateEntry\022\013\n\003ke"
-  "y\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0320\n\016StateDiffE"
-  "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"1\n\017"
-  "InfoReadWriteV2\022\r\n\005nonce\030\001 \001(\t\022\017\n\007balanc"
-  "e\030\002 \001(\t\"p\n\013FullTraceV2\0222\n\007context\030\001 \001(\0132"
-  "!.executor.v1.TransactionContextV2\022-\n\005st"
-  "eps\030\002 \003(\0132\036.executor.v1.TransactionStepV"
-  "2\"\224\002\n\024TransactionContextV2\022\014\n\004type\030\001 \001(\t"
-  "\022\014\n\004from\030\002 \001(\t\022\n\n\002to\030\003 \001(\t\022\014\n\004data\030\004 \001(\014"
-  "\022\013\n\003gas\030\005 \001(\004\022\r\n\005value\030\006 \001(\t\022\022\n\nblock_ha"
-  "sh\030\007 \001(\014\022\016\n\006output\030\010 \001(\014\022\020\n\010gas_used\030\t \001"
-  "(\004\022\021\n\tgas_price\030\n \001(\t\022\026\n\016execution_time\030"
-  "\013 \001(\r\022\026\n\016old_state_root\030\014 \001(\014\022\r\n\005nonce\030\r"
-  " \001(\004\022\020\n\010tx_index\030\016 \001(\004\022\020\n\010chain_id\030\017 \001(\004"
-  "\"\240\003\n\021TransactionStepV2\022\022\n\nstate_root\030\001 \001"
-  "(\014\022\r\n\005depth\030\002 \001(\r\022\n\n\002pc\030\003 \001(\004\022\013\n\003gas\030\004 \001"
-  "(\004\022\020\n\010gas_cost\030\005 \001(\004\022\022\n\ngas_refund\030\006 \001(\004"
-  "\022\n\n\002op\030\007 \001(\r\022\r\n\005stack\030\010 \003(\t\022\016\n\006memory\030\t "
-  "\001(\014\022\023\n\013memory_size\030\n \001(\r\022\025\n\rmemory_offse"
-  "t\030\013 \001(\r\022\023\n\013return_data\030\014 \001(\014\022)\n\010contract"
-  "\030\r \001(\0132\027.executor.v1.ContractV2\022$\n\005error"
-  "\030\016 \001(\0162\025.executor.v1.RomError\022<\n\007storage"
-  "\030\017 \003(\0132+.executor.v1.TransactionStepV2.S"
-  "torageEntry\032.\n\014StorageEntry\022\013\n\003key\030\001 \001(\t"
-  "\022\r\n\005value\030\002 \001(\t:\0028\001\"e\n\nContractV2\022\017\n\007add"
-  "ress\030\001 \001(\t\022\016\n\006caller\030\002 \001(\t\022\r\n\005value\030\003 \001("
-  "\t\022\014\n\004data\030\004 \001(\014\022\013\n\003gas\030\005 \001(\004\022\014\n\004type\030\006 \001"
-  "(\t\"\344\002\n\026ProcessBlockResponseV2\022\023\n\013parent_"
-  "hash\030\001 \001(\014\022\020\n\010coinbase\030\002 \001(\t\022\021\n\tgas_limi"
-  "t\030\003 \001(\004\022\024\n\014block_number\030\004 \001(\004\022\021\n\ttimesta"
-  "mp\030\005 \001(\004\022\013\n\003ger\030\006 \001(\014\022\025\n\rblock_hash_l1\030\007"
-  " \001(\014\022\020\n\010gas_used\030\010 \001(\004\022\027\n\017block_info_roo"
-  "t\030\t \001(\014\022\022\n\nblock_hash\030\n \001(\014\022<\n\tresponses"
-  "\030\013 \003(\0132).executor.v1.ProcessTransactionR"
-  "esponseV2\022 \n\004logs\030\014 \003(\0132\022.executor.v1.Lo"
-  "gV2\022$\n\005error\030\r \001(\0162\025.executor.v1.RomErro"
-  "r\"\236\004\n\034ProcessTransactionResponseV2\022\017\n\007tx"
-  "_hash\030\001 \001(\014\022\022\n\ntx_hash_l2\030\002 \001(\014\022\016\n\006rlp_t"
-  "x\030\003 \001(\014\022\022\n\nblock_hash\030\004 \001(\014\022\024\n\014block_num"
-  "ber\030\005 \001(\004\022\014\n\004type\030\006 \001(\r\022\024\n\014return_value\030"
-  "\007 \001(\014\022\020\n\010gas_left\030\010 \001(\004\022\020\n\010gas_used\030\t \001("
-  "\004\022\033\n\023cumulative_gas_used\030\n \001(\004\022\024\n\014gas_re"
-  "funded\030\013 \001(\004\022$\n\005error\030\014 \001(\0162\025.executor.v"
-  "1.RomError\022\026\n\016create_address\030\r \001(\t\022\022\n\nst"
-  "ate_root\030\016 \001(\014\022 \n\004logs\030\017 \003(\0132\022.executor."
-  "v1.LogV2\022,\n\nfull_trace\030\020 \001(\0132\030.executor."
-  "v1.FullTraceV2\022\033\n\023effective_gas_price\030\021 "
-  "\001(\t\022\034\n\024effective_percentage\030\022 \001(\r\022\033\n\023has"
-  "_gasprice_opcode\030\023 \001(\r\022\032\n\022has_balance_op"
-  "code\030\024 \001(\r\022\016\n\006status\030\025 \001(\r\"\246\001\n\005LogV2\022\017\n\007"
-  "address\030\001 \001(\t\022\016\n\006topics\030\002 \003(\014\022\014\n\004data\030\003 "
-  "\001(\014\022\024\n\014block_number\030\004 \001(\004\022\017\n\007tx_hash\030\005 \001"
-  "(\014\022\022\n\ntx_hash_l2\030\006 \001(\014\022\020\n\010tx_index\030\007 \001(\r"
-  "\022\022\n\nblock_hash\030\010 \001(\014\022\r\n\005index\030\t \001(\r\"\364\010\n\025"
-  "ProcessBatchRequestV3\022\026\n\016old_state_root\030"
-  "\001 \001(\014\022\032\n\022old_acc_input_hash\030\002 \001(\014\022\"\n\032pre"
-  "vious_l1_info_tree_root\030\003 \001(\014\022#\n\033previou"
-  "s_l1_info_tree_index\030\004 \001(\r\022\020\n\010chain_id\030\005"
-  " \001(\004\022\017\n\007fork_id\030\006 \001(\004\022\025\n\rbatch_l2_data\030\007"
-  " \001(\014\022\014\n\004type\030\010 \001(\r\022\030\n\020forced_hash_data\030\t"
-  " \001(\014\022,\n\013forced_data\030\n \001(\0132\027.executor.v1."
-  "ForcedData\022\020\n\010coinbase\030\013 \001(\t\022\032\n\022update_m"
-  "erkle_tree\030\014 \001(\r\022\023\n\013no_counters\030\r \001(\r\022\014\n"
-  "\004from\030\016 \001(\t\022\"\n\032skip_first_change_l2_bloc"
-  "k\030\017 \001(\r\022\"\n\032skip_write_block_info_root\030\020 "
-  "\001(\r\022Q\n\021l1_info_tree_data\030\021 \003(\01326.executo"
-  "r.v1.ProcessBatchRequestV3.L1InfoTreeDat"
-  "aEntry\0226\n\002db\030\022 \003(\0132*.executor.v1.Process"
-  "BatchRequestV3.DbEntry\022U\n\022contracts_byte"
-  "code\030\023 \003(\01329.executor.v1.ProcessBatchReq"
-  "uestV3.ContractsBytecodeEntry\0220\n\014trace_c"
-  "onfig\030\024 \001(\0132\032.executor.v1.TraceConfigV2\022"
-  "\022\n\ncontext_id\030\025 \001(\t\022\020\n\010get_keys\030\026 \001(\r\022M\n"
-  "\016state_override\030\027 \003(\01325.executor.v1.Proc"
-  "essBatchRequestV3.StateOverrideEntry\022#\n\005"
-  "debug\030\030 \001(\0132\024.executor.v1.DebugV2\032L\n\023L1I"
-  "nfoTreeDataEntry\022\013\n\003key\030\001 \001(\r\022$\n\005value\030\002"
-  " \001(\0132\025.executor.v1.L1DataV3:\0028\001\032)\n\007DbEnt"
-  "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026Co"
-  "ntractsBytecodeEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005val"
-  "ue\030\002 \001(\t:\0028\001\032T\n\022StateOverrideEntry\022\013\n\003ke"
-  "y\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.executor.v1.Ove"
-  "rrideAccountV2:\0028\001\"\204\001\n\010L1DataV3\022\030\n\020globa"
-  "l_exit_root\030\001 \001(\014\022\025\n\rblock_hash_l1\030\002 \001(\014"
-  "\022\025\n\rmin_timestamp\030\003 \001(\004\022\021\n\tsmt_proof\030\004 \003"
-  "(\014\022\035\n\025initial_historic_root\030\005 \001(\014\"\213\t\n\026Pr"
-  "ocessBatchResponseV3\022\026\n\016new_state_root\030\001"
-  " \001(\014\022\032\n\022new_acc_input_hash\030\002 \001(\014\022\033\n\023new_"
-  "local_exit_root\030\003 \001(\014\022\032\n\022new_last_timest"
-  "amp\030\004 \001(\014\022!\n\031current_l1_info_tree_root\030\005"
-  " \001(\014\022\"\n\032current_l1_info_tree_index\030\006 \001(\r"
-  "\022\031\n\021cnt_keccak_hashes\030\007 \001(\r\022\033\n\023cnt_posei"
-  "don_hashes\030\010 \001(\r\022\035\n\025cnt_poseidon_padding"
-  "s\030\t \001(\r\022\026\n\016cnt_mem_aligns\030\n \001(\r\022\027\n\017cnt_a"
-  "rithmetics\030\013 \001(\r\022\024\n\014cnt_binaries\030\014 \001(\r\022\021"
-  "\n\tcnt_steps\030\r \001(\r\022\031\n\021cnt_sha256_hashes\030\016"
-  " \001(\r\022<\n\017block_responses\030\017 \003(\0132#.executor"
-  ".v1.ProcessBlockResponseV2\022)\n\005error\030\020 \001("
-  "\0162\032.executor.v1.ExecutorError\022Y\n\024read_wr"
-  "ite_addresses\030\021 \003(\0132;.executor.v1.Proces"
-  "sBatchResponseV3.ReadWriteAddressesEntry"
-  "\022\020\n\010flush_id\030\022 \001(\004\022\027\n\017stored_flush_id\030\023 "
-  "\001(\004\022\021\n\tprover_id\030\024 \001(\t\022\020\n\010gas_used\030\025 \001(\004"
-  "\022\020\n\010smt_keys\030\026 \003(\014\022\024\n\014program_keys\030\027 \003(\014"
-  "\022\017\n\007fork_id\030\030 \001(\004\022\025\n\rinvalid_batch\030\031 \001(\r"
-  "\022(\n\terror_rom\030\032 \001(\0162\025.executor.v1.RomErr"
-  "or\022!\n\031cnt_reserve_keccak_hashes\030\033 \001(\r\022#\n"
-  "\033cnt_reserve_poseidon_hashes\030\034 \001(\r\022%\n\035cn"
-  "t_reserve_poseidon_paddings\030\035 \001(\r\022\036\n\026cnt"
-  "_reserve_mem_aligns\030\036 \001(\r\022\037\n\027cnt_reserve"
-  "_arithmetics\030\037 \001(\r\022\034\n\024cnt_reserve_binari"
-  "es\030  \001(\r\022\031\n\021cnt_reserve_steps\030! \001(\r\022!\n\031c"
-  "nt_reserve_sha256_hashes\030\" \001(\r\032W\n\027ReadWr"
-  "iteAddressesEntry\022\013\n\003key\030\001 \001(\t\022+\n\005value\030"
-  "\002 \001(\0132\034.executor.v1.InfoReadWriteV2:\0028\001\""
-  "T\n\nForcedData\022\030\n\020global_exit_root\030\001 \001(\014\022"
-  "\025\n\rblock_hash_l1\030\002 \001(\014\022\025\n\rmin_timestamp\030"
-  "\003 \001(\004\"\260\003\n\031ProcessBlobInnerRequestV3\022\033\n\023o"
-  "ld_blob_state_root\030\001 \001(\014\022\037\n\027old_blob_acc"
-  "_input_hash\030\002 \001(\014\022\024\n\014old_num_blob\030\003 \001(\004\022"
-  "\026\n\016old_state_root\030\004 \001(\014\022\017\n\007fork_id\030\005 \001(\004"
-  "\022\037\n\027last_l1_info_tree_index\030\006 \001(\r\022\036\n\026las"
-  "t_l1_info_tree_root\030\007 \001(\014\022\027\n\017timestamp_l"
-  "imit\030\010 \001(\004\022\020\n\010coinbase\030\t \001(\t\022\024\n\014zk_gas_l"
-  "imit\030\n \001(\014\022\014\n\004type\030\013 \001(\r\022\017\n\007point_z\030\014 \001("
-  "\014\022\017\n\007point_y\030\r \001(\014\022\021\n\tblob_data\030\016 \001(\014\022\030\n"
-  "\020forced_hash_data\030\017 \001(\014\022\022\n\ncontext_id\030\020 "
-  "\001(\t\022#\n\005debug\030\021 \001(\0132\024.executor.v1.DebugV3"
-  "\"]\n\007DebugV3\022\033\n\023new_blob_state_root\030\001 \001(\014"
-  "\022\037\n\027new_blob_acc_input_hash\030\002 \001(\014\022\024\n\014new"
-  "_blob_num\030\003 \001(\004\"\211\002\n\032ProcessBlobInnerResp"
-  "onseV3\022\033\n\023new_blob_state_root\030\001 \001(\014\022\037\n\027n"
-  "ew_blob_acc_input_hash\030\002 \001(\014\022\024\n\014new_num_"
-  "blob\030\003 \001(\004\022!\n\031final_acc_batch_hash_data\030"
-  "\004 \001(\014\022!\n\031local_exit_root_from_blob\030\005 \001(\014"
-  "\022\022\n\nis_invalid\030\006 \001(\r\022\022\n\nbatch_data\030\007 \003(\014"
-  "\022)\n\005error\030\010 \001(\0162\032.executor.v1.ExecutorEr"
-  "ror*\275\n\n\010RomError\022\031\n\025ROM_ERROR_UNSPECIFIE"
-  "D\020\000\022\026\n\022ROM_ERROR_NO_ERROR\020\001\022\030\n\024ROM_ERROR"
-  "_OUT_OF_GAS\020\002\022\034\n\030ROM_ERROR_STACK_OVERFLO"
-  "W\020\003\022\035\n\031ROM_ERROR_STACK_UNDERFLOW\020\004\022$\n RO"
-  "M_ERROR_MAX_CODE_SIZE_EXCEEDED\020\005\022(\n$ROM_"
-  "ERROR_CONTRACT_ADDRESS_COLLISION\020\006\022 \n\034RO"
-  "M_ERROR_EXECUTION_REVERTED\020\007\022\"\n\036ROM_ERRO"
-  "R_OUT_OF_COUNTERS_STEP\020\010\022$\n ROM_ERROR_OU"
-  "T_OF_COUNTERS_KECCAK\020\t\022$\n ROM_ERROR_OUT_"
-  "OF_COUNTERS_BINARY\020\n\022!\n\035ROM_ERROR_OUT_OF"
-  "_COUNTERS_MEM\020\013\022#\n\037ROM_ERROR_OUT_OF_COUN"
-  "TERS_ARITH\020\014\022%\n!ROM_ERROR_OUT_OF_COUNTER"
-  "S_PADDING\020\r\022&\n\"ROM_ERROR_OUT_OF_COUNTERS"
-  "_POSEIDON\020\016\022!\n\035ROM_ERROR_OUT_OF_COUNTERS"
-  "_SHA\020\017\022\032\n\026ROM_ERROR_INVALID_JUMP\020\020\022\034\n\030RO"
-  "M_ERROR_INVALID_OPCODE\020\021\022\034\n\030ROM_ERROR_IN"
-  "VALID_STATIC\020\022\022(\n$ROM_ERROR_INVALID_BYTE"
-  "CODE_STARTS_EF\020\023\022)\n%ROM_ERROR_INTRINSIC_"
-  "INVALID_SIGNATURE\020\024\022(\n$ROM_ERROR_INTRINS"
-  "IC_INVALID_CHAIN_ID\020\025\022%\n!ROM_ERROR_INTRI"
-  "NSIC_INVALID_NONCE\020\026\022)\n%ROM_ERROR_INTRIN"
-  "SIC_INVALID_GAS_LIMIT\020\027\022\'\n#ROM_ERROR_INT"
-  "RINSIC_INVALID_BALANCE\020\030\022/\n+ROM_ERROR_IN"
-  "TRINSIC_INVALID_BATCH_GAS_LIMIT\020\031\022+\n\'ROM"
-  "_ERROR_INTRINSIC_INVALID_SENDER_CODE\020\032\022\'"
-  "\n#ROM_ERROR_INTRINSIC_TX_GAS_OVERFLOW\020\033\022"
-  " \n\034ROM_ERROR_BATCH_DATA_TOO_BIG\020\034\022!\n\035ROM"
-  "_ERROR_UNSUPPORTED_FORK_ID\020\035\022\031\n\025ROM_ERRO"
-  "R_INVALID_RLP\020\036\022,\n(ROM_ERROR_INVALID_DEC"
-  "ODE_CHANGE_L2_BLOCK\020\037\0222\n.ROM_ERROR_INVAL"
-  "ID_NOT_FIRST_TX_CHANGE_L2_BLOCK\020 \0228\n4ROM"
-  "_ERROR_INVALID_TX_CHANGE_L2_BLOCK_LIMIT_"
-  "TIMESTAMP\020!\0226\n2ROM_ERROR_INVALID_TX_CHAN"
-  "GE_L2_BLOCK_MIN_TIMESTAMP\020\"*\2231\n\rExecutor"
-  "Error\022\036\n\032EXECUTOR_ERROR_UNSPECIFIED\020\000\022\033\n"
-  "\027EXECUTOR_ERROR_NO_ERROR\020\001\022\033\n\027EXECUTOR_E"
-  "RROR_DB_ERROR\020\002\0222\n.EXECUTOR_ERROR_SM_MAI"
-  "N_COUNTERS_OVERFLOW_STEPS\020\003\0223\n/EXECUTOR_"
-  "ERROR_SM_MAIN_COUNTERS_OVERFLOW_KECCAK\020\004"
-  "\0223\n/EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVER"
-  "FLOW_BINARY\020\005\0220\n,EXECUTOR_ERROR_SM_MAIN_"
-  "COUNTERS_OVERFLOW_MEM\020\006\0222\n.EXECUTOR_ERRO"
-  "R_SM_MAIN_COUNTERS_OVERFLOW_ARITH\020\007\0224\n0E"
-  "XECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_"
-  "PADDING\020\010\0225\n1EXECUTOR_ERROR_SM_MAIN_COUN"
-  "TERS_OVERFLOW_POSEIDON\020\t\022&\n\"EXECUTOR_ERR"
-  "OR_UNSUPPORTED_FORK_ID\020\n\022#\n\037EXECUTOR_ERR"
-  "OR_BALANCE_MISMATCH\020\013\022\035\n\031EXECUTOR_ERROR_"
-  "FEA2SCALAR\020\014\022\030\n\024EXECUTOR_ERROR_TOS32\020\r\022."
-  "\n*EXECUTOR_ERROR_SM_MAIN_INVALID_UNSIGNE"
-  "D_TX\020\016\022.\n*EXECUTOR_ERROR_SM_MAIN_INVALID"
-  "_NO_COUNTERS\020\017\0229\n5EXECUTOR_ERROR_SM_MAIN"
-  "_ARITH_ECRECOVER_DIVIDE_BY_ZERO\020\020\022/\n+EXE"
-  "CUTOR_ERROR_SM_MAIN_ADDRESS_OUT_OF_RANGE"
-  "\020\021\022+\n\'EXECUTOR_ERROR_SM_MAIN_ADDRESS_NEG"
-  "ATIVE\020\022\022.\n*EXECUTOR_ERROR_SM_MAIN_STORAG"
-  "E_INVALID_KEY\020\023\022 \n\034EXECUTOR_ERROR_SM_MAI"
-  "N_HASHK\020\024\0222\n.EXECUTOR_ERROR_SM_MAIN_HASH"
-  "K_SIZE_OUT_OF_RANGE\020\025\0222\n.EXECUTOR_ERROR_"
-  "SM_MAIN_HASHK_POSITION_NEGATIVE\020\026\022@\n<EXE"
-  "CUTOR_ERROR_SM_MAIN_HASHK_POSITION_PLUS_"
-  "SIZE_OUT_OF_RANGE\020\027\0228\n4EXECUTOR_ERROR_SM"
-  "_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND\020\030\0224\n"
-  "0EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_NOT_"
-  "COMPLETED\020\031\022 \n\034EXECUTOR_ERROR_SM_MAIN_HA"
-  "SHP\020\032\0222\n.EXECUTOR_ERROR_SM_MAIN_HASHP_SI"
-  "ZE_OUT_OF_RANGE\020\033\0222\n.EXECUTOR_ERROR_SM_M"
-  "AIN_HASHP_POSITION_NEGATIVE\020\034\022@\n<EXECUTO"
-  "R_ERROR_SM_MAIN_HASHP_POSITION_PLUS_SIZE"
-  "_OUT_OF_RANGE\020\035\0228\n4EXECUTOR_ERROR_SM_MAI"
-  "N_HASHPDIGEST_ADDRESS_NOT_FOUND\020\036\0224\n0EXE"
-  "CUTOR_ERROR_SM_MAIN_HASHPDIGEST_NOT_COMP"
-  "LETED\020\037\0227\n3EXECUTOR_ERROR_SM_MAIN_MEMALI"
-  "GN_OFFSET_OUT_OF_RANGE\020 \022*\n&EXECUTOR_ERR"
-  "OR_SM_MAIN_MULTIPLE_FREEIN\020!\022!\n\035EXECUTOR"
-  "_ERROR_SM_MAIN_ASSERT\020\"\022!\n\035EXECUTOR_ERRO"
-  "R_SM_MAIN_MEMORY\020#\0220\n,EXECUTOR_ERROR_SM_"
-  "MAIN_STORAGE_READ_MISMATCH\020$\0221\n-EXECUTOR"
-  "_ERROR_SM_MAIN_STORAGE_WRITE_MISMATCH\020%\022"
-  "/\n+EXECUTOR_ERROR_SM_MAIN_HASHK_VALUE_MI"
-  "SMATCH\020&\0221\n-EXECUTOR_ERROR_SM_MAIN_HASHK"
-  "_PADDING_MISMATCH\020\'\022.\n*EXECUTOR_ERROR_SM"
-  "_MAIN_HASHK_SIZE_MISMATCH\020(\0223\n/EXECUTOR_"
-  "ERROR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH\020)"
-  "\0220\n,EXECUTOR_ERROR_SM_MAIN_HASHKLEN_CALL"
-  "ED_TWICE\020*\0220\n,EXECUTOR_ERROR_SM_MAIN_HAS"
-  "HKDIGEST_NOT_FOUND\020+\0226\n2EXECUTOR_ERROR_S"
-  "M_MAIN_HASHKDIGEST_DIGEST_MISMATCH\020,\0223\n/"
-  "EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_CALLE"
-  "D_TWICE\020-\022/\n+EXECUTOR_ERROR_SM_MAIN_HASH"
-  "P_VALUE_MISMATCH\020.\0221\n-EXECUTOR_ERROR_SM_"
-  "MAIN_HASHP_PADDING_MISMATCH\020/\022.\n*EXECUTO"
-  "R_ERROR_SM_MAIN_HASHP_SIZE_MISMATCH\0200\0223\n"
-  "/EXECUTOR_ERROR_SM_MAIN_HASHPLEN_LENGTH_"
-  "MISMATCH\0201\0220\n,EXECUTOR_ERROR_SM_MAIN_HAS"
-  "HPLEN_CALLED_TWICE\0202\0226\n2EXECUTOR_ERROR_S"
-  "M_MAIN_HASHPDIGEST_DIGEST_MISMATCH\0203\0223\n/"
-  "EXECUTOR_ERROR_SM_MAIN_HASHPDIGEST_CALLE"
-  "D_TWICE\0204\022)\n%EXECUTOR_ERROR_SM_MAIN_ARIT"
-  "H_MISMATCH\0205\0223\n/EXECUTOR_ERROR_SM_MAIN_A"
-  "RITH_ECRECOVER_MISMATCH\0206\022.\n*EXECUTOR_ER"
-  "ROR_SM_MAIN_BINARY_ADD_MISMATCH\0207\022.\n*EXE"
-  "CUTOR_ERROR_SM_MAIN_BINARY_SUB_MISMATCH\020"
-  "8\022-\n)EXECUTOR_ERROR_SM_MAIN_BINARY_LT_MI"
-  "SMATCH\0209\022.\n*EXECUTOR_ERROR_SM_MAIN_BINAR"
-  "Y_SLT_MISMATCH\020:\022-\n)EXECUTOR_ERROR_SM_MA"
-  "IN_BINARY_EQ_MISMATCH\020;\022.\n*EXECUTOR_ERRO"
-  "R_SM_MAIN_BINARY_AND_MISMATCH\020<\022-\n)EXECU"
-  "TOR_ERROR_SM_MAIN_BINARY_OR_MISMATCH\020=\022."
-  "\n*EXECUTOR_ERROR_SM_MAIN_BINARY_XOR_MISM"
-  "ATCH\020>\0222\n.EXECUTOR_ERROR_SM_MAIN_MEMALIG"
-  "N_WRITE_MISMATCH\020\?\0223\n/EXECUTOR_ERROR_SM_"
-  "MAIN_MEMALIGN_WRITE8_MISMATCH\020@\0221\n-EXECU"
-  "TOR_ERROR_SM_MAIN_MEMALIGN_READ_MISMATCH"
-  "\020A\022,\n(EXECUTOR_ERROR_SM_MAIN_JMPN_OUT_OF"
-  "_RANGE\020B\0222\n.EXECUTOR_ERROR_SM_MAIN_HASHK"
-  "_READ_OUT_OF_RANGE\020C\0222\n.EXECUTOR_ERROR_S"
-  "M_MAIN_HASHP_READ_OUT_OF_RANGE\020D\022)\n%EXEC"
-  "UTOR_ERROR_INVALID_OLD_STATE_ROOT\020E\022-\n)E"
-  "XECUTOR_ERROR_INVALID_OLD_ACC_INPUT_HASH"
-  "\020F\022#\n\037EXECUTOR_ERROR_INVALID_CHAIN_ID\020G\022"
-  "(\n$EXECUTOR_ERROR_INVALID_BATCH_L2_DATA\020"
-  "H\022+\n\'EXECUTOR_ERROR_INVALID_GLOBAL_EXIT_"
-  "ROOT\020I\022#\n\037EXECUTOR_ERROR_INVALID_COINBAS"
-  "E\020J\022\037\n\033EXECUTOR_ERROR_INVALID_FROM\020K\022!\n\035"
-  "EXECUTOR_ERROR_INVALID_DB_KEY\020L\022#\n\037EXECU"
-  "TOR_ERROR_INVALID_DB_VALUE\020M\0221\n-EXECUTOR"
-  "_ERROR_INVALID_CONTRACTS_BYTECODE_KEY\020N\022"
-  "3\n/EXECUTOR_ERROR_INVALID_CONTRACTS_BYTE"
-  "CODE_VALUE\020O\022\"\n\036EXECUTOR_ERROR_INVALID_G"
-  "ET_KEY\020P\0223\n/EXECUTOR_ERROR_SM_MAIN_COUNT"
-  "ERS_OVERFLOW_SHA256\020Q\022 \n\034EXECUTOR_ERROR_"
-  "SM_MAIN_HASHS\020R\0222\n.EXECUTOR_ERROR_SM_MAI"
-  "N_HASHS_SIZE_OUT_OF_RANGE\020S\0222\n.EXECUTOR_"
-  "ERROR_SM_MAIN_HASHS_POSITION_NEGATIVE\020T\022"
-  "@\n<EXECUTOR_ERROR_SM_MAIN_HASHS_POSITION"
-  "_PLUS_SIZE_OUT_OF_RANGE\020U\0228\n4EXECUTOR_ER"
-  "ROR_SM_MAIN_HASHSDIGEST_ADDRESS_NOT_FOUN"
-  "D\020V\0224\n0EXECUTOR_ERROR_SM_MAIN_HASHSDIGES"
-  "T_NOT_COMPLETED\020W\022/\n+EXECUTOR_ERROR_SM_M"
-  "AIN_HASHS_VALUE_MISMATCH\020X\0221\n-EXECUTOR_E"
-  "RROR_SM_MAIN_HASHS_PADDING_MISMATCH\020Y\022.\n"
-  "*EXECUTOR_ERROR_SM_MAIN_HASHS_SIZE_MISMA"
-  "TCH\020Z\0223\n/EXECUTOR_ERROR_SM_MAIN_HASHSLEN"
-  "_LENGTH_MISMATCH\020[\0220\n,EXECUTOR_ERROR_SM_"
-  "MAIN_HASHSLEN_CALLED_TWICE\020\\\0220\n,EXECUTOR"
-  "_ERROR_SM_MAIN_HASHSDIGEST_NOT_FOUND\020]\0226"
-  "\n2EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_DIG"
-  "EST_MISMATCH\020^\0223\n/EXECUTOR_ERROR_SM_MAIN"
-  "_HASHSDIGEST_CALLED_TWICE\020_\0222\n.EXECUTOR_"
-  "ERROR_SM_MAIN_HASHS_READ_OUT_OF_RANGE\020`\022"
-  "\'\n#EXECUTOR_ERROR_INVALID_L1_INFO_ROOT\020a"
-  "\022.\n*EXECUTOR_ERROR_INVALID_FORCED_BLOCKH"
-  "ASH_L1\020b\0226\n2EXECUTOR_ERROR_INVALID_L1_DA"
-  "TA_V2_GLOBAL_EXIT_ROOT\020c\0223\n/EXECUTOR_ERR"
-  "OR_INVALID_L1_DATA_V2_BLOCK_HASH_L1\020d\022\'\n"
-  "#EXECUTOR_ERROR_INVALID_L1_SMT_PROOF\020e\022\""
-  "\n\036EXECUTOR_ERROR_INVALID_BALANCE\020f\022.\n*EX"
-  "ECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH"
-  "\020g\022)\n%EXECUTOR_ERROR_INVALID_NEW_STATE_R"
-  "OOT\020h\022-\n)EXECUTOR_ERROR_INVALID_NEW_ACC_"
-  "INPUT_HASH\020i\022.\n*EXECUTOR_ERROR_INVALID_N"
-  "EW_LOCAL_EXIT_ROOT\020j\022#\n\037EXECUTOR_ERROR_D"
-  "B_KEY_NOT_FOUND\020k\022(\n$EXECUTOR_ERROR_SMT_"
-  "INVALID_DATA_SIZE\020l\022$\n EXECUTOR_ERROR_HA"
-  "SHDB_GRPC_ERROR\020m\022 \n\034EXECUTOR_ERROR_STAT"
-  "E_MANAGER\020n\022-\n)EXECUTOR_ERROR_INVALID_L1"
-  "_INFO_TREE_INDEX\020o\0227\n3EXECUTOR_ERROR_INV"
-  "ALID_L1_INFO_TREE_SMT_PROOF_VALUE\020p\022\"\n\036E"
-  "XECUTOR_ERROR_INVALID_WITNESS\020q\022\037\n\033EXECU"
-  "TOR_ERROR_INVALID_CBOR\020r\022&\n\"EXECUTOR_ERR"
-  "OR_INVALID_DATA_STREAM\020s\022-\n)EXECUTOR_ERR"
-  "OR_INVALID_UPDATE_MERKLE_TREE\020t\0222\n.EXECU"
-  "TOR_ERROR_SM_MAIN_INVALID_TX_STATUS_ERRO"
-  "R\020u\0225\n1EXECUTOR_ERROR_INVALID_PREVIOUS_L"
-  "1_INFO_TREE_ROOT\020v\022+\n\'EXECUTOR_ERROR_INV"
-  "ALID_FORCED_HASH_DATA\020w\0227\n3EXECUTOR_ERRO"
-  "R_INVALID_FORCED_DATA_GLOBAL_EXIT_ROOT\020x"
-  "\0224\n0EXECUTOR_ERROR_INVALID_FORCED_DATA_B"
-  "LOCK_HASH_L1\020y\022;\n7EXECUTOR_ERROR_INVALID"
-  "_L1_DATA_V3_INITIAL_HISTORIC_ROOT\020z\022.\n*E"
-  "XECUTOR_ERROR_INVALID_OLD_BLOB_STATE_ROO"
-  "T\020{\0222\n.EXECUTOR_ERROR_INVALID_OLD_BLOB_A"
-  "CC_INPUT_HASH\020|\0221\n-EXECUTOR_ERROR_INVALI"
-  "D_LAST_L1_INFO_TREE_ROOT\020}\022.\n*EXECUTOR_E"
-  "RROR_INVALID_NEW_BLOB_STATE_ROOT\020~\0222\n.EX"
-  "ECUTOR_ERROR_INVALID_NEW_BLOB_ACC_INPUT_"
-  "HASH\020\177\022%\n EXECUTOR_ERROR_INVALID_BLOB_DA"
-  "TA\020\200\001\022(\n#EXECUTOR_ERROR_INVALID_ZK_GAS_L"
-  "IMIT\020\201\001\022#\n\036EXECUTOR_ERROR_INVALID_POINT_"
-  "Z\020\202\001\022#\n\036EXECUTOR_ERROR_INVALID_POINT_Y\020\203"
-  "\0012\313\004\n\017ExecutorService\022U\n\014ProcessBatch\022 ."
-  "executor.v1.ProcessBatchRequest\032!.execut"
-  "or.v1.ProcessBatchResponse\"\000\022[\n\016ProcessB"
-  "atchV2\022\".executor.v1.ProcessBatchRequest"
-  "V2\032#.executor.v1.ProcessBatchResponseV2\""
-  "\000\022[\n\016ProcessBatchV3\022\".executor.v1.Proces"
-  "sBatchRequestV3\032#.executor.v1.ProcessBat"
-  "chResponseV3\"\000\022g\n\022ProcessBlobInnerV3\022&.e"
-  "xecutor.v1.ProcessBlobInnerRequestV3\032\'.e"
-  "xecutor.v1.ProcessBlobInnerResponseV3\"\000\022"
-  "m\n\027ProcessStatelessBatchV2\022+.executor.v1"
-  ".ProcessStatelessBatchRequestV2\032#.execut"
-  "or.v1.ProcessBatchResponseV2\"\000\022O\n\016GetFlu"
-  "shStatus\022\026.google.protobuf.Empty\032#.execu"
-  "tor.v1.GetFlushStatusResponse\"\000B>Z<githu"
-  "b.com/0xPolygonHermez/zkevm-node/state/r"
-  "untime/executorb\006proto3"
+  "(\014\022\022\n\ncontext_id\030\010 \001(\t\0220\n\014trace_config\030\t"
+  " \001(\0132\032.executor.v1.TraceConfigV2\"e\n\010L1Da"
+  "taV2\022\030\n\020global_exit_root\030\001 \001(\014\022\025\n\rblock_"
+  "hash_l1\030\002 \001(\014\022\025\n\rmin_timestamp\030\003 \001(\004\022\021\n\t"
+  "smt_proof\030\004 \003(\014\"\204\001\n\007DebugV2\022\021\n\tgas_limit"
+  "\030\001 \001(\004\022\026\n\016new_state_root\030\002 \001(\014\022\032\n\022new_ac"
+  "c_input_hash\030\003 \001(\014\022\033\n\023new_local_exit_roo"
+  "t\030\004 \001(\014\022\025\n\rnew_batch_num\030\005 \001(\004\"\327\010\n\026Proce"
+  "ssBatchResponseV2\022\026\n\016new_state_root\030\001 \001("
+  "\014\022\032\n\022new_acc_input_hash\030\002 \001(\014\022\033\n\023new_loc"
+  "al_exit_root\030\003 \001(\014\022\025\n\rnew_batch_num\030\004 \001("
+  "\004\022\031\n\021cnt_keccak_hashes\030\005 \001(\r\022\033\n\023cnt_pose"
+  "idon_hashes\030\006 \001(\r\022\035\n\025cnt_poseidon_paddin"
+  "gs\030\007 \001(\r\022\026\n\016cnt_mem_aligns\030\010 \001(\r\022\027\n\017cnt_"
+  "arithmetics\030\t \001(\r\022\024\n\014cnt_binaries\030\n \001(\r\022"
+  "\021\n\tcnt_steps\030\013 \001(\r\022\031\n\021cnt_sha256_hashes\030"
+  "\014 \001(\r\022<\n\017block_responses\030\r \003(\0132#.executo"
+  "r.v1.ProcessBlockResponseV2\022)\n\005error\030\016 \001"
+  "(\0162\032.executor.v1.ExecutorError\022Y\n\024read_w"
+  "rite_addresses\030\017 \003(\0132;.executor.v1.Proce"
+  "ssBatchResponseV2.ReadWriteAddressesEntr"
+  "y\022\020\n\010flush_id\030\020 \001(\004\022\027\n\017stored_flush_id\030\021"
+  " \001(\004\022\021\n\tprover_id\030\022 \001(\t\022\020\n\010gas_used\030\023 \001("
+  "\004\022\020\n\010smt_keys\030\024 \003(\014\022\024\n\014program_keys\030\025 \003("
+  "\014\022\017\n\007fork_id\030\026 \001(\004\022\025\n\rinvalid_batch\030\027 \001("
+  "\r\022(\n\terror_rom\030\030 \001(\0162\025.executor.v1.RomEr"
+  "ror\022!\n\031cnt_reserve_keccak_hashes\030\031 \001(\r\022#"
+  "\n\033cnt_reserve_poseidon_hashes\030\032 \001(\r\022%\n\035c"
+  "nt_reserve_poseidon_paddings\030\033 \001(\r\022\036\n\026cn"
+  "t_reserve_mem_aligns\030\034 \001(\r\022\037\n\027cnt_reserv"
+  "e_arithmetics\030\035 \001(\r\022\034\n\024cnt_reserve_binar"
+  "ies\030\036 \001(\r\022\031\n\021cnt_reserve_steps\030\037 \001(\r\022!\n\031"
+  "cnt_reserve_sha256_hashes\030  \001(\r\022\026\n\016old_s"
+  "tate_root\030! \001(\014\032W\n\027ReadWriteAddressesEnt"
+  "ry\022\013\n\003key\030\001 \001(\t\022+\n\005value\030\002 \001(\0132\034.executo"
+  "r.v1.InfoReadWriteV2:\0028\001\"\232\001\n\rTraceConfig"
+  "V2\022\027\n\017disable_storage\030\001 \001(\r\022\025\n\rdisable_s"
+  "tack\030\002 \001(\r\022\025\n\renable_memory\030\003 \001(\r\022\032\n\022ena"
+  "ble_return_data\030\004 \001(\r\022&\n\036tx_hash_to_gene"
+  "rate_full_trace\030\005 \001(\014\"\236\002\n\021OverrideAccoun"
+  "tV2\022\017\n\007balance\030\001 \001(\014\022\r\n\005nonce\030\002 \001(\004\022\014\n\004c"
+  "ode\030\003 \001(\014\0228\n\005state\030\004 \003(\0132).executor.v1.O"
+  "verrideAccountV2.StateEntry\022A\n\nstate_dif"
+  "f\030\005 \003(\0132-.executor.v1.OverrideAccountV2."
+  "StateDiffEntry\032,\n\nStateEntry\022\013\n\003key\030\001 \001("
+  "\t\022\r\n\005value\030\002 \001(\t:\0028\001\0320\n\016StateDiffEntry\022\013"
+  "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\310\001\n\017InfoR"
+  "eadWriteV2\022\r\n\005nonce\030\001 \001(\t\022\017\n\007balance\030\002 \001"
+  "(\t\022\017\n\007sc_code\030\003 \001(\t\022\?\n\nsc_storage\030\004 \003(\0132"
+  "+.executor.v1.InfoReadWriteV2.ScStorageE"
+  "ntry\022\021\n\tsc_length\030\005 \001(\t\0320\n\016ScStorageEntr"
+  "y\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"p\n\013Ful"
+  "lTraceV2\0222\n\007context\030\001 \001(\0132!.executor.v1."
+  "TransactionContextV2\022-\n\005steps\030\002 \003(\0132\036.ex"
+  "ecutor.v1.TransactionStepV2\"\224\002\n\024Transact"
+  "ionContextV2\022\014\n\004type\030\001 \001(\t\022\014\n\004from\030\002 \001(\t"
+  "\022\n\n\002to\030\003 \001(\t\022\014\n\004data\030\004 \001(\014\022\013\n\003gas\030\005 \001(\004\022"
+  "\r\n\005value\030\006 \001(\t\022\022\n\nblock_hash\030\007 \001(\014\022\016\n\006ou"
+  "tput\030\010 \001(\014\022\020\n\010gas_used\030\t \001(\004\022\021\n\tgas_pric"
+  "e\030\n \001(\t\022\026\n\016execution_time\030\013 \001(\r\022\026\n\016old_s"
+  "tate_root\030\014 \001(\014\022\r\n\005nonce\030\r \001(\004\022\020\n\010tx_ind"
+  "ex\030\016 \001(\004\022\020\n\010chain_id\030\017 \001(\004\"\240\003\n\021Transacti"
+  "onStepV2\022\022\n\nstate_root\030\001 \001(\014\022\r\n\005depth\030\002 "
+  "\001(\r\022\n\n\002pc\030\003 \001(\004\022\013\n\003gas\030\004 \001(\004\022\020\n\010gas_cost"
+  "\030\005 \001(\004\022\022\n\ngas_refund\030\006 \001(\004\022\n\n\002op\030\007 \001(\r\022\r"
+  "\n\005stack\030\010 \003(\t\022\016\n\006memory\030\t \001(\014\022\023\n\013memory_"
+  "size\030\n \001(\r\022\025\n\rmemory_offset\030\013 \001(\r\022\023\n\013ret"
+  "urn_data\030\014 \001(\014\022)\n\010contract\030\r \001(\0132\027.execu"
+  "tor.v1.ContractV2\022$\n\005error\030\016 \001(\0162\025.execu"
+  "tor.v1.RomError\022<\n\007storage\030\017 \003(\0132+.execu"
+  "tor.v1.TransactionStepV2.StorageEntry\032.\n"
+  "\014StorageEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001("
+  "\t:\0028\001\"e\n\nContractV2\022\017\n\007address\030\001 \001(\t\022\016\n\006"
+  "caller\030\002 \001(\t\022\r\n\005value\030\003 \001(\t\022\014\n\004data\030\004 \001("
+  "\014\022\013\n\003gas\030\005 \001(\004\022\014\n\004type\030\006 \001(\t\"\344\002\n\026Process"
+  "BlockResponseV2\022\023\n\013parent_hash\030\001 \001(\014\022\020\n\010"
+  "coinbase\030\002 \001(\t\022\021\n\tgas_limit\030\003 \001(\004\022\024\n\014blo"
+  "ck_number\030\004 \001(\004\022\021\n\ttimestamp\030\005 \001(\004\022\013\n\003ge"
+  "r\030\006 \001(\014\022\025\n\rblock_hash_l1\030\007 \001(\014\022\020\n\010gas_us"
+  "ed\030\010 \001(\004\022\027\n\017block_info_root\030\t \001(\014\022\022\n\nblo"
+  "ck_hash\030\n \001(\014\022<\n\tresponses\030\013 \003(\0132).execu"
+  "tor.v1.ProcessTransactionResponseV2\022 \n\004l"
+  "ogs\030\014 \003(\0132\022.executor.v1.LogV2\022$\n\005error\030\r"
+  " \001(\0162\025.executor.v1.RomError\"\236\004\n\034ProcessT"
+  "ransactionResponseV2\022\017\n\007tx_hash\030\001 \001(\014\022\022\n"
+  "\ntx_hash_l2\030\002 \001(\014\022\016\n\006rlp_tx\030\003 \001(\014\022\022\n\nblo"
+  "ck_hash\030\004 \001(\014\022\024\n\014block_number\030\005 \001(\004\022\014\n\004t"
+  "ype\030\006 \001(\r\022\024\n\014return_value\030\007 \001(\014\022\020\n\010gas_l"
+  "eft\030\010 \001(\004\022\020\n\010gas_used\030\t \001(\004\022\033\n\023cumulativ"
+  "e_gas_used\030\n \001(\004\022\024\n\014gas_refunded\030\013 \001(\004\022$"
+  "\n\005error\030\014 \001(\0162\025.executor.v1.RomError\022\026\n\016"
+  "create_address\030\r \001(\t\022\022\n\nstate_root\030\016 \001(\014"
+  "\022 \n\004logs\030\017 \003(\0132\022.executor.v1.LogV2\022,\n\nfu"
+  "ll_trace\030\020 \001(\0132\030.executor.v1.FullTraceV2"
+  "\022\033\n\023effective_gas_price\030\021 \001(\t\022\034\n\024effecti"
+  "ve_percentage\030\022 \001(\r\022\033\n\023has_gasprice_opco"
+  "de\030\023 \001(\r\022\032\n\022has_balance_opcode\030\024 \001(\r\022\016\n\006"
+  "status\030\025 \001(\r\"\246\001\n\005LogV2\022\017\n\007address\030\001 \001(\t\022"
+  "\016\n\006topics\030\002 \003(\014\022\014\n\004data\030\003 \001(\014\022\024\n\014block_n"
+  "umber\030\004 \001(\004\022\017\n\007tx_hash\030\005 \001(\014\022\022\n\ntx_hash_"
+  "l2\030\006 \001(\014\022\020\n\010tx_index\030\007 \001(\r\022\022\n\nblock_hash"
+  "\030\010 \001(\014\022\r\n\005index\030\t \001(\r\"\364\010\n\025ProcessBatchRe"
+  "questV3\022\026\n\016old_state_root\030\001 \001(\014\022\032\n\022old_a"
+  "cc_input_hash\030\002 \001(\014\022\"\n\032previous_l1_info_"
+  "tree_root\030\003 \001(\014\022#\n\033previous_l1_info_tree"
+  "_index\030\004 \001(\r\022\020\n\010chain_id\030\005 \001(\004\022\017\n\007fork_i"
+  "d\030\006 \001(\004\022\025\n\rbatch_l2_data\030\007 \001(\014\022\014\n\004type\030\010"
+  " \001(\r\022\030\n\020forced_hash_data\030\t \001(\014\022,\n\013forced"
+  "_data\030\n \001(\0132\027.executor.v1.ForcedData\022\020\n\010"
+  "coinbase\030\013 \001(\t\022\032\n\022update_merkle_tree\030\014 \001"
+  "(\r\022\023\n\013no_counters\030\r \001(\r\022\014\n\004from\030\016 \001(\t\022\"\n"
+  "\032skip_first_change_l2_block\030\017 \001(\r\022\"\n\032ski"
+  "p_write_block_info_root\030\020 \001(\r\022Q\n\021l1_info"
+  "_tree_data\030\021 \003(\01326.executor.v1.ProcessBa"
+  "tchRequestV3.L1InfoTreeDataEntry\0226\n\002db\030\022"
+  " \003(\0132*.executor.v1.ProcessBatchRequestV3"
+  ".DbEntry\022U\n\022contracts_bytecode\030\023 \003(\01329.e"
+  "xecutor.v1.ProcessBatchRequestV3.Contrac"
+  "tsBytecodeEntry\0220\n\014trace_config\030\024 \001(\0132\032."
+  "executor.v1.TraceConfigV2\022\022\n\ncontext_id\030"
+  "\025 \001(\t\022\020\n\010get_keys\030\026 \001(\r\022M\n\016state_overrid"
+  "e\030\027 \003(\01325.executor.v1.ProcessBatchReques"
+  "tV3.StateOverrideEntry\022#\n\005debug\030\030 \001(\0132\024."
+  "executor.v1.DebugV2\032L\n\023L1InfoTreeDataEnt"
+  "ry\022\013\n\003key\030\001 \001(\r\022$\n\005value\030\002 \001(\0132\025.executo"
+  "r.v1.L1DataV3:\0028\001\032)\n\007DbEntry\022\013\n\003key\030\001 \001("
+  "\t\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026ContractsBytecod"
+  "eEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\032T"
+  "\n\022StateOverrideEntry\022\013\n\003key\030\001 \001(\t\022-\n\005val"
+  "ue\030\002 \001(\0132\036.executor.v1.OverrideAccountV2"
+  ":\0028\001\"\204\001\n\010L1DataV3\022\030\n\020global_exit_root\030\001 "
+  "\001(\014\022\025\n\rblock_hash_l1\030\002 \001(\014\022\025\n\rmin_timest"
+  "amp\030\003 \001(\004\022\021\n\tsmt_proof\030\004 \003(\014\022\035\n\025initial_"
+  "historic_root\030\005 \001(\014\"\243\t\n\026ProcessBatchResp"
+  "onseV3\022\026\n\016new_state_root\030\001 \001(\014\022\032\n\022new_ac"
+  "c_input_hash\030\002 \001(\014\022\033\n\023new_local_exit_roo"
+  "t\030\003 \001(\014\022\032\n\022new_last_timestamp\030\004 \001(\014\022!\n\031c"
+  "urrent_l1_info_tree_root\030\005 \001(\014\022\"\n\032curren"
+  "t_l1_info_tree_index\030\006 \001(\r\022\031\n\021cnt_keccak"
+  "_hashes\030\007 \001(\r\022\033\n\023cnt_poseidon_hashes\030\010 \001"
+  "(\r\022\035\n\025cnt_poseidon_paddings\030\t \001(\r\022\026\n\016cnt"
+  "_mem_aligns\030\n \001(\r\022\027\n\017cnt_arithmetics\030\013 \001"
+  "(\r\022\024\n\014cnt_binaries\030\014 \001(\r\022\021\n\tcnt_steps\030\r "
+  "\001(\r\022\031\n\021cnt_sha256_hashes\030\016 \001(\r\022<\n\017block_"
+  "responses\030\017 \003(\0132#.executor.v1.ProcessBlo"
+  "ckResponseV2\022)\n\005error\030\020 \001(\0162\032.executor.v"
+  "1.ExecutorError\022Y\n\024read_write_addresses\030"
+  "\021 \003(\0132;.executor.v1.ProcessBatchResponse"
+  "V3.ReadWriteAddressesEntry\022\020\n\010flush_id\030\022"
+  " \001(\004\022\027\n\017stored_flush_id\030\023 \001(\004\022\021\n\tprover_"
+  "id\030\024 \001(\t\022\020\n\010gas_used\030\025 \001(\004\022\020\n\010smt_keys\030\026"
+  " \003(\014\022\024\n\014program_keys\030\027 \003(\014\022\017\n\007fork_id\030\030 "
+  "\001(\004\022\025\n\rinvalid_batch\030\031 \001(\r\022(\n\terror_rom\030"
+  "\032 \001(\0162\025.executor.v1.RomError\022!\n\031cnt_rese"
+  "rve_keccak_hashes\030\033 \001(\r\022#\n\033cnt_reserve_p"
+  "oseidon_hashes\030\034 \001(\r\022%\n\035cnt_reserve_pose"
+  "idon_paddings\030\035 \001(\r\022\036\n\026cnt_reserve_mem_a"
+  "ligns\030\036 \001(\r\022\037\n\027cnt_reserve_arithmetics\030\037"
+  " \001(\r\022\034\n\024cnt_reserve_binaries\030  \001(\r\022\031\n\021cn"
+  "t_reserve_steps\030! \001(\r\022!\n\031cnt_reserve_sha"
+  "256_hashes\030\" \001(\r\022\026\n\016old_state_root\030# \001(\014"
+  "\032W\n\027ReadWriteAddressesEntry\022\013\n\003key\030\001 \001(\t"
+  "\022+\n\005value\030\002 \001(\0132\034.executor.v1.InfoReadWr"
+  "iteV2:\0028\001\"T\n\nForcedData\022\030\n\020global_exit_r"
+  "oot\030\001 \001(\014\022\025\n\rblock_hash_l1\030\002 \001(\014\022\025\n\rmin_"
+  "timestamp\030\003 \001(\004\"\260\003\n\031ProcessBlobInnerRequ"
+  "estV3\022\033\n\023old_blob_state_root\030\001 \001(\014\022\037\n\027ol"
+  "d_blob_acc_input_hash\030\002 \001(\014\022\024\n\014old_num_b"
+  "lob\030\003 \001(\004\022\026\n\016old_state_root\030\004 \001(\014\022\017\n\007for"
+  "k_id\030\005 \001(\004\022\037\n\027last_l1_info_tree_index\030\006 "
+  "\001(\r\022\036\n\026last_l1_info_tree_root\030\007 \001(\014\022\027\n\017t"
+  "imestamp_limit\030\010 \001(\004\022\020\n\010coinbase\030\t \001(\t\022\024"
+  "\n\014zk_gas_limit\030\n \001(\014\022\014\n\004type\030\013 \001(\r\022\017\n\007po"
+  "int_z\030\014 \001(\014\022\017\n\007point_y\030\r \001(\014\022\021\n\tblob_dat"
+  "a\030\016 \001(\014\022\030\n\020forced_hash_data\030\017 \001(\014\022\022\n\ncon"
+  "text_id\030\020 \001(\t\022#\n\005debug\030\021 \001(\0132\024.executor."
+  "v1.DebugV3\"]\n\007DebugV3\022\033\n\023new_blob_state_"
+  "root\030\001 \001(\014\022\037\n\027new_blob_acc_input_hash\030\002 "
+  "\001(\014\022\024\n\014new_blob_num\030\003 \001(\004\"\211\002\n\032ProcessBlo"
+  "bInnerResponseV3\022\033\n\023new_blob_state_root\030"
+  "\001 \001(\014\022\037\n\027new_blob_acc_input_hash\030\002 \001(\014\022\024"
+  "\n\014new_num_blob\030\003 \001(\004\022!\n\031final_acc_batch_"
+  "hash_data\030\004 \001(\014\022!\n\031local_exit_root_from_"
+  "blob\030\005 \001(\014\022\022\n\nis_invalid\030\006 \001(\r\022\022\n\nbatch_"
+  "data\030\007 \003(\014\022)\n\005error\030\010 \001(\0162\032.executor.v1."
+  "ExecutorError*\275\n\n\010RomError\022\031\n\025ROM_ERROR_"
+  "UNSPECIFIED\020\000\022\026\n\022ROM_ERROR_NO_ERROR\020\001\022\030\n"
+  "\024ROM_ERROR_OUT_OF_GAS\020\002\022\034\n\030ROM_ERROR_STA"
+  "CK_OVERFLOW\020\003\022\035\n\031ROM_ERROR_STACK_UNDERFL"
+  "OW\020\004\022$\n ROM_ERROR_MAX_CODE_SIZE_EXCEEDED"
+  "\020\005\022(\n$ROM_ERROR_CONTRACT_ADDRESS_COLLISI"
+  "ON\020\006\022 \n\034ROM_ERROR_EXECUTION_REVERTED\020\007\022\""
+  "\n\036ROM_ERROR_OUT_OF_COUNTERS_STEP\020\010\022$\n RO"
+  "M_ERROR_OUT_OF_COUNTERS_KECCAK\020\t\022$\n ROM_"
+  "ERROR_OUT_OF_COUNTERS_BINARY\020\n\022!\n\035ROM_ER"
+  "ROR_OUT_OF_COUNTERS_MEM\020\013\022#\n\037ROM_ERROR_O"
+  "UT_OF_COUNTERS_ARITH\020\014\022%\n!ROM_ERROR_OUT_"
+  "OF_COUNTERS_PADDING\020\r\022&\n\"ROM_ERROR_OUT_O"
+  "F_COUNTERS_POSEIDON\020\016\022!\n\035ROM_ERROR_OUT_O"
+  "F_COUNTERS_SHA\020\017\022\032\n\026ROM_ERROR_INVALID_JU"
+  "MP\020\020\022\034\n\030ROM_ERROR_INVALID_OPCODE\020\021\022\034\n\030RO"
+  "M_ERROR_INVALID_STATIC\020\022\022(\n$ROM_ERROR_IN"
+  "VALID_BYTECODE_STARTS_EF\020\023\022)\n%ROM_ERROR_"
+  "INTRINSIC_INVALID_SIGNATURE\020\024\022(\n$ROM_ERR"
+  "OR_INTRINSIC_INVALID_CHAIN_ID\020\025\022%\n!ROM_E"
+  "RROR_INTRINSIC_INVALID_NONCE\020\026\022)\n%ROM_ER"
+  "ROR_INTRINSIC_INVALID_GAS_LIMIT\020\027\022\'\n#ROM"
+  "_ERROR_INTRINSIC_INVALID_BALANCE\020\030\022/\n+RO"
+  "M_ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMI"
+  "T\020\031\022+\n\'ROM_ERROR_INTRINSIC_INVALID_SENDE"
+  "R_CODE\020\032\022\'\n#ROM_ERROR_INTRINSIC_TX_GAS_O"
+  "VERFLOW\020\033\022 \n\034ROM_ERROR_BATCH_DATA_TOO_BI"
+  "G\020\034\022!\n\035ROM_ERROR_UNSUPPORTED_FORK_ID\020\035\022\031"
+  "\n\025ROM_ERROR_INVALID_RLP\020\036\022,\n(ROM_ERROR_I"
+  "NVALID_DECODE_CHANGE_L2_BLOCK\020\037\0222\n.ROM_E"
+  "RROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOC"
+  "K\020 \0228\n4ROM_ERROR_INVALID_TX_CHANGE_L2_BL"
+  "OCK_LIMIT_TIMESTAMP\020!\0226\n2ROM_ERROR_INVAL"
+  "ID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP\020\"*\2231"
+  "\n\rExecutorError\022\036\n\032EXECUTOR_ERROR_UNSPEC"
+  "IFIED\020\000\022\033\n\027EXECUTOR_ERROR_NO_ERROR\020\001\022\033\n\027"
+  "EXECUTOR_ERROR_DB_ERROR\020\002\0222\n.EXECUTOR_ER"
+  "ROR_SM_MAIN_COUNTERS_OVERFLOW_STEPS\020\003\0223\n"
+  "/EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLO"
+  "W_KECCAK\020\004\0223\n/EXECUTOR_ERROR_SM_MAIN_COU"
+  "NTERS_OVERFLOW_BINARY\020\005\0220\n,EXECUTOR_ERRO"
+  "R_SM_MAIN_COUNTERS_OVERFLOW_MEM\020\006\0222\n.EXE"
+  "CUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_AR"
+  "ITH\020\007\0224\n0EXECUTOR_ERROR_SM_MAIN_COUNTERS"
+  "_OVERFLOW_PADDING\020\010\0225\n1EXECUTOR_ERROR_SM"
+  "_MAIN_COUNTERS_OVERFLOW_POSEIDON\020\t\022&\n\"EX"
+  "ECUTOR_ERROR_UNSUPPORTED_FORK_ID\020\n\022#\n\037EX"
+  "ECUTOR_ERROR_BALANCE_MISMATCH\020\013\022\035\n\031EXECU"
+  "TOR_ERROR_FEA2SCALAR\020\014\022\030\n\024EXECUTOR_ERROR"
+  "_TOS32\020\r\022.\n*EXECUTOR_ERROR_SM_MAIN_INVAL"
+  "ID_UNSIGNED_TX\020\016\022.\n*EXECUTOR_ERROR_SM_MA"
+  "IN_INVALID_NO_COUNTERS\020\017\0229\n5EXECUTOR_ERR"
+  "OR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZER"
+  "O\020\020\022/\n+EXECUTOR_ERROR_SM_MAIN_ADDRESS_OU"
+  "T_OF_RANGE\020\021\022+\n\'EXECUTOR_ERROR_SM_MAIN_A"
+  "DDRESS_NEGATIVE\020\022\022.\n*EXECUTOR_ERROR_SM_M"
+  "AIN_STORAGE_INVALID_KEY\020\023\022 \n\034EXECUTOR_ER"
+  "ROR_SM_MAIN_HASHK\020\024\0222\n.EXECUTOR_ERROR_SM"
+  "_MAIN_HASHK_SIZE_OUT_OF_RANGE\020\025\0222\n.EXECU"
+  "TOR_ERROR_SM_MAIN_HASHK_POSITION_NEGATIV"
+  "E\020\026\022@\n<EXECUTOR_ERROR_SM_MAIN_HASHK_POSI"
+  "TION_PLUS_SIZE_OUT_OF_RANGE\020\027\0228\n4EXECUTO"
+  "R_ERROR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_"
+  "FOUND\020\030\0224\n0EXECUTOR_ERROR_SM_MAIN_HASHKD"
+  "IGEST_NOT_COMPLETED\020\031\022 \n\034EXECUTOR_ERROR_"
+  "SM_MAIN_HASHP\020\032\0222\n.EXECUTOR_ERROR_SM_MAI"
+  "N_HASHP_SIZE_OUT_OF_RANGE\020\033\0222\n.EXECUTOR_"
+  "ERROR_SM_MAIN_HASHP_POSITION_NEGATIVE\020\034\022"
+  "@\n<EXECUTOR_ERROR_SM_MAIN_HASHP_POSITION"
+  "_PLUS_SIZE_OUT_OF_RANGE\020\035\0228\n4EXECUTOR_ER"
+  "ROR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUN"
+  "D\020\036\0224\n0EXECUTOR_ERROR_SM_MAIN_HASHPDIGES"
+  "T_NOT_COMPLETED\020\037\0227\n3EXECUTOR_ERROR_SM_M"
+  "AIN_MEMALIGN_OFFSET_OUT_OF_RANGE\020 \022*\n&EX"
+  "ECUTOR_ERROR_SM_MAIN_MULTIPLE_FREEIN\020!\022!"
+  "\n\035EXECUTOR_ERROR_SM_MAIN_ASSERT\020\"\022!\n\035EXE"
+  "CUTOR_ERROR_SM_MAIN_MEMORY\020#\0220\n,EXECUTOR"
+  "_ERROR_SM_MAIN_STORAGE_READ_MISMATCH\020$\0221"
+  "\n-EXECUTOR_ERROR_SM_MAIN_STORAGE_WRITE_M"
+  "ISMATCH\020%\022/\n+EXECUTOR_ERROR_SM_MAIN_HASH"
+  "K_VALUE_MISMATCH\020&\0221\n-EXECUTOR_ERROR_SM_"
+  "MAIN_HASHK_PADDING_MISMATCH\020\'\022.\n*EXECUTO"
+  "R_ERROR_SM_MAIN_HASHK_SIZE_MISMATCH\020(\0223\n"
+  "/EXECUTOR_ERROR_SM_MAIN_HASHKLEN_LENGTH_"
+  "MISMATCH\020)\0220\n,EXECUTOR_ERROR_SM_MAIN_HAS"
+  "HKLEN_CALLED_TWICE\020*\0220\n,EXECUTOR_ERROR_S"
+  "M_MAIN_HASHKDIGEST_NOT_FOUND\020+\0226\n2EXECUT"
+  "OR_ERROR_SM_MAIN_HASHKDIGEST_DIGEST_MISM"
+  "ATCH\020,\0223\n/EXECUTOR_ERROR_SM_MAIN_HASHKDI"
+  "GEST_CALLED_TWICE\020-\022/\n+EXECUTOR_ERROR_SM"
+  "_MAIN_HASHP_VALUE_MISMATCH\020.\0221\n-EXECUTOR"
+  "_ERROR_SM_MAIN_HASHP_PADDING_MISMATCH\020/\022"
+  ".\n*EXECUTOR_ERROR_SM_MAIN_HASHP_SIZE_MIS"
+  "MATCH\0200\0223\n/EXECUTOR_ERROR_SM_MAIN_HASHPL"
+  "EN_LENGTH_MISMATCH\0201\0220\n,EXECUTOR_ERROR_S"
+  "M_MAIN_HASHPLEN_CALLED_TWICE\0202\0226\n2EXECUT"
+  "OR_ERROR_SM_MAIN_HASHPDIGEST_DIGEST_MISM"
+  "ATCH\0203\0223\n/EXECUTOR_ERROR_SM_MAIN_HASHPDI"
+  "GEST_CALLED_TWICE\0204\022)\n%EXECUTOR_ERROR_SM"
+  "_MAIN_ARITH_MISMATCH\0205\0223\n/EXECUTOR_ERROR"
+  "_SM_MAIN_ARITH_ECRECOVER_MISMATCH\0206\022.\n*E"
+  "XECUTOR_ERROR_SM_MAIN_BINARY_ADD_MISMATC"
+  "H\0207\022.\n*EXECUTOR_ERROR_SM_MAIN_BINARY_SUB"
+  "_MISMATCH\0208\022-\n)EXECUTOR_ERROR_SM_MAIN_BI"
+  "NARY_LT_MISMATCH\0209\022.\n*EXECUTOR_ERROR_SM_"
+  "MAIN_BINARY_SLT_MISMATCH\020:\022-\n)EXECUTOR_E"
+  "RROR_SM_MAIN_BINARY_EQ_MISMATCH\020;\022.\n*EXE"
+  "CUTOR_ERROR_SM_MAIN_BINARY_AND_MISMATCH\020"
+  "<\022-\n)EXECUTOR_ERROR_SM_MAIN_BINARY_OR_MI"
+  "SMATCH\020=\022.\n*EXECUTOR_ERROR_SM_MAIN_BINAR"
+  "Y_XOR_MISMATCH\020>\0222\n.EXECUTOR_ERROR_SM_MA"
+  "IN_MEMALIGN_WRITE_MISMATCH\020\?\0223\n/EXECUTOR"
+  "_ERROR_SM_MAIN_MEMALIGN_WRITE8_MISMATCH\020"
+  "@\0221\n-EXECUTOR_ERROR_SM_MAIN_MEMALIGN_REA"
+  "D_MISMATCH\020A\022,\n(EXECUTOR_ERROR_SM_MAIN_J"
+  "MPN_OUT_OF_RANGE\020B\0222\n.EXECUTOR_ERROR_SM_"
+  "MAIN_HASHK_READ_OUT_OF_RANGE\020C\0222\n.EXECUT"
+  "OR_ERROR_SM_MAIN_HASHP_READ_OUT_OF_RANGE"
+  "\020D\022)\n%EXECUTOR_ERROR_INVALID_OLD_STATE_R"
+  "OOT\020E\022-\n)EXECUTOR_ERROR_INVALID_OLD_ACC_"
+  "INPUT_HASH\020F\022#\n\037EXECUTOR_ERROR_INVALID_C"
+  "HAIN_ID\020G\022(\n$EXECUTOR_ERROR_INVALID_BATC"
+  "H_L2_DATA\020H\022+\n\'EXECUTOR_ERROR_INVALID_GL"
+  "OBAL_EXIT_ROOT\020I\022#\n\037EXECUTOR_ERROR_INVAL"
+  "ID_COINBASE\020J\022\037\n\033EXECUTOR_ERROR_INVALID_"
+  "FROM\020K\022!\n\035EXECUTOR_ERROR_INVALID_DB_KEY\020"
+  "L\022#\n\037EXECUTOR_ERROR_INVALID_DB_VALUE\020M\0221"
+  "\n-EXECUTOR_ERROR_INVALID_CONTRACTS_BYTEC"
+  "ODE_KEY\020N\0223\n/EXECUTOR_ERROR_INVALID_CONT"
+  "RACTS_BYTECODE_VALUE\020O\022\"\n\036EXECUTOR_ERROR"
+  "_INVALID_GET_KEY\020P\0223\n/EXECUTOR_ERROR_SM_"
+  "MAIN_COUNTERS_OVERFLOW_SHA256\020Q\022 \n\034EXECU"
+  "TOR_ERROR_SM_MAIN_HASHS\020R\0222\n.EXECUTOR_ER"
+  "ROR_SM_MAIN_HASHS_SIZE_OUT_OF_RANGE\020S\0222\n"
+  ".EXECUTOR_ERROR_SM_MAIN_HASHS_POSITION_N"
+  "EGATIVE\020T\022@\n<EXECUTOR_ERROR_SM_MAIN_HASH"
+  "S_POSITION_PLUS_SIZE_OUT_OF_RANGE\020U\0228\n4E"
+  "XECUTOR_ERROR_SM_MAIN_HASHSDIGEST_ADDRES"
+  "S_NOT_FOUND\020V\0224\n0EXECUTOR_ERROR_SM_MAIN_"
+  "HASHSDIGEST_NOT_COMPLETED\020W\022/\n+EXECUTOR_"
+  "ERROR_SM_MAIN_HASHS_VALUE_MISMATCH\020X\0221\n-"
+  "EXECUTOR_ERROR_SM_MAIN_HASHS_PADDING_MIS"
+  "MATCH\020Y\022.\n*EXECUTOR_ERROR_SM_MAIN_HASHS_"
+  "SIZE_MISMATCH\020Z\0223\n/EXECUTOR_ERROR_SM_MAI"
+  "N_HASHSLEN_LENGTH_MISMATCH\020[\0220\n,EXECUTOR"
+  "_ERROR_SM_MAIN_HASHSLEN_CALLED_TWICE\020\\\0220"
+  "\n,EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_NOT"
+  "_FOUND\020]\0226\n2EXECUTOR_ERROR_SM_MAIN_HASHS"
+  "DIGEST_DIGEST_MISMATCH\020^\0223\n/EXECUTOR_ERR"
+  "OR_SM_MAIN_HASHSDIGEST_CALLED_TWICE\020_\0222\n"
+  ".EXECUTOR_ERROR_SM_MAIN_HASHS_READ_OUT_O"
+  "F_RANGE\020`\022\'\n#EXECUTOR_ERROR_INVALID_L1_I"
+  "NFO_ROOT\020a\022.\n*EXECUTOR_ERROR_INVALID_FOR"
+  "CED_BLOCKHASH_L1\020b\0226\n2EXECUTOR_ERROR_INV"
+  "ALID_L1_DATA_V2_GLOBAL_EXIT_ROOT\020c\0223\n/EX"
+  "ECUTOR_ERROR_INVALID_L1_DATA_V2_BLOCK_HA"
+  "SH_L1\020d\022\'\n#EXECUTOR_ERROR_INVALID_L1_SMT"
+  "_PROOF\020e\022\"\n\036EXECUTOR_ERROR_INVALID_BALAN"
+  "CE\020f\022.\n*EXECUTOR_ERROR_SM_MAIN_BINARY_LT"
+  "4_MISMATCH\020g\022)\n%EXECUTOR_ERROR_INVALID_N"
+  "EW_STATE_ROOT\020h\022-\n)EXECUTOR_ERROR_INVALI"
+  "D_NEW_ACC_INPUT_HASH\020i\022.\n*EXECUTOR_ERROR"
+  "_INVALID_NEW_LOCAL_EXIT_ROOT\020j\022#\n\037EXECUT"
+  "OR_ERROR_DB_KEY_NOT_FOUND\020k\022(\n$EXECUTOR_"
+  "ERROR_SMT_INVALID_DATA_SIZE\020l\022$\n EXECUTO"
+  "R_ERROR_HASHDB_GRPC_ERROR\020m\022 \n\034EXECUTOR_"
+  "ERROR_STATE_MANAGER\020n\022-\n)EXECUTOR_ERROR_"
+  "INVALID_L1_INFO_TREE_INDEX\020o\0227\n3EXECUTOR"
+  "_ERROR_INVALID_L1_INFO_TREE_SMT_PROOF_VA"
+  "LUE\020p\022\"\n\036EXECUTOR_ERROR_INVALID_WITNESS\020"
+  "q\022\037\n\033EXECUTOR_ERROR_INVALID_CBOR\020r\022&\n\"EX"
+  "ECUTOR_ERROR_INVALID_DATA_STREAM\020s\022-\n)EX"
+  "ECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE\020"
+  "t\0222\n.EXECUTOR_ERROR_SM_MAIN_INVALID_TX_S"
+  "TATUS_ERROR\020u\0225\n1EXECUTOR_ERROR_INVALID_"
+  "PREVIOUS_L1_INFO_TREE_ROOT\020v\022+\n\'EXECUTOR"
+  "_ERROR_INVALID_FORCED_HASH_DATA\020w\0227\n3EXE"
+  "CUTOR_ERROR_INVALID_FORCED_DATA_GLOBAL_E"
+  "XIT_ROOT\020x\0224\n0EXECUTOR_ERROR_INVALID_FOR"
+  "CED_DATA_BLOCK_HASH_L1\020y\022;\n7EXECUTOR_ERR"
+  "OR_INVALID_L1_DATA_V3_INITIAL_HISTORIC_R"
+  "OOT\020z\022.\n*EXECUTOR_ERROR_INVALID_OLD_BLOB"
+  "_STATE_ROOT\020{\0222\n.EXECUTOR_ERROR_INVALID_"
+  "OLD_BLOB_ACC_INPUT_HASH\020|\0221\n-EXECUTOR_ER"
+  "ROR_INVALID_LAST_L1_INFO_TREE_ROOT\020}\022.\n*"
+  "EXECUTOR_ERROR_INVALID_NEW_BLOB_STATE_RO"
+  "OT\020~\0222\n.EXECUTOR_ERROR_INVALID_NEW_BLOB_"
+  "ACC_INPUT_HASH\020\177\022%\n EXECUTOR_ERROR_INVAL"
+  "ID_BLOB_DATA\020\200\001\022(\n#EXECUTOR_ERROR_INVALI"
+  "D_ZK_GAS_LIMIT\020\201\001\022#\n\036EXECUTOR_ERROR_INVA"
+  "LID_POINT_Z\020\202\001\022#\n\036EXECUTOR_ERROR_INVALID"
+  "_POINT_Y\020\203\0012\313\004\n\017ExecutorService\022U\n\014Proce"
+  "ssBatch\022 .executor.v1.ProcessBatchReques"
+  "t\032!.executor.v1.ProcessBatchResponse\"\000\022["
+  "\n\016ProcessBatchV2\022\".executor.v1.ProcessBa"
+  "tchRequestV2\032#.executor.v1.ProcessBatchR"
+  "esponseV2\"\000\022[\n\016ProcessBatchV3\022\".executor"
+  ".v1.ProcessBatchRequestV3\032#.executor.v1."
+  "ProcessBatchResponseV3\"\000\022g\n\022ProcessBlobI"
+  "nnerV3\022&.executor.v1.ProcessBlobInnerReq"
+  "uestV3\032\'.executor.v1.ProcessBlobInnerRes"
+  "ponseV3\"\000\022m\n\027ProcessStatelessBatchV2\022+.e"
+  "xecutor.v1.ProcessStatelessBatchRequestV"
+  "2\032#.executor.v1.ProcessBatchResponseV2\"\000"
+  "\022O\n\016GetFlushStatus\022\026.google.protobuf.Emp"
+  "ty\032#.executor.v1.GetFlushStatusResponse\""
+  "\000B>Z<github.com/0xPolygonHermez/zkevm-no"
+  "de/state/runtime/executorb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_executor_2eproto_sccs[54] = {
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_executor_2eproto_sccs[55] = {
   &scc_info_Contract_executor_2eproto.base,
   &scc_info_ContractV2_executor_2eproto.base,
   &scc_info_DebugV2_executor_2eproto.base,
@@ -2436,6 +2479,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
   &scc_info_GetFlushStatusResponse_executor_2eproto.base,
   &scc_info_InfoReadWrite_executor_2eproto.base,
   &scc_info_InfoReadWriteV2_executor_2eproto.base,
+  &scc_info_InfoReadWriteV2_ScStorageEntry_DoNotUse_executor_2eproto.base,
   &scc_info_L1DataV2_executor_2eproto.base,
   &scc_info_L1DataV3_executor_2eproto.base,
   &scc_info_Log_executor_2eproto.base,
@@ -2483,10 +2527,10 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 20423,
-  &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 54, 1,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 20673,
+  &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 55, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
-  file_level_metadata_executor_2eproto, 54, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
+  file_level_metadata_executor_2eproto, 55, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
 };
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -9739,11 +9783,18 @@ void ProcessBatchRequestV2::InternalSwap(ProcessBatchRequestV2* other) {
 // ===================================================================
 
 void ProcessStatelessBatchRequestV2::InitAsDefaultInstance() {
+  ::executor::v1::_ProcessStatelessBatchRequestV2_default_instance_._instance.get_mutable()->trace_config_ = const_cast< ::executor::v1::TraceConfigV2*>(
+      ::executor::v1::TraceConfigV2::internal_default_instance());
 }
 class ProcessStatelessBatchRequestV2::_Internal {
  public:
+  static const ::executor::v1::TraceConfigV2& trace_config(const ProcessStatelessBatchRequestV2* msg);
 };
 
+const ::executor::v1::TraceConfigV2&
+ProcessStatelessBatchRequestV2::_Internal::trace_config(const ProcessStatelessBatchRequestV2* msg) {
+  return *msg->trace_config_;
+}
 ProcessStatelessBatchRequestV2::ProcessStatelessBatchRequestV2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -9788,6 +9839,11 @@ ProcessStatelessBatchRequestV2::ProcessStatelessBatchRequestV2(const ProcessStat
     context_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_context_id(),
       GetArena());
   }
+  if (from._internal_has_trace_config()) {
+    trace_config_ = new ::executor::v1::TraceConfigV2(*from.trace_config_);
+  } else {
+    trace_config_ = nullptr;
+  }
   timestamp_limit_ = from.timestamp_limit_;
   // @@protoc_insertion_point(copy_constructor:executor.v1.ProcessStatelessBatchRequestV2)
 }
@@ -9801,7 +9857,9 @@ void ProcessStatelessBatchRequestV2::SharedCtor() {
   l1_info_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   forced_blockhash_l1_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   context_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  timestamp_limit_ = PROTOBUF_ULONGLONG(0);
+  ::memset(&trace_config_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&timestamp_limit_) -
+      reinterpret_cast<char*>(&trace_config_)) + sizeof(timestamp_limit_));
 }
 
 ProcessStatelessBatchRequestV2::~ProcessStatelessBatchRequestV2() {
@@ -9819,6 +9877,7 @@ void ProcessStatelessBatchRequestV2::SharedDtor() {
   l1_info_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   forced_blockhash_l1_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   context_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete trace_config_;
 }
 
 void ProcessStatelessBatchRequestV2::ArenaDtor(void* object) {
@@ -9849,6 +9908,10 @@ void ProcessStatelessBatchRequestV2::Clear() {
   l1_info_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   forced_blockhash_l1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   context_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (GetArena() == nullptr && trace_config_ != nullptr) {
+    delete trace_config_;
+  }
+  trace_config_ = nullptr;
   timestamp_limit_ = PROTOBUF_ULONGLONG(0);
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -9923,6 +9986,13 @@ const char* ProcessStatelessBatchRequestV2::_InternalParse(const char* ptr, ::PR
           auto str = _internal_mutable_context_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "executor.v1.ProcessStatelessBatchRequestV2.context_id"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .executor.v1.TraceConfigV2 trace_config = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
+          ptr = ctx->ParseMessage(_internal_mutable_trace_config(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -10010,6 +10080,14 @@ failure:
         8, this->_internal_context_id(), target);
   }
 
+  // .executor.v1.TraceConfigV2 trace_config = 9;
+  if (this->has_trace_config()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        9, _Internal::trace_config(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -10075,6 +10153,13 @@ size_t ProcessStatelessBatchRequestV2::ByteSizeLong() const {
         this->_internal_context_id());
   }
 
+  // .executor.v1.TraceConfigV2 trace_config = 9;
+  if (this->has_trace_config()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *trace_config_);
+  }
+
   // uint64 timestamp_limit = 6;
   if (this->timestamp_limit() != 0) {
     total_size += 1 +
@@ -10134,6 +10219,9 @@ void ProcessStatelessBatchRequestV2::MergeFrom(const ProcessStatelessBatchReques
   if (from.context_id().size() > 0) {
     _internal_set_context_id(from._internal_context_id());
   }
+  if (from.has_trace_config()) {
+    _internal_mutable_trace_config()->::executor::v1::TraceConfigV2::MergeFrom(from._internal_trace_config());
+  }
   if (from.timestamp_limit() != 0) {
     _internal_set_timestamp_limit(from._internal_timestamp_limit());
   }
@@ -10167,7 +10255,12 @@ void ProcessStatelessBatchRequestV2::InternalSwap(ProcessStatelessBatchRequestV2
   l1_info_root_.Swap(&other->l1_info_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   forced_blockhash_l1_.Swap(&other->forced_blockhash_l1_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   context_id_.Swap(&other->context_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  swap(timestamp_limit_, other->timestamp_limit_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ProcessStatelessBatchRequestV2, timestamp_limit_)
+      + sizeof(ProcessStatelessBatchRequestV2::timestamp_limit_)
+      - PROTOBUF_FIELD_OFFSET(ProcessStatelessBatchRequestV2, trace_config_)>(
+          reinterpret_cast<char*>(&trace_config_),
+          reinterpret_cast<char*>(&other->trace_config_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ProcessStatelessBatchRequestV2::GetMetadata() const {
@@ -10864,6 +10957,11 @@ ProcessBatchResponseV2::ProcessBatchResponseV2(const ProcessBatchResponseV2& fro
     prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_prover_id(),
       GetArena());
   }
+  old_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_old_state_root().empty()) {
+    old_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_old_state_root(),
+      GetArena());
+  }
   ::memcpy(&new_batch_num_, &from.new_batch_num_,
     static_cast<size_t>(reinterpret_cast<char*>(&cnt_reserve_sha256_hashes_) -
     reinterpret_cast<char*>(&new_batch_num_)) + sizeof(cnt_reserve_sha256_hashes_));
@@ -10876,6 +10974,7 @@ void ProcessBatchResponseV2::SharedCtor() {
   new_acc_input_hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   new_local_exit_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   prover_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  old_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&new_batch_num_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&cnt_reserve_sha256_hashes_) -
       reinterpret_cast<char*>(&new_batch_num_)) + sizeof(cnt_reserve_sha256_hashes_));
@@ -10893,6 +10992,7 @@ void ProcessBatchResponseV2::SharedDtor() {
   new_acc_input_hash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   new_local_exit_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   prover_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  old_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void ProcessBatchResponseV2::ArenaDtor(void* object) {
@@ -10924,6 +11024,7 @@ void ProcessBatchResponseV2::Clear() {
   new_acc_input_hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   new_local_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  old_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::memset(&new_batch_num_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&cnt_reserve_sha256_hashes_) -
       reinterpret_cast<char*>(&new_batch_num_)) + sizeof(cnt_reserve_sha256_hashes_));
@@ -11191,6 +11292,14 @@ const char* ProcessBatchResponseV2::_InternalParse(const char* ptr, ::PROTOBUF_N
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // bytes old_state_root = 33;
+      case 33:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_old_state_root();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -11454,6 +11563,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(32, this->_internal_cnt_reserve_sha256_hashes(), target);
   }
 
+  // bytes old_state_root = 33;
+  if (this->old_state_root().size() > 0) {
+    target = stream->WriteBytesMaybeAliased(
+        33, this->_internal_old_state_root(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -11528,6 +11643,13 @@ size_t ProcessBatchResponseV2::ByteSizeLong() const {
     total_size += 2 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_prover_id());
+  }
+
+  // bytes old_state_root = 33;
+  if (this->old_state_root().size() > 0) {
+    total_size += 2 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_old_state_root());
   }
 
   // uint64 new_batch_num = 4;
@@ -11743,6 +11865,9 @@ void ProcessBatchResponseV2::MergeFrom(const ProcessBatchResponseV2& from) {
   if (from.prover_id().size() > 0) {
     _internal_set_prover_id(from._internal_prover_id());
   }
+  if (from.old_state_root().size() > 0) {
+    _internal_set_old_state_root(from._internal_old_state_root());
+  }
   if (from.new_batch_num() != 0) {
     _internal_set_new_batch_num(from._internal_new_batch_num());
   }
@@ -11846,6 +11971,7 @@ void ProcessBatchResponseV2::InternalSwap(ProcessBatchResponseV2* other) {
   new_acc_input_hash_.Swap(&other->new_acc_input_hash_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   new_local_exit_root_.Swap(&other->new_local_exit_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   prover_id_.Swap(&other->prover_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  old_state_root_.Swap(&other->old_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ProcessBatchResponseV2, cnt_reserve_sha256_hashes_)
       + sizeof(ProcessBatchResponseV2::cnt_reserve_sha256_hashes_)
@@ -12612,6 +12738,23 @@ void OverrideAccountV2::InternalSwap(OverrideAccountV2* other) {
 
 // ===================================================================
 
+InfoReadWriteV2_ScStorageEntry_DoNotUse::InfoReadWriteV2_ScStorageEntry_DoNotUse() {}
+InfoReadWriteV2_ScStorageEntry_DoNotUse::InfoReadWriteV2_ScStorageEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+    : SuperType(arena) {}
+void InfoReadWriteV2_ScStorageEntry_DoNotUse::MergeFrom(const InfoReadWriteV2_ScStorageEntry_DoNotUse& other) {
+  MergeFromInternal(other);
+}
+::PROTOBUF_NAMESPACE_ID::Metadata InfoReadWriteV2_ScStorageEntry_DoNotUse::GetMetadata() const {
+  return GetMetadataStatic();
+}
+void InfoReadWriteV2_ScStorageEntry_DoNotUse::MergeFrom(
+    const ::PROTOBUF_NAMESPACE_ID::Message& other) {
+  ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom(other);
+}
+
+
+// ===================================================================
+
 void InfoReadWriteV2::InitAsDefaultInstance() {
 }
 class InfoReadWriteV2::_Internal {
@@ -12619,7 +12762,8 @@ class InfoReadWriteV2::_Internal {
 };
 
 InfoReadWriteV2::InfoReadWriteV2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  sc_storage_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:executor.v1.InfoReadWriteV2)
@@ -12627,6 +12771,7 @@ InfoReadWriteV2::InfoReadWriteV2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
 InfoReadWriteV2::InfoReadWriteV2(const InfoReadWriteV2& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  sc_storage_.MergeFrom(from.sc_storage_);
   nonce_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_nonce().empty()) {
     nonce_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_nonce(),
@@ -12637,6 +12782,16 @@ InfoReadWriteV2::InfoReadWriteV2(const InfoReadWriteV2& from)
     balance_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_balance(),
       GetArena());
   }
+  sc_code_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_sc_code().empty()) {
+    sc_code_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_sc_code(),
+      GetArena());
+  }
+  sc_length_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_sc_length().empty()) {
+    sc_length_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_sc_length(),
+      GetArena());
+  }
   // @@protoc_insertion_point(copy_constructor:executor.v1.InfoReadWriteV2)
 }
 
@@ -12644,6 +12799,8 @@ void InfoReadWriteV2::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_InfoReadWriteV2_executor_2eproto.base);
   nonce_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   balance_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  sc_code_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  sc_length_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 InfoReadWriteV2::~InfoReadWriteV2() {
@@ -12656,6 +12813,8 @@ void InfoReadWriteV2::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   nonce_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   balance_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  sc_code_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  sc_length_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void InfoReadWriteV2::ArenaDtor(void* object) {
@@ -12679,8 +12838,11 @@ void InfoReadWriteV2::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  sc_storage_.Clear();
   nonce_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   balance_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  sc_code_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  sc_length_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -12707,6 +12869,36 @@ const char* InfoReadWriteV2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
           auto str = _internal_mutable_balance();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "executor.v1.InfoReadWriteV2.balance"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string sc_code = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_sc_code();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "executor.v1.InfoReadWriteV2.sc_code"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // map<string, string> sc_storage = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(&sc_storage_, ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<34>(ptr));
+        } else goto handle_unusual;
+        continue;
+      // string sc_length = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          auto str = _internal_mutable_sc_length();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "executor.v1.InfoReadWriteV2.sc_length"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -12758,6 +12950,71 @@ failure:
         2, this->_internal_balance(), target);
   }
 
+  // string sc_code = 3;
+  if (this->sc_code().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_sc_code().data(), static_cast<int>(this->_internal_sc_code().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "executor.v1.InfoReadWriteV2.sc_code");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_sc_code(), target);
+  }
+
+  // map<string, string> sc_storage = 4;
+  if (!this->_internal_sc_storage().empty()) {
+    typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_pointer
+        ConstPtr;
+    typedef ConstPtr SortItem;
+    typedef ::PROTOBUF_NAMESPACE_ID::internal::CompareByDerefFirst<SortItem> Less;
+    struct Utf8Check {
+      static void Check(ConstPtr p) {
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+          p->first.data(), static_cast<int>(p->first.length()),
+          ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+          "executor.v1.InfoReadWriteV2.ScStorageEntry.key");
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+          p->second.data(), static_cast<int>(p->second.length()),
+          ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+          "executor.v1.InfoReadWriteV2.ScStorageEntry.value");
+      }
+    };
+
+    if (stream->IsSerializationDeterministic() &&
+        this->_internal_sc_storage().size() > 1) {
+      ::std::unique_ptr<SortItem[]> items(
+          new SortItem[this->_internal_sc_storage().size()]);
+      typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::size_type size_type;
+      size_type n = 0;
+      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
+          it = this->_internal_sc_storage().begin();
+          it != this->_internal_sc_storage().end(); ++it, ++n) {
+        items[static_cast<ptrdiff_t>(n)] = SortItem(&*it);
+      }
+      ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
+      for (size_type i = 0; i < n; i++) {
+        target = InfoReadWriteV2_ScStorageEntry_DoNotUse::Funcs::InternalSerialize(4, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
+        Utf8Check::Check(&(*items[static_cast<ptrdiff_t>(i)]));
+      }
+    } else {
+      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
+          it = this->_internal_sc_storage().begin();
+          it != this->_internal_sc_storage().end(); ++it) {
+        target = InfoReadWriteV2_ScStorageEntry_DoNotUse::Funcs::InternalSerialize(4, it->first, it->second, target, stream);
+        Utf8Check::Check(&(*it));
+      }
+    }
+  }
+
+  // string sc_length = 5;
+  if (this->sc_length().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_sc_length().data(), static_cast<int>(this->_internal_sc_length().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "executor.v1.InfoReadWriteV2.sc_length");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_sc_length(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -12774,6 +13031,15 @@ size_t InfoReadWriteV2::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  // map<string, string> sc_storage = 4;
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(this->_internal_sc_storage_size());
+  for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
+      it = this->_internal_sc_storage().begin();
+      it != this->_internal_sc_storage().end(); ++it) {
+    total_size += InfoReadWriteV2_ScStorageEntry_DoNotUse::Funcs::ByteSizeLong(it->first, it->second);
+  }
+
   // string nonce = 1;
   if (this->nonce().size() > 0) {
     total_size += 1 +
@@ -12786,6 +13052,20 @@ size_t InfoReadWriteV2::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_balance());
+  }
+
+  // string sc_code = 3;
+  if (this->sc_code().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_sc_code());
+  }
+
+  // string sc_length = 5;
+  if (this->sc_length().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_sc_length());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -12819,11 +13099,18 @@ void InfoReadWriteV2::MergeFrom(const InfoReadWriteV2& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  sc_storage_.MergeFrom(from.sc_storage_);
   if (from.nonce().size() > 0) {
     _internal_set_nonce(from._internal_nonce());
   }
   if (from.balance().size() > 0) {
     _internal_set_balance(from._internal_balance());
+  }
+  if (from.sc_code().size() > 0) {
+    _internal_set_sc_code(from._internal_sc_code());
+  }
+  if (from.sc_length().size() > 0) {
+    _internal_set_sc_length(from._internal_sc_length());
   }
 }
 
@@ -12848,8 +13135,11 @@ bool InfoReadWriteV2::IsInitialized() const {
 void InfoReadWriteV2::InternalSwap(InfoReadWriteV2* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  sc_storage_.Swap(&other->sc_storage_);
   nonce_.Swap(&other->nonce_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   balance_.Swap(&other->balance_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  sc_code_.Swap(&other->sc_code_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  sc_length_.Swap(&other->sc_length_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata InfoReadWriteV2::GetMetadata() const {
@@ -18140,6 +18430,11 @@ ProcessBatchResponseV3::ProcessBatchResponseV3(const ProcessBatchResponseV3& fro
     prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_prover_id(),
       GetArena());
   }
+  old_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_old_state_root().empty()) {
+    old_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_old_state_root(),
+      GetArena());
+  }
   ::memcpy(&current_l1_info_tree_index_, &from.current_l1_info_tree_index_,
     static_cast<size_t>(reinterpret_cast<char*>(&cnt_reserve_sha256_hashes_) -
     reinterpret_cast<char*>(&current_l1_info_tree_index_)) + sizeof(cnt_reserve_sha256_hashes_));
@@ -18154,6 +18449,7 @@ void ProcessBatchResponseV3::SharedCtor() {
   new_last_timestamp_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   current_l1_info_tree_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   prover_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  old_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&current_l1_info_tree_index_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&cnt_reserve_sha256_hashes_) -
       reinterpret_cast<char*>(&current_l1_info_tree_index_)) + sizeof(cnt_reserve_sha256_hashes_));
@@ -18173,6 +18469,7 @@ void ProcessBatchResponseV3::SharedDtor() {
   new_last_timestamp_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   current_l1_info_tree_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   prover_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  old_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void ProcessBatchResponseV3::ArenaDtor(void* object) {
@@ -18206,6 +18503,7 @@ void ProcessBatchResponseV3::Clear() {
   new_last_timestamp_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   current_l1_info_tree_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  old_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::memset(&current_l1_info_tree_index_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&cnt_reserve_sha256_hashes_) -
       reinterpret_cast<char*>(&current_l1_info_tree_index_)) + sizeof(cnt_reserve_sha256_hashes_));
@@ -18489,6 +18787,14 @@ const char* ProcessBatchResponseV3::_InternalParse(const char* ptr, ::PROTOBUF_N
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // bytes old_state_root = 35;
+      case 35:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_old_state_root();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -18764,6 +19070,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(34, this->_internal_cnt_reserve_sha256_hashes(), target);
   }
 
+  // bytes old_state_root = 35;
+  if (this->old_state_root().size() > 0) {
+    target = stream->WriteBytesMaybeAliased(
+        35, this->_internal_old_state_root(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -18852,6 +19164,13 @@ size_t ProcessBatchResponseV3::ByteSizeLong() const {
     total_size += 2 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_prover_id());
+  }
+
+  // bytes old_state_root = 35;
+  if (this->old_state_root().size() > 0) {
+    total_size += 2 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_old_state_root());
   }
 
   // uint32 current_l1_info_tree_index = 6;
@@ -19073,6 +19392,9 @@ void ProcessBatchResponseV3::MergeFrom(const ProcessBatchResponseV3& from) {
   if (from.prover_id().size() > 0) {
     _internal_set_prover_id(from._internal_prover_id());
   }
+  if (from.old_state_root().size() > 0) {
+    _internal_set_old_state_root(from._internal_old_state_root());
+  }
   if (from.current_l1_info_tree_index() != 0) {
     _internal_set_current_l1_info_tree_index(from._internal_current_l1_info_tree_index());
   }
@@ -19178,6 +19500,7 @@ void ProcessBatchResponseV3::InternalSwap(ProcessBatchResponseV3* other) {
   new_last_timestamp_.Swap(&other->new_last_timestamp_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   current_l1_info_tree_root_.Swap(&other->current_l1_info_tree_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   prover_id_.Swap(&other->prover_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  old_state_root_.Swap(&other->old_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ProcessBatchResponseV3, cnt_reserve_sha256_hashes_)
       + sizeof(ProcessBatchResponseV3::cnt_reserve_sha256_hashes_)
@@ -20957,6 +21280,9 @@ template<> PROTOBUF_NOINLINE ::executor::v1::OverrideAccountV2_StateDiffEntry_Do
 }
 template<> PROTOBUF_NOINLINE ::executor::v1::OverrideAccountV2* Arena::CreateMaybeMessage< ::executor::v1::OverrideAccountV2 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::executor::v1::OverrideAccountV2 >(arena);
+}
+template<> PROTOBUF_NOINLINE ::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse* Arena::CreateMaybeMessage< ::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::executor::v1::InfoReadWriteV2_ScStorageEntry_DoNotUse >(arena);
 }
 template<> PROTOBUF_NOINLINE ::executor::v1::InfoReadWriteV2* Arena::CreateMaybeMessage< ::executor::v1::InfoReadWriteV2 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::executor::v1::InfoReadWriteV2 >(arena);

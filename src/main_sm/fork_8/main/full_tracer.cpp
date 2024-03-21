@@ -2730,6 +2730,9 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
 #define SMT_KEY_BALANCE 0
 #define SMT_KEY_NONCE 1
+#define SMT_KEY_SC_CODE 2
+#define SMT_KEY_SC_STORAGE 3
+#define SMT_KEY_SC_LENGTH 4
 
 /*
    Add an address when it is either read/write in the state-tree
@@ -2740,6 +2743,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
 zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &address3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
                                            const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
+                                           const Goldilocks::Element &storageKey0, const Goldilocks::Element &storageKey1, const Goldilocks::Element &storageKey2, const Goldilocks::Element &storageKey3, const Goldilocks::Element &storageKey4, const Goldilocks::Element &storageKey5, const Goldilocks::Element &storageKey6, const Goldilocks::Element &storageKey7,
                                            const mpz_class &value )
 {
 #ifdef LOG_TIME_STATISTICS
@@ -2790,6 +2794,56 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
         else
         {
             it->second.nonce = value.get_str();
+        }
+    }
+    else if (keyType == SMT_KEY_SC_CODE)
+    {
+        it = read_write_addresses.find(addressHex);
+        if (it == read_write_addresses.end())
+        {
+            InfoReadWrite infoReadWrite;
+            infoReadWrite.sc_code = value.get_str(16);
+            read_write_addresses[addressHex] = infoReadWrite;
+        }
+        else
+        {
+            it->second.sc_code = value.get_str(16);
+        }
+    }
+    else if (keyType == SMT_KEY_SC_STORAGE)
+    {
+        // Get storage key
+        mpz_class storageKey;
+        if (!fea2scalar(fr, storageKey, storageKey0, storageKey1, storageKey2, storageKey3, storageKey4, storageKey5, storageKey6, storageKey7))
+        {
+            zklog.error("FullTracer::addReadWriteAddress() failed calling fea2scalar(storageKey)");
+            return ZKR_SM_MAIN_FEA2SCALAR;
+        }
+
+        it = read_write_addresses.find(addressHex);
+        if (it == read_write_addresses.end())
+        {
+            InfoReadWrite infoReadWrite;
+            infoReadWrite.sc_storage[storageKey.get_str(16)] = value.get_str(16);
+            read_write_addresses[addressHex] = infoReadWrite;
+        }
+        else
+        {
+            it->second.sc_storage[storageKey.get_str(16)] = value.get_str(16);
+        }
+    }
+    else if (keyType == SMT_KEY_SC_LENGTH)
+    {
+        it = read_write_addresses.find(addressHex);
+        if (it == read_write_addresses.end())
+        {
+            InfoReadWrite infoReadWrite;
+            infoReadWrite.sc_length = value.get_str();
+            read_write_addresses[addressHex] = infoReadWrite;
+        }
+        else
+        {
+            it->second.sc_length = value.get_str();
         }
     }
 

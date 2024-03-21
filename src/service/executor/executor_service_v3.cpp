@@ -640,6 +640,7 @@ using grpc::Status;
     response->set_fork_id(proverRequest.input.publicInputsExtended.publicInputs.forkID);
     response->set_error_rom(string2error(proverRequest.pFullTracer->get_error()));
     response->set_invalid_batch(proverRequest.pFullTracer->get_invalid_batch());
+    response->set_old_state_root(string2ba(NormalizeToNFormat(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64)));
 
     // TODO: return these fields
     //response->set_current_l1_info_tree_root();
@@ -655,6 +656,15 @@ using grpc::Status;
             google::protobuf::Map<std::string, executor::v1::InfoReadWriteV2> * pReadWriteAddresses = response->mutable_read_write_addresses();
             infoReadWrite.set_balance(itRWA->second.balance);
             infoReadWrite.set_nonce(itRWA->second.nonce);
+            infoReadWrite.set_sc_code(itRWA->second.sc_code);
+            infoReadWrite.set_sc_length(itRWA->second.sc_length);
+            google::protobuf::Map<std::string, std::string> * pStorage = infoReadWrite.mutable_sc_storage();
+            zkassertpermanent(pStorage != NULL);
+            unordered_map<string, string>::const_iterator itStorage;
+            for (itStorage = itRWA->second.sc_storage.begin(); itStorage != itRWA->second.sc_storage.end(); itStorage++)
+            {
+                (*pStorage)[itStorage->first] = itStorage->second;
+            }
             (*pReadWriteAddresses)[itRWA->first] = infoReadWrite;
         }
     }

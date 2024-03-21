@@ -312,6 +312,7 @@ message ProcessStatelessBatchRequestV2 {
 
     // Debug
     string context_id = 8; // batch ID to be shown in the executor traces, for your convenience: "Erigon_candidate_batch_N"
+    TraceConfigV2 trace_config = 9;
 }
 
 message L1DataV2 {
@@ -362,6 +363,7 @@ message ProcessBatchResponseV2 {
     uint32 cnt_reserve_binaries = 30;
     uint32 cnt_reserve_steps = 31;
     uint32 cnt_reserve_sha256_hashes = 32;
+    bytes old_state_root = 33;
 }
 
 // Trace configuration request params
@@ -402,6 +404,12 @@ message InfoReadWriteV2 {
     string nonce = 1;
     // If balance="" then it has not been set; if set, string is in decimal (base 10)
     string balance = 2;
+    // If sc_code="" then it has not been set; if set, string is in hexa (base 16)
+    string sc_code = 3;
+    // Both sc_storage first (key) and second (value) map elements are set in hexa (base 16)
+    map<string, string> sc_storage = 4;
+    // If sc_length="" then it has not been set; if set, string is in decimal (base 10)
+    string sc_length = 5;
 }
 
 message FullTraceV2 {
@@ -1007,6 +1015,7 @@ message ProcessBatchResponseV3 {
     uint32 cnt_reserve_binaries = 32;
     uint32 cnt_reserve_steps = 33;
     uint32 cnt_reserve_sha256_hashes = 34;
+    bytes old_state_root = 35;
 }
 
 message ForcedData {
