@@ -208,6 +208,26 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
     }
 
+#ifdef BLOB_INNER
+        // Convert blob data to vector
+        vector<uint8_t> blobDataVector;
+        ba2ba(proverRequest.input.publicInputsExtended.publicInputs.blobData, blobDataVector);
+
+        // Load poseidonBlobData into DB
+        Goldilocks::Element blobKey[4];
+        poseidonLinearHash(blobDataVector, blobKey);
+        string blobKeyString = fea2string(fr, blobKey);
+        proverRequest.input.contractsBytecode[blobKeyString] = blobDataVector;
+        //zklog.info("Blob inner poseidon hash=" + fea2string(fr, blobKey));
+
+        // Load keccak256BlobData into DB
+        keccak256((const uint8_t *)proverRequest.input.publicInputsExtended.publicInputs.blobData.c_str(), proverRequest.input.publicInputsExtended.publicInputs.blobData.size(), ctx.blobL2HashData);
+        scalar2fea(fr, ctx.blobL2HashData, blobKey);
+        blobKeyString = fea2string(fr, blobKey);
+        proverRequest.input.contractsBytecode[blobKeyString] = blobDataVector;
+        //zklog.info("Blob inner keccak hash=" + fea2string(fr, blobKey));
+#endif
+
     // Copy input contracts database content into context database (dbProgram)
     if (proverRequest.input.contractsBytecode.size() > 0)
     {
@@ -219,11 +239,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pHashDB->clearCache();
         }
     }
-
-#ifdef BLOB_INNER
-        // Calculate blobL2HashData
-        keccak256((const uint8_t *)proverRequest.input.publicInputsExtended.publicInputs.blobData.c_str(), proverRequest.input.publicInputsExtended.publicInputs.blobData.size(), ctx.blobL2HashData);
-#endif
 
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
@@ -562,7 +577,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inSR[i] = rom.line[zkPC].inSR;
 
 #ifdef LOG_INX
-            zklog.info("inSR op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
+            zklog.info("inSR op=" + fr.toString(op7, 16) + ":" + fr.toString(op6, 16) + ":" + fr.toString(op5, 16) + ":" + fr.toString(op4, 16) + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -3012,18 +3027,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (!bProcessBatch) pols.hashKDigest[i] = fr.one();
 
-            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
-
-            // Find the entry in the hash database for this address
-            hashKIterator = ctx.hashK.find(hashAddr);
-            if (hashKIterator == ctx.hashK.end())
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND;
-                logError(ctx, "HashKDigest 2 could not find entry for hashAddr=" + to_string(hashAddr));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
             // Get contents of op into dg
             mpz_class dg;
             if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
@@ -3032,6 +3035,37 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 logError(ctx, "Failed calling fea2scalar(op)");
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
+            }
+
+            // Find the entry in the hash database for this address
+            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+            hashKIterator = ctx.hashK.find(hashAddr);
+            if (hashKIterator == ctx.hashK.end())
+            {
+#ifdef BLOB_INNER
+                HashValue hashValue;
+                Goldilocks::Element keyFea[4];
+                scalar2fea(fr, dg, keyFea);
+                zkresult zkr = pHashDB->getProgram(emptyString, keyFea, hashValue.data, proverRequest.dbReadLog);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    proverRequest.result = zkr;
+                    logError(ctx, "HashKDigest 2: blob inner data not found in DB dg=" + dg.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                hashValue.digest = dg;
+                hashValue.lenCalled = false;
+                ctx.hashK[hashAddr] = hashValue;
+                hashKIterator = ctx.hashK.find(hashAddr);
+                zkassertpermanent(hashKIterator != ctx.hashK.end());
+#else
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND;
+                logError(ctx, "HashKDigest 2 could not find entry for hashAddr=" + to_string(hashAddr));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+#endif
             }
 
             if (dg != hashKIterator->second.digest)
@@ -5821,8 +5855,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
-        outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[nexti],16) << ":" << fr.toString(pols.B0[nexti],16) << ":" << fr.toString(pols.C0[nexti],16) << ":" << fr.toString(pols.D0[nexti],16) << ":" << fr.toString(pols.E0[nexti],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
-        /*outfile << "<-- Completed step=" << step << " zkPC=" << zkPC <<
+        //outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[nexti],16) << ":" << fr.toString(pols.B0[nexti],16) << ":" << fr.toString(pols.C0[nexti],16) << ":" << fr.toString(pols.D0[nexti],16) << ":" << fr.toString(pols.E0[nexti],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
+        outfile << "<-- Completed step=" << step << " zkPC=" << zkPC <<
                    " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) <<
                    " A=" << fr.toString(pols.A7[nexti],16) << ":" << fr.toString(pols.A6[nexti],16) << ":" << fr.toString(pols.A5[nexti],16) << ":" << fr.toString(pols.A4[nexti],16) << ":" << fr.toString(pols.A3[nexti],16) << ":" << fr.toString(pols.A2[nexti],16) << ":" << fr.toString(pols.A1[nexti],16) << ":" << fr.toString(pols.A0[nexti],16) <<
                    " B=" << fr.toString(pols.B7[nexti],16) << ":" << fr.toString(pols.B6[nexti],16) << ":" << fr.toString(pols.B5[nexti],16) << ":" << fr.toString(pols.B4[nexti],16) << ":" << fr.toString(pols.B3[nexti],16) << ":" << fr.toString(pols.B2[nexti],16) << ":" << fr.toString(pols.B1[nexti],16) << ":" << fr.toString(pols.B0[nexti],16) <<
@@ -5830,7 +5864,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                    " D=" << fr.toString(pols.D7[nexti],16) << ":" << fr.toString(pols.D6[nexti],16) << ":" << fr.toString(pols.D5[nexti],16) << ":" << fr.toString(pols.D4[nexti],16) << ":" << fr.toString(pols.D3[nexti],16) << ":" << fr.toString(pols.D2[nexti],16) << ":" << fr.toString(pols.D1[nexti],16) << ":" << fr.toString(pols.D0[nexti],16) <<
                    " E=" << fr.toString(pols.E7[nexti],16) << ":" << fr.toString(pols.E6[nexti],16) << ":" << fr.toString(pols.E5[nexti],16) << ":" << fr.toString(pols.E4[nexti],16) << ":" << fr.toString(pols.E3[nexti],16) << ":" << fr.toString(pols.E2[nexti],16) << ":" << fr.toString(pols.E1[nexti],16) << ":" << fr.toString(pols.E0[nexti],16) <<
                    " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) <<
-                   " addr=" << addr << endl;*/
+                   " addr=" << addr << endl;
         outfile.close();
         //if (i==1000) break;
 #endif
@@ -5885,6 +5919,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
     }
+
+#ifndef BLOB_INNER
     if (!proverRequest.input.bNoCounters && (ctx.lastStep > rom.constants.MAX_CNT_STEPS_LIMIT))
     {
         proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
@@ -5894,6 +5930,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
     }
+#endif
 
 #ifdef CHECK_MAX_CNT_AT_THE_END
     if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntArith[0]) > rom.constants.MAX_CNT_ARITH_LIMIT))

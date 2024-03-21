@@ -657,7 +657,7 @@ void Input::loadGlobals (json &input)
         if ( input.contains("lastL1InfoTreeIndex") &&
             input["lastL1InfoTreeIndex"].is_number_unsigned() )
         {
-            publicInputsExtended.publicInputs.oldBlobNum = input["lastL1InfoTreeIndex"];
+            publicInputsExtended.publicInputs.lastL1InfoTreeIndex = input["lastL1InfoTreeIndex"];
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): lastL1InfoTreeIndex=" + to_string(lpublicInputsExtended.publicInputs.lastL1InfoTreeIndex));
 #endif
@@ -691,17 +691,17 @@ void Input::loadGlobals (json &input)
         {
             string zkGasLimitString = input["zkGasLimit"];
             zkGasLimitString = Remove0xIfPresent(zkGasLimitString);
-            if (!stringIsHex(zkGasLimitString))
+            if (!stringIsDec(zkGasLimitString))
             {
-                zklog.error("Input::loadGlobals() zkGasLimit found in input JSON file but not an hex string");
+                zklog.error("Input::loadGlobals() zkGasLimit found in input JSON file but not a decimal string");
                 exitProcess();
             }
-            if (zkGasLimitString.size() > 64)
+            if (zkGasLimitString.size() > 78)
             {
                 zklog.error("Input::loadGlobals() zkGasLimit found in input JSON file is too long");
                 exitProcess();
             }
-            publicInputsExtended.publicInputs.zkGasLimit.set_str(zkGasLimitString, 16);
+            publicInputsExtended.publicInputs.zkGasLimit.set_str(zkGasLimitString, 10);
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): zkGasLimit=" + publicInputsExtended.publicInputs.zkGasLimit.get_str(16));
 #endif
@@ -723,7 +723,7 @@ void Input::loadGlobals (json &input)
                 zklog.error("Input::loadGlobals() pointZ found in input JSON file is too long");
                 exitProcess();
             }
-            publicInputsExtended.publicInputs.zkGasLimit.set_str(pointZString, 16);
+            publicInputsExtended.publicInputs.pointZ.set_str(pointZString, 16);
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): pointZ=" + publicInputsExtended.publicInputs.pointZ.get_str(16));
 #endif

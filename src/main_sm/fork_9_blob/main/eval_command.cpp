@@ -4308,8 +4308,8 @@ void eval_getLastL1InfoTreeRoot (Context &ctx, const RomCommand &cmd, CommandRes
 #endif
 
     cr.type = crt_fea;
-    mpz_class lastL1InfoTreeIndex = ctx.proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex;
-    scalar2fea(fr, lastL1InfoTreeIndex, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    mpz_class lastL1InfoTreeRoot = ctx.proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot;
+    scalar2fea(fr, lastL1InfoTreeRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getLastL1InfoTreeIndex (Context &ctx, const RomCommand &cmd, CommandResult &cr)
