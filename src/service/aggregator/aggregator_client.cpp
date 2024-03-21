@@ -15,8 +15,11 @@ AggregatorClient::AggregatorClient (Goldilocks &fr, const Config &config, Prover
     config(config),
     prover(prover)
 {
+    grpc::ChannelArguments channelArguments;
+    channelArguments.SetMaxReceiveMessageSize(100*1024*1024);
+
     // Create channel
-    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateChannel(config.aggregatorClientHost + ":" + to_string(config.aggregatorClientPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateCustomChannel(config.aggregatorClientHost + ":" + to_string(config.aggregatorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new aggregator::v1::AggregatorService::Stub(channel);
