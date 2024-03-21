@@ -588,7 +588,7 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     // ROOT
 
     // Get from
-    pProverRequest->input.from = "0x0";
+    pProverRequest->input.from = "0x";
 
     // Flags
     pProverRequest->input.bUpdateMerkleTree = false;
