@@ -15,8 +15,15 @@ int main()
     string constTree = "test/examples/all/all.consttree";
     string starkInfoFile = "test/examples/all/all.starkinfo.json";
     string commitPols = "test/examples/all/all.commit";
-    string cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
     string verkey = "test/examples/all/all.verkey.json";
+
+    string cHelpersFile;
+
+    if(USE_GENERIC_PARSER) {
+        cHelpersFile = "test/examples/all/all.chelpers/all.chelpers_generic.bin";
+    } else {
+        cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
+    }
 
     StarkInfo starkInfo(starkInfoFile);
 
@@ -55,8 +62,13 @@ int main()
     allVerkey[2] = Goldilocks::fromU64(allVerkeyJson["constRoot"][2]);
     allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
 
-    AllSteps allSteps;
-    starks.genProof(fproof, &publicInputs[0], allVerkey, &allSteps);
+    if(USE_GENERIC_PARSER) {
+        CHelpersSteps cHelpersSteps;
+        starks.genProof(fproof, &publicInputs[0], allVerkey, &cHelpersSteps); 
+    } else {
+        AllSteps allSteps;
+        starks.genProof(fproof, &publicInputs[0], allVerkey, &allSteps);
+    }
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof);
