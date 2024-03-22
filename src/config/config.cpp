@@ -212,6 +212,7 @@ void Config::load(json &config)
     ParseU64(config, "aggregatorClientMockTimeout", "AGGREGATOR_CLIENT_MOCK_TIMEOUT", aggregatorClientMockTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientWatchdogTimeout", "AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT", aggregatorClientWatchdogTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientMaxStreams", "AGGREGATOR_CLIENT_MAX_STREAMS", aggregatorClientMaxStreams, 0);
+    ParseU64(config, "aggregatorClientMaxRecvMsgSize", "AGGREGATOR_CLIENT_MAX_RECV_MSG_SIZE", aggregatorClientMaxRecvMsgSize, 1024*1024*1024);
 
     // Logs
     ParseBool(config, "executorROMLineTraces", "EXECUTOR_ROM_LINE_TRACES", executorROMLineTraces, false);
@@ -497,6 +498,7 @@ void Config::print(void)
     zklog.info("    aggregatorClientMockTimeout=" + to_string(aggregatorClientMockTimeout));
     zklog.info("    aggregatorClientWatchdogTimeout=" + to_string(aggregatorClientWatchdogTimeout));
     zklog.info("    aggregatorClientMaxStreams=" + to_string(aggregatorClientMaxStreams));
+    zklog.info("    aggregatorClientMaxRecvMsgSize=" + to_string(aggregatorClientMaxRecvMsgSize));
 
     zklog.info("    inputFile=" + inputFile);
     zklog.info("    inputFile2=" + inputFile2);
