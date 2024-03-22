@@ -18,7 +18,7 @@ CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 $(GRPCPP_FLAGS) #-Wfatal-errors
 LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -liomp5 $(GRPCPP_LIBS)
-CFLAGS := -fopenmp -Wall -pthread -Wno-unused-label -fopenmp -mavx2
+CFLAGS := -fopenmp -Wall -pthread -Wno-unused-label -fopenmp -mavx2 -MD
 ASFLAGS := -felf64
 
 # Debug build flags
@@ -143,5 +143,6 @@ clean:
 
 -include $(DEPS_ZKP)
 -include $(DEPS_BCT)
+-include $(DEPS_TEST)
 
 MKDIR_P ?= mkdir -p

@@ -1,22 +1,39 @@
-#include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
 #include "AllSteps.hpp"
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc != 7)
+    {
+        cout << "Warning: not all arguments provided. Using defaults.\n"
+            << "Usage: " << argv[0] << " <constants> <consttree> <starkinfo> <commits> <chelpers_bin> <verkey>" << endl;
+    }
+
+    const char* default_args[] = {
+        "test/examples/all/all.const",
+        "test/examples/all/all.consttree",
+        "test/examples/all/all.starkinfo.json",
+        "test/examples/all/all.commit",
+        "test/examples/all/all.chelpers/all.chelpers.bin",
+        "test/examples/all/all.verkey.json"
+    };
+
+    auto arg = [&](int i) -> string {
+        return i < argc ? argv[i] : default_args[i - 1];
+    };
+
+    string constPols = arg(1);
+    string constTree = arg(2);
+    string starkInfoFile = arg(3);
+    string commitPols = arg(4);
+    string cHelpersFile = arg(5);
+    string verkey = arg(6);
 
     Config config;
     config.runFileGenBatchProof = true; // So that starkInfo is created
     config.mapConstPolsFile = false;
     config.mapConstantsTreeFile = false;
-    
-    string constPols = "test/examples/all/all.const";
-    string constTree = "test/examples/all/all.consttree";
-    string starkInfoFile = "test/examples/all/all.starkinfo.json";
-    string commitPols = "test/examples/all/all.commit";
-    string cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
-    string verkey = "test/examples/all/all.verkey.json";
 
     StarkInfo starkInfo(config, starkInfoFile);
 
@@ -35,17 +52,22 @@ int main()
         std::memcpy((uint8_t*)pAddress + i*starkInfo.nCm1*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.nCm1*sizeof(Goldilocks::Element), starkInfo.nCm1*sizeof(Goldilocks::Element));
     }
 
-    Goldilocks::Element publicInputs[3] = {
+    Goldilocks::Element publicInputs[0] = {};
+    /*
+    {
         Goldilocks::fromU64(1),
         Goldilocks::fromU64(2),
         Goldilocks::fromU64(74469561660084004),
     };
+    */
 
     json publicStarkJson;
+    /*
     for (int i = 0; i < 3; i++)
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
+    */
 
     json allVerkeyJson;
     file2json(verkey, allVerkeyJson);
