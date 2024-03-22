@@ -12,6 +12,7 @@
 #include "poseidon_goldilocks.hpp"
 #include <fstream>
 #include "merkleTreeBN128.hpp"
+#include "stark_info.hpp"
 #include <filesystem>
 #include <cstdint>
 
@@ -530,15 +531,17 @@ void interpolate(Goldilocks::Element *buffSrc, uint64_t nPols, uint64_t nBits, G
     free(tmpBuff);
 }
 
-void buildConstTree(const string constFile, const string starkStructFile, const string constTreeFile, const string verKeyFile)
+void buildConstTree(const string constFile, const string starkInfoFile, const string constTreeFile, const string verKeyFile)
 {
     TimerStart(BUILD_CONST_TREE);
 
-    json starkStruct;
-    file2json(starkStructFile, starkStruct);
+    json starkInfo;
+    StarkInfo starkInfo(starkInfoFile);
 
-    uint64_t nBits = starkStruct["nBits"];
-    uint64_t nBitsExt = starkStruct["nBitsExt"];
+    file2json(starkInfoFile, starkInfo);
+
+    uint64_t nBits = starkInfo.starkStruct["nBits"];
+    uint64_t nBitsExt = starkInfo.starkStruct["nBitsExt"];
     uint64_t n = 1 << nBits;
     uint64_t nExt = 1 << nBitsExt;
 
@@ -559,7 +562,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
 
     // writeToTextFile ("../build/tmp/constPolsArrayE.new.txt", constPolsArrayE, nExt*nPols);
 
-    if (starkStruct["verificationHashType"] == "GL")
+    if (starkInfo.starkStruct["verificationHashType"] == "GL")
     {
 
         TimerStart(MerkleTree_GL);
@@ -606,11 +609,11 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
 
         free(constTree);
     }
-    else if (starkStruct["verificationHashType"] == "BN128")
+    else if (starkInfo.starkStruct["verificationHashType"] == "BN128")
     {
 
         TimerStart(MerkleTree_BN128);
-        MerkleTreeBN128 mt(nExt, nPols, constPolsArrayE);
+        MerkleTreeBN128 mt(starkInfo.merkleTreeArity, nExt, nPols, constPolsArrayE);
         mt.merkelize();
         TimerStopAndLog(MerkleTree_BN128);
 
@@ -641,7 +644,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
     }
     else
     {
-        cerr << "Invalid Hash Type: " << starkStruct["verificationHashType"] << endl;
+        cerr << "Invalid Hash Type: " << starkInfo.starkStruct["verificationHashType"] << endl;
         exit(-1);
     }
 

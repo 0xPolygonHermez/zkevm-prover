@@ -11,7 +11,7 @@
 #define NUM_CHALLENGES 8
 
 StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config(config),
-                                                                          starkInfo(config, config.recursivefStarkInfo),
+                                                                          starkInfo(config.recursivefStarkInfo),
                                                                           N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                           NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                                           ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
@@ -63,13 +63,13 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
 
     if (config.mapConstantsTreeFile)
     {
-        pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant tree file " + config.recursivefConstantsTree);
+        pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity), false);
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant tree file " + config.recursivefConstantsTree);
     }
     else
     {
-        pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant file " + config.recursivefConstantsTree);
+        pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant file " + config.recursivefConstantsTree);
     }
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
 
@@ -124,7 +124,8 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
 
     TimerStart(CHELPERS_ALLOCATION);
-    cHelpersBinFile = BinFileUtils::openExisting(config.recursivefCHelpers, "chps", 1);
+    string recursivefChelpers = USE_GENERIC_PARSER ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
+    cHelpersBinFile = BinFileUtils::openExisting(recursivefChelpers, "chps", 1);
     chelpers.loadCHelpers(cHelpersBinFile.get());
     TimerStopAndLog(CHELPERS_ALLOCATION);
 }
@@ -149,7 +150,7 @@ StarkRecursiveF::~StarkRecursiveF()
 
     if (config.mapConstantsTreeFile)
     {
-        unmapFile(pConstTreeAddress, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
+        unmapFile(pConstTreeAddress, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
     }
     else
     {
@@ -167,8 +168,15 @@ StarkRecursiveF::~StarkRecursiveF()
 void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
 {
 
-    RecursiveFSteps chelpersSteps;
-    RecursiveFSteps *steps = &chelpersSteps;
+    if(USE_GENERIC_PARSER) {
+        CHelpersSteps chelpersSteps;
+        CHelpersSteps *steps = &chelpersSteps;
+    } else {
+        RecursiveFSteps chelpersSteps;
+        RecursiveFSteps *steps = &chelpersSteps;
+    }
+    
+
     // Initialize vars
     uint64_t numCommited = starkInfo.nCm1;
     TranscriptBN128 transcript;
@@ -185,11 +193,11 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     RawFr::Element root3;
 
     MerkleTreeBN128 *treesBN128[STARK_RECURSIVE_F_NUM_TREES];
-    treesBN128[0] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-    treesBN128[1] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
-    treesBN128[2] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
-    treesBN128[3] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
-    treesBN128[4] = new MerkleTreeBN128(pConstTreeAddress);
+    treesBN128[0] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
+    treesBN128[1] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
+    treesBN128[2] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
+    treesBN128[3] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
+    treesBN128[4] = new MerkleTreeBN128(starkInfo.merkleTreeArity, pConstTreeAddress);
 
     treesBN128[4]->getRoot(&rootC);
 
