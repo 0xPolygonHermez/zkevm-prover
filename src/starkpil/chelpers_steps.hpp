@@ -5,7 +5,7 @@
 
 class CHelpersSteps {
 public:
-    void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
+    virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
         uint32_t nrowsBatch = 4;
         bool domainExtended = parserParams.stage > 3 ? true : false;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
@@ -98,7 +98,7 @@ public:
             Goldilocks3::Element_avx tmp3_;
             // Goldilocks3::Element_avx tmp3_0;
             Goldilocks3::Element_avx tmp3_1;
-            // __m256i tmp1_0;
+            __m256i tmp1_0;
             __m256i tmp1_1;
             __m256i bufferT_[2*nCols];
 
@@ -1237,7 +1237,7 @@ public:
                     break;
             }
                     default: {
-                        std::cout << " Wrong operation!" << std::endl;
+                        std::cout << " Wrong operation! " << uint64_t(ops[kk]) << std::endl;
                         exit(1);
                     }
                 }
