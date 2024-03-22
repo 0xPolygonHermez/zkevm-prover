@@ -4,6 +4,7 @@
 #include <math.h>
 #include "fr.hpp"
 #include "goldilocks_base_field.hpp"
+#include "exit_process.hpp"
 #include "poseidon_opt.hpp"
 
 #define GOLDILOCKS_ELEMENTS 3
