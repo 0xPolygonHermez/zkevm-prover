@@ -4,6 +4,13 @@
 #include <cstdint>
 #include <string>
 #include "goldilocks_base_field.hpp"
+#include "ntt_goldilocks.hpp"
+#include "merkleTreeBN128.hpp"
+#include "merkleTreeGL.hpp"
+#include "timer.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
