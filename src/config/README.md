@@ -190,6 +190,16 @@ The configuration parameters can be of different uses:
 |`blobOuterCHelpers`|production|string|blobOuter STARK chelpers binary file|config + "/blob_outer/blob_outer.chelpers.bin"|BLOB_OUTER_CHELPERS|
 |`blobOuterRecursive2CHelpers`|production|string|blobOuterRecursive2 STARK chelpers binary file|config + "/blob_outer_recursive2/blob_outer_recursive2.chelpers.bin"|BLOB_OUTER_CHELPERS|
 |`recursivefCHelpers`|production|string|RecursiveF STARK chelpers binary file|config + "/recursivef/recursivef.chelpers.bin"|RECURSIVEF_CHELPERS|
+|`zkevmGenericCHelpers`|production|string|zkEVM STARK generic chelpers binary file|config + "/zkevm/zkevm.chelpers_generic.bin"|ZKEVM_GENERIC_CHELPERS|
+|`c12aGenericCHelpers`|production|string|C12a STARK generic chelpers binary file|config + "/c12a/c12a.chelpers_generic.bin"|C12A_GENERIC_CHELPERS|
+|`recursive1GenericCHelpers`|production|string|Recursive1 STARK generic chelpers binary file|config + "/recursive1/recursive1.chelpers_generic.bin"|RECURSIVE1_GENERIC_CHELPERS|
+|`recursive2GenericCHelpers`|production|string|Recursive2 STARK generic chelpers binary file|config + "/recursive2/recursive2.chelpers_generic.bin"|RECURSIVE2_GENERIC_CHELPERS|
+|`blobInnerGenericCHelpers`|production|string|blobInner STARK generic chelpers binary file|config + "/blob_inner/blob_inner.chelpers_generic.bin"|BLOB_INNER_GENERIC_CHELPERS|
+|`blobInnerCompressorGenericCHelpers`|production|string| blobInnerCompressor STARK generic chelpers binary file|config + "/blob_inner_compressor/blob_inner_compressor.chelpers_generic.bin"|BLOB_INNER_COMPRESSOR_GENERIC_CHELPERS|
+|`blobInnerRecursive1GenericCHelpers`|production|string| blobInnerRecursive1 STARK generic chelpers binary file|config + "/blob_inner_recursive1/blob_inner_recursive1.chelpers_generic.bin"|BLOB_INNER_RECURSIVE1_GENERIC_CHELPERS|
+|`blobOuterGenericCHelpers`|production|string|blobOuter STARK generic chelpers binary file|config + "/blob_outer/blob_outer.chelpers_generic.bin"|BLOB_OUTER_GENERIC_CHELPERS|
+|`blobOuterRecursive2GenericCHelpers`|production|string|blobOuterRecursive2 STARK generic chelpers binary file|config + "/blob_outer_recursive2/blob_outer_recursive2.chelpers_generic.bin"|BLOB_OUTER_RECURSIVE2_GENERIC_CHELPERS|
+|`recursivefGenericCHelpers`|production|string|RecursiveF STARK generic chelpers binary file|config + "/recursivef/recursivef.chelpers_generic.bin"|RECURSIVEF_GENERIC_CHELPERS|
 |`storageRomFile`|production|string|Storage ROM file|config + "/scripts/storage_sm_rom.json"|STORAGE_ROM_FILE|
 |`recursivefConstantsTree`|production|string|Recursive final contant polynomials tree file|config + "/recursivef/recursivef.consttree"|RECURSIVE1_CONSTANTS_TREE|
 |`sha256PolsFile`|production|string|SHA-256 polynomials file|"sha256_pols.json"|SHA256_POLS_FILE|

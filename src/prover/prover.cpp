@@ -29,6 +29,7 @@
 #include "C12aSteps.hpp"
 #include "Recursive1Steps.hpp"
 #include "Recursive2Steps.hpp"
+#include "RecursiveFSteps.hpp"
 #include "chelpers_steps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
@@ -88,7 +89,7 @@ Prover::Prover(Goldilocks &fr,
             pthread_create(&proverPthread, NULL, proverThread, this);
             pthread_create(&cleanerPthread, NULL, cleanerThread, this);
 
-            StarkInfo _starkInfo(config, config.zkevmStarkInfo);
+            StarkInfo _starkInfo(config.zkevmStarkInfo);
 
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
             // and create them using the allocated address
@@ -149,25 +150,35 @@ Prover::Prover(Goldilocks &fr,
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
             prover->setZkey(zkey.get());
 
-            StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
+            StarkInfo _starkInfoRecursiveF(config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
             if (pAddressStarksRecursiveF == NULL){
                 zklog.error("Prover::Prover() failed calling malloc() of size " + to_string(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element)));
                 exitProcess();
             }
 
-            starkBatch = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, config.zkevmCHelpers}, pAddress);
+            string zkevmCHelpers = USE_GENERIC_PARSER ? config.zkevmGenericCHelpers : config.zkevmCHelpers;
+            string c12aCHelpers = USE_GENERIC_PARSER ? config.c12aGenericCHelpers : config.c12aCHelpers;
+            string recursive1CHelpers = USE_GENERIC_PARSER ? config.recursive1GenericCHelpers : config.recursive1CHelpers;
+            string recursive2CHelpers = USE_GENERIC_PARSER ? config.recursive2GenericCHelpers : config.recursive2CHelpers;
+            string blobInnerCHelpers = USE_GENERIC_PARSER ? config.blobInnerGenericCHelpers : config.blobInnerCHelpers;
+            string blobInnerCompressorCHelpers = USE_GENERIC_PARSER ? config.blobInnerCompressorGenericCHelpers : config.blobInnerCompressorCHelpers;
+            string blobInnerRecursive1CHelpers = USE_GENERIC_PARSER ? config.blobInnerRecursive1GenericCHelpers : config.blobInnerRecursive1CHelpers;
+            string blobOuterCHelpers = USE_GENERIC_PARSER ? config.blobOuterGenericCHelpers : config.blobOuterCHelpers;
+            string blobOuterRecursive2CHelpers = USE_GENERIC_PARSER ? config.blobOuterRecursive2GenericCHelpers : config.blobOuterRecursive2CHelpers;
+            
+            starkBatch = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, zkevmCHelpers}, pAddress);
             if(optimizeMemoryNTT) starkBatch->optimizeMemoryNTT = true;
             if(optimizeMemoryNTTCommitPols) starkBatch->optimizeMemoryNTTCommitPols = true;
-            starkBatchC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, config.c12aCHelpers}, pAddress);
-            starkBatchRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, config.recursive1CHelpers}, pAddress);
-            starkBatchRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, config.recursive2CHelpers}, pAddress);
+            starkBatchC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, c12aCHelpers}, pAddress);
+            starkBatchRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, recursive1CHelpers}, pAddress);
+            starkBatchRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, recursive2CHelpers}, pAddress);
             starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
-            starkBlobInner = new Starks(config, {config.blobInnerConstPols, config.mapConstPolsFile, config.blobInnerConstantsTree, config.blobInnerStarkInfo, config.blobInnerCHelpers}, pAddress);
-            starkBlobInnerCompressor = new Starks(config, {config.blobInnerCompressorConstPols, config.mapConstPolsFile, config.blobInnerCompressorConstantsTree, config.blobInnerCompressorStarkInfo, config.blobInnerCompressorCHelpers}, pAddress);
-            starkBlobInnerRecursive1 = new Starks(config, {config.blobInnerRecursive1ConstPols, config.mapConstPolsFile, config.blobInnerRecursive1ConstantsTree, config.blobInnerRecursive1StarkInfo, config.blobInnerRecursive1CHelpers}, pAddress);
-            starkBlobOuter = new Starks(config, {config.blobOuterConstPols, config.mapConstPolsFile, config.blobOuterConstantsTree, config.blobOuterStarkInfo, config.blobOuterCHelpers}, pAddress);
-            starkBlobOuterRecursive2 = new Starks(config, {config.blobOuterRecursive2ConstPols, config.mapConstPolsFile, config.blobOuterRecursive2ConstantsTree, config.blobOuterRecursive2StarkInfo, config.blobOuterRecursive2CHelpers}, pAddress);
+            starkBlobInner = new Starks(config, {config.blobInnerConstPols, config.mapConstPolsFile, config.blobInnerConstantsTree, config.blobInnerStarkInfo, blobInnerCHelpers}, pAddress);
+            starkBlobInnerCompressor = new Starks(config, {config.blobInnerCompressorConstPols, config.mapConstPolsFile, config.blobInnerCompressorConstantsTree, config.blobInnerCompressorStarkInfo, blobInnerCompressorCHelpers}, pAddress);
+            starkBlobInnerRecursive1 = new Starks(config, {config.blobInnerRecursive1ConstPols, config.mapConstPolsFile, config.blobInnerRecursive1ConstantsTree, config.blobInnerRecursive1StarkInfo, blobInnerRecursive1CHelpers}, pAddress);
+            starkBlobOuter = new Starks(config, {config.blobOuterConstPols, config.mapConstPolsFile, config.blobOuterConstantsTree, config.blobOuterStarkInfo, blobOuterCHelpers}, pAddress);
+            starkBlobOuterRecursive2 = new Starks(config, {config.blobOuterRecursive2ConstPols, config.mapConstPolsFile, config.blobOuterRecursive2ConstantsTree, config.blobOuterRecursive2StarkInfo, blobOuterRecursive2CHelpers}, pAddress);
         }
     }
     catch (std::exception &e)
@@ -673,12 +684,18 @@ void Prover::genBatchProof (ProverRequest *pProverRequest)
         /*************************************/
         /*  Generate stark proof            */
         /*************************************/
-
+        CHelpersSteps cHelpersSteps;
+        
         TimerStart(STARK_PROOF_BATCH_PROOF);
         ZkevmSteps zkevmChelpersSteps;
         uint64_t polBits = starkBatch->getPolBits();
         FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkBatch->starkInfo.starkStruct.steps.size(), starkBatch->starkInfo.evMap.size(), starkBatch->starkInfo.nPublics);
-        starkBatch->genProof(fproof, &publics[0], zkevmVerkey, &zkevmChelpersSteps);
+        if(USE_GENERIC_PARSER) {
+            starkBatch->genProof(fproof, &publics[0], zkevmVerkey, &cHelpersSteps);
+        } else {
+            starkBatch->genProof(fproof, &publics[0], zkevmVerkey, &zkevmChelpersSteps);
+        }
+        
         TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
 
         TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
@@ -709,7 +726,11 @@ void Prover::genBatchProof (ProverRequest *pProverRequest)
         FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starkBatchC12a->starkInfo.starkStruct.steps.size(), starkBatchC12a->starkInfo.evMap.size(), starkBatchC12a->starkInfo.nPublics);
 
         // Generate the proof
-        starkBatchC12a->genProof(fproofC12a, publics, c12aVerkey, &c12aChelpersSteps);
+        if(USE_GENERIC_PARSER) {
+            starkBatchC12a->genProof(fproofC12a, publics, c12aVerkey, &cHelpersSteps);
+        } else {
+            starkBatchC12a->genProof(fproofC12a, publics, c12aVerkey, &c12aChelpersSteps);
+        }
 
         TimerStopAndLog(STARK_C12_A_PROOF_BATCH_PROOF);
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
@@ -743,7 +764,12 @@ void Prover::genBatchProof (ProverRequest *pProverRequest)
         Recursive1Steps recursive1ChelpersSteps;
         uint64_t polBitsRecursive1 = starkBatchRecursive1->getPolBits();
         FRIProof fproofRecursive1((1 << polBitsRecursive1), FIELD_EXTENSION, starkBatchRecursive1->starkInfo.starkStruct.steps.size(), starkBatchRecursive1->starkInfo.evMap.size(), starkBatchRecursive1->starkInfo.nPublics);
-        starkBatchRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1ChelpersSteps);
+        if(USE_GENERIC_PARSER) {
+            starkBatchRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &cHelpersSteps);
+        } else {
+            starkBatchRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1ChelpersSteps);
+        }
+        
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
 
         // Save the proof & zkinproof
@@ -960,11 +986,18 @@ void Prover::genBlobInnerProof (ProverRequest *pProverRequest){
         /*  Generate stark proof            */
         /*************************************/
 
+        CHelpersSteps cHelpersSteps;
+
         TimerStart(STARK_PROOF_BLOB_INNER_PROOF);
         BlobInnerSteps blobInnerChelpersSteps;
         uint64_t polBits = starkBlobInner->getPolBits();
         FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkBlobInner->starkInfo.starkStruct.steps.size(), starkBlobInner->starkInfo.evMap.size(), starkBlobInner->starkInfo.nPublics);
-        starkBlobInner->genProof(fproof, &publics[0], blobInnerVerkey, &blobInnerChelpersSteps);
+        if(USE_GENERIC_PARSER) {
+            starkBlobInner->genProof(fproof, &publics[0], blobInnerVerkey, &cHelpersSteps);
+        } else {
+            starkBlobInner->genProof(fproof, &publics[0], blobInnerVerkey, &blobInnerChelpersSteps);
+        }
+        
         TimerStopAndLog(STARK_PROOF_BLOB_INNER_PROOF);
 
         TimerStart(STARK_GEN_AND_CALC_WITNESS_COMPRESSOR);
@@ -994,7 +1027,11 @@ void Prover::genBlobInnerProof (ProverRequest *pProverRequest){
         FRIProof fproofCompressor((1 << polBitsCompressor), FIELD_EXTENSION, starkBlobInnerCompressor->starkInfo.starkStruct.steps.size(), starkBlobInnerCompressor->starkInfo.evMap.size(), starkBlobInnerCompressor->starkInfo.nPublics);
 
         // Generate the proof
-        starkBlobInnerCompressor->genProof(fproofCompressor, publics, compressorVerkey, &compressorChelpersSteps);
+        if(USE_GENERIC_PARSER) {
+            starkBlobInnerCompressor->genProof(fproofCompressor, publics, compressorVerkey, &cHelpersSteps);
+        } else {
+            starkBlobInnerCompressor->genProof(fproofCompressor, publics, compressorVerkey, &compressorChelpersSteps);
+        }
         TimerStopAndLog(STARKCOMPRESSOR_PROOF_BLOB_INNNER_PROOF);
 
         TimerStart(STARK_JSON_GENERATION_BLOB_INNER_PROOF_COMPRESSOR);
@@ -1019,7 +1056,12 @@ void Prover::genBlobInnerProof (ProverRequest *pProverRequest){
         BlobInnerRecursive1Steps recursive1ChelpersSteps;
         uint64_t polBitsRecursive1 = starkBlobInnerRecursive1->getPolBits();
         FRIProof fproofRecursive1((1 << polBitsRecursive1), FIELD_EXTENSION, starkBlobInnerRecursive1->starkInfo.starkStruct.steps.size(), starkBlobInnerRecursive1->starkInfo.evMap.size(), starkBlobInnerRecursive1->starkInfo.nPublics);
-        starkBlobInnerRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1ChelpersSteps);
+        
+        if(USE_GENERIC_PARSER) {
+            starkBlobInnerRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &cHelpersSteps);
+        } else {
+            starkBlobInnerRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1ChelpersSteps);
+        }
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BLOB_INNER_PROOF);
 
         // Save the proof & zkinproof
@@ -1111,7 +1153,13 @@ void Prover::genBlobOuterProof (ProverRequest *pProverRequest){
     Recursive2Steps blobOuterChelpersSteps;
     uint64_t polBitsBlobOuter = starkBlobOuter->getPolBits();
     FRIProof fproofBlobOuter((1 << polBitsBlobOuter), FIELD_EXTENSION, starkBlobOuter->starkInfo.starkStruct.steps.size(), starkBlobOuter->starkInfo.evMap.size(), starkBlobOuter->starkInfo.nPublics);
-    starkBlobOuter->genProof(fproofBlobOuter, publics, blobOuterVerkey, &blobOuterChelpersSteps);
+    if(USE_GENERIC_PARSER) {
+        CHelpersSteps cHelpersSteps;
+        starkBlobOuter->genProof(fproofBlobOuter, publics, blobOuterVerkey, &cHelpersSteps);
+    } else {
+        starkBlobOuter->genProof(fproofBlobOuter, publics, blobOuterVerkey, &blobOuterChelpersSteps);
+    }
+    
     TimerStopAndLog(STARK_BLOB_OUTER_PROOF);
 
     // Save the proof & zkinproof
@@ -1258,7 +1306,13 @@ void Prover::genAggregatedBatchProof (ProverRequest *pProverRequest)
     Recursive2Steps recursive2ChelpersSteps;
     uint64_t polBitsRecursive2 = starkBatchRecursive2->getPolBits();
     FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starkBatchRecursive2->starkInfo.starkStruct.steps.size(), starkBatchRecursive2->starkInfo.evMap.size(), starkBatchRecursive2->starkInfo.nPublics);
-    starkBatchRecursive2->genProof(fproofRecursive2, publics, recursive2Verkey, &recursive2ChelpersSteps);
+    if(USE_GENERIC_PARSER) {
+        CHelpersSteps cHelpersSteps;
+        starkBatchRecursive2->genProof(fproofRecursive2, publics, recursive2Verkey, &cHelpersSteps);
+    } else {
+        starkBatchRecursive2->genProof(fproofRecursive2, publics, recursive2Verkey, &recursive2ChelpersSteps);
+    }
+    
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
@@ -1416,7 +1470,13 @@ void Prover::genAggregatedBlobOuterProof (ProverRequest *pProverRequest){
     Recursive2Steps blobOuterRecursive2ChelpersSteps;
     uint64_t polBitsRecursive2 = starkBlobOuterRecursive2->getPolBits();
     FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starkBlobOuterRecursive2->starkInfo.starkStruct.steps.size(), starkBlobOuterRecursive2->starkInfo.evMap.size(), starkBlobOuterRecursive2->starkInfo.nPublics);
-    starkBlobOuterRecursive2->genProof(fproofRecursive2, publics, recursive2Verkey, &blobOuterRecursive2ChelpersSteps);
+    if(USE_GENERIC_PARSER) {
+        CHelpersSteps cHelpersSteps;
+        starkBlobOuterRecursive2->genProof(fproofRecursive2, publics, recursive2Verkey, &cHelpersSteps);
+    } else {
+        starkBlobOuterRecursive2->genProof(fproofRecursive2, publics, recursive2Verkey, &blobOuterRecursive2ChelpersSteps);
+    }
+    
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BLOB_OUTER_PROOF);
 
     // Save the proof & zkinproof
@@ -1501,7 +1561,13 @@ void Prover::genFinalProof (ProverRequest *pProverRequest)
     TimerStart(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
     uint64_t polBitsRecursiveF = starksRecursiveF->starkInfo.starkStruct.steps[starksRecursiveF->starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
-    starksRecursiveF->genProof(fproofRecursiveF, publics);
+    if(USE_GENERIC_PARSER) {
+        CHelpersSteps cHelpersSteps;
+        starksRecursiveF->genProof(fproofRecursiveF, publics, &cHelpersSteps);
+    } else {
+        RecursiveFSteps recursiveFChelpersSteps;
+        starksRecursiveF->genProof(fproofRecursiveF, publics, &recursiveFChelpersSteps);
+    }
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
