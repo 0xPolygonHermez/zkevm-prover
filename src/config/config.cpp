@@ -269,13 +269,13 @@ void Config::load(json &config)
     ParseString(config, "recursive1ConstantsTree", "RECURSIVE1_CONSTANTS_TREE", recursive1ConstantsTree, configPath + "/recursive1/recursive1.consttree");
     ParseString(config, "recursive1Exec", "RECURSIVE1_EXEC", recursive1Exec, configPath + "/recursive1/recursive1.exec");
     ParseString(config, "recursive1StarkInfo", "RECURSIVE1_STARK_INFO", recursive1StarkInfo, configPath + "/recursive1/recursive1.starkinfo.json");
-    ParseString(config, "recursive1Verifier", "RECURSIVE1_VERIFIER", recursive1Verifier, configPath + "/recursive1/recursive1.verifier.dat");
+    ParseString(config, "recursive1Circuit", "RECURSIVE1_CIRCUIT", recursive1Circuit, configPath + "/recursive1/recursive1.dat");
     ParseString(config, "recursive1Verkey", "RECURSIVE1_VERKEY", recursive1Verkey, configPath + "/recursive1/recursive1.verkey.json");
     ParseString(config, "recursive2ConstPols", "RECURSIVE2_CONST_POLS", recursive2ConstPols, configPath + "/recursive2/recursive2.const");
     ParseString(config, "recursive2ConstantsTree", "RECURSIVE2_CONSTANTS_TREE", recursive2ConstantsTree, configPath + "/recursive2/recursive2.consttree");
     ParseString(config, "recursive2Exec", "RECURSIVE2_EXEC", recursive2Exec, configPath + "/recursive2/recursive2.exec");
     ParseString(config, "recursive2StarkInfo", "RECURSIVE2_STARK_INFO", recursive2StarkInfo, configPath + "/recursive2/recursive2.starkinfo.json");
-    ParseString(config, "recursive2Verifier", "RECURSIVE2_VERIFIER", recursive2Verifier, configPath + "/recursive2/recursive2.verifier.dat");
+    ParseString(config, "recursive2Circuit", "RECURSIVE2_CIRCUIT", recursive2Circuit, configPath + "/recursive2/recursive2.dat");
     ParseString(config, "recursive2Verkey", "RECURSIVE2_VERKEY", recursive2Verkey, configPath + "/recursive2/recursive2.verkey.json");
     ParseString(config, "blobInnerCmPols", "BLOB_INNER_CM_POLS", blobInnerCmPols, "");
     ParseString(config, "blobInnerConstPols", "BLOB_INNER_CONST_POLS", blobInnerConstPols,configPath +  "/blob_inner/blob_inner.const");
@@ -292,21 +292,21 @@ void Config::load(json &config)
     ParseString(config, "blobInnerRecursive1CmPols", "BLOB_INNER_RECURSIVE1_CM_POLS", blobInnerRecursive1CmPols, "");
     ParseString(config, "blobInnerRecursive1ConstPols", "BLOB_INNER_RECURSIVE1_CONST_POLS", blobInnerRecursive1ConstPols, configPath + "/blob_inner_recursive1/blob_inner_recursive1.const");
     ParseString(config, "blobInnerRecursive1ConstantsTree", "BLOB_INNER_RECURSIVE1_CONSTANTS_TREE", blobInnerRecursive1ConstantsTree,configPath +  "/blob_inner_recursive1/blob_inner_recursive1.consttree");
-    ParseString(config, "blobInnerRecursive1Verifier", "BLOB_INNER_RECURSIVE1_VERIFIER", blobInnerRecursive1Verifier,configPath + "/blob_inner_recursive1/blob_inner_recursive1.verifier.dat");
+    ParseString(config, "blobInnerRecursive1Circuit", "BLOB_INNER_RECURSIVE1_CIRCUIT", blobInnerRecursive1Circuit,configPath + "/blob_inner_recursive1/blob_inner_recursive1.dat");
     ParseString(config, "blobInnerRecursive1Verkey", "BLOB_INNER_RECURSIVE1_VERKEY", blobInnerRecursive1Verkey, configPath + "/blob_inner_recursive1/blob_inner_recursive1.verkey.json");
     ParseString(config, "blobInnerRecursive1Exec", "BLOB_INNER_RECURSIVE1_EXEC", blobInnerRecursive1Exec, configPath + "/blob_inner_recursive1/blob_inner_recursive1.exec");
     ParseString(config, "blobInnerRecursive1StarkInfo", "BLOB_INNER_RECURSIVE1_STARK_INFO", blobInnerRecursive1StarkInfo,configPath +  "/blob_inner_recursive1/blob_inner_recursive1.starkinfo.json");
     ParseString(config, "blobOuterCmPols", "BLOB_OUTER_CM_POLS", blobOuterCmPols,configPath +  "");
     ParseString(config, "blobOuterConstPols", "BLOB_OUTER_CONST_POLS", blobOuterConstPols, configPath + "/blob_outer/blob_outer.const");
     ParseString(config, "blobOuterConstantsTree", "BLOB_OUTER_CONSTANTS_TREE", blobOuterConstantsTree,configPath +  "/blob_outer/blob_outer.consttree");
-    ParseString(config, "blobOuterVerifier", "BLOB_OUTER_VERIFIER", blobOuterVerifier,configPath + "/blob_outer/blob_outer.verifier.dat");
+    ParseString(config, "blobOuterCircuit", "BLOB_OUTER_CIRCUIT", blobOuterCircuit,configPath + "/blob_outer/blob_outer.dat");
     ParseString(config, "blobOuterVerkey", "BLOB_OUTER_VERKEY", blobOuterVerkey,configPath +  "/blob_outer/blob_outer.verkey.json");
     ParseString(config, "blobOuterExec", "BLOB_OUTER_EXEC", blobOuterExec, configPath + "/blob_outer/blob_outer.exec");
     ParseString(config, "blobOuterStarkInfo", "BLOB_OUTER_STARK_INFO", blobOuterStarkInfo, configPath + "/blob_outer/blob_outer.starkinfo.json");
     ParseString(config, "blobOuterRecursive2CmPols", "BLOB_OUTER_RECURSIVE2_CM_POLS", blobOuterRecursive2CmPols, "");
     ParseString(config, "blobOuterRecursive2ConstPols", "BLOB_OUTER_RECURSIVE2_CONST_POLS", blobOuterRecursive2ConstPols, configPath + "/blob_outer_recursive2/blob_outer_recursive2.const");
     ParseString(config, "blobOuterRecursive2ConstantsTree", "BLOB_OUTER_RECURSIVE2_CONSTANTS_TREE", blobOuterRecursive2ConstantsTree,configPath +  "/blob_outer_recursive2/blob_outer_recursive2.consttree");
-    ParseString(config, "blobOuterRecursive2Verifier", "BLOB_OUTER_RECURSIVE2_VERIFIER", blobOuterRecursive2Verifier,configPath + "/blob_outer_recursive2/blob_outer_recursive2.verifier.dat");
+    ParseString(config, "blobOuterRecursive2Circuit", "BLOB_OUTER_RECURSIVE2_CIRCUIT", blobOuterRecursive2Circuit,configPath + "/blob_outer_recursive2/blob_outer_recursive2.dat");
     ParseString(config, "blobOuterRecursive2Verkey", "BLOB_OUTER_RECURSIVE2_VERKEY", blobOuterRecursive2Verkey, configPath + "/blob_outer_recursive2/blob_outer_recursive2.verkey.json");
     ParseString(config, "blobOuterRecursive2Exec", "BLOB_OUTER_RECURSIVE2_EXEC", blobOuterRecursive2Exec,configPath + "/blob_outer_recursive2/blob_outer_recursive2.exec");
     ParseString(config, "blobOuterRecursive2StarkInfo", "BLOB_OUTER_RECURSIVE2_STARK_INFO", blobOuterRecursive2StarkInfo,configPath +  "/blob_outer_recursive2/blob_outer_recursive2.starkinfo.json");
@@ -314,9 +314,9 @@ void Config::load(json &config)
     ParseString(config, "recursivefConstantsTree", "RECURSIVEF_CONSTANTS_TREE", recursivefConstantsTree, configPath + "/recursivef/recursivef.consttree");
     ParseString(config, "recursivefExec", "RECURSIVEF_EXEC", recursivefExec, configPath + "/recursivef/recursivef.exec");
     ParseString(config, "recursivefStarkInfo", "RECURSIVEF_STARK_INFO", recursivefStarkInfo, configPath + "/recursivef/recursivef.starkinfo.json");
-    ParseString(config, "recursivefVerifier", "RECURSIVEF_VERIFIER", recursivefVerifier, configPath + "/recursivef/recursivef.verifier.dat");
+    ParseString(config, "recursivefCircuit", "RECURSIVEF_CIRCUIT", recursivefCircuit, configPath + "/recursivef/recursivef.dat");
     ParseString(config, "recursivefVerkey", "RECURSIVEF_VERKEY", recursivefVerkey, configPath + "/recursivef/recursivef.verkey.json");
-    ParseString(config, "finalVerifier", "FINAL_VERIFIER", finalVerifier, configPath + "/final/final.verifier.dat");
+    ParseString(config, "finalCircuit", "FINAL_CIRCUIT", finalCircuit, configPath + "/final/final.dat");
     ParseString(config, "finalVerkey", "FINAL_VERKEY", finalVerkey, configPath + "/final/final.fflonk.verkey.json");
     ParseString(config, "finalStarkZkey", "FINAL_STARK_ZKEY", finalStarkZkey, configPath + "/final/final.fflonk.zkey");
     ParseString(config, "recursive1CmPols", "RECURSIVE1_CM_POLS", recursive1CmPols, "");
@@ -543,22 +543,22 @@ void Config::print(void)
     zklog.info("    zkevmVerifier=" + zkevmVerifier);
     zklog.info("    zkevmVerkey=" + zkevmVerkey);
     zklog.info("    c12aVerkey=" + c12aVerkey);
-    zklog.info("    recursive1Verifier=" + recursive1Verifier);
+    zklog.info("    recursive1Circuit=" + recursive1Circuit);
     zklog.info("    recursive1Verkey=" + recursive1Verkey);
-    zklog.info("    recursive2Verifier=" + recursive2Verifier);
+    zklog.info("    recursive2Circuit=" + recursive2Circuit);
     zklog.info("    recursive2Verkey=" + recursive2Verkey);
     zklog.info("    blobInnerVerifier=" + blobInnerVerifier);
     zklog.info("    blobInnerVerkey=" + blobInnerVerkey);
     zklog.info("    blobInnerCompressorVerkey=" + blobInnerCompressorVerkey);
-    zklog.info("    blobInnerRecursive1Verifier=" + blobInnerRecursive1Verifier);
+    zklog.info("    blobInnerRecursive1Circuit=" + blobInnerRecursive1Circuit);
     zklog.info("    blobInnerRecursive1Verkey=" + blobInnerRecursive1Verkey);
-    zklog.info("    blobOuterVerifier=" + blobOuterVerifier);
+    zklog.info("    blobOuterCircuit=" + blobOuterCircuit);
     zklog.info("    blobOuterVerkey=" + blobOuterVerkey);
-    zklog.info("    blobOuterRecursive2Verifier=" + blobOuterRecursive2Verifier);
+    zklog.info("    blobOuterRecursive2Circuit=" + blobOuterRecursive2Circuit);
     zklog.info("    blobOuterRecursive2Verkey=" + blobOuterRecursive2Verkey);
-    zklog.info("    recursivefVerifier=" + recursivefVerifier);
+    zklog.info("    recursivefCircuit=" + recursivefCircuit);
     zklog.info("    recursivefVerkey=" + recursivefVerkey);
-    zklog.info("    finalVerifier=" + finalVerifier);
+    zklog.info("    finalCircuit=" + finalCircuit);
     zklog.info("    finalVerkey=" + finalVerkey);
     zklog.info("    finalStarkZkey=" + finalStarkZkey);
     zklog.info("    zkevmCHelpers=" + zkevmCHelpers);
@@ -754,9 +754,9 @@ bool Config::check (void)
             zklog.error("required file config.c12aVerkey=" + c12aVerkey + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive1Verifier))
+        if (!fileExists(recursive1Circuit))
         {
-            zklog.error("required file config.recursive1Verifier=" + recursive1Verifier + " does not exist");
+            zklog.error("required file config.recursive1Circuit=" + recursive1Circuit + " does not exist");
             bError = true;
         }
         if (!fileExists(recursive1Verkey))
@@ -764,9 +764,9 @@ bool Config::check (void)
             zklog.error("required file config.recursive1Verkey=" + recursive1Verkey + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive2Verifier))
+        if (!fileExists(recursive2Circuit))
         {
-            zklog.error("required file config.recursive2Verifier=" + recursive2Verifier + " does not exist");
+            zklog.error("required file config.recursive2Circuit=" + recursive2Circuit + " does not exist");
             bError = true;
         }
         if (!fileExists(recursive2Verkey))
@@ -774,9 +774,9 @@ bool Config::check (void)
             zklog.error("required file config.recursive2Verkey=" + recursive2Verkey + " does not exist");
             bError = true;
         }
-        if (!fileExists(finalVerifier))
+        if (!fileExists(finalCircuit))
         {
-            zklog.error("required file config.finalVerifier=" + finalVerifier + " does not exist");
+            zklog.error("required file config.finalCircuit=" + finalCircuit + " does not exist");
             bError = true;
         }
         
@@ -795,9 +795,9 @@ bool Config::check (void)
             zklog.error("required file config.blobInnerCompressorVerkey=" + blobInnerCompressorVerkey + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerRecursive1Verifier))
+        if (!fileExists(blobInnerRecursive1Circuit))
         {
-            zklog.error("required file config.blobInnerRecursive1Verifier=" + blobInnerRecursive1Verifier + " does not exist");
+            zklog.error("required file config.blobInnerRecursive1Circuit=" + blobInnerRecursive1Circuit + " does not exist");
             bError = true;
         }
         if (!fileExists(blobInnerRecursive1Verkey))
@@ -805,9 +805,9 @@ bool Config::check (void)
             zklog.error("required file config.blobInnerRecursive1Verkey=" + blobInnerRecursive1Verkey + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobOuterVerifier))
+        if (!fileExists(blobOuterCircuit))
         {
-            zklog.error("required file config.blobOuterVerifier=" + blobOuterVerifier + " does not exist");
+            zklog.error("required file config.blobOuterCircuit=" + blobOuterCircuit + " does not exist");
             bError = true;
         }
         if (!fileExists(blobOuterVerkey))
@@ -815,9 +815,9 @@ bool Config::check (void)
             zklog.error("required file config.blobOuterVerkey=" + blobOuterVerkey + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobOuterRecursive2Verifier))
+        if (!fileExists(blobOuterRecursive2Circuit))
         {
-            zklog.error("required file config.blobOuterRecursive2Verifier=" + blobOuterRecursive2Verifier + " does not exist");
+            zklog.error("required file config.blobOuterRecursive2Circuit=" + blobOuterRecursive2Circuit + " does not exist");
             bError = true;
         }
         if (!fileExists(blobOuterRecursive2Verkey))
@@ -825,9 +825,9 @@ bool Config::check (void)
             zklog.error("required file config.blobOuterRecursive2Verkey=" + blobOuterRecursive2Verkey + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursivefVerifier))
+        if (!fileExists(recursivefCircuit))
         {
-            zklog.error("required file config.recursivefVerifier=" + recursivefVerifier + " does not exist");
+            zklog.error("required file config.recursivefCircuit=" + recursivefCircuit + " does not exist");
             bError = true;
         }
         if (!fileExists(recursivefVerkey))

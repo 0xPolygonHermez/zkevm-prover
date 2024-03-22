@@ -134,46 +134,46 @@ public:
     string c12aConstPols;
     string recursive1ConstPols;
     string recursive2ConstPols;
-    string recursivefConstPols;
     string blobInnerConstPols;
     string blobInnerCompressorConstPols;
     string blobInnerRecursive1ConstPols;
     string blobOuterConstPols;
     string blobOuterRecursive2ConstPols;
+    string recursivefConstPols;
     bool mapConstPolsFile;
 
     string zkevmConstantsTree;
     string c12aConstantsTree;
     string recursive1ConstantsTree;
     string recursive2ConstantsTree;
-    string recursivefConstantsTree;
     string blobInnerConstantsTree;
     string blobInnerCompressorConstantsTree;
     string blobInnerRecursive1ConstantsTree;
     string blobOuterConstantsTree;
     string blobOuterRecursive2ConstantsTree;
+    string recursivefConstantsTree;
     bool mapConstantsTreeFile;
     
     string zkevmVerifier;
-    string recursive1Verifier;
-    string recursive2Verifier;
-    string recursivefVerifier;
+    string recursive1Circuit;
+    string recursive2Circuit;
     string blobInnerVerifier;
-    string blobInnerRecursive1Verifier;
-    string blobOuterVerifier;
-    string blobOuterRecursive2Verifier;
-    string finalVerifier;
+    string blobInnerRecursive1Circuit;
+    string blobOuterCircuit;
+    string blobOuterRecursive2Circuit;
+    string recursivefCircuit;
+    string finalCircuit;
 
     string zkevmVerkey;
     string c12aVerkey;
     string recursive1Verkey;
     string recursive2Verkey;
-    string recursivefVerkey;
     string blobInnerVerkey;
     string blobInnerCompressorVerkey;
     string blobInnerRecursive1Verkey;
     string blobOuterVerkey;
     string blobOuterRecursive2Verkey;
+    string recursivefVerkey;
     string finalVerkey;
     
     string c12aExec;

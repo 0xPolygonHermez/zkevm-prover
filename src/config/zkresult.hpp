@@ -113,6 +113,7 @@ typedef enum : int
     
     ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR = 99, // Invalid TX status-error combination
 
+    ZKR_BLOB_OUTER_PROOF_INVALID_INPUT = 100, // Invalid Blob outer proof input
 } zkresult;
 
 string zkresult2string (int code);

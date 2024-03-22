@@ -333,10 +333,10 @@ public:
                     break;
             }
                 case 25: {
-                    // COPY tmp3 to f
-                    Goldilocks3::copy_avx(tmp3_, tmp3[args[i_args]]);
+                    // OPERATION WITH DEST: f - SRC0: tmp3 - SRC1: tmp3
+                    Goldilocks3::op_avx(args[i_args], tmp3_, tmp3[args[i_args + 1]], tmp3[args[i_args + 2]]);
                     Goldilocks3::store_avx(&params.f_2ns[i*3], uint64_t(3), tmp3_);
-                    i_args += 1;
+                    i_args += 3;
                     break;
             }
                 case 26: {

@@ -111,65 +111,63 @@ The configuration parameters can be of different uses:
 |`c12aCmPols`|test|string|Saves C12A commit polynomials into file|""|C12A_CM_POLS|
 |`c12aConstPols`|production|string|C12A constant polynomials file|config + "/c12a/c12a.const"|C12A_CONST_POLS|
 |`c12aConstantsTree`|production|string|C12A constant tree polynomials file|config + "/c12a/c12a.consttree"|C12A_CONSTANTS_TREE|
-|`c12aVerifier`| production | string | C12A verifier data file | config +  "/c12z/c12a.verifier.dat"|C12A_VERIFIER|
 |`c12aVerkey`|production|string|C12A verification key file|config + "/c12a/c12a.verkey.json"|C12A_VERKEY|
 |`c12aExec`|production|string|C12A exec file|config + "/c12a/c12a.exec"|C12A_EXEC|
 |`c12aStarkInfo`|production|string|C12A STARK info file|config + "/c12a/c12a.starkinfo.json"|C12A_STARK_INFO|
 |`recursive1CmPols`|test|string|Saves recursive 1 commit polynomials into file|""|RECURSIVE1_CM_POLS|
 |`recursive1ConstPols`|production|string|Recursive 1 constant polynomials file|config + "/recursive1/recursive1.const"|RECURSIVE1_CONST_POLS|
 |`recursive1ConstantsTree`|production|string|Recursive 1 contant polynomials tree file|config + "/recursive1/recursive1.consttree"|
-|`recursive1Verifier`|production|string|Recursive 1 verifier data file|config + "/recursive1/recursive1.verifier.dat"|RECURSIVE1_VERIFIER|
+|`recursive1Circuit`|production|string|Recursive 1 circuit data file|config + "/recursive1/recursive1.dat"|RECURSIVE1_CIRCUIT|
 |`recursive1Verkey`|production|string|Recursive 1 verification key file|config + "/recursive1/recursive1.verkey.json"|RECURSIVE1_VERKEY|
 |`recursive1Exec`|production|string|Recursive 1 exec file|config + "/recursive1/recursive1.exec"|RECURSIVE1_EXEC|
 |`recursive1StarkInfo`|production|string|Recursive 1 STARK info file|config + "/recursive1/recursive1.starkinfo.json"|RECURSIVE1_STARK_INFO|
 |`recursive2CmPols`|test|string|Saves recursive 2 commit polynomials into file|""|RECURSIVE2_CM_POLS|
 |`recursive2ConstPols`|production|string|Recursive 2 constant polynomials file|config + "/recursive2/recursive2.const"|RECURSIVE2_CONST_POLS|
 |`recursive2ConstantsTree`|production|string|Recursive 2 contant polynomials tree file|config + "/recursive2/recursive2.consttree"|
-|`recursive2Verifier`|production|string|Recursive 2 verifier data file|config + "/recursive2/recursive2.verifier.dat"|RECURSIVE2_VERIFIER|
+|`recursive2Circuit`|production|string|Recursive 2 circuit data file|config + "/recursive2/recursive2.dat"|RECURSIVE2_CIRCUIT|
 |`recursive2Verkey`|production|string|Recursive 2 verification key file|config + "/recursive2/recursive2.verkey.json"|RECURSIVE2_VERKEY|
 |`recursive2Exec`|production|string|Recursive 2 exec file|config + "/recursive2/recursive2.exec"|RECURSIVE2_EXEC|
 |`recursive2StarkInfo`|production|string|Recursive 2 STARK info file|config + "/recursive2/recursive2.starkinfo.json"|RECURSIVE2_STARK_INFO|
 |`blobInnerCmPols`|test|string|Saves commit polynomials into file|""|BLOB_INNER_CM_POLS|
-|`blobInnerConstPols`|production|string|Saves constant polynomials into file|config + "/blobinner/blobinner.const"|BLOB_INNER_CONST_POLS|
-|`blobInnerConstantsTree`|production|string|Constant polynomials tree file|config + "/blobinner/blobinner.consttree"|BLOB_INNER_CONSTANTS_TREE|
-|`blobInnerVerifier`|production|string|BLOB_INNER verifier data file|config + "/blobinner/blobinner.verifier.dat"|BLOB_INNER_VERIFIER|
-|`blobInnerVerkey`|production|string|BLOB_INNER verification key file|config + "/blobinner/blobinner.verkey.json"|BLOB_INNER_VERKEY|
-|`blobInnerStarkInfo`|production|string|BLOB_INNER STARK info file|config + "/blobinner/blobinner.starkinfo.json"|BLOB_INNER_STARK_INFO|
-|`blobInnerC12ACmPols`|test|string|Saves commit polynomials into file|""|BLOB_INNER_C12A_CM_POLS|
-|`blobInnerC12AConstPols`|production|string|Saves constant polynomials into file|config + "/blobinner_c12a/blobinner_c12a.const"|BLOB_INNER_C12A_CONST_POLS|
-|`blobInnerC12AConstantsTree`|production|string|Constant polynomials tree file|config + "/blobinner_c12a/blobinner_c12a.consttree"|BLOB_INNER_C12A_CONSTANTS_TREE|
-|`blobInnerC12AVerifier`|production|string|BLOB_INNER_C12A verifier data file|config + "/blobinner_c12a/blobinner_c12a.verifier.dat"|BLOB_INNER_C12A_VERIFIER|
-|`blobInnerC12AVerkey`|production|string|BLOB_INNER_C12A verification key file|config + "/blobinner_c12a/blobinner_c12a.verkey.json"|BLOB_INNER_C12A_VERKEY|
-|`blobInnerC12AExec`|production|string|BLOB_INNER_C12A exec file|config + "/blobinner_c12a/blobinner_c12a.exec"|BLOB_INNER_C12A_EXEC|
-|`blobInnerC12AStarkInfo`|production|string|BLOB_INNER_C12A STARK info file|config + "/blobinner_c12a/blobinner_c12a.starkinfo.json"|BLOB_INNER_C12A_STARK_INFO|
+|`blobInnerConstPols`|production|string|Saves constant polynomials into file|config + "/blob_inner/blob_inner.const"|BLOB_INNER_CONST_POLS|
+|`blobInnerConstantsTree`|production|string|Constant polynomials tree file|config + "/blob_inner/blob_inner.consttree"|BLOB_INNER_CONSTANTS_TREE|
+|`blobInnerVerifier`|production|string|BLOB_INNER verifier data file|config + "/blob_inner/blob_inner.verifier.dat"|BLOB_INNER_VERIFIER|
+|`blobInnerVerkey`|production|string|BLOB_INNER verification key file|config + "/blob_inner/blob_inner.verkey.json"|BLOB_INNER_VERKEY|
+|`blobInnerStarkInfo`|production|string|BLOB_INNER STARK info file|config + "/blob_inner/blob_inner.starkinfo.json"|BLOB_INNER_STARK_INFO|
+|`blobInnerCompressorCmPols`|test|string|Saves commit polynomials into file|""|BLOB_INNER_COMPRESSOR_CM_POLS|
+|`blobInnerCompressorConstPols`|production|string|Saves constant polynomials into file|config + "/blob_inner_compressor/blob_inner_compressor.const"|BLOB_INNER_COMPRESSOR_CONST_POLS|
+|`blobInnerCompressorConstantsTree`|production|string|Constant polynomials tree file|config + "/blob_inner_compressor/blob_inner_compressor.consttree"|BLOB_INNER_COMPRESSOR_CONSTANTS_TREE|
+|`blobInnerCompressorVerkey`|production|string|BLOB_INNER_COMPRESSOR verification key file|config + "/blob_inner_compressor/blob_inner_compressor.verkey.json"|BLOB_INNER_COMPRESSOR_VERKEY|
+|`blobInnerCompressorExec`|production|string|BLOB_INNER_COMPRESSOR exec file|config + "/blob_inner_compressor/blob_inner_compressor.exec"|BLOB_INNER_COMPRESSOR_EXEC|
+|`blobInnerCompressorStarkInfo`|production|string|BLOB_INNER_COMPRESSOR STARK info file|config + "/blob_inner_compressor/blob_inner_compressor.starkinfo.json"|BLOB_INNER_COMPRESSOR_STARK_INFO|
 |`blobInnerRecursive1CmPols`|test|string|Saves commit polynomials into file|""|BLOB_INNER_RECURSIVE1_CM_POLS|
-|`blobInnerRecursive1ConstPols`|production|string|Saves constant polynomials into file|config + "/blobinner_recursive1/blobinner_recursive1.const"|BLOB_INNER_RECURSIVE1_CONST_POLS|
-|`blobInnerRecursive1ConstantsTree`|production|string|Constant polynomials tree file|config + "/blobinner_recursive1/blobinner_recursive1.consttree"|BLOB_INNER_RECURSIVE1_CONSTANTS_TREE|
-|`blobInnerRecursive1Verifier`|production|string|BLOB_INNER_RECURSIVE1 verifier data file|config + "/blobinner_recursive1/blobinner_recursive1.verifier.dat"|BLOB_INNER_RECURSIVE1_VERIFIER|
-|`blobInnerRecursive1Verkey`|production|string|BLOB_INNER_RECURSIVE1 verification key file|config + "/blobinner_recursive1/blobinner_recursive1.verkey.json"|BLOB_INNER_RECURSIVE1_VERKEY|
-|`blobInnerRecursive1Exec`|production|string|BLOB_INNER_RECURSIVE1 exec file|config + "/blobinner_recursive1/blobinner_recursive1.exec"|BLOB_INNER_RECURSIVE1_EXEC|
-|`blobInnerRecursive1StarkInfo`|production|string|BLOB_INNER_RECURSIVE1 stark info file|config + "/blobinner_recursive1/blobinner_recursive1.starkinfo.json"|BLOB_INNER_RECURSIVE1_STARK_INFO|
+|`blobInnerRecursive1ConstPols`|production|string|Saves constant polynomials into file|config + "/blob_inner_recursive1/blob_inner_recursive1.const"|BLOB_INNER_RECURSIVE1_CONST_POLS|
+|`blobInnerRecursive1ConstantsTree`|production|string|Constant polynomials tree file|config + "/blob_inner_recursive1/blob_inner_recursive1.consttree"|BLOB_INNER_RECURSIVE1_CONSTANTS_TREE|
+|`blobInnerRecursive1Circuit`|production|string|BLOB_INNER_RECURSIVE1 circuit data file|config + "/blob_inner_recursive1/blob_inner_recursive1.dat"|BLOB_INNER_RECURSIVE1_CIRCUIT|
+|`blobInnerRecursive1Verkey`|production|string|BLOB_INNER_RECURSIVE1 verification key file|config + "/blob_inner_recursive1/blob_inner_recursive1.verkey.json"|BLOB_INNER_RECURSIVE1_VERKEY|
+|`blobInnerRecursive1Exec`|production|string|BLOB_INNER_RECURSIVE1 exec file|config + "/blob_inner_recursive1/blob_inner_recursive1.exec"|BLOB_INNER_RECURSIVE1_EXEC|
+|`blobInnerRecursive1StarkInfo`|production|string|BLOB_INNER_RECURSIVE1 stark info file|config + "/blob_inner_recursive1/blob_inner_recursive1.starkinfo.json"|BLOB_INNER_RECURSIVE1_STARK_INFO|
 |`blobOuterCmPols`|test|string|Saves commit polynomials into file|""|BLOB_OUTER_CM_POLS|
-|`blobOuterConstPols`|production|string|Saves constant polynomials into file|config + "/blobouter/blobouter.const"|BLOB_OUTER_CONST_POLS|
-|`blobOuterConstantsTree`|production|string|Constant polynomials tree file|config + "/blobouter/blobouter.consttree"|BLOB_OUTER_CONSTANTS_TREE|
-|`blobOuterVerifier`|production|string|BLOB_OUTER verifier data file|config + "/blobouter/blobouter.verifier.dat"|BLOB_OUTER_VERIFIER|
-|`blobOuterVerkey`|production|string|BLOB_OUTER verification key file|config + "/blobouter/blobouter.verkey.json"|BLOB_OUTER_VERKEY|
-|`blobOuterExec`|production|string|BLOB_OUTER exec file|config + "/blobouter/blobouter.exec"|BLOB_OUTER_EXEC|
-|`blobOuterStarkInfo`|production|string|BLOB_OUTER STARK info file|config + "/blobouter/blobouter.starkinfo.json"|BLOB_OUTER_STARK_INFO|
+|`blobOuterConstPols`|production|string|Saves constant polynomials into file|config + "/blob_outer/blob_outer.const"|BLOB_OUTER_CONST_POLS|
+|`blobOuterConstantsTree`|production|string|Constant polynomials tree file|config + "/blob_outer/blob_outer.consttree"|BLOB_OUTER_CONSTANTS_TREE|
+|`blobOuterCircuit`|production|string|BLOB_OUTER circuit data file|config + "/blob_outer/blob_outer.dat"|BLOB_OUTER_CIRCUIT|
+|`blobOuterVerkey`|production|string|BLOB_OUTER verification key file|config + "/blob_outer/blob_outer.verkey.json"|BLOB_OUTER_VERKEY|
+|`blobOuterExec`|production|string|BLOB_OUTER exec file|config + "/blob_outer/blob_outer.exec"|BLOB_OUTER_EXEC|
+|`blobOuterStarkInfo`|production|string|BLOB_OUTER STARK info file|config + "/blob_outer/blob_outer.starkinfo.json"|BLOB_OUTER_STARK_INFO|
 |`blobOuterRecursive2CmPols`|test|string|Saves commit polynomials into file|""|BLOB_OUTER_RECURSIVE2_CM_POLS|
-|`blobOuterRecursive2ConstPols`|production|string|Saves constant polynomials into file|config + "/blobouter_recursive2/blobouter_recursive2.const"|BLOB_OUTER_RECURSIVE2_CONST_POLS|
-|`blobOuterRecursive2ConstantsTree`|production|string|Constant polynomials tree file|config + "/blobouter_recursive2/blobouter_recursive2.consttree"|BLOB_OUTER_RECURSIVE2_CONSTANTS_TREE|
-|`blobOuterRecursive2Verifier`|production|string|BLOB_OUTER_RECURSIVE2 verifier data file|config + "/blobouter_recursive2/blobouter_recursive2.verifier.dat"|BLOB_OUTER_RECURSIVE2_VERIFIER|
-|`blobOuterRecursive2Verkey`|production|string|BLOB_OUTER_RECURSIVE2 verification key file|config + "/blobouter_recursive2/blobouter_recursive2.verkey.json"|BLOB_OUTER_RECURSIVE2_VERKEY|
-|`blobOuterRecursive2Exec`|production|string|BLOB_OUTER_RECURSIVE2 exec file|config + "/blobouter_recursive2/blobouter_recursive2.exec"|BLOB_OUTER_RECURSIVE2_EXEC|
-|`blobOuterRecursive2StarkInfo`|production|string|BLOB_OUTER_RECURSIVE2 STARK info file|config + "/blobouter_recursive2/blobouter_recursive2.starkinfo.json"|BLOB_OUTER_RECURSIVE2_STARK_INFO|
+|`blobOuterRecursive2ConstPols`|production|string|Saves constant polynomials into file|config + "/blob_outer_recursive2/blob_outer_recursive2.const"|BLOB_OUTER_RECURSIVE2_CONST_POLS|
+|`blobOuterRecursive2ConstantsTree`|production|string|Constant polynomials tree file|config + "/blob_outer_recursive2/blob_outer_recursive2.consttree"|BLOB_OUTER_RECURSIVE2_CONSTANTS_TREE|
+|`blobOuterRecursive2Circuit`|production|string|BLOB_OUTER_RECURSIVE_2 circuit data file|config + "/blob_outer_recursive2/blob_outer_recursive2.dat"|BLOB_OUTER_RECURSIVE2_CIRCUIT|
+|`blobOuterRecursive2Verkey`|production|string|BLOB_OUTER_RECURSIVE2 verification key file|config + "/blob_outer_recursive2/blob_outer_recursive2.verkey.json"|BLOB_OUTER_RECURSIVE2_VERKEY|
+|`blobOuterRecursive2Exec`|production|string|BLOB_OUTER_RECURSIVE2 exec file|config + "/blob_outer_recursive2/blob_outer_recursive2.exec"|BLOB_OUTER_RECURSIVE2_EXEC|
+|`blobOuterRecursive2StarkInfo`|production|string|BLOB_OUTER_RECURSIVE2 STARK info file|config + "/blob_outer_recursive2/blob_outer_recursive2.starkinfo.json"|BLOB_OUTER_RECURSIVE2_STARK_INFO|
 |`recursivefConstPols`|production|string|Recursive final constant polynomials file|config + "/recursivef/recursivef.const"|RECURSIVEF_CONST_POLS|
-|`recursivefVerifier`|production|string|Recursive final verifier data file|config + "/recursivef/recursivef.verifier.dat"|RECURSIVEF_VERIFIER|
+|`recursivefCircuit`|production|string|Recursive final circuit data file|config + "/recursivef/recursivef.dat"|RECURSIVEF_CIRCUIT|
 |`mapConstantsTreeFile`|test|boolean|Maps constant polynomials tree file to memory|false|MAP_CONSTANTS_TREE_FILE|
 |`recursivefStarkInfo`|production|string|Recursive final STARK info file|config + "/recursivef/recursivef.starkinfo.json"|RECURSIVEF_STARK_INFO|
 |`finalVerkey`|production|string|Final verification key file|config + "/final/final.fflonk.verkey.json"|FINAL_VERKEY|
 |`recursivefVerkey`|production|string|Recursive F verification key file|config + "/recursivef/recursivef.verkey.json"|RECURSIVEF_VERKEY|
-|`finalVerifier`|production|string|Final verifier data file|config + "/final/final.verifier.dat"|FINAL_VERIFIER|
+|`finalCircuit`|production|string|Final circuit data file|config + "/final/final.dat"|FINAL_CIRCUIT|
 |`recursivefExec`|production|string|Recursive final exec file|config + "/recursivef/recursivef.exec"|RECURSIVEF_EXEC|
 |`finalStarkZkey`|production|string|Final STARK zkey file|config + "/final/final.fflonk.zkey"|FINAL_STARK_ZKEY|
 |`publicsOutput`|production|string|Public data output file|"public.json"|PUBLICS_OUTPUT|

@@ -316,15 +316,15 @@ namespace CircomRecursiveF
     inStream.close();
     loadJsonImpl(ctx, j);
   }
-  void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin, uint64_t N, uint64_t nCols)
+  void getCommitedPols(CommitPolsStarks *commitPols, const std::string recursivefCircuit, const std::string execFile, nlohmann::json &zkin, uint64_t N, uint64_t nCols)
   {
     //-------------------------------------------
     // Verifier stark proof
     //-------------------------------------------
-    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_F);
-    Circom_Circuit *circuit = loadCircuit(zkevmVerifier);
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_F);
-    TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF);
+    TimerStart(CIRCOM_LOAD_CIRCUIT_RECURSIVE_F_PROOF);
+    Circom_Circuit *circuit = loadCircuit(recursivefCircuit);
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_RECURSIVE_F_PROOF);
+    TimerStart(CIRCOM_LOAD_JSON_RECURSIVE_F_PROOF);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
 
     loadJsonImpl(ctx, zkin);
@@ -333,11 +333,11 @@ namespace CircomRecursiveF
       zklog.error("Prover::genBatchProof() Not all inputs have been set. Only " + to_string(get_main_input_signal_no() - ctx->getRemaingInputsToBeSet()) + " out of " + to_string(get_main_input_signal_no()));
       exitProcess();
     }
-    TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF);
+    TimerStopAndLog(CIRCOM_LOAD_JSON_RECURSIVE_F_PROOF);
     //-------------------------------------------
     // Compute witness and commited pols
     //-------------------------------------------
-    TimerStart(STARK_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
+    TimerStart(STARK_WITNESS_AND_COMMITED_POLS_RECURSIVE_F_PROOF);
 
     ExecFile exec(execFile, nCols);
     uint64_t sizeWitness = get_size_of_witness();
@@ -393,7 +393,7 @@ namespace CircomRecursiveF
     }
     delete[] tmp;
     freeCircuit(circuit);
-    TimerStopAndLog(STARK_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
+    TimerStopAndLog(STARK_WITNESS_AND_COMMITED_POLS_RECURSIVE_F_PROOF);
   }
 
 }
