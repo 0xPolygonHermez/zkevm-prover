@@ -62,14 +62,8 @@ SRCS_TEST := $(shell find ./test/examples/ ./src/XKCP ./src/goldilocks/src ./src
 OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
 DEPS_TEST := $(OBJS_TEST:.o=.d)
 
-SRCS_SETUP := $(shell find $(SETUP_DIRS) ! -path "./src/sm/*" ! -path "./src/main_sm/*" -name *.cpp)
-SRCS_SETUP += $(shell find src/XKCP -name *.cpp)
-SRCS_SETUP += $(shell find src/fflonk_setup -name fflonk_setup.cpp)
-SRCS_SETUP += $(addprefix $(SETUP_DPNDS_DIR)/, alt_bn128.cpp fr.cpp fq.cpp fnec.cpp fec.cpp misc.cpp naf.cpp splitparstr.cpp)
-SRCS_SETUP += $(shell find $(SETUP_DPNDS_DIR) -name *.asm)
-OBJS_SETUP := $(patsubst %,$(BUILD_DIR)/%.o,$(SRCS_SETUP))
-OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
-OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main_test.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
+SRCS_SETUP := $(shell find ./src/fflonk_setup ./src/rapidsnark ./src/ffiasm ./src/XKCP -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS_SETUP := $(SRCS_SETUP:%=$(BUILD_DIR)/%.o)
 DEPS_SETUP := $(OBJS_SETUP:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)

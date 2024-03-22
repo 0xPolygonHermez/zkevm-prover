@@ -1568,7 +1568,6 @@ void Prover::genFinalProof (ProverRequest *pProverRequest)
         RecursiveFSteps recursiveFChelpersSteps;
         starksRecursiveF->genProof(fproofRecursiveF, publics, &recursiveFChelpersSteps);
     }
-    starksRecursiveF->genProof(fproofRecursiveF, publics);
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
