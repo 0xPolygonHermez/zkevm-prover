@@ -895,102 +895,102 @@ bool Config::check (void)
             zklog.error("required file config.recursivefStarkInfo=" + recursivefStarkInfo + " does not exist");
             bError = true;
         }
-        if (!fileExists(zkevmCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(zkevmCHelpers))
         {
             zklog.error("required file config.zkevmCHelpers=" + zkevmCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(c12aCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(c12aCHelpers))
         {
             zklog.error("required file config.c12aCHelpers=" + c12aCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive1CHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(recursive1CHelpers))
         {
             zklog.error("required file config.recursive1CHelpers=" + recursive1CHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive2CHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(recursive2CHelpers))
         {
             zklog.error("required file config.recursive2CHelpers=" + recursive2CHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursivefCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(recursivefCHelpers))
         {
             zklog.error("required file config.recursivefCHelpers=" + recursivefCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobInnerCHelpers))
         {
             zklog.error("required file config.blobInnerCHelpers=" + blobInnerCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerCompressorCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobInnerCompressorCHelpers))
         {
             zklog.error("required file config.blobInnerCompressorCHelpers=" + blobInnerCompressorCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerRecursive1CHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobInnerRecursive1CHelpers))
         {
             zklog.error("required file config.blobInnerRecursive1CHelpers=" + blobInnerRecursive1CHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobOuterCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobOuterCHelpers))
         {
             zklog.error("required file config.blobOuterCHelpers=" + blobOuterCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobOuterRecursive2CHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobOuterRecursive2CHelpers))
         {
             zklog.error("required file config.blobOuterRecursive2CHelpers=" + blobOuterRecursive2CHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(zkevmGenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(zkevmGenericCHelpers))
         {
             zklog.error("required file config.zkevmGenericCHelpers=" + zkevmGenericCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(c12aGenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(c12aGenericCHelpers))
         {
             zklog.error("required file config.c12aGenericCHelpers=" + c12aGenericCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive1GenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(recursive1GenericCHelpers))
         {
             zklog.error("required file config.recursive1GenericCHelpers=" + recursive1GenericCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive2GenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(recursive2GenericCHelpers))
         {
             zklog.error("required file config.recursive2GenericCHelpers=" + recursive2GenericCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursivefGenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(recursivefGenericCHelpers))
         {
             zklog.error("required file config.recursivefGenericCHelpers=" + recursivefGenericCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerGenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(blobInnerGenericCHelpers))
         {
             zklog.error("required file config.blobInnerGenericCHelpers=" + blobInnerGenericCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerCompressorGenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(blobInnerCompressorGenericCHelpers))
         {
             zklog.error("required file config.blobInnerCompressorGenericCHelpers=" + blobInnerCompressorGenericCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerRecursive1GenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(blobInnerRecursive1GenericCHelpers))
         {
             zklog.error("required file config.blobInnerRecursive1GenericCHelpers=" + blobInnerRecursive1GenericCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobOuterGenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(blobOuterGenericCHelpers))
         {
             zklog.error("required file config.blobOuterGenericCHelpers=" + blobOuterGenericCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobOuterRecursive2GenericCHelpers))
+        if (USE_GENERIC_PARSER && !fileExists(blobOuterRecursive2GenericCHelpers))
         {
             zklog.error("required file config.blobOuterRecursive2GenericCHelpers=" + blobOuterRecursive2GenericCHelpers + " does not exist");
             bError = true;

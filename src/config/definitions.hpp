@@ -77,6 +77,6 @@
 
 //#define MULTI_ROM_TEST
 
-#define USE_GENERIC_PARSER true
+#define USE_GENERIC_PARSER false
 
 #endif
