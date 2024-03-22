@@ -39,55 +39,73 @@ using grpc::Status;
     //aggregate batches 01
     const string inputBatchFile01a = outputBatchFile0;
     const string inputBatchFile01b = outputBatchFile1;
-    const string outputBatchFile01 = "testvectors/blobOuterProof/recursive2.zkin.proof_01.json";
+    const string outputBatchFile01 = "testvectors/aggregatedBatchProof/recursive2.zkin.proof_01.json";
 
     //batch2
     const string inputBatchFile2  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_2.json";
     const string outputBatchFile2 = "testvectors/aggregatedBatchProof/recursive1.zkin.proof_2.json";
     
+    //aggregate batches 02
+    const string inputBatchFile02a = outputBatchFile01;
+    const string inputBatchFile02b = outputBatchFile2;
+    const string outputBatchFile02 = "testvectors/blobOuterProof/recursive2.zkin.proof_02.json";
+
+    //blob inner for batches 02
+    const string inputBlobInnerFile02  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_blob_inner_executor_02.json";
+    const string outputBlobInnerFile02 = "testvectors/blobOuterProof/blob_inner_recursive1.zkin.proof_02.json";
+
+    //blob outer for batches 02
+    const string inputBlobOuterFile02a  = outputBatchFile02;
+    const string inputBlobOuterFile02b  = outputBlobInnerFile02;
+    const string outputBlobOuterFile02  = "testvectors/aggregatedBlobOuterProof/blob_outer.zkin.proof_02.json"; 
+
     //batch3
     const string inputBatchFile3  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_3.json";
-    const string outputBatchFile3 = "testvectors/aggregatedBatchProof/recursive1.zkin.proof_3.json";
+    const string outputBatchFile3 = "testvectors/blobOuterProof/recursive1.zkin.proof_3.json";
 
-    //aggregate batches 23
-    const string inputBatchFile23a = outputBatchFile2;
-    const string inputBatchFile23b = outputBatchFile3;
-    const string outputBatchFile23 = "testvectors/blobOuterProof/recursive2.zkin.proof_23.json";
+    //blob inner for batches 33
+    const string inputBlobInnerFile33  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_blob_inner_executor_33.json";
+    const string outputBlobInnerFile33 = "testvectors/blobOuterProof/blob_inner_recursive1.zkin.proof_33.json";
 
-    //aggregate batches 03
-    const string inputBatchFile03a = outputBatchFile01;
-    const string inputBatchFile03b = outputBatchFile23;
-    const string outputBatchFile03 = "testvectors/blobOuterProof/recursive2.zkin.proof_03.json";
-
-    //blob inner for batches 03
-    const string inputBlobInnerFile03  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_blob_inner_03.json";
-    const string outputBlobInnerFile03 = "testvectors/blobOuterProof/blob_inner_recursive1.zkin.proof_03.json";
-
-    //blob outer for batches 03
-    const string inputBlobOuterFile03a  = outputBatchFile03;
-    const string inputBlobOuterFile03b  = outputBlobInnerFile03;
-    const string outputBlobOuterFile03  = "testvectors/aggregatedBlobOuterProof/blob_outer.zkin.proof_01.json"; 
+    //blob outer for batches 33
+    const string inputBlobOuterFile33a  = outputBatchFile3;
+    const string inputBlobOuterFile33b  = outputBlobInnerFile33;
+    const string outputBlobOuterFile33  = "testvectors/aggregatedBlobOuterProof/blob_outer.zkin.proof_33.json"; 
 
     //batch4
     const string inputBatchFile4  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_4.json";
     const string outputBatchFile4 = "testvectors/aggregatedBatchProof/recursive1.zkin.proof_4.json";
 
-    //blob inner 44
-    const string inputBlobInnerFile44  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_blob_inner_44.json";
-    const string outputBlobInnerFile44 = "testvectors/blobOuterProof/blob_inner_recursive1.zkin.proof_44.json";
+    //batch5
+    const string inputBatchFile5  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_5.json";
+    const string outputBatchFile5 = "testvectors/aggregatedBatchProof/recursive1.zkin.proof_5.json";
 
-    //blob outer for batches 44
-    const string inputBlobOuterFile44a  = outputBatchFile4;
-    const string inputBlobOuterFile44b  = outputBlobInnerFile44;
-    const string outputBlobOuterFile44  = "testvectors/aggregatedBlobOuterProof/blob_outer.zkin.proof_44.json"; 
+    //aggregate batches 45
+    const string inputBatchFile45a = outputBatchFile4;
+    const string inputBatchFile45b = outputBatchFile5;
+    const string outputBatchFile45 = "testvectors/blobOuterProof/recursive2.zkin.proof_45.json";
 
-    //aggregate blob outer 03 and blob outer 44
-    const string inputBlobOuterFile04a  = outputBlobOuterFile03;
-    const string inputBlobOuterFile04b  = outputBlobOuterFile44;
-    const string outputBlobOuterFile04  = "testvectors/finalProof/blob_outer_recursive2.zkin.proof_04.json";
+    //blob inner 45
+    const string inputBlobInnerFile45  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_blob_inner_executor_45.json";
+    const string outputBlobInnerFile45 = "testvectors/blobOuterProof/blob_inner_recursive1.zkin.proof_45.json";
+
+    //blob outer for batches 45
+    const string inputBlobOuterFile45a  = outputBatchFile45;
+    const string inputBlobOuterFile45b  = outputBlobInnerFile45;
+    const string outputBlobOuterFile45  = "testvectors/aggregatedBlobOuterProof/blob_outer.zkin.proof_45.json"; 
+
+    //aggregate blob outer 02 and blob outer 33
+    const string inputBlobOuterFile03a  = outputBlobOuterFile02;
+    const string inputBlobOuterFile03b  = outputBlobOuterFile33;
+    const string outputBlobOuterFile03  = "testvectors/aggregatedBlobOuterProof/blob_outer_recursive2.zkin.proof_03.json";
+
+    //aggregate blob outer 03 and blob outer 45
+    const string inputBlobOuterFile05a  = outputBlobOuterFile03;
+    const string inputBlobOuterFile05b  = outputBlobOuterFile45;
+    const string outputBlobOuterFile05  = "testvectors/finalProof/blob_outer_recursive2.zkin.proof_05.json";
 
     //final proof
-    const string inputFileFinal  = outputBlobOuterFile04;
+    const string inputFileFinal  = outputBlobOuterFile05;
     const string outputFileFinal = "testvectors/finalProof/proof.json";
 
     // Get status
@@ -144,6 +162,30 @@ using grpc::Status;
         }
         cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputBatchFile2 << ", " << outputBatchFile2 << ")" << endl;
 
+        // Generate aggregated proof 02
+        grpcStatus = GenAndGetAggregatedBatchProof(context, stream, inputBatchFile02a, inputBatchFile02b, outputBatchFile02);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputBatchFile02a << ", " << inputBatchFile02b << ", " << outputBatchFile02 << ")" << endl;
+
+        // Generate blob inner proof 02
+        grpcStatus = GenAndGetBlobInnerProof(context, stream, inputBlobInnerFile02, outputBlobInnerFile02);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobInnerProof(" << inputBlobInnerFile02 << ", " << outputBlobInnerFile02 << ")" << endl;
+
+        // Generate blob outer proof 02
+        grpcStatus = GenAndGetBlobOuterProof(context, stream, outputBatchFile02, outputBlobInnerFile02, outputBlobOuterFile02);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobOuterProof(" << outputBatchFile02 << ", " << outputBlobInnerFile02 << ", " << outputBlobOuterFile02 << ")" << endl;
+
         // Generate batch proof 3
         grpcStatus = GenAndGetBatchProof(context, stream, inputBatchFile3, outputBatchFile3);
         if (grpcStatus.error_code() != Status::OK.error_code())
@@ -152,38 +194,21 @@ using grpc::Status;
         }
         cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputBatchFile3 << ", " << outputBatchFile3 << ")" << endl;
 
-        // Generate aggregated proof 23
-        grpcStatus = GenAndGetAggregatedBatchProof(context, stream, inputBatchFile23a, inputBatchFile23b, outputBatchFile23);
+        // Generate blob inner proof 33
+        grpcStatus = GenAndGetBlobInnerProof(context, stream, inputBlobInnerFile33, outputBlobInnerFile33);
         if (grpcStatus.error_code() != Status::OK.error_code())
         {
             return grpcStatus;
         }
-        cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputBatchFile23a << ", " << inputBatchFile23b << ", " << outputBatchFile23 << ")" << endl;
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobInnerProof(" << inputBlobInnerFile33 << ", " << outputBlobInnerFile33 << ")" << endl;
 
-
-        // Generate aggregated proof 03
-        grpcStatus = GenAndGetAggregatedBatchProof(context, stream, inputBatchFile03a, inputBatchFile03b, outputBatchFile03);
+        // Generate blob outer proof 33
+        grpcStatus = GenAndGetBlobOuterProof(context, stream, outputBatchFile3, outputBlobInnerFile33, outputBlobOuterFile33);
         if (grpcStatus.error_code() != Status::OK.error_code())
         {
             return grpcStatus;
         }
-        cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputBatchFile03a << ", " << inputBatchFile03b << ", " << outputBatchFile03 << ")" << endl;
-
-        // Generate blob inner proof 0
-        grpcStatus = GenAndGetBlobInnerProof(context, stream, inputBlobInnerFile03, outputBlobInnerFile03);
-        if (grpcStatus.error_code() != Status::OK.error_code())
-        {
-            return grpcStatus;
-        }
-        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobInnerProof(" << inputBlobInnerFile03 << ", " << outputBlobInnerFile03 << ")" << endl;
-
-        // Generate blob outer proof 0
-        grpcStatus = GenAndGetBlobOuterProof(context, stream, outputBatchFile03, outputBlobInnerFile03, outputBlobOuterFile03);
-        if (grpcStatus.error_code() != Status::OK.error_code())
-        {
-            return grpcStatus;
-        }
-        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobOuterProof(" << outputBatchFile03 << ", " << outputBlobInnerFile03 << ", " << outputBlobOuterFile03 << ")" << endl;
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobOuterProof(" << outputBatchFile3 << ", " << outputBlobInnerFile33 << ", " << outputBlobOuterFile33 << ")" << endl;
 
         // Generate batch proof 4
         grpcStatus = GenAndGetBatchProof(context, stream, inputBatchFile4, outputBatchFile4);
@@ -193,29 +218,53 @@ using grpc::Status;
         }
         cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputBatchFile4 << ", " << outputBatchFile4 << ")" << endl;
 
-        // Generate blob inner proof 44
-        grpcStatus = GenAndGetBlobInnerProof(context, stream, inputBlobInnerFile44, outputBlobInnerFile44);
+        // Generate batch proof 5
+        grpcStatus = GenAndGetBatchProof(context, stream, inputBatchFile5, outputBatchFile5);
         if (grpcStatus.error_code() != Status::OK.error_code())
         {
             return grpcStatus;
         }
-        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobInnerProof(" << inputBlobInnerFile44 << ", " << outputBlobInnerFile44 << ")" << endl;
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputBatchFile5 << ", " << outputBatchFile5 << ")" << endl;
 
-        // Generate blob outer proof 44
-        grpcStatus = GenAndGetBlobOuterProof(context, stream, outputBatchFile4, outputBlobInnerFile44, outputBlobOuterFile44);
+        // Generate aggregated proof 45
+        grpcStatus = GenAndGetAggregatedBatchProof(context, stream, inputBatchFile45a, inputBatchFile45b, outputBatchFile45);
         if (grpcStatus.error_code() != Status::OK.error_code())
         {
             return grpcStatus;
         }
-        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobOuterProof(" << outputBatchFile4 << ", " << outputBlobInnerFile44 << ", " << outputBlobOuterFile44 << ")" << endl;
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputBatchFile45a << ", " << inputBatchFile45b << ", " << outputBatchFile45 << ")" << endl;
 
-        // Generate blob outer proof 04
-        grpcStatus = GenAndGetAggregatedBlobOuterProof(context, stream, inputBlobOuterFile04a, inputBlobOuterFile04b, outputBlobOuterFile04);
+        // Generate blob inner proof 45
+        grpcStatus = GenAndGetBlobInnerProof(context, stream, inputBlobInnerFile45, outputBlobInnerFile45);
         if (grpcStatus.error_code() != Status::OK.error_code())
         {
             return grpcStatus;
         }
-        cout << "AggregatorServiceImpl::Channel() called GenAggregatedBlobOuterProof(" << inputBlobOuterFile04a << ", " << inputBlobOuterFile04b << ", " << outputBlobOuterFile04 << ")" << endl;
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobInnerProof(" << inputBlobInnerFile45 << ", " << outputBlobInnerFile45 << ")" << endl;
+
+        // Generate blob outer proof 45
+        grpcStatus = GenAndGetBlobOuterProof(context, stream, outputBatchFile45, outputBlobInnerFile45, outputBlobOuterFile45);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBlobOuterProof(" << outputBatchFile45 << ", " << outputBlobInnerFile45 << ", " << outputBlobOuterFile45 << ")" << endl;
+
+        // Generate aggregated blob outer proof 03
+        grpcStatus = GenAndGetAggregatedBlobOuterProof(context, stream, inputBlobOuterFile03a, inputBlobOuterFile03b, outputBlobOuterFile03);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAggregatedBlobOuterProof(" << inputBlobOuterFile03a << ", " << inputBlobOuterFile03b << ", " << outputBlobOuterFile03 << ")" << endl;
+
+        // Generate aggregated blob outer proof 05
+        grpcStatus = GenAndGetAggregatedBlobOuterProof(context, stream, inputBlobOuterFile05a, inputBlobOuterFile05b, outputBlobOuterFile05);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAggregatedBlobOuterProof(" << inputBlobOuterFile05a << ", " << inputBlobOuterFile05b << ", " << outputBlobOuterFile05 << ")" << endl;
         
         // Generate final proof
         grpcStatus = GenAndGetFinalProof(context, stream, inputFileFinal, outputFileFinal);
