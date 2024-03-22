@@ -25,6 +25,7 @@
 #include <openssl/sha.h>
 
 #include "commit_pols_starks.hpp"
+#include "chelpers_steps.hpp"
 #include "ZkevmSteps.hpp"
 #include "C12aSteps.hpp"
 #include "Recursive1Steps.hpp"
@@ -116,7 +117,7 @@ Prover::Prover(Goldilocks &fr,
             pthread_create(&proverPthread, NULL, proverThread, this);
             pthread_create(&cleanerPthread, NULL, cleanerThread, this);
 
-            StarkInfo _starkInfo(config, config.zkevmStarkInfo);
+            StarkInfo _starkInfo(config.zkevmStarkInfo);
 
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
             // and create them using the allocated address
@@ -184,15 +185,20 @@ Prover::Prover(Goldilocks &fr,
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
             prover->setZkey(zkey.get());
 
-            StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
+            StarkInfo _starkInfoRecursiveF(config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
 
-            starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, config.zkevmCHelpers}, pAddress);
+            string zkevmChelpers = USE_GENERIC_PARSER ? config.zkevmGenericCHelpers : config.zkevmCHelpers;
+            string c12aChelpers = USE_GENERIC_PARSER ? config.c12aGenericCHelpers : config.c12aCHelpers;
+            string recursive1Chelpers = USE_GENERIC_PARSER ? config.recursive1GenericCHelpers : config.recursive1CHelpers;
+            string recursive2Chelpers = USE_GENERIC_PARSER ? config.recursive2GenericCHelpers : config.recursive2CHelpers;
+
+            starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, zkevmChelpers}, pAddress);
             if(optimizeMemoryNTT) starkZkevm->optimizeMemoryNTT = true;
             if(optimizeMemoryNTTCommitPols) starkZkevm->optimizeMemoryNTTCommitPols = true;
-            starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, config.c12aCHelpers}, pAddress);
-            starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, config.recursive1CHelpers}, pAddress);
-            starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, config.recursive2CHelpers}, pAddress);
+            starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, c12aChelpers}, pAddress);
+            starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, recursive1Chelpers}, pAddress);
+            starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, recursive2Chelpers}, pAddress);
             starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
         }
     }
@@ -633,12 +639,19 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*  Generate stark proof            */
         /*************************************/
 
+        CHelpersSteps cHelpersSteps;
+
         TimerStart(STARK_PROOF_BATCH_PROOF);
 
         ZkevmSteps zkevmChelpersSteps;
         uint64_t polBits = starkZkevm->starkInfo.starkStruct.steps[starkZkevm->starkInfo.starkStruct.steps.size() - 1].nBits;
         FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkZkevm->starkInfo.starkStruct.steps.size(), starkZkevm->starkInfo.evMap.size(), starkZkevm->starkInfo.nPublics);
-        starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &zkevmChelpersSteps);
+        
+        if(USE_GENERIC_PARSER) {
+            starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &cHelpersSteps);
+        } else {
+            starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &zkevmChelpersSteps);
+        }
 
         TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
         TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
@@ -670,7 +683,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starksC12a->starkInfo.starkStruct.steps.size(), starksC12a->starkInfo.evMap.size(), starksC12a->starkInfo.nPublics);
 
         // Generate the proof
-        starksC12a->genProof(fproofC12a, publics, c12aVerkey, &c12aChelpersSteps);
+        if(USE_GENERIC_PARSER) {
+            starksC12a->genProof(fproofC12a, publics, c12aVerkey, &cHelpersSteps);
+        } else {
+            starksC12a->genProof(fproofC12a, publics, c12aVerkey, &c12aChelpersSteps);
+        }
 
         TimerStopAndLog(STARK_C12_A_PROOF_BATCH_PROOF);
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
@@ -704,7 +721,12 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         Recursive1Steps recursive1ChelpersSteps;
         uint64_t polBitsRecursive1 = starksRecursive1->starkInfo.starkStruct.steps[starksRecursive1->starkInfo.starkStruct.steps.size() - 1].nBits;
         FRIProof fproofRecursive1((1 << polBitsRecursive1), FIELD_EXTENSION, starksRecursive1->starkInfo.starkStruct.steps.size(), starksRecursive1->starkInfo.evMap.size(), starksRecursive1->starkInfo.nPublics);
-        starksRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1ChelpersSteps);
+        
+        if(USE_GENERIC_PARSER) {
+            starksRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &cHelpersSteps);
+        } else {
+            starksRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1ChelpersSteps);
+        }
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
 
         // Save the proof & zkinproof
@@ -842,7 +864,14 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     Recursive2Steps recursive2ChelpersSteps;
     uint64_t polBitsRecursive2 = starksRecursive2->starkInfo.starkStruct.steps[starksRecursive2->starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starksRecursive2->starkInfo.starkStruct.steps.size(), starksRecursive2->starkInfo.evMap.size(), starksRecursive2->starkInfo.nPublics);
-    starksRecursive2->genProof(fproofRecursive2, publics, recursive2VerkeyValues, &recursive2ChelpersSteps);
+    
+    if(USE_GENERIC_PARSER) {
+        CHelpersSteps cHelpersSteps;
+        starksRecursive2->genProof(fproofRecursive2, publics, recursive2VerkeyValues, &cHelpersSteps);
+    } else {
+        starksRecursive2->genProof(fproofRecursive2, publics, recursive2VerkeyValues, &recursive2ChelpersSteps);
+    }
+   
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof

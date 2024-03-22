@@ -18,8 +18,8 @@ public:
     static void evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinomial &x);
     static void getTransposed(Polinomial &aux, Polinomial &pol2_e, uint64_t trasposeBits);
 
-    static void queryPol(FRIProofC12 &fproof, MerkleTreeBN128 **trees, uint64_t idx, uint64_t treeIdx);
-    static void queryPol(FRIProofC12 &fproof, MerkleTreeBN128 *trees, uint64_t idx, uint64_t treeIdx);
+    static void queryPol(FRIProofC12 &fproof, MerkleTreeBN128 **trees, uint64_t arity, uint64_t idx, uint64_t treeIdx);
+    static void queryPol(FRIProofC12 &fproof, MerkleTreeBN128 *trees, uint64_t arity, uint64_t idx, uint64_t treeIdx);
 };
 
 #endif

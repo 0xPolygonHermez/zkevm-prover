@@ -4,7 +4,6 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
-#include "config.hpp"
 #include "zkassert.hpp"
 #include "goldilocks_base_field.hpp"
 #include "polinomial.hpp"
@@ -161,7 +160,6 @@ public:
 
 class StarkInfo
 {
-    const Config &config;
 public:
     StarkStruct starkStruct;
 
@@ -177,6 +175,8 @@ public:
     uint64_t friExpId;
     uint64_t nExps;
 
+    uint64_t merkleTreeArity;
+
     PolsSections mapDeg;
     PolsSections mapOffsets;
     PolsSections mapSectionsN;
@@ -191,7 +191,7 @@ public:
     map<string,uint64_t> exp2pol;
     
     /* Constructor */
-    StarkInfo(const Config &config, string file);
+    StarkInfo(string file);
 
     /* Loads data from a json object */
     void load (json j);
