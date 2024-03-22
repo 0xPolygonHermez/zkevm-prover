@@ -30,6 +30,7 @@
 #include "C12aSteps.hpp"
 #include "Recursive1Steps.hpp"
 #include "Recursive2Steps.hpp"
+#include "RecursiveFSteps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
@@ -928,7 +929,14 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     TimerStart(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
     uint64_t polBitsRecursiveF = starksRecursiveF->starkInfo.starkStruct.steps[starksRecursiveF->starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
-    starksRecursiveF->genProof(fproofRecursiveF, publics);
+    if(USE_GENERIC_PARSER) {
+        CHelpersSteps cHelpersSteps;
+        starksRecursiveF->genProof(fproofRecursiveF, publics, &cHelpersSteps);
+    } else {
+        RecursiveFSteps recursiveFChelpersSteps;
+        starksRecursiveF->genProof(fproofRecursiveF, publics, &recursiveFChelpersSteps);
+    }
+    
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof

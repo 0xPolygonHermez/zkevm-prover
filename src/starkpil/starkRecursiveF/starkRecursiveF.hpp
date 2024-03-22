@@ -19,6 +19,7 @@
 #include "chelpers_steps.hpp"
 #include "steps.hpp"
 #include "chelpers.hpp"
+#include "config.hpp"
 
 #define STARK_RECURSIVE_F_NUM_TREES 5
 
@@ -127,6 +128,6 @@ public:
     uint64_t getCommitPolsSize(void) { return starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element); }
 
     /* Generates a proof from the address to all polynomials memory area, and the committed pols */
-    void genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8]);
+    void genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8], CHelpersSteps *chelpersSteps);
 };
 #endif
