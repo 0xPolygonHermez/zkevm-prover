@@ -7,6 +7,6 @@
 
 using namespace std;
 
-void buildConstTree(const string constFile, const string starkStructFile, const string constTreeFile, const string verKeyFile);
+void buildConstTree(const string constFile, const string starkInfoFile, const string constTreeFile, const string verKeyFile);
 
 #endif

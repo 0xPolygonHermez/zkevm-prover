@@ -79,7 +79,7 @@ void merkelizeMemory(); // function for DBG purposes
 
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
-                                                                           starkInfo(config, starkFiles.zkevmStarkInfo),
+                                                                           starkInfo(starkFiles.zkevmStarkInfo),
                                                                            starkFiles(starkFiles),
                                                                            N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
