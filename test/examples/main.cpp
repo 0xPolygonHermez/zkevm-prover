@@ -18,7 +18,7 @@ int main()
     string cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
     string verkey = "test/examples/all/all.verkey.json";
 
-    StarkInfo starkInfo(config, starkInfoFile);
+    StarkInfo starkInfo(starkInfoFile);
 
     uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
