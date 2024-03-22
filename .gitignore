@@ -16,6 +16,7 @@ config/c12a/*
 config/final/*
 config/recursive*/*
 config/zkevm/*
+config/blob*/*
 config/tmp
 config/config.json
 runtime/*
