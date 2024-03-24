@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define U64Mask4  uint64_t(0xF)
+#define U64Mask6  uint64_t(0x3F)
 #define U64Mask8  uint64_t(0xFF)
 #define U64Mask12 uint64_t(0xFFF)
 #define U64Mask16 uint64_t(0xFFFF)
