@@ -884,6 +884,7 @@ using grpc::Status;
     if (errorString == "invalid_change_l2_block_min_timestamp"  ) return ::executor::v1::ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP;
     if (errorString == "invalidDecodeChangeL2Block"       ) return ::executor::v1::ROM_ERROR_INVALID_DECODE_CHANGE_L2_BLOCK;
     if (errorString == "invalidNotFirstTxChangeL2Block"   ) return ::executor::v1::ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK;
+    if (errorString == "invalid_l1_info_tree_index"       ) return ::executor::v1::ROM_ERROR_INVALID_L1_INFO_TREE_INDEX;
     if (errorString == ""                                 ) return ::executor::v1::ROM_ERROR_NO_ERROR;
     zklog.error("ExecutorServiceImpl::string2error() found invalid error string=" + errorString);
     exitProcess();

@@ -619,8 +619,20 @@ zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
         // Data length is stored in C
         mpz_class cScalar;
         getRegFromCtx(ctx, reg_C, cScalar);
+
+        // Data always should be 32 or less but limit to 32 for safety
         uint64_t size = zkmin(cScalar.get_ui(), 32);
-        string dataString = PrependZeros(data.get_str(16), size*2);
+
+        // Convert data to hex string and append zeros, left zeros are stored in logs, for example if data = 0x01c8 and size=32, data is 0x00000000000000000000000000000000000000000000000000000000000001c8
+        string dataString = data.get_str(16);
+        if ((size * 2) > dataString.size())
+        {
+            dataString = PrependZeros(dataString, size*2);
+        }
+
+        // Get only left size length from bytes, example if size=1 and data= 0xaa00000000000000000000000000000000000000000000000000000000000000, we get 0xaa
+        dataString = dataString.substr(0, size * 2);
+        
         it->second.data.push_back(dataString);
     }
 
