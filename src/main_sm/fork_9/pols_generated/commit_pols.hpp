@@ -27,20 +27,20 @@ class MemAlignCommitPols
 {
 public:
     CommitPol inM[2];
-    CommitPol inV;
-    CommitPol wr256;
-    CommitPol wr8;
+    CommitPol inV[2];
+    CommitPol inV_V;
+    CommitPol wr;
     CommitPol m0[8];
     CommitPol m1[8];
     CommitPol w0[8];
     CommitPol w1[8];
     CommitPol v[8];
+    CommitPol selM0;
     CommitPol selM1;
-    CommitPol factorV[8];
-    CommitPol offset;
-    CommitPol resultRd;
-    CommitPol resultWr8;
-    CommitPol resultWr256;
+    CommitPol selV;
+    CommitPol mode;
+    CommitPol result;
+    CommitPol bytePos;
 private:
     void * _pAddress;
     uint64_t _degree;
