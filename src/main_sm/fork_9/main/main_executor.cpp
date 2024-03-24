@@ -2051,7 +2051,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         
                     if (offset>64 || len > 32 || mode > 0x7FFFF)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_MODE_OUT_OF_RANGE;
+                        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
                         logError(ctx, "MemAlign out of range mode="+to_string(mode)+" offset=" + to_string(offset)+" len="+to_string(len));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
@@ -4817,7 +4817,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (offset>64 || len > 32 || mode > 0x7FFFF)
             {
-                proverRequest.result = ZKR_SM_MAIN_MEMALIGN_MODE_OUT_OF_RANGE;
+                proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
                 logError(ctx, "MemAlign out of range mode="+to_string(mode)+" offset=" + to_string(offset)+" len="+to_string(len));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;

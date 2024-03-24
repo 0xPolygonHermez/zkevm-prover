@@ -493,7 +493,7 @@ DatabaseConnection * Database::getConnection (void)
         usedConnections++;
         if (pConnection->bDisconnect)
         {
-            pConnection->pConnection->disconnect();
+            // pConnection->pConnection->disconnect();
             pConnection->bDisconnect = false;
         }
         //zklog.info("Database::getWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));

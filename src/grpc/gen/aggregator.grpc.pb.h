@@ -7,24 +7,23 @@
 #include "aggregator.pb.h"
 
 #include <functional>
-#include <grpc/impl/codegen/port_platform.h>
-#include <grpcpp/impl/codegen/async_generic_service.h>
-#include <grpcpp/impl/codegen/async_stream.h>
-#include <grpcpp/impl/codegen/async_unary_call.h>
-#include <grpcpp/impl/codegen/client_callback.h>
-#include <grpcpp/impl/codegen/client_context.h>
-#include <grpcpp/impl/codegen/completion_queue.h>
-#include <grpcpp/impl/codegen/message_allocator.h>
-#include <grpcpp/impl/codegen/method_handler.h>
+#include <grpcpp/generic/async_generic_service.h>
+#include <grpcpp/support/async_stream.h>
+#include <grpcpp/support/async_unary_call.h>
+#include <grpcpp/support/client_callback.h>
+#include <grpcpp/client_context.h>
+#include <grpcpp/completion_queue.h>
+#include <grpcpp/support/message_allocator.h>
+#include <grpcpp/support/method_handler.h>
 #include <grpcpp/impl/codegen/proto_utils.h>
-#include <grpcpp/impl/codegen/rpc_method.h>
-#include <grpcpp/impl/codegen/server_callback.h>
+#include <grpcpp/impl/rpc_method.h>
+#include <grpcpp/support/server_callback.h>
 #include <grpcpp/impl/codegen/server_callback_handlers.h>
-#include <grpcpp/impl/codegen/server_context.h>
-#include <grpcpp/impl/codegen/service_type.h>
+#include <grpcpp/server_context.h>
+#include <grpcpp/impl/service_type.h>
 #include <grpcpp/impl/codegen/status.h>
-#include <grpcpp/impl/codegen/stub_options.h>
-#include <grpcpp/impl/codegen/sync_stream.h>
+#include <grpcpp/support/stub_options.h>
+#include <grpcpp/support/sync_stream.h>
 
 namespace aggregator {
 namespace v1 {
@@ -51,30 +50,22 @@ class AggregatorService final {
     std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>> PrepareAsyncChannel(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncReaderWriterInterface< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>>(PrepareAsyncChannelRaw(context, cq));
     }
-    class experimental_async_interface {
+    class async_interface {
      public:
-      virtual ~experimental_async_interface() {}
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual ~async_interface() {}
       virtual void Channel(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>* reactor) = 0;
-      #else
-      virtual void Channel(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>* reactor) = 0;
-      #endif
     };
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    typedef class experimental_async_interface async_interface;
-    #endif
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    async_interface* async() { return experimental_async(); }
-    #endif
-    virtual class experimental_async_interface* experimental_async() { return nullptr; }
-  private:
+    typedef class async_interface experimental_async_interface;
+    virtual class async_interface* async() { return nullptr; }
+    class async_interface* experimental_async() { return async(); }
+   private:
     virtual ::grpc::ClientReaderWriterInterface< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* ChannelRaw(::grpc::ClientContext* context) = 0;
     virtual ::grpc::ClientAsyncReaderWriterInterface< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* AsyncChannelRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) = 0;
     virtual ::grpc::ClientAsyncReaderWriterInterface< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* PrepareAsyncChannelRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
-    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel);
+    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
     std::unique_ptr< ::grpc::ClientReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>> Channel(::grpc::ClientContext* context) {
       return std::unique_ptr< ::grpc::ClientReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>>(ChannelRaw(context));
     }
@@ -84,25 +75,21 @@ class AggregatorService final {
     std::unique_ptr<  ::grpc::ClientAsyncReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>> PrepareAsyncChannel(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>>(PrepareAsyncChannelRaw(context, cq));
     }
-    class experimental_async final :
-      public StubInterface::experimental_async_interface {
+    class async final :
+      public StubInterface::async_interface {
      public:
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void Channel(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>* reactor) override;
-      #else
-      void Channel(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>* reactor) override;
-      #endif
      private:
       friend class Stub;
-      explicit experimental_async(Stub* stub): stub_(stub) { }
+      explicit async(Stub* stub): stub_(stub) { }
       Stub* stub() { return stub_; }
       Stub* stub_;
     };
-    class experimental_async_interface* experimental_async() override { return &async_stub_; }
+    class async* async() override { return &async_stub_; }
 
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
-    class experimental_async async_stub_{this};
+    class async async_stub_{this};
     ::grpc::ClientReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* ChannelRaw(::grpc::ClientContext* context) override;
     ::grpc::ClientAsyncReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* AsyncChannelRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) override;
     ::grpc::ClientAsyncReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* PrepareAsyncChannelRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) override;
@@ -138,27 +125,17 @@ class AggregatorService final {
   };
   typedef WithAsyncMethod_Channel<Service > AsyncService;
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_Channel : public BaseClass {
+  class WithCallbackMethod_Channel : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_Channel() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(0,
-          new ::grpc_impl::internal::CallbackBidiHandler< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>(
+    WithCallbackMethod_Channel() {
+      ::grpc::Service::MarkMethodCallback(0,
+          new ::grpc::internal::CallbackBidiHandler< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context) { return this->Channel(context); }));
+                   ::grpc::CallbackServerContext* context) { return this->Channel(context); }));
     }
-    ~ExperimentalWithCallbackMethod_Channel() override {
+    ~WithCallbackMethod_Channel() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -166,20 +143,12 @@ class AggregatorService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerBidiReactor< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* Channel(
       ::grpc::CallbackServerContext* /*context*/)
-    #else
-    virtual ::grpc::experimental::ServerBidiReactor< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* Channel(
-      ::grpc::experimental::CallbackServerContext* /*context*/)
-    #endif
       { return nullptr; }
   };
-  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_Channel<Service > CallbackService;
-  #endif
-
-  typedef ExperimentalWithCallbackMethod_Channel<Service > ExperimentalCallbackService;
+  typedef WithCallbackMethod_Channel<Service > CallbackService;
+  typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_Channel : public BaseClass {
    private:
@@ -218,27 +187,17 @@ class AggregatorService final {
     }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_Channel : public BaseClass {
+  class WithRawCallbackMethod_Channel : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_Channel() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(0,
-          new ::grpc_impl::internal::CallbackBidiHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_Channel() {
+      ::grpc::Service::MarkMethodRawCallback(0,
+          new ::grpc::internal::CallbackBidiHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context) { return this->Channel(context); }));
+                   ::grpc::CallbackServerContext* context) { return this->Channel(context); }));
     }
-    ~ExperimentalWithRawCallbackMethod_Channel() override {
+    ~WithRawCallbackMethod_Channel() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -246,13 +205,8 @@ class AggregatorService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerBidiReactor< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* Channel(
       ::grpc::CallbackServerContext* /*context*/)
-    #else
-    virtual ::grpc::experimental::ServerBidiReactor< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* Channel(
-      ::grpc::experimental::CallbackServerContext* /*context*/)
-    #endif
       { return nullptr; }
   };
   typedef Service StreamedUnaryService;

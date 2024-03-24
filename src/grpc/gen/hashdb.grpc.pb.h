@@ -7,24 +7,23 @@
 #include "hashdb.pb.h"
 
 #include <functional>
-#include <grpc/impl/codegen/port_platform.h>
-#include <grpcpp/impl/codegen/async_generic_service.h>
-#include <grpcpp/impl/codegen/async_stream.h>
-#include <grpcpp/impl/codegen/async_unary_call.h>
-#include <grpcpp/impl/codegen/client_callback.h>
-#include <grpcpp/impl/codegen/client_context.h>
-#include <grpcpp/impl/codegen/completion_queue.h>
-#include <grpcpp/impl/codegen/message_allocator.h>
-#include <grpcpp/impl/codegen/method_handler.h>
+#include <grpcpp/generic/async_generic_service.h>
+#include <grpcpp/support/async_stream.h>
+#include <grpcpp/support/async_unary_call.h>
+#include <grpcpp/support/client_callback.h>
+#include <grpcpp/client_context.h>
+#include <grpcpp/completion_queue.h>
+#include <grpcpp/support/message_allocator.h>
+#include <grpcpp/support/method_handler.h>
 #include <grpcpp/impl/codegen/proto_utils.h>
-#include <grpcpp/impl/codegen/rpc_method.h>
-#include <grpcpp/impl/codegen/server_callback.h>
+#include <grpcpp/impl/rpc_method.h>
+#include <grpcpp/support/server_callback.h>
 #include <grpcpp/impl/codegen/server_callback_handlers.h>
-#include <grpcpp/impl/codegen/server_context.h>
-#include <grpcpp/impl/codegen/service_type.h>
+#include <grpcpp/server_context.h>
+#include <grpcpp/impl/service_type.h>
 #include <grpcpp/impl/codegen/status.h>
-#include <grpcpp/impl/codegen/stub_options.h>
-#include <grpcpp/impl/codegen/sync_stream.h>
+#include <grpcpp/support/stub_options.h>
+#include <grpcpp/support/sync_stream.h>
 
 namespace hashdb {
 namespace v1 {
@@ -172,234 +171,50 @@ class HashDBService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ResetDBResponse>> PrepareAsyncResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ResetDBResponse>>(PrepareAsyncResetDBRaw(context, request, cq));
     }
-    class experimental_async_interface {
+    class async_interface {
      public:
-      virtual ~experimental_async_interface() {}
+      virtual ~async_interface() {}
       virtual void GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void GetLatestStateRoot(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetLatestStateRootResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void GetLatestStateRoot(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetLatestStateRoot(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void Set(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void Set(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void Set(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void Get(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void Get(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void Get(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetProgramResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void GetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetProgramResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void GetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void FinishTx(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void FinishTx(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void FinishTx(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void FinishTx(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void FinishTx(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void FinishTx(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void StartBlock(::grpc::ClientContext* context, const ::hashdb::v1::StartBlockRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void StartBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void StartBlock(::grpc::ClientContext* context, const ::hashdb::v1::StartBlockRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void StartBlock(::grpc::ClientContext* context, const ::hashdb::v1::StartBlockRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void StartBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void StartBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void FinishBlock(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void FinishBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void FinishBlock(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void FinishBlock(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void FinishBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void FinishBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void Flush(::grpc::ClientContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::FlushResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void Flush(::grpc::ClientContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void Flush(::grpc::ClientContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::FlushResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::FlushResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void ResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void ResetDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ResetDBResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void ResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void ResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void ResetDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void ResetDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
     };
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    typedef class experimental_async_interface async_interface;
-    #endif
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    async_interface* async() { return experimental_async(); }
-    #endif
-    virtual class experimental_async_interface* experimental_async() { return nullptr; }
-  private:
+    typedef class async_interface experimental_async_interface;
+    virtual class async_interface* async() { return nullptr; }
+    class async_interface* experimental_async() { return async(); }
+   private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetLatestStateRootResponse>* AsyncGetLatestStateRootRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetLatestStateRootResponse>* PrepareAsyncGetLatestStateRootRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::SetResponse>* AsyncSetRaw(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest& request, ::grpc::CompletionQueue* cq) = 0;
@@ -439,7 +254,7 @@ class HashDBService final {
   };
   class Stub final : public StubInterface {
    public:
-    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel);
+    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
     ::grpc::Status GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::hashdb::v1::GetLatestStateRootResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetLatestStateRootResponse>> AsyncGetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetLatestStateRootResponse>>(AsyncGetLatestStateRootRaw(context, request, cq));
@@ -566,236 +381,56 @@ class HashDBService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ResetDBResponse>> PrepareAsyncResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ResetDBResponse>>(PrepareAsyncResetDBRaw(context, request, cq));
     }
-    class experimental_async final :
-      public StubInterface::experimental_async_interface {
+    class async final :
+      public StubInterface::async_interface {
      public:
       void GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response, std::function<void(::grpc::Status)>) override;
-      void GetLatestStateRoot(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetLatestStateRootResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void GetLatestStateRoot(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetLatestStateRoot(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, std::function<void(::grpc::Status)>) override;
-      void Set(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void Set(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void Set(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, std::function<void(::grpc::Status)>) override;
-      void Get(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void Get(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void Get(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, std::function<void(::grpc::Status)>) override;
-      void SetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetProgramResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, std::function<void(::grpc::Status)>) override;
-      void GetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetProgramResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void GetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      void LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      void LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void FinishTx(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      void FinishTx(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void FinishTx(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void FinishTx(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void FinishTx(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void FinishTx(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void StartBlock(::grpc::ClientContext* context, const ::hashdb::v1::StartBlockRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      void StartBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void StartBlock(::grpc::ClientContext* context, const ::hashdb::v1::StartBlockRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void StartBlock(::grpc::ClientContext* context, const ::hashdb::v1::StartBlockRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void StartBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void StartBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void FinishBlock(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      void FinishBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void FinishBlock(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void FinishBlock(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void FinishBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void FinishBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void Flush(::grpc::ClientContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response, std::function<void(::grpc::Status)>) override;
-      void Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::FlushResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void Flush(::grpc::ClientContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void Flush(::grpc::ClientContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::FlushResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::FlushResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)>) override;
-      void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)>) override;
-      void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)>) override;
-      void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)>) override;
-      void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) override;
-      void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, std::function<void(::grpc::Status)>) override;
-      void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void ResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response, std::function<void(::grpc::Status)>) override;
-      void ResetDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ResetDBResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void ResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void ResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void ResetDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void ResetDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
      private:
       friend class Stub;
-      explicit experimental_async(Stub* stub): stub_(stub) { }
+      explicit async(Stub* stub): stub_(stub) { }
       Stub* stub() { return stub_; }
       Stub* stub_;
     };
-    class experimental_async_interface* experimental_async() override { return &async_stub_; }
+    class async* async() override { return &async_stub_; }
 
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
-    class experimental_async async_stub_{this};
+    class async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetLatestStateRootResponse>* AsyncGetLatestStateRootRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetLatestStateRootResponse>* PrepareAsyncGetLatestStateRootRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::SetResponse>* AsyncSetRaw(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest& request, ::grpc::CompletionQueue* cq) override;
@@ -1238,36 +873,22 @@ class HashDBService final {
   };
   typedef WithAsyncMethod_GetLatestStateRoot<WithAsyncMethod_Set<WithAsyncMethod_Get<WithAsyncMethod_SetProgram<WithAsyncMethod_GetProgram<WithAsyncMethod_LoadDB<WithAsyncMethod_LoadProgramDB<WithAsyncMethod_FinishTx<WithAsyncMethod_StartBlock<WithAsyncMethod_FinishBlock<WithAsyncMethod_Flush<WithAsyncMethod_GetFlushStatus<WithAsyncMethod_GetFlushData<WithAsyncMethod_ConsolidateState<WithAsyncMethod_Purge<WithAsyncMethod_ReadTree<WithAsyncMethod_CancelBatch<WithAsyncMethod_ResetDB<Service > > > > > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_GetLatestStateRoot : public BaseClass {
+  class WithCallbackMethod_GetLatestStateRoot : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_GetLatestStateRoot() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(0,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::GetLatestStateRootResponse>(
+    WithCallbackMethod_GetLatestStateRoot() {
+      ::grpc::Service::MarkMethodCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::GetLatestStateRootResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response) { return this->GetLatestStateRoot(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response) { return this->GetLatestStateRoot(context, request, response); }));}
     void SetMessageAllocatorFor_GetLatestStateRoot(
-        ::grpc::experimental::MessageAllocator< ::google::protobuf::Empty, ::hashdb::v1::GetLatestStateRootResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::google::protobuf::Empty, ::hashdb::v1::GetLatestStateRootResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::GetLatestStateRootResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::GetLatestStateRootResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_GetLatestStateRoot() override {
+    ~WithCallbackMethod_GetLatestStateRoot() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1275,46 +896,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetLatestStateRoot(
-      ::grpc::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::GetLatestStateRootResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetLatestStateRoot(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::GetLatestStateRootResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::GetLatestStateRootResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_Set : public BaseClass {
+  class WithCallbackMethod_Set : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_Set() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(1,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>(
+    WithCallbackMethod_Set() {
+      ::grpc::Service::MarkMethodCallback(1,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response) { return this->Set(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response) { return this->Set(context, request, response); }));}
     void SetMessageAllocatorFor_Set(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_Set() override {
+    ~WithCallbackMethod_Set() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1322,46 +923,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Set(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::SetRequest* /*request*/, ::hashdb::v1::SetResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* Set(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::SetRequest* /*request*/, ::hashdb::v1::SetResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::SetRequest* /*request*/, ::hashdb::v1::SetResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_Get : public BaseClass {
+  class WithCallbackMethod_Get : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_Get() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(2,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>(
+    WithCallbackMethod_Get() {
+      ::grpc::Service::MarkMethodCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response) { return this->Get(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response) { return this->Get(context, request, response); }));}
     void SetMessageAllocatorFor_Get(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(2);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_Get() override {
+    ~WithCallbackMethod_Get() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1369,46 +950,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Get(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::GetRequest* /*request*/, ::hashdb::v1::GetResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* Get(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::GetRequest* /*request*/, ::hashdb::v1::GetResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::GetRequest* /*request*/, ::hashdb::v1::GetResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetProgram : public BaseClass {
+  class WithCallbackMethod_SetProgram : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetProgram() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(3,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>(
+    WithCallbackMethod_SetProgram() {
+      ::grpc::Service::MarkMethodCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response) { return this->SetProgram(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response) { return this->SetProgram(context, request, response); }));}
     void SetMessageAllocatorFor_SetProgram(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetProgram() override {
+    ~WithCallbackMethod_SetProgram() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1416,46 +977,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetProgram(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::SetProgramRequest* /*request*/, ::hashdb::v1::SetProgramResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetProgram(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::SetProgramRequest* /*request*/, ::hashdb::v1::SetProgramResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::SetProgramRequest* /*request*/, ::hashdb::v1::SetProgramResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_GetProgram : public BaseClass {
+  class WithCallbackMethod_GetProgram : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_GetProgram() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(4,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>(
+    WithCallbackMethod_GetProgram() {
+      ::grpc::Service::MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response) { return this->GetProgram(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response) { return this->GetProgram(context, request, response); }));}
     void SetMessageAllocatorFor_GetProgram(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_GetProgram() override {
+    ~WithCallbackMethod_GetProgram() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1463,46 +1004,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetProgram(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::GetProgramRequest* /*request*/, ::hashdb::v1::GetProgramResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetProgram(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::GetProgramRequest* /*request*/, ::hashdb::v1::GetProgramResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::GetProgramRequest* /*request*/, ::hashdb::v1::GetProgramResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_LoadDB : public BaseClass {
+  class WithCallbackMethod_LoadDB : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_LoadDB() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(5,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>(
+    WithCallbackMethod_LoadDB() {
+      ::grpc::Service::MarkMethodCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response) { return this->LoadDB(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response) { return this->LoadDB(context, request, response); }));}
     void SetMessageAllocatorFor_LoadDB(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(5);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_LoadDB() override {
+    ~WithCallbackMethod_LoadDB() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1510,46 +1031,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* LoadDB(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::LoadDBRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* LoadDB(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::LoadDBRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::LoadDBRequest* /*request*/, ::google::protobuf::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_LoadProgramDB : public BaseClass {
+  class WithCallbackMethod_LoadProgramDB : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_LoadProgramDB() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(6,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>(
+    WithCallbackMethod_LoadProgramDB() {
+      ::grpc::Service::MarkMethodCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response) { return this->LoadProgramDB(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response) { return this->LoadProgramDB(context, request, response); }));}
     void SetMessageAllocatorFor_LoadProgramDB(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(6);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_LoadProgramDB() override {
+    ~WithCallbackMethod_LoadProgramDB() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1557,46 +1058,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* LoadProgramDB(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::LoadProgramDBRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* LoadProgramDB(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::LoadProgramDBRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::LoadProgramDBRequest* /*request*/, ::google::protobuf::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_FinishTx : public BaseClass {
+  class WithCallbackMethod_FinishTx : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_FinishTx() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(7,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::FinishTxRequest, ::google::protobuf::Empty>(
+    WithCallbackMethod_FinishTx() {
+      ::grpc::Service::MarkMethodCallback(7,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::FinishTxRequest, ::google::protobuf::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response) { return this->FinishTx(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response) { return this->FinishTx(context, request, response); }));}
     void SetMessageAllocatorFor_FinishTx(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::FinishTxRequest, ::google::protobuf::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::FinishTxRequest, ::google::protobuf::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(7);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(7);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::FinishTxRequest, ::google::protobuf::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::FinishTxRequest, ::google::protobuf::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_FinishTx() override {
+    ~WithCallbackMethod_FinishTx() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1604,46 +1085,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* FinishTx(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::FinishTxRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* FinishTx(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::FinishTxRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::FinishTxRequest* /*request*/, ::google::protobuf::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_StartBlock : public BaseClass {
+  class WithCallbackMethod_StartBlock : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_StartBlock() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(8,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::StartBlockRequest, ::google::protobuf::Empty>(
+    WithCallbackMethod_StartBlock() {
+      ::grpc::Service::MarkMethodCallback(8,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::StartBlockRequest, ::google::protobuf::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::StartBlockRequest* request, ::google::protobuf::Empty* response) { return this->StartBlock(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::StartBlockRequest* request, ::google::protobuf::Empty* response) { return this->StartBlock(context, request, response); }));}
     void SetMessageAllocatorFor_StartBlock(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::StartBlockRequest, ::google::protobuf::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::StartBlockRequest, ::google::protobuf::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(8);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(8);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::StartBlockRequest, ::google::protobuf::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::StartBlockRequest, ::google::protobuf::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_StartBlock() override {
+    ~WithCallbackMethod_StartBlock() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1651,46 +1112,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* StartBlock(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::StartBlockRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* StartBlock(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::StartBlockRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::StartBlockRequest* /*request*/, ::google::protobuf::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_FinishBlock : public BaseClass {
+  class WithCallbackMethod_FinishBlock : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_FinishBlock() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(9,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::FinishBlockRequest, ::google::protobuf::Empty>(
+    WithCallbackMethod_FinishBlock() {
+      ::grpc::Service::MarkMethodCallback(9,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::FinishBlockRequest, ::google::protobuf::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response) { return this->FinishBlock(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response) { return this->FinishBlock(context, request, response); }));}
     void SetMessageAllocatorFor_FinishBlock(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::FinishBlockRequest, ::google::protobuf::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::FinishBlockRequest, ::google::protobuf::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(9);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(9);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::FinishBlockRequest, ::google::protobuf::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::FinishBlockRequest, ::google::protobuf::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_FinishBlock() override {
+    ~WithCallbackMethod_FinishBlock() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1698,46 +1139,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* FinishBlock(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::FinishBlockRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* FinishBlock(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::FinishBlockRequest* /*request*/, ::google::protobuf::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::FinishBlockRequest* /*request*/, ::google::protobuf::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_Flush : public BaseClass {
+  class WithCallbackMethod_Flush : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_Flush() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(10,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>(
+    WithCallbackMethod_Flush() {
+      ::grpc::Service::MarkMethodCallback(10,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response) { return this->Flush(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response) { return this->Flush(context, request, response); }));}
     void SetMessageAllocatorFor_Flush(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(10);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(10);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_Flush() override {
+    ~WithCallbackMethod_Flush() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1745,46 +1166,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Flush(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::FlushRequest* /*request*/, ::hashdb::v1::FlushResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* Flush(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::FlushRequest* /*request*/, ::hashdb::v1::FlushResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::FlushRequest* /*request*/, ::hashdb::v1::FlushResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_GetFlushStatus : public BaseClass {
+  class WithCallbackMethod_GetFlushStatus : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_GetFlushStatus() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(11,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>(
+    WithCallbackMethod_GetFlushStatus() {
+      ::grpc::Service::MarkMethodCallback(11,
+          new ::grpc::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response) { return this->GetFlushStatus(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response) { return this->GetFlushStatus(context, request, response); }));}
     void SetMessageAllocatorFor_GetFlushStatus(
-        ::grpc::experimental::MessageAllocator< ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(11);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(11);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_GetFlushStatus() override {
+    ~WithCallbackMethod_GetFlushStatus() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1792,46 +1193,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetFlushStatus(
-      ::grpc::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::GetFlushStatusResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetFlushStatus(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::GetFlushStatusResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::GetFlushStatusResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_GetFlushData : public BaseClass {
+  class WithCallbackMethod_GetFlushData : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_GetFlushData() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(12,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>(
+    WithCallbackMethod_GetFlushData() {
+      ::grpc::Service::MarkMethodCallback(12,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response) { return this->GetFlushData(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response) { return this->GetFlushData(context, request, response); }));}
     void SetMessageAllocatorFor_GetFlushData(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(12);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(12);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_GetFlushData() override {
+    ~WithCallbackMethod_GetFlushData() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1839,46 +1220,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetFlushData(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetFlushData(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_ConsolidateState : public BaseClass {
+  class WithCallbackMethod_ConsolidateState : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_ConsolidateState() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(13,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>(
+    WithCallbackMethod_ConsolidateState() {
+      ::grpc::Service::MarkMethodCallback(13,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response) { return this->ConsolidateState(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response) { return this->ConsolidateState(context, request, response); }));}
     void SetMessageAllocatorFor_ConsolidateState(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(13);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(13);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_ConsolidateState() override {
+    ~WithCallbackMethod_ConsolidateState() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1886,46 +1247,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* ConsolidateState(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* ConsolidateState(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_Purge : public BaseClass {
+  class WithCallbackMethod_Purge : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_Purge() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(14,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>(
+    WithCallbackMethod_Purge() {
+      ::grpc::Service::MarkMethodCallback(14,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response) { return this->Purge(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response) { return this->Purge(context, request, response); }));}
     void SetMessageAllocatorFor_Purge(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(14);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(14);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_Purge() override {
+    ~WithCallbackMethod_Purge() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1933,46 +1274,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Purge(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* Purge(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_ReadTree : public BaseClass {
+  class WithCallbackMethod_ReadTree : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_ReadTree() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(15,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
+    WithCallbackMethod_ReadTree() {
+      ::grpc::Service::MarkMethodCallback(15,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response) { return this->ReadTree(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response) { return this->ReadTree(context, request, response); }));}
     void SetMessageAllocatorFor_ReadTree(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(15);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(15);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_ReadTree() override {
+    ~WithCallbackMethod_ReadTree() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1980,46 +1301,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* ReadTree(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* ReadTree(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_CancelBatch : public BaseClass {
+  class WithCallbackMethod_CancelBatch : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_CancelBatch() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(16,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>(
+    WithCallbackMethod_CancelBatch() {
+      ::grpc::Service::MarkMethodCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response) { return this->CancelBatch(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response) { return this->CancelBatch(context, request, response); }));}
     void SetMessageAllocatorFor_CancelBatch(
-        ::grpc::experimental::MessageAllocator< ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(16);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(16);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_CancelBatch() override {
+    ~WithCallbackMethod_CancelBatch() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2027,46 +1328,26 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* CancelBatch(
-      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CancelBatch(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_ResetDB : public BaseClass {
+  class WithCallbackMethod_ResetDB : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_ResetDB() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(17,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>(
+    WithCallbackMethod_ResetDB() {
+      ::grpc::Service::MarkMethodCallback(17,
+          new ::grpc::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response) { return this->ResetDB(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response) { return this->ResetDB(context, request, response); }));}
     void SetMessageAllocatorFor_ResetDB(
-        ::grpc::experimental::MessageAllocator< ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(17);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(17);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_ResetDB() override {
+    ~WithCallbackMethod_ResetDB() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2074,20 +1355,11 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* ResetDB(
-      ::grpc::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::ResetDBResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* ResetDB(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::ResetDBResponse* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::ResetDBResponse* /*response*/)  { return nullptr; }
   };
-  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_GetLatestStateRoot<ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_FinishTx<ExperimentalWithCallbackMethod_StartBlock<ExperimentalWithCallbackMethod_FinishBlock<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<ExperimentalWithCallbackMethod_ConsolidateState<ExperimentalWithCallbackMethod_Purge<ExperimentalWithCallbackMethod_ReadTree<ExperimentalWithCallbackMethod_CancelBatch<ExperimentalWithCallbackMethod_ResetDB<Service > > > > > > > > > > > > > > > > > > CallbackService;
-  #endif
-
-  typedef ExperimentalWithCallbackMethod_GetLatestStateRoot<ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_FinishTx<ExperimentalWithCallbackMethod_StartBlock<ExperimentalWithCallbackMethod_FinishBlock<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<ExperimentalWithCallbackMethod_ConsolidateState<ExperimentalWithCallbackMethod_Purge<ExperimentalWithCallbackMethod_ReadTree<ExperimentalWithCallbackMethod_CancelBatch<ExperimentalWithCallbackMethod_ResetDB<Service > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
+  typedef WithCallbackMethod_GetLatestStateRoot<WithCallbackMethod_Set<WithCallbackMethod_Get<WithCallbackMethod_SetProgram<WithCallbackMethod_GetProgram<WithCallbackMethod_LoadDB<WithCallbackMethod_LoadProgramDB<WithCallbackMethod_FinishTx<WithCallbackMethod_StartBlock<WithCallbackMethod_FinishBlock<WithCallbackMethod_Flush<WithCallbackMethod_GetFlushStatus<WithCallbackMethod_GetFlushData<WithCallbackMethod_ConsolidateState<WithCallbackMethod_Purge<WithCallbackMethod_ReadTree<WithCallbackMethod_CancelBatch<WithCallbackMethod_ResetDB<Service > > > > > > > > > > > > > > > > > > CallbackService;
+  typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_GetLatestStateRoot : public BaseClass {
    private:
@@ -2755,27 +2027,17 @@ class HashDBService final {
     }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_GetLatestStateRoot : public BaseClass {
+  class WithRawCallbackMethod_GetLatestStateRoot : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_GetLatestStateRoot() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(0,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_GetLatestStateRoot() {
+      ::grpc::Service::MarkMethodRawCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetLatestStateRoot(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetLatestStateRoot(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_GetLatestStateRoot() override {
+    ~WithRawCallbackMethod_GetLatestStateRoot() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2783,37 +2045,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetLatestStateRoot(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetLatestStateRoot(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_Set : public BaseClass {
+  class WithRawCallbackMethod_Set : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_Set() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(1,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_Set() {
+      ::grpc::Service::MarkMethodRawCallback(1,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Set(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Set(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_Set() override {
+    ~WithRawCallbackMethod_Set() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2821,37 +2067,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Set(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* Set(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_Get : public BaseClass {
+  class WithRawCallbackMethod_Get : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_Get() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(2,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_Get() {
+      ::grpc::Service::MarkMethodRawCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Get(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Get(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_Get() override {
+    ~WithRawCallbackMethod_Get() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2859,37 +2089,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Get(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* Get(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetProgram : public BaseClass {
+  class WithRawCallbackMethod_SetProgram : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetProgram() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(3,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetProgram() {
+      ::grpc::Service::MarkMethodRawCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetProgram(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetProgram(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetProgram() override {
+    ~WithRawCallbackMethod_SetProgram() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2897,37 +2111,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetProgram(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetProgram(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_GetProgram : public BaseClass {
+  class WithRawCallbackMethod_GetProgram : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_GetProgram() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(4,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_GetProgram() {
+      ::grpc::Service::MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetProgram(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetProgram(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_GetProgram() override {
+    ~WithRawCallbackMethod_GetProgram() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2935,37 +2133,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetProgram(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetProgram(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_LoadDB : public BaseClass {
+  class WithRawCallbackMethod_LoadDB : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_LoadDB() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(5,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_LoadDB() {
+      ::grpc::Service::MarkMethodRawCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->LoadDB(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->LoadDB(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_LoadDB() override {
+    ~WithRawCallbackMethod_LoadDB() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2973,37 +2155,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* LoadDB(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* LoadDB(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_LoadProgramDB : public BaseClass {
+  class WithRawCallbackMethod_LoadProgramDB : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_LoadProgramDB() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(6,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_LoadProgramDB() {
+      ::grpc::Service::MarkMethodRawCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->LoadProgramDB(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->LoadProgramDB(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_LoadProgramDB() override {
+    ~WithRawCallbackMethod_LoadProgramDB() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3011,37 +2177,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* LoadProgramDB(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* LoadProgramDB(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_FinishTx : public BaseClass {
+  class WithRawCallbackMethod_FinishTx : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_FinishTx() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(7,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_FinishTx() {
+      ::grpc::Service::MarkMethodRawCallback(7,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->FinishTx(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->FinishTx(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_FinishTx() override {
+    ~WithRawCallbackMethod_FinishTx() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3049,37 +2199,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* FinishTx(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* FinishTx(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_StartBlock : public BaseClass {
+  class WithRawCallbackMethod_StartBlock : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_StartBlock() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(8,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_StartBlock() {
+      ::grpc::Service::MarkMethodRawCallback(8,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->StartBlock(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->StartBlock(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_StartBlock() override {
+    ~WithRawCallbackMethod_StartBlock() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3087,37 +2221,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* StartBlock(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* StartBlock(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_FinishBlock : public BaseClass {
+  class WithRawCallbackMethod_FinishBlock : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_FinishBlock() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(9,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_FinishBlock() {
+      ::grpc::Service::MarkMethodRawCallback(9,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->FinishBlock(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->FinishBlock(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_FinishBlock() override {
+    ~WithRawCallbackMethod_FinishBlock() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3125,37 +2243,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* FinishBlock(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* FinishBlock(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_Flush : public BaseClass {
+  class WithRawCallbackMethod_Flush : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_Flush() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(10,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_Flush() {
+      ::grpc::Service::MarkMethodRawCallback(10,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Flush(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Flush(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_Flush() override {
+    ~WithRawCallbackMethod_Flush() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3163,37 +2265,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Flush(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* Flush(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_GetFlushStatus : public BaseClass {
+  class WithRawCallbackMethod_GetFlushStatus : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_GetFlushStatus() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(11,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_GetFlushStatus() {
+      ::grpc::Service::MarkMethodRawCallback(11,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetFlushStatus(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetFlushStatus(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_GetFlushStatus() override {
+    ~WithRawCallbackMethod_GetFlushStatus() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3201,37 +2287,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetFlushStatus(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetFlushStatus(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_GetFlushData : public BaseClass {
+  class WithRawCallbackMethod_GetFlushData : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_GetFlushData() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(12,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_GetFlushData() {
+      ::grpc::Service::MarkMethodRawCallback(12,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetFlushData(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetFlushData(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_GetFlushData() override {
+    ~WithRawCallbackMethod_GetFlushData() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3239,37 +2309,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetFlushData(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetFlushData(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_ConsolidateState : public BaseClass {
+  class WithRawCallbackMethod_ConsolidateState : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_ConsolidateState() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(13,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_ConsolidateState() {
+      ::grpc::Service::MarkMethodRawCallback(13,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ConsolidateState(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ConsolidateState(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_ConsolidateState() override {
+    ~WithRawCallbackMethod_ConsolidateState() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3277,37 +2331,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* ConsolidateState(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* ConsolidateState(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_Purge : public BaseClass {
+  class WithRawCallbackMethod_Purge : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_Purge() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(14,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_Purge() {
+      ::grpc::Service::MarkMethodRawCallback(14,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Purge(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Purge(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_Purge() override {
+    ~WithRawCallbackMethod_Purge() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3315,37 +2353,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* Purge(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* Purge(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_ReadTree : public BaseClass {
+  class WithRawCallbackMethod_ReadTree : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_ReadTree() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(15,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_ReadTree() {
+      ::grpc::Service::MarkMethodRawCallback(15,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ReadTree(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ReadTree(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_ReadTree() override {
+    ~WithRawCallbackMethod_ReadTree() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3353,37 +2375,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* ReadTree(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* ReadTree(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_CancelBatch : public BaseClass {
+  class WithRawCallbackMethod_CancelBatch : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_CancelBatch() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(16,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_CancelBatch() {
+      ::grpc::Service::MarkMethodRawCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CancelBatch(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CancelBatch(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_CancelBatch() override {
+    ~WithRawCallbackMethod_CancelBatch() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3391,37 +2397,21 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* CancelBatch(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CancelBatch(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_ResetDB : public BaseClass {
+  class WithRawCallbackMethod_ResetDB : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_ResetDB() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(17,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_ResetDB() {
+      ::grpc::Service::MarkMethodRawCallback(17,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ResetDB(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ResetDB(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_ResetDB() override {
+    ~WithRawCallbackMethod_ResetDB() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3429,14 +2419,8 @@ class HashDBService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* ResetDB(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* ResetDB(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_GetLatestStateRoot : public BaseClass {
@@ -3447,8 +2431,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::StreamedUnaryHandler<
           ::google::protobuf::Empty, ::hashdb::v1::GetLatestStateRootResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::google::protobuf::Empty, ::hashdb::v1::GetLatestStateRootResponse>* streamer) {
                        return this->StreamedGetLatestStateRoot(context,
                          streamer);
@@ -3474,8 +2458,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>* streamer) {
                        return this->StreamedSet(context,
                          streamer);
@@ -3501,8 +2485,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(2,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>* streamer) {
                        return this->StreamedGet(context,
                          streamer);
@@ -3528,8 +2512,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(3,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>* streamer) {
                        return this->StreamedSetProgram(context,
                          streamer);
@@ -3555,8 +2539,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(4,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>* streamer) {
                        return this->StreamedGetProgram(context,
                          streamer);
@@ -3582,8 +2566,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(5,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>* streamer) {
                        return this->StreamedLoadDB(context,
                          streamer);
@@ -3609,8 +2593,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(6,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>* streamer) {
                        return this->StreamedLoadProgramDB(context,
                          streamer);
@@ -3636,8 +2620,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(7,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::FinishTxRequest, ::google::protobuf::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::FinishTxRequest, ::google::protobuf::Empty>* streamer) {
                        return this->StreamedFinishTx(context,
                          streamer);
@@ -3663,8 +2647,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(8,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::StartBlockRequest, ::google::protobuf::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::StartBlockRequest, ::google::protobuf::Empty>* streamer) {
                        return this->StreamedStartBlock(context,
                          streamer);
@@ -3690,8 +2674,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(9,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::FinishBlockRequest, ::google::protobuf::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::FinishBlockRequest, ::google::protobuf::Empty>* streamer) {
                        return this->StreamedFinishBlock(context,
                          streamer);
@@ -3717,8 +2701,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(10,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>* streamer) {
                        return this->StreamedFlush(context,
                          streamer);
@@ -3744,8 +2728,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(11,
         new ::grpc::internal::StreamedUnaryHandler<
           ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>* streamer) {
                        return this->StreamedGetFlushStatus(context,
                          streamer);
@@ -3771,8 +2755,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(12,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>* streamer) {
                        return this->StreamedGetFlushData(context,
                          streamer);
@@ -3798,8 +2782,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(13,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>* streamer) {
                        return this->StreamedConsolidateState(context,
                          streamer);
@@ -3825,8 +2809,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(14,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>* streamer) {
                        return this->StreamedPurge(context,
                          streamer);
@@ -3852,8 +2836,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(15,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>* streamer) {
                        return this->StreamedReadTree(context,
                          streamer);
@@ -3879,8 +2863,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(16,
         new ::grpc::internal::StreamedUnaryHandler<
           ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>* streamer) {
                        return this->StreamedCancelBatch(context,
                          streamer);
@@ -3906,8 +2890,8 @@ class HashDBService final {
       ::grpc::Service::MarkMethodStreamed(17,
         new ::grpc::internal::StreamedUnaryHandler<
           ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>* streamer) {
                        return this->StreamedResetDB(context,
                          streamer);

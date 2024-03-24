@@ -37,7 +37,7 @@ typedef enum : int
     ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO = 27, // Main state machine arith operation during ECRecover found a divide by zero situation
     ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE = 28, // Main state machine address out of valid memory space range
     ZKR_SM_MAIN_ADDRESS_NEGATIVE = 29, // Main state machine address is negative
-    ZKR_SM_MAIN_MEMALIGN_MODE_OUT_OF_RANGE = 30, // Main state machine mem align mode(offset,len,left,endian) is out of range
+    ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE = 30, // Main state machine mem align mode(offset,len,left,endian) is out of range
     ZKR_SM_MAIN_MULTIPLE_FREEIN = 31, // Main state machine got multiple free inputs in one sigle ROM instruction
     ZKR_SM_MAIN_STORAGE_READ_MISMATCH = 32, // Main state machine read ROM operation check failed
     ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH = 33, // Main state machine write ROM operation check failed
