@@ -97,7 +97,7 @@ $(BUILD_DIR)/%.cc.o: %.cc
 
 main_generator: $(BUILD_DIR)/$(TARGET_MNG)
 
-$(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp
+$(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp ./src/config/definitions.hpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/main_generator/main_generator.cpp -o $@ -lgmp
 
@@ -106,7 +106,7 @@ generate: main_generator
 
 pols_generator: $(BUILD_DIR)/$(TARGET_PLG)
 
-$(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp
+$(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp ./src/config/definitions.hpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/pols_generator/pols_generator.cpp -o $@ -lgmp
 
