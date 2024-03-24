@@ -276,12 +276,13 @@ enum RomError : int {
   ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK = 32,
   ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_LIMIT_TIMESTAMP = 33,
   ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP = 34,
+  ROM_ERROR_INVALID_L1_INFO_TREE_INDEX = 35,
   RomError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   RomError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool RomError_IsValid(int value);
 constexpr RomError RomError_MIN = ROM_ERROR_UNSPECIFIED;
-constexpr RomError RomError_MAX = ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP;
+constexpr RomError RomError_MAX = ROM_ERROR_INVALID_L1_INFO_TREE_INDEX;
 constexpr int RomError_ARRAYSIZE = RomError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* RomError_descriptor();

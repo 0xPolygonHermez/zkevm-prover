@@ -11,6 +11,8 @@
 #include "main_sm/fork_8/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_8/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
+#include "main_sm/fork_9/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_9/main_exec_generated/main_exec_generated_fast.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
 
@@ -272,6 +274,38 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             return;
         }
+        case 9: // fork_9
+        {
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+            if (config.useMainExecGenerated)
+            {
+                //zklog.info("Executor::process_batch() fork 8 generated");
+                fork_9::main_exec_generated_fast(mainExecutor_fork_9, proverRequest);
+            }
+            else
+#endif
+            {
+                //zklog.info("Executor::process_batch() fork 8 native");
+
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_9::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_9::CommitPols::pilSize()) + ")");
+                    exitProcess();
+                }
+                fork_9::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_9::MainExecRequired required;
+
+                mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
         default:
         {
             zklog.error("Executor::process_batch() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
@@ -464,12 +498,12 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
-                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_8, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_9, proverRequest, commitPols.Main, required);
             }
             else
 #endif
             {
-                mainExecutor_fork_8.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
             }
 
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -586,12 +620,12 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
         if (config.useMainExecGenerated)
         {
-            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_8, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_9, proverRequest, commitPols.Main, required);
         }
         else
 #endif
         {
-            mainExecutor_fork_8.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
         }
 
         // Save input to <timestamp>.input.json after execution including dbReadLog
