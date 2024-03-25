@@ -5,23 +5,13 @@
 #include <string>
 #include "main_sm/fork_9/main/rom_line.hpp"
 #include "main_sm/fork_9/main/rom_constants.hpp"
-#include "main_sm/fork_9/main/rom_labels.hpp"
 #include "config.hpp"
-#include "zkassert.hpp"
 
 using json = nlohmann::json;
 using namespace std;
 
 namespace fork_9
 {
-
-enum RomType
-{
-    UNSPECIFIED = 0,
-    BATCH = 1,
-    BLOB = 2,
-    COLLECTION = 3
-};
 
 class Rom
 {
@@ -32,7 +22,7 @@ public:
     uint64_t size; // Size of the ROM program, i.e. number of ROM lines found in rom.json
     RomLine *line; // ROM program lines, parsed and stored in memory
     unordered_map<string, uint64_t> memoryMap; // Map of memory variables offsets
-    unordered_map<string, uint64_t> labelsMap; // ROM lines labels, i.e. names of the ROM lines
+    unordered_map<string, uint64_t> labels; // ROM lines labels, i.e. names of the ROM lines
 
     /* Offsets of memory variables */
     uint64_t memLengthOffset;
@@ -51,7 +41,9 @@ public:
     uint64_t retDataCTXOffset;
     uint64_t retDataOffsetOffset;
     uint64_t retDataLengthOffset;
-    uint64_t newBatchAccInputHashOffset;
+    uint64_t newAccInputHashOffset;
+    uint64_t oldNumBatchOffset;
+    uint64_t newNumBatchOffset;
     uint64_t newLocalExitRootOffset;
     uint64_t gasRefundOffset;
     uint64_t txSrcAddrOffset;
@@ -87,13 +79,8 @@ public:
     /* Constants */
     RomConstants constants;
 
-    /* Labels */
-    RomLabels labels;
-
-    RomType type;
-
     /* Constructor */
-    Rom (const Config &config, RomType type) :
+    Rom (const Config &config) :
             config(config),
             size(0),
             line(NULL),
@@ -113,7 +100,9 @@ public:
             retDataCTXOffset(0),
             retDataOffsetOffset(0),
             retDataLengthOffset(0),
-            newBatchAccInputHashOffset(0),
+            newAccInputHashOffset(0),
+            oldNumBatchOffset(0),
+            newNumBatchOffset(0),
             newLocalExitRootOffset(0),
             gasRefundOffset(0),
             txSrcAddrOffset(0),
@@ -142,11 +131,8 @@ public:
             l2TxHashOffset(0),
             currentTxOffset(0),
             txStatusOffset(0),
-            currentLogIndexOffset(0),
-            type(type)
-            {
-                zkassert((type == BATCH) || (type == BLOB) || (type == COLLECTION));
-            };
+            currentLogIndexOffset(0)
+            { };
 
     /* Destructor */
     ~Rom() { if (line!=NULL) unload(); }

@@ -1,7 +1,6 @@
 #include <iostream>
 #include "main_sm/fork_9/main/rom.hpp"
 #include "main_sm/fork_9/main/rom_command.hpp"
-#include "main_sm/fork_9/main/main_definitions.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "zklog.hpp"
@@ -27,29 +26,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     }
     loadLabels(fr, romJson["labels"]);
 
-    // finalizeExecution is a mandatory label for all types of roms
-    labels.finalizeExecutionLabel     = getLabel(string("finalizeExecution"));
-    
-    if (type == BATCH)
-    {
-        labels.checkAndSaveFromLabel      = getLabel(string("checkAndSaveFrom"));
-        labels.ecrecoverStoreArgsLabel    = getLabel(string("ecrecover_store_args"));
-        labels.ecrecoverEndLabel          = getLabel(string("ecrecover_end"));
-        labels.checkFirstTxTypeLabel      = getLabel(string("checkFirstTxType"));
-        labels.writeBlockInfoRootLabel    = getLabel(string("writeBlockInfoRoot"));
-        labels.outOfCountersStepLabel     = getLabel(string("outOfCountersStep"));
-        labels.outOfCountersArithLabel    = getLabel(string("outOfCountersArith"));
-        labels.outOfCountersBinaryLabel   = getLabel(string("outOfCountersBinary"));
-        labels.outOfCountersKeccakLabel   = getLabel(string("outOfCountersKeccak"));
-        labels.outOfCountersSha256Label   = getLabel(string("outOfCountersSha256"));
-        labels.outOfCountersMemalignLabel = getLabel(string("outOfCountersMemalign"));
-        labels.outOfCountersPoseidonLabel = getLabel(string("outOfCountersPoseidon"));
-        labels.outOfCountersPaddingLabel  = getLabel(string("outOfCountersPadding"));
-        labels.invalidIntrinsicTxSenderCodeLabel = getLabel(string("invalidIntrinsicTxSenderCode"));
-    }
-
     // Get labels offsets
-    if (type == BATCH)
     {
         memLengthOffset              = getMemoryOffset("memLength");
         txDestAddrOffset             = getMemoryOffset("txDestAddr");
@@ -67,7 +44,9 @@ void Rom::load(Goldilocks &fr, json &romJson)
         retDataCTXOffset             = getMemoryOffset("retDataCTX");
         retDataOffsetOffset          = getMemoryOffset("retDataOffset");
         retDataLengthOffset          = getMemoryOffset("retDataLength");
-        newBatchAccInputHashOffset   = getMemoryOffset("newBatchAccInputHash");
+        newAccInputHashOffset        = getMemoryOffset("newAccInputHash");
+        oldNumBatchOffset            = getMemoryOffset("oldNumBatch");
+        newNumBatchOffset            = getMemoryOffset("newNumBatch");
         newLocalExitRootOffset       = getMemoryOffset("newLocalExitRoot");
         gasRefundOffset              = getMemoryOffset("gasRefund");
         txSrcAddrOffset              = getMemoryOffset("txSrcAddr");
@@ -102,105 +81,91 @@ void Rom::load(Goldilocks &fr, json &romJson)
     }
 
     // Load ROM integer constants
-    if (type == BATCH)
-    {
-        constants.BATCH_DIFFICULTY                  = getConstant(romJson, "BATCH_DIFFICULTY");
-        constants.TX_GAS_LIMIT                      = getConstant(romJson, "TX_GAS_LIMIT");
-        constants.GLOBAL_EXIT_ROOT_STORAGE_POS      = getConstant(romJson, "GLOBAL_EXIT_ROOT_STORAGE_POS");
-        constants.LOCAL_EXIT_ROOT_STORAGE_POS       = getConstant(romJson, "LOCAL_EXIT_ROOT_STORAGE_POS");
-        constants.STATE_ROOT_STORAGE_POS            = getConstant(romJson, "STATE_ROOT_STORAGE_POS");
-        constants.MAX_MEM_EXPANSION_BYTES           = getConstant(romJson, "MAX_MEM_EXPANSION_BYTES");
-        constants.FORK_ID                           = getConstant(romJson, "FORK_ID");
-        constants.MIN_VALUE_SHORT                   = getConstant(romJson, "MIN_VALUE_SHORT");
-        constants.MIN_BYTES_LONG                    = getConstant(romJson, "MIN_BYTES_LONG");
-        constants.SMT_KEY_BALANCE                   = getConstant(romJson, "SMT_KEY_BALANCE");
-        constants.SMT_KEY_NONCE                     = getConstant(romJson, "SMT_KEY_NONCE");
-        constants.SMT_KEY_SC_CODE                   = getConstant(romJson, "SMT_KEY_SC_CODE");
-        constants.SMT_KEY_SC_STORAGE                = getConstant(romJson, "SMT_KEY_SC_STORAGE");
-        constants.SMT_KEY_SC_LENGTH                 = getConstant(romJson, "SMT_KEY_SC_LENGTH");
-        constants.SMT_KEY_TOUCHED_ADDR              = getConstant(romJson, "SMT_KEY_TOUCHED_ADDR");
-        constants.SMT_KEY_TOUCHED_SLOTS             = getConstant(romJson, "SMT_KEY_TOUCHED_SLOTS");
-        constants.BASE_TX_GAS                       = getConstant(romJson, "BASE_TX_GAS");
-        constants.BASE_TX_DEPLOY_GAS                = getConstant(romJson, "BASE_TX_DEPLOY_GAS");
-        constants.SLOAD_GAS                         = getConstant(romJson, "SLOAD_GAS");
-        constants.GAS_QUICK_STEP                    = getConstant(romJson, "GAS_QUICK_STEP");
-        constants.GAS_FASTEST_STEP                  = getConstant(romJson, "GAS_FASTEST_STEP");
-        constants.GAS_FAST_STEP                     = getConstant(romJson, "GAS_FAST_STEP");
-        constants.GAS_MID_STEP                      = getConstant(romJson, "GAS_MID_STEP");
-        constants.GAS_SLOW_STEP                     = getConstant(romJson, "GAS_SLOW_STEP");
-        constants.GAS_EXT_STEP                      = getConstant(romJson, "GAS_EXT_STEP");
-        constants.CALL_VALUE_TRANSFER_GAS           = getConstant(romJson, "CALL_VALUE_TRANSFER_GAS");
-        constants.CALL_NEW_ACCOUNT_GAS              = getConstant(romJson, "CALL_NEW_ACCOUNT_GAS");
-        constants.CALL_STIPEND                      = getConstant(romJson, "CALL_STIPEND");
-        constants.ECRECOVER_GAS                     = getConstant(romJson, "ECRECOVER_GAS");
-        constants.IDENTITY_GAS                      = getConstant(romJson, "IDENTITY_GAS");
-        constants.IDENTITY_WORD_GAS                 = getConstant(romJson, "IDENTITY_WORD_GAS");
-        constants.KECCAK_GAS                        = getConstant(romJson, "KECCAK_GAS");
-        constants.KECCAK_WORD_GAS                   = getConstant(romJson, "KECCAK_WORD_GAS");
-        constants.LOG_GAS                           = getConstant(romJson, "LOG_GAS");
-        constants.LOG_TOPIC_GAS                     = getConstant(romJson, "LOG_TOPIC_GAS");
-        constants.JUMP_DEST_GAS                     = getConstant(romJson, "JUMP_DEST_GAS");
-        constants.WARM_STORAGE_READ_GAS             = getConstant(romJson, "WARM_STORAGE_READ_GAS");
-        constants.COLD_ACCOUNT_ACCESS_COST_REDUCED  = getConstant(romJson, "COLD_ACCOUNT_ACCESS_COST_REDUCED");
-        constants.COLD_ACCOUNT_ACCESS_COST          = getConstant(romJson, "COLD_ACCOUNT_ACCESS_COST");
-        constants.EXP_BYTE_GAS                      = getConstant(romJson, "EXP_BYTE_GAS");
-        constants.RETURN_GAS_COST                   = getConstant(romJson, "RETURN_GAS_COST");
-        constants.CREATE_GAS                        = getConstant(romJson, "CREATE_GAS");
-        constants.CREATE_2_GAS                      = getConstant(romJson, "CREATE_2_GAS");
-        constants.SENDALL_GAS                       = getConstant(romJson, "SENDALL_GAS");
-        constants.LOG_DATA_GAS                      = getConstant(romJson, "LOG_DATA_GAS");
-        constants.SSTORE_ENTRY_EIP_2200_GAS         = getConstant(romJson, "SSTORE_ENTRY_EIP_2200_GAS");
-        constants.SSTORE_SET_EIP_2200_GAS           = getConstant(romJson, "SSTORE_SET_EIP_2200_GAS");
-        constants.COLD_SLOAD_COST                   = getConstant(romJson, "COLD_SLOAD_COST");
-        constants.COLD_SLOAD_COST_REDUCED           = getConstant(romJson, "COLD_SLOAD_COST_REDUCED");
-        constants.SSTORE_DYNAMIC_GAS                = getConstant(romJson, "SSTORE_DYNAMIC_GAS");
-        constants.SSTORE_SET_GAS                    = getConstant(romJson, "SSTORE_SET_GAS");
-        constants.SSTORE_SET_GAS_REDUCED            = getConstant(romJson, "SSTORE_SET_GAS_REDUCED");
-        constants.SSTORE_RESET_GAS                  = getConstant(romJson, "SSTORE_RESET_GAS");
-        constants.SSTORE_RESET_GAS_REDUCED          = getConstant(romJson, "SSTORE_RESET_GAS_REDUCED");
-        constants.SSTORE_CLEARS_SCHEDULE            = getConstant(romJson, "SSTORE_CLEARS_SCHEDULE");
-        constants.MIN_STEPS_FINISH_BATCH            = getConstant(romJson, "MIN_STEPS_FINISH_BATCH");
-        constants.TOTAL_STEPS_LIMIT                 = getConstant(romJson, "TOTAL_STEPS_LIMIT");
-        constants.MAX_CNT_STEPS_LIMIT               = getConstant(romJson, "MAX_CNT_STEPS_LIMIT");
-        constants.MAX_CNT_ARITH_LIMIT               = getConstant(romJson, "MAX_CNT_ARITH_LIMIT");
-        constants.MAX_CNT_BINARY_LIMIT              = getConstant(romJson, "MAX_CNT_BINARY_LIMIT");
-        constants.MAX_CNT_MEM_ALIGN_LIMIT           = getConstant(romJson, "MAX_CNT_MEM_ALIGN_LIMIT");
-        constants.MAX_CNT_KECCAK_F_LIMIT            = getConstant(romJson, "MAX_CNT_KECCAK_F_LIMIT");
-        constants.MAX_CNT_PADDING_PG_LIMIT          = getConstant(romJson, "MAX_CNT_PADDING_PG_LIMIT");
-        constants.MAX_CNT_POSEIDON_G_LIMIT          = getConstant(romJson, "MAX_CNT_POSEIDON_G_LIMIT");
-        constants.MAX_CNT_SHA256_F_LIMIT            = getConstant(romJson, "MAX_CNT_SHA256_F_LIMIT");
-        constants.SAFE_RANGE                        = getConstant(romJson, "SAFE_RANGE");
-        constants.MAX_CNT_STEPS                     = getConstant(romJson, "MAX_CNT_STEPS");
-        constants.MAX_CNT_ARITH                     = getConstant(romJson, "MAX_CNT_ARITH");
-        constants.MAX_CNT_BINARY                    = getConstant(romJson, "MAX_CNT_BINARY");
-        constants.MAX_CNT_MEM_ALIGN                 = getConstant(romJson, "MAX_CNT_MEM_ALIGN");
-        constants.MAX_CNT_KECCAK_F                  = getConstant(romJson, "MAX_CNT_KECCAK_F");
-        constants.MAX_CNT_PADDING_PG                = getConstant(romJson, "MAX_CNT_PADDING_PG");
-        constants.MAX_CNT_POSEIDON_G                = getConstant(romJson, "MAX_CNT_POSEIDON_G");
-        constants.MAX_CNT_SHA256_F                  = getConstant(romJson, "MAX_CNT_SHA256_F");
-        constants.MAX_CNT_POSEIDON_SLOAD_SSTORE     = getConstant(romJson, "MAX_CNT_POSEIDON_SLOAD_SSTORE");
-        constants.MIN_CNT_KECCAK_BATCH              = getConstant(romJson, "MIN_CNT_KECCAK_BATCH");
-        constants.CODE_SIZE_LIMIT                   = getConstant(romJson, "CODE_SIZE_LIMIT");
-        constants.BYTECODE_STARTS_EF                = getConstant(romJson, "BYTECODE_STARTS_EF");
-        constants.BLOCK_GAS_LIMIT                   = getConstant(romJson, "BLOCK_GAS_LIMIT");
+    constants.BATCH_DIFFICULTY                  = getConstant(romJson, "BATCH_DIFFICULTY");
+    constants.TX_GAS_LIMIT                      = getConstant(romJson, "TX_GAS_LIMIT");
+    constants.GLOBAL_EXIT_ROOT_STORAGE_POS      = getConstant(romJson, "GLOBAL_EXIT_ROOT_STORAGE_POS");
+    constants.LOCAL_EXIT_ROOT_STORAGE_POS       = getConstant(romJson, "LOCAL_EXIT_ROOT_STORAGE_POS");
+    constants.STATE_ROOT_STORAGE_POS            = getConstant(romJson, "STATE_ROOT_STORAGE_POS");
+    constants.MAX_MEM_EXPANSION_BYTES           = getConstant(romJson, "MAX_MEM_EXPANSION_BYTES");
+    constants.FORK_ID                           = getConstant(romJson, "FORK_ID");
+    constants.MIN_VALUE_SHORT                   = getConstant(romJson, "MIN_VALUE_SHORT");
+    constants.MIN_BYTES_LONG                    = getConstant(romJson, "MIN_BYTES_LONG");
+    constants.SMT_KEY_BALANCE                   = getConstant(romJson, "SMT_KEY_BALANCE");
+    constants.SMT_KEY_NONCE                     = getConstant(romJson, "SMT_KEY_NONCE");
+    constants.SMT_KEY_SC_CODE                   = getConstant(romJson, "SMT_KEY_SC_CODE");
+    constants.SMT_KEY_SC_STORAGE                = getConstant(romJson, "SMT_KEY_SC_STORAGE");
+    constants.SMT_KEY_SC_LENGTH                 = getConstant(romJson, "SMT_KEY_SC_LENGTH");
+    constants.SMT_KEY_TOUCHED_ADDR              = getConstant(romJson, "SMT_KEY_TOUCHED_ADDR");
+    constants.SMT_KEY_TOUCHED_SLOTS             = getConstant(romJson, "SMT_KEY_TOUCHED_SLOTS");
+    constants.BASE_TX_GAS                       = getConstant(romJson, "BASE_TX_GAS");
+    constants.BASE_TX_DEPLOY_GAS                = getConstant(romJson, "BASE_TX_DEPLOY_GAS");
+    constants.SLOAD_GAS                         = getConstant(romJson, "SLOAD_GAS");
+    constants.GAS_QUICK_STEP                    = getConstant(romJson, "GAS_QUICK_STEP");
+    constants.GAS_FASTEST_STEP                  = getConstant(romJson, "GAS_FASTEST_STEP");
+    constants.GAS_FAST_STEP                     = getConstant(romJson, "GAS_FAST_STEP");
+    constants.GAS_MID_STEP                      = getConstant(romJson, "GAS_MID_STEP");
+    constants.GAS_SLOW_STEP                     = getConstant(romJson, "GAS_SLOW_STEP");
+    constants.GAS_EXT_STEP                      = getConstant(romJson, "GAS_EXT_STEP");
+    constants.CALL_VALUE_TRANSFER_GAS           = getConstant(romJson, "CALL_VALUE_TRANSFER_GAS");
+    constants.CALL_NEW_ACCOUNT_GAS              = getConstant(romJson, "CALL_NEW_ACCOUNT_GAS");
+    constants.CALL_STIPEND                      = getConstant(romJson, "CALL_STIPEND");
+    constants.ECRECOVER_GAS                     = getConstant(romJson, "ECRECOVER_GAS");
+    constants.IDENTITY_GAS                      = getConstant(romJson, "IDENTITY_GAS");
+    constants.IDENTITY_WORD_GAS                 = getConstant(romJson, "IDENTITY_WORD_GAS");
+    constants.KECCAK_GAS                        = getConstant(romJson, "KECCAK_GAS");
+    constants.KECCAK_WORD_GAS                   = getConstant(romJson, "KECCAK_WORD_GAS");
+    constants.LOG_GAS                           = getConstant(romJson, "LOG_GAS");
+    constants.LOG_TOPIC_GAS                     = getConstant(romJson, "LOG_TOPIC_GAS");
+    constants.JUMP_DEST_GAS                     = getConstant(romJson, "JUMP_DEST_GAS");
+    constants.WARM_STORAGE_READ_GAS             = getConstant(romJson, "WARM_STORAGE_READ_GAS");
+    constants.COLD_ACCOUNT_ACCESS_COST_REDUCED  = getConstant(romJson, "COLD_ACCOUNT_ACCESS_COST_REDUCED");
+    constants.COLD_ACCOUNT_ACCESS_COST          = getConstant(romJson, "COLD_ACCOUNT_ACCESS_COST");
+    constants.EXP_BYTE_GAS                      = getConstant(romJson, "EXP_BYTE_GAS");
+    constants.RETURN_GAS_COST                   = getConstant(romJson, "RETURN_GAS_COST");
+    constants.CREATE_GAS                        = getConstant(romJson, "CREATE_GAS");
+    constants.CREATE_2_GAS                      = getConstant(romJson, "CREATE_2_GAS");
+    constants.SENDALL_GAS                       = getConstant(romJson, "SENDALL_GAS");
+    constants.LOG_DATA_GAS                      = getConstant(romJson, "LOG_DATA_GAS");
+    constants.SSTORE_ENTRY_EIP_2200_GAS         = getConstant(romJson, "SSTORE_ENTRY_EIP_2200_GAS");
+    constants.SSTORE_SET_EIP_2200_GAS           = getConstant(romJson, "SSTORE_SET_EIP_2200_GAS");
+    constants.COLD_SLOAD_COST                   = getConstant(romJson, "COLD_SLOAD_COST");
+    constants.COLD_SLOAD_COST_REDUCED           = getConstant(romJson, "COLD_SLOAD_COST_REDUCED");
+    constants.SSTORE_DYNAMIC_GAS                = getConstant(romJson, "SSTORE_DYNAMIC_GAS");
+    constants.SSTORE_SET_GAS                    = getConstant(romJson, "SSTORE_SET_GAS");
+    constants.SSTORE_SET_GAS_REDUCED            = getConstant(romJson, "SSTORE_SET_GAS_REDUCED");
+    constants.SSTORE_RESET_GAS                  = getConstant(romJson, "SSTORE_RESET_GAS");
+    constants.SSTORE_RESET_GAS_REDUCED          = getConstant(romJson, "SSTORE_RESET_GAS_REDUCED");
+    constants.SSTORE_CLEARS_SCHEDULE            = getConstant(romJson, "SSTORE_CLEARS_SCHEDULE");
+    constants.MIN_STEPS_FINISH_BATCH            = getConstant(romJson, "MIN_STEPS_FINISH_BATCH");
+    constants.TOTAL_STEPS_LIMIT                 = getConstant(romJson, "TOTAL_STEPS_LIMIT");
+    constants.MAX_CNT_STEPS_LIMIT               = getConstant(romJson, "MAX_CNT_STEPS_LIMIT");
+    constants.MAX_CNT_ARITH_LIMIT               = getConstant(romJson, "MAX_CNT_ARITH_LIMIT");
+    constants.MAX_CNT_BINARY_LIMIT              = getConstant(romJson, "MAX_CNT_BINARY_LIMIT");
+    constants.MAX_CNT_MEM_ALIGN_LIMIT           = getConstant(romJson, "MAX_CNT_MEM_ALIGN_LIMIT");
+    constants.MAX_CNT_KECCAK_F_LIMIT            = getConstant(romJson, "MAX_CNT_KECCAK_F_LIMIT");
+    constants.MAX_CNT_PADDING_PG_LIMIT          = getConstant(romJson, "MAX_CNT_PADDING_PG_LIMIT");
+    constants.MAX_CNT_POSEIDON_G_LIMIT          = getConstant(romJson, "MAX_CNT_POSEIDON_G_LIMIT");
+    constants.MAX_CNT_SHA256_F_LIMIT            = getConstant(romJson, "MAX_CNT_SHA256_F_LIMIT");
+    constants.SAFE_RANGE                        = getConstant(romJson, "SAFE_RANGE");
+    constants.MAX_CNT_STEPS                     = getConstant(romJson, "MAX_CNT_STEPS");
+    constants.MAX_CNT_ARITH                     = getConstant(romJson, "MAX_CNT_ARITH");
+    constants.MAX_CNT_BINARY                    = getConstant(romJson, "MAX_CNT_BINARY");
+    constants.MAX_CNT_MEM_ALIGN                 = getConstant(romJson, "MAX_CNT_MEM_ALIGN");
+    constants.MAX_CNT_KECCAK_F                  = getConstant(romJson, "MAX_CNT_KECCAK_F");
+    constants.MAX_CNT_PADDING_PG                = getConstant(romJson, "MAX_CNT_PADDING_PG");
+    constants.MAX_CNT_POSEIDON_G                = getConstant(romJson, "MAX_CNT_POSEIDON_G");
+    constants.MAX_CNT_SHA256_F                  = getConstant(romJson, "MAX_CNT_SHA256_F");
+    constants.MAX_CNT_POSEIDON_SLOAD_SSTORE     = getConstant(romJson, "MAX_CNT_POSEIDON_SLOAD_SSTORE");
+    constants.MIN_CNT_KECCAK_BATCH              = getConstant(romJson, "MIN_CNT_KECCAK_BATCH");
+    constants.CODE_SIZE_LIMIT                   = getConstant(romJson, "CODE_SIZE_LIMIT");
+    constants.BYTECODE_STARTS_EF                = getConstant(romJson, "BYTECODE_STARTS_EF");
+    constants.BLOCK_GAS_LIMIT                   = getConstant(romJson, "BLOCK_GAS_LIMIT");
 
-        // Load ROM scalar constants
-        constants.ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 = getConstantL(romJson, "ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2");
-        constants.ADDRESS_SYSTEM                      = getConstantL(romJson, "ADDRESS_SYSTEM");
-        constants.MAX_NONCE                           = getConstantL(romJson, "MAX_NONCE");
-        constants.MAX_UINT_256                        = getConstantL(romJson, "MAX_UINT_256");
-    }
-    else if (type == COLLECTION)
-    {
-        constants.MAX_CNT_STEPS_LIMIT               = U64Mask64;
-        constants.MAX_CNT_ARITH_LIMIT               = U64Mask64;
-        constants.MAX_CNT_BINARY_LIMIT              = U64Mask64;
-        constants.MAX_CNT_MEM_ALIGN_LIMIT           = U64Mask64;
-        constants.MAX_CNT_KECCAK_F_LIMIT            = U64Mask64;
-        constants.MAX_CNT_PADDING_PG_LIMIT          = U64Mask64;
-        constants.MAX_CNT_POSEIDON_G_LIMIT          = U64Mask64;
-        constants.MAX_CNT_SHA256_F_LIMIT            = U64Mask64;
-    }
+    // Load ROM scalar constants
+    constants.ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 = getConstantL(romJson, "ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2");
+    constants.ADDRESS_SYSTEM                      = getConstantL(romJson, "ADDRESS_SYSTEM");
+    constants.MAX_NONCE                           = getConstantL(romJson, "MAX_NONCE");
+    constants.MAX_UINT_256                        = getConstantL(romJson, "MAX_UINT_256");
 }
 
 void Rom::loadProgram(Goldilocks &fr, json &romJson)
@@ -291,7 +256,6 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         else
         {
             line[i].bElseAddrPresent = false;
-            line[i].elseAddr = fr.zero();
         }
 
         if (l["offset"].is_number_integer())
@@ -334,30 +298,21 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["inCntPaddingPG"].is_string()) fr.fromString(line[i].inCntPaddingPG, l["inCntPaddingPG"]); else line[i].inCntPaddingPG = fr.zero();
         if (l["inROTL_C"].is_string()) fr.fromString(line[i].inROTL_C, l["inROTL_C"]); else line[i].inROTL_C = fr.zero();
         if (l["inRCX"].is_string()) fr.fromString(line[i].inRCX, l["inRCX"]); else line[i].inRCX = fr.zero();
-        if (l["inRID"].is_string()) fr.fromString(line[i].inRID, l["inRID"]); else line[i].inRID = fr.zero();
-        if (l["elseUseAddrRel"].is_number_integer()) line[i].elseUseAddrRel = l["elseUseAddrRel"]; else line[i].elseUseAddrRel = 0;
 
         if (l["mOp"].is_number_integer()) line[i].mOp = l["mOp"]; else line[i].mOp = 0;
         if (l["mWR"].is_number_integer()) line[i].mWR = l["mWR"]; else line[i].mWR = 0;
-        if (l["memUseAddrRel"].is_number_integer()) line[i].memUseAddrRel = l["memUseAddrRel"]; else line[i].memUseAddrRel = 0;
-        if (l["assumeFree"].is_number_integer()) line[i].assumeFree = l["assumeFree"]; else line[i].assumeFree = 0;
-        if (l["hashBytes"].is_number_integer()) line[i].hashBytes = l["hashBytes"]; else line[i].hashBytes = 0;
-        if (l["hashBytesInD"].is_number_integer()) line[i].hashBytesInD = l["hashBytesInD"]; else line[i].hashBytesInD = 0;
         if (l["hashK"].is_number_integer()) line[i].hashK = l["hashK"]; else line[i].hashK = 0;
+        if (l["hashK1"].is_number_integer()) line[i].hashK1 = l["hashK1"]; else line[i].hashK1 = 0;
         if (l["hashKLen"].is_number_integer()) line[i].hashKLen = l["hashKLen"]; else line[i].hashKLen = 0;
         if (l["hashKDigest"].is_number_integer()) line[i].hashKDigest = l["hashKDigest"]; else line[i].hashKDigest = 0;
         if (l["hashP"].is_number_integer()) line[i].hashP = l["hashP"]; else line[i].hashP = 0;
+        if (l["hashP1"].is_number_integer()) line[i].hashP1 = l["hashP1"]; else line[i].hashP1 = 0;
         if (l["hashPLen"].is_number_integer()) line[i].hashPLen = l["hashPLen"]; else line[i].hashPLen = 0;
         if (l["hashPDigest"].is_number_integer()) line[i].hashPDigest = l["hashPDigest"]; else line[i].hashPDigest = 0;
-#ifdef SUPPORT_SHA256
         if (l["hashS"].is_number_integer()) line[i].hashS = l["hashS"]; else line[i].hashS = 0;
+        if (l["hashS1"].is_number_integer()) line[i].hashS1 = l["hashS1"]; else line[i].hashS1 = 0;
         if (l["hashSLen"].is_number_integer()) line[i].hashSLen = l["hashSLen"]; else line[i].hashSLen = 0;
         if (l["hashSDigest"].is_number_integer()) line[i].hashSDigest = l["hashSDigest"]; else line[i].hashSDigest = 0;
-#else
-        line[i].hashS = 0;
-        line[i].hashSLen = 0;
-        line[i].hashSDigest = 0;
-#endif
 
         if (l["JMP"].is_number_integer()) line[i].JMP = l["JMP"]; else line[i].JMP = 0;
         if (l["JMPC"].is_number_integer()) line[i].JMPC = l["JMPC"]; else line[i].JMPC = 0;
@@ -365,18 +320,15 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["JMPZ"].is_number_integer()) line[i].JMPZ = l["JMPZ"]; else line[i].JMPZ = 0;
         if (l["call"].is_number_integer()) line[i].call = l["call"]; else line[i].call = 0;
         if (l["return"].is_number_integer()) line[i].return_ = l["return"]; else line[i].return_ = 0;
-        if (l["save"].is_number_integer()) line[i].save = l["save"]; else line[i].save = 0;
-        if (l["restore"].is_number_integer()) line[i].restore = l["restore"]; else line[i].restore = 0;
-        if (l["jmpUseAddrRel"].is_number_integer()) line[i].jmpUseAddrRel = l["jmpUseAddrRel"]; else line[i].jmpUseAddrRel = 0;
+        if (l["useJmpAddr"].is_number_integer()) line[i].useJmpAddr = l["useJmpAddr"]; else line[i].useJmpAddr = 0;
         if (l["useElseAddr"].is_number_integer()) line[i].useElseAddr = l["useElseAddr"]; else line[i].useElseAddr = 0;
         if (l["useCTX"].is_number_integer()) line[i].useCTX = l["useCTX"]; else line[i].useCTX = 0;
         if (l["isStack"].is_number_integer()) line[i].isStack = l["isStack"]; else line[i].isStack = 0;
         if (l["isMem"].is_number_integer()) line[i].isMem = l["isMem"]; else line[i].isMem = 0;
 
         if (l["incStack"].is_number_integer()) line[i].incStack = l["incStack"]; else line[i].incStack = 0;
-        if (l["hashOffset"].is_number_integer()) line[i].hashOffset = l["hashOffset"]; else line[i].hashOffset = 0;
-        if (l["ind"].is_number_integer()) fr.fromS64(line[i].ind, l["ind"]); else line[i].ind = fr.zero();
-        if (l["indRR"].is_number_integer()) fr.fromS64(line[i].indRR, l["indRR"]); else line[i].indRR = fr.zero();
+        if (l["ind"].is_number_integer()) line[i].ind = l["ind"]; else line[i].ind = 0;
+        if (l["indRR"].is_number_integer()) line[i].indRR = l["indRR"]; else line[i].indRR = 0;
 
         if (l["assert"].is_number_integer()) line[i].assert = l["assert"]; else line[i].assert = 0;
         
@@ -394,28 +346,30 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["setRR"].is_number_integer()) line[i].setRR = l["setRR"]; else line[i].setRR = 0;
         if (l["setHASHPOS"].is_number_integer()) line[i].setHASHPOS = l["setHASHPOS"]; else line[i].setHASHPOS = 0;
         if (l["setRCX"].is_number_integer()) line[i].setRCX = l["setRCX"]; else line[i].setRCX = 0;
-        if (l["setRID"].is_number_integer()) line[i].setRID = l["setRID"]; else line[i].setRID = 0;
  
         if (l["sRD"].is_number_integer()) line[i].sRD = l["sRD"]; else line[i].sRD = 0;
         if (l["sWR"].is_number_integer()) line[i].sWR = l["sWR"]; else line[i].sWR = 0;
-        if (l["arith"].is_number_integer()) line[i].arith = l["arith"]; else line[i].arith = 0;
-        if (l["arithEquation"].is_number_integer()) line[i].arithEquation = l["arithEquation"]; else line[i].arithEquation = 0;
+        if (l["arithEq0"].is_number_integer()) line[i].arithEq0 = l["arithEq0"]; else line[i].arithEq0 = 0;
+        if (l["arithEq1"].is_number_integer()) line[i].arithEq1 = l["arithEq1"]; else line[i].arithEq1 = 0;
+        if (l["arithEq2"].is_number_integer()) line[i].arithEq2 = l["arithEq2"]; else line[i].arithEq2 = 0;
+        if (l["arithEq3"].is_number_integer()) line[i].arithEq3 = l["arithEq3"]; else line[i].arithEq3 = 0;
+        if (l["arithEq4"].is_number_integer()) line[i].arithEq4 = l["arithEq4"]; else line[i].arithEq4 = 0;
+        if (l["arithEq5"].is_number_integer()) line[i].arithEq5 = l["arithEq5"]; else line[i].arithEq5 = 0;
         if (l["bin"].is_number_integer()) line[i].bin = l["bin"]; else line[i].bin = 0;
         if (l["binOpcode"].is_number_integer()) line[i].binOpcode = l["binOpcode"]; else line[i].binOpcode = 0;
         if (l["memAlignRD"].is_number_integer()) line[i].memAlignRD = l["memAlignRD"]; else line[i].memAlignRD = 0;
         if (l["memAlignWR"].is_number_integer()) line[i].memAlignWR = l["memAlignWR"]; else line[i].memAlignWR = 0;
         if (l["memAlignWR8"].is_number_integer()) line[i].memAlignWR8 = l["memAlignWR8"]; else line[i].memAlignWR8 = 0;
         if (l["repeat"].is_number_integer()) line[i].repeat = l["repeat"]; else line[i].repeat = 0;
-        if (l["free0IsByte"].is_number_integer()) line[i].free0IsByte = l["free0IsByte"]; else line[i].free0IsByte = 0;
     }
 }
 
 void Rom::loadLabels(Goldilocks &fr, json &romJson)
 {
     // Check that memoryMap is empty
-    if (labelsMap.size() != 0)
+    if (labels.size() != 0)
     {
-        zklog.error("Rom::loadLabels() called with labelsMap.size()=" + to_string(labelsMap.size()));
+        zklog.error("Rom::loadLabels() called with labels.size()=" + to_string(labels.size()));
         exitProcess();
     }
 
@@ -434,15 +388,15 @@ void Rom::loadLabels(Goldilocks &fr, json &romJson)
             zklog.error("Rom::loadLabels() labels value is not a number");
             exitProcess();
         }
-        labelsMap[it.key()] = it.value();
+        labels[it.key()] = it.value();
     }
 }
 
 uint64_t Rom::getLabel(const string &label) const
 {
     unordered_map<string,uint64_t>::const_iterator it;
-    it = labelsMap.find(label);
-    if (it==labelsMap.end())
+    it = labels.find(label);
+    if (it==labels.end())
     {
         zklog.error("Rom::getLabel() could not find label=" + label);
         exitProcess();
@@ -456,7 +410,7 @@ uint64_t Rom::getMemoryOffset(const string &label) const
     it = memoryMap.find(label);
     if (it==memoryMap.end())
     {
-        zklog.error("Rom::getMemoryOffset() could not find label=" + label + " type=" + to_string(type));
+        zklog.error("Rom::getMemoryOffset() could not find label=" + label);
         exitProcess();
     }
     return it->second;

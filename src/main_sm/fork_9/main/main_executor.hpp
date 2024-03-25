@@ -45,9 +45,7 @@ public:
     PoseidonGoldilocks &poseidon;
 
     // ROM JSON file data:
-    Rom romBatch;
-    Rom romCollection;
-
+    Rom rom;
 #ifdef MULTI_ROM_TEST
     Rom rom_gas_limit_100000000;
     Rom rom_gas_limit_2147483647;
@@ -56,6 +54,23 @@ public:
 
     // Database server configuration, if any
     const Config &config;
+
+    // ROM labels
+    uint64_t finalizeExecutionLabel;
+    uint64_t checkAndSaveFromLabel;
+    uint64_t ecrecoverStoreArgsLabel;
+    uint64_t ecrecoverEndLabel;
+    uint64_t checkFirstTxTypeLabel;
+    uint64_t writeBlockInfoRootLabel;
+    uint64_t verifyMerkleProofEndLabel;
+    uint64_t outOfCountersStepLabel;
+    uint64_t outOfCountersArithLabel;
+    uint64_t outOfCountersBinaryLabel;
+    uint64_t outOfCountersKeccakLabel;
+    uint64_t outOfCountersSha256Label;
+    uint64_t outOfCountersMemalignLabel;
+    uint64_t outOfCountersPoseidonLabel;
+    uint64_t outOfCountersPaddingLabel;
 
     // Labels lock
     pthread_mutex_t labelsMutex;    // Mutex to protect the labels vector

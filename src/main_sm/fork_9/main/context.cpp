@@ -1,5 +1,4 @@
 #include "main_sm/fork_9/main/context.hpp"
-#include "main_sm/fork_9/main/main_definitions.hpp"
 #include "zklog.hpp"
 
 namespace fork_9
@@ -44,9 +43,7 @@ void Context::printRegs()
         " cntBinary=" + reg2string(pols.cntBinary[*pStep]) +
         " cntMemAlign=" + reg2string(pols.cntMemAlign[*pStep]) +
         " cntKeccakF=" + reg2string(pols.cntKeccakF[*pStep]) +
-#ifdef SUPPORT_SHA256
         " cntSha256F=" + reg2string(pols.cntSha256F[*pStep]) +
-#endif
         " cntPoseidonG=" + reg2string(pols.cntPoseidonG[*pStep]) +
         " cntPaddingPG=" + reg2string(pols.cntPaddingPG[*pStep]) );
 

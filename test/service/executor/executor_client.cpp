@@ -214,7 +214,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         }
     }
     else if ((input.publicInputsExtended.publicInputs.forkID >= 7) &&
-             (input.publicInputsExtended.publicInputs.forkID <= 8) &&
+             (input.publicInputsExtended.publicInputs.forkID <= 9) &&
              (input.publicInputsExtended.publicInputs.witness.empty()))
     {
         ::executor::v1::ProcessBatchRequestV2 request;
@@ -385,7 +385,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         }
     }
     else if ((input.publicInputsExtended.publicInputs.forkID >= 7) &&
-             (input.publicInputsExtended.publicInputs.forkID <= 8) &&
+             (input.publicInputsExtended.publicInputs.forkID <= 9) &&
              (!input.publicInputsExtended.publicInputs.witness.empty())) // Stateless
     {
         ::executor::v1::ProcessStatelessBatchRequestV2 request;
@@ -453,7 +453,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
         }
     }
-    else if ((input.publicInputsExtended.publicInputs.forkID >= 9) &&
+    else if ((input.publicInputsExtended.publicInputs.forkID >= 10) &&
              (!input.publicInputsExtended.publicInputs.batchL2Data.empty())) // Batch
     {
         ::executor::v1::ProcessBatchRequestV3 request;
@@ -631,18 +631,9 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
         }    
     }
-    else if ((input.publicInputsExtended.publicInputs.forkID >= 9) &&
+    else if ((input.publicInputsExtended.publicInputs.forkID >= 10) &&
              (!input.publicInputsExtended.publicInputs.blobData.empty())) // Blob
     {
-        /*
-        
-
-
-    bytes blob_data = 14;
-    bytes forced_hash_data = 15;
-    string context_id = 16;
-    DebugV3 debug = 17;
-        */
         ::executor::v1::ProcessBlobInnerRequestV3 request;
         request.set_old_blob_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldBlobStateRoot));
         request.set_old_blob_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldBlobAccInputHash));
