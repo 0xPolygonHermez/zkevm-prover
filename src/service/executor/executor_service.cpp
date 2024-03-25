@@ -172,6 +172,13 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
+    if (proverRequest.input.bUpdateMerkleTree && config.dbReadOnly)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got bUpdateMerkleTree=true while dbReadOnly=true", &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
 
     // Trace config
     if (request->has_trace_config())
@@ -920,12 +927,18 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
+    if (proverRequest.input.bUpdateMerkleTree && config.dbReadOnly)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatchV2() got bUpdateMerkleTree=true while dbReadOnly=true", &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
     proverRequest.input.bNoCounters = request->no_counters();
     proverRequest.input.bGetKeys = request->get_keys();
     proverRequest.input.bSkipVerifyL1InfoRoot = request->skip_verify_l1_info_root();
     proverRequest.input.bSkipFirstChangeL2Block = request->skip_first_change_l2_block();
     proverRequest.input.bSkipWriteBlockInfoRoot = request->skip_write_block_info_root();
-    proverRequest.input.executionMode = request->execution_mode();
 
     // Trace config
     if (request->has_trace_config())
@@ -1282,7 +1295,6 @@ using grpc::Status;
         " from=" + proverRequest.input.from +
         " bUpdateMerkleTree=" + to_string(proverRequest.input.bUpdateMerkleTree) +
         " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
-        " executionMode=" + to_string(proverRequest.input.executionMode) +
         " bGetKeys=" + to_string(proverRequest.input.bGetKeys) +
         " bSkipVerifyL1InfoRoot=" + to_string(proverRequest.input.bSkipVerifyL1InfoRoot) +
         " bSkipFirstChangeL2Block=" + to_string(proverRequest.input.bSkipFirstChangeL2Block) +
@@ -1316,6 +1328,7 @@ using grpc::Status;
     
     response->set_error(zkresult2error(proverRequest.result));
     response->set_gas_used(proverRequest.pFullTracer->get_gas_used());
+
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
     response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
     response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
@@ -1324,6 +1337,16 @@ using grpc::Status;
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_sha256_hashes(proverRequest.counters.sha256F);
     response->set_cnt_steps(proverRequest.counters.steps);
+    
+    response->set_cnt_reserve_keccak_hashes(proverRequest.counters_reserve.keccakF);
+    response->set_cnt_reserve_poseidon_hashes(proverRequest.counters_reserve.poseidonG);
+    response->set_cnt_reserve_poseidon_paddings(proverRequest.counters_reserve.paddingPG);
+    response->set_cnt_reserve_mem_aligns(proverRequest.counters_reserve.memAlign);
+    response->set_cnt_reserve_arithmetics(proverRequest.counters_reserve.arith);
+    response->set_cnt_reserve_binaries(proverRequest.counters_reserve.binary);
+    response->set_cnt_reserve_sha256_hashes(proverRequest.counters_reserve.sha256F);
+    response->set_cnt_reserve_steps(proverRequest.counters_reserve.steps);
+
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
     response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
@@ -1333,7 +1356,8 @@ using grpc::Status;
     response->set_fork_id(proverRequest.input.publicInputsExtended.publicInputs.forkID);
     response->set_error_rom(string2error(proverRequest.pFullTracer->get_error()));
     response->set_invalid_batch(proverRequest.pFullTracer->get_invalid_batch());
-    
+    response->set_old_state_root(string2ba(NormalizeToNFormat(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64)));
+
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
     {
@@ -1344,6 +1368,15 @@ using grpc::Status;
             google::protobuf::Map<std::string, executor::v1::InfoReadWriteV2> * pReadWriteAddresses = response->mutable_read_write_addresses();
             infoReadWrite.set_balance(itRWA->second.balance);
             infoReadWrite.set_nonce(itRWA->second.nonce);
+            infoReadWrite.set_sc_code(itRWA->second.sc_code);
+            infoReadWrite.set_sc_length(itRWA->second.sc_length);
+            google::protobuf::Map<std::string, std::string> * pStorage = infoReadWrite.mutable_sc_storage();
+            zkassertpermanent(pStorage != NULL);
+            unordered_map<string, string>::const_iterator itStorage;
+            for (itStorage = itRWA->second.sc_storage.begin(); itStorage != itRWA->second.sc_storage.end(); itStorage++)
+            {
+                (*pStorage)[itStorage->first] = itStorage->second;
+            }
             (*pReadWriteAddresses)[itRWA->first] = infoReadWrite;
         }
     }
@@ -1386,6 +1419,8 @@ using grpc::Status;
             pLog->set_tx_index(block_responses[block].logs[log].tx_index); // Index of the transaction in the block
             //pLog->set_batch_hash(string2ba(block_responses[block].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(block_responses[block].logs[log].index); // Index of the log in the block
+            pLog->set_block_hash(string2ba(block_responses[block].logs[log].block_hash));
+            pLog->set_block_number(block_responses[block].logs[log].block_number);
         }
 
         vector<ResponseV2> &responses = block_responses[block].responses;
@@ -1410,6 +1445,7 @@ using grpc::Status;
             pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
             pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
             pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+            pProcessTransactionResponse->set_status(responses[tx].status);
             pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
             pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
             pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);
@@ -1434,6 +1470,8 @@ using grpc::Status;
                 pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
                 //pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
                 pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
+                pLog->set_block_hash(string2ba(responses[tx].logs[log].block_hash));
+                pLog->set_block_number(responses[tx].logs[log].block_number);
             }
             if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateFullTrace == responses[tx].tx_hash))
             {
@@ -1451,6 +1489,8 @@ using grpc::Status;
                 pTransactionContext->set_gas_used(responses[tx].full_trace.context.gas_used); // Total gas used as result of execution
                 pTransactionContext->set_execution_time(responses[tx].full_trace.context.execution_time);
                 pTransactionContext->set_old_state_root(string2ba(responses[tx].full_trace.context.old_state_root)); // Starting state root
+                pTransactionContext->set_chain_id(responses[tx].full_trace.context.chainId);
+                pTransactionContext->set_tx_index(responses[tx].full_trace.context.txIndex);
                 for (uint64_t step=0; step<responses[tx].full_trace.steps.size(); step++)
                 {
                     executor::v1::TransactionStepV2 * pTransactionStep = pFullTrace->add_steps();
@@ -1506,6 +1546,8 @@ using grpc::Status;
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
         string s = "ExecutorServiceImpl::ProcessBatchV2() returns result=" + to_string(response->error()) +
+            " error_rom=" + to_string(response->error_rom()) + "=" + proverRequest.pFullTracer->get_error() +
+            " invalid_batch=" + to_string(response->invalid_batch()) +
             " old_state_root=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
             " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
             " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
@@ -1709,17 +1751,18 @@ using grpc::Status;
     // PUBLIC INPUTS
 
     // Get witness
-    const string &witness = request->witness();
-    if (witness.empty())
+    proverRequest.input.publicInputsExtended.publicInputs.witness = request->witness();
+    if (proverRequest.input.publicInputsExtended.publicInputs.witness.empty())
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got an empty witness", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_WITNESS);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
     }
+    //zklog.info("witness.size=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.witness.size()) + " witness=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.witness.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.witness.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.witness.size())-10), proverRequest.input.publicInputsExtended.publicInputs.witness.size())));
 
     // Parse witness and get db, programs and old state root
-    zkr = witness2db(witness, proverRequest.input.db, proverRequest.input.contractsBytecode, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot);
+    zkr = witness2db(proverRequest.input.publicInputsExtended.publicInputs.witness, proverRequest.input.db, proverRequest.input.contractsBytecode, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() failed calling witness2db() result=" + zkresult2string(zkr), &proverRequest.tags);
@@ -1729,8 +1772,8 @@ using grpc::Status;
     }
 
     // Get data stream
-    const string &dataStream = request->data_stream();
-    if (dataStream.empty())
+    proverRequest.input.publicInputsExtended.publicInputs.dataStream = request->data_stream();
+    if (proverRequest.input.publicInputsExtended.publicInputs.dataStream.empty())
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got an empty data stream", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM);
@@ -1740,7 +1783,7 @@ using grpc::Status;
 
     // Parse data stream and get a binary structure
     DataStreamBatch batch;
-    zkr = dataStream2batch(dataStream, batch);
+    zkr = dataStream2batch(proverRequest.input.publicInputsExtended.publicInputs.dataStream, batch);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() failed calling dataStream2batch() result=" + zkresult2string(zkr), &proverRequest.tags);
@@ -1750,7 +1793,7 @@ using grpc::Status;
     }
     if (batch.blocks.empty())
     {
-        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() called dataStream2batch() but got zero blocks=", &proverRequest.tags);
+        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() called dataStream2batch() but got zero blocks", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -1783,11 +1826,18 @@ using grpc::Status;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, request->old_acc_input_hash());
 
-    // Get batchNum
-    proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber;
+    // Get old batch number
+    if (batch.batchNumber == 0)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() called dataStream2batch() but got batch.batchNumber=0", &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
+    proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber - 1;
 
     // Get chain ID
-    proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
+    proverRequest.input.publicInputsExtended.publicInputs.chainID = batch.chainId;
     if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got chainID = 0", &proverRequest.tags);
@@ -1815,7 +1865,7 @@ using grpc::Status;
         return Status::OK;
     }
 
-    // Get globalExitRoot
+    // Get L1 info root
     if (request->l1_info_root().size() > 32)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got l1_info_root too long, size=" + to_string(request->l1_info_root().size()), &proverRequest.tags);
@@ -1825,7 +1875,7 @@ using grpc::Status;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot, request->l1_info_root());
 
-    // Get forcedBlockHashL1
+    // Get forced block hash L1
     if (request->forced_blockhash_l1().size() > 32)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got forced_blockhash_l1 too long, size=" + to_string(request->forced_blockhash_l1().size()), &proverRequest.tags);
@@ -1858,8 +1908,8 @@ using grpc::Status;
 
     // ROOT
 
-    // Get from
-    proverRequest.input.from = "0x0";
+    // Leave from empty
+    //proverRequest.input.from = "0x";
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = true;
@@ -1868,6 +1918,34 @@ using grpc::Status;
     proverRequest.input.bSkipVerifyL1InfoRoot = true;
     proverRequest.input.bSkipFirstChangeL2Block = false;
     proverRequest.input.bSkipWriteBlockInfoRoot = false;
+
+    // Trace config
+    if (request->has_trace_config())
+    {
+        proverRequest.input.traceConfig.bEnabled = true;
+        const executor::v1::TraceConfigV2 & traceConfig = request->trace_config();
+        if (traceConfig.disable_storage())
+        {
+            proverRequest.input.traceConfig.bDisableStorage = true;
+        }
+        if (traceConfig.disable_stack())
+        {
+            proverRequest.input.traceConfig.bDisableStack = true;
+        }
+        if (traceConfig.enable_memory())
+        {
+            proverRequest.input.traceConfig.bEnableMemory = true;
+        }
+        if (traceConfig.enable_return_data())
+        {
+            proverRequest.input.traceConfig.bEnableReturnData = true;
+        }
+        if (traceConfig.tx_hash_to_generate_full_trace().size() > 0)
+        {
+            proverRequest.input.traceConfig.txHashToGenerateFullTrace = Add0xIfMissing(ba2string(traceConfig.tx_hash_to_generate_full_trace()));
+        }
+        proverRequest.input.traceConfig.calculateFlags();
+    }
 
     // Default values
     proverRequest.input.publicInputsExtended.newStateRoot = "0x0";
@@ -1934,6 +2012,7 @@ using grpc::Status;
     
     response->set_error(zkresult2error(proverRequest.result));
     response->set_gas_used(proverRequest.pFullTracer->get_gas_used());
+
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
     response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
     response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
@@ -1942,6 +2021,16 @@ using grpc::Status;
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_sha256_hashes(proverRequest.counters.sha256F);
     response->set_cnt_steps(proverRequest.counters.steps);
+    
+    response->set_cnt_reserve_keccak_hashes(proverRequest.counters_reserve.keccakF);
+    response->set_cnt_reserve_poseidon_hashes(proverRequest.counters_reserve.poseidonG);
+    response->set_cnt_reserve_poseidon_paddings(proverRequest.counters_reserve.paddingPG);
+    response->set_cnt_reserve_mem_aligns(proverRequest.counters_reserve.memAlign);
+    response->set_cnt_reserve_arithmetics(proverRequest.counters_reserve.arith);
+    response->set_cnt_reserve_binaries(proverRequest.counters_reserve.binary);
+    response->set_cnt_reserve_sha256_hashes(proverRequest.counters_reserve.sha256F);
+    response->set_cnt_reserve_steps(proverRequest.counters_reserve.steps);
+
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
     response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
@@ -1951,6 +2040,7 @@ using grpc::Status;
     response->set_fork_id(proverRequest.input.publicInputsExtended.publicInputs.forkID);
     response->set_error_rom(string2error(proverRequest.pFullTracer->get_error()));
     response->set_invalid_batch(proverRequest.pFullTracer->get_invalid_batch());
+    response->set_old_state_root(string2ba(NormalizeToNFormat(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64)));
     
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
@@ -1962,6 +2052,15 @@ using grpc::Status;
             google::protobuf::Map<std::string, executor::v1::InfoReadWriteV2> * pReadWriteAddresses = response->mutable_read_write_addresses();
             infoReadWrite.set_balance(itRWA->second.balance);
             infoReadWrite.set_nonce(itRWA->second.nonce);
+            infoReadWrite.set_sc_code(itRWA->second.sc_code);
+            infoReadWrite.set_sc_length(itRWA->second.sc_length);
+            google::protobuf::Map<std::string, std::string> * pStorage = infoReadWrite.mutable_sc_storage();
+            zkassertpermanent(pStorage != NULL);
+            unordered_map<string, string>::const_iterator itStorage;
+            for (itStorage = itRWA->second.sc_storage.begin(); itStorage != itRWA->second.sc_storage.end(); itStorage++)
+            {
+                (*pStorage)[itStorage->first] = itStorage->second;
+            }
             (*pReadWriteAddresses)[itRWA->first] = infoReadWrite;
         }
     }
@@ -2004,6 +2103,8 @@ using grpc::Status;
             pLog->set_tx_index(block_responses[block].logs[log].tx_index); // Index of the transaction in the block
             //pLog->set_batch_hash(string2ba(block_responses[block].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(block_responses[block].logs[log].index); // Index of the log in the block
+            pLog->set_block_hash(string2ba(block_responses[block].logs[log].block_hash));
+            pLog->set_block_number(block_responses[block].logs[log].block_number);
         }
 
         vector<ResponseV2> &responses = block_responses[block].responses;
@@ -2028,6 +2129,7 @@ using grpc::Status;
             pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
             pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
             pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+            pProcessTransactionResponse->set_status(responses[tx].status);
             pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
             pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
             pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);
@@ -2052,6 +2154,8 @@ using grpc::Status;
                 pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
                 //pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
                 pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
+                pLog->set_block_hash(string2ba(responses[tx].logs[log].block_hash));
+                pLog->set_block_number(responses[tx].logs[log].block_number);
             }
             if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateFullTrace == responses[tx].tx_hash))
             {
@@ -2069,6 +2173,8 @@ using grpc::Status;
                 pTransactionContext->set_gas_used(responses[tx].full_trace.context.gas_used); // Total gas used as result of execution
                 pTransactionContext->set_execution_time(responses[tx].full_trace.context.execution_time);
                 pTransactionContext->set_old_state_root(string2ba(responses[tx].full_trace.context.old_state_root)); // Starting state root
+                pTransactionContext->set_chain_id(responses[tx].full_trace.context.chainId);
+                pTransactionContext->set_tx_index(responses[tx].full_trace.context.txIndex);
                 for (uint64_t step=0; step<responses[tx].full_trace.steps.size(); step++)
                 {
                     executor::v1::TransactionStepV2 * pTransactionStep = pFullTrace->add_steps();
@@ -2124,6 +2230,8 @@ using grpc::Status;
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
         string s = "ExecutorServiceImpl::ProcessStatelessBatchV2() returns result=" + to_string(response->error()) +
+            " error_rom=" + to_string(response->error_rom()) + "=" + proverRequest.pFullTracer->get_error() +
+            " invalid_batch=" + to_string(response->invalid_batch()) +
             " old_state_root=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
             " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
             " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
@@ -2405,6 +2513,7 @@ using grpc::Status;
     if (errorString == "invalid_change_l2_block_min_timestamp"  ) return ::executor::v1::ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP;
     if (errorString == "invalidDecodeChangeL2Block"       ) return ::executor::v1::ROM_ERROR_INVALID_DECODE_CHANGE_L2_BLOCK;
     if (errorString == "invalidNotFirstTxChangeL2Block"   ) return ::executor::v1::ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK;
+    if (errorString == "invalid_l1_info_tree_index"       ) return ::executor::v1::ROM_ERROR_INVALID_L1_INFO_TREE_INDEX;
     if (errorString == ""                                 ) return ::executor::v1::ROM_ERROR_NO_ERROR;
     zklog.error("ExecutorServiceImpl::string2error() found invalid error string=" + errorString);
     exitProcess();
@@ -2518,9 +2627,8 @@ using grpc::Status;
     case ZKR_SM_MAIN_INVALID_WITNESS:                       return ::executor::v1::EXECUTOR_ERROR_INVALID_WITNESS;
     case ZKR_CBOR_INVALID_DATA:                             return ::executor::v1::EXECUTOR_ERROR_INVALID_CBOR;
     case ZKR_DATA_STREAM_INVALID_DATA:                      return ::executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM;
-    case ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED:               return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_PRECOMPILED;
-    case ZKR_SM_MAIN_OOG_2:                                 return ::executor::v1::EXECUTOR_ERROR_OOG_2;
-    case ZKR_SM_MAIN_CLOSE_BATCH:                           return ::executor::v1::EXECUTOR_ERROR_CLOSE_BATCH;
+
+    case ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_INVALID_TX_STATUS_ERROR;
 
     case ZKR_AGGREGATED_PROOF_INVALID_INPUT: // Only returned when generating a proof
     case ZKR_DB_VERSION_NOT_FOUND_KVDB: // To be mapped to an executor error when HashDB64 is operative

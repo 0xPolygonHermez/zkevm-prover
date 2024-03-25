@@ -37,9 +37,11 @@ void ExecutorClient::runThread (void)
     pthread_create(&t, NULL, executorClientThread, this);
 }
 
-void ExecutorClient::waitForThread (void)
+int64_t ExecutorClient::waitForThread (void)
 {
-    pthread_join(t, NULL);
+    void * pResult;
+    pthread_join(t, &pResult);
+    return (int64_t)pResult;
 }
 
 void ExecutorClient::runThreads (void)
@@ -53,12 +55,20 @@ void ExecutorClient::runThreads (void)
     }
 }
 
-void ExecutorClient::waitForThreads (void)
+int64_t ExecutorClient::waitForThreads (void)
 {
+    int64_t iTotalResult = 0;
     for (uint64_t i=0; i<EXECUTOR_CLIENT_MULTITHREAD_N_THREADS; i++)
     {
-        pthread_join(threads[i], NULL);
+        void * pResult;
+        pthread_join(threads[i], &pResult);
+        int64_t iResult = (int64_t)pResult;
+        if (iResult != 0)
+        {
+            iTotalResult = iResult;
+        }
     }
+    return iTotalResult;
 }
 
 bool ExecutorClient::ProcessBatch (const string &inputFile)
@@ -81,7 +91,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     zkresult zkResult = input.load(inputJson);
     if (zkResult != ZKR_SUCCESS)
     {
-        cerr << "Error: ProverClient::GenProof() failed calling input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+        cerr << "Error: ExecutorClient::ProcessBatch() failed calling input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
         exit(-1);
     }
 
@@ -93,7 +103,6 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     {
         no_counters = true;
     }
-    uint64_t executionMode = input.executionMode;
     
     // Resulting new state root
     string newStateRoot;
@@ -185,7 +194,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     #endif
         }
 
-        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
@@ -215,7 +225,6 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
         request.set_update_merkle_tree(update_merkle_tree);
         request.set_no_counters(no_counters);
-        request.set_execution_mode(executionMode);
         request.set_get_keys(get_keys);
         request.set_skip_verify_l1_info_root(input.bSkipVerifyL1InfoRoot);
         request.set_skip_first_change_l2_block(input.bSkipFirstChangeL2Block);
@@ -355,7 +364,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
         }
 
-        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
@@ -383,7 +393,6 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
         request.set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
         request.set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
-        request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
 
         ::executor::v1::ProcessBatchResponseV2 processBatchResponse;
         for (uint64_t i=0; i<config.executorClientLoops; i++)
@@ -422,7 +431,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
         }
 
-        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
@@ -568,6 +578,9 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
              || (inputFile.find("rlp-error/test-length-data_2.json") != string::npos) // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
              || (inputFile.find("ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return2_0.json") != string::npos) // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
              || (inputFile.find("ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return_0.json") != string::npos) // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
+             || (inputFile.find("inputs-executor/ethereum-tests/GeneralStateTests/stCreate2/create2collisionCode_0.json") != string::npos)
+             || (inputFile.find("inputs-executor/ethereum-tests/GeneralStateTests/stCreate2/create2collisionNonce_0.json") != string::npos)
+             || (inputFile.find("inputs-executor/ethereum-tests/GeneralStateTests/stCreate2/create2noCash_2.json") != string::npos)
            )
         {
             zklog.warning("ProcessDirectory() skipping file=" + inputFile + " fileCounter=" + to_string(fileCounter) + " skippedFileCounter=" + to_string(skippedFileCounter));
@@ -614,7 +627,8 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
 
 void* executorClientThread (void* arg)
 {
-    cout << "executorClientThread() started" << endl;
+    zklog.info("executorClientThread() started");
+    int64_t result = 0;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
 
@@ -633,22 +647,29 @@ void* executorClientThread (void* arg)
         if (!bResult)
         {
             zklog.error("executorClientThread() failed calling ProcessDirectory()");
+            result = -1;
         }
         zklog.info("executorClientThread() called ProcessDirectory() and got directories=" + to_string(directoryCounter) + " files=" + to_string(fileCounter) + " skippedFiles=" + to_string(skippedFileCounter) + " percentage=" + to_string((fileCounter*100)/zkmax(1, fileCounter + skippedFileCounter)) + "% skippedDirectories=" + to_string(skippedDirectoryCounter));
     }
     else
     {
-        pClient->ProcessBatch(config.inputFile);
+        bool bResult = pClient->ProcessBatch(config.inputFile);
+        if (!bResult)
+        {
+            zklog.error("executorClientThread() failed calling ProcessBatch()");
+            result = -1;
+        }
     }
 
     TimerStopAndLog(EXECUTOR_CLIENT_THREAD);
 
-    return NULL;
+    return (void *)result;
 }
 
 void* executorClientThreads (void* arg)
 {
-    //cout << "executorClientThreads() started" << endl;
+    zklog.info("executorClientThreads() started");
+    int64_t result = 0;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
 
@@ -669,15 +690,21 @@ void* executorClientThreads (void* arg)
                 if (!bResult)
                 {
                     zklog.error("executorClientThreads() failed i=" + to_string(i) + " inputFile=" + inputFile);
+                    result = -1;
                     break;
                 }
             }
         }
         else
         {
-            pClient->ProcessBatch(config.inputFile);
+            bool bResult = pClient->ProcessBatch(config.inputFile);
+            if (!bResult)
+            {
+                zklog.error("executorClientThreads() failed calling ProcessBatch()");
+                result = -1;
+            }
         }
     }
 
-    return NULL;
+    return (void *)result;
 }

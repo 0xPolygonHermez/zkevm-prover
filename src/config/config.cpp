@@ -169,7 +169,8 @@ void Config::load(json &config)
     ParseBool(config, "saveFilesInSubfolders", "SAVE_FILES_IN_SUBFOLDERS", saveFilesInSubfolders, false);
 
     // Load DB to mem cache TODO: Discontinue this functionality
-    ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
+    //ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
+    loadDBToMemCache = false;
     ParseBool(config, "loadDBToMemCacheInParallel", "LOAD_DB_TO_MEM_CACHE_IN_PARALLEL", loadDBToMemCacheInParallel, false);
     ParseU64(config, "loadDBToMemTimeout", "LOAD_DB_TO_MEM_TIMEOUT", loadDBToMemTimeout, 30*1000*1000); // Default = 30 seconds
 
@@ -210,6 +211,7 @@ void Config::load(json &config)
     ParseU64(config, "aggregatorClientMockTimeout", "AGGREGATOR_CLIENT_MOCK_TIMEOUT", aggregatorClientMockTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientWatchdogTimeout", "AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT", aggregatorClientWatchdogTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientMaxStreams", "AGGREGATOR_CLIENT_MAX_STREAMS", aggregatorClientMaxStreams, 0);
+    ParseU64(config, "aggregatorClientMaxRecvMsgSize", "AGGREGATOR_CLIENT_MAX_RECV_MSG_SIZE", aggregatorClientMaxRecvMsgSize, 1024*1024*1024);
 
     // Logs
     ParseBool(config, "executorROMLineTraces", "EXECUTOR_ROM_LINE_TRACES", executorROMLineTraces, false);
@@ -452,6 +454,7 @@ void Config::print(void)
     zklog.info("    aggregatorClientMockTimeout=" + to_string(aggregatorClientMockTimeout));
     zklog.info("    aggregatorClientWatchdogTimeout=" + to_string(aggregatorClientWatchdogTimeout));
     zklog.info("    aggregatorClientMaxStreams=" + to_string(aggregatorClientMaxStreams));
+    zklog.info("    aggregatorClientMaxRecvMsgSize=" + to_string(aggregatorClientMaxRecvMsgSize));
 
     zklog.info("    inputFile=" + inputFile);
     zklog.info("    inputFile2=" + inputFile2);

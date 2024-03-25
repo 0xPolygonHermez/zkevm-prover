@@ -85,6 +85,7 @@ The configuration parameters can be of different uses:
 |`aggregatorClientMockTimeout`|test|u64|Aggregator client mock timeout, in microseconds|60000000 (60 seconds)|AGGREGATOR_CLIENT_MOCK_TIMEOUT|
 |**`aggregatorClientWatchdogTimeout`**|production|u64|Aggregator client watchdog timeout, in microseconds|60000000 (60 seconds)|AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT|
 |`aggregatorClientMaxStreams`|test|u64|Max number of aggregator client streams, used to limit E2E test execution; if 0 then there is no limit|0|AGGREGATOR_CLIENT_MAX_STREAMS|
+|`aggregatorClientMaxRecvMsgSize`|test|u64|Max size of aggregator client received messages; if 0 then there is no limit|1024*1024*1024|AGGREGATOR_CLIENT_MAX_RECV_MSG_SIZE|
 |`executorROMLineTraces`|test|boolean|If true, the main state machine executor will log the content of every executed ROM program line; it only works with native main executor, not with generated code executor|false|EXECUTOR_ROM_LINE_TRACES|
 |`executorTimeStatistics`|test|boolean|If true, the main state machine executor will log the time metrics statistics of external calls|false|EXECUTOR_TIME_STATISTICS|
 |`opcodeTracer`|test|boolean|Generate main state machine executor opcode statistics|false|OPCODE_TRACER|

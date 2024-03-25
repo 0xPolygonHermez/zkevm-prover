@@ -4216,7 +4216,7 @@ class StatelessPublicInputs PROTOBUF_FINAL :
   enum : int {
     kL1InfoTreeDataFieldNumber = 9,
     kWitnessFieldNumber = 1,
-    kDatastreamDataFieldNumber = 2,
+    kDataStreamFieldNumber = 2,
     kOldAccInputHashFieldNumber = 3,
     kL1InfoRootFieldNumber = 4,
     kSequencerAddrFieldNumber = 6,
@@ -4266,29 +4266,29 @@ class StatelessPublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_witness();
   public:
 
-  // bytes datastream_data = 2;
-  void clear_datastream_data();
-  const std::string& datastream_data() const;
-  void set_datastream_data(const std::string& value);
-  void set_datastream_data(std::string&& value);
-  void set_datastream_data(const char* value);
-  void set_datastream_data(const void* value, size_t size);
-  std::string* mutable_datastream_data();
-  std::string* release_datastream_data();
-  void set_allocated_datastream_data(std::string* datastream_data);
+  // bytes data_stream = 2;
+  void clear_data_stream();
+  const std::string& data_stream() const;
+  void set_data_stream(const std::string& value);
+  void set_data_stream(std::string&& value);
+  void set_data_stream(const char* value);
+  void set_data_stream(const void* value, size_t size);
+  std::string* mutable_data_stream();
+  std::string* release_data_stream();
+  void set_allocated_data_stream(std::string* data_stream);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_datastream_data();
+  std::string* unsafe_arena_release_data_stream();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_datastream_data(
-      std::string* datastream_data);
+  void unsafe_arena_set_allocated_data_stream(
+      std::string* data_stream);
   private:
-  const std::string& _internal_datastream_data() const;
-  void _internal_set_datastream_data(const std::string& value);
-  std::string* _internal_mutable_datastream_data();
+  const std::string& _internal_data_stream() const;
+  void _internal_set_data_stream(const std::string& value);
+  std::string* _internal_mutable_data_stream();
   public:
 
   // bytes old_acc_input_hash = 3;
@@ -4439,7 +4439,7 @@ class StatelessPublicInputs PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
       0 > l1_info_tree_data_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr witness_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr datastream_data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_stream_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_acc_input_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr l1_info_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sequencer_addr_;
@@ -9609,85 +9609,85 @@ inline void StatelessPublicInputs::unsafe_arena_set_allocated_witness(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.StatelessPublicInputs.witness)
 }
 
-// bytes datastream_data = 2;
-inline void StatelessPublicInputs::clear_datastream_data() {
-  datastream_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// bytes data_stream = 2;
+inline void StatelessPublicInputs::clear_data_stream() {
+  data_stream_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& StatelessPublicInputs::datastream_data() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.StatelessPublicInputs.datastream_data)
-  return _internal_datastream_data();
+inline const std::string& StatelessPublicInputs::data_stream() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.StatelessPublicInputs.data_stream)
+  return _internal_data_stream();
 }
-inline void StatelessPublicInputs::set_datastream_data(const std::string& value) {
-  _internal_set_datastream_data(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.StatelessPublicInputs.datastream_data)
+inline void StatelessPublicInputs::set_data_stream(const std::string& value) {
+  _internal_set_data_stream(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.StatelessPublicInputs.data_stream)
 }
-inline std::string* StatelessPublicInputs::mutable_datastream_data() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.StatelessPublicInputs.datastream_data)
-  return _internal_mutable_datastream_data();
+inline std::string* StatelessPublicInputs::mutable_data_stream() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.StatelessPublicInputs.data_stream)
+  return _internal_mutable_data_stream();
 }
-inline const std::string& StatelessPublicInputs::_internal_datastream_data() const {
-  return datastream_data_.Get();
+inline const std::string& StatelessPublicInputs::_internal_data_stream() const {
+  return data_stream_.Get();
 }
-inline void StatelessPublicInputs::_internal_set_datastream_data(const std::string& value) {
+inline void StatelessPublicInputs::_internal_set_data_stream(const std::string& value) {
   
-  datastream_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  data_stream_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void StatelessPublicInputs::set_datastream_data(std::string&& value) {
+inline void StatelessPublicInputs::set_data_stream(std::string&& value) {
   
-  datastream_data_.Set(
+  data_stream_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.StatelessPublicInputs.datastream_data)
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.StatelessPublicInputs.data_stream)
 }
-inline void StatelessPublicInputs::set_datastream_data(const char* value) {
+inline void StatelessPublicInputs::set_data_stream(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  datastream_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  data_stream_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.StatelessPublicInputs.datastream_data)
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.StatelessPublicInputs.data_stream)
 }
-inline void StatelessPublicInputs::set_datastream_data(const void* value,
+inline void StatelessPublicInputs::set_data_stream(const void* value,
     size_t size) {
   
-  datastream_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  data_stream_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.StatelessPublicInputs.datastream_data)
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.StatelessPublicInputs.data_stream)
 }
-inline std::string* StatelessPublicInputs::_internal_mutable_datastream_data() {
+inline std::string* StatelessPublicInputs::_internal_mutable_data_stream() {
   
-  return datastream_data_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return data_stream_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* StatelessPublicInputs::release_datastream_data() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.StatelessPublicInputs.datastream_data)
-  return datastream_data_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* StatelessPublicInputs::release_data_stream() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.StatelessPublicInputs.data_stream)
+  return data_stream_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void StatelessPublicInputs::set_allocated_datastream_data(std::string* datastream_data) {
-  if (datastream_data != nullptr) {
+inline void StatelessPublicInputs::set_allocated_data_stream(std::string* data_stream) {
+  if (data_stream != nullptr) {
     
   } else {
     
   }
-  datastream_data_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), datastream_data,
+  data_stream_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), data_stream,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.StatelessPublicInputs.datastream_data)
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.StatelessPublicInputs.data_stream)
 }
-inline std::string* StatelessPublicInputs::unsafe_arena_release_datastream_data() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.StatelessPublicInputs.datastream_data)
+inline std::string* StatelessPublicInputs::unsafe_arena_release_data_stream() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.StatelessPublicInputs.data_stream)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return datastream_data_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return data_stream_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void StatelessPublicInputs::unsafe_arena_set_allocated_datastream_data(
-    std::string* datastream_data) {
+inline void StatelessPublicInputs::unsafe_arena_set_allocated_data_stream(
+    std::string* data_stream) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (datastream_data != nullptr) {
+  if (data_stream != nullptr) {
     
   } else {
     
   }
-  datastream_data_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      datastream_data, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.StatelessPublicInputs.datastream_data)
+  data_stream_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      data_stream, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.StatelessPublicInputs.data_stream)
 }
 
 // bytes old_acc_input_hash = 3;
