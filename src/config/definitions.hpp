@@ -1,10 +1,10 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
-#define PROVER_FORK_ID 6
-#define PROVER_FORK_NAMESPACE fork_6
-#define PROVER_FORK_NAMESPACE_STRING "fork_6"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_6
+#define PROVER_FORK_ID 7
+#define PROVER_FORK_NAMESPACE fork_7
+#define PROVER_FORK_NAMESPACE_STRING "fork_7"
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_7
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
@@ -72,5 +72,23 @@
 //#define DATABASE_COMMIT // If defined, the Database class can be configured to autocommit, or explicitly commit(); used for testing only
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
 #define USE_NEW_KVTREE
+
+#define MAIN_SM_EXECUTOR_GENERATED_CODE
+
+//#define MULTI_ROM_TEST
+
+#define USE_CHELPERS_PARSER
+
+/* chelpers defines */
+#ifdef USE_CHELPERS_PARSER
+    #ifndef __AVX512__
+        #define NROWS_STEPS_ 4
+    #else
+        #define NROWS_STEPS_ 8
+    #endif
+#else
+#define NROWS_STEPS_ 1
+#endif
+
 
 #endif

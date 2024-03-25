@@ -13,6 +13,7 @@
 #include "key_value.hpp"
 #include "hash_value_gl.hpp"
 #include "zkglobals.hpp"
+#include "page_context.hpp"
 
 using namespace std;
 
@@ -49,10 +50,6 @@ During a process batch, we need to:
 class TreeChunk
 {
 private:
-    //Database64          &db;
-    //Goldilocks          &fr;
-    PoseidonGoldilocks  &poseidon;
-private:
     uint64_t            level; // Level of the top hash of the chunk: 0, 6, 12, 18, 24, etc.
     uint8_t             key; // 6 bits portion of the total key at this level of the SMT tree
     Goldilocks::Element hash[4];
@@ -78,10 +75,7 @@ public:
 public:
 
     // Constructor
-    TreeChunk(/*Database64 &db,*/ PoseidonGoldilocks &poseidon) :
-        //db(db),
-        //fr(db.fr),
-        poseidon(poseidon),
+    TreeChunk() :
         bHashValid(false),
         bChildrenRestValid(false),
         bChildren64Valid(false),
@@ -92,13 +86,7 @@ public:
         hash[2] = fr.zero();
         hash[3] = fr.zero();
     };
-
-    // Read from database
-    //zkresult readDataFromDb (const Goldilocks::Element (&hash)[4]);
-
-    // Encode/decode data functions
-    zkresult data2children (void); // Decodde data and store result into children64
-    zkresult children2data (void); // Encode children64 into data
+    
     uint64_t numberOfNonZeroChildren (void);
 
     // Calculate hash functions
@@ -190,9 +178,12 @@ public:
         result[3] = hash[3];
     }
 
-    void getLeafHash(const uint64_t position, Goldilocks::Element (&result)[4]);
+    void getLeafHash (const uint64_t position, Goldilocks::Element (&result)[4]);
 
     void print (void) const;
+
+    zkresult loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_t pageNumber, const uint64_t version, const uint64_t level);
+    zkresult getHashValues (const uint64_t children64Position, vector<HashValueGL> *hashValues);
 };
 
 #endif

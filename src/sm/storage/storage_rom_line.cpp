@@ -32,22 +32,23 @@ void StorageRomLine::print (uint64_t l)
     if (inVALUE_LOW) s += "inVALUE_LOW ";
     if (inVALUE_HIGH) s += "inVALUE_HIGH ";
     if (inRKEY) s += "inRKEY ";
-    if (inSIBLING_RKEY) s += "inSIBLING_RKEY ";
+    if (inSIBLING_RKEY) s += "inSIBLING_RKEY(" + to_string(inSIBLING_RKEY)+")";
     if (inSIBLING_VALUE_HASH) s += "inSIBLING_VALUE_HASH ";
     if (inROTL_VH) s += "inROTL_VH ";
+    if (inLEVEL) s += "inLEVEL ";
 
     // Instructions
-    if (iJmpz) s += "iJmpz ";
-    if (iJmp) s += "iJmp ";
-    if (addressLabel.size()>0) s += "addressLabel=" + addressLabel + " "; // Jump parameter
-    if (address>0) s += "address=" + to_string(address) + " "; // Jump parameter
-    if (iRotateLevel) s += "iRotateLevel ";
-    if (iHash) s += "iHash iHashType=" + to_string(iHashType) + " ";
-    if (iClimbRkey) s += "iClimbRkey ";
-    if (iClimbSiblingRkey) s += "iClimbSiblingRkey ";
-    if (iClimbSiblingRkeyN) s += "iClimbSiblingRkeyN ";
-    if (iLatchGet) s += "iLatchGet ";
-    if (iLatchSet) s += "iLatchSet ";
+    if (jmpz) s += "jmpz ";
+    if (jmpz) s += "jmpnz ";
+    if (jmp) s += "jmp ";
+    if (jmpAddressLabel.size()>0) s += "jmpAddressLabel=" + jmpAddressLabel + " "; // Jump parameter
+    if (jmpAddress>0) s += "jmpAddress=" + to_string(jmpAddress) + " "; // Jump parameter
+    if (hash) s += "hash hashType=" + to_string(hashType) + " ";
+    if (climbRkey) s += "climbRkey ";
+    if (climbSiblingRkey) s += "climbSiblingRkey ";
+    if (climbBitN) s += "climbBitN ";
+    if (latchGet) s += "latchGet ";
+    if (latchSet) s += "latchSet ";
 
     // Setters
     if (setRKEY) s += "setRKEY ";

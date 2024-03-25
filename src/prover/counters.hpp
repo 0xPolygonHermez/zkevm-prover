@@ -14,6 +14,7 @@ public:
     uint64_t keccakF;
     uint64_t poseidonG;
     uint64_t paddingPG;
+    uint64_t sha256F;
     uint64_t steps;
     Counters():
         arith(0),
@@ -22,6 +23,7 @@ public:
         keccakF(0),
         poseidonG(0),
         paddingPG(0),
+        sha256F(0),
         steps(0) {};
 };
 

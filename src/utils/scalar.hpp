@@ -9,6 +9,7 @@
 #include "exit_process.hpp"
 #include "zklog.hpp"
 #include "zkglobals.hpp"
+#include "constants.hpp"
 
 using namespace std;
 
@@ -28,12 +29,17 @@ extern mpz_class ScalarTwoTo32;
 extern mpz_class ScalarTwoTo64;
 extern mpz_class ScalarTwoTo128;
 extern mpz_class ScalarTwoTo192;
-extern mpz_class ScalarTwoTo256;
+extern mpz_class ScalarTwoTo254;
 extern mpz_class ScalarTwoTo255;
+extern mpz_class ScalarTwoTo256;
+extern mpz_class ScalarTwoTo257;
 extern mpz_class ScalarTwoTo258;
+extern mpz_class ScalarTwoTo259;
 extern mpz_class ScalarZero;
 extern mpz_class ScalarOne;
 extern mpz_class ScalarGoldilocksPrime;
+extern mpz_class Scalar4xGoldilocksPrime;
+
 
 /* Scalar to/from field element conversion */
 
@@ -144,6 +150,107 @@ inline bool fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     return true;
 }
 
+inline bool fea2fea (Goldilocks::Element (&fea)[4], const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3, const Goldilocks::Element &fe4, const Goldilocks::Element &fe5, const Goldilocks::Element &fe6, const Goldilocks::Element &fe7)
+{
+    // Add field element 7
+    uint64_t auxH = fr.toU64(fe7);
+    if (auxH >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 7 has a too high value=" + fr.toString(fe7, 16));
+        return false;
+    }
+
+    // Add field element 6
+    uint64_t auxL = fr.toU64(fe6);
+    if (auxL >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 6 has a too high value=" + fr.toString(fe6, 16));
+        return false;
+    }
+
+    fea[3] = fr.fromU64((auxH<<32) + auxL);
+
+    // Add field element 5
+    auxH = fr.toU64(fe5);
+    if (auxH >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 5 has a too high value=" + fr.toString(fe5, 16));
+        return false;
+    }
+
+    // Add field element 4
+    auxL = fr.toU64(fe4);
+    if (auxL >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 4 has a too high value=" + fr.toString(fe4, 16));
+        return false;
+    }
+    
+    fea[2] = fr.fromU64((auxH<<32) + auxL);
+
+    // Add field element 3
+    auxH = fr.toU64(fe3);
+    if (auxH >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 3 has a too high value=" + fr.toString(fe3, 16));
+        return false;
+    }
+
+    // Add field element 2
+    auxL = fr.toU64(fe2);
+    if (auxL >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 2 has a too high value=" + fr.toString(fe2, 16));
+        return false;
+    }
+    
+    fea[1] = fr.fromU64((auxH<<32) + auxL);
+
+    // Add field element 1
+    auxH = fr.toU64(fe1);
+    if (auxH >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 1 has a too high value=" + fr.toString(fe1, 16));
+        return false;
+    }
+
+    // Add field element 0
+    auxL = fr.toU64(fe0);
+    if (auxL >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 0 has a too high value=" + fr.toString(fe0, 16));
+        return false;
+    }
+    
+    fea[0] = fr.fromU64((auxH<<32) + auxL);
+    return true;
+}
+
+inline void fea2fea (Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7, const Goldilocks::Element (&fea)[4])
+{
+    uint64_t aux;
+
+    aux = fr.toU64(fea[0]);
+    fe0 = fr.fromU64(aux & U64Mask32);
+    aux = aux >> 32;
+    fe1 = fr.fromU64(aux);
+    
+    aux = fr.toU64(fea[1]);
+    fe2 = fr.fromU64(aux & U64Mask32);
+    aux = aux >> 32;
+    fe3 = fr.fromU64(aux);
+    
+    aux = fr.toU64(fea[2]);
+    fe4 = fr.fromU64(aux & U64Mask32);
+    aux = aux >> 32;
+    fe5 = fr.fromU64(aux);
+    
+    aux = fr.toU64(fea[3]);
+    fe6 = fr.fromU64(aux & U64Mask32);
+    aux = aux >> 32;
+    fe7 = fr.fromU64(aux);
+}
+
 inline bool fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
 {
    return fea2scalar(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
@@ -245,8 +352,18 @@ inline bool charIsHex (char c)
     return false;
 }
 
+// Check that a char is a decimal character
+inline bool charIsDec (char c)
+{
+    if ( (c >= '0') && (c <= '9') ) return true;
+    return false;
+}
+
 // Check that the string contains only hex characters
 bool stringIsHex (const string &s);
+
+// Check that the string contains only decimal characters
+bool stringIsDec (const string &s);
 
 // Check that the string contains only 0x + hex characters
 bool stringIs0xHex (const string &s);
@@ -330,8 +447,8 @@ inline void ba2fea (Goldilocks &fr, const uint8_t * pData, uint64_t len, Goldilo
 void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s);
 void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s);
 string scalar2ba32(const mpz_class &s); // Returns exactly 32 bytes
-void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32]);
-void scalar2bytesBE(mpz_class &s, uint8_t *pBytes); // pBytes must be a 32-bytes array
+void scalar2bytes(mpz_class s, uint8_t (&bytes)[32]);
+void scalar2bytesBE(mpz_class s, uint8_t *pBytes); // pBytes must be a 32-bytes array
 
 
 /* Scalar to byte array string conversion */
@@ -394,6 +511,26 @@ void sr4to8 ( Goldilocks &fr,
 void fec2scalar(RawFec &fec, const RawFec::Element &fe, mpz_class &s);
 void scalar2fec(RawFec &fec, RawFec::Element &fe, const mpz_class &s);
 
+/* Less than 4
+*  Computes comparation of 256 bits, these values (a,b) are divided in 4 chunks of 64 bits
+*  and compared one-to-one, 4 comparations, lt4 return 1 if ALL chunks of a are less than b.
+*  lt = a[0] < b[0] && a[1] < b[1] && a[2] < b[2] && a[3] < b[3]
+*/
+inline mpz_class lt4(const mpz_class& a, const mpz_class& b) {
+     
+    mpz_class a_=a;
+    mpz_class b_=b;
+    mpz_class mask(0xffffffffffffffff);
+    for (int i = 0; i < 4; i++) {    
+        if ((a_ & mask) >= (b_ & mask) ) {
+            return 0;
+        }
+        a_ = a_ >> 64;
+        b_ = b_ >> 64;
+    }
+    return 1;
+}
+
 /* Unsigned 64 to an array of bytes.  pOutput must be 8 bytes long */
 void u642bytes (uint64_t input, uint8_t * pOutput, bool bBigEndian);
 
@@ -430,5 +567,17 @@ bool inline feaIsZero (const Goldilocks::Element (&fea)[4])
 {
     return fr.isZero(fea[0]) && fr.isZero(fea[1]) && fr.isZero(fea[2]) && fr.isZero(fea[3]);
 }
+
+bool inline feaIsZero (const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3)
+{
+    return fr.isZero(fe0) && fr.isZero(fe1) && fr.isZero(fe2) && fr.isZero(fe3);
+}
+
+bool inline feaIsEqual (const Goldilocks::Element (&a)[4], const Goldilocks::Element (&b)[4])
+{
+    return fr.equal(a[0], b[0]) && fr.equal(a[1], b[1]) && fr.equal(a[2], b[2]) && fr.equal(a[3], b[3]);
+}
+
+
 
 #endif

@@ -185,8 +185,9 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
                 pPublicInputs->set_old_batch_num(1);
                 pPublicInputs->set_chain_id(1000);
                 pPublicInputs->set_batch_l2_data(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
-                pPublicInputs->set_global_exit_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
-                pPublicInputs->set_eth_timestamp(1000000);
+                pPublicInputs->set_l1_info_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                pPublicInputs->set_timestamp_limit(1000000);
+                pPublicInputs->set_forced_blockhash_l1(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 pPublicInputs->set_sequencer_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
                 pPublicInputs->set_aggregator_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
                 aggregator::v1::PublicInputsExtended* pPublicInputsExtended = new(aggregator::v1::PublicInputsExtended);

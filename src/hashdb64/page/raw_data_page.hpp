@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
+#include "page_context.hpp"
 
 /*
     Example with 3 raw pages:
@@ -42,13 +43,13 @@ public:
     static const uint64_t maxOffset = 4096; // This means that the page is completely full
     static const uint64_t allignment = 8; // The data will be written in an address alligned with these many bytes
 
-    static zkresult InitEmptyPage (const uint64_t  pageNumber);
-    static zkresult Read          (const uint64_t  pageNumber, const uint64_t offset, const uint64_t length,       string &data);
-    static zkresult Write         (      uint64_t &pageNumber,                                               const string &data);
+    static zkresult InitEmptyPage (PageContext &ctx, const uint64_t  pageNumber);
+    static zkresult Read          (PageContext &ctx, const uint64_t  pageNumber, const uint64_t offset, const uint64_t length,       string &data);
+    static zkresult Write         (PageContext &ctx,       uint64_t &pageNumber,                                               const string &data);
     
-    static uint64_t GetOffset     (const uint64_t  pageNumber);
+    static uint64_t GetOffset     (PageContext &ctx, const uint64_t  pageNumber);
     
-    static void Print (const uint64_t pageNumber, bool details, const string &prefix);
+    static void Print (PageContext &ctx, const uint64_t pageNumber, bool details, const string &prefix);
 };
 
 #endif

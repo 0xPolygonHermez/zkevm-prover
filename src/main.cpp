@@ -23,6 +23,8 @@
 #include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/storage/storage_test.hpp"
+#include "sm/climb_key/climb_key_executor.hpp"
+#include "sm/climb_key/climb_key_test.hpp"
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
 #include "timer.hpp"
@@ -37,8 +39,7 @@
 #include "hashdb_singleton.hpp"
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
-#include "main_sm/fork_5/main_exec_c/account.hpp"
-#include "main_sm/fork_6/main_exec_c/account.hpp"
+#include "main_sm/fork_7/main_exec_c/account.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
@@ -97,7 +98,7 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
         }
     }
     TimerStopAndLog(INPUT_LOAD);
-    
+
     // Create full tracer based on fork ID
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
@@ -156,23 +157,28 @@ uint64_t processBatchTotalSteps = 0;
 
 void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
 {
-    // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
+    
     // Create and init an empty prover request
     ProverRequest proverRequest(fr, config, prt_processBatch);
-    if (config.inputFile.size() > 0)
+
+    // Load and parse input JSON file
+    if (config.inputFile.empty())
     {
-        json inputJson;
-        file2json(config.inputFile, inputJson);
-        zkresult zkResult = proverRequest.input.load(inputJson);
-        if (zkResult != ZKR_SUCCESS)
-        {
-            zklog.error("runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
-            exitProcess();
-        }
+        zklog.error("runFileProcessBatch() found config.inputFile empty");
+        exitProcess();
     }
+    json inputJson;
+    file2json(config.inputFile, inputJson);
+    zkresult zkResult = proverRequest.input.load(inputJson);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        zklog.error("runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
+        exitProcess();
+    }
+
     TimerStopAndLog(INPUT_LOAD);
-    
+
     // Create full tracer based on fork ID
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
@@ -207,7 +213,7 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
         " paddingPG=" + to_string(processBatchTotalPaddingPG) +
         " poseidonG=" + to_string(processBatchTotalPoseidonG) +
         " steps=" + to_string(processBatchTotalSteps));
- }
+}
 
 class RunFileThreadArguments
 {
@@ -271,7 +277,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
         }
     }
     TimerStopAndLog(INPUT_LOAD);
-    
+
     // Create full tracer based on fork ID
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
@@ -353,9 +359,15 @@ int main(int argc, char **argv)
     // Create one instance of the Poseidon hash library
     PoseidonGoldilocks poseidon;
 
+#ifdef DEBUG
+    zklog.info("BN128 p-1 =" + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
+    zklog.info("FQ    p-1 =" + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));
+    zklog.info("FEC   p-1 =" + fec.toString(fec.negOne(),16) + " = " + fec.toString(fec.negOne(),10));
+    zklog.info("FNEC  p-1 =" + fnec.toString(fnec.negOne(),16) + " = " + fnec.toString(fnec.negOne(),10));
+#endif
+
     // Generate account zero keys
-    fork_5::Account::GenerateZeroKey(fr, poseidon);
-    fork_6::Account::GenerateZeroKey(fr, poseidon);
+    fork_7::Account::GenerateZeroKey(fr, poseidon);
 
     // Init the HashDB singleton
     hashDBSingleton.init(fr, config);
@@ -363,7 +375,7 @@ int main(int argc, char **argv)
     // Init the StateManager singleton
     if (config.hashDB64)
     {
-        stateManager64.init(config);
+        stateManager64.init();
     }
     else
     {
@@ -373,7 +385,7 @@ int main(int argc, char **argv)
     // Init goldilocks precomputed
     TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
     glp.init();
-    TimerStopAndLog(GOLDILOCKS_PRECOMPUTED_INIT);    
+    TimerStopAndLog(GOLDILOCKS_PRECOMPUTED_INIT);
 
     /* TOOLS */
 
@@ -424,7 +436,7 @@ int main(int argc, char **argv)
             TimerStopAndLog(DB_CACHE_LOAD);
         }
     }
-    
+
 #endif // DATABASE_USE_CACHE
 
     /* TESTS */
@@ -441,6 +453,12 @@ int main(int argc, char **argv)
     if (config.runStorageSMTest)
     {
         StorageSMTest(fr, poseidon, config);
+    }
+
+    // Test Storage SM
+    if (config.runClimbKeySMTest)
+    {
+        ClimbKeySMTest(fr, config);
     }
 
     // Test Binary SM
@@ -484,7 +502,7 @@ int main(int argc, char **argv)
     {
         CheckTreeTest(config);
     }
-    
+
     // Test Database performance
     if (config.runDatabasePerformanceTest)
     {
@@ -500,7 +518,7 @@ int main(int argc, char **argv)
     {
         KeyValueTreeTest();
     }
-    
+
     // Test SMT64
     if (config.runSMT64Test)
     {

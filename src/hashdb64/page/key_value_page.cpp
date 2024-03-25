@@ -12,14 +12,14 @@
 
 //#define LOG_KEY_VALUE_PAGE
 
-zkresult KeyValuePage::InitEmptyPage (const uint64_t pageNumber)
+zkresult KeyValuePage::InitEmptyPage (PageContext &ctx, const uint64_t pageNumber)
 {
-    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
+    KeyValueStruct * page = (KeyValueStruct *)ctx.pageManager.getPageAddress(pageNumber);
     memset((void *)page, 0, 4096);
     return ZKR_SUCCESS;
 }
 
-zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const vector<uint64_t> &keyBits, string &value, const uint64_t level)
+zkresult KeyValuePage::Read (PageContext &ctx, const uint64_t pageNumber, const string &key, const vector<uint64_t> &keyBits, string &value, const uint64_t level)
 {
     // Check input parameters
     if (level >= keyBits.size())
@@ -31,7 +31,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
     zkresult zkr;
 
     // Get control
-    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
+    KeyValueStruct * page = (KeyValueStruct *)ctx.pageManager.getPageAddress(pageNumber);
     uint64_t index = keyBits[level];
     uint64_t control = page->key[index] >> 60;
 
@@ -50,7 +50,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
             uint64_t rawDataPage = page->key[index] & U64Mask48;
             uint64_t rawDataOffset = (page->key[index] >> 48) & U64Mask12;
             string lengthBa;
-            zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 4, lengthBa);
+            zkr = RawDataPage::Read(ctx, rawDataPage, rawDataOffset, 4, lengthBa);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("KeyValuePage::Read() failed calling RawDataPage::Read(4) result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
@@ -65,7 +65,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
             uint64_t length;
             length = *(uint32_t *)lengthBa.c_str();
             string rawData;
-            zkr = RawDataPage::Read(rawDataPage, rawDataOffset, length, rawData);
+            zkr = RawDataPage::Read(ctx, rawDataPage, rawDataOffset, length, rawData);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("KeyValuePage::Read() failed calling RawDataPage::Read() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
@@ -104,7 +104,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
         case 2:
         {
             uint64_t nextKeyValuePage = page->key[index] & U64Mask48;
-            return Read(nextKeyValuePage, key, keyBits, value, level+1);
+            return Read(ctx, nextKeyValuePage, key, keyBits, value, level+1);
         }
 
         // Default
@@ -118,7 +118,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
     return ZKR_DB_ERROR;
 }
 
-zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, string &value)
+zkresult KeyValuePage::Read (PageContext &ctx, const uint64_t pageNumber, const string &key, string &value)
 {
     // Check input parameters
     if (key.size() == 0)
@@ -137,10 +137,10 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, strin
     //zklog.info("KeyValuePage::Read() key=" + ba2string(key) + " keyBits=" + to_string(keyBits[0]) + ":" + to_string(keyBits[1]) + ":" + to_string(keyBits[2]));
 
     // Call Read with level=0
-    return Read(pageNumber, key, keyBits, value, 0);
+    return Read(ctx, pageNumber, key, keyBits, value, 0);
 }
 
-zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, const uint64_t headerPageNumber)
+zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, uint64_t &headerPageNumber)
 {
     // Check input parameters
     if (level >= keyBits.size())
@@ -150,10 +150,10 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
     }
 
     // Get an editable page
-    pageNumber = pageManager.editPage(pageNumber);
+    pageNumber = ctx.pageManager.editPage(pageNumber);
 
     zkresult zkr;
-    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
+    KeyValueStruct * page = (KeyValueStruct *)ctx.pageManager.getPageAddress(pageNumber);
     uint64_t index = keyBits[level];
 
     uint64_t control = page->key[index] >> 60;
@@ -177,12 +177,13 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
             lengthKeyValue += value;
 
             // Get header page data
-            HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+            headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
+            HeaderStruct * headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
             uint64_t rawDataPage = headerPage->rawDataPage;
-            uint64_t rawDataOffset = RawDataPage::GetOffset(headerPage->rawDataPage);
+            uint64_t rawDataOffset = RawDataPage::GetOffset(ctx, headerPage->rawDataPage);
 
             // Write to raw data page list
-            zkr = RawDataPage::Write(headerPage->rawDataPage, lengthKeyValue);
+            zkr = RawDataPage::Write(ctx, headerPage->rawDataPage, lengthKeyValue);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("KeyValuePage::Write() failed calling RawDataPage::Write() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
@@ -218,7 +219,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
             string lengthString;
 
             // Get the length
-            zkr = RawDataPage::Read(rawPageNumber, rawPageOffset, 4, lengthString);
+            zkr = RawDataPage::Read(ctx, rawPageNumber, rawPageOffset, 4, lengthString);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("KeyValuePage::Write() failed calling RawDataPage::Read(4) result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
@@ -233,7 +234,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
 
             // Get the existing key
             string existingLengthAndKey;
-            zkr = RawDataPage::Read(rawPageNumber, rawPageOffset, 4 + key.size(), existingLengthAndKey);
+            zkr = RawDataPage::Read(ctx, rawPageNumber, rawPageOffset, 4 + key.size(), existingLengthAndKey);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("KeyValuePage::Write() failed calling RawDataPage::Read() result=" + zkresult2string(zkr) + " length=" + to_string(length) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
@@ -252,7 +253,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
 
                 // Get the existing key + value
                 string existingLengthKeyAndValue;
-                zkr = RawDataPage::Read(rawPageNumber, rawPageOffset, length, existingLengthKeyAndValue);
+                zkr = RawDataPage::Read(ctx, rawPageNumber, rawPageOffset, length, existingLengthKeyAndValue);
                 if (zkr != ZKR_SUCCESS)
                 {
                     zklog.error("KeyValuePage::Write() failed calling RawDataPage::Read() result=" + zkresult2string(zkr) + " length=" + to_string(length) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
@@ -275,9 +276,9 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
             }
 
             // If keys are different, create a new page, move the existing key one level down, and call Write(level+1)
-            uint64_t newPageNumber = pageManager.getFreePage();
-            KeyValuePage::InitEmptyPage(newPageNumber);
-            KeyValueStruct * newPage = (KeyValueStruct *)pageManager.getPageAddress(newPageNumber);
+            uint64_t newPageNumber = ctx.pageManager.getFreePage();
+            KeyValuePage::InitEmptyPage(ctx, newPageNumber);
+            KeyValueStruct * newPage = (KeyValueStruct *)ctx.pageManager.getPageAddress(newPageNumber);
             string existingKey = existingLengthAndKey.substr(4);
             vector<uint64_t> existingKeyBits;
             splitKey9(existingKey, existingKeyBits);
@@ -294,7 +295,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
 #endif
 
             // Write the new key in the newly created page at the next level
-            zkr = Write(newPageNumber, key, keyBits, value, level+1, headerPageNumber);
+            zkr = Write(ctx, newPageNumber, key, keyBits, value, level+1, headerPageNumber);
             if (zkr != ZKR_SUCCESS)
             {
                 return zkr;
@@ -311,12 +312,13 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
         {
             // Call Write with the next level
             uint64_t nextKeyValuePage = page->key[index] & U64Mask48;
-            zkr = Write(nextKeyValuePage, key, keyBits, value, level+1, headerPageNumber);
+            zkr = Write(ctx, nextKeyValuePage, key, keyBits, value, level+1, headerPageNumber);
             if (zkr != ZKR_SUCCESS)
             {
                 return zkr;
             }
-            page->key[index] = nextKeyValuePage + (uint64_t(2) << 60);
+            //nextKeyValuePage could have changed, so we need to update it.
+            page->key[index] = nextKeyValuePage | (uint64_t(2) << 60); 
 
             return ZKR_SUCCESS;
         }
@@ -332,7 +334,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
     return ZKR_DB_ERROR;
 }
 
-zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const string &value, const uint64_t headerPageNumber)
+zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const string &key, const string &value, uint64_t &headerPageNumber)
 {
     // Check input parameters
     if (key.size() == 0)
@@ -345,14 +347,13 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const str
     vector<uint64_t> keyBits;
     splitKey9(key, keyBits);
 
-
     //zklog.info("KeyValuePage::Write() key=" + ba2string(key) + " keyBits=" + to_string(keyBits[0]) + ":" + to_string(keyBits[1]) + ":" + to_string(keyBits[2]));
 
     // Call Write with level=0
-    return Write(pageNumber, key, keyBits, value, 0, headerPageNumber);
+    return Write(ctx, pageNumber, key, keyBits, value, 0, headerPageNumber);
 }
 
-void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string& prefix, const uint64_t keySize)
+void KeyValuePage::Print (PageContext &ctx, const uint64_t pageNumber, bool details, const string& prefix, const uint64_t keySize)
 {
     zklog.info(prefix + "KeyValuePage::Print() pageNumber=" + to_string(pageNumber));
 
@@ -361,7 +362,7 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
     vector<uint64_t> nextKeyValuePages;
 
     // For each entry of the page
-    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
+    KeyValueStruct * page = (KeyValueStruct *)ctx.pageManager.getPageAddress(pageNumber);
     for (uint64_t index = 0; index < 512; index++)
     {
         uint64_t control = page->key[index] >> 60;
@@ -383,7 +384,7 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
                 if (details)
                 {
                     string lengthBa;
-                    zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 4, lengthBa);
+                    zkr = RawDataPage::Read(ctx, rawDataPage, rawDataOffset, 4, lengthBa);
                     if (zkr != ZKR_SUCCESS)
                     {
                         zklog.error("KeyValuePage::Print() failed calling RawDataPage::Read(4) result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
@@ -398,7 +399,7 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
                     uint64_t length;
                     length = *(uint32_t *)lengthBa.c_str();
                     string rawData;
-                    zkr = RawDataPage::Read(rawDataPage, rawDataOffset, length, rawData);
+                    zkr = RawDataPage::Read(ctx, rawDataPage, rawDataOffset, length, rawData);
                     if (zkr != ZKR_SUCCESS)
                     {
                         zklog.error("KeyValuePage::Print() failed calling RawDataPage::Read() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
@@ -449,6 +450,6 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
 
     for (uint64_t i=0; i<nextKeyValuePages.size(); i++)
     {
-        Print(nextKeyValuePages[i], details, prefix + " ", keySize);
+        Print(ctx, nextKeyValuePages[i], details, prefix + " ", keySize);
     }
 }

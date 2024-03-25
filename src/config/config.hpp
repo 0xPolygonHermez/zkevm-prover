@@ -21,7 +21,7 @@ public:
     bool runHashDBTest;
     bool runAggregatorServer;
     bool runAggregatorClient;
-    bool runAggregatorClientMock;    
+    bool runAggregatorClientMock;
 
     bool runFileGenBatchProof;              // Proof of 1 batch = Executor + Stark + StarkC12a + Recursive1
     bool runFileGenAggregatedProof;         // Proof of 2 batches = Recursive2 (of the 2 batches StarkC12a)
@@ -34,6 +34,7 @@ public:
     bool runSHA256ScriptGenerator;
     bool runKeccakTest;
     bool runStorageSMTest;
+    bool runClimbKeySMTest;
     bool runBinarySMTest;
     bool runMemAlignSMTest;
     bool runSHA256Test;
@@ -47,7 +48,7 @@ public:
     bool runKeyValueTreeTest;
     bool runSMT64Test;
     bool runUnitTest;
-    
+
     bool executeInParallel;
     bool useMainExecGenerated;
     bool useMainExecC;
@@ -73,13 +74,14 @@ public:
     int64_t log2DbVersionsAssociativeCacheSize; // log2 of the size in entries of the DatabaseVersionsAssociativeCache. Note 1 cache entry = 40 bytes
     int64_t log2DbVersionsAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseVersionsAssociativeCache indexes. Note index entry = 4 bytes
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
-    
+
     // Executor service
     uint16_t executorServerPort;
     uint16_t executorClientPort;
     string executorClientHost;
     uint64_t executorClientLoops;
     bool executorClientCheckNewStateRoot;
+    bool executorClientResetDB;
 
     // HashDB service
     uint16_t hashDBServerPort;
@@ -87,6 +89,9 @@ public:
     bool hashDB64;
     uint64_t kvDBMaxVersions;
     string dbCacheSynchURL;
+    string hashDBFileName;
+    uint64_t hashDBFileSize;
+    string hashDBFolder;
 
     // Aggregator service (client)
     uint16_t aggregatorServerPort;
@@ -101,7 +106,7 @@ public:
     bool executorTimeStatistics;
     bool opcodeTracer;
     bool logRemoteDbReads;
-    bool logExecutorServerInput; // Logs all inputs, before processing 
+    bool logExecutorServerInput; // Logs all inputs, before processing
     bool logExecutorServerInputJson; // Logs all inputs in input.json format, before processing
     uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
     bool logExecutorServerResponses;
@@ -113,7 +118,6 @@ public:
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
     string configPath;
-    string rom;
     string zkevmCmPols; // Maps commit pols memory into file, which slows down a bit the executor
     string zkevmCmPolsAfterExecutor; // Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning
     string c12aCmPols;
@@ -135,11 +139,11 @@ public:
     string recursive1Verifier;
     string recursive2Verifier;
     string recursivefVerifier;
-    string zkevmVerkey;    
-    string c12aVerkey;    
-    string recursive1Verkey;    
-    string recursive2Verkey;    
-    string recursivefVerkey;    
+    string zkevmVerkey;
+    string c12aVerkey;
+    string recursive1Verkey;
+    string recursive2Verkey;
+    string recursivefVerkey;
     string finalVerifier;
     string c12aExec;
     string recursive1Exec;
@@ -165,9 +169,6 @@ public:
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;
-    string dbKeyValueTableName;
-    string dbVersionTableName;
-    string dbLatestVersionTableName;
     bool dbMultiWrite;
     uint64_t dbMultiWriteSingleQuerySize;
     bool dbConnectionsPool;
@@ -182,7 +183,6 @@ public:
     // State manager
     bool stateManager;
     bool stateManagerPurge;
-    bool stateManagerPurgeTxs;
 
     // Infrastructure
     uint64_t cleanerPollingPeriod;

@@ -10,10 +10,11 @@
 #include "main_sm/fork_4/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_5/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_6/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_6/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_6/main_exec_c/main_exec_c.hpp"
+#include "main_sm/fork_7/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_7/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_7/main_exec_c/main_exec_c.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
 
@@ -112,12 +113,14 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 4: // fork_4
         {
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 4 generated");
                 fork_4::main_exec_generated_fast(mainExecutor_fork_4, proverRequest);
             }
             else
+#endif
             {
                 //zklog.info("Executor::process_batch() fork 4 native");
 
@@ -141,18 +144,15 @@ void Executor::process_batch (ProverRequest &proverRequest)
             return;
         }
         case 5: // fork_5
-        {            
-            if (config.useMainExecC) // Do not use in production; under development
-            {
-                //zklog.info("Executor::process_batch() fork 5 C");
-                mainExecutorC_fork_5.execute(proverRequest);
-            }
-            else if (config.useMainExecGenerated)
+        {
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+            if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 5 generated");
                 fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
             }
             else
+#endif
             {
                 //zklog.info("Executor::process_batch() fork 5 native");
 
@@ -177,17 +177,14 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 6: // fork_6
         {
-            if (config.useMainExecC) // Do not use in production; under development
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+            if (config.useMainExecGenerated)
             {
-                //zklog.info("Executor::process_batch() fork 6 C");
-                mainExecutorC_fork_6.execute(proverRequest);
-            }
-            else if (config.useMainExecGenerated)
-            {
-                //zklog.info("Executor::process_batch() fork 5 generated");
+                //zklog.info("Executor::process_batch() fork 6 generated");
                 fork_6::main_exec_generated_fast(mainExecutor_fork_6, proverRequest);
             }
             else
+#endif
             {
                 //zklog.info("Executor::process_batch() fork 6 native");
 
@@ -204,6 +201,43 @@ void Executor::process_batch (ProverRequest &proverRequest)
                 fork_6::MainExecRequired required;
 
                 mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
+        case 7: // fork_7
+        {
+            if (config.useMainExecC) // Do not use in production; under development
+            {
+                //zklog.info("Executor::process_batch() fork 7 C");
+                mainExecutorC_fork_7.execute(proverRequest);
+            }
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+            else if (config.useMainExecGenerated)
+            {
+                //zklog.info("Executor::process_batch() fork 7 generated");
+                fork_7::main_exec_generated_fast(mainExecutor_fork_7, proverRequest);
+            }
+            else
+#endif
+            {
+                //zklog.info("Executor::process_batch() fork 7 native");
+
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_7::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_7::CommitPols::pilSize()) + ")");
+                    exitProcess();
+                }
+                fork_7::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_7::MainExecRequired required;
+
+                mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
 
                 // Free committed polynomials address space
                 free(pAddress);
@@ -231,7 +265,7 @@ void* BinaryThread (void* arg)
 {
     // Get the context
     ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
-    
+
     // Execute the Binary State Machine
     TimerStart(BINARY_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->binaryExecutor.execute(pExecutorContext->pRequired->Binary, pExecutorContext->pCommitPols->Binary);
@@ -244,7 +278,7 @@ void* MemAlignThread (void* arg)
 {
     // Get the context
     ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
-    
+
     // Execute the MemAlign State Machine
     TimerStart(MEM_ALIGN_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->memAlignExecutor.execute(pExecutorContext->pRequired->MemAlign, pExecutorContext->pCommitPols->MemAlign);
@@ -257,7 +291,7 @@ void* MemoryThread (void* arg)
 {
     // Get the context
     ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
-    
+
     // Execute the Binary State Machine
     TimerStart(MEMORY_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->memoryExecutor.execute(pExecutorContext->pRequired->Memory, pExecutorContext->pCommitPols->Mem);
@@ -270,7 +304,7 @@ void* ArithThread (void* arg)
 {
     // Get the context
     ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
-    
+
     // Execute the Binary State Machine
     TimerStart(ARITH_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->arithExecutor.execute(pExecutorContext->pRequired->Arith, pExecutorContext->pCommitPols->Arith);
@@ -279,24 +313,53 @@ void* ArithThread (void* arg)
     return NULL;
 }
 
+void* PaddingPGThread (void* arg)
+{
+    // Get the context
+    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+
+    // Execute the Padding PG State Machine
+    TimerStart(PADDING_PG_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->paddingPGExecutor.execute(pExecutorContext->pRequired->PaddingPG, pExecutorContext->pCommitPols->PaddingPG, pExecutorContext->pRequired->PoseidonGFromPG);
+    TimerStopAndLog(PADDING_PG_SM_EXECUTE_THREAD);
+
+    return NULL;
+}
+
+void* StorageThread (void* arg)
+{
+    // Get the context
+    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+
+    // Execute the Storage State Machine
+    TimerStart(STORAGE_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->storageExecutor.execute(pExecutorContext->pRequired->Storage, pExecutorContext->pCommitPols->Storage, pExecutorContext->pRequired->PoseidonGFromST, pExecutorContext->pRequired->ClimbKey);
+    TimerStopAndLog(STORAGE_SM_EXECUTE_THREAD);
+
+    return NULL;
+}
+
+void* ClimbKeyThread (void* arg)
+{
+    // Get the context
+    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+
+    // Execute the ClimbKey State Machine
+    TimerStart(CLIMB_KEY_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->climbKeyExecutor.execute(pExecutorContext->pRequired->ClimbKey, pExecutorContext->pCommitPols->ClimbKey);
+    TimerStopAndLog(CLIMB_KEY_SM_EXECUTE_THREAD);
+
+    return NULL;
+}
+
 void* PoseidonThread (void* arg)
 {
     // Get the context
     ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
-    
-    // Execute the Padding PG State Machine
-    TimerStart(PADDING_PG_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->paddingPGExecutor.execute(pExecutorContext->pRequired->PaddingPG, pExecutorContext->pCommitPols->PaddingPG, pExecutorContext->pRequired->PoseidonG);
-    TimerStopAndLog(PADDING_PG_SM_EXECUTE_THREAD);
-    
-    // Execute the Storage State Machine
-    TimerStart(STORAGE_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->storageExecutor.execute(pExecutorContext->pRequired->Storage, pExecutorContext->pCommitPols->Storage, pExecutorContext->pRequired->PoseidonG);
-    TimerStopAndLog(STORAGE_SM_EXECUTE_THREAD);
-    
+
     // Execute the Poseidon G State Machine
     TimerStart(POSEIDON_G_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->poseidonGExecutor.execute(pExecutorContext->pRequired->PoseidonG, pExecutorContext->pCommitPols->PoseidonG);
+    pExecutorContext->pExecutor->poseidonGExecutor.execute(pExecutorContext->pRequired->PoseidonG, pExecutorContext->pRequired->PoseidonGFromPG, pExecutorContext->pRequired->PoseidonGFromST, pExecutorContext->pCommitPols->PoseidonG);
     TimerStopAndLog(POSEIDON_G_SM_EXECUTE_THREAD);
 
     return NULL;
@@ -306,26 +369,54 @@ void* KeccakThread (void* arg)
 {
     // Get the context
     ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
-    
+
     // Execute the Padding KK State Machine
     TimerStart(PADDING_KK_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->paddingKKExecutor.execute(pExecutorContext->pRequired->PaddingKK, pExecutorContext->pCommitPols->PaddingKK, pExecutorContext->pRequired->PaddingKKBit);
     TimerStopAndLog(PADDING_KK_SM_EXECUTE_THREAD);
-    
+
     // Execute the PaddingKKBit State Machine
     TimerStart(PADDING_KK_BIT_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->paddingKKBitExecutor.execute(pExecutorContext->pRequired->PaddingKKBit, pExecutorContext->pCommitPols->PaddingKKBit, pExecutorContext->pRequired->Bits2Field);
     TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE_THREAD);
-    
-    // Execute the Poseidon G State Machine
+
+    // Execute the Bits2Field State Machine
     TimerStart(BITS2FIELD_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->bits2FieldExecutor.execute(pExecutorContext->pRequired->Bits2Field, pExecutorContext->pCommitPols->Bits2Field, pExecutorContext->pRequired->KeccakF);
     TimerStopAndLog(BITS2FIELD_SM_EXECUTE_THREAD);
-    
+
     // Execute the Keccak F State Machine
     TimerStart(KECCAK_F_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->keccakFExecutor.execute(pExecutorContext->pRequired->KeccakF, pExecutorContext->pCommitPols->KeccakF);
     TimerStopAndLog(KECCAK_F_SM_EXECUTE_THREAD);
+
+    return NULL;
+}
+
+void* Sha256Thread (void* arg)
+{
+    // Get the context
+    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+
+    // Execute the Padding SHA256 State Machine
+    TimerStart(PADDING_SHA256_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->paddingSha256Executor.execute(pExecutorContext->pRequired->PaddingSha256, pExecutorContext->pCommitPols->PaddingSha256, pExecutorContext->pRequired->PaddingSha256Bit);
+    TimerStopAndLog(PADDING_SHA256_SM_EXECUTE_THREAD);
+
+    // Execute the PaddingSha256Bit State Machine
+    TimerStart(PADDING_SHA256_BIT_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->paddingSha256BitExecutor.execute(pExecutorContext->pRequired->PaddingSha256Bit, pExecutorContext->pCommitPols->PaddingSha256Bit, pExecutorContext->pRequired->Bits2FieldSha256);
+    TimerStopAndLog(PADDING_SHA256_BIT_SM_EXECUTE_THREAD);
+
+    // Execute the Bits2FieldSha256 State Machine
+    TimerStart(BITS2FIELDSHA256_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->bits2FieldSha256Executor.execute(pExecutorContext->pRequired->Bits2FieldSha256, pExecutorContext->pCommitPols->Bits2FieldSha256, pExecutorContext->pRequired->Sha256F);
+    TimerStopAndLog(BITS2FIELDSHA256_SM_EXECUTE_THREAD);
+
+    // Execute the Sha256 F State Machine
+    TimerStart(SHA256_F_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->sha256FExecutor.execute(pExecutorContext->pRequired->Sha256F, pExecutorContext->pCommitPols->Sha256F);
+    TimerStopAndLog(SHA256_F_SM_EXECUTE_THREAD);
 
     return NULL;
 }
@@ -342,15 +433,17 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (proverRequest.input.publicInputsExtended.publicInputs.forkID == PROVER_FORK_ID)
         {
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
-                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_6, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_7, proverRequest, commitPols.Main, required);
             }
             else
+#endif
             {
-                mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
             }
-            
+
             // Save input to <timestamp>.input.json after execution including dbReadLog
             if (config.saveDbReadsToFile)
             {
@@ -366,19 +459,23 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-        if (proverRequest.result != ZKR_SUCCESS)
+        if (proverRequest.result == ZKR_SM_MAIN_CLOSE_BATCH)
+        {
+            proverRequest.result = ZKR_SUCCESS;
+        }
+        else if (proverRequest.result != ZKR_SUCCESS)
         {
             return;
         }
 
         // Execute the Padding PG State Machine
         TimerStart(PADDING_PG_SM_EXECUTE);
-        paddingPGExecutor.execute(required.PaddingPG, commitPols.PaddingPG, required.PoseidonG);
+        paddingPGExecutor.execute(required.PaddingPG, commitPols.PaddingPG, required.PoseidonGFromPG);
         TimerStopAndLog(PADDING_PG_SM_EXECUTE);
 
         // Execute the Storage State Machine
         TimerStart(STORAGE_SM_EXECUTE);
-        storageExecutor.execute(required.Storage, commitPols.Storage, required.PoseidonG);
+        storageExecutor.execute(required.Storage, commitPols.Storage, required.PoseidonGFromST, required.ClimbKey);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
 
         // Execute the Arith State Machine
@@ -395,7 +492,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(MEM_ALIGN_SM_EXECUTE);
         memAlignExecutor.execute(required.MemAlign, commitPols.MemAlign);
         TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);
-        
+
         // Execute the Memory State Machine
         TimerStart(MEMORY_SM_EXECUTE);
         memoryExecutor.execute(required.Memory, commitPols.Mem);
@@ -421,10 +518,35 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         keccakFExecutor.execute(required.KeccakF, commitPols.KeccakF);
         TimerStopAndLog(KECCAK_F_SM_EXECUTE);
 
+        // Execute the PaddingSha256 State Machine
+        TimerStart(PADDING_SHA256_SM_EXECUTE);
+        paddingSha256Executor.execute(required.PaddingSha256, commitPols.PaddingSha256, required.PaddingSha256Bit);
+        TimerStopAndLog(PADDING_SHA256_SM_EXECUTE);
+
+        // Execute the PaddingSha256Bit State Machine
+        TimerStart(PADDING_SHA256_BIT_SM_EXECUTE);
+        paddingSha256BitExecutor.execute(required.PaddingSha256Bit, commitPols.PaddingSha256Bit, required.Bits2FieldSha256);
+        TimerStopAndLog(PADDING_SHA256_BIT_SM_EXECUTE);
+
+        // Execute the Bits2FieldSha256 State Machine
+        TimerStart(BITS2FIELDSHA256_SM_EXECUTE);
+        bits2FieldSha256Executor.execute(required.Bits2FieldSha256, commitPols.Bits2FieldSha256, required.Sha256F);
+        TimerStopAndLog(BITS2FIELDSHA256_SM_EXECUTE);
+
+        // Excute the Sha256 F State Machine
+        TimerStart(SHA256_F_SM_EXECUTE);
+        sha256FExecutor.execute(required.Sha256F, commitPols.Sha256F);
+        TimerStopAndLog(SHA256_F_SM_EXECUTE);
+
         // Execute the PoseidonG State Machine
         TimerStart(POSEIDON_G_SM_EXECUTE);
-        poseidonGExecutor.execute(required.PoseidonG, commitPols.PoseidonG);
+        poseidonGExecutor.execute(required.PoseidonG, required.PoseidonGFromPG, required.PoseidonGFromST, commitPols.PoseidonG);
         TimerStopAndLog(POSEIDON_G_SM_EXECUTE);
+
+        // Execute the ClimbKey State Machine
+        TimerStart(CLIMB_KEY_SM_EXECUTE);
+        climbKeyExecutor.execute(required.ClimbKey, commitPols.ClimbKey);
+        TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);
     }
     else
     {
@@ -437,15 +559,17 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
         if (config.useMainExecGenerated)
         {
-            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_6, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_7, proverRequest, commitPols.Main, required);
         }
         else
+#endif
         {
-            mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
         }
-            
+
         // Save input to <timestamp>.input.json after execution including dbReadLog
         if (config.saveDbReadsToFile)
         {
@@ -456,15 +580,23 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-        if (proverRequest.result != ZKR_SUCCESS)
+        if (proverRequest.result == ZKR_SM_MAIN_CLOSE_BATCH)
+        {
+            proverRequest.result = ZKR_SUCCESS;
+        }
+        else if (proverRequest.result != ZKR_SUCCESS)
         {
             zklog.error("Executor::execute() got from main execution proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
             return;
         }
 
-        // Execute the Padding PG, Storage and Poseidon G State Machines
-        pthread_t poseidonThread;
-        pthread_create(&poseidonThread, NULL, PoseidonThread, &executorContext);
+        // Execute the Storage State Machines
+        pthread_t storageThread;
+        pthread_create(&storageThread, NULL, StorageThread, &executorContext);
+
+        // Execute the Padding PG
+        pthread_t paddingPGThread;
+        pthread_create(&paddingPGThread, NULL, PaddingPGThread, &executorContext);
 
         // Execute the Arith State Machine, in parallel
         pthread_t arithThread;
@@ -477,14 +609,32 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         // Execute the Mem Align State Machine, in parallel
         pthread_t memAlignThread;
         pthread_create(&memAlignThread, NULL, MemAlignThread, &executorContext);
-        
+
         // Execute the Memory State Machine, in parallel
         pthread_t memoryThread;
         pthread_create(&memoryThread, NULL, MemoryThread, &executorContext);
 
-        // Execute the PaddingKK, PaddingKKBit, Bits2Field, Keccak F and NormGate9 State Machines
+        // Execute the PaddingKK, PaddingKKBit, Bits2Field, Keccak F
         pthread_t keccakThread;
         pthread_create(&keccakThread, NULL, KeccakThread, &executorContext);
+
+        // Execute the PaddingSha256, PaddingSha256Bit, Bits2FieldSha256, Sha256 F
+        pthread_t sha256Thread;
+        pthread_create(&sha256Thread, NULL, Sha256Thread, &executorContext);
+
+        // Wait for the Storage SM threads
+        pthread_join(storageThread, NULL);
+
+        // Execute the ClimKey State Machines (now that Storage is done)
+        pthread_t climbKeyThread;
+        pthread_create(&climbKeyThread, NULL, ClimbKeyThread, &executorContext);
+
+        // Wait for the PaddingPG SM threads
+        pthread_join(paddingPGThread, NULL);
+
+        // Execute the PoseidonG State Machine (now that Storage and PaddingPG are done)
+        pthread_t poseidonThread;
+        pthread_create(&poseidonThread, NULL, PoseidonThread, &executorContext);
 
         // Wait for the parallel SM threads
         pthread_join(binaryThread, NULL);
@@ -493,5 +643,8 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_join(arithThread, NULL);
         pthread_join(poseidonThread, NULL);
         pthread_join(keccakThread, NULL);
+        pthread_join(sha256Thread, NULL);
+        pthread_join(climbKeyThread, NULL);
+
     }
 }

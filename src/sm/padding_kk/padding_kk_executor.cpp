@@ -23,6 +23,7 @@ uint64_t PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
             }
 
             // Convert string (data) into binary (dataBytes)
+            input[i].dataBytes.clear();
             for (uint64_t c=0; c<input[i].data.length(); c+=2)
             {
                 uint8_t aux;

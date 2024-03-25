@@ -6,11 +6,17 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 #include "zkassert.hpp"
-#include "version_data_page.hpp"
+#include "version_data_entry.hpp"
 #include "scalar.hpp"
+#include "key_value.hpp"
+#include "hash_value_gl.hpp"
+#include "page_context.hpp"
 
 struct HeaderStruct
 {
+    // UUID
+    uint8_t uuid[32];
+
     // Raw data
     uint64_t firstRawDataPage;
     uint64_t rawDataPage;
@@ -30,40 +36,51 @@ struct HeaderStruct
 
     // Free pages list
     uint64_t freePages;
+    uint64_t firstUnusedPage;
 };
 
 class HeaderPage
 {
 public:
+    
+    // Header uuid
+    static zkresult Check (PageContext &ctx, const uint64_t headerPageNumber);
+
     // Header-only methods
-    static zkresult InitEmptyPage  (const uint64_t  headerPageNumber);
-    static uint64_t GetLastVersion (const uint64_t  headerPageNumber);
-    static void     SetLastVersion (      uint64_t &headerPageNumber, const uint64_t lastVersion);
+    static zkresult InitEmptyPage  (PageContext &ctx, const uint64_t  headerPageNumber);
+    static uint64_t GetLastVersion (PageContext &ctx, const uint64_t  headerPageNumber);
+    static void     SetLastVersion (PageContext &ctx,       uint64_t &headerPageNumber, const uint64_t lastVersion);
 
     // Free pages list methods
-    static zkresult GetFreePages    (const uint64_t  headerPageNumber,                                vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
-    static zkresult CreateFreePages (      uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
+    static zkresult GetFreePagesContainer (PageContext &ctx, const uint64_t  headerPageNumber, vector<uint64_t> (&containerPages));
+    static zkresult GetFreePages          (PageContext &ctx, const uint64_t  headerPageNumber, vector<uint64_t> (&freePages));
+    static zkresult CreateFreePages       (PageContext &ctx,       uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages));
+    static zkresult GetFirstUnusedPage    (PageContext &ctx,  const uint64_t  headerPageNumber, uint64_t &firstUnusedPage);
+    static zkresult SetFirstUnusedPage    (PageContext &ctx,       uint64_t &headerPageNumber, const uint64_t firstUnusedPage);
 
     // Root version methods
-    static zkresult ReadRootVersion  (const uint64_t  headerPageNumber, const string &root,       uint64_t &version);
-    static zkresult WriteRootVersion (      uint64_t &headerPageNumber, const string &root, const uint64_t &version);
+    static zkresult GetLatestStateRoot (PageContext &ctx, const uint64_t  headerPageNumber, Goldilocks::Element (&root)[4]);
+    static zkresult ReadRootVersion    (PageContext &ctx, const uint64_t  headerPageNumber, const string &root,       uint64_t &version);
+    static zkresult WriteRootVersion   (PageContext &ctx,       uint64_t &headerPageNumber, const string &root, const uint64_t &version);
 
     // Version data methods
-    static zkresult ReadVersionData  (const uint64_t  headerPageNumber, const uint64_t &version,       VersionDataStruct &versionData);
-    static zkresult WriteVersionData (      uint64_t &headerPageNumber, const uint64_t &version, const VersionDataStruct &versionData);
+    static zkresult ReadVersionData  (PageContext &ctx, const uint64_t  headerPageNumber, const uint64_t &version,       VersionDataEntry &versionData);
+    static zkresult WriteVersionData (PageContext &ctx,       uint64_t &headerPageNumber, const uint64_t &version, const VersionDataEntry &versionData);
 
     // Key-Value-History methods
-    static zkresult KeyValueHistoryRead          (const uint64_t  keyValueHistoryPage, const string &key, const uint64_t version,       mpz_class &value, uint64_t &keyLevel);
-    static zkresult KeyValueHistoryReadLevel     (      uint64_t &headerPageNumber,    const string &key, uint64_t &keyLevel);
-    static zkresult KeyValueHistoryWrite         (      uint64_t &headerPageNumber,    const string &key, const uint64_t version, const mpz_class &value);
-    static zkresult KeyValueHistoryCalculateHash (uint64_t &headerPageNumber, Goldilocks::Element (&hash)[4]);
+    static zkresult KeyValueHistoryRead          (PageContext &ctx, const uint64_t  keyValueHistoryPage, const string &key, const uint64_t version,       mpz_class &value, uint64_t &keyLevel);
+    static zkresult KeyValueHistoryReadLevel     (PageContext &ctx, const uint64_t &headerPageNumber,    const string &key, uint64_t &keyLevel);
+    static zkresult KeyValueHistoryReadTree      (PageContext &ctx, const uint64_t  keyValueHistoryPage, const uint64_t version,    vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues);
+    static zkresult KeyValueHistoryWrite         (PageContext &ctx,       uint64_t &headerPageNumber,    const string &key, const uint64_t version, const mpz_class &value);
+    static zkresult KeyValueHistoryCalculateHash (PageContext &ctx,       uint64_t &headerPageNumber,    Goldilocks::Element (&hash)[4]);
+    static zkresult KeyValueHistoryPrint         (PageContext &ctx, const uint64_t  headerPageNumber,    const string &root);
 
     // Program page methods
-    static zkresult ReadProgram  (const uint64_t  headerPageNumber, const string &key,       string &value);
-    static zkresult WriteProgram (      uint64_t &headerPageNumber, const string &key, const string &value);
+    static zkresult ReadProgram  (PageContext &ctx, const uint64_t  headerPageNumber, const string &key,       string &value);
+    static zkresult WriteProgram (PageContext &ctx,       uint64_t &headerPageNumber, const string &key, const string &value);
 
 
-    static void Print (const uint64_t headerPageNumber, bool details);
+    static void Print (PageContext &ctx, const uint64_t headerPageNumber, bool details);
 };
 
 #endif

@@ -137,6 +137,7 @@ void Config::load(json &config)
     ParseBool(config, "runSHA256ScriptGenerator", "RUN_SHA256_SCRIPT_GENERATOR", runSHA256ScriptGenerator, false);
     ParseBool(config, "runKeccakTest", "RUN_KECCAK_TEST", runKeccakTest, false);
     ParseBool(config, "runStorageSMTest", "RUN_STORAGE_SM_TEST", runStorageSMTest, false);
+    ParseBool(config, "runClimbKeySMTest", "RUN_CLIMBKEY_SM_TEST", runClimbKeySMTest, false);
     ParseBool(config, "runBinarySMTest", "RUN_BINARY_SM_TEST", runBinarySMTest, false);
     ParseBool(config, "runMemAlignSMTest", "RUN_MEM_ALIGN_SM_TEST", runMemAlignSMTest, false);
     ParseBool(config, "runSHA256Test", "RUN_SHA256_TEST", runSHA256Test, false);
@@ -193,12 +194,16 @@ void Config::load(json &config)
     ParseString(config, "executorClientHost", "EXECUTOR_CLIENT_HOST", executorClientHost, "127.0.0.1");
     ParseU64(config, "executorClientLoops", "EXECUTOR_CLIENT_LOOPS", executorClientLoops, 1);
     ParseBool(config, "executorClientCheckNewStateRoot", "EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT", executorClientCheckNewStateRoot, false);
+    ParseBool(config, "executorClientResetDB", "EXECUTOR_CLIENT_RESET_DB", executorClientResetDB, false);
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
     //ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
     hashDB64 = false; // Do not use in production; under development
     ParseU64(config, "kvDBMaxVersions", "HASHDB64_MAX_VERSIONS", kvDBMaxVersions, 131072);
     ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
+    ParseString(config, "hashDBFileName", "HASHDB_FILE_NAME", hashDBFileName, "");
+    ParseU64(config, "hashDBFileSize", "HASHDB_FILE_SIZE", hashDBFileSize, 128);
+    ParseString(config, "hashDBFolder", "HASHDB_FOLDER", hashDBFolder, "hashdb");
     ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
     ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
     ParseString(config, "aggregatorClientHost", "AGGREGATOR_CLIENT_HOST", aggregatorClientHost, "127.0.0.1");
@@ -223,7 +228,6 @@ void Config::load(json &config)
     ParseString(config, "inputFile2", "INPUT_FILE_2", inputFile2, "");
     ParseString(config, "outputPath", "OUTPUT_PATH", outputPath, "output");
     ParseString(config, "configPath", "CONFIG_PATH", configPath, "config");
-    ParseString(config, "rom", "ROM", rom, string("src/main_sm/") + string(PROVER_FORK_NAMESPACE_STRING) + string("/scripts/rom.json"));
     ParseString(config, "zkevmCmPols", "ZKEVM_CM_POLS", zkevmCmPols, "");
     ParseString(config, "zkevmCmPolsAfterExecutor", "ZKEVM_CM_POLS_AFTER_EXECUTOR", zkevmCmPolsAfterExecutor, "");
     ParseString(config, "keccakScriptFile", "KECCAK_SCRIPT_FILE", keccakScriptFile, configPath + "/scripts/keccak_script.json");
@@ -275,9 +279,6 @@ void Config::load(json &config)
     ParseString(config, "databaseURL", "DATABASE_URL", databaseURL, "local");
     ParseString(config, "dbNodesTableName", "DB_NODES_TABLE_NAME", dbNodesTableName, "state.nodes");
     ParseString(config, "dbProgramTableName", "DB_PROGRAM_TABLE_NAME", dbProgramTableName, "state.program");
-    ParseString(config, "dbKeyValueTableName", "DB_KEYVALUE_TABLE_NAME", dbKeyValueTableName, "state.keyvalue");
-    ParseString(config, "dbKeyVersionTableName", "DB_VERSION_TABLE_NAME", dbVersionTableName, "state.version");
-    ParseString(config, "dbLatestVersionTableName", "DB_LATEST_VERSION_TABLE_NAME", dbLatestVersionTableName, "state.latestversion");
     ParseBool(config, "dbMultiWrite", "DB_MULTIWRITE", dbMultiWrite, true);
     ParseU64(config, "dbMultiWriteSingleQuerySize", "DB_MULTIWRITE_SINGLE_QUERY_SIZE", dbMultiWriteSingleQuerySize, 20*1024*1024);
     ParseBool(config, "dbConnectionsPool", "DB_CONNECTIONS_POOL", dbConnectionsPool, true);
@@ -292,7 +293,6 @@ void Config::load(json &config)
     // State Manager
     ParseBool(config, "stateManager", "STATE_MANAGER", stateManager, true);
     ParseBool(config, "stateManagerPurge", "STATE_MANAGER_PURGE", stateManagerPurge, true);
-    ParseBool(config, "stateManagerPurgeTxs", "STATE_MANAGER_PURGE_TXS", stateManagerPurgeTxs, true);
 
     // Threads
     ParseU64(config, "cleanerPollingPeriod", "CLEANER_POLLING_PERIOD", cleanerPollingPeriod, 600);
@@ -313,7 +313,7 @@ void Config::load(json &config)
     ParseU64(config, "ECRecoverPrecalcNThreads", "ECRECOVER_PRECALC_N_THREADS", ECRecoverPrecalcNThreads, 16);
 
     // Logs
-    ParseBool(config, "jsonLogs", "JSON_LOGS", jsonLogs, true);
+    ParseBool(config, "jsonLogs", "JSON_LOGS", jsonLogs, false);
 }
 
 void Config::print(void)
@@ -334,7 +334,7 @@ void Config::print(void)
     if (runAggregatorServer)
         zklog.info("    runAggregatorServer=true");
     zklog.info("    runAggregatorClient=" + to_string(runAggregatorClient));
-    if (runAggregatorClientMock)        
+    if (runAggregatorClientMock)
         zklog.info("    runAggregatorClientMock=true");
     if (runFileGenBatchProof)
         zklog.info("    runFileGenBatchProof=true");
@@ -357,6 +357,8 @@ void Config::print(void)
         zklog.info("    runKeccakTest=true");
     if (runStorageSMTest)
         zklog.info("    runStorageSMTest=true");
+    if (runClimbKeySMTest)
+        zklog.info("    runClimbKeySMTest=true");
     if (runBinarySMTest)
         zklog.info("    runBinarySMTest=true");
     if (runMemAlignSMTest)
@@ -435,11 +437,15 @@ void Config::print(void)
     zklog.info("    executorClientHost=" + executorClientHost);
     zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
     zklog.info("    executorClientCheckNewStateRoot=" + to_string(executorClientCheckNewStateRoot));
+    zklog.info("    executorClientResetDB=" + to_string(executorClientResetDB));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
     zklog.info("    hashDB64=" + to_string(hashDB64));
     zklog.info("    kvDBMaxVersions=" + to_string(kvDBMaxVersions));
     zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
+    zklog.info("    hashDBFileName=" + hashDBFileName);
+    zklog.info("    hashDBFileSize=" + to_string(hashDBFileSize));
+    zklog.info("    hastDBFolder=" + hashDBFolder);
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
     zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
@@ -451,7 +457,6 @@ void Config::print(void)
     zklog.info("    inputFile2=" + inputFile2);
     zklog.info("    outputPath=" + outputPath);
     zklog.info("    configPath=" + configPath);
-    zklog.info("    rom=" + rom);
     zklog.info("    zkevmCmPols=" + zkevmCmPols);
     zklog.info("    c12aCmPols=" + c12aCmPols);
     zklog.info("    recursive1CmPols=" + recursive1CmPols);
@@ -486,9 +491,6 @@ void Config::print(void)
     zklog.info("    databaseURL=" + databaseURL.substr(0, 5) + "...");
     zklog.info("    dbNodesTableName=" + dbNodesTableName);
     zklog.info("    dbProgramTableName=" + dbProgramTableName);
-    zklog.info("    dbKeyValueTableName=" + dbKeyValueTableName);
-    zklog.info("    dbVersionTableName=" + dbVersionTableName);
-    zklog.info("    dbLatestVersionTableName=" + dbLatestVersionTableName);
     zklog.info("    dbMultiWrite=" + to_string(dbMultiWrite));
     zklog.info("    dbMultiWriteSingleQuerySize=" + to_string(dbMultiWriteSingleQuerySize));
     zklog.info("    dbConnectionsPool=" + to_string(dbConnectionsPool));
@@ -501,7 +503,6 @@ void Config::print(void)
     zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
     zklog.info("    stateManager=" + to_string(stateManager));
     zklog.info("    stateManagerPurge=" + to_string(stateManagerPurge));
-    zklog.info("    stateManagerPurgeTxs=" + to_string(stateManagerPurgeTxs));
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));
@@ -526,11 +527,6 @@ bool Config::check (void)
 {
     // Check required files presence
     bool bError = false;
-    if (!fileExists(rom))
-    {
-        zklog.error("Required file config.rom=" + rom + " does not exist");
-        bError = true;
-    }
     if (generateProof())
     {
         if (!fileExists(zkevmConstPols))

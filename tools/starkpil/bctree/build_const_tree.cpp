@@ -1,13 +1,16 @@
 #include "build_const_tree.hpp"
 #include <string>
 #include <nlohmann/json.hpp>
-#include "utils.hpp"
 #include <algorithm>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/time.h>
 #include "goldilocks_base_field.hpp"
 #include "merklehash_goldilocks.hpp"
 #include "poseidon_goldilocks.hpp"
 #include <fstream>
-#include "timer.hpp"
 #include "merkleTreeBN128.hpp"
 #include <filesystem>
 #include <cstdint>
@@ -23,6 +26,203 @@ using json = nlohmann::json;
 #define SIZE_GL 8
 
 Goldilocks fr;
+
+void exitProcess(void)
+{
+    exit(-1);
+}
+
+class zkLog
+{
+public:
+    static void error(const string &s)
+    {
+        cerr << s << endl;
+    }
+    static void info(const string &s)
+    {
+        cout << s << endl;
+    }
+};
+
+zkLog zklog;
+
+uint64_t TimeDiff(const struct timeval &startTime, const struct timeval &endTime)
+{
+    struct timeval diff;
+
+    // Calculate the time difference
+    diff.tv_sec = endTime.tv_sec - startTime.tv_sec;
+    if (endTime.tv_usec >= startTime.tv_usec)
+    {
+        diff.tv_usec = endTime.tv_usec - startTime.tv_usec;
+    }
+    else if (diff.tv_sec > 0)
+    {
+        diff.tv_usec = 1000000 + endTime.tv_usec - startTime.tv_usec;
+        diff.tv_sec--;
+    }
+    else
+    {
+        // gettimeofday() can go backwards under some circumstances: NTP, multithread...
+        //cerr << "Error: TimeDiff() got startTime > endTime: startTime.tv_sec=" << startTime.tv_sec << " startTime.tv_usec=" << startTime.tv_usec << " endTime.tv_sec=" << endTime.tv_sec << " endTime.tv_usec=" << endTime.tv_usec << endl;
+        return 0;
+    }
+
+    // Return the total number of us
+    return diff.tv_usec + 1000000 * diff.tv_sec;
+}
+
+uint64_t TimeDiff(const struct timeval &startTime)
+{
+    struct timeval endTime;
+    gettimeofday(&endTime, NULL);
+    return TimeDiff(startTime, endTime);
+}
+
+std::string DateAndTime(struct timeval &tv)
+{
+    struct tm *pTm;
+    pTm = localtime(&tv.tv_sec);
+    char cResult[32];
+    strftime(cResult, sizeof(cResult), "%Y/%m/%d %H:%M:%S", pTm);
+    std::string sResult(cResult);
+    return sResult;
+}
+
+#define TimerStart(name) struct timeval name##_start; gettimeofday(&name##_start,NULL); zklog.info("--> " + string(#name) + " starting...")
+#define TimerStop(name) struct timeval name##_stop; gettimeofday(&name##_stop,NULL); zklog.info("<-- " + string(#name) + " done")
+#define TimerLog(name) zklog.info(string(#name) + ": " _ to_string(double(TimeDiff(name##_start, name##_stop))/1000000) + " s")
+#define TimerStopAndLog(name) struct timeval name##_stop; gettimeofday(&name##_stop,NULL); zklog.info("<-- " + string(#name) + " done: " + to_string(double(TimeDiff(name##_start, name##_stop))/1000000) + " s")
+
+void file2json(const string &fileName, json &j)
+{
+    std::ifstream inputStream(fileName);
+    if (!inputStream.good())
+    {
+        zklog.error("file2json() failed loading input JSON file " + fileName + "; does this file exist?");
+        exitProcess();
+    }
+    try
+    {
+        inputStream >> j;
+    }
+    catch (exception &e)
+    {
+        zklog.error("file2json() failed parsing input JSON file " + fileName + " exception=" + e.what());
+        exitProcess();
+    }
+    inputStream.close();
+}
+
+void json2file(const json &j, const string &fileName)
+{
+    ofstream outputStream(fileName);
+    if (!outputStream.good())
+    {
+        zklog.error("json2file() failed creating output JSON file " + fileName);
+        exitProcess();
+    }
+    outputStream << setw(4) << j << endl;
+    outputStream.close();
+}
+
+void unmapFile(void *pAddress, uint64_t size)
+{
+    int err = munmap(pAddress, size);
+    if (err != 0)
+    {
+        zklog.error("unmapFile() failed calling munmap() of address=" + to_string(uint64_t(pAddress)) + " size=" + to_string(size));
+        exitProcess();
+    }
+}
+
+void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)
+{
+    // If input, check the file size is the same as the expected polsSize
+    if (!bOutput)
+    {
+        struct stat sb;
+        if (lstat(fileName.c_str(), &sb) == -1)
+        {
+            zklog.error("mapFile() failed calling lstat() of file " + fileName);
+            exitProcess();
+        }
+        if ((uint64_t)sb.st_size != size)
+        {
+            zklog.error("mapFile() found size of file " + fileName + " to be " + to_string(sb.st_size) + " B instead of " + to_string(size) + " B");
+            exitProcess();
+        }
+    }
+
+    // Open the file withe the proper flags
+    int oflags;
+    if (bOutput)
+        oflags = O_CREAT | O_RDWR | O_TRUNC;
+    else
+        oflags = O_RDONLY;
+    int fd = open(fileName.c_str(), oflags, 0666);
+    if (fd < 0)
+    {
+        zklog.error("mapFile() failed opening file: " + fileName);
+        exitProcess();
+    }
+
+    // If output, extend the file size to the required one
+    if (bOutput)
+    {
+        // Seek the last byte of the file
+        int result = lseek(fd, size - 1, SEEK_SET);
+        if (result == -1)
+        {
+            zklog.error("mapFile() failed calling lseek() of file: " + fileName);
+            exitProcess();
+        }
+
+        // Write a 0 at the last byte of the file, to set its size; content is all zeros
+        result = write(fd, "", 1);
+        if (result < 0)
+        {
+            zklog.error("mapFile() failed calling write() of file: " + fileName);
+            exitProcess();
+        }
+    }
+
+    // Map the file into memory
+    void *pAddress;
+    pAddress = (uint8_t *)mmap(NULL, size, bOutput ? (PROT_READ | PROT_WRITE) : PROT_READ, MAP_SHARED, fd, 0);
+    if (pAddress == MAP_FAILED)
+    {
+        zklog.error("mapFile() failed calling mmap() of file: " + fileName);
+        exitProcess();
+    }
+    close(fd);
+
+    // If mapped memory is wanted, then we are done
+    if (bMapInputFile)
+        return pAddress;
+
+    // Allocate memory
+    void *pMemAddress = malloc(size);
+    if (pMemAddress == NULL)
+    {
+        zklog.error("mapFile() failed calling malloc() of size: " + to_string(size));
+        exitProcess();
+    }
+
+    // Copy file contents into memory
+    memcpy(pMemAddress, pAddress, size);
+
+    // Unmap file content from memory
+    unmapFile(pAddress, size);
+
+    return pMemAddress;
+}
+
+void *copyFile(const string &fileName, uint64_t size)
+{
+    return mapFileInternal(fileName, size, false, false);
+}
 
 string time()
 {
@@ -369,7 +569,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         uint64_t numElements = numElementsCopy + numElementsTree;
 
         uint64_t sizeConstTree = numElements * sizeof(Goldilocks::Element);
-        uint64_t batchSize = std::max((uint64_t)8, (nPols + 3) / 4);
+        //uint64_t batchSize = std::max((uint64_t)8, (nPols + 3) / 4);
         Goldilocks::Element *constTree = (Goldilocks::Element *)malloc(sizeConstTree);
         constTree[0] = Goldilocks::fromU64(nPols);
         constTree[1] = Goldilocks::fromU64(nExt);

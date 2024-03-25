@@ -57,6 +57,9 @@ public:
     // HashDB
     HashDBInterface *pHashDB;
 
+    // When we reach this zkPC, state root (SR) will be consolidated (from virtual to real state root)
+    const uint64_t consolidateStateRootZKPC = 4835;
+
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
 
@@ -70,6 +73,7 @@ public:
     void checkFinalState(Context &ctx);
     void assertOutputs(Context &ctx);
     void logError(Context &ctx, const string &message = "");
+    void linearPoseidon(Context &ctx, const vector<uint8_t> &data, Goldilocks::Element (&result)[4]);
 
 private:
     // Flush

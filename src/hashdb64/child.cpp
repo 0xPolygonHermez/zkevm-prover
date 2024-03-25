@@ -27,3 +27,39 @@ string Child::print (Goldilocks &fr) const
         }
     }
 }
+
+zkresult Child::getHash (Goldilocks::Element (&hash)[4]) const
+{
+    switch (type)
+    {
+        case ZERO:
+        {
+            hash[0] = fr.zero();
+            hash[1] = fr.zero();
+            hash[2] = fr.zero();
+            hash[3] = fr.zero();
+            return ZKR_SUCCESS;
+        }
+        case LEAF:
+        {
+            hash[0] = leaf.hash[0];
+            hash[1] = leaf.hash[1];
+            hash[2] = leaf.hash[2];
+            hash[3] = leaf.hash[3];
+            return ZKR_SUCCESS;
+        }
+        case INTERMEDIATE:
+        {
+            hash[0] = intermediate.hash[0];
+            hash[1] = intermediate.hash[1];
+            hash[2] = intermediate.hash[2];
+            hash[3] = intermediate.hash[3];
+            return ZKR_SUCCESS;
+        }
+        default:
+        {
+            zklog.error("Child::getHash() found unexpected type=" + to_string(type));
+            return ZKR_DB_ERROR;
+        }
+    }
+}

@@ -17,6 +17,8 @@
 #include "key_value_level.hpp"
 #include "version_value.hpp"
 #include "child.hpp"
+#include "page_manager.hpp"
+#include "page_context.hpp"
 
 using namespace std;
 
@@ -68,6 +70,8 @@ private:
     uint64_t headerPageNumber;
     pthread_mutex_t mutex;
     uint64_t currentFlushId;
+    PageManager pageManager;
+    PageContext ctx;
 
 public:
 
@@ -77,7 +81,10 @@ public:
 
     // Basic methods
     void init(void);
-    
+    // State Root
+
+    zkresult getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]);
+
     // Program
     zkresult getProgram (const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram (const string &_key, const vector<uint8_t> &value, const bool persistent);
@@ -85,10 +92,11 @@ public:
     // Tree64
     zkresult WriteTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent);
     zkresult ReadTree  (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues);
+    zkresult PrintTree (const string &root); // Prints the tree corresponding to this root.  If root is empty, prints the latest version tree
 
     // Key - Value - Level
     zkresult readKV    (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value,  uint64_t &level, DatabaseMap *dbReadLog);
-    zkresult readLevel (const Goldilocks::Element (&key)[4], uint64_t &level){ level=128; return ZKR_SUCCESS;}
+    zkresult readLevel (const Goldilocks::Element (&key)[4], uint64_t &level);
 
     // Block
     zkresult consolidateBlock (uint64_t blockNumber); // TODO: Who reports this block number?
@@ -97,6 +105,9 @@ public:
     // Flush data pending to be stored permamently
     zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId);
     zkresult getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram);
+
+    // Reset database content
+    zkresult resetDB (void);
 
     // Lock/Unlock
     void Lock(void) { pthread_mutex_lock(&mutex); };

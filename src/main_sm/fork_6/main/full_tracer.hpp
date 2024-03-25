@@ -6,7 +6,6 @@
 #include "main_sm/fork_6/main/context.hpp"
 #include "main_sm/fork_6/main/rom_command.hpp"
 #include "main_sm/fork_6/main/rom_line.hpp"
-#include "main_sm/fork_6/main_exec_c/context_c.hpp"
 #include "utils/time_metric.hpp"
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
@@ -39,8 +38,7 @@ public:
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
     map<uint64_t,map<uint64_t,Log>> logs;
-    vector<Opcode> call_trace;
-    vector<Opcode> execution_trace;
+    vector<Opcode> full_trace;
     string lastError;
     uint64_t numberOfOpcodesInThisTx;
     uint64_t lastErrorOpcode;
@@ -58,19 +56,12 @@ public:
 #endif
 public:
     zkresult onError         (Context &ctx, const RomCommand &cmd);
-    zkresult onError         (ContextC &ctxc, const string &error);
     zkresult onStoreLog      (Context &ctx, const RomCommand &cmd);
-    zkresult onStoreLog      (ContextC &ctxc);
     zkresult onProcessTx     (Context &ctx, const RomCommand &cmd);
-    zkresult onProcessTx     (ContextC &ctxc);
     zkresult onUpdateStorage (Context &ctx, const RomCommand &cmd);
-    zkresult onUpdateStorage (ContextC &ctxc);
     zkresult onFinishTx      (Context &ctx, const RomCommand &cmd);
-    zkresult onFinishTx      (ContextC &ctxc);
     zkresult onStartBatch    (Context &ctx, const RomCommand &cmd);
-    zkresult onStartBatch    (ContextC &ctxc);
     zkresult onFinishBatch   (Context &ctx, const RomCommand &cmd);
-    zkresult onFinishBatch   (ContextC &ctxc);
 
     zkresult onOpcode (Context &ctx, const RomCommand &cmd);
     zkresult addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
@@ -101,8 +92,7 @@ public:
         fullStack       = other.fullStack;
         accBatchGas     = other.accBatchGas;
         logs            = other.logs;
-        call_trace      = other.call_trace;
-        execution_trace = other.execution_trace;
+        full_trace      = other.full_trace;
         lastError       = other.lastError;
         callData        = other.callData;
         return *this;
@@ -112,6 +102,10 @@ public:
     uint64_t get_cumulative_gas_used (void)
     {
         return finalTrace.cumulative_gas_used;
+    }
+    uint64_t get_gas_used (void)
+    {
+        return 0;
     }
     string & get_new_state_root (void)
     {
@@ -133,13 +127,33 @@ public:
     {
         return finalTrace.responses;
     }
+    vector<Block> emptyBlocks;
+    vector<Block> & get_block_responses(void)
+    {
+        zklog.error("FullTracer::get_block_responses() called in fork 6");
+        exitProcess();
+        return emptyBlocks;
+    }
     vector<Opcode> & get_info(void)
     {
-        return execution_trace;
+        return full_trace;
+    }
+    uint64_t get_block_number(void)
+    {
+        return finalTrace.responses.size();
     }
     uint64_t get_tx_number(void)
     {
-        return finalTrace.responses.size();
+        return 0;
+    }
+    string emptyString;
+    string & get_error(void)
+    {
+        return emptyString;
+    }
+    bool get_invalid_batch(void)
+    {
+        return false;
     }
 };
 

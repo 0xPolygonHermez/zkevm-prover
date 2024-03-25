@@ -51,6 +51,12 @@ void file2json(const string &fileName, ordered_json &j);
 // Returns if file exists
 bool fileExists (const string &fileName);
 
+// Returns file size
+uint64_t fileSize (const string &fileName);
+
+// Return if file is a directory
+bool fileIsDirectory (const string &fileName);
+
 // Ensure directory exists
 void ensureDirectoryExists (const string &fileName);
 
@@ -92,8 +98,11 @@ void getIPAddress (string &ipAddress);
 
 // Gets the incremental of a string (old) vs. another (old), i.e. the set of chars that are different
 // If the new string is shorter than the old string, it returns the whole new string
-void getStringIncrement(const string &oldString, const string &newString, uint64_t &offset, uint64_t &length);
+void getStringIncrement (const string &oldString, const string &newString, uint64_t &offset, uint64_t &length);
 
 extern string emptyString;
+
+// Calculates the Poseidon linear hash of a buffer
+void poseidonLinearHash (const vector<uint8_t> &_data, Goldilocks::Element (&result)[4]);
 
 #endif

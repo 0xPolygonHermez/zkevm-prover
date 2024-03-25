@@ -2125,3 +2125,87 @@ void loadDb2MemCache(const Config &config)
 
 #endif
 }
+
+zkresult Database::resetDB(void)
+{
+#ifdef DEBUG
+
+    zkresult result = ZKR_SUCCESS;
+
+    // Check that it has  been initialized before
+    if (!bInitialized)
+    {
+        zklog.error("Database::resetDB() called uninitialized");
+        exitProcess();
+    }
+
+    if (useRemoteDB)
+    {
+        // Reset multi write
+        if (config.dbMultiWrite)
+        {
+            multiWrite.Lock();
+            multiWrite.data[0].Reset();
+            multiWrite.data[1].Reset();
+            multiWrite.data[2].Reset();
+            multiWrite.Unlock();
+        }
+    
+        // Reset the remote database
+        string query = "DELETE FROM " + config.dbNodesTableName + "; DELETE FROM " + config.dbProgramTableName + ";";
+        DatabaseConnection * pDatabaseConnection = getConnection();
+        try
+        {        
+
+#ifdef DATABASE_COMMIT
+            if (autoCommit)
+#endif
+            {
+                pqxx::work w(*(pDatabaseConnection->pConnection));
+                pqxx::result res = w.exec(query);
+                w.commit();
+            }
+#ifdef DATABASE_COMMIT
+            else
+            {
+                if (transaction == NULL)
+                    transaction = new pqxx::work{*pConnectionWrite};
+                pqxx::result res = transaction->exec(query);
+            }
+#endif
+        }
+        catch (const std::exception &e)
+        {
+            zklog.error("Database::resetDB() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+            result = ZKR_DB_ERROR;
+            queryFailed();
+        }
+
+        disposeConnection(pDatabaseConnection);
+    }
+
+#ifdef DATABASE_USE_CACHE
+    // Reset the caches
+    if (dbMTCache.enabled())
+    {
+        dbMTCache.clear();
+    }
+    if (dbMTACache.enabled() && usingAssociativeCache())
+    {
+        dbMTACache.clear();
+    }
+#endif
+
+#ifdef LOG_DB
+    zklog.info("Database::resetDB()");
+#endif
+
+    return result;
+
+#else // DEBUG
+
+    zklog.error("Database::resetDB() called while not in debug mode");
+    return ZKR_DB_ERROR;
+
+#endif // DEBUG
+}

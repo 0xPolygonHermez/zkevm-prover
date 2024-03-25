@@ -171,17 +171,26 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     }
     pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genBatchProofRequest.input().public_inputs().batch_l2_data();
 
-    // Get global exit root
-    if (genBatchProofRequest.input().public_inputs().global_exit_root().size() > 32)
+    // Get L1 info root
+    if (genBatchProofRequest.input().public_inputs().l1_info_root().size() > 32)
     {
-        zklog.error("AggregatorClient::GenProof() got globalExitRoot too long, size=" + to_string(genBatchProofRequest.input().public_inputs().global_exit_root().size()));
+        zklog.error("AggregatorClient::GenProof() got l1_info_root too long, size=" + to_string(genBatchProofRequest.input().public_inputs().l1_info_root().size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
-    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot, genBatchProofRequest.input().public_inputs().global_exit_root());
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.l1InfoRoot, genBatchProofRequest.input().public_inputs().l1_info_root());
 
     // Get timestamp
-    pProverRequest->input.publicInputsExtended.publicInputs.timestamp = genBatchProofRequest.input().public_inputs().eth_timestamp();
+    pProverRequest->input.publicInputsExtended.publicInputs.timestampLimit = genBatchProofRequest.input().public_inputs().timestamp_limit();
+
+    // Get forced blockhash L1
+    if (genBatchProofRequest.input().public_inputs().forced_blockhash_l1().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenProof() got forced_blockhash_l1 too long, size=" + to_string(genBatchProofRequest.input().public_inputs().forced_blockhash_l1().size()));
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.forcedBlockHashL1, genBatchProofRequest.input().public_inputs().forced_blockhash_l1());
 
     // Get sequencer address
     string auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().sequencer_addr());
@@ -302,6 +311,49 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
 
         // Save key-value
         pProverRequest->input.contractsBytecode[key] = dbValue;
+    }
+
+    // Parse L1 info tree data
+    const google::protobuf::Map<google::protobuf::uint32, aggregator::v1::L1Data> &l1InfoTreeData = genBatchProofRequest.input().public_inputs().l1_info_tree_data();
+    google::protobuf::Map<google::protobuf::uint32, aggregator::v1::L1Data>::const_iterator itl;
+    for (itl=l1InfoTreeData.begin(); itl!=l1InfoTreeData.end(); itl++)
+    {
+        // Get index
+        uint64_t index = itl->first;
+
+        // Get L1 data
+        L1Data l1Data;
+        const aggregator::v1::L1Data &l1DataV2 = itl->second;
+        if (l1DataV2.global_exit_root().size() > 32)
+        {
+            zklog.error("AggregatorClient::GenBatchProof()() got l1DataV2.global_exit_root() too long, size=" + to_string(l1DataV2.global_exit_root().size()), &(pProverRequest->tags));
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
+        ba2scalar(l1Data.globalExitRoot, l1DataV2.global_exit_root());
+        if (l1DataV2.blockhash_l1().size() > 32)
+        {
+            zklog.error("AggregatorClient::GenBatchProof()() got l1DataV2.block_hash_l1() too long, size=" + to_string(l1DataV2.blockhash_l1().size()), &(pProverRequest->tags));
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
+        ba2scalar(l1Data.blockHashL1, l1DataV2.blockhash_l1());
+        l1Data.minTimestamp = l1DataV2.min_timestamp();
+        for (int64_t i=0; i<l1DataV2.smt_proof_size(); i++)
+        {
+            mpz_class auxScalar;
+            if (l1DataV2.smt_proof(i).size() > 32)
+            {
+                zklog.error("AggregatorClient::GenBatchProof()() got l1DataV2.smt_proof(i) too long, size=" + to_string(l1DataV2.smt_proof(i).size()), &(pProverRequest->tags));
+                genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+                return false;
+            }
+            ba2scalar(auxScalar, l1DataV2.smt_proof(i));
+            l1Data.smtProof.emplace_back(auxScalar);
+        }
+
+        // Store it
+        pProverRequest->input.l1InfoTreeData[index] = l1Data;
     }
 
     // Submit the prover request
@@ -496,8 +548,9 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainID);
                     pPublicInputs->set_fork_id(pProverRequest->proof.publicInputsExtended.publicInputs.forkID);
                     pPublicInputs->set_batch_l2_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchL2Data);
-                    pPublicInputs->set_global_exit_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.globalExitRoot));
-                    pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
+                    pPublicInputs->set_l1_info_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.l1InfoRoot));
+                    pPublicInputs->set_timestamp_limit(pProverRequest->proof.publicInputsExtended.publicInputs.timestampLimit);
+                    pPublicInputs->set_forced_blockhash_l1(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.forcedBlockHashL1));
                     pPublicInputs->set_sequencer_addr(Add0xIfMissing(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
                     pPublicInputs->set_aggregator_addr(Add0xIfMissing(pProverRequest->proof.publicInputsExtended.publicInputs.aggregatorAddress.get_str(16)));
                     aggregator::v1::PublicInputsExtended* pPublicInputsExtended = new(aggregator::v1::PublicInputsExtended);

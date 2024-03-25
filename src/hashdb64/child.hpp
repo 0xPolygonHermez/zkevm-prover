@@ -82,6 +82,8 @@ public:
             }
         }
     }
+
+    zkresult getHash (Goldilocks::Element (&hash)[4]) const;
 };
 
 #endif

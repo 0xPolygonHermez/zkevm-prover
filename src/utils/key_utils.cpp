@@ -27,6 +27,7 @@ void splitKey (Goldilocks &fr, const Goldilocks::Element (&key)[4], bool (&resul
 }
 
 // Get 256 key bits in SMT order, in sets of 6 bits
+// TODO: use SMT order in splitKey6
 void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&result)[43])
 {
     bool bits[256];
@@ -34,38 +35,51 @@ void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&r
     for (uint64_t i=0; i<42; i++)
     {
         result[i] =
-            bits[i*6 + 0] * 0b000001 +
-            bits[i*6 + 1] * 0b000010 +
-            bits[i*6 + 2] * 0b000100 +
-            bits[i*6 + 3] * 0b001000 +
-            bits[i*6 + 4] * 0b010000 +
-            bits[i*6 + 5] * 0b100000;
+            (bits[i*6 + 0] ? 0b100000 : 0) +
+            (bits[i*6 + 1] ? 0b010000 : 0) +
+            (bits[i*6 + 2] ? 0b001000 : 0) +
+            (bits[i*6 + 3] ? 0b000100 : 0) +
+            (bits[i*6 + 4] ? 0b000010 : 0) +
+            (bits[i*6 + 5] ? 0b000001 : 0);
     }
     result[42] =
-        bits[42*6 + 0] * 0b000001 +
-        bits[42*6 + 1] * 0b000010 +
-        bits[42*6 + 2] * 0b000100 +
-        bits[42*6 + 3] * 0b001000;
+        (bits[42*6 + 0] ? 0b100000 : 0) +
+        (bits[42*6 + 1] ? 0b010000 : 0) +
+        (bits[42*6 + 2] ? 0b001000 : 0) +
+        (bits[42*6 + 3] ? 0b000100 : 0);
+}
+
+// Get 64 key bits, in sets of 6 bits
+void splitKey6 (Goldilocks &fr, const uint64_t key, uint8_t (&_result)[11])
+{
+    uint64_t bits = key;
+    _result[10] = (uint8_t)(bits & 0x0F);
+    bits >>= 4;
+    for (int i = 9; i >= 0; i--) {
+        _result[i] = (uint8_t)(bits & 0x3F);
+        bits >>= 6;
+    }
 }
 
 void splitKey9 (const string &baString, vector<uint64_t> &result)
 {
     // Calculate the total number of bits to read
-    uint64_t numberOfBits = baString.size() * 8;
+    uint64_t size = baString.size();
+    uint64_t numberOfBits = size << 3;
     
     // Split them in chunks of 9 bits
     for (uint64_t i = 0; i < numberOfBits; i += 9)
     {
         // Calculate the byte and bit of the first part
-        uint64_t firstByte = i/8;
-        uint64_t firstByteBit = i%8;
+        uint64_t firstByte = i >> 3;
+        uint64_t firstByteBit = i & 7;
         uint8_t resultByte = (uint8_t)baString[firstByte];
         resultByte = resultByte << firstByteBit;
-        uint64_t resultPart = resultByte;
-        resultPart = resultPart << (8 - firstByteBit);
+        uint64_t resultPart = uint64_t(resultByte);
+        resultPart = resultPart << 1;
 
         // If this is not the end of the byte array, consume the rest of bits of the next byte
-        if ((firstByte + 1) < baString.size())
+        if ((firstByte + 1) < size)
         {
             resultByte = (uint8_t)baString[firstByte + 1];
             resultByte = resultByte >> (7 - firstByteBit);
@@ -73,7 +87,7 @@ void splitKey9 (const string &baString, vector<uint64_t> &result)
         }
 
         // Add to the result
-        result.emplace_back(resultPart);
+        result.emplace_back((uint64_t)resultPart);
     }
 }
 
@@ -131,55 +145,4 @@ void removeKeyBits (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint64_
     {
         rkey[i] = fr.fromU64(auxk[i]);
     }
-}
-
-uint64_t getKeyChildren64Position (const bool (&keys)[256], uint64_t level)
-{
-    if (level > 250)
-    {
-        zklog.error("getKeyChildren64Position() got invalid level=" + to_string(level));
-        exitProcess();
-    }
-    uint64_t result = 0;
-    if (keys[level + 0]) result += 32;
-    if (keys[level + 1]) result += 16;
-    if (keys[level + 2]) result += 8;
-    if (keys[level + 3]) result += 4;
-    if (keys[level + 4]) result += 2;
-    if (keys[level + 5]) result += 1;
-    return result;
-}
-
-uint64_t getKeyChildren64Position (const uint64_t index)
-{
-    zkassert(index <= 64);
-
-    uint64_t result = 0;
-
-    if ((index & 0b100000) != 0)
-    {
-        result += 32;
-    }
-    if ((index & 0b010000) != 0)
-    {
-        result += 16;
-    }
-    if ((index & 0b001000) != 0)
-    {
-        result += 8;
-    }
-    if ((index & 0b000100) != 0)
-    {
-        result += 4;
-    }
-    if ((index & 0b000010) != 0)
-    {
-        result += 2;
-    }
-    if ((index & 0b000001) != 0)
-    {
-        result += 1;
-    }
-
-    return result;
 }
