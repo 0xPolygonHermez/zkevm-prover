@@ -131,7 +131,7 @@ string Logger::getCurrentTime()
    // Convert current time to string
    currTime.assign(ctime(&now));
 
-   // Last charactor of currentTime is "\n", so remove it
+   // Last character of currentTime is "\n", so remove it
    string currentTime = currTime.substr(0, currTime.size()-1);
    return currentTime;
 }
