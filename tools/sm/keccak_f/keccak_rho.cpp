@@ -1,4 +1,5 @@
-#include "keccak_state.hpp"
+#include "gate_state.hpp"
+#include "keccak.hpp"
 
 /*
 Keccak-f Rho permutation.
@@ -11,7 +12,7 @@ Steps:
 4. Return A′
 */
 
-void KeccakRho (KeccakState &S)
+void KeccakRho (GateState &S)
 {
     
     // For all z such that 0 ≤ z <w, let A′ [0, 0, z] = A[0, 0, z]

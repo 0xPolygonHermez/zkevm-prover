@@ -5,6 +5,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "zklog.hpp"
+#include "goldilocks_precomputed.hpp"
 
 using json = nlohmann::json;
 
@@ -13,6 +14,9 @@ Goldilocks::Element eq1 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint
 Goldilocks::Element eq2 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
 Goldilocks::Element eq3 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
 Goldilocks::Element eq4 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+
+const uint16_t chunksPrimeHL[16] = { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+                                     0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFE, 0xFFFF, 0xFC2F };
 
 void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 {
@@ -104,6 +108,11 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             // s=(y2-y1)/(x2-x1)
             fec.sub(aux1, y2, y1);
             fec.sub(aux2, x2, x1);
+            if (fec.isZero(aux2))
+            {
+                zklog.error("ArithExecutor::execute() divide by zero calculating S for input " + to_string(i));
+                exitProcess();
+            }
             fec.div(s, aux1, aux2);
 
             // Get s as a scalar
@@ -205,25 +214,57 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
     for (uint64_t i = 0; i < input.size(); i++)
     {
         uint64_t offset = i*32;
+        bool xAreDifferent = false;
+        bool valueLtPrime = false;
         for (uint64_t step=0; step<32; step++)
         {
+            uint64_t index = offset + step;
+            uint64_t nextIndex = (index + 1) % N;
+            uint64_t step16 = step % 16;
+            if (step16 == 0)
+            {
+                valueLtPrime = false;
+            }
             for (uint64_t j=0; j<16; j++)
             {
-                pols.x1[j][offset + step] = fr.fromU64(input[i]._x1[j]);
-                pols.y1[j][offset + step] = fr.fromU64(input[i]._y1[j]);
-                pols.x2[j][offset + step] = fr.fromU64(input[i]._x2[j]);
-                pols.y2[j][offset + step] = fr.fromU64(input[i]._y2[j]);
-                pols.x3[j][offset + step] = fr.fromU64(input[i]._x3[j]);
-                pols.y3[j][offset + step] = fr.fromU64(input[i]._y3[j]);
-                pols.s[j][offset + step]  = fr.fromU64(input[i]._s[j]);
-                pols.q0[j][offset + step] = fr.fromU64(input[i]._q0[j]);
-                pols.q1[j][offset + step] = fr.fromU64(input[i]._q1[j]);
-                pols.q2[j][offset + step] = fr.fromU64(input[i]._q2[j]);
+                pols.x1[j][index] = fr.fromU64(input[i]._x1[j]);
+                pols.y1[j][index] = fr.fromU64(input[i]._y1[j]);
+                pols.x2[j][index] = fr.fromU64(input[i]._x2[j]);
+                pols.y2[j][index] = fr.fromU64(input[i]._y2[j]);
+                pols.x3[j][index] = fr.fromU64(input[i]._x3[j]);
+                pols.y3[j][index] = fr.fromU64(input[i]._y3[j]);
+                pols.s[j][index]  = fr.fromU64(input[i]._s[j]);
+                pols.q0[j][index] = fr.fromU64(input[i]._q0[j]);
+                pols.q1[j][index] = fr.fromU64(input[i]._q1[j]);
+                pols.q2[j][index] = fr.fromU64(input[i]._q2[j]);
             }
-            pols.selEq[0][offset + step] = fr.fromU64(input[i].selEq0);
-            pols.selEq[1][offset + step] = fr.fromU64(input[i].selEq1);
-            pols.selEq[2][offset + step] = fr.fromU64(input[i].selEq2);
-            pols.selEq[3][offset + step] = fr.fromU64(input[i].selEq3);
+            pols.selEq[0][index] = fr.fromU64(input[i].selEq0);
+            pols.selEq[1][index] = fr.fromU64(input[i].selEq1);
+            pols.selEq[2][index] = fr.fromU64(input[i].selEq2);
+            pols.selEq[3][index] = fr.fromU64(input[i].selEq3);
+
+            // selEq1 (addition different points) is select need to check that points are diferent
+            if (!fr.isZero(pols.selEq[1][index]) && (step < 16))
+            {
+                if (xAreDifferent == false)
+                {
+                    Goldilocks::Element delta = fr.sub(pols.x2[step][index], pols.x1[step][index]);
+                    pols.xDeltaChunkInverse[index] = fr.isZero(delta) ? fr.zero() : glp.inv(delta);
+                    xAreDifferent = fr.isZero(delta) ? false : true;
+                }
+                pols.xAreDifferent[nextIndex] = xAreDifferent ? fr.one() : fr.zero();
+            }
+
+            // selEq3 (addition + doubling points) is select need to check that x3, y3 is alias free.
+            if (!fr.isZero(pols.selEq[3][index]))
+            {
+                Goldilocks::Element chunkValue = step > 15 ? pols.y3[15 - step16][offset] : pols.x3[15 - step16][offset];
+                uint64_t chunkPrime = chunksPrimeHL[step16];
+                bool chunkLtPrime = valueLtPrime ? false : (fr.toU64(chunkValue) < chunkPrime);
+                valueLtPrime = valueLtPrime || chunkLtPrime;
+                pols.chunkLtPrime[index] = chunkLtPrime ? fr.one() : fr.zero();
+                pols.valueLtPrime[nextIndex] = valueLtPrime ? fr.one() : fr.zero();
+            }
         }
 
         mpz_class carry[3] = {0, 0, 0};

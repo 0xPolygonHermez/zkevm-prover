@@ -37,12 +37,17 @@
 #include "hashdb_singleton.hpp"
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
-#include "database_associative_cache_test.hpp"
 #include "main_sm/fork_5/main_exec_c/account.hpp"
+#include "main_sm/fork_6/main_exec_c/account.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
 #include "database_performance_test.hpp"
+#include "smt_64_test.hpp"
+#include "sha256.hpp"
+#include "page_manager_test.hpp"
+#include "zkglobals.hpp"
+#include "key_value_tree_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -305,9 +310,9 @@ int main(int argc, char **argv)
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
     file2json(pConfigFile, configJson);
-    Config config;
     config.load(configJson);
-    zklog.setPrefix(config.proverID.substr(0, 7) + " "); // Set the logs prefix
+    zklog.setJsonLogs(config.jsonLogs);
+    zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
 
     // Print the zkProver version
     zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));
@@ -336,154 +341,11 @@ int main(int argc, char **argv)
 
     TimerStart(WHOLE_PROCESS);
 
-    // Check required files presence
-    bool bError = false;
-    if (!fileExists(config.rom))
+    if (config.check())
     {
-        zklog.error("Required file config.rom=" + config.rom + " does not exist");
-        bError = true;
-    }
-    if (config.generateProof())
-    {
-        if (!fileExists(config.zkevmConstPols))
-        {
-            zklog.error("required file config.zkevmConstPols=" + config.zkevmConstPols + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.c12aConstPols))
-        {
-            zklog.error("required file config.c12aConstPols=" + config.c12aConstPols + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1ConstPols))
-        {
-            zklog.error("required file config.recursive1ConstPols=" + config.recursive1ConstPols + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2ConstPols))
-        {
-            zklog.error("required file config.recursive2ConstPols=" + config.recursive2ConstPols + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefConstPols))
-        {
-            zklog.error("required file config.recursivefConstPols=" + config.recursivefConstPols + " does not exist");
-            bError = true;
-        }
-
-        if (!fileExists(config.zkevmConstantsTree))
-        {
-            zklog.error("required file config.zkevmConstantsTree=" + config.zkevmConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.c12aConstantsTree))
-        {
-            zklog.error("required file config.c12aConstantsTree=" + config.c12aConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1ConstantsTree))
-        {
-            zklog.error("required file config.recursive1ConstantsTree=" + config.recursive1ConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2ConstantsTree))
-        {
-            zklog.error("required file config.recursive2ConstantsTree=" + config.recursive2ConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefConstantsTree))
-        {
-            zklog.error("required file config.recursivefConstantsTree=" + config.recursivefConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.zkevmVerifier))
-        {
-            zklog.error("required file config.zkevmVerifier=" + config.zkevmVerifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1Verifier))
-        {
-            zklog.error("required file config.recursive1Verifier=" + config.recursive1Verifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2Verifier))
-        {
-            zklog.error("required file config.recursive2Verifier=" + config.recursive2Verifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2Verkey))
-        {
-            zklog.error("required file config.recursive2Verkey=" + config.recursive2Verkey + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.finalVerifier))
-        {
-            zklog.error("required file config.finalVerifier=" + config.finalVerifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefVerifier))
-        {
-            zklog.error("required file config.recursivefVerifier=" + config.recursivefVerifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.finalStarkZkey))
-        {
-            zklog.error("required file config.finalStarkZkey=" + config.finalStarkZkey + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.storageRomFile))
-        {
-            zklog.error("required file config.storageRomFile=" + config.storageRomFile + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.zkevmStarkInfo))
-        {
-            zklog.error("required file config.zkevmStarkInfo=" + config.zkevmStarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.c12aStarkInfo))
-        {
-            zklog.error("required file config.c12aStarkInfo=" + config.c12aStarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1StarkInfo))
-        {
-            zklog.error("required file config.recursive1StarkInfo=" + config.recursive1StarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2StarkInfo))
-        {
-            zklog.error("required file config.recursive2StarkInfo=" + config.recursive2StarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefStarkInfo))
-        {
-            zklog.error("required file config.recursivefStarkInfo=" + config.recursivefStarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.c12aExec))
-        {
-            zklog.error("required file config.c12aExec=" + config.c12aExec + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1Exec))
-        {
-            zklog.error("required file config.recursive1Exec=" + config.recursive1Exec + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2Exec))
-        {
-            zklog.error("required file config.recursive2Exec=" + config.recursive2Exec + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefExec))
-        {
-            zklog.error("required file config.recursivefExec=" + config.recursivefExec + " does not exist");
-            bError = true;
-        }
-    }
-    if (bError)
+        zklog.error("main() failed calling config.check()");
         exitProcess();
+    }
 
     // Create one instance of the Goldilocks finite field instance
     Goldilocks fr;
@@ -493,6 +355,7 @@ int main(int argc, char **argv)
 
     // Generate account zero keys
     fork_5::Account::GenerateZeroKey(fr, poseidon);
+    fork_6::Account::GenerateZeroKey(fr, poseidon);
 
     // Init the HashDB singleton
     hashDBSingleton.init(fr, config);
@@ -520,13 +383,57 @@ int main(int argc, char **argv)
         KeccakGenerateScript(config);
     }
 
+    // Generate SHA256 SM script
+    if (config.runSHA256ScriptGenerator)
+    {
+        SHA256GenerateScript(config);
+    }
+
+#ifdef DATABASE_USE_CACHE
+
+    /* INIT DB CACHE */
+    if(config.useAssociativeCache){
+        Database::useAssociativeCache = true;
+        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
+    }
+    else{
+        Database::useAssociativeCache = false;
+        Database::dbMTCache.setName("MTCache");
+        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+    }
+    Database::dbProgramCache.setName("ProgramCache");
+    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
+
+    if (config.databaseURL != "local") // remote DB
+    {
+
+        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
+        {
+            TimerStart(DB_CACHE_LOAD);
+            // if we have a db cache enabled
+            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
+            {
+                if (config.loadDBToMemCacheInParallel) {
+                    // Run thread that loads the DB into the dbCache
+                    std::thread loadDBThread (loadDb2MemCache, config);
+                    loadDBThread.detach();
+                } else {
+                    loadDb2MemCache(config);
+                }
+            }
+            TimerStopAndLog(DB_CACHE_LOAD);
+        }
+    }
+    
+#endif // DATABASE_USE_CACHE
+
     /* TESTS */
 
     // Test Keccak SM
     if (config.runKeccakTest)
     {
         // Keccak2Test();
-        KeccakSMTest();
+        KeccakTest();
         KeccakSMExecutorTest(fr, config);
     }
 
@@ -572,12 +479,6 @@ int main(int argc, char **argv)
         DatabaseCacheTest();
     }
 
-    // Test Associative Database cache
-    if (config.runDatabaseAssociativeCacheTest)
-    {
-        DatabaseAssociativeCacheTest();
-    }
-
     // Test check tree
     if (config.runCheckTreeTest)
     {
@@ -588,6 +489,22 @@ int main(int argc, char **argv)
     if (config.runDatabasePerformanceTest)
     {
         DatabasePerformanceTest();
+    }
+    // Test PageManager
+    if (config.runPageManagerTest)
+    {
+        PageManagerTest();
+    }
+    // Test KeyValueTree
+    if (config.runKeyValueTreeTest)
+    {
+        KeyValueTreeTest();
+    }
+    
+    // Test SMT64
+    if (config.runSMT64Test)
+    {
+        Smt64Test(config);
     }
 
     // Unit test
@@ -622,44 +539,6 @@ int main(int argc, char **argv)
                   poseidon,
                   config);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
-
-#ifdef DATABASE_USE_CACHE
-
-    /* INIT DB CACHE */
-    if(config.useAssociativeCache){
-        Database::useAssociativeCache = true;
-        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
-    }
-    else{
-        Database::useAssociativeCache = false;
-        Database::dbMTCache.setName("MTCache");
-        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
-    }
-    Database::dbProgramCache.setName("ProgramCache");
-    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
-
-    if (config.databaseURL != "local") // remote DB
-    {
-
-        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
-        {
-            TimerStart(DB_CACHE_LOAD);
-            // if we have a db cache enabled
-            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
-            {
-                if (config.loadDBToMemCacheInParallel) {
-                    // Run thread that loads the DB into the dbCache
-                    std::thread loadDBThread (loadDb2MemCache, config);
-                    loadDBThread.detach();
-                } else {
-                    loadDb2MemCache(config);
-                }
-            }
-            TimerStopAndLog(DB_CACHE_LOAD);
-        }
-    }
-    
-#endif // DATABASE_USE_CACHE
 
     /* SERVERS */
 

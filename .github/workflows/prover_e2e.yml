@@ -3,9 +3,9 @@ name: Prover e2e test
 on:
   workflow_dispatch:
   push:
-    branches: [ "main","develop" ]
+    branches: [ "main","develop", "release_*" ]
   pull_request:
-    branches: [ "main","develop" ]
+    branches: [ "main","develop", "release_*" ]
 
 jobs:
   build:
@@ -28,7 +28,7 @@ jobs:
     - name: remove old proofs
       run: rm -rf runtime/output/*
     - name: link files
-      run: ln -s /root/v2.0.0-RC4-fork.5/config/ config
+      run: ln -s /root/v3.0.0-RC3-fork.6/config/ config
     - name: run e2e tests
       run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
     - name: run snarkjs verification

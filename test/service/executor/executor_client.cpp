@@ -18,7 +18,7 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     channelArguments.SetMaxReceiveMessageSize(1024*1024*1024);
 
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = grpc::CreateCustomChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
+    std::shared_ptr<grpc::Channel> channel = grpc::CreateCustomChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new executor::v1::ExecutorService::Stub(channel);
@@ -82,6 +82,7 @@ bool ExecutorClient::ProcessBatch (void)
     }
 
     bool update_merkle_tree = true;
+    bool get_keys = false;
 
     //request.set_batch_num(input.publicInputs.batchNum);
     request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
@@ -91,6 +92,7 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
     request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
+    request.set_get_keys(get_keys);
     request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
     request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
     request.set_from(input.from);
@@ -194,7 +196,6 @@ bool ExecutorClient::ProcessBatch (void)
         if (config.hashDB64)
         {
             Database64 &db = hashDB.db64;
-            db.clearCache();
 
             CheckTreeCounters64 checkTreeCounters;
 

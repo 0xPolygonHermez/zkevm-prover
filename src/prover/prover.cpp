@@ -355,11 +355,14 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
 
 void Prover::processBatch(ProverRequest *pProverRequest)
 {
-    TimerStart(PROVER_PROCESS_BATCH);
+    //TimerStart(PROVER_PROCESS_BATCH);
     zkassert(pProverRequest != NULL);
     zkassert(pProverRequest->type == prt_processBatch);
 
-    zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    if (config.runAggregatorClient)
+    {
+        zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    }
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -388,7 +391,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
         json2file(inputJsonEx, pProverRequest->inputDbFile());
     }
 
-    TimerStopAndLog(PROVER_PROCESS_BATCH);
+    //TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
 void Prover::genBatchProof(ProverRequest *pProverRequest)
@@ -454,6 +457,30 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         json publicStarkJson;
 
         uint64_t lastN = cmPols.pilDegree() - 1;
+
+        json zkevmVerkeyJson;
+        file2json(config.zkevmVerkey, zkevmVerkeyJson);
+        Goldilocks::Element zkevmVerkey[4];
+        zkevmVerkey[0] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][0]);
+        zkevmVerkey[1] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][1]);
+        zkevmVerkey[2] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][2]);
+        zkevmVerkey[3] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][3]);
+
+        json c12aVerkeyJson;
+        file2json(config.c12aVerkey, c12aVerkeyJson);
+        Goldilocks::Element c12aVerkey[4];
+        c12aVerkey[0] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][0]);
+        c12aVerkey[1] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][1]);
+        c12aVerkey[2] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][2]);
+        c12aVerkey[3] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][3]);
+
+        json recursive1VerkeyJson;
+        file2json(config.recursive1Verkey, recursive1VerkeyJson);
+        Goldilocks::Element recursive1Verkey[4];
+        recursive1Verkey[0] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][0]);
+        recursive1Verkey[1] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][1]);
+        recursive1Verkey[2] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][2]);
+        recursive1Verkey[3] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][3]);
 
         json recursive2Verkey;
         file2json(config.recursive2Verkey, recursive2Verkey);
@@ -541,7 +568,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         ZkevmSteps zkevmSteps;
         uint64_t polBits = starkZkevm->starkInfo.starkStruct.steps[starkZkevm->starkInfo.starkStruct.steps.size() - 1].nBits;
         FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkZkevm->starkInfo.starkStruct.steps.size(), starkZkevm->starkInfo.evMap.size(), starkZkevm->starkInfo.nPublics);
-        starkZkevm->genProof(fproof, &publics[0], &zkevmSteps);
+        starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &zkevmSteps);
 
         TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
         TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
@@ -574,7 +601,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         // Generate the proof
         C12aSteps c12aSteps;
 
-        starksC12a->genProof(fproofC12a, publics, &c12aSteps);
+        starksC12a->genProof(fproofC12a, publics, c12aVerkey, &c12aSteps);
 
         TimerStopAndLog(STARK_C12_A_PROOF_BATCH_PROOF);
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
@@ -608,7 +635,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         uint64_t polBitsRecursive1 = starksRecursive1->starkInfo.starkStruct.steps[starksRecursive1->starkInfo.starkStruct.steps.size() - 1].nBits;
         FRIProof fproofRecursive1((1 << polBitsRecursive1), FIELD_EXTENSION, starksRecursive1->starkInfo.starkStruct.steps.size(), starksRecursive1->starkInfo.evMap.size(), starksRecursive1->starkInfo.nPublics);
         Recursive1Steps recursive1Steps;
-        starksRecursive1->genProof(fproofRecursive1, publics, &recursive1Steps);
+        starksRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1Steps);
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
 
         // Save the proof & zkinproof
@@ -713,6 +740,12 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     json recursive2Verkey;
     file2json(config.recursive2Verkey, recursive2Verkey);
 
+    Goldilocks::Element recursive2VerkeyValues[4];
+    recursive2VerkeyValues[0] = Goldilocks::fromU64(recursive2Verkey["constRoot"][0]);
+    recursive2VerkeyValues[1] = Goldilocks::fromU64(recursive2Verkey["constRoot"][1]);
+    recursive2VerkeyValues[2] = Goldilocks::fromU64(recursive2Verkey["constRoot"][2]);
+    recursive2VerkeyValues[3] = Goldilocks::fromU64(recursive2Verkey["constRoot"][3]);
+
     Goldilocks::Element publics[starksRecursive2->starkInfo.nPublics];
 
     for (uint64_t i = 0; i < starkZkevm->starkInfo.nPublics; i++)
@@ -740,7 +773,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     uint64_t polBitsRecursive2 = starksRecursive2->starkInfo.starkStruct.steps[starksRecursive2->starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starksRecursive2->starkInfo.starkStruct.steps.size(), starksRecursive2->starkInfo.evMap.size(), starksRecursive2->starkInfo.nPublics);
     Recursive2Steps recursive2Steps;
-    starksRecursive2->genProof(fproofRecursive2, publics, &recursive2Steps);
+    starksRecursive2->genProof(fproofRecursive2, publics, recursive2VerkeyValues, &recursive2Steps);
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof

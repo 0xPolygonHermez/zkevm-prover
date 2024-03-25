@@ -7,15 +7,16 @@ TARGET_TEST := zkProverTest
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
 
-LIBOMP := $(shell find /usr/lib/llvm-* -name "libomp.so" | sed 's/libomp.so//')
-ifndef LIBOMP
-$(error LIBOMP is not set, you need to install libomp-dev)
+GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
+GRPCPP_LIBS := $(shell pkg-config grpc++ --libs) -lgrpc++_reflection
+ifndef GRPCPP_LIBS
+$(error gRPC++ could not be found via pkg-config, you need to install them)
 endif
 
 CXX := g++
 AS := nasm
-CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 #-march=native
-LDFLAGS := -lprotobuf -lsodium -lgrpc -lgrpc++ -lgrpc++_reflection -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1 -lcrypto -luuid -L$(LIBOMP)
+CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-Wfatal-errors
+LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -fopenmp -liomp5 $(GRPCPP_LIBS)
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
 
@@ -39,6 +40,12 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
+GRPC_CPP_PLUGIN = grpc_cpp_plugin
+GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d) $(sort $(dir))
+INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+
 SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
@@ -58,13 +65,13 @@ bctree: $(BUILD_DIR)/$(TARGET_BCT)
 test: $(BUILD_DIR)/$(TARGET_TEST)
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
-	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 $(BUILD_DIR)/$(TARGET_BCT): $(OBJS_BCT)
-	$(CXX) $(OBJS_BCT) $(CXXFLAGS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS_BCT) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 $(BUILD_DIR)/$(TARGET_TEST): $(OBJS_TEST)
-	$(CXX) $(OBJS_TEST) $(CXXFLAGS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS_TEST) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 # assembly
 $(BUILD_DIR)/%.asm.o: %.asm

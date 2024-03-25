@@ -1,251 +1,285 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "zkProver",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/zkProver",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
         {
-            "name": "zkProver",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/zkProver",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build zkProver",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "runFile",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/zkProver",
-            "args": [
-                "-c",
-                "config_runFile.json"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build zkProver",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "runFile BatchProof",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/zkProver",
-            "args": [
-                "-c",
-                "./testvectors/config_runFile_BatchProof.json"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build zkProver",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "runFile AggregatedProof",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/zkProver",
-            "args": [
-                "-c",
-                "testvectors/config_runFile_AggregatedProof.json"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build zkProver",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "runFile FinalProof",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/zkProver",
-            "args": [
-                "-c",
-                "testvectors/config_runFile_FinalProof.json"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build zkProver",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "starkTest",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/zkProver",
-            "args": [
-                "-c",
-                "config_starkTest.json"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build zkProver",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "zkProverTest",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/zkProverTest",
-            "args": [
-                "-c",
-                "config_starkTest.json"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build zkProver",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "bctree",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/bctree",
-            "args": [
-                "-c",
-                "../testvectors/zkevm.const",
-                "-s",
-                "../testvectors/zkevm.starkstruct.json",
-                "-t",
-                "../testvectors/output/zkevm.consttree",
-                "-v",
-                "../testvectors/output/zkevm.verkey.json"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build bctree",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "main_generator",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/mainGenerator",
-            "args": [
-                //"-c",
-                //"../testvectors/zkevm.const",
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build main generator",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "pols_generator",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/polsGenerator",
-            "args": [
-                //"-c",
-                //"../testvectors/zkevm.const",
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build pols generator",
-            "miDebuggerPath": "/usr/bin/gdb"
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
         }
-    ]
+      ],
+      "preLaunchTask": "Build zkProver",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "runFile",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/zkProver",
+      "args": [
+        "-c",
+        "config_runFile.json"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build zkProver",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "runFile BatchProof",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/zkProver",
+      "args": [
+        "-c",
+        "./testvectors/config_runFile_BatchProof.json"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build zkProver",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "runFile AggregatedProof",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/zkProver",
+      "args": [
+        "-c",
+        "testvectors/config_runFile_AggregatedProof.json"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build zkProver",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "runFile FinalProof",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/zkProver",
+      "args": [
+        "-c",
+        "testvectors/config_runFile_FinalProof.json"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build zkProver",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "starkTest",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/zkProver",
+      "args": [
+        "-c",
+        "config_starkTest.json"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build zkProver",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "zkProverTest",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/zkProverTest",
+      "args": [
+        "-c",
+        "config_starkTest.json"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build zkProver",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "bctree",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/bctree",
+      "args": [
+        "-c",
+        "../testvectors/zkevm.const",
+        "-s",
+        "../testvectors/zkevm.starkstruct.json",
+        "-t",
+        "../testvectors/output/zkevm.consttree",
+        "-v",
+        "../testvectors/output/zkevm.verkey.json"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build bctree",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "main_generator",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/mainGenerator",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build main generator",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "pols_generator",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/polsGenerator",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build pols generator",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "rick",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/zkProver",
+      "args": [
+        "-c",
+        "config/config_rick_2.json"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build zkProver",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "cwd": "/home/rick/zkevm-prover/test/hashdb",
+      "program": "/home/rick/zkevm-prover/test/hashdb/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
 }

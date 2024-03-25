@@ -2,6 +2,7 @@
 #define POLS_IDENTITY_CONSTANTS
 
 #include <string>
+#include <stdint.h>
 
 std::string GetPolsIdentityConstant(uint64_t parity);
 

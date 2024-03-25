@@ -1108,10 +1108,13 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
         singleInfo.contract.value = auxScalar;
 
-        getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
-        uint64_t txCalldataLen  = auxScalar.get_ui();
+        if ((prevTraceCall != NULL) && ((opIncContext.find(prevTraceCall->opcode) != opIncContext.end()) || (zeroCostOp.find(prevTraceCall->opcode) != zeroCostOp.end())))
+        {
+            getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
+            uint64_t txCalldataLen  = auxScalar.get_ui();
 
-        getCalldataFromStack(ctx, 0, txCalldataLen, singleInfo.contract.data);
+            getCalldataFromStack(ctx, 0, txCalldataLen, singleInfo.contract.data);
+        }
         
         singleInfo.contract.gas = txGAS[depth].remaining;
 

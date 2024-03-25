@@ -59,6 +59,9 @@ public:
     // Labels lock
     pthread_mutex_t labelsMutex;    // Mutex to protect the labels vector
 
+    // HashDB
+    HashDBInterface *pHashDB;
+
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
 

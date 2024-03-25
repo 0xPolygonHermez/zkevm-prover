@@ -5,81 +5,71 @@
 #include <map>
 #include <pqxx/pqxx>
 #include "goldilocks_base_field.hpp"
+#include "poseidon_goldilocks.hpp"
 #include "compare_fe.hpp"
 #include "config.hpp"
 #include <semaphore.h>
 #include "zkresult.hpp"
 #include "database_map.hpp"
-#include "database_cache_64.hpp"
 #include "database_connection.hpp"
 #include "zkassert.hpp"
-#include "multi_write_64.hpp"
-#include "database_associative_cache_64.hpp"
+#include "key_value.hpp"
+#include "key_value_level.hpp"
+#include "version_value.hpp"
+#include "child.hpp"
 
 using namespace std;
 
+
+/*
+
+A Tree (state) is made of a set of TreeChunks, each of them stored in one 4kB page:
+
+      /\
+     /__\
+        /\
+       /__\
+          /\
+         /__\
+        /\ 
+       /__\
+
+When we want to read [key, value] for a given root:
+    - we search for the right page starting from the root until we reach the [key, value] leaf node in the final page
+
+When we want to write a new leaf node [key, newValue] on a given root and get the resulting newStateRoot
+    - we calculate the new position of [key, newValue], creating new pages if needed
+    - we recalculate the hashes of all the modified and new chunks
+    - we write every resulting hash in the proper position of the proper page
+
+Every time we write a [key, newValue] we are potentially creating a new Tree = SUM(TreeChunks) if newValue != oldValue
+Every new Tree represents a newer version of the state
+Many Trees, or states, coexist in the same Forest, or state history; the forest is stored in the database
+Every executor.processBatch() can potentially create several new Trees (states), one per SMT.set()
+The Forest takes note of the latest Tree hash to keep track of the current state:
+
+     SR1      SR2      SR3      SR4
+     /\       /\       /\       /\
+    /__\     /__\     /__\     /__\
+                /\       /\       /\
+               /__\     /__\     /__\
+                           /\       /\
+                          /__\     /__\
+                                  /\ 
+                                 /__\
+
+*/
+
 class Database64
 {
-public:
-    Goldilocks &fr;
-    const Config &config;
-
-#ifdef DATABASE_COMMIT
-    bool autoCommit = true;
-#endif
-
-    // Basic flags
-    bool bInitialized = false;
-    bool useRemoteDB = false;
-
-#ifdef DATABASE_COMMIT
-    pqxx::work* transaction = NULL;
-#endif
-
-    // Connection(s) attributes
-    pthread_mutex_t connMutex; // Mutex to protect the connection(s)
-    void connLock(void) { pthread_mutex_lock(&connMutex); };
-    void connUnlock(void) { pthread_mutex_unlock(&connMutex); };
-    DatabaseConnection connection;
-    DatabaseConnection * connectionsPool;
-    uint64_t nextConnection;
-    uint64_t usedConnections;
-    DatabaseConnection * getConnection (void);
-    void disposeConnection (DatabaseConnection * pConnection);
-    void queryFailed (void);
-
-    // Multi write attributes
-public:
-    MultiWrite64 multiWrite;
-    sem_t senderSem; // Semaphore to wakeup database sender thread when flush() is called
-    sem_t getFlushDataSem; // Semaphore to unblock getFlushData() callers when new data is available
 private:
-    pthread_t senderPthread; // Database sender thread
-    pthread_t cacheSynchPthread; // Cache synchronization thread
 
-private:
-    // Remote database based on Postgres (PostgreSQL)
-    void initRemote(void);
-    zkresult readRemote(bool bProgram, const string &key, string &value);
-    zkresult readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields);
-    zkresult writeRemote(bool bProgram, const string &key, const string &value);
-    zkresult writeGetTreeFunction(void);
+    bool     bInitialized = false;
+    uint64_t headerPageNumber;
+    pthread_mutex_t mutex;
+    uint64_t currentFlushId;
 
 public:
-#ifdef DATABASE_USE_CACHE
-    // Cache static instances
-    static bool useAssociativeCache;
-    static DatabaseMTAssociativeCache64 dbMTACache;
-    static DatabaseMTCache64 dbMTCache;
-    static DatabaseProgramCache64 dbProgramCache;
-
-    // This is a fixed key to store the latest state root hash, used to load it to the cache
-    // This key is "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-    // This key cannot be the result of a hash because it is out of the Goldilocks Element range
-    static string dbStateRootKey;
-    static Goldilocks::Element dbStateRootvKey[4];
-
-#endif
 
     // Constructor and destructor
     Database64(Goldilocks &fr, const Config &config);
@@ -87,46 +77,30 @@ public:
 
     // Basic methods
     void init(void);
-    zkresult read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false, bool *keys = NULL , uint64_t level=0);
-    zkresult write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent);
-    zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
-    zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
-    inline bool usingAssociativeCache(void){ return useAssociativeCache; };
+    
+    // Program
+    zkresult getProgram (const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
+    zkresult setProgram (const string &_key, const vector<uint8_t> &value, const bool persistent);
+    
+    // Tree64
+    zkresult WriteTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent);
+    zkresult ReadTree  (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues);
 
-private:
-    zkresult createStateRoot(void);
-public:
-    zkresult updateStateRoot(const Goldilocks::Element (&stateRoot)[4]);
+    // Key - Value - Level
+    zkresult readKV    (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value,  uint64_t &level, DatabaseMap *dbReadLog);
+    zkresult readLevel (const Goldilocks::Element (&key)[4], uint64_t &level){ level=128; return ZKR_SUCCESS;}
 
-#ifdef DATABASE_COMMIT
-    void setAutoCommit(const bool autoCommit);
-    void commit();
-#endif
+    // Block
+    zkresult consolidateBlock (uint64_t blockNumber); // TODO: Who reports this block number?
+    zkresult revertBlock      (uint64_t blockNumber);
 
-    // Flush multi write pending requests
+    // Flush data pending to be stored permamently
     zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId);
-    void semiFlush (void);
     zkresult getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram);
 
-    // Send multi write data to remote database; called by dbSenderThread
-    zkresult sendData(void);
-
-    // Get flush data, written to database by dbSenderThread; it blocks
-    zkresult getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);
-
-    // Print tree
-    void printTree(const string &root, string prefix = "");
-
-    // Clear cache
-    void clearCache(void);
+    // Lock/Unlock
+    void Lock(void) { pthread_mutex_lock(&mutex); };
+    void Unlock(void) { pthread_mutex_unlock(&mutex); };
 };
-
-// Thread to send data to database
-void *dbSenderThread64(void *arg);
-
-// Thread to synchronize cache from master hash DB server
-void *dbCacheSynchThread64(void *arg);
-
-void loadDb2MemCache64(const Config &config);
 
 #endif

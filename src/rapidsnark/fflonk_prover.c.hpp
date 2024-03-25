@@ -120,6 +120,8 @@ namespace Fflonk
                 throw std::invalid_argument("zkey curve not supported");
             }
 
+            mpz_clear(altBbn128r);
+            
             sDomain = zkey->domainSize * sizeof(FrElement);
 
             ////////////////////////////////////////////////////
