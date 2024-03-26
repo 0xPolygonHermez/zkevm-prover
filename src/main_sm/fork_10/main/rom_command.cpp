@@ -70,7 +70,7 @@ tFunction string2Function(string s)
     else if (s == "storeLog")                       return f_storeLog;
     else if (s == "memAlignWR_W0")                  return f_memAlignWR_W0;
     else if (s == "memAlignWR_W1")                  return f_memAlignWR_W1;
-    else if (s == "memAlignWR8_W0")                 return f_memAlignWR8_W0;
+    else if (s == "memAlignRD")                     return f_memAlignRD;
     else if (s == "onOpcode")                       return f_onOpcode;
     else if (s == "onUpdateStorage")                return f_onUpdateStorage;
     else if (s == "getL1InfoRoot")                  return f_getL1InfoRoot;
