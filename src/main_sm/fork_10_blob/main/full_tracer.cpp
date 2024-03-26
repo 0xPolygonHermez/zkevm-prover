@@ -317,73 +317,106 @@ void getTransactionHash( string    &to,
 /***************/
 
 zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
-{    
-    if (cmd.function == f_storeLog)
+{
+    // BLOB INNER
+    if (ctx.proverRequest.isBlobInner())
     {
-        // if (ctx.proverRequest.bNoCounters) return;
-        return onStoreLog(ctx, cmd);
-    }
-    if (cmd.params.size() == 0)
-    {
-        zklog.error("FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" + function2String(cmd.function));
+        if (cmd.params.size() == 0)
+        {
+            zklog.error("FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" + function2String(cmd.function));
+            exitProcess();
+        }
+        if (cmd.params[0]->varName == "onError")
+        {
+            return onErrorBlob(ctx, cmd);
+        }
+        if (cmd.params[0]->function == f_onStartBlob)
+        {
+            return onStartBlob(ctx, cmd);
+        }
+        if (cmd.params[0]->function == f_onFinishBlob)
+        {
+            return onFinishBlob(ctx, cmd);
+        }
+        if (cmd.params[0]->function == f_onAddBatch)
+        {
+            return onAddBatch(ctx, cmd);
+        }
+        zklog.error("FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" + cmd.params[0]->varName + " cmd.function=" + function2String(cmd.function));
         exitProcess();
+        return ZKR_INTERNAL_ERROR;
     }
-    if (cmd.params[0]->varName == "onError")
+
+    // BATCH
+    else
     {
-        return onError(ctx, cmd);
-    }
-    if (cmd.params[0]->varName == "onProcessTx")
-    {
-        return onProcessTx(ctx, cmd);
-    }
-    if (cmd.params[0]->varName == "onFinishTx")
-    {
-        if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
+        if (cmd.function == f_storeLog)
         {
-            zklog.error("FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
-            return ZKR_SM_MAIN_BALANCE_MISMATCH;
+            // if (ctx.proverRequest.bNoCounters) return;
+            return onStoreLog(ctx, cmd);
         }
-        return onFinishTx(ctx, cmd);
-    }
-    if (cmd.params[0]->varName == "onStartBlock")
-    {
-        return onStartBlock(ctx);
-    }
-    if (cmd.params[0]->varName == "onFinishBlock")
-    {
-        if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
+        if (cmd.params.size() == 0)
         {
-            zklog.error("FullTracer::handleEvent(onFinishBlock) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
-            return ZKR_SM_MAIN_BALANCE_MISMATCH;
+            zklog.error("FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" + function2String(cmd.function));
+            exitProcess();
         }
-        return onFinishBlock(ctx);
-    }
-    if (cmd.params[0]->varName == "onStartBatch")
-    {
-        return onStartBatch(ctx, cmd);
-    }
-    if (cmd.params[0]->varName == "onFinishBatch")
-    {
-        if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
+        if (cmd.params[0]->varName == "onError")
         {
-            zklog.error("FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
-            return ZKR_SM_MAIN_BALANCE_MISMATCH;
+            return onError(ctx, cmd);
         }
-        return onFinishBatch(ctx, cmd);
+        if (cmd.params[0]->varName == "onProcessTx")
+        {
+            return onProcessTx(ctx, cmd);
+        }
+        if (cmd.params[0]->varName == "onFinishTx")
+        {
+            if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
+            {
+                zklog.error("FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
+                return ZKR_SM_MAIN_BALANCE_MISMATCH;
+            }
+            return onFinishTx(ctx, cmd);
+        }
+        if (cmd.params[0]->varName == "onStartBlock")
+        {
+            return onStartBlock(ctx);
+        }
+        if (cmd.params[0]->varName == "onFinishBlock")
+        {
+            if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
+            {
+                zklog.error("FullTracer::handleEvent(onFinishBlock) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
+                return ZKR_SM_MAIN_BALANCE_MISMATCH;
+            }
+            return onFinishBlock(ctx);
+        }
+        if (cmd.params[0]->varName == "onStartBatch")
+        {
+            return onStartBatch(ctx, cmd);
+        }
+        if (cmd.params[0]->varName == "onFinishBatch")
+        {
+            if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
+            {
+                zklog.error("FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
+                return ZKR_SM_MAIN_BALANCE_MISMATCH;
+            }
+            return onFinishBatch(ctx, cmd);
+        }
+        if (cmd.params[0]->function == f_onOpcode)
+        {
+            // if (ctx.proverRequest.bNoCounters) return;
+            return onOpcode(ctx, cmd);
+        }
+        if (cmd.params[0]->function == f_onUpdateStorage)
+        {
+            // if (ctx.proverRequest.bNoCounters) return;
+            return onUpdateStorage(ctx, *cmd.params[0]);
+        }
+        zklog.error("FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" + cmd.params[0]->varName + " cmd.function=" + function2String(cmd.function));
+        exitProcess();
+        return ZKR_INTERNAL_ERROR;
     }
-    if (cmd.params[0]->function == f_onOpcode)
-    {
-        // if (ctx.proverRequest.bNoCounters) return;
-        return onOpcode(ctx, cmd);
-    }
-    if (cmd.params[0]->function == f_onUpdateStorage)
-    {
-        // if (ctx.proverRequest.bNoCounters) return;
-        return onUpdateStorage(ctx, *cmd.params[0]);
-    }
-    zklog.error("FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" + cmd.params[0]->varName + " cmd.function=" + function2String(cmd.function));
-    exitProcess();
-    return ZKR_INTERNAL_ERROR;
 }
 
 zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
@@ -2278,6 +2311,163 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
     tms.add("addReadWriteAddress", TimeDiff(t));
 #endif
 
+    return ZKR_SUCCESS;
+}
+
+/**********************/
+/* BLOB INNER METHODS */
+/**********************/
+
+zkresult FullTracer::onErrorBlob (Context &ctx, const RomCommand &cmd)
+{
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
+    // Check params size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("FullTracer::onErrorBlob() got an invalid cmd.params.size()=" + to_string(cmd.params.size()));
+        exitProcess();
+    }
+
+    // Store the error
+    string error = cmd.params[1]->varName;
+    finalTraceBlob.error = error;
+
+#ifdef LOG_FULL_TRACER_ON_ERROR
+    zklog.info("FullTracer::onErrorBlob() error=" + error + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
+#endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onError", TimeDiff(t));
+#endif
+    return ZKR_SUCCESS;
+}
+
+zkresult FullTracer::onStartBlob (Context &ctx, const RomCommand &cmd)
+{
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
+    // Check params size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("FullTracer::onStartBlob() got an invalid cmd.params.size()=" + to_string(cmd.params.size()));
+        exitProcess();
+    }
+
+    // Reset the blob trace data
+    finalTraceBlob.clear();
+
+#ifdef LOG_FULL_TRACER
+    zklog.info("FullTracer::onStartBlob() zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
+#endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onStartBlob", TimeDiff(t));
+#endif
+    return ZKR_SUCCESS;
+}
+
+zkresult FullTracer::onFinishBlob (Context &ctx, const RomCommand &cmd)
+{
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
+    // Check params size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("FullTracer::onFinishBlob() got an invalid cmd.params.size()=" + to_string(cmd.params.size()));
+        exitProcess();
+    }
+
+    zkresult zkr;
+    mpz_class auxScalar;
+
+    // Get new blob state root
+    zkr = getVarFromCtx(ctx, true, ctx.rom.newBlobStateRootOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlob() failed calling getVarFromCtx(ctx.rom.newBlobStateRootOffset)");
+        return zkr;
+    }
+    finalTraceBlob.new_blob_state_root = auxScalar;
+
+    // Get new blob acc input hash
+    zkr = getVarFromCtx(ctx, true, ctx.rom.newBlobAccInputHashOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlob() failed calling getVarFromCtx(ctx.rom.newBlobAccInputHashOffset)");
+        return zkr;
+    }
+    finalTraceBlob.new_blob_acc_input_hash = auxScalar;
+
+    // Get new blob number
+    zkr = getVarFromCtx(ctx, true, ctx.rom.newBlobNumberOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlob() failed calling getVarFromCtx(ctx.rom.newBlobNumberOffset)");
+        return zkr;
+    }
+    finalTraceBlob.new_num_blob = auxScalar.get_ui();
+
+    // Get final acc batch hash data
+    zkr = getVarFromCtx(ctx, true, ctx.rom.finalAccBatchHashDataOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlob() failed calling getVarFromCtx(ctx.rom.finalAccBatchHashDataOffset)");
+        return zkr;
+    }
+    finalTraceBlob.final_acc_batch_hash_data = auxScalar;
+
+    // Get local exit root from blob
+    zkr = getVarFromCtx(ctx, true, ctx.rom.localExitRootFromBlobOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlob() failed calling getVarFromCtx(ctx.rom.localExitRootFromBlobOffset)");
+        return zkr;
+    }
+    finalTraceBlob.local_exit_root_from_blob = auxScalar;
+
+    // Get is invalid
+    zkr = getVarFromCtx(ctx, true, ctx.rom.isInvalidOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlob() failed calling getVarFromCtx(ctx.rom.isInvalidOffset)");
+        return zkr;
+    }
+    finalTraceBlob.is_invalid = auxScalar.get_ui();
+
+#ifdef LOG_FULL_TRACER
+    zklog.info("FullTracer::onFinishBlob() zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
+#endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onFinishBlob", TimeDiff(t));
+#endif
+    return ZKR_SUCCESS;
+}
+
+zkresult FullTracer::onAddBatch (Context &ctx, const RomCommand &cmd)
+{
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
+    
+    // Get indexLog from the provided register value
+    mpz_class addressHashPScalar;
+    getRegFromCtx(ctx, cmd.params[0]->params[0]->reg, addressHashPScalar);
+    uint64_t addressHashP = addressHashPScalar.get_ui();
+
+    // Get the data byte array
+    string dataBa;
+    ba2ba(ctx.hashP[addressHashP].data, dataBa);
+
+    finalTraceBlob.batch_data.emplace_back(dataBa);
+
+#ifdef LOG_FULL_TRACER
+    zklog.info("FullTracer::onAddBatch() zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
+#endif
+#ifdef LOG_TIME_STATISTICS
+    tms.add("onAddBatch", TimeDiff(t));
+#endif
     return ZKR_SUCCESS;
 }
 

@@ -116,6 +116,8 @@ tFunction string2Function(string s)
     else if (s == "getLastL1InfoTreeRoot")          return f_getLastL1InfoTreeRoot;
     else if (s == "getLastL1InfoTreeIndex")         return f_getLastL1InfoTreeIndex;
     else if (s == "onAddBatch")                     return f_onAddBatch;
+    else if (s == "onStartBlob")                    return f_onStartBlob;
+    else if (s == "onFinishBlob")                   return f_onFinishBlob;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -203,6 +205,8 @@ string function2String(tFunction f)
         case f_getLastL1InfoTreeRoot:           return "getLastL1InfoTreeRoot";
         case f_getLastL1InfoTreeIndex:          return "getLastL1InfoTreeIndex";
         case f_onAddBatch:                      return "onAddBatch";
+        case f_onStartBlob:                     return "onStartBlob";
+        case f_onFinishBlob:                    return "onFinishBlob";
         case f_empty:                           return "";
         default:                                return "unknown";
     }

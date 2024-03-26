@@ -50,6 +50,8 @@ public:
     uint64_t txIndex; // Transaction index in the current block
     Block currentBlock;
     bool isForced;
+    FinalTraceBlob finalTraceBlob;
+
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;
@@ -72,6 +74,12 @@ public:
                                    const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
                                    const Goldilocks::Element &storageKey0, const Goldilocks::Element &storageKey1, const Goldilocks::Element &storageKey2, const Goldilocks::Element &storageKey3, const Goldilocks::Element &storageKey4, const Goldilocks::Element &storageKey5, const Goldilocks::Element &storageKey6, const Goldilocks::Element &storageKey7,
                                    const mpz_class &value );
+
+    // fork_10_blob methods
+    zkresult onErrorBlob     (Context &ctx, const RomCommand &cmd);
+    zkresult onStartBlob     (Context &ctx, const RomCommand &cmd);
+    zkresult onFinishBlob    (Context &ctx, const RomCommand &cmd);
+    zkresult onAddBatch      (Context &ctx, const RomCommand &cmd);
 
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), prevCTX(0), initGas(0), txTime(0), accBatchGas(0), numberOfOpcodesInThisTx(0), lastErrorOpcode(0), hasGaspriceOpcode(false), hasBalanceOpcode(false), txIndex(0), isForced(false) { };
     ~FullTracer()
@@ -161,6 +169,8 @@ public:
     {
         return finalTrace.invalid_batch;
     }
+
+    FinalTraceBlob & get_final_trace_blob(void) { return finalTraceBlob; };
 };
 
 void getTransactionHash( string    &to,

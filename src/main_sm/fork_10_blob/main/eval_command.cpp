@@ -413,7 +413,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             cr.u64 = ctx.fr.toU64(ctx.pols.RID[*ctx.pStep]);
             break;
         default:
-            zklog.error("eval_getReg() Invalid register: " + reg2string(cmd.reg) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            zklog.error("eval_getReg() Invalid register=" + reg2string(cmd.reg) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
     }
 }

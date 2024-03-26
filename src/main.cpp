@@ -389,6 +389,7 @@ int main(int argc, char **argv)
     PoseidonGoldilocks poseidon;
 
 #ifdef DEBUG
+    zklog.info("Goldilocks p-1 =" + fr.toString(fr.negone(),16) + " = " + fr.toString(fr.negone(),10));
     zklog.info("BN128      p-1 =" + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
     zklog.info("FQ         p-1 =" + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));
     zklog.info("FEC        p-1 =" + fec.toString(fec.negOne(),16) + " = " + fec.toString(fec.negOne(),10));

@@ -127,6 +127,8 @@ public:
     }
 
     void onDBReadLogChange(DatabaseMap *dbMap);
+
+    bool isBlobInner (void) { return (type == prt_processBlobInner) || (type == prt_executeBlobInner) || (type == prt_genBlobInnerProof);};
 };
 
 #endif

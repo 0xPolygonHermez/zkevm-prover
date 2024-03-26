@@ -712,3 +712,8 @@ void poseidonLinearHash (const vector<uint8_t> &_data, Goldilocks::Element (&res
     // Free allocated memory
     delete[] pBuffer;
 }
+
+void debug1 (void)
+{
+    zklog.info("debug1");
+}
