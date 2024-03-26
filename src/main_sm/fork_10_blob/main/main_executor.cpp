@@ -213,19 +213,47 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         vector<uint8_t> blobDataVector;
         ba2ba(proverRequest.input.publicInputsExtended.publicInputs.blobData, blobDataVector);
 
-        // Load poseidonBlobData into DB
-        Goldilocks::Element blobKey[4];
-        poseidonLinearHash(blobDataVector, blobKey);
-        string blobKeyString = fea2string(fr, blobKey);
-        proverRequest.input.contractsBytecode[blobKeyString] = blobDataVector;
-        //zklog.info("Blob inner poseidon hash=" + fea2string(fr, blobKey));
-
-        // Load keccak256BlobData into DB
-        keccak256((const uint8_t *)proverRequest.input.publicInputsExtended.publicInputs.blobData.c_str(), proverRequest.input.publicInputsExtended.publicInputs.blobData.size(), ctx.blobL2HashData);
-        scalar2fea(fr, ctx.blobL2HashData, blobKey);
-        blobKeyString = fea2string(fr, blobKey);
-        proverRequest.input.contractsBytecode[blobKeyString] = blobDataVector;
-        //zklog.info("Blob inner keccak hash=" + fea2string(fr, blobKey));
+        if (proverRequest.input.publicInputsExtended.publicInputs.type == 1)
+        {
+            // Load poseidonBlobData into DB
+            Goldilocks::Element blobKey[4];
+            poseidonLinearHash(blobDataVector, blobKey);
+            string blobKeyString = fea2string(fr, blobKey);
+            mpz_class pointZ;
+            pointZ.set_str(blobKeyString, 16);
+            if (proverRequest.input.publicInputsExtended.publicInputs.pointZ == 0)
+            {
+                proverRequest.input.publicInputsExtended.publicInputs.pointZ = pointZ;
+            }
+            else if (proverRequest.input.publicInputsExtended.publicInputs.pointZ != pointZ)
+            {
+                proverRequest.result = ZKR_SM_MAIN_POINT_Z_MISMATCH;
+                zklog.error("MainExecutor::execute() mismatch input.pointZ=" + proverRequest.input.publicInputsExtended.publicInputs.pointZ.get_str(16) + " pointZ=" + pointZ.get_str(16));
+                return;
+            }
+            proverRequest.input.contractsBytecode[blobKeyString] = blobDataVector;
+            //zklog.info("Blob inner poseidon hash=" + fea2string(fr, blobKey));
+        }
+        else
+        {
+            // Load keccak256BlobData into DB
+            Goldilocks::Element blobKey[4];
+            mpz_class blobL2HashData;
+            keccak256((const uint8_t *)proverRequest.input.publicInputsExtended.publicInputs.blobData.c_str(), proverRequest.input.publicInputsExtended.publicInputs.blobData.size(), blobL2HashData);
+            scalar2fea(fr, blobL2HashData, blobKey);
+            if (proverRequest.input.publicInputsExtended.publicInputs.blobL2HashData == 0)
+            {
+                proverRequest.input.publicInputsExtended.publicInputs.blobL2HashData = blobL2HashData;
+            }
+            else if (proverRequest.input.publicInputsExtended.publicInputs.blobL2HashData != blobL2HashData)
+            {
+                proverRequest.result = ZKR_SM_MAIN_BLOB_L2_HASH_DATA_MISMATCH;
+                zklog.error("MainExecutor::execute() mismatch input.blobL2HashData=" + proverRequest.input.publicInputsExtended.publicInputs.blobL2HashData.get_str(16) + " blobL2HashData=" + blobL2HashData.get_str(16));
+                return;
+            }
+            proverRequest.input.contractsBytecode[fea2string(fr, blobKey)] = blobDataVector;
+            //zklog.info("Blob inner keccak hash=" + fea2string(fr, blobKey));
+        }
 #endif
 
     // Copy input contracts database content into context database (dbProgram)
