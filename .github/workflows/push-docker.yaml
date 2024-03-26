@@ -45,7 +45,7 @@ jobs:
         with:
           context: .
           file: Dockerfile-GHA
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           target: executor
           tags: |
