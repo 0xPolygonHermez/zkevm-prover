@@ -99,6 +99,12 @@ void Rom::load(Goldilocks &fr, json &romJson)
         currentTxOffset              = getMemoryOffset("currentTx");
         txStatusOffset               = getMemoryOffset("txStatus");
         currentLogIndexOffset        = getMemoryOffset("currentLogIndex");
+        newBlobStateRootOffset       = getMemoryOffset("newBlobStateRoot");
+        newBlobAccInputHashOffset    = getMemoryOffset("newBlobAccInputHash");
+        newBlobNumberOffset          = getMemoryOffset("newBlobNumber");
+        finalAccBatchHashDataOffset  = getMemoryOffset("finalAccBatchHashData");
+        localExitRootFromBlobOffset  = getMemoryOffset("localExitRootFromBlob");
+        isInvalidOffset              = getMemoryOffset("isInvalid");
     }
 
     // Load ROM integer constants

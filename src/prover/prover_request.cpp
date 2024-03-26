@@ -11,6 +11,7 @@
 #include "main_sm/fork_8/main/full_tracer.hpp"
 #include "main_sm/fork_9/main/full_tracer.hpp"
 #include "main_sm/fork_10/main/full_tracer.hpp"
+#include "main_sm/fork_10_blob/main/full_tracer.hpp"
 #include "zklog.hpp"
 
 ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type) :
@@ -174,11 +175,23 @@ void ProverRequest::CreateFullTracer(void)
         }
         case 10: // fork_10
         {
-            pFullTracer = new fork_10::FullTracer(fr);
-            if (pFullTracer == NULL)
+            if (isBlobInner())
             {
-                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_10::FullTracer()");
-                exitProcess();
+                pFullTracer = new fork_10_blob::FullTracer(fr);
+                if (pFullTracer == NULL)
+                {
+                    zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_10_blob::FullTracer()");
+                    exitProcess();
+                }
+            }
+            else
+            {
+                pFullTracer = new fork_10::FullTracer(fr);
+                if (pFullTracer == NULL)
+                {
+                    zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_10::FullTracer()");
+                    exitProcess();
+                }
             }
             result = ZKR_SUCCESS;
             return;

@@ -6189,8 +6189,8 @@ void MainExecutor::initState(Context &ctx)
     // Set oldNumBlob to RR register
     ctx.pols.RR[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldBlobNum);
 
-    // Set oldStateRoot to register SR
-    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, ctx.pols.SR0[0], ctx.pols.SR1[0], ctx.pols.SR2[0], ctx.pols.SR3[0], ctx.pols.SR4[0], ctx.pols.SR5[0], ctx.pols.SR6[0], ctx.pols.SR7[0]);
+    // Set oldStateRoot to register D
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, ctx.pols.D0[0], ctx.pols.D1[0], ctx.pols.D2[0], ctx.pols.D3[0], ctx.pols.D4[0], ctx.pols.D5[0], ctx.pols.D6[0], ctx.pols.D7[0]);
 
     // Set fork ID to RCX register
     ctx.pols.RCX[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID);
@@ -6208,14 +6208,6 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.A5[0])) ||
         (!fr.isZero(ctx.pols.A6[0])) ||
         (!fr.isZero(ctx.pols.A7[0])) ||
-        (!fr.isZero(ctx.pols.D0[0])) ||
-        (!fr.isZero(ctx.pols.D1[0])) ||
-        (!fr.isZero(ctx.pols.D2[0])) ||
-        (!fr.isZero(ctx.pols.D3[0])) ||
-        (!fr.isZero(ctx.pols.D4[0])) ||
-        (!fr.isZero(ctx.pols.D5[0])) ||
-        (!fr.isZero(ctx.pols.D6[0])) ||
-        (!fr.isZero(ctx.pols.D7[0])) ||
         (!fr.isZero(ctx.pols.E0[0])) ||
         (!fr.isZero(ctx.pols.E1[0])) ||
         (!fr.isZero(ctx.pols.E2[0])) ||
@@ -6224,13 +6216,21 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.E5[0])) ||
         (!fr.isZero(ctx.pols.E6[0])) ||
         (!fr.isZero(ctx.pols.E7[0])) ||
+        (!fr.isZero(ctx.pols.SR0[0])) ||
+        (!fr.isZero(ctx.pols.SR1[0])) ||
+        (!fr.isZero(ctx.pols.SR2[0])) ||
+        (!fr.isZero(ctx.pols.SR3[0])) ||
+        (!fr.isZero(ctx.pols.SR4[0])) ||
+        (!fr.isZero(ctx.pols.SR5[0])) ||
+        (!fr.isZero(ctx.pols.SR6[0])) ||
+        (!fr.isZero(ctx.pols.SR7[0])) ||
         (!fr.isZero(ctx.pols.PC[0])) ||
         (!fr.isZero(ctx.pols.SP[0])) ||
         (!fr.isZero(ctx.pols.GAS[0])) ||
         (!fr.isZero(ctx.pols.HASHPOS[0]))
     )
     {
-        logError(ctx, "MainExecutor::checkFinalState() Program ended with registers A, D, E, PC, SP, GAS, HASHPOS not set to zero");
+        logError(ctx, "MainExecutor::checkFinalState() Program ended with registers A, E, SR, PC, SP, GAS, HASHPOS not set to zero");
         exitProcess();
     }
 
@@ -6285,21 +6285,21 @@ void MainExecutor::checkFinalState(Context &ctx)
     Goldilocks::Element feaOldStateRoot[8];
     scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, feaOldStateRoot);
     if (
-        (!fr.equal(ctx.pols.SR0[0], feaOldStateRoot[0])) ||
-        (!fr.equal(ctx.pols.SR1[0], feaOldStateRoot[1])) ||
-        (!fr.equal(ctx.pols.SR2[0], feaOldStateRoot[2])) ||
-        (!fr.equal(ctx.pols.SR3[0], feaOldStateRoot[3])) ||
-        (!fr.equal(ctx.pols.SR4[0], feaOldStateRoot[4])) ||
-        (!fr.equal(ctx.pols.SR5[0], feaOldStateRoot[5])) ||
-        (!fr.equal(ctx.pols.SR6[0], feaOldStateRoot[6])) ||
-        (!fr.equal(ctx.pols.SR7[0], feaOldStateRoot[7])) )
+        (!fr.equal(ctx.pols.D0[0], feaOldStateRoot[0])) ||
+        (!fr.equal(ctx.pols.D1[0], feaOldStateRoot[1])) ||
+        (!fr.equal(ctx.pols.D2[0], feaOldStateRoot[2])) ||
+        (!fr.equal(ctx.pols.D3[0], feaOldStateRoot[3])) ||
+        (!fr.equal(ctx.pols.D4[0], feaOldStateRoot[4])) ||
+        (!fr.equal(ctx.pols.D5[0], feaOldStateRoot[5])) ||
+        (!fr.equal(ctx.pols.D6[0], feaOldStateRoot[6])) ||
+        (!fr.equal(ctx.pols.D7[0], feaOldStateRoot[7])) )
     {
         mpz_class srScalar;
-        if (!fea2scalar(ctx.fr, srScalar, ctx.pols.SR0[0], ctx.pols.SR1[0], ctx.pols.SR2[0], ctx.pols.SR3[0], ctx.pols.SR4[0], ctx.pols.SR5[0], ctx.pols.SR6[0], ctx.pols.SR7[0]))
+        if (!fea2scalar(ctx.fr, srScalar, ctx.pols.D0[0], ctx.pols.D1[0], ctx.pols.D2[0], ctx.pols.D3[0], ctx.pols.D4[0], ctx.pols.D5[0], ctx.pols.D6[0], ctx.pols.D7[0]))
         {
-            logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.SR)");
+            logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.D)");
         }
-        logError(ctx, "MainExecutor::checkFinalState() Register SR=" + srScalar.get_str(16) + " not ended equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
+        logError(ctx, "MainExecutor::checkFinalState() Register D=" + srScalar.get_str(16) + " not ended equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
         exitProcess();
     }
 

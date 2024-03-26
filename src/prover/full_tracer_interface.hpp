@@ -263,6 +263,32 @@ public:
     ReturnFromCreate() : enabled(false), originCTX(0), createCTX(0) {};
 };
 
+class FinalTraceBlob
+{
+public:
+    string error;
+    vector<string> batch_data;
+    mpz_class new_blob_state_root;
+    mpz_class new_blob_acc_input_hash;
+    uint64_t new_num_blob;
+    mpz_class final_acc_batch_hash_data;
+    mpz_class local_exit_root_from_blob;
+    uint64_t is_invalid;
+
+    FinalTraceBlob() { clear(); };
+    void clear (void)
+    {
+        error.clear();
+        batch_data.clear();
+        new_blob_state_root = 0;
+        new_blob_acc_input_hash = 0;
+        new_num_blob = 0;
+        final_acc_batch_hash_data = 0;
+        local_exit_root_from_blob = 0;
+        is_invalid = 0;
+    }
+};
+
 class FullTracerInterface
 {
 public:
@@ -280,6 +306,7 @@ public:
     virtual uint64_t get_tx_number(void) = 0; // tx number = 0, 1, 2...
     virtual string & get_error(void) = 0;
     virtual bool get_invalid_batch(void) = 0;
+    virtual FinalTraceBlob & get_final_trace_blob(void) = 0;
 };
 
 #endif
