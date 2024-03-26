@@ -99,9 +99,13 @@ void Rom::load(Goldilocks &fr, json &romJson)
         currentTxOffset              = getMemoryOffset("currentTx");
         txStatusOffset               = getMemoryOffset("txStatus");
         currentLogIndexOffset        = getMemoryOffset("currentLogIndex");
+    }
+
+    if (type == BLOB)
+    {
         newBlobStateRootOffset       = getMemoryOffset("newBlobStateRoot");
         newBlobAccInputHashOffset    = getMemoryOffset("newBlobAccInputHash");
-        newBlobNumberOffset          = getMemoryOffset("newBlobNumber");
+        newBlobNumberOffset          = getMemoryOffset("newNumBlob");
         finalAccBatchHashDataOffset  = getMemoryOffset("finalAccBatchHashData");
         localExitRootFromBlobOffset  = getMemoryOffset("localExitRootFromBlob");
         isInvalidOffset              = getMemoryOffset("isInvalid");
