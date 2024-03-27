@@ -16,12 +16,17 @@
 
 const int CHELPERS_HEADER_SECTION = 2;
 const int CHELPERS_STAGES_SECTION = 3;
-const int CHELPERS_BUFFERS_SECTION = 4;
+const int CHELPERS_BUFFERS_SECTION = 4; 
 
-struct ParserParams 
+const int CHELPERS_STAGES_PIL2_SECTION = 2;
+const int CHELPERS_EXPRESSIONS_PIL2_SECTION = 3;
+const int CHELPERS_CONSTRAINTS_PIL2_SECTION = 4;
+
+struct ParserParams
 {
     uint32_t stage;
     uint32_t executeBefore;
+    uint32_t expId;
     uint32_t nTemp1;
     uint32_t nTemp3;
     uint32_t nOps;
@@ -30,6 +35,12 @@ struct ParserParams
     uint32_t argsOffset;
     uint32_t nNumbers;
     uint64_t numbersOffset;
+    uint32_t nConstPolsUsed;
+    uint32_t constPolsOffset;
+    uint32_t nCmPolsUsed;
+    uint32_t cmPolsOffset;
+    uint32_t destDim;
+    uint32_t destId;
 };
 
 struct ParserArgs 
@@ -37,24 +48,58 @@ struct ParserArgs
     uint8_t* ops;
     uint16_t* args;
     uint64_t* numbers;
+    uint16_t* constPolsIds;
+    uint16_t* cmPolsIds;
 };
 
 class CHelpers
 {
 public:
-    std::map<std::string, ParserParams> stagesInfo;
+    bool pil2;
+    std::map<string, ParserParams> stagesInfo;
+    std::map<uint64_t, ParserParams> expressionsInfo;
+
+    std::vector<std::vector<ParserParams>> constraintsInfoDebug;
     
     ParserArgs cHelpersArgs;
+
+    ParserArgs cHelpersArgsDebug;
+
+    ParserArgs cHelpersArgsExpressions;
 
     ~CHelpers() {
         delete[] cHelpersArgs.ops;
         delete[] cHelpersArgs.args;
         delete[] cHelpersArgs.numbers;
+        
 
+        if(pil2) {
+            delete[] cHelpersArgs.constPolsIds;
+            delete[] cHelpersArgs.cmPolsIds;
+
+            delete[] cHelpersArgsExpressions.ops;
+            delete[] cHelpersArgsExpressions.args;
+            delete[] cHelpersArgsExpressions.numbers;
+            delete[] cHelpersArgsExpressions.constPolsIds;
+            delete[] cHelpersArgsExpressions.cmPolsIds;
+
+            delete[] cHelpersArgsDebug.ops;
+            delete[] cHelpersArgsDebug.args;
+            delete[] cHelpersArgsDebug.numbers;
+            delete[] cHelpersArgsDebug.constPolsIds;
+            delete[] cHelpersArgsDebug.cmPolsIds;
+
+            constraintsInfoDebug.clear();
+            expressionsInfo.clear();
+        }
+        
         stagesInfo.clear();
     };
 
-    void loadCHelpers(BinFileUtils::BinFile *cHelpersBin);
+    void loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2_);
+    void loadCHelpersPil1(BinFileUtils::BinFile *cHelpersBin);
+    void loadCHelpersPil2(BinFileUtils::BinFile *cHelpersBin);
+
 };
 
 

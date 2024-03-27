@@ -1,10 +1,10 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
-#define PROVER_FORK_ID 7
-#define PROVER_FORK_NAMESPACE fork_7
-#define PROVER_FORK_NAMESPACE_STRING "fork_7"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_7
+#define PROVER_FORK_ID 8
+#define PROVER_FORK_NAMESPACE fork_8
+#define PROVER_FORK_NAMESPACE_STRING "fork_8"
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_8
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
@@ -76,9 +76,5 @@
 // #define MAIN_SM_EXECUTOR_GENERATED_CODE
 
 //#define MULTI_ROM_TEST
-
-/* chelpers defines */
-#define USE_GENERIC_PARSER true
-
 
 #endif

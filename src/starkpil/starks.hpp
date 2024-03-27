@@ -33,7 +33,10 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
-
+    bool debug = false;
+    bool optimizeMemoryNTT = false;
+    bool optimizeMemoryNTTCommitPols = false;
+    
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
 
@@ -58,6 +61,14 @@ private:
     MerkleTreeType **treesGL;
     MerkleTreeType **treesFRI;
 
+    map<uint64_t, uint64_t> cm2Transposed;
+
+    vector<bool> publicsCalculated;
+    vector<bool> constsCalculated;
+    vector<bool> subProofValuesCalculated;
+    vector<bool> witnessCalculated;
+    vector<bool> challengesCalculated;
+
     Goldilocks::Element *mem;
     void *pAddress;
 
@@ -67,6 +78,7 @@ private:
     CHelpers chelpers;
 
 void merkelizeMemory(); // function for DBG purposes
+void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
 
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
@@ -206,9 +218,23 @@ public:
         TimerStart(CHELPERS_ALLOCATION);
         if(!starkFiles.zkevmCHelpers.empty()) {
             cHelpersBinFile = BinFileUtils::openExisting(starkFiles.zkevmCHelpers, "chps", 1);
-            chelpers.loadCHelpers(cHelpersBinFile.get());
+            chelpers.loadCHelpers(cHelpersBinFile.get(), starkInfo.pil2);
         }
         TimerStopAndLog(CHELPERS_ALLOCATION);
+
+        if(starkInfo.pil2) {
+            constsCalculated.resize(starkInfo.nConstants, true);
+        }
+        
+        if(starkInfo.mapOffsets.section[eSection::cm1_2ns] < starkInfo.mapOffsets.section[eSection::tmpExp_n]) {
+            optimizeMemoryNTTCommitPols = true;
+        }
+
+        uint64_t currentSectionStart = starkInfo.mapOffsets.section[string2section("cm" + to_string(starkInfo.nStages) + "_n")] * sizeof(Goldilocks::Element);
+        uint64_t nttHelperSize = starkInfo.mapSectionsN.section[string2section("cm" + to_string(starkInfo.nStages) + "_n")] * NExtended * sizeof(Goldilocks::Element);
+        if(currentSectionStart > nttHelperSize) {
+            optimizeMemoryNTT = true;
+        }
     };
     ~Starks()
     {
@@ -247,10 +273,12 @@ public:
             delete treesFRI[i];
         }
         delete[] treesFRI;
+
+        cm2Transposed.clear();
     };
 
     uint64_t getConstTreeSize()
-    {
+    {   
         uint n_tmp = 1 << starkInfo.starkStruct.nBitsExt;
         uint64_t nextN = floor(((double)(n_tmp - 1) / merkleTreeArity) + 1);
         uint64_t acc = nextN * merkleTreeArity;
@@ -272,7 +300,7 @@ public:
         uint64_t numElements = (1 << starkInfo.starkStruct.nBitsExt) * starkInfo.nConstants * sizeof(Goldilocks::Element);
         uint64_t total = numElements + acc * hashSize * sizeof(ElementType);
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
-            total += merkleTreeArity;
+            total += 16; // HEADER
         } else {
             total += merkleTreeArity * sizeof(ElementType);
         }
@@ -282,41 +310,45 @@ public:
 
     void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps *chelpersSteps);
     
-    void calculateZ(StepsParams& params);
-    void calculateH1H2(StepsParams& params);
+    void calculateHints(uint64_t step, StepsParams& params);
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
-    void calculateExpressions(std::string step, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpressions(uint64_t step, bool after, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpression(uint64_t expId, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateConstraint(ParserParams &constraintCode, StepsParams &params, CHelpersSteps *chelpersSteps);
     
-    void computeQ(StepsParams& params, FRIProof<ElementType> &proof);
+    void computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps);
+    void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
+    
     void computeEvals(StepsParams& params, FRIProof<ElementType> &proof);
 
-    Polinomial *computeFRIPol(StepsParams& params, CHelpersSteps *chelpersSteps);
+    Polinomial *computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps *chelpersSteps);
     
     void computeFRIFolding(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t step, Polinomial &challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries);
 
-    void addTranscriptPublics(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
+    void addTranscriptGL(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, Polinomial &pol);
-public:
-    void getChallenges(TranscriptType &transcript, Goldilocks::Element* challenges, uint64_t nChallenges);
+    void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
 
 private:
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
 
-    Polinomial *transposeH1H2Columns(StepsParams& params);
-    void transposeH1H2Rows(StepsParams& params, Polinomial *transPols);
-    Polinomial *transposeZColumns(StepsParams& params);
-    void transposeZRows(StepsParams& params, Polinomial *transPols);
+    void transposePolsColumns(StepsParams& params, Polinomial* transPols, uint64_t &indx, Hint hint, Goldilocks::Element *pBuffer);
+    void transposePolsRows(uint64_t step, StepsParams& params, Polinomial *transPols);
+    
     void evmap(StepsParams &params, Polinomial &LEv);
 
+    uint64_t checkSymbolsToBeCalculated(vector<Symbol> symbols);
 public:
     // Following function are created to be used by the ffi interface
-    void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
+    void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial* pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
     void ffi_extend_and_merkelize(uint64_t step, StepsParams* params, FRIProof<ElementType>* proof);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
+
+    void *ffi_get_vector_pointer(char *name);
 };
 
 template class Starks<Goldilocks::Element>;

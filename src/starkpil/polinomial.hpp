@@ -108,7 +108,7 @@ public:
         return res;
     }
 
-    static void copy(Polinomial &a, Polinomial &b, uint64_t size = 0)
+    static void copy(Polinomial &a, Polinomial &b)
     {
         assert(a.dim() == b.dim());
         assert(a.degree() == b.degree());
@@ -353,7 +353,7 @@ public:
         }
     }
 
-    static void calculateH1H2_opt1(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys, uint64_t size_values)
+    static void calculateH1H2_opt1(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys)
     {
         vector<int> counter(tPol.degree(), 1);  // this 1 is important, space of the original buffer could be used
         vector<bool> touched(size_keys, false); // faster use this than initialize buffer, bitmask could be used
@@ -469,7 +469,7 @@ public:
         // std::cout << "holu: " << id << " " << pos << " times: " << time2 - time1 << " " << time3 - time2 << " " << time4 - time3 << " " << h2.dim() << std::endl;
     }
 
-    static void calculateH1H2_opt3(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys, uint64_t size_values)
+    static void calculateH1H2_opt3(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol, uint64_t pNumber, uint64_t *buffer, uint64_t size_keys)
     {
         vector<int> counter(tPol.degree(), 1);  // this 1 is important, space of the original buffer could be used
         vector<bool> touched(size_keys, false); // faster use this than initialize buffer, bitmask could be used
@@ -611,6 +611,29 @@ public:
         Polinomial::mulElement(checkVal, 0, z, size - 1, tmp, 0);
 
         zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));
+    }
+
+    static void calculateS(Polinomial &s, Polinomial &num, Polinomial &den)
+    {
+        uint64_t size = num.degree();
+
+        Polinomial denI(size, 3);
+        Polinomial checkVal(1, 3);
+        Goldilocks::Element *pS = s[0];
+        Goldilocks3::copy((Goldilocks3::Element *)&pS[0], &Goldilocks3::zero());
+
+        batchInverse(denI, den);
+        for (uint64_t i = 1; i < size; i++)
+        {
+            Polinomial tmp(1, 3);
+            Polinomial::mulElement(tmp, 0, num, i - 1, denI, i - 1);
+            Polinomial::addElement(s, i, s, i - 1, tmp, 0);
+        }
+        Polinomial tmp(1, 3);
+        Polinomial::mulElement(tmp, 0, num, size - 1, denI, size - 1);
+        Polinomial::addElement(checkVal, 0, s, size - 1, tmp, 0);
+
+        zkassert(Goldilocks3::isZero((Goldilocks3::Element &)*checkVal[0]));
     }
 
     // compute the multiplications of the polynomials in src in parallel with partitions of size partitionSize

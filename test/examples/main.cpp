@@ -2,30 +2,69 @@
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
 #include "AllSteps.hpp"
+#include "AllPil2Steps.hpp"
+#include "AllC18Pil2Steps.hpp"
 
-int main()
+
+int main(int argc, char **argv)
 {
-
     Config config;
     config.runFileGenBatchProof = true; // So that starkInfo is created
     config.mapConstPolsFile = false;
     config.mapConstantsTreeFile = false;
     
-    string constPols = "test/examples/all/all.const";
-    string constTree = "test/examples/all/all.consttree";
-    string starkInfoFile = "test/examples/all/all.starkinfo.json";
-    string commitPols = "test/examples/all/all.commit";
-    string cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
-    string verkey = "test/examples/all/all.verkey.json";
+    string constPols;
+    string constTree;
+    string starkInfoFile;
+    string commitPols;
+    string cHelpersFile;
+    string verkey;
+    string publicsFile;
 
+    // Check arguments list
+    if (argc != 2)
+    {
+        cout << "Error: expected 1 arguments but got " << argc - 1 << " Usage: zkProverTest <testname>" << endl;
+        return -1;
+    }
+
+    string testName = argv[1];
+
+    if(testName != "all" && testName != "all_pil2" && testName != "compressor_pil2") {
+        cout << "Error: unknown test name " << testName << endl;
+        return -1;
+    }
+
+    if(testName == "all_pil2") {
+        constPols = "test/examples/pil2/all/all.const";
+        constTree = "test/examples/pil2/all/all.consttree";
+        starkInfoFile = "test/examples/pil2/all/all.starkinfo.json";
+        commitPols = "test/examples/pil2/all/all.commit";
+        cHelpersFile = "test/examples/pil2/all/all.chelpers/all.chelpers.bin";
+        verkey = "test/examples/pil2/all/all.verkey.json";
+        publicsFile = "test/examples/pil2/all/all.publics.json";
+    } else if(testName == "compressor_pil2") {
+        constPols = "test/examples/pil2/compressor/all.c18.const";
+        constTree = "test/examples/pil2/compressor/all.c18.consttree";
+        starkInfoFile = "test/examples/pil2/compressor/all.c18.starkinfo.json";
+        commitPols = "test/examples/pil2/compressor/all.c18.commit";
+        cHelpersFile = "test/examples/pil2/compressor/all.c18.chelpers/all.c18.chelpers.bin";
+        verkey = "test/examples/pil2/compressor/all.c18.verkey.json";
+        publicsFile = "test/examples/pil2/compressor/all.c18.publics.json";
+    } else if(testName == "all") {
+        constPols = "test/examples/all/all.const";
+        constTree = "test/examples/all/all.consttree";
+        starkInfoFile = "test/examples/all/all.starkinfo.json";
+        commitPols = "test/examples/all/all.commit";
+        cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
+        verkey = "test/examples/all/all.verkey.json";
+        publicsFile = "test/examples/all/all.publics.json";
+    }
+   
     StarkInfo starkInfo(config, starkInfoFile);
 
-    FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
-
     void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
-    void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
-
-    Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
+    void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN.section[eSection::cm3_n] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
 
     uint64_t N = (1 << starkInfo.starkStruct.nBits);
     #pragma omp parallel for
@@ -34,28 +73,49 @@ int main()
         std::memcpy((uint8_t*)pAddress + i*starkInfo.nCm1*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.nCm1*sizeof(Goldilocks::Element), starkInfo.nCm1*sizeof(Goldilocks::Element));
     }
 
-    Goldilocks::Element publicInputs[3] = {
-        Goldilocks::fromU64(1),
-        Goldilocks::fromU64(2),
-        Goldilocks::fromU64(74469561660084004),
-    };
 
+    json publics;
+    file2json(publicsFile, publics);
+
+    Goldilocks::Element publicInputs[starkInfo.nPublics];
+
+    for(uint64_t i = 0; i < starkInfo.nPublics; i++) {
+        publicInputs[i] = Goldilocks::fromU64(publics[i]);
+    }
+    
     json publicStarkJson;
-    for (int i = 0; i < 3; i++)
+    for (uint64_t i = 0; i < starkInfo.nPublics; i++)
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
 
-    AllSteps allSteps;
-    starks.genProof(fproof, &publicInputs[0], &allSteps);
+    nlohmann::ordered_json jProof;
 
-    nlohmann::ordered_json jProof = fproof.proofs.proof2json();
+    if(testName == "all_pil2") {
+        AllPil2Steps allPil2Steps;
+        FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
+        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
+        starks.genProof(fproof, &publicInputs[0], &allPil2Steps);
+        jProof = fproof.proofs.proof2json();
+    } else if(testName == "compressor_pil2") {
+        AllC18Pil2Steps allC18Pil2Steps;
+        FRIProof<RawFr::Element> fproof(starkInfo, 1);
+        Starks<RawFr::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
+        starks.genProof(fproof, &publicInputs[0], &allC18Pil2Steps);
+        jProof = fproof.proofs.proof2json();
+    } else if(testName == "all") {
+        AllSteps allSteps;
+        FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
+        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
+        starks.genProof(fproof, &publicInputs[0], &allSteps);
+        jProof = fproof.proofs.proof2json();
+    }
 
     nlohmann::json zkin = proof2zkinStark(jProof, starkInfo);
 
     // Generate publics
-    jProof["publics"] = publicStarkJson;
-    zkin["publics"] = publicStarkJson;
+    jProof["publics"] = publics;
+    zkin["publics"] = publics;
 
     json2file(publicStarkJson, "runtime/output/publics.json");
     json2file(zkin, "runtime/output/zkin.json");

@@ -44,6 +44,19 @@ public:
 
 typedef enum
 {
+    const_ = 0,
+    cm = 1,
+    tmp = 2,
+    public_ = 3,
+    subproofvalue = 4,
+    challenge = 5,
+    number = 6,
+} opType;
+
+opType string2opType (const string s);
+
+typedef enum
+{
     cm1_n = 0,
     cm1_2ns = 1,
     cm2_n = 2,
@@ -59,6 +72,16 @@ typedef enum
 } eSection;
 
 eSection string2section (const string s);
+
+typedef enum {
+    h1h2 = 0,
+    gprod = 1,
+    gsum = 2,
+    publicValue = 3,
+    subproofValue = 4,
+} hintType;
+
+hintType string2hintType (const string s);
 
 class PolsSections
 {
@@ -78,6 +101,49 @@ public:
     uint64_t stageId;
 };
 
+class Symbol 
+{
+public:
+    opType op;
+    uint64_t stage;
+    uint64_t stageId;
+    uint64_t id;
+    uint64_t value;
+
+    void setSymbol(json j) {
+        op = string2opType(j["op"]);
+        if(j.contains("stage")) stage = j["stage"];
+        if(j.contains("stageId")) stageId = j["stageId"];
+        if(j.contains("id")) id = j["id"];
+        if(j.contains("value")) value = j["value"];
+    };
+
+    void setSymbol(uint64_t stage_, uint64_t id_) {
+        op = string2opType("cm");
+        stage = stage_;
+        id = id_;
+    };
+};
+
+class ExpressionCodeSymbol 
+{
+public:
+    uint64_t stage;
+    uint64_t expId;
+    vector<Symbol> symbolsUsed;
+};
+
+class Hint 
+{
+public:
+    hintType type;
+    std::vector<string> fields;
+    std::map<std::string, Symbol> fieldSymbols;
+    std::vector<Symbol> destSymbols;
+    std::vector<Symbol> symbols;
+    uint64_t index;
+};
+
 
 class VarPolMap
 {
@@ -86,42 +152,6 @@ public:
     uint64_t dim;
     uint64_t sectionPos;
     uint64_t deg;
-};
-
-class PeCtx
-{
-public:
-    uint64_t tExpId;
-    uint64_t fExpId;
-    uint64_t zId;
-    uint64_t c1Id;
-    uint64_t numId;
-    uint64_t denId;
-    uint64_t c2Id;
-};
-
-class PuCtx
-{
-public:
-    uint64_t tExpId;
-    uint64_t fExpId;
-    uint64_t h1Id;
-    uint64_t h2Id;
-    uint64_t zId;
-    uint64_t c1Id;
-    uint64_t numId;
-    uint64_t denId;
-    uint64_t c2Id;
-};
-
-class CiCtx
-{
-public:
-    uint64_t zId;
-    uint64_t numId;
-    uint64_t denId;
-    uint64_t c1Id;
-    uint64_t c2Id;
 };
 
 class EvMap
@@ -136,7 +166,7 @@ public:
 
     eType type;
     uint64_t id;
-    bool prime;
+    int64_t prime;
 
     void setType (string s)
     {
@@ -154,6 +184,9 @@ public:
 class StarkInfo
 {
     const Config &config;
+
+private:
+    Symbol setSymbol(json j);
 public:
     StarkStruct starkStruct;
 
@@ -168,8 +201,15 @@ public:
     uint64_t nStages;
 
     vector<uint64_t> numChallenges;
+    
+    vector<uint64_t> stageChallengeIndex;
+    uint64_t qChallengeIndex;
+    uint64_t xiChallengeIndex;
+    uint64_t fri1ChallengeIndex;
+    uint64_t fri2ChallengeIndex;
 
     uint64_t nChallenges;
+    uint64_t nSubProofValues;
 
     vector<uint64_t> openingPoints;
     
@@ -185,15 +225,20 @@ public:
 
     // pil2-stark-js specific
     vector<CmPolMap> cmPolsMap;
+    vector<vector<Symbol>> symbolsStage;
+    vector<vector<Symbol>> stageCodeSymbols;
+    vector<vector<ExpressionCodeSymbol>> expressionsCodeSymbols;
+    
+    std::map<uint64_t, vector<Hint>> hints;
 
     // pil-stark specific
     vector<VarPolMap> varPolMap;
     vector<uint64_t> cm_n;
     vector<uint64_t> cm_2ns;
-    vector<PeCtx> peCtx;
-    vector<PuCtx> puCtx;
-    vector<CiCtx> ciCtx;
+
     vector<EvMap> evMap;
+
+
     map<uint64_t,uint64_t> exp2pol;
     
     /* Constructor */

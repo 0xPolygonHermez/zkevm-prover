@@ -23,7 +23,7 @@ public:
     virtual zkresult get                (const string &batchUUID, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog) = 0;
     virtual zkresult setProgram         (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence) = 0;
     virtual zkresult getProgram         (const string &batchUUID, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog) = 0;
-    virtual void     loadDB             (const DatabaseMap::MTMap &input, const bool persistentconst, const Goldilocks::Element (&stateRoot)[4]) = 0;
+    virtual void     loadDB             (const DatabaseMap::MTMap &input, const bool persistent, const Goldilocks::Element (&stateRoot)[4]) = 0;
     virtual void     loadProgramDB      (const DatabaseMap::ProgramMap &input, const bool persistent) = 0;
     virtual void     finishTx           (const string &batchUUID, const string &newStateRoot, const Persistence persistence) = 0;
     virtual void     startBlock         (const string &batchUUID, const string &oldStateRoot, const Persistence persistence) = 0;

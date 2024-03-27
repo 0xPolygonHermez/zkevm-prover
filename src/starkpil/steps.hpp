@@ -7,6 +7,7 @@ struct StepsParams
     ConstantPolsStarks *pConstPols;
     ConstantPolsStarks *pConstPols2ns;
     Polinomial &challenges;
+    Polinomial &subproofValues;
     Polinomial &x_n;
     Polinomial &x_2ns;
     Polinomial &zi;

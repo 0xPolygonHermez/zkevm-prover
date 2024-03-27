@@ -1,10 +1,10 @@
 #!/bin/bash -x
 
-VERSION=v4.0.0-rc.6-fork.7
+VERSION=v5.0.0-rc.4-fork.8
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 
-WORKING_DIR=/releases/${VERSION}
+WORKING_DIR=../test_pil2
 CONFIG_DIR=${WORKING_DIR}/config/
 C_FILES=${WORKING_DIR}/c_files
 CIRCOM_HEADER="#pragma GCC diagnostic push\n#pragma GCC diagnostic ignored \"-Wunused-variable\"\n#pragma GCC push_options\n#pragma GCC optimize (\"O0\")\n#include <stdio.h>\n#include <iostream>\n#include <assert.h>\n#include <cassert>\n"
@@ -75,8 +75,7 @@ cp ${CONFIG_DIR}/scripts/metadata-rom.txt ./src/main_sm/$FORK_ID/scripts/
 cp ${WORKING_DIR}/pil/zkevm/main.pil.json  ./src/main_sm/$FORK_ID/scripts/
 
 #main generator files
-make main_generator
-./build/mainGenerator
+make generate
 
 #pols generator files
 make pols_generator

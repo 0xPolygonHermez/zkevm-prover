@@ -82,6 +82,7 @@ public:
     uint64_t executorClientLoops;
     bool executorClientCheckNewStateRoot;
     bool executorClientResetDB;
+    bool executorClientClearCache;
 
     // HashDB service
     uint16_t hashDBServerPort;

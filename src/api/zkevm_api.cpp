@@ -39,7 +39,7 @@
 #include "hashdb_singleton.hpp"
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
-#include "main_sm/fork_7/main_exec_c/account.hpp"
+#include "main_sm/fork_8/main_exec_c/account.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
@@ -53,7 +53,7 @@
 #include "C12aSteps.hpp"
 #include "Recursive1Steps.hpp"
 #include "Recursive2Steps.hpp"
-#include "RecursiveFSteps.hpp"
+#include "StarkRecursiveFSteps.hpp"
 #include "proof2zkinStark.hpp"
 #include "starks.hpp"
 
@@ -350,7 +350,7 @@ int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRe
 #endif
 
     // Generate account zero keys
-    fork_7::Account::GenerateZeroKey(fr, poseidon);
+    fork_8::Account::GenerateZeroKey(fr, poseidon);
 
     // Init the HashDB singleton
     hashDBSingleton.init(fr, config);
@@ -1146,22 +1146,18 @@ void *c12a_steps_new() {
     C12aSteps* c12aSteps = new C12aSteps();
     return c12aSteps;
 }
-
 void c12a_steps_free(void *pC12aSteps) {
     C12aSteps* c12aSteps = (C12aSteps*)pC12aSteps;
     delete c12aSteps;
 }
-
 void *recursive1_steps_new() {
     Recursive1Steps* recursive1Steps = new Recursive1Steps();
     return recursive1Steps;
 }
-
 void recursive1_steps_free(void *pRecursive1Steps) {
     Recursive1Steps* recursive1Steps = (Recursive1Steps*)pRecursive1Steps;
     delete recursive1Steps;
 }
-
 void *recursive2_steps_new() {
     Recursive2Steps* recursive2Steps = new Recursive2Steps();
     return recursive2Steps;
@@ -1234,14 +1230,15 @@ void starks_free(void *pStarks) {
     delete starks;
 }
 
-void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pPublicInputs) {
+void *steps_params_new(void *pStarks, void * pChallenges, void * pSubproofValues, void *pEvals, void *pXDivXSubXi, void *pPublicInputs) {
     Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
     Polinomial* challenges = (Polinomial*)pChallenges;
+    Polinomial* subproofValues = (Polinomial*)pSubproofValues;
     Polinomial* evals = (Polinomial*)pEvals;
     Polinomial* xDivXSubXi = (Polinomial*)pXDivXSubXi;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
 
-    return starks->ffi_create_steps_params(challenges, evals, xDivXSubXi, publicInputs);
+    return starks->ffi_create_steps_params(challenges, subproofValues, evals, xDivXSubXi, publicInputs);
 }
 
 void steps_params_free(void *pStepsParams) {
@@ -1265,22 +1262,35 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst) {
 }
 
 void calculate_h1_h2(void *pStarks, void *pParams) {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->calculateH1H2(*(StepsParams*)pParams);
+    // Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    // starks->calculateH1H2(*(StepsParams*)pParams); // TODO
 }
 
 void calculate_z(void *pStarks, void *pParams) {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->calculateZ(*(StepsParams*)pParams);
+    // Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    // starks->calculateZ(*(StepsParams*)pParams); // TODO
 }
 
 void calculate_expressions(void *pStarks, char* step, void *pParams, void *pChelpersSteps) {
-    ((Starks<Goldilocks::Element>*)pStarks)->calculateExpressions(step, *(StepsParams*)pParams, (CHelpersSteps*)pChelpersSteps);
+    // ((Starks<Goldilocks::Element>*)pStarks)->calculateExpressions(step, *(StepsParams*)pParams, (CHelpersSteps*)pChelpersSteps); // TODO
+}
+
+void compute_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pTranscript, void *pChelpersSteps) {
+    // type == 1 => Goldilocks
+    // type == 2 => BN128
+    switch (elementType) {
+        case 1:
+            ((Starks<Goldilocks::Element>*)pStarks)->computeStage(step, *(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof, *(TranscriptGL*)pTranscript, (CHelpersSteps*)pChelpersSteps);
+            break;
+        default: 
+            cerr << "Invalid elementType: " << elementType << endl;
+            break;
+    }
 }
 
 void compute_q(void *pStarks, void *pParams, void *pProof) {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->computeQ(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof);
+    // Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    // starks->computeQ(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof); // TODO 
 }
 
 void compute_evals(void *pStarks, void *pParams, void *pProof) {
@@ -1288,9 +1298,9 @@ void compute_evals(void *pStarks, void *pParams, void *pProof) {
     starks->computeEvals(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof);
 }
 
-void *compute_fri_pol(void *pStarks, void *pParams, void *cHelpersSteps) {
+void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    return starks->computeFRIPol(*(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps);
+    return starks->computeFRIPol(step, *(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps);
 }
 
 void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge) {
@@ -1301,6 +1311,22 @@ void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t st
 void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* friQueries) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
     starks->computeFRIQueries(*(FRIProof<Goldilocks::Element>*)pProof, *(Polinomial*)pFriPol, friQueries);
+}
+
+void *get_vector_pointer(void *pStarks, char *name) {
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    return starks->ffi_get_vector_pointer(name);   
+}
+
+void resize_vector(void *pVector, uint64_t newSize, bool value)
+{
+    std::vector<bool> *vector = (std::vector<bool> *)pVector;
+    vector->resize(newSize, value);
+}
+
+void set_bool_vector_value(void *pVector, uint64_t index, bool value) {
+    std::vector<bool> *vector = (std::vector<bool> *)pVector;
+    vector->at(index) = value;
 }
 
 void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols) {
@@ -1351,9 +1377,17 @@ void *zkin_new(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs,
     return zkin;
 }
 
-void *transcript_new() {
-    TranscriptGL *transcript = new TranscriptGL();
-    return transcript;
+void *transcript_new(uint32_t elementType) {
+    // type == 1 => Goldilocks
+    // type == 2 => BN128
+    switch (elementType) {
+        case 1:
+            return new TranscriptGL();
+        case 2:
+            return new TranscriptBN128();
+        default:
+            return NULL;
+    }
 }
 
 void transcript_add(void *pTranscript, void *pInput, uint64_t size) {
@@ -1372,15 +1406,20 @@ void transcript_add_polinomial(void *pTranscript, void *pPolinomial) {
     }
 }
 
-void transcript_free(void *pTranscript) {
-    TranscriptGL* transcript = (TranscriptGL*)pTranscript;
-    delete transcript;
+void transcript_free(void *pTranscript, uint32_t elementType) {
+    switch (elementType) {
+        case 1:
+            delete (TranscriptGL*)pTranscript;
+            break;
+        case 2:
+            delete (TranscriptBN128*)pTranscript;
+            break;
+    }
 }
 
-void get_challenges(void *pStarks, void *pTranscript, void *pElement, uint64_t nChallenges) {
+void get_challenge(void *pStarks, void *pTranscript, void *pElement) {
     TranscriptGL *transcript = (TranscriptGL *)pTranscript;
-
-    ((Starks<Goldilocks::Element>*)pStarks)->getChallenges(*transcript, (Goldilocks::Element*)pElement, nChallenges);
+    ((Starks<Goldilocks::Element>*)pStarks)->getChallenge(*transcript, *(Goldilocks::Element*)pElement);
 }
 
 void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits) {

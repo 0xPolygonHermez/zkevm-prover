@@ -113,7 +113,7 @@ void FRI<ElementType>::proveQueries(uint64_t* friQueries, FRIProof<ElementType> 
         for (uint64_t i = 0; i < starkInfo.starkStruct.nQueries; i++)
         {
             if (step == 0) {
-                queryPol(fproof, trees, 5, friQueries[i], step);
+                queryPol(fproof, trees, starkInfo.nStages + 2, friQueries[i], step);
             } else {
                 queryPol(fproof, treesFRI[step - 1], friQueries[i], step);
             }

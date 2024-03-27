@@ -4996,7 +4996,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 pols.isNeg[i] = fr.one();
                 if (rom.line[zkPC].useJmpAddr)
+                {
                     pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+                }
                 else
                     pols.zkPC[nexti] = fr.fromU64(addr);
                 jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(0x100000000)));
@@ -5041,14 +5043,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 jmpnCondValue = jmpnCondValue >> 1;
             }
             pols.JMPN[i] = fr.one();
-
-            if (pols.zkPC[nexti] == fr.fromU64(funcModexpLabel))
-            {
-                proverRequest.result = ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED;
-                logError(ctx, "Invalid funcModexp call");
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
         }
         // If JMPC, jump conditionally if carry
         else if (rom.line[zkPC].JMPC == 1)
@@ -5351,6 +5345,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
     proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);
     proverRequest.counters.steps = ctx.lastStep;
+    proverRequest.counters_reserve = proverRequest.counters;
 
     // Set the error (all previous errors generated a return)
     proverRequest.result = ZKR_SUCCESS;
