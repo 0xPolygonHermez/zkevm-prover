@@ -4171,7 +4171,7 @@ void eval_getBlobL2HashData (Context &ctx, const RomCommand &cmd, CommandResult 
 #endif
 
     cr.type = crt_fea;
-    scalar2fea(fr, ctx.blobL2HashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.blobL2HashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getForcedHashData (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -4248,8 +4248,8 @@ void eval_frBLS12_381inv (Context &ctx, const RomCommand &cmd, CommandResult &cr
     bls12_381.toMpz(rScalar.get_mpz_t(), r);
 
     // Return result
-    cr.type = crt_fea;
-    scalar2fea(fr, rScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    cr.type = crt_scalar;
+    cr.scalar = rScalar;
 }
 
 void eval_dump (Context &ctx, const RomCommand &cmd, CommandResult &cr)

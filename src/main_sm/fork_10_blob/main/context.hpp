@@ -197,7 +197,6 @@ public:
 
     // Fork 9 attributes
     map<uint64_t, Saved> saved;
-    mpz_class blobL2HashData;
     BLS12_381Root BLS512_381root;
 
     Context( Goldilocks &fr,

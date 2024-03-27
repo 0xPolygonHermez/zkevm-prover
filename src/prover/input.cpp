@@ -709,9 +709,29 @@ void Input::loadGlobals (json &input)
 
         // Parse pointZ
         if ( input.contains("pointZ") &&
-                input["pointZ"].is_string() )
+             input["pointZ"].is_string() )
         {
             string pointZString = input["pointZ"];
+            pointZString = Remove0xIfPresent(pointZString);
+            if (!stringIsHex(pointZString))
+            {
+                zklog.error("Input::loadGlobals() pointZ found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (pointZString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() pointZ found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.pointZ.set_str(pointZString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): pointZ=" + publicInputsExtended.publicInputs.pointZ.get_str(16));
+#endif
+        }
+        else if ( input.contains("z") &&
+                  input["z"].is_string() )
+        {
+            string pointZString = input["z"];
             pointZString = Remove0xIfPresent(pointZString);
             if (!stringIsHex(pointZString))
             {
@@ -731,9 +751,29 @@ void Input::loadGlobals (json &input)
 
         // Parse pointY
         if ( input.contains("pointY") &&
-                input["pointY"].is_string() )
+             input["pointY"].is_string() )
         {
             string pointYString = input["pointY"];
+            pointYString = Remove0xIfPresent(pointYString);
+            if (!stringIsHex(pointYString))
+            {
+                zklog.error("Input::loadGlobals() pointY found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (pointYString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() pointY found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.pointY.set_str(pointYString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): pointY=" + publicInputsExtended.publicInputs.pointY.get_str(16));
+#endif
+        }
+        else if ( input.contains("y") &&
+                  input["y"].is_string() )
+        {
+            string pointYString = input["y"];
             pointYString = Remove0xIfPresent(pointYString);
             if (!stringIsHex(pointYString))
             {
@@ -758,9 +798,38 @@ void Input::loadGlobals (json &input)
             publicInputsExtended.publicInputs.blobData = string2ba(input["blobData"]);
         }
 
+        // Parse blobL2HashData
+        if ( input.contains("blobL2HashData") &&
+             input["blobL2HashData"].is_string() )
+        {
+            string blobL2HashDataString = input["blobL2HashData"];
+            blobL2HashDataString = Remove0xIfPresent(blobL2HashDataString);
+            if (!stringIsHex(blobL2HashDataString))
+            {
+                zklog.error("Input::loadGlobals() blobL2HashData found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (blobL2HashDataString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() blobL2HashData found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.blobL2HashData.set_str(blobL2HashDataString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): blobL2HashData=" + publicInputsExtended.publicInputs.blobL2HashData.get_str(16));
+#endif
+        }
+
+        // Parse type
+        if ( input.contains("blobType") &&
+             input["blobType"].is_number_unsigned() )
+        {
+            publicInputsExtended.publicInputs.type = input["blobType"];
+        }
+
         // Parse currentL1InfoTreeRoot
         if ( input.contains("currentL1InfoTreeRoot") &&
-                input["currentL1InfoTreeRoot"].is_string() )
+             input["currentL1InfoTreeRoot"].is_string() )
         {
             string currentL1InfoTreeRootString = input["currentL1InfoTreeRoot"];
             currentL1InfoTreeRootString = Remove0xIfPresent(currentL1InfoTreeRootString);
@@ -782,7 +851,7 @@ void Input::loadGlobals (json &input)
 
         // Parse currentL1InfoTreeIndex
         if ( input.contains("currentL1InfoTreeIndex") &&
-            input["currentL1InfoTreeIndex"].is_number_unsigned() )
+             input["currentL1InfoTreeIndex"].is_number_unsigned() )
         {
             publicInputsExtended.currentL1InfoTreeIndex = input["currentL1InfoTreeIndex"];
 #ifdef LOG_INPUT
@@ -792,7 +861,7 @@ void Input::loadGlobals (json &input)
 
         // Parse newBlobStateRoot
         if ( input.contains("newBlobStateRoot") &&
-                input["newBlobStateRoot"].is_string() )
+             input["newBlobStateRoot"].is_string() )
         {
             string newBlobStateRootString = input["newBlobStateRoot"];
             newBlobStateRootString = Remove0xIfPresent(newBlobStateRootString);
@@ -814,7 +883,7 @@ void Input::loadGlobals (json &input)
 
         // Parse newBlobAccInputHash
         if ( input.contains("newBlobAccInputHash") &&
-                input["newBlobAccInputHash"].is_string() )
+             input["newBlobAccInputHash"].is_string() )
         {
             string newBlobAccInputHashString = input["newBlobAccInputHash"];
             newBlobAccInputHashString = Remove0xIfPresent(newBlobAccInputHashString);
@@ -828,17 +897,17 @@ void Input::loadGlobals (json &input)
                 zklog.error("Input::loadGlobals() newBlobAccInputHash found in input JSON file is too long");
                 exitProcess();
             }
-            publicInputsExtended.newBlobStateRoot.set_str(newBlobAccInputHashString, 16);
+            publicInputsExtended.newBlobAccInputHash.set_str(newBlobAccInputHashString, 16);
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): newBlobAccInputHash=" + publicInputsExtended.newBlobAccInputHash.get_str(16));
 #endif
         }
 
         // Parse newBlobNum
-        if ( input.contains("newBlobNum") &&
-            input["newBlobNum"].is_number_unsigned() )
+        if ( input.contains("newNumBlob") &&
+             input["newNumBlob"].is_number_unsigned() )
         {
-            publicInputsExtended.newBlobNum = input["newBlobNum"];
+            publicInputsExtended.newBlobNum = input["newNumBlob"];
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): newBlobNum=" + to_string(lpublicInputsExtended.newBlobNum));
 #endif
@@ -860,7 +929,7 @@ void Input::loadGlobals (json &input)
                 zklog.error("Input::loadGlobals() finalAccBatchHashData found in input JSON file is too long");
                 exitProcess();
             }
-            publicInputsExtended.newBlobStateRoot.set_str(finalAccBatchHashDataString, 16);
+            publicInputsExtended.finalAccBatchHashData.set_str(finalAccBatchHashDataString, 16);
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): finalAccBatchHashData=" + publicInputsExtended.finalAccBatchHashData.get_str(16));
 #endif
@@ -868,7 +937,7 @@ void Input::loadGlobals (json &input)
 
         // Parse localExitRootFromBlob
         if ( input.contains("localExitRootFromBlob") &&
-                input["localExitRootFromBlob"].is_string() )
+             input["localExitRootFromBlob"].is_string() )
         {
             string localExitRootFromBlobString = input["localExitRootFromBlob"];
             localExitRootFromBlobString = Remove0xIfPresent(localExitRootFromBlobString);
@@ -882,7 +951,7 @@ void Input::loadGlobals (json &input)
                 zklog.error("Input::loadGlobals() localExitRootFromBlob found in input JSON file is too long");
                 exitProcess();
             }
-            publicInputsExtended.newBlobStateRoot.set_str(localExitRootFromBlobString, 16);
+            publicInputsExtended.localExitRootFromBlob.set_str(localExitRootFromBlobString, 16);
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): localExitRootFromBlob=" + publicInputsExtended.localExitRootFromBlob.get_str(16));
 #endif
@@ -890,7 +959,7 @@ void Input::loadGlobals (json &input)
 
         // Parse isInvalid
         if ( input.contains("isInvalid") &&
-            input["isInvalid"].is_boolean() )
+             input["isInvalid"].is_boolean() )
         {
             publicInputsExtended.isInvalid = input["isInvalid"];
     #ifdef LOG_INPUT
