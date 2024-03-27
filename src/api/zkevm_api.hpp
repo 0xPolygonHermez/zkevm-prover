@@ -32,10 +32,11 @@
     int zkevm_sha256_f(void * inputs_, int ninputs, void * pAddress);
     int zkevm_sha256_f_req(void* pSMRequests,  void * pAddress);
 
-    int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut);
-    int zkevm_climb_key(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_storage_req(void* pSMRequests,  void * pAddress);
+    int zkevm_padding_pg_req(void* pSMRequests,  void * pAddress);
+    int zkevm_climb_key_req(void* pSMRequests,  void * pAddress);
+    int zkevm_poseidon_g_req(void* pSMRequests,  void * pAddress);
     
-
     // FRI Proof
     // ========================================================================================
     void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);

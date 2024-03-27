@@ -470,17 +470,18 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             return;
         }
 
-        // Execute the Padding PG State Machine
-        TimerStart(PADDING_PG_SM_EXECUTE);
-        paddingPGExecutor.execute(required->PaddingPG, commitPols.PaddingPG, required->PoseidonGFromPG);
-        TimerStopAndLog(PADDING_PG_SM_EXECUTE);
-
+#ifndef __ZKEVM_SM__
+        
         // Execute the Storage State Machine
         TimerStart(STORAGE_SM_EXECUTE);
         storageExecutor.execute(required->Storage, commitPols.Storage, required->PoseidonGFromST, required->ClimbKey);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
 
-#ifndef __ZKEVM_SM__
+        // Execute the Padding PG State Machine
+        TimerStart(PADDING_PG_SM_EXECUTE);
+        paddingPGExecutor.execute(required->PaddingPG, commitPols.PaddingPG, required->PoseidonGFromPG);
+        TimerStopAndLog(PADDING_PG_SM_EXECUTE);
+
         // Execute the Arith State Machine
         TimerStart(ARITH_SM_EXECUTE);
         arithExecutor.execute(required->Arith, commitPols.Arith);
@@ -540,8 +541,6 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         sha256FExecutor.execute(required->Sha256F, commitPols.Sha256F);
         TimerStopAndLog(SHA256_F_SM_EXECUTE);
 
-    #endif
-
         // Execute the PoseidonG State Machine
         TimerStart(POSEIDON_G_SM_EXECUTE);
         poseidonGExecutor.execute(required->PoseidonG, required->PoseidonGFromPG, required->PoseidonGFromST, commitPols.PoseidonG);
@@ -551,6 +550,8 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(CLIMB_KEY_SM_EXECUTE);
         climbKeyExecutor.execute(required->ClimbKey, commitPols.ClimbKey);
         TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);
+
+#endif
 
         #ifdef __ZKEVM_SM__
         if(pSMRequestsOut!=NULL){
@@ -563,14 +564,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             PaddingKKExecutorInput::DTO *buffer2 = PaddingKKExecutorInput::toDTO(required->PaddingKK);
             add_padding_kk_inputs((void *)pSMRequestsOut, (void *) buffer2, required->PaddingKK.size());
             delete[] buffer2;
-            PaddingPGExecutorInput::DTO *buffer3 = PaddingPGExecutorInput::toDTO(required->PaddingPG);
-            add_padding_pg_inputs((void *)pSMRequestsOut, (void *) buffer3, required->PaddingPG.size());
-            delete[] buffer3;
             add_memory_inputs((void *)pSMRequestsOut, (void *)required->Memory.data(), (uint64_t) required->Memory.size());
             add_arith_inputs((void *)pSMRequestsOut, (void *)required->Arith.data(), (uint64_t) required->Arith.size());
             TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
         }
-#endif
+    #endif
     }
     else
     {

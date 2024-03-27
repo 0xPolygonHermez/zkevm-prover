@@ -1067,27 +1067,39 @@ int zkevm_keccak_f_req(void* pSMRequests,  void * pAddress){
     keccakFExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->KeccakF, pols);
     return 0;
 }
-int zkevm_padding_pg(void * inputs_, int ninputs, void * pAddress, void* pSMRequestsOut){
-    PaddingPGExecutorInput::DTO * p_inputs= (PaddingPGExecutorInput::DTO*) inputs_;
-    std::vector<PaddingPGExecutorInput> inputs;
-    PaddingPGExecutorInput::fromDTO(p_inputs, ninputs, inputs);
-    PoseidonGoldilocks poseidon;
+
+int zkevm_storage_req( void* pSMRequests,  void * pAddress){
+    StorageExecutor storageExecutor(fr, poseidon, config);
+    PROVER_FORK_NAMESPACE::StorageCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::StorageCommitPols::pilDegree());
+    storageExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Storage, pols,
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonGFromST, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->ClimbKey);
+    return 0;
+}
+
+int zkevm_padding_pg_req( void* pSMRequests,  void * pAddress){
     PaddingPGExecutor paddingPGExecutor(fr, poseidon);
-    paddingPGExecutor.execute(inputs, (Goldilocks::Element*) pAddress, pSMRequestsOut);
+    PROVER_FORK_NAMESPACE::PaddingPGCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingPGCommitPols::pilDegree());
+    paddingPGExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingPG, pols, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonGFromPG);
     return 0;
 }
-int zkevm_climb_key(void * inputs_, int ninputs, void * pAddress){
-    std::vector<ClimbKeyAction> inputs;
-    if(ninputs > 0){
-        inputs.assign((ClimbKeyAction*)inputs_, (ClimbKeyAction*)inputs_ + ninputs);
-    }
-    Config config_;
-    ClimbKeyExecutor climbKeyExecutor(fr, config_);
-    climbKeyExecutor.execute(inputs, (Goldilocks::Element*) pAddress);
-    return 0;
 
+int zkevm_climb_key_req( void* pSMRequests,  void * pAddress){
+    ClimbKeyExecutor climbKeyExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::ClimbKeyCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::ClimbKeyCommitPols::pilDegree());
+    climbKeyExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->ClimbKey, pols);
+    return 0;
 }
 
+int zkevm_poseidon_g_req( void* pSMRequests,  void * pAddress){
+    PoseidonGExecutor poseidonGExecutor(fr, poseidon);
+    PROVER_FORK_NAMESPACE::PoseidonGCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PoseidonGCommitPols::pilDegree());
+    poseidonGExecutor.execute(
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonG,
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonGFromPG,
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonGFromST,
+     pols);
+    return 0;
+}
 
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
     auto friProof = (FRIProof<Goldilocks::Element>*)pFriProof;
