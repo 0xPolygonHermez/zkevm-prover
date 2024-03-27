@@ -144,7 +144,7 @@ string function2String(tFunction f)
         case f_storeLog:                        return "storeLog";
         case f_memAlignWR_W0:                   return "memAlignWR_W0";
         case f_memAlignWR_W1:                   return "memAlignWR_W1";
-        case f_memAlignWR8_W0:                  return "memAlignWR8_W0";
+        case f_memAlignRD:                      return "memAlignRD";
         case f_onOpcode:                        return "onOpcode";
         case f_onUpdateStorage:                 return "onUpdateStorage";
         case f_getL1InfoRoot:                   return "getL1InfoRoot";
