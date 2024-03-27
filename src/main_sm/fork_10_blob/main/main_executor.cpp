@@ -6404,7 +6404,7 @@ void MainExecutor::assertOutputs(Context &ctx)
     if ( ctx.proverRequest.input.publicInputsExtended.finalAccBatchHashData != 0 )
     {
         Goldilocks::Element feaFinalAccBatchHashData[8];
-        scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.newBlobAccInputHash, feaFinalAccBatchHashData);
+        scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.finalAccBatchHashData, feaFinalAccBatchHashData);
 
         if (
             (!fr.equal(ctx.pols.A0[step], feaFinalAccBatchHashData[0])) ||

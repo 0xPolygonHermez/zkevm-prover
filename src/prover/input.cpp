@@ -897,17 +897,17 @@ void Input::loadGlobals (json &input)
                 zklog.error("Input::loadGlobals() newBlobAccInputHash found in input JSON file is too long");
                 exitProcess();
             }
-            publicInputsExtended.newBlobStateRoot.set_str(newBlobAccInputHashString, 16);
+            publicInputsExtended.newBlobAccInputHash.set_str(newBlobAccInputHashString, 16);
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): newBlobAccInputHash=" + publicInputsExtended.newBlobAccInputHash.get_str(16));
 #endif
         }
 
         // Parse newBlobNum
-        if ( input.contains("newBlobNum") &&
-             input["newBlobNum"].is_number_unsigned() )
+        if ( input.contains("newNumBlob") &&
+             input["newNumBlob"].is_number_unsigned() )
         {
-            publicInputsExtended.newBlobNum = input["newBlobNum"];
+            publicInputsExtended.newBlobNum = input["newNumBlob"];
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): newBlobNum=" + to_string(lpublicInputsExtended.newBlobNum));
 #endif
@@ -929,7 +929,7 @@ void Input::loadGlobals (json &input)
                 zklog.error("Input::loadGlobals() finalAccBatchHashData found in input JSON file is too long");
                 exitProcess();
             }
-            publicInputsExtended.newBlobStateRoot.set_str(finalAccBatchHashDataString, 16);
+            publicInputsExtended.finalAccBatchHashData.set_str(finalAccBatchHashDataString, 16);
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): finalAccBatchHashData=" + publicInputsExtended.finalAccBatchHashData.get_str(16));
 #endif
@@ -951,7 +951,7 @@ void Input::loadGlobals (json &input)
                 zklog.error("Input::loadGlobals() localExitRootFromBlob found in input JSON file is too long");
                 exitProcess();
             }
-            publicInputsExtended.newBlobStateRoot.set_str(localExitRootFromBlobString, 16);
+            publicInputsExtended.localExitRootFromBlob.set_str(localExitRootFromBlobString, 16);
 #ifdef LOG_INPUT
             zklog.info("Input::loadGlobals(): localExitRootFromBlob=" + publicInputsExtended.localExitRootFromBlob.get_str(16));
 #endif
