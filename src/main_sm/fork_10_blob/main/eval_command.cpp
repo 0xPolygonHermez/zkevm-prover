@@ -49,7 +49,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);
             case f_memAlignWR_W0:                   return eval_memAlignWR_W0(ctx, cmd, cr);
             case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);
-            case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);
+            case f_memAlignRD:                      return eval_memAlignRD(ctx, cmd, cr);
             case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
 
             // Etrog (fork 7) new methods:
@@ -1926,14 +1926,45 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    int64_t offset = cr.scalar.get_si();
+    uint64_t mode = cr.scalar.get_ui();
 
-    int64_t shiftLeft = (32 - offset) * 8;
-    int64_t shiftRight = offset * 8;
-    mpz_class result = (m0 & (ScalarMask256 << shiftLeft)) | (ScalarMask256 & (value >> shiftRight));
+    uint64_t offset = mode & 0x7F;
+    uint64_t len = (mode >> 7) & 0x3F;
+    bool leftAlignment = mode & 0x2000;
+    bool littleEndian = mode & 0x4000;
 
+    if (offset>64 || len > 32 || mode > 0x7FFFF)
+    {
+        zklog.error("eval_memAlignWR_W0() invalid mode : " + to_string(mode) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+    uint64_t _len = len == 0 ? 32 : len;
+    if ((_len + offset) > 64) 
+    {
+        _len = 64 - offset;
+    }
+    mpz_class maskV = ScalarMask256 >> (32 - _len);
+    uint64_t shiftBits = (64 - offset - _len) * 8;
+
+    if (leftAlignment && _len < 32) 
+    {
+        value = value >> (8* (32 - len));
+    }
+    value = value & maskV;
+    if (littleEndian) 
+    {
+        // reverse bytes
+        mpz_class _tmpv = 0;
+        for (int ilen = 0; ilen < _len; ++ilen) 
+        {
+            _tmpv = (_tmpv << 8) | (value & 0xFF);
+            value = value >> 8;
+        }
+        value = _tmpv;
+    }
+    mpz_class w0 = ((m0 << 256 & (ScalarMask512 ^ (maskV << shiftBits))) | (value << shiftBits)) >> 256;
     cr.type = crt_fea;
-    scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(ctx.fr, w0, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -1990,23 +2021,55 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    int64_t offset = cr.scalar.get_si();
+    uint64_t mode = cr.scalar.get_ui();
 
-    int64_t shiftRight = offset * 8;
-    int64_t shiftLeft = (32 - offset) * 8;
-    mpz_class result = (m1 & (ScalarMask256 >> shiftRight)) | (ScalarMask256 & (value << shiftLeft));
+    uint64_t offset = mode & 0x7F;
+    uint64_t len = (mode >> 7) & 0x3F;
+    bool leftAlignment = mode & 0x2000;
+    bool littleEndian = mode & 0x4000;
 
+    if (offset>64 || len > 32 || mode > 0x7FFFF)
+    {
+        zklog.error("eval_memAlignWR_W1() invalid mode : " + to_string(mode) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+    uint64_t _len = len == 0 ? 32 : len;
+    if ((_len + offset) > 64) 
+    {
+        _len = 64 - offset;
+    }
+    mpz_class maskV = ScalarMask256 >> (32 - _len);
+    uint64_t shiftBits = (64 - offset - _len) * 8;
+
+    if (leftAlignment && _len < 32) 
+    {
+        value = value >> (8* (32 - len));
+    }
+    value = value & maskV;
+    if (littleEndian) 
+    {
+        // reverse bytes
+        mpz_class _tmpv = 0;
+        for (int ilen = 0; ilen < _len; ++ilen) 
+        {
+            _tmpv = (_tmpv << 8) | (value & 0xFF);
+            value = value >> 8;
+        }
+        value = _tmpv;
+    }
+    mpz_class w1 = ((m1 & (ScalarMask512 ^ (maskV << shiftBits))) | (value << shiftBits)) &  ScalarMask256;
     cr.type = crt_fea;
-    scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(ctx.fr, w1, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+
 }
 
-void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+void eval_memAlignRD (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     // Check parameters list size
     if (cmd.params.size() != 3)
     {
-        zklog.error("eval_memAlignWR8_W0() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_memAlignRD() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -2020,7 +2083,7 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        zklog.error("eval_memAlignWR8_W0() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_memAlignRD() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -2035,11 +2098,11 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        zklog.error("eval_memAlignWR8_W0() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_memAlignRD() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
-    mpz_class value = cr.scalar;
+    mpz_class m1 = cr.scalar;
 
     // Get offset by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
@@ -2050,18 +2113,51 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        zklog.error("eval_memAlignWR8_W0() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_memAlignRD() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
-    int64_t offset = cr.scalar.get_si();
+    uint64_t mode = cr.scalar.get_ui();
+    uint64_t offset = mode & 0x7F;
+    uint64_t len = (mode >> 7) & 0x3F;
+    bool leftAlignment = mode & 0x2000;
+    bool littleEndian = mode & 0x4000;
 
-    int64_t bits = (31 - offset) * 8;
-
-    mpz_class result = (m0 & (ScalarMask256 - (ScalarMask8 << bits))) | ((ScalarMask8 & value ) << bits);
-
+    if (offset>64 || len > 32 || mode > 0x7FFFF)
+    {
+        zklog.error("eval_memAlignRD() 2 invalid mode: " + to_string(mode) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+    uint64_t _len = len == 0 ? 32 : len;
+    if ((_len + offset) > 64) 
+    {
+        _len = 64 - offset;
+    }
+    mpz_class m = (m0 << 256) | m1;
+    mpz_class maskV = ScalarMask256 >> (32 - _len);
+    uint64_t shiftBits = (64 - offset - _len) * 8;
+    if (shiftBits > 0) 
+    {
+        m = m >> shiftBits;
+    }
+    mpz_class _v = m & maskV;
+    if (littleEndian) 
+    {
+        // reverse bytes
+        mpz_class _tmpv = 0;
+        for (int ilen = 0; ilen < _len; ++ilen) 
+        {
+            _tmpv = (_tmpv << 8) | (_v & 0xFF);
+            _v = _v >> 8;
+        }
+        _v = _tmpv;
+    }
+    if (leftAlignment && _len < 32) 
+    {
+        _v = _v << ((32 - len) * 8);
+    }
     cr.type = crt_fea;
-    scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(ctx.fr, _v, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 /*************************/

@@ -120,7 +120,7 @@ void eval_exp                 (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_memAlignRD          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 // Etrog (fork 7) new methods:
 void eval_getL1InfoRoot               (Context &ctx, const RomCommand &cmd, CommandResult &cr);

@@ -104,7 +104,6 @@ string RomLine::toString(Goldilocks &fr)
     if (binOpcode != 0) result += " binOpcode=" + to_string(binOpcode);
     if (memAlignRD != 0) result += " memAlignRD=" + to_string(memAlignRD);
     if (memAlignWR != 0) result += " memAlignWR=" + to_string(memAlignWR);
-    if (memAlignWR8 != 0) result += " memAlignWR8=" + to_string(memAlignWR8);
     if (repeat != 0) result += " repeat=" + to_string(repeat);
     if (free0IsByte != 0) result += " free0IsByte=" + to_string(free0IsByte);
 

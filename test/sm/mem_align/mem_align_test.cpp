@@ -42,8 +42,8 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.w0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
     action.w1.set_str("A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF",16);
     action.v.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
-    action.offset = 0;
-    action.wr256 = 0;    
+    action.mode = 0;
+    action.wr = 0;    
     input.push_back(action);
 
     action.m0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
@@ -51,8 +51,8 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.w0.set_str("0",16);
     action.w1.set_str("0",16);
     action.v.set_str("060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021A0A1A2A3A4",16);
-    action.offset = 5;
-    action.wr256 = 0;    
+    action.mode = 5;
+    action.wr = 0;    
     input.push_back(action);
 
     action.m0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
@@ -60,8 +60,8 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.w0.set_str("0",16);
     action.w1.set_str("0",16);
     action.v.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
-    action.offset = 0;
-    action.wr256 = 0;    
+    action.mode = 0;
+    action.wr = 0;    
     input.push_back(action);
 
     action.m0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
@@ -69,8 +69,8 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.w0.set_str("C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF",16);
     action.w1.set_str("A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF",16);
     action.v.set_str("C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF",16);
-    action.offset = 0;
-    action.wr256 = 1;    
+    action.mode = 0;
+    action.wr = 1;    
     input.push_back(action);
 
     action.m0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
@@ -78,8 +78,8 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.w0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
     action.w1.set_str("C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF",16);
     action.v.set_str("C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF",16);
-    action.offset = 32;
-    action.wr256 = 1;    
+    action.mode = 32;
+    action.wr = 1;    
     input.push_back(action);
 
     action.m0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
@@ -87,8 +87,8 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.w0.set_str("01020304C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADB",16);
     action.w1.set_str("DCDDDEDFA4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF",16);
     action.v.set_str("C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF",16);
-    action.offset = 4;
-    action.wr256 = 1;    
+    action.mode = 4;
+    action.wr = 1;    
     input.push_back(action);
 
     action.m0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
@@ -96,8 +96,8 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.w0.set_str("01C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDE",16);
     action.w1.set_str("DFA1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF",16);
     action.v.set_str("C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF",16);
-    action.offset = 1;
-    action.wr256 = 1;    
+    action.mode = 1;
+    action.wr = 1;    
     input.push_back(action);
 
     action.m0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2021",16);
@@ -105,8 +105,8 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.w0.set_str("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E2000",16);
     action.w1.set_str("00000000000000000000000000000000000000000000000000000000000000BF",16);
     action.v.set_str("0",16);
-    action.offset = 31;
-    action.wr256 = 1;    
+    action.mode = 31;
+    action.wr = 1;    
     input.push_back(action);    
 
     void * pAddress = malloc(CommitPols::pilSize());
@@ -127,7 +127,7 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
         numberOfErrors += compareValue (fr, index, "m1", cmPols.MemAlign.m1, input[index].m1);
         numberOfErrors += compareValue (fr, index, "v", cmPols.MemAlign.v, input[index].v);
 
-        if (input[index].wr256)
+        if (input[index].wr)
         {
             numberOfErrors += compareValue (fr, index, "w0", cmPols.MemAlign.w0, input[index].w0);
             numberOfErrors += compareValue (fr, index, "w1", cmPols.MemAlign.w1, input[index].w1);

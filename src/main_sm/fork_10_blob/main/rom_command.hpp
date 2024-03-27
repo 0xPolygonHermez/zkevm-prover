@@ -44,7 +44,7 @@ typedef enum : int {
     f_storeLog,
     f_memAlignWR_W0,
     f_memAlignWR_W1,
-    f_memAlignWR8_W0,
+    f_memAlignRD,
     f_onOpcode,
     f_onUpdateStorage,
     f_getL1InfoRoot,

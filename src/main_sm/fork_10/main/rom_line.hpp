@@ -113,7 +113,6 @@ public:
     vector<RomCommand *> cmdAfter;
     uint8_t memAlignRD;
     uint8_t memAlignWR;
-    uint8_t memAlignWR8;
     uint8_t repeat;
     uint8_t free0IsByte;
 
