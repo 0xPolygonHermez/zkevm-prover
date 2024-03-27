@@ -16,11 +16,11 @@
 
 const int CHELPERS_HEADER_SECTION = 2;
 const int CHELPERS_STAGES_SECTION = 3;
-const int CHELPERS_BUFFERS_SECTION = 4;
-const int CHELPERS_EXPRESSIONS_SECTION = 5;
-const int CHELPERS_SYMBOLS_SECTION = 6;
-const int CHELPERS_CONSTRAINTS_DEBUG_SECTION = 7;
+const int CHELPERS_BUFFERS_SECTION = 4; 
 
+const int CHELPERS_STAGES_PIL2_SECTION = 2;
+const int CHELPERS_EXPRESSIONS_PIL2_SECTION = 3;
+const int CHELPERS_CONSTRAINTS_PIL2_SECTION = 4;
 
 struct ParserParams
 {
@@ -55,7 +55,7 @@ struct ParserArgs
 class CHelpers
 {
 public:
-    bool pil2_;
+    bool pil2;
     std::map<string, ParserParams> stagesInfo;
     std::map<uint64_t, ParserParams> expressionsInfo;
 
@@ -73,7 +73,7 @@ public:
         delete[] cHelpersArgs.numbers;
         
 
-        if(pil2_) {
+        if(pil2) {
             delete[] cHelpersArgs.constPolsIds;
             delete[] cHelpersArgs.cmPolsIds;
 
@@ -96,7 +96,10 @@ public:
         stagesInfo.clear();
     };
 
-    void loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2);
+    void loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2_);
+    void loadCHelpersPil1(BinFileUtils::BinFile *cHelpersBin);
+    void loadCHelpersPil2(BinFileUtils::BinFile *cHelpersBin);
+
 };
 
 
