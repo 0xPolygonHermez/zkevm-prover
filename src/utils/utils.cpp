@@ -23,6 +23,9 @@
 using namespace std;
 using namespace std::filesystem;
 
+// Commenting out this code probably breaks the main executable, but makes the
+// test binary leaner.
+/*
 void printBa(uint8_t *pData, uint64_t dataSize, string name)
 {
     string s = name + " = ";
@@ -43,7 +46,7 @@ void printBits(uint8_t *pData, uint64_t dataSize, string name)
         s += byte2string(byte) + ":";
     }
     zklog.info(s);
-}
+}*/
 
 void printCallStack(void)
 {
