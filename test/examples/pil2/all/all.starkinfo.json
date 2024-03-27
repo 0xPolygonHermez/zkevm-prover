@@ -1,4 +1,6 @@
 {
+ "isVadcop": false,
+ "hashCommits": false,
  "cmPolsMap": [
   {
    "stage": "cm1",
@@ -217,7 +219,7 @@
    "stageId": 6
   },
   {
-   "stage": "cmQ",
+   "stage": "cm4",
    "stageNum": 4,
    "name": "Q0",
    "dim": 3,
@@ -226,7 +228,7 @@
    "stagePos": 0
   },
   {
-   "stage": "cmQ",
+   "stage": "cm4",
    "stageNum": 4,
    "name": "Q1",
    "dim": 3,
@@ -382,8 +384,8 @@
   "cm2_ext": 6,
   "cm3_n": 21,
   "cm3_ext": 21,
-  "cmQ_n": 6,
-  "cmQ_ext": 6,
+  "cm4_n": 6,
+  "cm4_ext": 6,
   "q_ext": 3,
   "f_ext": 3
  },
@@ -715,12 +717,12 @@
   "cm1_n": 0,
   "cm2_n": 15360,
   "cm3_n": 21504,
-  "cmQ_n": 43008,
+  "cm4_n": 43008,
   "tmpExp_n": 49152,
   "cm1_ext": 68608,
   "cm2_ext": 99328,
   "cm3_ext": 111616,
-  "cmQ_ext": 154624,
+  "cm4_ext": 154624,
   "q_ext": 166912,
   "f_ext": 173056
  },
@@ -1530,6 +1532,24 @@
     {
      "op": "cm",
      "stage": 1,
+     "stageId": 14,
+     "id": 14
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 0,
+     "id": 0
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 1,
+     "id": 1
+    },
+    {
+     "op": "cm",
+     "stage": 1,
      "stageId": 11,
      "id": 11
     },
@@ -1544,12 +1564,6 @@
      "stage": 1,
      "stageId": 13,
      "id": 13
-    },
-    {
-     "op": "cm",
-     "stage": 1,
-     "stageId": 14,
-     "id": 14
     },
     {
      "op": "tmp",
@@ -3364,6 +3378,42 @@
      "id": 14
     },
     {
+     "op": "tmp",
+     "stage": 2,
+     "stageId": 1,
+     "id": 27
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 0,
+     "id": 0
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 1,
+     "id": 1
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 3,
+     "id": 20
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 0,
+     "id": 2
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 1,
+     "id": 3
+    },
+    {
      "op": "cm",
      "stage": 2,
      "stageId": 0,
@@ -3374,18 +3424,6 @@
      "stage": 2,
      "stageId": 1,
      "id": 16
-    },
-    {
-     "op": "cm",
-     "stage": 3,
-     "stageId": 3,
-     "id": 20
-    },
-    {
-     "op": "tmp",
-     "stage": 2,
-     "stageId": 1,
-     "id": 27
     },
     {
      "op": "tmp",
@@ -7020,6 +7058,21 @@
      "id": 8
     },
     {
+     "op": "public",
+     "stage": 1,
+     "id": 0
+    },
+    {
+     "op": "public",
+     "stage": 1,
+     "id": 1
+    },
+    {
+     "op": "public",
+     "stage": 1,
+     "id": 2
+    },
+    {
      "op": "cm",
      "stage": 1,
      "stageId": 0,
@@ -7112,12 +7165,6 @@
     {
      "op": "cm",
      "stage": 3,
-     "stageId": 0,
-     "id": 17
-    },
-    {
-     "op": "cm",
-     "stage": 3,
      "stageId": 1,
      "id": 18
     },
@@ -7136,12 +7183,6 @@
     {
      "op": "cm",
      "stage": 3,
-     "stageId": 4,
-     "id": 21
-    },
-    {
-     "op": "cm",
-     "stage": 3,
      "stageId": 5,
      "id": 22
     },
@@ -7150,6 +7191,84 @@
      "stage": 3,
      "stageId": 6,
      "id": 23
+    },
+    {
+     "op": "tmp",
+     "stage": 2,
+     "stageId": 1,
+     "id": 27
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 0,
+     "id": 0
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 1,
+     "id": 1
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 0,
+     "id": 17
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 4,
+     "id": 21
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 2,
+     "id": 28
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 3,
+     "id": 29
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 4,
+     "id": 30
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 5,
+     "id": 31
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 6,
+     "id": 32
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 0,
+     "id": 2
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 1,
+     "id": 3
+    },
+    {
+     "op": "challenge",
+     "stage": 4,
+     "stageId": 0,
+     "id": 4
     }
    ]
   },
@@ -14637,15 +14756,27 @@
     },
     {
      "op": "cm",
-     "stage": "Q",
+     "stage": 4,
      "stageId": 0,
      "id": 24
     },
     {
      "op": "cm",
-     "stage": "Q",
+     "stage": 4,
      "stageId": 1,
      "id": 25
+    },
+    {
+     "op": "challenge",
+     "stage": 6,
+     "stageId": 0,
+     "id": 6
+    },
+    {
+     "op": "challenge",
+     "stage": 6,
+     "stageId": 1,
+     "id": 7
     }
    ]
   },
@@ -15726,7 +15857,7 @@
        "dim": 3
       },
       {
-       "type": "treeQ",
+       "type": "tree4",
        "id": 24,
        "prime": 0,
        "dim": 3,
@@ -15771,7 +15902,7 @@
        "dim": 3
       },
       {
-       "type": "treeQ",
+       "type": "tree4",
        "id": 25,
        "prime": 0,
        "dim": 3,
@@ -17723,7 +17854,7 @@
      },
      "src": [
       {
-       "type": "treeQ",
+       "type": "tree4",
        "id": 24,
        "prime": 0,
        "dim": 3,
@@ -17788,7 +17919,7 @@
      },
      "src": [
       {
-       "type": "treeQ",
+       "type": "tree4",
        "id": 25,
        "prime": 0,
        "dim": 3,
@@ -18710,7 +18841,7 @@
     ],
     "boundary": "everyRow",
     "line": 13,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
    },
    {
     "tmpUsed": 7,
@@ -18888,7 +19019,7 @@
     ],
     "boundary": "everyRow",
     "line": 18,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
    },
    {
     "tmpUsed": 3,
@@ -18963,6 +19094,11 @@
       "op": "const",
       "stage": 0,
       "id": 1
+     },
+     {
+      "op": "public",
+      "stage": 1,
+      "id": 0
      },
      {
       "op": "cm",
@@ -18973,7 +19109,7 @@
     ],
     "boundary": "everyRow",
     "line": 20,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
    },
    {
     "tmpUsed": 3,
@@ -19047,6 +19183,11 @@
      {
       "op": "const",
       "stage": 0,
+      "id": 1
+     },
+     {
+      "op": "public",
+      "stage": 1,
       "id": 1
      },
      {
@@ -19058,7 +19199,7 @@
     ],
     "boundary": "everyRow",
     "line": 21,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
    },
    {
     "tmpUsed": 3,
@@ -19135,6 +19276,11 @@
       "id": 2
      },
      {
+      "op": "public",
+      "stage": 1,
+      "id": 2
+     },
+     {
       "op": "cm",
       "stage": 1,
       "stageId": 0,
@@ -19143,7 +19289,7 @@
     ],
     "boundary": "everyRow",
     "line": 22,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
    }
   ],
   "stage2": [],
@@ -19210,7 +19356,7 @@
     ],
     "boundary": "everyRow",
     "line": 9,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_plookup/plookup.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_plookup/plookup.pil"
    },
    {
     "tmpUsed": 51,
@@ -20441,6 +20587,24 @@
       "id": 16
      },
      {
+      "op": "tmp",
+      "stage": 2,
+      "stageId": 1,
+      "id": 27
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 0,
+      "id": 0
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 1,
+      "id": 1
+     },
+     {
       "op": "cm",
       "stage": 3,
       "stageId": 0,
@@ -20460,20 +20624,26 @@
      },
      {
       "op": "tmp",
-      "stage": 2,
-      "stageId": 1,
-      "id": 27
-     },
-     {
-      "op": "tmp",
       "stage": 3,
       "stageId": 2,
       "id": 28
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 1,
+      "id": 3
      }
     ],
     "boundary": "everyRow",
     "line": 9,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_plookup/plookup.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_plookup/plookup.pil"
    },
    {
     "tmpUsed": 2,
@@ -20538,7 +20708,7 @@
     ],
     "boundary": "everyRow",
     "line": 7,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_permutation/permutation.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_permutation/permutation.pil"
    },
    {
     "tmpUsed": 19,
@@ -21010,6 +21180,18 @@
       "id": 10
      },
      {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 0,
+      "id": 0
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 1,
+      "id": 1
+     },
+     {
       "op": "cm",
       "stage": 3,
       "stageId": 1,
@@ -21026,11 +21208,17 @@
       "stage": 3,
       "stageId": 4,
       "id": 30
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
      }
     ],
     "boundary": "everyRow",
     "line": 7,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_permutation/permutation.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_permutation/permutation.pil"
    },
    {
     "tmpUsed": 2,
@@ -21095,7 +21283,7 @@
     ],
     "boundary": "everyRow",
     "line": 7,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_connection/connection.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_connection/connection.pil"
    },
    {
     "tmpUsed": 29,
@@ -21858,11 +22046,23 @@
       "stage": 3,
       "stageId": 6,
       "id": 32
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 1,
+      "id": 3
      }
     ],
     "boundary": "everyRow",
     "line": 7,
-    "filename": "/home/roger/pil2-stark-js/test/state_machines/sm_connection/connection.pil"
+    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_connection/connection.pil"
    }
   ]
  },
@@ -22215,6 +22415,18 @@
       "stage": 1,
       "stageId": 14,
       "id": 14
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 0,
+      "id": 0
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 1,
+      "id": 1
      }
     ]
    },
@@ -22793,6 +23005,18 @@
       "stage": 2,
       "stageId": 1,
       "id": 27
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 0,
+      "id": 0
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 1,
+      "id": 1
      }
     ]
    },
@@ -23133,16 +23357,40 @@
       "id": 14
      },
      {
+      "op": "tmp",
+      "stage": 2,
+      "stageId": 1,
+      "id": 27
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 0,
+      "id": 0
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 1,
+      "id": 1
+     },
+     {
       "op": "cm",
       "stage": 3,
       "stageId": 3,
       "id": 20
      },
      {
-      "op": "tmp",
-      "stage": 2,
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
       "stageId": 1,
-      "id": 27
+      "id": 3
      }
     ]
    },
@@ -23443,6 +23691,18 @@
       "stage": 2,
       "stageId": 1,
       "id": 16
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 1,
+      "id": 3
      }
     ]
    },
@@ -23698,6 +23958,24 @@
       "stage": 1,
       "stageId": 9,
       "id": 9
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 0,
+      "id": 0
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 1,
+      "id": 1
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
      }
     ]
    },
@@ -23953,6 +24231,24 @@
       "stage": 1,
       "stageId": 10,
       "id": 10
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 0,
+      "id": 0
+     },
+     {
+      "op": "challenge",
+      "stage": 2,
+      "stageId": 1,
+      "id": 1
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
      }
     ]
    },
@@ -24221,6 +24517,18 @@
       "op": "cm",
       "stage": 1,
       "stageId": 3,
+      "id": 3
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 1,
       "id": 3
      }
     ]
@@ -24528,6 +24836,18 @@
       "op": "cm",
       "stage": 1,
       "stageId": 3,
+      "id": 3
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 1,
       "id": 3
      }
     ]
@@ -24946,6 +25266,18 @@
       "stage": 3,
       "stageId": 5,
       "id": 31
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 1,
+      "id": 3
      }
     ]
    },
@@ -25410,6 +25742,18 @@
       "stage": 3,
       "stageId": 6,
       "id": 32
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 0,
+      "id": 2
+     },
+     {
+      "op": "challenge",
+      "stage": 3,
+      "stageId": 1,
+      "id": 3
      }
     ]
    },
@@ -25838,7 +26182,7 @@
    "name": "Q0",
    "prime": 0,
    "dim": 3,
-   "stage": "Q",
+   "stage": 4,
    "airId": 0,
    "subproofId": 0
   },
@@ -25848,7 +26192,7 @@
    "name": "Q1",
    "prime": 0,
    "dim": 3,
-   "stage": "Q",
+   "stage": 4,
    "airId": 0,
    "subproofId": 0
   }
@@ -25858,7 +26202,7 @@
   "cm1": 15,
   "cm2": 2,
   "cm3": 7,
-  "cmQ": 2,
+  "cm4": 2,
   "tmpExp": 7
  }
 }

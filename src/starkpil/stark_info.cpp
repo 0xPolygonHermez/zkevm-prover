@@ -114,7 +114,7 @@ void StarkInfo::load(json j)
     std::string ext = pil2 ? "_ext" : "_2ns";
 
     for(uint64_t i = 1; i <= nStages + 1; i++) {
-        string s = i == nStages + 1 && pil2 ? "Q" : to_string(i);
+        string s = to_string(i);
         string step = "cm" + s + "_n";
         string stepExt = "cm" + s + ext;
         
