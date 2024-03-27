@@ -1,11 +1,5 @@
 #include "executor.hpp"
 #include "utils.hpp"
-#include "main_sm/fork_1/main_exec_generated/main_exec_generated.hpp"
-#include "main_sm/fork_1/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_2/main_exec_generated/main_exec_generated.hpp"
-#include "main_sm/fork_2/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_3/main_exec_generated/main_exec_generated.hpp"
-#include "main_sm/fork_3/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_4/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_4/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated.hpp"
@@ -14,7 +8,9 @@
 #include "main_sm/fork_6/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_7/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_7/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_7/main_exec_c/main_exec_c.hpp"
+#include "main_sm/fork_8/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_8/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
 #ifdef __ZKEVM_SM__
@@ -213,13 +209,8 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 7: // fork_7
         {
-            if (config.useMainExecC) // Do not use in production; under development
-            {
-                //zklog.info("Executor::process_batch() fork 7 C");
-                mainExecutorC_fork_7.execute(proverRequest);
-            }
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            else if (config.useMainExecGenerated)
+            if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 7 generated");
                 fork_7::main_exec_generated_fast(mainExecutor_fork_7, proverRequest);
@@ -242,6 +233,43 @@ void Executor::process_batch (ProverRequest &proverRequest)
                 fork_7::MainExecRequired required;
 
                 mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
+        case 8: // fork_8
+        {
+            if (config.useMainExecC) // Do not use in production; under development
+            {
+                //zklog.info("Executor::process_batch() fork 8 C");
+                mainExecutorC_fork_8.execute(proverRequest);
+            }
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+            else if (config.useMainExecGenerated)
+            {
+                //zklog.info("Executor::process_batch() fork 8 generated");
+                fork_8::main_exec_generated_fast(mainExecutor_fork_8, proverRequest);
+            }
+            else
+#endif
+            {
+                //zklog.info("Executor::process_batch() fork 8 native");
+
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_8::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_8::CommitPols::pilSize()) + ")");
+                    exitProcess();
+                }
+                fork_8::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_8::MainExecRequired required;
+
+                mainExecutor_fork_8.execute(proverRequest, commitPols.Main, required);
 
                 // Free committed polynomials address space
                 free(pAddress);
@@ -442,12 +470,12 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
-                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_7, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_8, proverRequest, commitPols.Main, required);
             }
             else
 #endif
             {
-                mainExecutor_fork_7.execute(proverRequest, commitPols.Main, *required);
+                mainExecutor_fork_8.execute(proverRequest, commitPols.Main, *required);
             }
 
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -582,12 +610,12 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
         if (config.useMainExecGenerated)
         {
-            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_7, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_8, proverRequest, commitPols.Main, required);
         }
         else
 #endif
         {
-            mainExecutor_fork_7.execute(proverRequest, commitPols.Main, *required);
+            mainExecutor_fork_8.execute(proverRequest, commitPols.Main, *required);
         }
 
         // Save input to <timestamp>.input.json after execution including dbReadLog

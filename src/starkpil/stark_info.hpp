@@ -144,7 +144,6 @@ public:
     uint64_t index;
 };
 
-
 class VarPolMap
 {
 public:
