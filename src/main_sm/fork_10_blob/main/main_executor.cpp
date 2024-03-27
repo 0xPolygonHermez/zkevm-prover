@@ -4170,12 +4170,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
                 // A(x1) * B(y1) + C(x2) = op(y3) (mod D(y2))
-                mpz_class left = A*B + C;
-                mpz_class right = op % D;
+                mpz_class left = (A*B + C) % D;
+                mpz_class right = op;
                 if (left != right)
                 {
                     proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
-                    logError(ctx, "Arithmetic does not match: (A*B) + C = " + left.get_str(16) + ", op mod D = " + right.get_str(16));
+                    logError(ctx, "Arithmetic does not match: ((A*B) + C) % D = " + left.get_str(16) + ", op = " + right.get_str(16));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }

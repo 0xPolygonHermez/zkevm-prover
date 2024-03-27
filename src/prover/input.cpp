@@ -822,7 +822,7 @@ void Input::loadGlobals (json &input)
 
         // Parse type
         if ( input.contains("blobType") &&
-             input["blobType"].is_string() )
+             input["blobType"].is_number_unsigned() )
         {
             publicInputsExtended.publicInputs.type = input["blobType"];
         }
