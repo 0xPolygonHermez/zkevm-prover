@@ -101,6 +101,7 @@ public:
     uint64_t aggregatorClientMockTimeout;
     uint64_t aggregatorClientWatchdogTimeout;
     uint64_t aggregatorClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
+    uint64_t aggregatorClientMaxRecvMsgSize; // Max received message size, in bytes
 
     // Executor debugging
     bool executorROMLineTraces;
@@ -112,45 +113,81 @@ public:
     uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
     bool logExecutorServerResponses;
     bool logExecutorServerTxs;
-    bool dontLoadRomOffsets;
+    bool loadCollectionRom;
 
     // Files
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
     string configPath;
+    
     string zkevmCmPols; // Maps commit pols memory into file, which slows down a bit the executor
     string zkevmCmPolsAfterExecutor; // Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning
     string c12aCmPols;
     string recursive1CmPols;
+    string blobInnerCmPols;
+    string blobInnerCompressorCmPols;
+    string blobInnerRecursive1CmPols;
+    string blobOuterCmPols;
+    string blobOuterRecursive2CmPols;
+
     string zkevmConstPols;
     string c12aConstPols;
     string recursive1ConstPols;
     string recursive2ConstPols;
     string recursivefConstPols;
+    string blobInnerConstPols;
+    string blobInnerCompressorConstPols;
+    string blobInnerRecursive1ConstPols;
+    string blobOuterConstPols;
+    string blobOuterRecursive2ConstPols;
     bool mapConstPolsFile;
+
     string zkevmConstantsTree;
     string c12aConstantsTree;
     string recursive1ConstantsTree;
     string recursive2ConstantsTree;
     string recursivefConstantsTree;
+    string blobInnerConstantsTree;
+    string blobInnerCompressorConstantsTree;
+    string blobInnerRecursive1ConstantsTree;
+    string blobOuterConstantsTree;
+    string blobOuterRecursive2ConstantsTree;
     bool mapConstantsTreeFile;
-    string finalVerkey;
+    
     string zkevmVerifier;
     string recursive1Verifier;
     string recursive2Verifier;
     string recursivefVerifier;
+    string blobInnerVerifier;
+    string blobInnerRecursive1Verifier;
+    string blobOuterVerifier;
+    string blobOuterRecursive2Verifier;
+    string finalVerifier;
+
     string zkevmVerkey;
     string c12aVerkey;
     string recursive1Verkey;
     string recursive2Verkey;
     string recursivefVerkey;
-    string finalVerifier;
+    string blobInnerVerkey;
+    string blobInnerCompressorVerkey;
+    string blobInnerRecursive1Verkey;
+    string blobOuterVerkey;
+    string blobOuterRecursive2Verkey;
+    string finalVerkey;
+    
     string c12aExec;
     string recursive1Exec;
     string recursive2Exec;
+    string blobInnerCompressorExec;
+    string blobInnerRecursive1Exec;
+    string blobOuterExec;
+    string blobOuterRecursive2Exec;
     string recursivefExec;
+    
     string finalStarkZkey;
+    
     string publicsOutput;
     string proofFile;
     string keccakScriptFile;
@@ -160,11 +197,39 @@ public:
     string keccakConnectionsFile;
     string sha256ConnectionsFile;
     string storageRomFile;
+    
     string zkevmStarkInfo;
     string c12aStarkInfo;
     string recursive1StarkInfo;
     string recursive2StarkInfo;
     string recursivefStarkInfo;
+    string blobInnerStarkInfo;
+    string blobInnerCompressorStarkInfo;
+    string blobInnerRecursive1StarkInfo;
+    string blobOuterStarkInfo;
+    string blobOuterRecursive2StarkInfo;
+
+    string zkevmCHelpers;
+    string c12aCHelpers;
+    string recursive1CHelpers;
+    string recursive2CHelpers;
+    string recursivefCHelpers;
+    string blobInnerCHelpers;
+    string blobInnerCompressorCHelpers;
+    string blobInnerRecursive1CHelpers;
+    string blobOuterCHelpers;
+    string blobOuterRecursive2CHelpers;
+
+    string zkevmGenericCHelpers;
+    string c12aGenericCHelpers;
+    string recursive1GenericCHelpers;
+    string recursive2GenericCHelpers;
+    string recursivefGenericCHelpers;
+    string blobInnerGenericCHelpers;
+    string blobInnerCompressorGenericCHelpers;
+    string blobInnerRecursive1GenericCHelpers;
+    string blobOuterGenericCHelpers;
+    string blobOuterRecursive2GenericCHelpers;
 
     // Database
     string databaseURL;

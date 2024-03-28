@@ -301,12 +301,21 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "    MainCommitPols pols((void *)polsBuffer, 1);\n";
     }
     code += "    int32_t addrRel = 0; // Relative and absolute address auxiliary variables\n";
-    code += "    uint64_t addr = 0;\n";
+    if (forkID >= 9)
+        code += "    int32_t addr = 0;\n";
+    else
+        code += "    uint64_t addr = 0;\n";
+
     code += "    int32_t sp;\n";
     if (forkID < 8)
         code += "    int64_t i64Aux;\n";
     //code += "    int64_t incHashPos = 0;\n"; // TODO: Remove initialization to check it is initialized before being used
-    code += "    Rom &rom = mainExecutor.rom;\n";
+    
+    if (forkID >=9)
+        code += "    Rom &rom = config.loadCollectionRom ? mainExecutor.romCollection : mainExecutor.romBatch;\n";
+    else
+        code += "    Rom &rom = mainExecutor.rom;\n";
+
     code += "    Goldilocks &fr = mainExecutor.fr;\n";
     code += "    uint64_t flushId;\n";
     code += "    uint64_t lastSentFlushId;\n";
@@ -335,7 +344,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "        return;\n";
     code += "    }\n\n";
 
-    code += "    Context ctx(mainExecutor.fr, mainExecutor.config, mainExecutor.fec, mainExecutor.fnec, pols, mainExecutor.rom, proverRequest, mainExecutor.pHashDB);\n\n";
+    code += "    Context ctx(mainExecutor.fr, mainExecutor.config, mainExecutor.fec, mainExecutor.fnec, pols, rom, proverRequest, mainExecutor.pHashDB);\n\n";
 
     code += "    mainExecutor.initState(ctx);\n\n";
 
@@ -462,6 +471,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     if (forkID >= 8)
     {
     code += "    int64_t reserve;\n";
+    }
+    if (forkID >= 9)
+    {
+        code += "    uint64_t rid;\n";
+        code += "    Saved dataToRestore;\n";
+        code += "    map<uint64_t, Saved>::iterator itSaved;\n";
     }
 
     if (!bFastMode)
@@ -899,6 +914,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             opInitialized = true;
         }
 
+        if ((forkID >= 9) && rom["program"][zkPC].contains("inRCX") && (rom["program"][zkPC]["inRCX"]!=0))
+        {
+            code += selector1("RCX", rom["program"][zkPC]["inRCX"], opInitialized, bFastMode);
+            opInitialized = true;
+        }
+
         if (rom["program"][zkPC].contains("CONST") && (rom["program"][zkPC]["CONST"]!=0))
         {
             string aux = rom["program"][zkPC]["CONST"];
@@ -921,23 +942,24 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         bool bOnlyOffset = false;
 
         if ( (rom["program"][zkPC].contains("mOp") && (rom["program"][zkPC]["mOp"]==1)) ||
-             (rom["program"][zkPC].contains("mWR") && (rom["program"][zkPC]["mWR"]==1)) ||
-             (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"]==1)) ||
-             (rom["program"][zkPC].contains("hashK1") && (rom["program"][zkPC]["hashK1"]==1)) ||
-             (rom["program"][zkPC].contains("hashKLen") && (rom["program"][zkPC]["hashKLen"]==1)) ||
-             (rom["program"][zkPC].contains("hashKDigest") && (rom["program"][zkPC]["hashKDigest"]==1)) ||
-             (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"]==1)) ||
-             (rom["program"][zkPC].contains("hashP1") && (rom["program"][zkPC]["hashP1"]==1)) ||
-             (rom["program"][zkPC].contains("hashPLen") && (rom["program"][zkPC]["hashPLen"]==1)) ||
-             (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ||
-             (  (forkID >= 7) &&
-                (
-                    (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"]==1)) ||
-                    (rom["program"][zkPC].contains("hashS1") && (rom["program"][zkPC]["hashS1"]==1)) ||
-                    (rom["program"][zkPC].contains("hashSLen") && (rom["program"][zkPC]["hashSLen"]==1)) ||
-                    (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"]==1))
-                )
-             ) ||
+             ( (forkID <= 8) && (
+                (rom["program"][zkPC].contains("mWR") && (rom["program"][zkPC]["mWR"]==1)) ||
+                (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"]==1)) ||
+                (rom["program"][zkPC].contains("hashK1") && (rom["program"][zkPC]["hashK1"]==1)) ||
+                (rom["program"][zkPC].contains("hashKLen") && (rom["program"][zkPC]["hashKLen"]==1)) ||
+                (rom["program"][zkPC].contains("hashKDigest") && (rom["program"][zkPC]["hashKDigest"]==1)) ||
+                (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"]==1)) ||
+                (rom["program"][zkPC].contains("hashP1") && (rom["program"][zkPC]["hashP1"]==1)) ||
+                (rom["program"][zkPC].contains("hashPLen") && (rom["program"][zkPC]["hashPLen"]==1)) ||
+                (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ||
+                (  (forkID >= 7) &&
+                    (
+                        (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"]==1)) ||
+                        (rom["program"][zkPC].contains("hashS1") && (rom["program"][zkPC]["hashS1"]==1)) ||
+                        (rom["program"][zkPC].contains("hashSLen") && (rom["program"][zkPC]["hashSLen"]==1)) ||
+                        (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"]==1))
+                    )
+                ) ) )||
              (rom["program"][zkPC].contains("JMP") && (rom["program"][zkPC]["JMP"]==1)) ||
              (rom["program"][zkPC].contains("JMPN") && (rom["program"][zkPC]["JMPN"]==1)) ||
              (rom["program"][zkPC].contains("JMPC") && (rom["program"][zkPC]["JMPC"]==1)) ||
@@ -945,6 +967,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
              (rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"]==1)) )
         {
             bool bAddrRel = false;
+            bool bAddr = false;
             bool bOffset = false;
             code += "    // If address is involved, load offset into addr\n";
             if ( (rom["program"][zkPC].contains("ind") && (rom["program"][zkPC]["ind"]==1))  &&
@@ -953,9 +976,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 cerr << "Error: Both ind and indRR are set to 1" << endl;
                 exit(-1);
             }
-            if (rom["program"][zkPC].contains("ind") && (rom["program"][zkPC]["ind"]==1))
+            if (rom["program"][zkPC].contains("ind") && (rom["program"][zkPC]["ind"]!=0))
             {
-                code += "    if (!fr.toS32(addrRel, pols.E0[" + string(bFastMode?"0":"i") + "]))\n";
+                if ((rom["program"][zkPC]["ind"]==1))
+                    code += "    if (!fr.toS32(addrRel, pols.E0[" + string(bFastMode?"0":"i") + "]))\n";
+                else
+                    code += "    if (!fr.toS32(addrRel, fr.mul(rom.line[" + to_string(zkPC) + "].ind, pols.E0[" + string(bFastMode?"0":"i") + "])))\n";
                 code += "    {\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_TOS32;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
@@ -965,9 +991,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 code += "    }\n";
                 bAddrRel = true;
             }
-            if (rom["program"][zkPC].contains("indRR") && (rom["program"][zkPC]["indRR"]==1))
+            if (rom["program"][zkPC].contains("indRR") && (rom["program"][zkPC]["indRR"]!=0))
             {
-                code += "    if ( !fr.toS32(addrRel, pols.RR[" + string(bFastMode?"0":"i") + "]))\n";
+                if ((rom["program"][zkPC]["indRR"]==1))
+                    code += "    if ( !fr.toS32(addrRel, pols.RR[" + string(bFastMode?"0":"i") + "]))\n";
+                else
+                    code += "    if (!fr.toS32(addrRel, fr.mul(rom.line[" + to_string(zkPC) + "].indRR, pols.E0[" + string(bFastMode?"0":"i") + "])))\n";
                 code += "    {\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_TOS32;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
@@ -979,10 +1008,22 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             if (rom["program"][zkPC].contains("offset") && (rom["program"][zkPC]["offset"] != 0))
             {
-                if (bAddrRel)
-                    code += "    addrRel += " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+                if (forkID < 9)
+                {
+                    if (bAddrRel)
+                        code += "    addrRel += " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+                    else
+                        code += "    addrRel = " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+                    bAddrRel = true;
+                }
                 else
-                    code += "    addrRel = " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+                {
+                    if (bAddr)
+                        code += "    addr += " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+                    else
+                        code += "    addr = " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+                    bAddr = true;
+                }
                 bOffset = true;
             }
             if (rom["program"][zkPC].contains("isStack") && (rom["program"][zkPC]["isStack"]==1))
@@ -995,17 +1036,28 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
-                if (bAddrRel || bOffset)
-                    code += "    addrRel += sp;\n";
+                if (forkID < 9)
+                {
+                    if (bAddrRel || bOffset)
+                        code += "    addrRel += sp;\n";
+                    else
+                        code += "    addrRel = sp;\n";
+                    bAddrRel = true;
+                }
                 else
-                    code += "    addrRel = sp;\n";
-                bAddrRel = true;
+                {
+                    if (bAddr || bOffset)
+                        code += "    addr += sp;\n";
+                    else
+                        code += "    addr = sp;\n";
+                    bAddr = true;
+                }
             }
             if (bAddrRel)
             {
                 code += "    // If addrRel is possitive, and the sum is too big, fail\n";
 
-                if (forkNamespace == "fork_4")
+                if (forkID == 4)
                 {
 
                     code += "    if (proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum > 382000)\n";
@@ -1033,7 +1085,10 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 }
                 else
                 {
-                    code += "    if ( addrRel >= " + to_string( ( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) - 2048 ) + ")\n";
+                    if (forkID < 9)
+                        code += "    if ( addrRel >= " + to_string( ( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) - 2048 ) + ")\n";
+                    else
+                        code += "    if ( addrRel >= " + to_string( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) + ")\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
@@ -1057,7 +1112,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             else if (!bAddrRel && bOffset)
             {
-                if ((rom["program"][zkPC]["offset"] < 0) || (rom["program"][zkPC]["offset"] >= 0x10000))
+                if (/*(rom["program"][zkPC]["offset"] < 0) ||*/ (rom["program"][zkPC]["offset"] >= 0x10000))
                 {
                     cerr << "Error: invalid offset=" + to_string(rom["program"][zkPC]["offset"]) << endl;
                     exit(-1);
@@ -1145,6 +1200,46 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         /* FREE INPUT */
         /**************/
 
+        if (forkID >= 9)
+        {
+            code += "    rid = 0;\n";
+
+            if (rom["program"][zkPC].contains("restore") && (rom["program"][zkPC]["restore"] == 1))
+            {
+                code += "    rid = fr.toU64(pols.RID[" + string(bFastMode?"0":"i") + "]);\n";
+                if (!bFastMode)
+                {
+                    code += "    pols.restore[i] = fr.one();\n";
+                }
+
+                // Check if there is saved data with the current RID value
+                code += "    itSaved = ctx.saved.find(rid);\n";
+                code += "    if (itSaved == ctx.saved.end())\n";
+                code += "    {\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"restore could not find rid=\" + to_string(rid));\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+                code += "        return;\n";
+                code += "    }\n";
+
+                // Verify that saved data was not restored previously
+                code += "    if (itSaved->second.restored)\n";
+                code += "    {\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"restore found saved data was already restored rid=\" + to_string(rid));\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+                code += "        return;\n";
+                code += "    }\n";
+
+                code += "    itSaved->second.restored = true;\n";
+                code += "    itSaved->second.restoredZKPC = " + to_string(zkPC) + ";\n";
+                code += "    itSaved->second.restoredStep = i;\n";
+                code += "    dataToRestore = itSaved->second;\n";
+            }
+        }
+
         if (rom["program"][zkPC].contains("inFREE")
             || ( (forkID >= 7) && rom["program"][zkPC].contains("inFREE0") ) )
         {
@@ -1159,6 +1254,20 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                  (rom["program"][zkPC]["freeInTag"]["op"] == "") )
             {
                 uint64_t nHits = 0;
+                
+                // Restore fi from saved op
+                if ((forkID >= 9) && rom["program"][zkPC].contains("restore") && (rom["program"][zkPC]["restore"] == 1))
+                {
+                    code += "    fi0 = ctx.saved[rid].op[0];\n";
+                    code += "    fi1 = ctx.saved[rid].op[1];\n";
+                    code += "    fi2 = ctx.saved[rid].op[2];\n";
+                    code += "    fi3 = ctx.saved[rid].op[3];\n";
+                    code += "    fi4 = ctx.saved[rid].op[4];\n";
+                    code += "    fi5 = ctx.saved[rid].op[5];\n";
+                    code += "    fi6 = ctx.saved[rid].op[6];\n";
+                    code += "    fi7 = ctx.saved[rid].op[7];\n";
+                    nHits++;
+                }
 
                 // Memory read free in: get fi=mem[addr], if it exists
                 if ( (rom["program"][zkPC].contains("mOp") && (rom["program"][zkPC]["mOp"]==1)) &&
@@ -1780,6 +1889,15 @@ code += "    #endif\n";
                     nHits++;
                 }
 
+                if (forkID >= 10)
+                {
+                    // TODO: HashKLen free in
+                    if (rom["program"][zkPC].contains("hashKLen") && (rom["program"][zkPC]["hashKLen"] == 1)) 
+                    {
+                        nHits++;
+                    }
+                }
+
                 // HashP free in
                 if ( (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1)) ||
                      (rom["program"][zkPC].contains("hashP1") && (rom["program"][zkPC]["hashP1"] == 1)) )
@@ -1872,6 +1990,15 @@ code += "    #endif\n";
                     code += "    // Copy digest into fi\n";
                     code += "    scalar2fea(fr, hashIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
                     nHits++;
+                }
+
+                if (forkID >= 10)
+                {
+                    // TODO: HashPLen free in
+                    if (rom["program"][zkPC].contains("hashPLen") && (rom["program"][zkPC]["hashPLen"] == 1)) 
+                    {
+                        nHits++;
+                    }
                 }
 
                 if (forkID >= 7)
@@ -1983,6 +2110,16 @@ code += "    #endif\n";
                 }
 
                 }
+
+                if (forkID >= 10)
+                {
+                    // TODO: HashSLen free in
+                    if (rom["program"][zkPC].contains("hashSLen") && (rom["program"][zkPC]["hashSLen"] == 1)) 
+                    {
+                        nHits++;
+                    }
+                }
+
 
                 // Binary free in
                 if (rom["program"][zkPC].contains("bin") && (rom["program"][zkPC]["bin"] == 1))
@@ -6498,7 +6635,7 @@ string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, c
         }
         code += "\n";
     }
-    else if ((forkID >= 7) && rom["labels"].contains("verifyMerkleProofEnd") && (zkPC == rom["labels"]["verifyMerkleProofEnd"]) && (reg=="C"))
+    else if ((forkID >= 7) && (forkID <=8) && rom["labels"].contains("verifyMerkleProofEnd") && (zkPC == rom["labels"]["verifyMerkleProofEnd"]) && (reg=="C"))
     {
         code += "    if (proverRequest.input.bSkipVerifyL1InfoRoot)\n";
         code += "    {\n";

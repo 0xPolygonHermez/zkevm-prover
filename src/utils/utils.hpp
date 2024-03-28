@@ -105,4 +105,6 @@ extern string emptyString;
 // Calculates the Poseidon linear hash of a buffer
 void poseidonLinearHash (const vector<uint8_t> &_data, Goldilocks::Element (&result)[4]);
 
+void debug1 (void);
+
 #endif

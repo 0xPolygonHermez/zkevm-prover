@@ -13,7 +13,7 @@ int main()
     config.zkevmConstantsTree = "config/zkevm/zkevm.consttree";
     config.zkevmStarkInfo = "config/zkevm/zkevm.starkinfo.json";
 
-    StarkInfo starkInfo(config, config.zkevmStarkInfo);
+    StarkInfo starkInfo(config.zkevmStarkInfo);
 
 
     uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;

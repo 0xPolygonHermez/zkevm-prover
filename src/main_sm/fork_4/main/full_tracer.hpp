@@ -152,6 +152,9 @@ public:
     {
         return false;
     }
+
+    FinalTraceBlob emptyTraceBlob;
+    FinalTraceBlob & get_final_trace_blob(void) { return emptyTraceBlob; };
 };
                          
 } // namespace

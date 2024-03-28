@@ -25,6 +25,8 @@ namespace v1 {
 static const char* ExecutorService_method_names[] = {
   "/executor.v1.ExecutorService/ProcessBatch",
   "/executor.v1.ExecutorService/ProcessBatchV2",
+  "/executor.v1.ExecutorService/ProcessBatchV3",
+  "/executor.v1.ExecutorService/ProcessBlobInnerV3",
   "/executor.v1.ExecutorService/ProcessStatelessBatchV2",
   "/executor.v1.ExecutorService/GetFlushStatus",
 };
@@ -38,8 +40,10 @@ std::unique_ptr< ExecutorService::Stub> ExecutorService::NewStub(const std::shar
 ExecutorService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
   : channel_(channel), rpcmethod_ProcessBatch_(ExecutorService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ProcessBatchV2_(ExecutorService_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ProcessStatelessBatchV2_(ExecutorService_method_names[2], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetFlushStatus_(ExecutorService_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ProcessBatchV3_(ExecutorService_method_names[2], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ProcessBlobInnerV3_(ExecutorService_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ProcessStatelessBatchV2_(ExecutorService_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetFlushStatus_(ExecutorService_method_names[5], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status ExecutorService::Stub::ProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest& request, ::executor::v1::ProcessBatchResponse* response) {
@@ -96,6 +100,62 @@ void ExecutorService::Stub::experimental_async::ProcessBatchV2(::grpc::ClientCon
 
 ::grpc::ClientAsyncResponseReader< ::executor::v1::ProcessBatchResponseV2>* ExecutorService::Stub::PrepareAsyncProcessBatchV2Raw(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequestV2& request, ::grpc::CompletionQueue* cq) {
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::executor::v1::ProcessBatchResponseV2>::Create(channel_.get(), cq, rpcmethod_ProcessBatchV2_, context, request, false);
+}
+
+::grpc::Status ExecutorService::Stub::ProcessBatchV3(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequestV3& request, ::executor::v1::ProcessBatchResponseV3* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_ProcessBatchV3_, context, request, response);
+}
+
+void ExecutorService::Stub::experimental_async::ProcessBatchV3(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequestV3* request, ::executor::v1::ProcessBatchResponseV3* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ProcessBatchV3_, context, request, response, std::move(f));
+}
+
+void ExecutorService::Stub::experimental_async::ProcessBatchV3(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBatchResponseV3* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ProcessBatchV3_, context, request, response, std::move(f));
+}
+
+void ExecutorService::Stub::experimental_async::ProcessBatchV3(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequestV3* request, ::executor::v1::ProcessBatchResponseV3* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ProcessBatchV3_, context, request, response, reactor);
+}
+
+void ExecutorService::Stub::experimental_async::ProcessBatchV3(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBatchResponseV3* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ProcessBatchV3_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::executor::v1::ProcessBatchResponseV3>* ExecutorService::Stub::AsyncProcessBatchV3Raw(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequestV3& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::executor::v1::ProcessBatchResponseV3>::Create(channel_.get(), cq, rpcmethod_ProcessBatchV3_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::executor::v1::ProcessBatchResponseV3>* ExecutorService::Stub::PrepareAsyncProcessBatchV3Raw(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequestV3& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::executor::v1::ProcessBatchResponseV3>::Create(channel_.get(), cq, rpcmethod_ProcessBatchV3_, context, request, false);
+}
+
+::grpc::Status ExecutorService::Stub::ProcessBlobInnerV3(::grpc::ClientContext* context, const ::executor::v1::ProcessBlobInnerRequestV3& request, ::executor::v1::ProcessBlobInnerResponseV3* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_ProcessBlobInnerV3_, context, request, response);
+}
+
+void ExecutorService::Stub::experimental_async::ProcessBlobInnerV3(::grpc::ClientContext* context, const ::executor::v1::ProcessBlobInnerRequestV3* request, ::executor::v1::ProcessBlobInnerResponseV3* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ProcessBlobInnerV3_, context, request, response, std::move(f));
+}
+
+void ExecutorService::Stub::experimental_async::ProcessBlobInnerV3(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBlobInnerResponseV3* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ProcessBlobInnerV3_, context, request, response, std::move(f));
+}
+
+void ExecutorService::Stub::experimental_async::ProcessBlobInnerV3(::grpc::ClientContext* context, const ::executor::v1::ProcessBlobInnerRequestV3* request, ::executor::v1::ProcessBlobInnerResponseV3* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ProcessBlobInnerV3_, context, request, response, reactor);
+}
+
+void ExecutorService::Stub::experimental_async::ProcessBlobInnerV3(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBlobInnerResponseV3* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ProcessBlobInnerV3_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::executor::v1::ProcessBlobInnerResponseV3>* ExecutorService::Stub::AsyncProcessBlobInnerV3Raw(::grpc::ClientContext* context, const ::executor::v1::ProcessBlobInnerRequestV3& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::executor::v1::ProcessBlobInnerResponseV3>::Create(channel_.get(), cq, rpcmethod_ProcessBlobInnerV3_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::executor::v1::ProcessBlobInnerResponseV3>* ExecutorService::Stub::PrepareAsyncProcessBlobInnerV3Raw(::grpc::ClientContext* context, const ::executor::v1::ProcessBlobInnerRequestV3& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::executor::v1::ProcessBlobInnerResponseV3>::Create(channel_.get(), cq, rpcmethod_ProcessBlobInnerV3_, context, request, false);
 }
 
 ::grpc::Status ExecutorService::Stub::ProcessStatelessBatchV2(::grpc::ClientContext* context, const ::executor::v1::ProcessStatelessBatchRequestV2& request, ::executor::v1::ProcessBatchResponseV2* response) {
@@ -178,6 +238,26 @@ ExecutorService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       ExecutorService_method_names[2],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< ExecutorService::Service, ::executor::v1::ProcessBatchRequestV3, ::executor::v1::ProcessBatchResponseV3>(
+          [](ExecutorService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::executor::v1::ProcessBatchRequestV3* req,
+             ::executor::v1::ProcessBatchResponseV3* resp) {
+               return service->ProcessBatchV3(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      ExecutorService_method_names[3],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< ExecutorService::Service, ::executor::v1::ProcessBlobInnerRequestV3, ::executor::v1::ProcessBlobInnerResponseV3>(
+          [](ExecutorService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::executor::v1::ProcessBlobInnerRequestV3* req,
+             ::executor::v1::ProcessBlobInnerResponseV3* resp) {
+               return service->ProcessBlobInnerV3(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      ExecutorService_method_names[4],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< ExecutorService::Service, ::executor::v1::ProcessStatelessBatchRequestV2, ::executor::v1::ProcessBatchResponseV2>(
           [](ExecutorService::Service* service,
              ::grpc_impl::ServerContext* ctx,
@@ -186,7 +266,7 @@ ExecutorService::Service::Service() {
                return service->ProcessStatelessBatchV2(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      ExecutorService_method_names[3],
+      ExecutorService_method_names[5],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< ExecutorService::Service, ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>(
           [](ExecutorService::Service* service,
@@ -208,6 +288,20 @@ ExecutorService::Service::~Service() {
 }
 
 ::grpc::Status ExecutorService::Service::ProcessBatchV2(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequestV2* request, ::executor::v1::ProcessBatchResponseV2* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ExecutorService::Service::ProcessBatchV3(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequestV3* request, ::executor::v1::ProcessBatchResponseV3* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ExecutorService::Service::ProcessBlobInnerV3(::grpc::ServerContext* context, const ::executor::v1::ProcessBlobInnerRequestV3* request, ::executor::v1::ProcessBlobInnerResponseV3* response) {
   (void) context;
   (void) request;
   (void) response;

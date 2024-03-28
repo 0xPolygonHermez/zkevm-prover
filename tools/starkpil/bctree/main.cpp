@@ -5,13 +5,6 @@
 
 using namespace std;
 
-bool fileExists (const string &fileName)
-{
-    struct stat fileStat;
-    int iResult = stat( fileName.c_str(), &fileStat);
-    return (iResult == 0);
-}
-
 class ArgumentParser {
 private:
     vector <string> arguments;
@@ -55,7 +48,7 @@ void showVersion()
 int main(int argc, char **argv)
 {
     string constFile = "";
-    string starkStructFile = "";
+    string starkInfoFile = "";
     string constTreeFile = "";
     string verKeyFile = "";
 
@@ -68,9 +61,9 @@ int main(int argc, char **argv)
             if (!fileExists(constFile)) throw runtime_error("bctree: constants file doesn't exist ("+constFile+")");
         } else throw runtime_error("bctree: constants input file argument not specified <-c/--const> <const_file>");
         if (aParser.argumentExists("-s","--stark")) {
-            starkStructFile = aParser.getArgumentValue("-s", "--stark");
-            if (!fileExists(starkStructFile)) throw runtime_error("bctree: starkstruct file doesn't exist ("+starkStructFile+")");
-        } else throw runtime_error("bctree: starkstruct input file argument not specified <-s/--stark> <starkstruct_file>");
+            starkInfoFile = aParser.getArgumentValue("-s", "--stark");
+            if (!fileExists(starkInfoFile)) throw runtime_error("bctree: starkinfo file doesn't exist ("+starkInfoFile+")");
+        } else throw runtime_error("bctree: starkinfo input file argument not specified <-s/--stark> <starkinfo_file>");
 
         //Output arguments
         if (aParser.argumentExists("-t","--tree")) {
@@ -84,14 +77,14 @@ int main(int argc, char **argv)
 
         showVersion();
 
-        buildConstTree(constFile, starkStructFile, constTreeFile, verKeyFile);
+        buildConstTree(constFile, starkInfoFile, constTreeFile, verKeyFile);
         
         return EXIT_SUCCESS;
     } catch (const exception &e) {
         cerr << e.what() << endl;
         showVersion();
-        cerr << "usage: bctree <-c|--const> <const_file> <-s|--stark> <starkstruct_file> <-t|--tree> <consttree_file> [<-v|--verkey> <verkey_file>]" << endl;
-        cerr << "example: bctree -c zkevm.const -s zkevm.starkstruct.json -t zkevm.consttree -v zkevm.verkey" << endl;
+        cerr << "usage: bctree <-c|--const> <const_file> <-s|--stark> <starkinfo_file> <-t|--tree> <consttree_file> [<-v|--verkey> <verkey_file>]" << endl;
+        cerr << "example: bctree -c zkevm.const -s zkevm.starkinfo.json -t zkevm.consttree -v zkevm.verkey" << endl;
         return EXIT_FAILURE;        
     }    
 }

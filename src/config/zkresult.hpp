@@ -113,6 +113,9 @@ typedef enum : int
     
     ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR = 99, // Invalid TX status-error combination
 
+    ZKR_SM_MAIN_POINT_Z_MISMATCH = 100, // Point Z was calculated and different from the one provided as an input via JSON
+    ZKR_SM_MAIN_BLOB_L2_HASH_DATA_MISMATCH = 101, // Blob L1 data hash was calculated and different from the one provided as an input via JSON
+
 } zkresult;
 
 string zkresult2string (int code);

@@ -326,6 +326,18 @@ int RawFr::fromRprBE(Element &element, const uint8_t *data, int bytes)
     return Fr_N64 * 8;
 }
 
+int RawFr::fromRprLE(Element &element, const uint8_t *data, int bytes) {
+    if (bytes < Fr_N64 * 8) {
+        return -(Fr_N64 * 8);
+    }
+    mpz_t r;
+    mpz_init(r);
+    mpz_import(r, bytes, -1, 1, -1, 0, data);  // Change the order parameter to 1 for little-endian
+    fromMpz(element, r);
+    mpz_clear(r);
+    return Fr_N64 * 8;
+}
+
 static bool init = Fr_init();
 
 RawFr RawFr::field;

@@ -1,10 +1,10 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
-#define PROVER_FORK_ID 8
-#define PROVER_FORK_NAMESPACE fork_8
-#define PROVER_FORK_NAMESPACE_STRING "fork_8"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_8
+#define PROVER_FORK_ID 10
+#define PROVER_FORK_NAMESPACE fork_10
+#define PROVER_FORK_NAMESPACE_STRING "fork_10"
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_10
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
@@ -73,22 +73,10 @@
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
 #define USE_NEW_KVTREE
 
-#define MAIN_SM_EXECUTOR_GENERATED_CODE
+//#define MAIN_SM_EXECUTOR_GENERATED_CODE
 
 //#define MULTI_ROM_TEST
 
-#define USE_CHELPERS_PARSER
-
-/* chelpers defines */
-#ifdef USE_CHELPERS_PARSER
-    #ifndef __AVX512__
-        #define NROWS_STEPS_ 4
-    #else
-        #define NROWS_STEPS_ 8
-    #endif
-#else
-#define NROWS_STEPS_ 1
-#endif
-
+#define USE_GENERIC_PARSER false
 
 #endif

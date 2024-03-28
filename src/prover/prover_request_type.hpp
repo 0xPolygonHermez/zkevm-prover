@@ -8,11 +8,25 @@ using namespace std;
 typedef enum
 {
     prt_none = 0,
-    prt_genBatchProof = 1,
-    prt_genAggregatedProof = 2,
-    prt_genFinalProof = 3,
-    prt_processBatch = 4,
-    prt_execute = 5
+
+    // Executor service
+    prt_processBatch = 1,
+    prt_executeBatch = 2,
+    prt_processBlobInner = 3,
+    prt_executeBlobInner = 4,
+
+    // Aggregator client --> batch
+    prt_genBatchProof = 5,
+    prt_genAggregatedBatchProof = 6,
+
+    // Aggregator client --> blob inner
+    prt_genBlobInnerProof = 7,
+
+    // Aggregator client --> blob outer and final
+    prt_genBlobOuterProof = 8,
+    prt_genAggregatedBlobOuterProof = 9,
+    prt_genFinalProof = 10
+
 } tProverRequestType;
 
 string proverRequestType2string (tProverRequestType type);

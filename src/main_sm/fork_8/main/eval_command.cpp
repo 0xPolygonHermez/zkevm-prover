@@ -2516,6 +2516,7 @@ zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value)
     return ((fork_8::FullTracer *)ctx.proverRequest.pFullTracer)->addReadWriteAddress(
         ctx.pols.A0[0], ctx.pols.A1[0], ctx.pols.A2[0], ctx.pols.A3[0], ctx.pols.A4[0], ctx.pols.A5[0], ctx.pols.A6[0], ctx.pols.A7[0],
         ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0],
+        ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0],
         value);
 }
 

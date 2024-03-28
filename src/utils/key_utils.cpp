@@ -50,14 +50,14 @@ void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&r
 }
 
 // Get 64 key bits, in sets of 6 bits
-void splitKey6 (Goldilocks &fr, const uint64_t key, uint8_t (&_result)[11])
+void splitKey6 (Goldilocks &fr, const uint64_t key, uint8_t (&result)[11])
 {
     uint64_t bits = key;
-    _result[10] = (uint8_t)(bits & 0x0F);
-    bits >>= 4;
-    for (int i = 9; i >= 0; i--) {
-        _result[i] = (uint8_t)(bits & 0x3F);
+    result[0] = (uint8_t)(bits & U64Mask6);
+    for (uint64_t i = 1; i <11; i++)
+    {
         bits >>= 6;
+        result[i] = (uint8_t)(bits & U64Mask6);
     }
 }
 

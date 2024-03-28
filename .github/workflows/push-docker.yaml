@@ -2,7 +2,7 @@ name: Build docker image and run node tests
 
 on:
   push:
-    branches: [ develop, main, fork_8 ]
+    branches: [ develop, main, fork_9 ]
 
 jobs:
   build-docker:

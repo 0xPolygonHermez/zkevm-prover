@@ -22,6 +22,7 @@ extern mpz_class ScalarMask32;
 extern mpz_class ScalarMask64;
 extern mpz_class ScalarMask160;
 extern mpz_class ScalarMask256;
+extern mpz_class ScalarMask512;
 extern mpz_class ScalarTwoTo8;
 extern mpz_class ScalarTwoTo16;
 extern mpz_class ScalarTwoTo18;

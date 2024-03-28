@@ -7,6 +7,7 @@
 #include "ffiasm/fnec.hpp"
 #include "ffiasm/fr.hpp"
 #include "ffiasm/fq.hpp"
+#include "ffiasm/bls12_381.hpp"
 #include "config.hpp"
 
 extern Goldilocks fr;
@@ -15,6 +16,7 @@ extern RawFec fec;
 extern RawFnec fnec;
 extern RawFr bn128;
 extern RawFq fq;
+extern RawBLS12_381 bls12_381;
 extern Config config;
 
 #endif

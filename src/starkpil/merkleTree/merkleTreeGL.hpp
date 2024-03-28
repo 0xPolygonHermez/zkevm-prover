@@ -4,6 +4,7 @@
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
 #include <math.h>
+#include "zkassert.hpp"
 
 #define MERKLEHASHGL_ARITY 2
 class MerkleTreeGL
@@ -36,9 +37,17 @@ public:
         if (source == NULL)
         {
             source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
+            if(source == NULL){
+                std::cout << "MerkleTreeGL: malloc failed" << std::endl;
+                exitProcess();
+            }   
             isSourceAllocated = true;
         }
         nodes = (Goldilocks::Element *)calloc(getTreeNumElements(), sizeof(Goldilocks::Element));
+        if(nodes == NULL){
+            std::cout << "MerkleTreeGL: malloc failed" << std::endl;
+            exitProcess();
+        }
         isNodesAllocated = true;
     };
     ~MerkleTreeGL()

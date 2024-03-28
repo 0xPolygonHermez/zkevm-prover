@@ -24,11 +24,11 @@ rm config/scripts/metadata-rom.txt
 #Uncomment the following line if you want to generate source code the first time after the release files generation
 
 #Copy the chelpers files
-cp ${C_FILES}/zkevm.chelpers/*.step* ./src/starkpil/zkevm/chelpers/
-cp ${C_FILES}/c12a.chelpers/*.step* ./src/starkpil/starkC12a/chelpers/
-cp ${C_FILES}/recursive1.chelpers/*.step* ./src/starkpil/starkRecursive1/chelpers/
-cp ${C_FILES}/recursive2.chelpers/*.step* ./src/starkpil/starkRecursive2/chelpers/
-cp ${C_FILES}/recursivef.chelpers/*.step* ./src/starkpil/starkRecursiveF/chelpers/
+cp ${C_FILES}/zkevm.chelpers/ZkevmSteps.hpp ./src/starkpil/zkevm/chelpers/ZkevmSteps.hpp
+cp ${C_FILES}/c12a.chelpers/C12aSteps.hpp ./src/starkpil/starkC12a/chelpers/C12aSteps.hpp
+cp ${C_FILES}/recursive1.chelpers/Recursive1Steps.hpp ./src/starkpil/starkRecursive1/chelpers/Recursive1Steps.hpp
+cp ${C_FILES}/recursive2.chelpers/Recursive2Steps.hpp ./src/starkpil/starkRecursive2/chelpers/Recursive2Steps.hpp
+cp ${C_FILES}/recursivef.chelpers/RecursiveFSteps.hpp ./src/starkpil/starkRecursiveF/chelpers/RecursiveFSteps.hpp
 
 # Generate the zkevm.verifier.cpp
 cp ${C_FILES}/zkevm.verifier_cpp/zkevm.verifier.cpp ${ZKEVM_VERIFIER_CPP}

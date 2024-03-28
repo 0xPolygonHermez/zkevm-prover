@@ -6,9 +6,7 @@
 #include <cstring>
 #include "goldilocks_base_field.hpp"
 
-#define TRANSCRIPT_STATE_SIZE 4
-#define TRANSCRIPT_PENDING_SIZE 8
-#define TRANSCRIPT_OUT_SIZE 12
+#define TRANSCRIPT_BN128_ARITY 16
 
 // TODO: Pending to review and re-factor
 class TranscriptBN128
