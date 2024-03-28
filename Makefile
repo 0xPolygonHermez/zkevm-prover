@@ -67,15 +67,17 @@ SRCS_BCT := ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o) $(PROTO_OBJS)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
-LIBS_TEST := -lgmp -luuid -lcrypto
+LDFLAGS_TEST := -rdynamic -lgmp -luuid -lcrypto -ldl
 OBJS_TEST := ./build/./test/examples/main.cpp.o ./build/./src/goldilocks/src/ntt_goldilocks.cpp.o ./build/./src/goldilocks/src/poseidon_goldilocks.cpp.o ./build/./src/goldilocks/src/goldilocks_cubic_extension.cpp.o ./build/./src/goldilocks/src/goldilocks_base_field.cpp.o ./build/./src/starkpil/stark_info.cpp.o ./build/./src/starkpil/starks.cpp.o ./build/./src/starkpil/chelpers.cpp.o ./build/./src/rapidsnark/binfile_utils.cpp.o ./build/./src/starkpil/merkleTree/merkleTreeGL.cpp.o ./build/./src/starkpil/transcript/transcript.cpp.o ./build/./src/starkpil/fri/friProve.cpp.o ./build/./src/starkpil/fri/proof2zkinStark.cpp.o ./build/./src/ffiasm/fnec.asm.o ./build/./src/ffiasm/fq.asm.o ./build/./src/ffiasm/fq.cpp.o ./build/./src/ffiasm/splitparstr.cpp.o ./build/./src/ffiasm/fec.asm.o ./build/./src/ffiasm/fnec.cpp.o ./build/./src/ffiasm/fr.asm.o ./build/./src/ffiasm/fec.cpp.o ./build/./src/ffiasm/fr.cpp.o ./build/./src/utils/exit_process.cpp.o ./build/./src/utils/timer.cpp.o ./build/./src/utils/zklog.cpp.o ./build/./src/utils/utils.cpp.o
-DEPS_TEST := $(OBJS_TEST:.o=.d)
+DEPS_TEST := $(OBJS_TEST:.o=.d) ./build/dynamic_chelpers.d
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
 
-test: $(BUILD_DIR)/$(TARGET_TEST)
+test: $(BUILD_DIR)/$(TARGET_TEST) $(BUILD_DIR)/dynamic_chelpers.so
+
+.PHONY: all bctree test
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
 	$(CXX) $(OBJS_ZKP) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
@@ -84,7 +86,10 @@ $(BUILD_DIR)/$(TARGET_BCT): $(OBJS_BCT)
 	$(CXX) $(OBJS_BCT) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 $(BUILD_DIR)/$(TARGET_TEST): $(OBJS_TEST)
-	$(CXX) $(OBJS_TEST) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LIBS_TEST)
+	$(CXX) $(OBJS_TEST) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS_TEST)
+
+$(BUILD_DIR)/dynamic_chelpers.so: ./test/examples/dynamic_chelpers.cpp
+	$(CXX) -shared -fPIC -o $@ $< $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 
 # protobuf
 $(BUILD_DIR)/gen/%.pb.cc $(BUILD_DIR)/gen/%.pb.h $(BUILD_DIR)/gen/%.grpc.pb.cc $(BUILD_DIR)/gen/%.grpc.pb.h &: %.proto
