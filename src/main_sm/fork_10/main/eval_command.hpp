@@ -126,7 +126,7 @@ void eval_memAlignRD          (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_getL1InfoRoot               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1InfoGER                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1InfoBlockHash          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getL1InfoTimestamp          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getL1InfoMinTimestamp       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTimestampLimit           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getForcedBlockHashL1        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getSmtProof                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -154,6 +154,11 @@ void eval_getType                     (Context &ctx, const RomCommand &cmd, Comm
 void eval_getForcedGER                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1HistoricRoot           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getPendingRID               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getForcedHashData           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_signedComparison            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_signedComparisonWithConst   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getFirstDiffChunkRem        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getSmtProofPreviousIndex    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);

@@ -76,7 +76,7 @@ tFunction string2Function(string s)
     else if (s == "getL1InfoRoot")                  return f_getL1InfoRoot;
     else if (s == "getL1InfoGER")                   return f_getL1InfoGER;
     else if (s == "getL1InfoBlockHash")             return f_getL1InfoBlockHash;
-    else if (s == "getL1InfoTimestamp")             return f_getL1InfoTimestamp;
+    else if (s == "getL1InfoMinTimestamp")          return f_getL1InfoMinTimestamp;
     else if (s == "getTimestampLimit")              return f_getTimestampLimit;
     else if (s == "getForcedBlockHashL1")           return f_getForcedBlockHashL1;
     else if (s == "getSmtProof")                    return f_getSmtProof;
@@ -103,6 +103,11 @@ tFunction string2Function(string s)
     else if (s == "getForcedTimestamp")             return f_getForcedTimestamp;
     else if (s == "getL1HistoricRoot")              return f_getL1HistoricRoot;
     else if (s == "getPendingRID")                  return f_getPendingRID;
+    else if (s == "getForcedHashData")              return f_getForcedHashData;
+    else if (s == "signedComparison")               return f_signedComparison;
+    else if (s == "signedComparisonWithConst")      return f_signedComparisonWithConst;
+    else if (s == "getFirstDiffChunkRem")           return f_getFirstDiffChunkRem;
+    else if (s == "getSmtProofPreviousIndex")       return f_getSmtProofPreviousIndex;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -150,7 +155,7 @@ string function2String(tFunction f)
         case f_getL1InfoRoot:                   return "getL1InfoRoot";
         case f_getL1InfoGER:                    return "getL1InfoGER";
         case f_getL1InfoBlockHash:              return "getL1InfoBlockHash";
-        case f_getL1InfoTimestamp:              return "getL1InfoTimestamp";
+        case f_getL1InfoMinTimestamp:           return "getL1InfoMinTimestamp";
         case f_getTimestampLimit:               return "getTimestampLimit";
         case f_getForcedBlockHashL1:            return "getForcedBlockHashL1";
         case f_getSmtProof:                     return "getSmtProof";
@@ -177,6 +182,11 @@ string function2String(tFunction f)
         case f_getForcedTimestamp:              return "getForcedTimestamp";
         case f_getL1HistoricRoot:               return "getL1HistoricRoot";
         case f_getPendingRID:                   return "getPendingRID";
+        case f_getForcedHashData:               return "getForcedHashData";
+        case f_signedComparison:                return "signedComparison";
+        case f_signedComparisonWithConst:       return "signedComparisonWithConst";
+        case f_getFirstDiffChunkRem:            return "getFirstDiffChunkRem";
+        case f_getSmtProofPreviousIndex:        return "getSmtProofPreviousIndex";
         case f_empty:                           return "";
         default:                                return "unknown";
     }
