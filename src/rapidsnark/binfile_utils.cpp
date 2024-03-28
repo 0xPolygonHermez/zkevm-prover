@@ -226,6 +226,34 @@ namespace BinFileUtils
         return res;
     }
 
+    std::string BinFile::readString()
+    {
+        uint8_t *startOfString = (uint8_t *)((u_int64_t)addr + pos);
+        uint8_t *endOfString = startOfString;
+        uint8_t *endOfSection = (uint8_t *)((uint64_t)readingSection->start + readingSection->size);
+
+        uint8_t *i;
+        for (i = endOfString; i != endOfSection; i++)
+        {
+            if (*i == 0)
+            {
+                endOfString = i;
+                break;
+            }
+        }
+
+        if (i == endOfSection)
+        {
+            endOfString = i - 1;
+        }
+
+        uint32_t len = endOfString - startOfString;
+        std::string str = std::string((const char *)startOfString, len);
+        pos += len + 1;
+
+        return str;
+    }
+
     std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion)
     {
         return std::unique_ptr<BinFile>(new BinFile(filename, type, maxVersion));

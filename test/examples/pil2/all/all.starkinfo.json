@@ -427,270 +427,145 @@
  "hints": [
   {
    "name": "h1h2",
-   "f": {
-    "op": "cm",
-    "stage": 3,
-    "stageId": 3,
-    "id": 20
-   },
-   "t": {
-    "op": "tmp",
-    "stage": 2,
-    "stageId": 1,
-    "id": 27
-   },
-   "dest": [
-    {
-     "op": "cm",
-     "stage": 2,
-     "id": 15,
-     "stageId": 0
-    },
-    {
-     "op": "cm",
-     "stage": 2,
-     "id": 16,
-     "stageId": 1
-    }
-   ],
    "fields": [
-    "f",
-    "t"
-   ],
-   "symbols": [
     {
-     "op": "tmp",
-     "stage": 2,
-     "stageId": 1,
-     "id": 27
+     "name": "referenceH1",
+     "op": "cm",
+     "id": 15
     },
     {
+     "name": "referenceH2",
      "op": "cm",
-     "stage": 3,
-     "stageId": 3,
+     "id": 16
+    },
+    {
+     "name": "f",
+     "op": "cm",
      "id": 20
-    }
-   ]
-  },
-  {
-   "name": "gprod",
-   "numerator": {
-    "op": "cm",
-    "stage": 3,
-    "stageId": 4,
-    "id": 21
-   },
-   "denominator": {
-    "op": "tmp",
-    "stage": 3,
-    "stageId": 2,
-    "id": 28
-   },
-   "dest": [
-    {
-     "op": "cm",
-     "stage": 3,
-     "id": 17,
-     "stageId": 0
-    }
-   ],
-   "fields": [
-    "numerator",
-    "denominator"
-   ],
-   "symbols": [
-    {
-     "op": "tmp",
-     "stage": 3,
-     "stageId": 2,
-     "id": 28
     },
     {
-     "op": "cm",
-     "stage": 3,
-     "stageId": 4,
-     "id": 21
+     "name": "t",
+     "op": "tmp",
+     "id": 27
     }
    ]
   },
   {
    "name": "gprod",
-   "numerator": {
-    "op": "tmp",
-    "stage": 3,
-    "stageId": 3,
-    "id": 29
-   },
-   "denominator": {
-    "op": "tmp",
-    "stage": 3,
-    "stageId": 4,
-    "id": 30
-   },
-   "dest": [
-    {
-     "op": "cm",
-     "stage": 3,
-     "id": 18,
-     "stageId": 2
-    }
-   ],
    "fields": [
-    "numerator",
-    "denominator"
-   ],
-   "symbols": [
     {
+     "name": "reference",
+     "op": "cm",
+     "id": 17
+    },
+    {
+     "name": "numerator",
+     "op": "cm",
+     "id": 21
+    },
+    {
+     "name": "denominator",
      "op": "tmp",
-     "stage": 3,
-     "stageId": 3,
+     "id": 28
+    }
+   ]
+  },
+  {
+   "name": "gprod",
+   "fields": [
+    {
+     "name": "reference",
+     "op": "cm",
+     "id": 18
+    },
+    {
+     "name": "numerator",
+     "op": "tmp",
      "id": 29
     },
     {
+     "name": "denominator",
      "op": "tmp",
-     "stage": 3,
-     "stageId": 4,
      "id": 30
     }
    ]
   },
   {
    "name": "gprod",
-   "numerator": {
-    "op": "cm",
-    "stage": 3,
-    "stageId": 6,
-    "id": 23
-   },
-   "denominator": {
-    "op": "cm",
-    "stage": 3,
-    "stageId": 5,
-    "id": 22
-   },
-   "dest": [
-    {
-     "op": "cm",
-     "stage": 3,
-     "id": 19,
-     "stageId": 3
-    }
-   ],
    "fields": [
-    "numerator",
-    "denominator"
-   ],
-   "symbols": [
     {
+     "name": "reference",
      "op": "cm",
-     "stage": 3,
-     "stageId": 5,
-     "id": 22
+     "id": 19
     },
     {
+     "name": "numerator",
      "op": "cm",
-     "stage": 3,
-     "stageId": 6,
      "id": 23
+    },
+    {
+     "name": "denominator",
+     "op": "cm",
+     "id": 22
     }
    ]
   },
   {
    "name": "public",
-   "row_index": {
-    "op": "number",
-    "value": 0
-   },
-   "expression": {
-    "op": "tmp",
-    "stage": 1,
-    "stageId": 0,
-    "id": 26
-   },
-   "dest": [
-    {
-     "op": "public",
-     "stage": 1,
-     "id": 0
-    }
-   ],
    "fields": [
-    "row_index",
-    "expression"
-   ],
-   "symbols": [
     {
+     "name": "reference",
+     "op": "public",
+     "id": 0
+    },
+    {
+     "name": "row_index",
+     "op": "number",
+     "value": 0
+    },
+    {
+     "name": "expression",
      "op": "tmp",
-     "stage": 1,
-     "stageId": 0,
      "id": 26
     }
    ]
   },
   {
    "name": "public",
-   "row_index": {
-    "op": "number",
-    "value": 0
-   },
-   "expression": {
-    "op": "cm",
-    "stageId": 0,
-    "id": 0,
-    "stage": 1,
-    "dim": 1,
-    "rowOffset": 0
-   },
-   "dest": [
-    {
-     "op": "public",
-     "stage": 1,
-     "id": 1
-    }
-   ],
    "fields": [
-    "row_index",
-    "expression"
-   ],
-   "symbols": [
     {
+     "name": "reference",
+     "op": "public",
+     "id": 1
+    },
+    {
+     "name": "row_index",
+     "op": "number",
+     "value": 0
+    },
+    {
+     "name": "expression",
      "op": "cm",
-     "stage": 1,
-     "stageId": 0,
      "id": 0
     }
    ]
   },
   {
    "name": "public",
-   "row_index": {
-    "op": "number",
-    "value": 1023
-   },
-   "expression": {
-    "op": "cm",
-    "stageId": 0,
-    "id": 0,
-    "stage": 1,
-    "dim": 1,
-    "rowOffset": 0
-   },
-   "dest": [
-    {
-     "op": "public",
-     "stage": 1,
-     "id": 2
-    }
-   ],
    "fields": [
-    "row_index",
-    "expression"
-   ],
-   "symbols": [
     {
+     "name": "reference",
+     "op": "public",
+     "id": 2
+    },
+    {
+     "name": "row_index",
+     "op": "number",
+     "value": 1023
+    },
+    {
+     "name": "expression",
      "op": "cm",
-     "stage": 1,
-     "stageId": 0,
      "id": 0
     }
    ]

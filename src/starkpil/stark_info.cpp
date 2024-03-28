@@ -212,39 +212,6 @@ void StarkInfo::load(json j)
             expressionsCodeSymbols[expSymbol.stage - 1].push_back(expSymbol);
         }
 
-        for(uint64_t i = 0; i < j["hints"].size(); i++) {
-            Hint hint;
-            if(j["hints"][i]["name"] == string("public")) continue;
-            hint.type = string2hintType(j["hints"][i]["name"]);
-            
-            uint64_t stage = j["hints"][i]["dest"][0]["stage"];
-            
-            hint.fields = std::vector<string>();
-            for(uint64_t k = 0; k < j["hints"][i]["fields"].size(); k++) {
-                std::string field = j["hints"][i]["fields"][k];
-                hint.fields.push_back(field);
-                Symbol symbol;
-                symbol.setSymbol(j["hints"][i][field]);
-                hint.fieldSymbols.insert(pair(field,symbol));
-            }
-
-            hint.destSymbols = std::vector<Symbol>();
-            for(uint64_t k = 0; k < j["hints"][i]["dest"].size(); k++) {
-                Symbol symbol;
-                symbol.setSymbol(j["hints"][i]["dest"][k]);
-                hint.destSymbols.push_back(symbol);
-            }
-
-            hint.symbols = std::vector<Symbol>();
-            for(uint64_t k = 0; k < j["hints"][i]["symbols"].size(); k++) {
-                Symbol symbol;
-                symbol.setSymbol(j["hints"][i]["symbols"][k]);
-                hint.symbols.push_back(symbol);
-            }
-
-            hints[stage].push_back(hint);
-        }
-
     } else {
         for (uint64_t i = 0; i < j["varPolMap"].size(); i++)
         {
@@ -262,109 +229,6 @@ void StarkInfo::load(json j)
         for (uint64_t i = 0; i < j["cm_2ns"].size(); i++)
             cm_2ns.push_back(j["cm_2ns"][i]);
         
-
-        uint64_t indxStage2 = 0;
-        uint64_t indxStage3 = 0;
-
-        for (uint64_t i = 0; i < j["puCtx"].size(); i++)
-        {
-            Hint hintH1H2;
-            hintH1H2.type = hintType::h1h2;
-
-            Symbol fExp;
-            fExp.setSymbol(2, j["puCtx"][i]["fExpId"]);
-            hintH1H2.fields.push_back("fExpId");           
-            hintH1H2.fieldSymbols.insert(pair("fExpId", fExp));
-
-            Symbol tExp;
-            tExp.setSymbol(2, j["puCtx"][i]["tExpId"]);
-            hintH1H2.fields.push_back("tExpId");           
-            hintH1H2.fieldSymbols.insert(pair("tExpId", tExp));
-
-            Symbol h1;
-            Symbol h2;
-            h1.setSymbol(2, j["puCtx"][i]["h1Id"]);
-            h2.setSymbol(2, j["puCtx"][i]["h2Id"]);
-            hintH1H2.destSymbols.push_back(h1);
-            hintH1H2.destSymbols.push_back(h2);
-  
-            hintH1H2.index = indxStage2;
-            indxStage2 += 4;
-
-            hints[2].push_back(hintH1H2);
-
-            Hint hintGProd;
-            hintGProd.type = hintType::gprod;
-
-            Symbol num;
-            num.setSymbol(2, j["puCtx"][i]["numId"]);
-            hintGProd.fields.push_back("numId");
-            hintGProd.fieldSymbols.insert(pair("numId", num));
-
-            Symbol den;
-            den.setSymbol(2, j["puCtx"][i]["denId"]);
-            hintGProd.fields.push_back("denId");
-            hintGProd.fieldSymbols.insert(pair("denId", den));
-
-            Symbol z;
-            z.setSymbol(2, j["puCtx"][i]["zId"]);
-            hintGProd.destSymbols.push_back(z);
-
-            hintGProd.index = indxStage3;
-            indxStage3 += 3;
-
-            hints[3].push_back(hintGProd);
-        }
-
-        for (uint64_t i = 0; i < j["peCtx"].size(); i++) 
-        {
-            Hint hintGProd;
-            hintGProd.type = hintType::gprod;
-
-            Symbol num;
-            num.setSymbol(2, j["peCtx"][i]["numId"]);
-            hintGProd.fields.push_back("numId");
-            hintGProd.fieldSymbols.insert(pair("numId", num));
-
-            Symbol den;
-            den.setSymbol(2, j["peCtx"][i]["denId"]);
-            hintGProd.fields.push_back("denId");
-            hintGProd.fieldSymbols.insert(pair("denId", den));
-
-            Symbol z;
-            z.setSymbol(2, j["peCtx"][i]["zId"]);
-            hintGProd.destSymbols.push_back(z);
-
-            hintGProd.index = indxStage3;
-            indxStage3 += 3;
-
-            hints[3].push_back(hintGProd);
-        }
-
-        for (uint64_t i = 0; i < j["ciCtx"].size(); i++) 
-        {
-            Hint hintGProd;
-            hintGProd.type = hintType::gprod;
-
-            Symbol num;
-            num.setSymbol(2, j["ciCtx"][i]["numId"]);
-            hintGProd.fields.push_back("numId");
-            hintGProd.fieldSymbols.insert(pair("numId", num));
-
-            Symbol den;
-            den.setSymbol(2, j["ciCtx"][i]["denId"]);
-            hintGProd.fields.push_back("denId");
-            hintGProd.fieldSymbols.insert(pair("denId", den));
-
-            Symbol z;
-            z.setSymbol(2, j["ciCtx"][i]["zId"]);
-            hintGProd.destSymbols.push_back(z);
-
-            hintGProd.index = indxStage3;
-            indxStage3 += 3;
-
-            hints[3].push_back(hintGProd);
-        }
 
         for (auto it =  j["exp2pol"].begin(); it != j["exp2pol"].end(); ++it) {
             uint64_t key = std::stoull(it.key()); 
@@ -462,23 +326,6 @@ eSection string2section(const string s)
     if (s == "q_2ns")
         return q_2ns;
     zklog.error("string2section() found invalid string=" + s);
-    exitProcess();
-    exit(-1);
-}
-
-hintType string2hintType(const string s)
-{
-    if(s == "h1h2")
-        return h1h2;
-    if(s == "gprod")
-        return gprod;
-    if(s == "public")
-        return publicValue;
-    if(s == "gsum") 
-        return gsum;
-    if(s == "subproofvalue")
-        return subproofValue;
-    zklog.error("string2hintType() found invalid string=" + s);
     exitProcess();
     exit(-1);
 }

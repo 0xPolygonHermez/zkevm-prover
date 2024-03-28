@@ -72,16 +72,6 @@ typedef enum
 
 eSection string2section (const string s);
 
-typedef enum {
-    h1h2 = 0,
-    gprod = 1,
-    gsum = 2,
-    publicValue = 3,
-    subproofValue = 4,
-} hintType;
-
-hintType string2hintType (const string s);
-
 class PolsSections
 {
 public:
@@ -132,16 +122,6 @@ public:
     vector<Symbol> symbolsUsed;
 };
 
-class Hint 
-{
-public:
-    hintType type;
-    std::vector<string> fields;
-    std::map<std::string, Symbol> fieldSymbols;
-    std::vector<Symbol> destSymbols;
-    std::vector<Symbol> symbols;
-    uint64_t index;
-};
 
 class VarPolMap
 {
@@ -231,8 +211,6 @@ public:
     vector<vector<Symbol>> stageCodeSymbols;
     vector<vector<ExpressionCodeSymbol>> expressionsCodeSymbols;
     
-    std::map<uint64_t, vector<Hint>> hints;
-
     // pil-stark specific
     vector<VarPolMap> varPolMap;
     vector<uint64_t> cm_n;

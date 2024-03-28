@@ -65,12 +65,16 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     addTranscriptGL(transcript, &publicInputs[0], starkInfo.nPublics);
 
     for(uint64_t step = 1; step <= starkInfo.nStages + 1; step++) {
-        if(debug && step == starkInfo.nStages + 1) return;
         TimerStartStep(STARK, step);
         computeStage(step, params, proof, transcript, chelpersSteps);
         TimerStopAndLogStep(STARK, step);
     }
    
+    if(debug) {
+        TimerStopAndLog(STARK_PROOF);
+        return;
+    }
+
     TimerStartStep(STARK, starkInfo.nStages + 2);
     
     getChallenge(transcript, *params.challenges[starkInfo.xiChallengeIndex]);
@@ -216,7 +220,7 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams& params, FRIPr
 
     calculateExpressions(step, false, params, chelpersSteps);
 
-    calculateHints(step, params);
+    calculateHints(step, params, chelpers.hints);
 
     if(!starkInfo.pil2) {
         if(step == starkInfo.nStages) {
@@ -248,22 +252,21 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams& params, FRIPr
         }
     }
 
-    if(step <= starkInfo.nStages) {
-        if(debug) {
-            for(uint64_t i = 0; i < chelpers.constraintsInfoDebug[step].size(); i++) {
-                calculateConstraint(chelpers.constraintsInfoDebug[step][i], params, chelpersSteps);
-            }
-        } else {
-            extendAndMerkelize(step, params, proof);
+    if(debug) {
+        for(uint64_t i = 0; i < chelpers.constraintsInfoDebug[step].size(); i++) {
+            calculateConstraint(chelpers.constraintsInfoDebug[step][i], params, chelpersSteps);
         }
     } else {
-        computeQ(step, params, proof);
-        if(starkInfo.pil2) {
-            for(uint64_t i = 0; i < starkInfo.qs.size(); ++i) {
-                witnessCalculated[starkInfo.qs[i]] = true;
-            }  
+        if(step <= starkInfo.nStages) {
+            extendAndMerkelize(step, params, proof);
+        } else {
+            computeQ(step, params, proof);
+            if(starkInfo.pil2) {
+                for(uint64_t i = 0; i < starkInfo.qs.size(); ++i) {
+                    witnessCalculated[starkInfo.qs[i]] = true;
+                }  
+            } 
         }
-        
     }
 
     if(debug) {
@@ -419,81 +422,140 @@ void Starks<ElementType>::computeFRIQueries(FRIProof<ElementType> &fproof, Polin
 }
 
 template <typename ElementType>
-void Starks<ElementType>::transposePolsColumns(StepsParams& params, Polinomial* transPols, uint64_t &indx, Hint hint, Goldilocks::Element *pBuffer) {
+void Starks<ElementType>::transposePolsColumns(StepsParams& params, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer) {
     u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8;
 
-    for(uint64_t i = 0; i < hint.fields.size(); i++) {
-        uint64_t id = hint.fieldSymbols[hint.fields[i]].id;
-        Polinomial p = starkInfo.getPolinomial(params.pols, starkInfo.getPolinomialRef("exp", id), N);
-        transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
-        Polinomial::copy(transPols[indx], p);
-        cm2Transposed[id] = indx++;
-    }
-
-    for(uint64_t i = 0; i < hint.destSymbols.size(); i++) {
-        uint64_t id = hint.destSymbols[i].id;
-        Polinomial p = starkInfo.getPolinomial(params.pols, starkInfo.getPolinomialRef("cm_n", id), N);
-        transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
-        Polinomial::copy(transPols[indx], p);
-        cm2Transposed[id] = indx++;
+    for (auto it = hint.fields.begin(); it != hint.fields.end(); ++it) {
+        const auto& hintField = it->second;
+        if(hintField.operand == opType::cm || hintField.operand == opType::tmp) {
+            uint64_t id = hintField.id;
+            Polinomial p = starkInfo.getPolinomial(params.pols, id, N);
+            uint64_t indx = cm2Transposed[id];
+            transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
+            Polinomial::copy(transPols[indx], p);
+        }
     }
 }
 
 template <typename ElementType>
-void Starks<ElementType>::transposePolsRows(uint64_t step, StepsParams& params, Polinomial *transPols)
+void Starks<ElementType>::transposePolsRows(StepsParams& params, Polinomial *transPols, Hint hint)
 {
-    TimerStartStep(STARK_CALCULATE_TRANSPOSE_2, step);
-    for (uint64_t i = 0; i < starkInfo.hints[step].size(); i++)
-    {   
-        Hint hint = starkInfo.hints[step][i];
-        for(uint64_t j = 0; j < hint.destSymbols.size(); j++) {
-            uint64_t polId = hint.destSymbols[j].id;
-            uint64_t transposedId = cm2Transposed[polId];
-            Polinomial cmPol = starkInfo.getPolinomial(params.pols, starkInfo.getPolinomialRef("cm_n", polId), N);
+    for (auto it = hint.fields.begin(); it != hint.fields.end(); ++it) {
+        const auto& hintField = it->second;
+        if(hintField.operand == opType::cm) {
+            uint64_t id = hintField.id;
+            uint64_t transposedId = cm2Transposed[id];
+            Polinomial cmPol = starkInfo.getPolinomial(params.pols, id, N);
             Polinomial::copy(cmPol, transPols[transposedId]);
         }
     }
-    TimerStopAndLogStep(STARK_CALCULATE_TRANSPOSE_2, step);
 }
 
 template <typename ElementType>
-void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
+bool Starks<ElementType>::isHintResolved(Hint &hint)
+{
+    if(hint.name == "subproofvalue") {
+        return isSymbolCalculated(hint.fields["reference"].operand, hint.fields["reference"].id);
+    } else if(hint.name == "public") {
+        return isSymbolCalculated(hint.fields["reference"].operand, hint.fields["reference"].id);
+    } else if(hint.name == "gsum") {
+        return isSymbolCalculated(hint.fields["reference"].operand, hint.fields["reference"].id);
+    } else if(hint.name == "gprod") {
+        return isSymbolCalculated(hint.fields["reference"].operand, hint.fields["reference"].id);
+    } else if(hint.name == "h1h2") {
+        bool h1Calculated = isSymbolCalculated(hint.fields["referenceH1"].operand, hint.fields["referenceH1"].id);
+        bool h2Calculated = isSymbolCalculated(hint.fields["referenceH2"].operand, hint.fields["referenceH1"].id);
+        return h1Calculated && h2Calculated;
+    } else {
+        zklog.error("Invalid hint name=" + hint.name);
+        exitProcess();
+        exit(-1);
+    }
 
-    std::vector<Hint> hints;
-    for(uint64_t i = 0; i < starkInfo.hints[step].size(); i++) {
-        if(!starkInfo.pil2) {
-            hints.push_back(starkInfo.hints[step][i]);
+    return false;
+}
+
+template <typename ElementType>
+bool Starks<ElementType>::canHintBeResolved(Hint &hint)
+{
+    if(hint.name == "subproofvalue") {
+        HintField expression = hint.fields["expression"];
+        if((expression.operand == opType::cm || expression.operand == opType::tmp) 
+            && !isSymbolCalculated(expression.operand, expression.id)) return false;
+    } else if(hint.name == "public") {
+        HintField expression = hint.fields["expression"];
+        if((expression.operand == opType::cm || expression.operand == opType::tmp) 
+            && !isSymbolCalculated(expression.operand, expression.id)) return false;
+    } else if(hint.name == "gsum") {
+        HintField numerator = hint.fields["numerator"];
+        HintField denominator = hint.fields["denominator"];
+        if((numerator.operand == opType::cm || numerator.operand == opType::tmp) 
+            && !isSymbolCalculated(numerator.operand, numerator.id)) return false;
+        if((denominator.operand == opType::cm || denominator.operand == opType::tmp) 
+            && !isSymbolCalculated(denominator.operand, denominator.id)) return false;
+    } else if(hint.name == "gprod") {
+        HintField numerator = hint.fields["numerator"];
+        HintField denominator = hint.fields["denominator"];
+        if((numerator.operand == opType::cm || numerator.operand == opType::tmp) 
+            && !isSymbolCalculated(numerator.operand, numerator.id)) return false;
+        if((denominator.operand == opType::cm || denominator.operand == opType::tmp) 
+            && !isSymbolCalculated(denominator.operand, denominator.id)) return false;
+    } else if(hint.name == "h1h2") {
+        HintField f = hint.fields["f"];
+        HintField t = hint.fields["t"];
+        if((f.operand == opType::cm || f.operand == opType::tmp) 
+            && !isSymbolCalculated(f.operand, f.id)) return false;
+        if((t.operand == opType::cm || t.operand == opType::tmp) 
+            && !isSymbolCalculated(t.operand, t.id)) return false;
+    } else {
+        zklog.error("Invalid hint name=" + hint.name);
+        exitProcess();
+        exit(-1);
+    }
+
+    return true;
+}
+
+
+template <typename ElementType>
+void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params, vector<Hint> &hints) {
+
+    vector<Hint> hintsToCalculate;
+
+    for(uint64_t i = 0; i < hints.size(); i++) {
+        Hint hint = hints[i];
+        if(isHintResolved(hint)) {
+            zklog.info("Hint" + to_string(i) + " is already resolved.");
+        } else if(canHintBeResolved(hint)) {
+            zklog.info("Calculating hint" + to_string(i));
+            hintsToCalculate.push_back(hint);
         } else {
-            uint64_t symbolsHintsToBeCalculated = checkSymbolsToBeCalculated(starkInfo.hints[step][i].symbols);
-            if(!symbolsHintsToBeCalculated) {
-                hints.push_back(starkInfo.hints[step][i]);
-            } else {
-                zklog.info("Skipping hint=" + to_string(i) + " because it has symbols that are not calculated yet.");
-            }
+            zklog.info("Skipping hint=" + to_string(i) + " because it has symbols that are not calculated yet.");
         }
     }
-    uint64_t numHints = hints.size();
 
-    if(numHints == 0) return;
+    if(hintsToCalculate.size() == 0) return;
         
     std::string sectionExtended = "cm" + to_string(step) + "_2ns";
     uint64_t sectionExtendedOffset = starkInfo.mapOffsets.section[string2section(sectionExtended)];
     Goldilocks::Element *pBuffer = &params.pols[sectionExtendedOffset];
 
-    std::vector<uint64_t> hintsIndex(numHints, 0);
 
     uint64_t numPols = 0;
-    for(uint64_t i = 0; i < numHints; ++i) {
-        hintsIndex[i] = numPols;
-        numPols += hints[i].fields.size() + hints[i].destSymbols.size();
+    for(uint64_t i = 0; i < hintsToCalculate.size(); ++i) {
+        for(auto it = hintsToCalculate[i].fields.begin(); it != hintsToCalculate[i].fields.end(); ++it) {
+            const auto& hintField = it->second;
+            if(hintField.operand == opType::cm || hintField.operand == opType::tmp) {
+                cm2Transposed[hintField.id] = numPols++;
+            }
+        }
     }
 
     Polinomial *transPols = new Polinomial[numPols];
     
     TimerStartStep(STARK_CALCULATE_TRANSPOSE, step);
-    uint64_t indx = 0;
-    for(uint64_t i = 0; i < numHints; ++i) {
-        transposePolsColumns(params, transPols, indx, starkInfo.hints[step][i], pBuffer);
+    for(uint64_t i = 0; i < hintsToCalculate.size(); ++i) {
+        transposePolsColumns(params, transPols, hintsToCalculate[i], pBuffer);
     }
     TimerStopAndLogStep(STARK_CALCULATE_TRANSPOSE, step);
 
@@ -502,56 +564,59 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
     uint64_t *pbufferH = &mem_[sectionExtendedOffset + numPols * (N * FIELD_EXTENSION + 8)];
     
     uint64_t maxThreads = omp_get_max_threads();
-    uint64_t nThreads = numHints > maxThreads ? maxThreads : numHints;
+    uint64_t nThreads = hintsToCalculate.size() > maxThreads ? maxThreads : hintsToCalculate.size();
 
 #pragma omp parallel for num_threads(nThreads)
-    for (uint64_t i = 0; i < numHints; i++)
+    for (uint64_t i = 0; i < hintsToCalculate.size(); i++)
     {
-        Hint hint = starkInfo.hints[step][i];
-        int index = hintsIndex[i];
+        Hint hint = hintsToCalculate[i];
         
-        if(hint.type == hintType::h1h2) {
-            if (transPols[index + 2].dim() == 1)
+        if(hint.name == "h1h2") {
+            uint64_t h1Id = hint.fields["referenceH1"].id;
+            uint64_t h2Id = hint.fields["referenceH2"].id;
+            uint64_t fId = hint.fields["f"].id;
+            uint64_t tId = hint.fields["t"].id;
+
+            if (transPols[cm2Transposed[h1Id]].dim() == 1)
             {
-                Polinomial::calculateH1H2_opt1(transPols[index + 2], transPols[index + 3], transPols[index], transPols[index + 1], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 3) * N);
+                Polinomial::calculateH1H2_opt1(transPols[cm2Transposed[h1Id]], transPols[cm2Transposed[h2Id]], transPols[cm2Transposed[fId]], transPols[cm2Transposed[tId]], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 3) * N);
             }
-            else if(transPols[index + 2].dim() == 3)
+            else if(transPols[cm2Transposed[h1Id]].dim() == 3)
             {
-                Polinomial::calculateH1H2_opt3(transPols[index + 2], transPols[index + 3], transPols[index], transPols[index + 1], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 5) * N);
+                Polinomial::calculateH1H2_opt3(transPols[cm2Transposed[h1Id]], transPols[cm2Transposed[h2Id]], transPols[cm2Transposed[fId]], transPols[cm2Transposed[tId]], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 5) * N);
             } else {
                 std::cerr << "Error: calculateH1H2_ invalid" << std::endl;   
                 exit(-1);
             }
             if(starkInfo.pil2) {
-                witnessCalculated[hint.destSymbols[0].id] = true;
-                witnessCalculated[hint.destSymbols[1].id] = true;
+                witnessCalculated[h1Id] = true;
+                witnessCalculated[h2Id] = true;
             }
-        } else if(hint.type == hintType::gprod) {
-            Polinomial::calculateZ(transPols[index + 2], transPols[index], transPols[index + 1]);
+        } else if(hint.name == "gprod") {
+            uint64_t zId = hint.fields["reference"].id;
+            uint64_t numeratorId = hint.fields["numerator"].id;
+            uint64_t denominatorId = hint.fields["denominator"].id;
+            Polinomial::calculateZ(transPols[cm2Transposed[zId]], transPols[cm2Transposed[numeratorId]], transPols[cm2Transposed[denominatorId]]);
             if(starkInfo.pil2) {
-                witnessCalculated[hint.destSymbols[0].id] = true;
+                witnessCalculated[zId] = true;
             }
-        } else if(hint.type == hintType::gsum) {
-            Polinomial::calculateS(transPols[index + 2], transPols[index], transPols[index + 1]);
-            if(starkInfo.pil2) {
-                witnessCalculated[hint.destSymbols[0].id] = true;
-            }
-        } else if(hint.type == hintType::subproofValue) {
-            uint64_t id = hint.fieldSymbols["expression"].id;
-            Polinomial p = starkInfo.getPolinomial(params.pols, starkInfo.getPolinomialRef("exp", id), N);
-
-            //TODO:
-            // subproofValue[hint.destSymbols[0].id] = p[hint.fieldSymbols["row_index"].value];
-            // subProofValuesCalculated[hint.destSymbols[0].id] = true;
+        } else if(hint.name == "gsum") {
+            
+        } else if(hint.name == "subproofValue") {
+        
         } else {
-            zklog.error("Invalid hint type=" + hint.type);
+            zklog.error("Invalid hint type=" + hint.name);
             exitProcess();
             exit(-1);
         }
     }
     TimerStopAndLogStep(STARK_CALCULATE_HINTS, step);
 
-    transposePolsRows(step, params, transPols);
+    TimerStartStep(STARK_CALCULATE_TRANSPOSE_2, step);
+    for(uint64_t i = 0; i < hintsToCalculate.size(); ++i) {
+        transposePolsRows(params, transPols, hintsToCalculate[i]);
+    }
+    TimerStopAndLogStep(STARK_CALCULATE_TRANSPOSE_2, step);
 
     delete[] transPols;
 }
@@ -725,26 +790,36 @@ uint64_t Starks<ElementType>::checkSymbolsToBeCalculated(vector<Symbol> symbols)
     uint64_t symbolsToBeCalculated = 0;
     for(uint64_t i = 0; i < symbols.size(); ++i) {
         Symbol sym = symbols[i];
-        if(sym.op == opType::const_) {
-            if(!constsCalculated[sym.id]) symbolsToBeCalculated++;
-        } else if(sym.op == opType::cm) {
-            if(!witnessCalculated[sym.id]) symbolsToBeCalculated++;
-        } else if(sym.op == opType::tmp) {
-            if(!witnessCalculated[sym.id]) symbolsToBeCalculated++;
-        } else if(sym.op == opType::public_) {
-            if(!publicsCalculated[sym.id]) symbolsToBeCalculated++;
-        } else if(sym.op == opType::subproofvalue) {
-            if(!subProofValuesCalculated[sym.id]) symbolsToBeCalculated++;
-        } else if(sym.op == opType::challenge) {
-            if(!challengesCalculated[sym.id]) symbolsToBeCalculated++;
-        } else {
-            zklog.error("Invalid symbol type=" + sym.op);
-            exitProcess();
-            exit(-1);
+        if(!isSymbolCalculated(sym.op, sym.id)) {
+            symbolsToBeCalculated++;
         }
     }
 
     return symbolsToBeCalculated;
+}
+
+template <typename ElementType>
+bool Starks<ElementType>::isSymbolCalculated(opType operand, uint64_t id) {
+    bool isCalculated = false;
+    if(operand == opType::const_) {
+        if(constsCalculated[id]) isCalculated = true;
+    } else if(operand == opType::cm) {
+        if(witnessCalculated[id]) isCalculated = true;
+    } else if(operand == opType::tmp) {
+        if(witnessCalculated[id]) isCalculated = true;
+    } else if(operand == opType::public_) {
+        if(publicsCalculated[id]) isCalculated = true;
+    } else if(operand == opType::subproofvalue) {
+        if(subProofValuesCalculated[id]) isCalculated = true;
+    } else if(operand == opType::challenge) {
+        if(challengesCalculated[id]) isCalculated = true;
+    } else {
+        zklog.error("Invalid symbol type=" + operand);
+        exitProcess();
+        exit(-1);
+    }
+
+    return isCalculated;
 }
 
 template <typename ElementType>

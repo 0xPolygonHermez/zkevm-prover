@@ -311,7 +311,7 @@ public:
 
     void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps *chelpersSteps);
     
-    void calculateHints(uint64_t step, StepsParams& params);
+    void calculateHints(uint64_t step, StepsParams& params, vector<Hint> &hints);
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
@@ -337,12 +337,16 @@ public:
 private:
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
 
-    void transposePolsColumns(StepsParams& params, Polinomial* transPols, uint64_t &indx, Hint hint, Goldilocks::Element *pBuffer);
-    void transposePolsRows(uint64_t step, StepsParams& params, Polinomial *transPols);
-    
+    void transposePolsColumns(StepsParams& params, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
+    void transposePolsRows(StepsParams& params, Polinomial *transPols, Hint hint);
+
+    bool isHintResolved(Hint &hint);
+    bool canHintBeResolved(Hint &hint);
+
     void evmap(StepsParams &params, Polinomial &LEv);
 
     uint64_t checkSymbolsToBeCalculated(vector<Symbol> symbols);
+    bool isSymbolCalculated(opType operand, uint64_t id);
 public:
     // Following function are created to be used by the ffi interface
     void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial* pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);

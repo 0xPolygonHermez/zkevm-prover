@@ -267,7 +267,7 @@ void CHelpers::loadCHelpersPil2(BinFileUtils::BinFile *cHelpersBin) {
     cHelpersArgsDebug.publicsIds = new uint16_t[nPublicsIdsDebug];
     cHelpersArgsDebug.subproofValuesIds = new uint16_t[nSubproofValuesIdsDebug];
 
-    constraintsInfoDebug.resize(nStages);
+    constraintsInfoDebug.resize(nStages + 1);
     
     uint32_t nConstraints = cHelpersBin->readU32LE();
 
@@ -343,6 +343,34 @@ void CHelpers::loadCHelpersPil2(BinFileUtils::BinFile *cHelpersBin) {
 
     for(uint64_t j = 0; j < nSubproofValuesIdsDebug; ++j) {
         cHelpersArgsDebug.subproofValuesIds[j] = cHelpersBin->readU16LE();
+    }
+
+    cHelpersBin->endReadSection();
+
+    cHelpersBin->startReadSection(CHELPERS_HINTS_PIL2_SECTION);
+
+    uint32_t nHints = cHelpersBin->readU32LE();
+
+    for(uint64_t h = 0; h < nHints; h++) {
+        Hint hint;
+        hint.name = cHelpersBin->readString();
+
+        uint32_t nFields = cHelpersBin->readU32LE();
+
+        for(uint64_t f = 0; f < nFields; f++) {
+            HintField hintField;
+            std::string name = cHelpersBin->readString();
+            std::string operand = cHelpersBin->readString();
+            hintField.operand = string2opType(operand);
+            if(hintField.operand == opType::number) {
+                hintField.value = cHelpersBin->readU32LE();
+            } else {
+                hintField.id = cHelpersBin->readU32LE();
+            }
+            hint.fields[name] = hintField;
+        }
+
+        hints.push_back(hint);
     }
 
     cHelpersBin->endReadSection();

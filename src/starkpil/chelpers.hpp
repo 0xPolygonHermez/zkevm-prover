@@ -21,6 +21,23 @@ const int CHELPERS_BUFFERS_SECTION = 4;
 const int CHELPERS_STAGES_PIL2_SECTION = 2;
 const int CHELPERS_EXPRESSIONS_PIL2_SECTION = 3;
 const int CHELPERS_CONSTRAINTS_PIL2_SECTION = 4;
+const int CHELPERS_HINTS_PIL2_SECTION = 5;
+
+class HintField
+{
+public:
+    opType operand;
+    uint64_t id;
+    uint64_t value;    
+};
+
+
+class Hint 
+{
+public:
+    std::string name;
+    std::map<string,HintField> fields;    
+};
 
 struct ParserParams
 {
@@ -69,6 +86,8 @@ public:
     std::map<uint64_t, ParserParams> expressionsInfo;
 
     std::vector<std::vector<ParserParams>> constraintsInfoDebug;
+
+    std::vector<Hint> hints;
     
     ParserArgs cHelpersArgs;
 
