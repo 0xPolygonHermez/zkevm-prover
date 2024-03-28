@@ -1,13 +1,50 @@
+#include <dlfcn.h>
+
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
-#include "AllSteps.hpp"
+#include "chelpers_dyn_interface.hpp"
+
+class DynamicLoadedSteps final: public CHelpersSteps {
+public:
+    DynamicLoadedSteps(std::string fileName)
+    {
+        lib = dlopen(fileName.c_str(), RTLD_NOW);
+        if (!lib)
+        {
+            std::cerr << "Error loading library \"" << fileName << "\": " << dlerror() << std::endl;
+            exit(1);
+        }
+
+        const auto symbol = "calculateExpressions";
+        loadedCalculateExpressions = (CalculateExpressionsFnPtr)dlsym(lib, symbol);
+        if (!loadedCalculateExpressions)
+        {
+            std::cerr << "Error loading symbol \"" << symbol << "\" from library \"" << fileName << "\": " << dlerror() << std::endl;
+            exit(1);
+        }
+    }
+
+    ~DynamicLoadedSteps()
+    {
+        dlclose(lib);
+    }
+
+    void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams)
+    {
+        loadedCalculateExpressions(&starkInfo, &params, &parserArgs, &parserParams);
+    }
+
+private:
+    void *lib;
+    CalculateExpressionsFnPtr loadedCalculateExpressions;
+};
 
 int main(int argc, char *argv[])
 {
-    if (argc != 7)
+    if (argc != 8)
     {
         cout << "Warning: not all arguments provided. Using defaults.\n"
-            << "Usage: " << argv[0] << " <constants> <consttree> <starkinfo> <commits> <chelpers_bin> <verkey>" << endl;
+            << "Usage: " << argv[0] << " <constants> <consttree> <starkinfo> <commits> <chelpers_bin> <chelpers_dylib> <verkey>" << endl;
     }
 
     const char* default_args[] = {
@@ -28,7 +65,8 @@ int main(int argc, char *argv[])
     string starkInfoFile = arg(3);
     string commitPols = arg(4);
     string cHelpersFile = arg(5);
-    string verkey = arg(6);
+    string cHelpersDylib = arg(6);
+    string verkey = arg(7);
 
     Config config;
     config.runFileGenBatchProof = true; // So that starkInfo is created
@@ -77,8 +115,8 @@ int main(int argc, char *argv[])
     allVerkey[2] = Goldilocks::fromU64(allVerkeyJson["constRoot"][2]);
     allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
 
-    AllSteps allSteps;
-    starks.genProof(fproof, &publicInputs[0], allVerkey, &allSteps);
+    DynamicLoadedSteps steps{cHelpersDylib};
+    starks.genProof(fproof, &publicInputs[0], allVerkey, &steps);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof);
