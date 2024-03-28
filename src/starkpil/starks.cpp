@@ -425,8 +425,17 @@ template <typename ElementType>
 void Starks<ElementType>::transposePolsColumns(StepsParams& params, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer) {
     u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8;
 
-    for (auto it = hint.fields.begin(); it != hint.fields.end(); ++it) {
-        const auto& hintField = it->second;
+    vector<string> srcFields = getSrcFields(hint.name);
+    vector<string> dstFields = getDstFields(hint.name);
+
+    for (uint64_t i = 0; i < srcFields.size(); i++) {
+        auto it = hint.fields.find(srcFields[i]);
+        if(it == hint.fields.end()) {
+            zklog.error("Unknown src field name=" + srcFields[i]);
+            exitProcess();
+            exit(-1);
+        }
+        HintField hintField = hint.fields[srcFields[i]];
         if(hintField.operand == opType::cm || hintField.operand == opType::tmp) {
             uint64_t id = hintField.id;
             Polinomial p = starkInfo.getPolinomial(params.pols, id, N);
@@ -435,13 +444,38 @@ void Starks<ElementType>::transposePolsColumns(StepsParams& params, Polinomial* 
             Polinomial::copy(transPols[indx], p);
         }
     }
+
+    for (uint64_t i = 0; i < dstFields.size(); i++) {
+        auto it = hint.fields.find(dstFields[i]);
+        if(it == hint.fields.end()) {
+            zklog.error("Unknown src field name=" + dstFields[i]);
+            exitProcess();
+            exit(-1);
+        }
+        HintField hintField = hint.fields[dstFields[i]];
+        if(hintField.operand == opType::cm || hintField.operand == opType::tmp) {
+            uint64_t id = hintField.id;
+            Polinomial p = starkInfo.getPolinomial(params.pols, id, N);
+            uint64_t indx = cm2Transposed[id];
+            transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
+        }
+    }
 }
 
 template <typename ElementType>
 void Starks<ElementType>::transposePolsRows(StepsParams& params, Polinomial *transPols, Hint hint)
 {
-    for (auto it = hint.fields.begin(); it != hint.fields.end(); ++it) {
-        const auto& hintField = it->second;
+    vector<string> dstFields = getDstFields(hint.name);
+
+    for (uint64_t i = 0; i < dstFields.size(); i++) {
+        auto it = hint.fields.find(dstFields[i]);
+        if(it == hint.fields.end()) {
+            zklog.error("Unknown dest field name=" + dstFields[i]);
+            exitProcess();
+            exit(-1);
+        }
+        HintField hintField = hint.fields[dstFields[i]];
+        setSymbolCalculated(hintField.operand, hintField.id);
         if(hintField.operand == opType::cm) {
             uint64_t id = hintField.id;
             uint64_t transposedId = cm2Transposed[id];
@@ -452,65 +486,37 @@ void Starks<ElementType>::transposePolsRows(StepsParams& params, Polinomial *tra
 }
 
 template <typename ElementType>
-bool Starks<ElementType>::isHintResolved(Hint &hint)
-{
-    if(hint.name == "subproofvalue") {
-        return isSymbolCalculated(hint.fields["reference"].operand, hint.fields["reference"].id);
-    } else if(hint.name == "public") {
-        return isSymbolCalculated(hint.fields["reference"].operand, hint.fields["reference"].id);
-    } else if(hint.name == "gsum") {
-        return isSymbolCalculated(hint.fields["reference"].operand, hint.fields["reference"].id);
-    } else if(hint.name == "gprod") {
-        return isSymbolCalculated(hint.fields["reference"].operand, hint.fields["reference"].id);
-    } else if(hint.name == "h1h2") {
-        bool h1Calculated = isSymbolCalculated(hint.fields["referenceH1"].operand, hint.fields["referenceH1"].id);
-        bool h2Calculated = isSymbolCalculated(hint.fields["referenceH2"].operand, hint.fields["referenceH1"].id);
-        return h1Calculated && h2Calculated;
-    } else {
-        zklog.error("Invalid hint name=" + hint.name);
-        exitProcess();
-        exit(-1);
+bool Starks<ElementType>::isHintResolved(Hint &hint, vector<string> dstFields)
+{   
+    for(uint64_t i = 0; i < dstFields.size(); i++) {
+        auto it = hint.fields.find(dstFields[i]);
+        if(it == hint.fields.end()) {
+            zklog.error("Unknown dest field name=" + dstFields[i]);
+            exitProcess();
+            exit(-1);
+        }
+        if(!isSymbolCalculated(hint.fields[dstFields[i]].operand, hint.fields[dstFields[i]].id)) {
+            return false;
+        }
     }
 
-    return false;
+    return true;
 }
 
 template <typename ElementType>
-bool Starks<ElementType>::canHintBeResolved(Hint &hint)
+bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields)
 {
-    if(hint.name == "subproofvalue") {
-        HintField expression = hint.fields["expression"];
-        if((expression.operand == opType::cm || expression.operand == opType::tmp) 
-            && !isSymbolCalculated(expression.operand, expression.id)) return false;
-    } else if(hint.name == "public") {
-        HintField expression = hint.fields["expression"];
-        if((expression.operand == opType::cm || expression.operand == opType::tmp) 
-            && !isSymbolCalculated(expression.operand, expression.id)) return false;
-    } else if(hint.name == "gsum") {
-        HintField numerator = hint.fields["numerator"];
-        HintField denominator = hint.fields["denominator"];
-        if((numerator.operand == opType::cm || numerator.operand == opType::tmp) 
-            && !isSymbolCalculated(numerator.operand, numerator.id)) return false;
-        if((denominator.operand == opType::cm || denominator.operand == opType::tmp) 
-            && !isSymbolCalculated(denominator.operand, denominator.id)) return false;
-    } else if(hint.name == "gprod") {
-        HintField numerator = hint.fields["numerator"];
-        HintField denominator = hint.fields["denominator"];
-        if((numerator.operand == opType::cm || numerator.operand == opType::tmp) 
-            && !isSymbolCalculated(numerator.operand, numerator.id)) return false;
-        if((denominator.operand == opType::cm || denominator.operand == opType::tmp) 
-            && !isSymbolCalculated(denominator.operand, denominator.id)) return false;
-    } else if(hint.name == "h1h2") {
-        HintField f = hint.fields["f"];
-        HintField t = hint.fields["t"];
-        if((f.operand == opType::cm || f.operand == opType::tmp) 
-            && !isSymbolCalculated(f.operand, f.id)) return false;
-        if((t.operand == opType::cm || t.operand == opType::tmp) 
-            && !isSymbolCalculated(t.operand, t.id)) return false;
-    } else {
-        zklog.error("Invalid hint name=" + hint.name);
-        exitProcess();
-        exit(-1);
+    for(uint64_t i = 0; i < srcFields.size(); i++) {
+        auto it = hint.fields.find(srcFields[i]);
+        if(it == hint.fields.end()) {
+            zklog.error("Unknown dest field name=" + srcFields[i]);
+            exitProcess();
+            exit(-1);
+        }
+        if(hint.fields[srcFields[i]].operand == opType::number) continue;
+        if(!isSymbolCalculated(hint.fields[srcFields[i]].operand, hint.fields[srcFields[i]].id)) {
+            return false;
+        }
     }
 
     return true;
@@ -518,15 +524,47 @@ bool Starks<ElementType>::canHintBeResolved(Hint &hint)
 
 
 template <typename ElementType>
+std::vector<string> Starks<ElementType>::getSrcFields(std::string hintName) {
+    if(hintName == "public" || hintName == "subproofvalue") {
+        return { "expression" };
+    } else if(hintName == "gsum" || hintName == "gprod") {
+        return { "numerator", "denominator" };
+    } else if(hintName == "h1h2") {
+        return { "f", "t" };
+    } else {
+        zklog.error("Invalid hint name=" + hintName);
+        exitProcess();
+        exit(-1);
+    }
+}
+
+template <typename ElementType>
+std::vector<string> Starks<ElementType>::getDstFields(std::string hintName) {
+    if(hintName == "public" || hintName == "subproofvalue" || hintName == "gsum" || hintName == "gprod") {
+        return { "reference" };
+    } else if(hintName == "h1h2") {
+        return { "referenceH1", "referenceH2" };
+    } else {
+        zklog.error("Invalid hint name=" + hintName);
+        exitProcess();
+        exit(-1);
+    }
+}
+
+template <typename ElementType>
 void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params, vector<Hint> &hints) {
 
     vector<Hint> hintsToCalculate;
-
+    
     for(uint64_t i = 0; i < hints.size(); i++) {
         Hint hint = hints[i];
-        if(isHintResolved(hint)) {
+
+        vector<string> srcFields = getSrcFields(hint.name);
+        vector<string> dstFields = getDstFields(hint.name);
+
+        if(isHintResolved(hint, dstFields)) {
             zklog.info("Hint" + to_string(i) + " is already resolved.");
-        } else if(canHintBeResolved(hint)) {
+        } else if(canHintBeResolved(hint, srcFields)) {
             zklog.info("Calculating hint" + to_string(i));
             hintsToCalculate.push_back(hint);
         } else {
@@ -543,8 +581,21 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params, vec
 
     uint64_t numPols = 0;
     for(uint64_t i = 0; i < hintsToCalculate.size(); ++i) {
-        for(auto it = hintsToCalculate[i].fields.begin(); it != hintsToCalculate[i].fields.end(); ++it) {
-            const auto& hintField = it->second;
+        Hint hint = hintsToCalculate[i];
+        vector<string> srcFields = getSrcFields(hint.name);
+        vector<string> dstFields = getDstFields(hint.name);
+
+        vector<string> fields(srcFields.begin(), srcFields.end());
+        fields.insert(fields.end(), dstFields.begin(), dstFields.end());
+
+        for (uint64_t i = 0; i < fields.size(); i++) {
+            auto it = hint.fields.find(fields[i]);
+            if(it == hint.fields.end()) {
+                zklog.error("Unknown field name=" + fields[i]);
+                exitProcess();
+                exit(-1);
+            }
+            HintField hintField = hint.fields[fields[i]];
             if(hintField.operand == opType::cm || hintField.operand == opType::tmp) {
                 cm2Transposed[hintField.id] = numPols++;
             }
@@ -574,25 +625,25 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params, vec
         if (1 == 0)
         {
             // // Build the Hint object
-            // // string hint_label = starkInfo.hints[step][i].type;
-            // std::unique_ptr<Hint> hint = HintBuilder::create(hint_label)->build();
+            // std::unique_ptr<Hint> hint = HintBuilder::create(hint.name)->build();
+
+            // vector<string> srcFields = getSrcFields(hint.name);
+            // vector<string> dstFields = getDstFields(hint.name);
+
+            // vector<string> fields(srcFields.begin(), srcFields.end());
+            // fields.insert(fields.end(), dstFields.begin(), dstFields.end());
 
             // // Prepare polynomials to be sent to the hint
             // std::map<std::string, Polinomial *> polynomials;
-            // for (uint64_t j = 0; j < hints[i].fields.size(); j++)
+            // for (uint64_t j = 0; j < fields.size(); j++)
             // {
+            //     if(hintField.operand == opType::cm || hintField.operand == opType::tmp) {
+            //         polynomials[fields[j]] = &transPols[cm2Transposed[hint.fields[fields[j]].id]];
+            //     }
             // }
-
-            // // Destination fields are included in hints[i].fields ?
 
             // // Resolve hint
-            // hint->resolveHint(N, polynomials);
-
-            // // Update witnessCalculated
-            // for (uint64_t j = 0; j < hints[i].fields.size(); j++)
-            // {
-            //     witnessCalculated[hint.destSymbols[0].id] = true;
-            // }
+            // hint->resolveHint(N, hint, polynomials);
         }
         else {
             if (hint.name == "h1h2")
@@ -613,10 +664,6 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params, vec
                     std::cerr << "Error: calculateH1H2_ invalid" << std::endl;   
                     exit(-1);
                 }
-                if(starkInfo.pil2) {
-                    witnessCalculated[h1Id] = true;
-                    witnessCalculated[h2Id] = true;
-                }
             }
             else if (hint.name == "gprod")
             {
@@ -624,9 +671,6 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params, vec
                 uint64_t numeratorId = hint.fields["numerator"].id;
                 uint64_t denominatorId = hint.fields["denominator"].id;
                 Polinomial::calculateZ(transPols[cm2Transposed[zId]], transPols[cm2Transposed[numeratorId]], transPols[cm2Transposed[denominatorId]]);
-                if(starkInfo.pil2) {
-                    witnessCalculated[zId] = true;
-                }
             }
             else if (hint.name == "gsum")
             {
@@ -646,7 +690,8 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params, vec
 
     TimerStartStep(STARK_CALCULATE_TRANSPOSE_2, step);
     for(uint64_t i = 0; i < hintsToCalculate.size(); ++i) {
-        transposePolsRows(params, transPols, hintsToCalculate[i]);
+        Hint hint = hintsToCalculate[i];
+        transposePolsRows(params, transPols, hint);
     }
     TimerStopAndLogStep(STARK_CALCULATE_TRANSPOSE_2, step);
 
@@ -852,6 +897,27 @@ bool Starks<ElementType>::isSymbolCalculated(opType operand, uint64_t id) {
     }
 
     return isCalculated;
+}
+
+template <typename ElementType>
+void Starks<ElementType>::setSymbolCalculated(opType operand, uint64_t id) {
+    if(operand == opType::const_) {
+        if(!constsCalculated[id]) constsCalculated[id] = true;
+    } else if(operand == opType::cm) {
+        if(!witnessCalculated[id]) witnessCalculated[id] = true;
+    } else if(operand == opType::tmp) {
+        if(!witnessCalculated[id]) witnessCalculated[id] = true;
+    } else if(operand == opType::public_) {
+        if(!publicsCalculated[id]) publicsCalculated[id] = true;
+    } else if(operand == opType::subproofvalue) {
+        if(!subProofValuesCalculated[id]) subProofValuesCalculated[id] = true;
+    } else if(operand == opType::challenge) {
+        if(!challengesCalculated[id]) challengesCalculated[id] = true;
+    } else {
+        zklog.error("Invalid symbol type=" + operand);
+        exitProcess();
+        exit(-1);
+    }
 }
 
 template <typename ElementType>

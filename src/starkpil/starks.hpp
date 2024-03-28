@@ -349,13 +349,17 @@ private:
     void transposePolsColumns(StepsParams& params, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
     void transposePolsRows(StepsParams& params, Polinomial *transPols, Hint hint);
 
-    bool isHintResolved(Hint &hint);
-    bool canHintBeResolved(Hint &hint);
+    std::vector<string> getSrcFields(std::string hintName);
+    std::vector<string> getDstFields(std::string hintName);
+    bool isHintResolved(Hint &hint, std::vector<string> dstFields);
+    bool canHintBeResolved(Hint &hint, std::vector<string> srcFields);
 
     void evmap(StepsParams &params, Polinomial &LEv);
 
     uint64_t checkSymbolsToBeCalculated(vector<Symbol> symbols);
     bool isSymbolCalculated(opType operand, uint64_t id);
+    void setSymbolCalculated(opType operand, uint64_t id);
+
 public:
     // Following function are created to be used by the ffi interface
     void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial* pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
