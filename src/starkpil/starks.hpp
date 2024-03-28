@@ -51,6 +51,7 @@ private:
     uint64_t NExtended;
     uint64_t hashSize;
     uint64_t merkleTreeArity;
+    bool merkleTreeCustom;
     NTT_Goldilocks ntt;
     NTT_Goldilocks nttExtended;
     Polinomial x_n;
@@ -61,7 +62,7 @@ private:
     MerkleTreeType **treesGL;
     MerkleTreeType **treesFRI;
 
-    map<uint64_t, uint64_t> cm2Transposed;
+    vector<int64_t> cm2Transposed;
 
     vector<bool> publicsCalculated;
     vector<bool> constsCalculated;
@@ -82,7 +83,7 @@ void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purp
 
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
-                                                                           starkInfo(config, starkFiles.zkevmStarkInfo),
+                                                                           starkInfo(starkFiles.zkevmStarkInfo),
                                                                            starkFiles(starkFiles),
                                                                            N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
@@ -100,10 +101,12 @@ public:
 
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             hashSize = 1;
-            merkleTreeArity = 16;
+            merkleTreeArity = starkInfo.merkleTreeArity;
+            merkleTreeCustom = starkInfo.merkleTreeCustom;
         } else {
             hashSize = HASH_SIZE;
             merkleTreeArity = 2;
+            merkleTreeCustom = true;
         }
 
         // Allocate an area of memory, mapped to file, to read all the constant polynomials,
@@ -202,16 +205,16 @@ public:
             std::string sectionExt = "cm" + to_string(i + 1) + "_2ns";
             uint64_t nCols = starkInfo.mapSectionsN.section[string2section(section)];
             Goldilocks::Element *pBuffExtended = &mem[starkInfo.mapOffsets.section[string2section(sectionExt)]];
-            treesGL[i] = new MerkleTreeType(NExtended, nCols, pBuffExtended);
+            treesGL[i] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom,  NExtended, nCols, pBuffExtended);
         }
-        treesGL[starkInfo.nStages + 1] = new MerkleTreeType((Goldilocks::Element *)pConstTreeAddress);
+        treesGL[starkInfo.nStages + 1] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, (Goldilocks::Element *)pConstTreeAddress);
 
         treesFRI = new MerkleTreeType*[starkInfo.starkStruct.steps.size() - 1];
         for(uint64_t step = 0; step < starkInfo.starkStruct.steps.size() - 1; ++step) {
             uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
             uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
 
-            treesFRI[step] = new MerkleTreeType(nGroups, groupSize * FIELD_EXTENSION, NULL);
+            treesFRI[step] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
 
@@ -273,8 +276,6 @@ public:
             delete treesFRI[i];
         }
         delete[] treesFRI;
-
-        cm2Transposed.clear();
     };
 
     uint64_t getConstTreeSize()

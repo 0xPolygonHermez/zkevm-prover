@@ -4,11 +4,8 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
-StarkInfo::StarkInfo(const Config &config, string file) : config(config)
+StarkInfo::StarkInfo(string file)
 {
-    // Avoid initialization if we are not going to generate any proof
-    if (!config.generateProof())
-        return;
 
     // Load contents from json file
     TimerStart(STARK_INFO_LOAD);
@@ -109,6 +106,20 @@ void StarkInfo::load(json j)
         qs.push_back(j["qs"][i]);
     }
 
+    if(starkStruct.verificationHashType == "BN128") {
+        if(j.contains("merkleTreeArity")) {
+            merkleTreeArity = j["merkleTreeArity"]; 
+        } else {
+            merkleTreeArity = 16;
+        }
+        
+        if(j.contains("merkleTreeCustom")) {
+            merkleTreeCustom = j["merkleTreeCustom"];
+        } else {
+            merkleTreeCustom = false;
+        }
+    }
+
     mapTotalN = j["mapTotalN"];
     
     std::string ext = pil2 ? "_ext" : "_2ns";
@@ -151,6 +162,9 @@ void StarkInfo::load(json j)
     }
 
     if(pil2) {
+        isVadcop = j["isVadcop"];
+        hashCommits = j["hashCommits"];
+
         for (uint64_t i = 0; i < j["cmPolsMap"].size(); i++) 
         {
             CmPolMap map;

@@ -3,7 +3,7 @@
 #include <algorithm> // std::max
 
 
-MerkleTreeGL::MerkleTreeGL(uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source(_source)
+MerkleTreeGL::MerkleTreeGL(uint64_t _arity, bool _custom, uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source(_source)
 {
 
     if (source == NULL)
@@ -11,16 +11,20 @@ MerkleTreeGL::MerkleTreeGL(uint64_t _height, uint64_t _width, Goldilocks::Elemen
         source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
         isSourceAllocated = true;
     }
+    arity = _arity;
+    custom = _custom;
     numNodes = getNumNodes(height);
     nodes = (Goldilocks::Element *)calloc(numNodes, sizeof(Goldilocks::Element));
     isNodesAllocated = true;
 };
 
-MerkleTreeGL::MerkleTreeGL(Goldilocks::Element *tree)
+MerkleTreeGL::MerkleTreeGL(uint64_t _arity, bool _custom, Goldilocks::Element *tree)
 {
     width = Goldilocks::toU64(tree[0]);
     height = Goldilocks::toU64(tree[1]);
     source = &tree[2];
+    arity = _arity;
+    custom = _custom;
     numNodes = getNumNodes(height);
     nodes = &tree[2 + height * width];
     isNodesAllocated = false;
@@ -92,7 +96,7 @@ void MerkleTreeGL::getGroupProof(Goldilocks::Element *proof, uint64_t idx) {
         proof[i] = getElement(idx, i);
     }
 
-    genMerkleProof(&proof[width], idx, 0, height * HASH_SIZE);
+    genMerkleProof(&proof[width], idx, 0, height * elementSize);
 }
 
 void MerkleTreeGL::genMerkleProof(Goldilocks::Element *proof, uint64_t idx, uint64_t offset, uint64_t n)

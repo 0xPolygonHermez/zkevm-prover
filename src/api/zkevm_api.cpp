@@ -932,9 +932,8 @@ void config_free(void *pConfig) {
     delete config;
 }
 
-void *starkinfo_new(void* pConfig, char* filename) {
-    auto config = (Config*)pConfig;
-    auto starkInfo = new StarkInfo(*config, filename);
+void *starkinfo_new(char* filename) {
+    auto starkInfo = new StarkInfo(filename);
 
     return starkInfo;
 }
@@ -1108,14 +1107,14 @@ void *zkin_new(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs,
 void *transcript_new(uint32_t elementType) {
     // type == 1 => Goldilocks
     // type == 2 => BN128
-    switch (elementType) {
-        case 1:
-            return new TranscriptGL();
-        case 2:
-            return new TranscriptBN128();
-        default:
-            return NULL;
-    }
+    // switch (elementType) {
+    //     case 1:
+    //         return new TranscriptGL();
+    //     case 2:
+    //         return new TranscriptBN128();
+    //     default:
+    //         return NULL;
+    // }
 }
 
 void transcript_add(void *pTranscript, void *pInput, uint64_t size) {

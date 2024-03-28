@@ -16,11 +16,11 @@
 
 const int CHELPERS_HEADER_SECTION = 2;
 const int CHELPERS_STAGES_SECTION = 3;
-const int CHELPERS_BUFFERS_SECTION = 4;
-const int CHELPERS_EXPRESSIONS_SECTION = 5;
-const int CHELPERS_SYMBOLS_SECTION = 6;
-const int CHELPERS_CONSTRAINTS_DEBUG_SECTION = 7;
+const int CHELPERS_BUFFERS_SECTION = 4; 
 
+const int CHELPERS_STAGES_PIL2_SECTION = 2;
+const int CHELPERS_EXPRESSIONS_PIL2_SECTION = 3;
+const int CHELPERS_CONSTRAINTS_PIL2_SECTION = 4;
 
 struct ParserParams
 {
@@ -39,6 +39,12 @@ struct ParserParams
     uint32_t constPolsOffset;
     uint32_t nCmPolsUsed;
     uint32_t cmPolsOffset;
+    uint32_t nChallengesUsed;
+    uint32_t challengesOffset;
+    uint32_t nPublicsUsed;
+    uint32_t publicsOffset;
+    uint32_t nSubproofValuesUsed;
+    uint32_t subproofValuesOffset;
     uint32_t destDim;
     uint32_t destId;
 };
@@ -50,12 +56,15 @@ struct ParserArgs
     uint64_t* numbers;
     uint16_t* constPolsIds;
     uint16_t* cmPolsIds;
+    uint16_t* challengesIds;
+    uint16_t* publicsIds;
+    uint16_t* subproofValuesIds;
 };
 
 class CHelpers
 {
 public:
-    bool pil2_;
+    bool pil2;
     std::map<string, ParserParams> stagesInfo;
     std::map<uint64_t, ParserParams> expressionsInfo;
 
@@ -73,21 +82,30 @@ public:
         delete[] cHelpersArgs.numbers;
         
 
-        if(pil2_) {
+        if(pil2) {
             delete[] cHelpersArgs.constPolsIds;
             delete[] cHelpersArgs.cmPolsIds;
+            delete[] cHelpersArgs.challengesIds;
+            delete[] cHelpersArgs.publicsIds;
+            delete[] cHelpersArgs.subproofValuesIds;
 
             delete[] cHelpersArgsExpressions.ops;
             delete[] cHelpersArgsExpressions.args;
             delete[] cHelpersArgsExpressions.numbers;
             delete[] cHelpersArgsExpressions.constPolsIds;
             delete[] cHelpersArgsExpressions.cmPolsIds;
+            delete[] cHelpersArgsExpressions.challengesIds;
+            delete[] cHelpersArgsExpressions.publicsIds;
+            delete[] cHelpersArgsExpressions.subproofValuesIds;
 
             delete[] cHelpersArgsDebug.ops;
             delete[] cHelpersArgsDebug.args;
             delete[] cHelpersArgsDebug.numbers;
             delete[] cHelpersArgsDebug.constPolsIds;
             delete[] cHelpersArgsDebug.cmPolsIds;
+            delete[] cHelpersArgsDebug.challengesIds;
+            delete[] cHelpersArgsDebug.publicsIds;
+            delete[] cHelpersArgsDebug.subproofValuesIds;
 
             constraintsInfoDebug.clear();
             expressionsInfo.clear();
@@ -96,7 +114,10 @@ public:
         stagesInfo.clear();
     };
 
-    void loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2);
+    void loadCHelpers(BinFileUtils::BinFile *cHelpersBin, bool pil2_);
+    void loadCHelpersPil1(BinFileUtils::BinFile *cHelpersBin);
+    void loadCHelpersPil2(BinFileUtils::BinFile *cHelpersBin);
+
 };
 
 

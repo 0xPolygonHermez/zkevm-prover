@@ -15,7 +15,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
-    TranscriptType transcript;
+    TranscriptType transcript(merkleTreeArity, merkleTreeCustom);
 
     Polinomial evals(starkInfo.evMap.size(), FIELD_EXTENSION);
     Polinomial challenges(starkInfo.nChallenges, FIELD_EXTENSION);
@@ -43,6 +43,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     };
 
     if(starkInfo.pil2) {
+        cm2Transposed.resize(starkInfo.cmPolsMap.size(), -1);
         publicsCalculated.resize(starkInfo.nPublics, true);
 
         subProofValuesCalculated.resize(starkInfo.nSubProofValues, false);
@@ -116,7 +117,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     if(starkInfo.pil2) {
         Polinomial challenge(1, FIELD_EXTENSION);
         getChallenge(transcript, *challenge[0]);
-        TranscriptType transcriptPermutation;
+        TranscriptType transcriptPermutation(merkleTreeArity, merkleTreeCustom);
         addTranscript(transcriptPermutation, challenge);
         transcriptPermutation.getPermutations(friQueries, starkInfo.starkStruct.nQueries, starkInfo.starkStruct.steps[0].nBits);
     } else {
@@ -237,7 +238,7 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams& params, FRIPr
                 }
                 uint64_t newSymbolsToBeCalculated = checkSymbolsToBeCalculated(starkInfo.symbolsStage[step - 1]);
                 if(newSymbolsToBeCalculated == symbolsToBeCalculated) {
-                    zklog.error("Something went wrong when calculating stage " + to_string(step));
+                    zklog.info("Something went wrong when calculating stage " + to_string(step));
                     exitProcess();
                     exit(-1);
                 }
@@ -426,13 +427,14 @@ void Starks<ElementType>::transposePolsColumns(StepsParams& params, Polinomial* 
         Polinomial p = starkInfo.getPolinomial(params.pols, starkInfo.getPolinomialRef("exp", id), N);
         transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
         Polinomial::copy(transPols[indx], p);
-        indx++;
+        cm2Transposed[id] = indx++;
     }
 
     for(uint64_t i = 0; i < hint.destSymbols.size(); i++) {
         uint64_t id = hint.destSymbols[i].id;
         Polinomial p = starkInfo.getPolinomial(params.pols, starkInfo.getPolinomialRef("cm_n", id), N);
         transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
+        Polinomial::copy(transPols[indx], p);
         cm2Transposed[id] = indx++;
     }
 }
@@ -466,7 +468,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params) {
             if(!symbolsHintsToBeCalculated) {
                 hints.push_back(starkInfo.hints[step][i]);
             } else {
-                zklog.error("Skipping hint=" + to_string(i) + " because it has symbols that are not calculated yet.");
+                zklog.info("Skipping hint=" + to_string(i) + " because it has symbols that are not calculated yet.");
             }
         }
     }
@@ -787,7 +789,7 @@ void Starks<ElementType>::printPolRoot(uint64_t polId, StepsParams& params) {
     pCol.potConstruct(pBuffCol, p.degree(), p.dim(), p.dim());
     Polinomial::copy(pCol, p);
 
-    MerkleTreeGL *mt_ = new MerkleTreeGL(N, p.dim(), pBuffCol);
+    MerkleTreeGL *mt_ = new MerkleTreeGL(merkleTreeArity, true, N, p.dim(), pBuffCol);
     mt_->merkelize();
 
     Goldilocks::Element root[4];
