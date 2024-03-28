@@ -17,6 +17,11 @@
 #include "exit_process.hpp"
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
+#include "hint.hpp"
+#include "hint_builder.hpp"
+#include "hint/h1h2_hint.hpp"
+#include "hint/gprod_hint.hpp"
+#include "hint/gsum_hint.hpp"
 
 struct StarkFiles
 {
@@ -238,6 +243,10 @@ public:
         if(currentSectionStart > nttHelperSize) {
             optimizeMemoryNTT = true;
         }
+
+        Hints::HintBuilder::registerBuilder(Hints::H1H2Hint::getName(), std::make_unique<Hints::H1H2HintBuilder>());
+        Hints::HintBuilder::registerBuilder(Hints::GProdHint::getName(), std::make_unique<Hints::GProdHintBuilder>());
+        Hints::HintBuilder::registerBuilder(Hints::GSumHint::getName(), std::make_unique<Hints::GSumHintBuilder>());
     };
     ~Starks()
     {

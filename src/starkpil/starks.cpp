@@ -570,44 +570,76 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams& params, vec
     for (uint64_t i = 0; i < hintsToCalculate.size(); i++)
     {
         Hint hint = hintsToCalculate[i];
-        
-        if(hint.name == "h1h2") {
-            uint64_t h1Id = hint.fields["referenceH1"].id;
-            uint64_t h2Id = hint.fields["referenceH2"].id;
-            uint64_t fId = hint.fields["f"].id;
-            uint64_t tId = hint.fields["t"].id;
 
-            if (transPols[cm2Transposed[h1Id]].dim() == 1)
+        if (1 == 0)
+        {
+            // // Build the Hint object
+            // // string hint_label = starkInfo.hints[step][i].type;
+            // std::unique_ptr<Hint> hint = HintBuilder::create(hint_label)->build();
+
+            // // Prepare polynomials to be sent to the hint
+            // std::map<std::string, Polinomial *> polynomials;
+            // for (uint64_t j = 0; j < hints[i].fields.size(); j++)
+            // {
+            // }
+
+            // // Destination fields are included in hints[i].fields ?
+
+            // // Resolve hint
+            // hint->resolveHint(N, polynomials);
+
+            // // Update witnessCalculated
+            // for (uint64_t j = 0; j < hints[i].fields.size(); j++)
+            // {
+            //     witnessCalculated[hint.destSymbols[0].id] = true;
+            // }
+        }
+        else {
+            if (hint.name == "h1h2")
             {
-                Polinomial::calculateH1H2_opt1(transPols[cm2Transposed[h1Id]], transPols[cm2Transposed[h2Id]], transPols[cm2Transposed[fId]], transPols[cm2Transposed[tId]], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 3) * N);
+                uint64_t h1Id = hint.fields["referenceH1"].id;
+                uint64_t h2Id = hint.fields["referenceH2"].id;
+                uint64_t fId = hint.fields["f"].id;
+                uint64_t tId = hint.fields["t"].id;
+
+                if (transPols[cm2Transposed[h1Id]].dim() == 1)
+                {
+                    Polinomial::calculateH1H2_opt1(transPols[cm2Transposed[h1Id]], transPols[cm2Transposed[h2Id]], transPols[cm2Transposed[fId]], transPols[cm2Transposed[tId]], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 3) * N);
+                }
+                else if(transPols[cm2Transposed[h1Id]].dim() == 3)
+                {
+                    Polinomial::calculateH1H2_opt3(transPols[cm2Transposed[h1Id]], transPols[cm2Transposed[h2Id]], transPols[cm2Transposed[fId]], transPols[cm2Transposed[tId]], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 5) * N);
+                } else {
+                    std::cerr << "Error: calculateH1H2_ invalid" << std::endl;   
+                    exit(-1);
+                }
+                if(starkInfo.pil2) {
+                    witnessCalculated[h1Id] = true;
+                    witnessCalculated[h2Id] = true;
+                }
             }
-            else if(transPols[cm2Transposed[h1Id]].dim() == 3)
+            else if (hint.name == "gprod")
             {
-                Polinomial::calculateH1H2_opt3(transPols[cm2Transposed[h1Id]], transPols[cm2Transposed[h2Id]], transPols[cm2Transposed[fId]], transPols[cm2Transposed[tId]], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 5) * N);
-            } else {
-                std::cerr << "Error: calculateH1H2_ invalid" << std::endl;   
+                uint64_t zId = hint.fields["reference"].id;
+                uint64_t numeratorId = hint.fields["numerator"].id;
+                uint64_t denominatorId = hint.fields["denominator"].id;
+                Polinomial::calculateZ(transPols[cm2Transposed[zId]], transPols[cm2Transposed[numeratorId]], transPols[cm2Transposed[denominatorId]]);
+                if(starkInfo.pil2) {
+                    witnessCalculated[zId] = true;
+                }
+            }
+            else if (hint.name == "gsum")
+            {
+            }
+            else if (hint.name == "subproofValue")
+            {
+            }
+            else
+            {
+                zklog.error("Invalid hint type=" + hint.name);
+                exitProcess();
                 exit(-1);
             }
-            if(starkInfo.pil2) {
-                witnessCalculated[h1Id] = true;
-                witnessCalculated[h2Id] = true;
-            }
-        } else if(hint.name == "gprod") {
-            uint64_t zId = hint.fields["reference"].id;
-            uint64_t numeratorId = hint.fields["numerator"].id;
-            uint64_t denominatorId = hint.fields["denominator"].id;
-            Polinomial::calculateZ(transPols[cm2Transposed[zId]], transPols[cm2Transposed[numeratorId]], transPols[cm2Transposed[denominatorId]]);
-            if(starkInfo.pil2) {
-                witnessCalculated[zId] = true;
-            }
-        } else if(hint.name == "gsum") {
-            
-        } else if(hint.name == "subproofValue") {
-        
-        } else {
-            zklog.error("Invalid hint type=" + hint.name);
-            exitProcess();
-            exit(-1);
         }
     }
     TimerStopAndLogStep(STARK_CALCULATE_HINTS, step);
