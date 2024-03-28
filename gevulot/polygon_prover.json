@@ -1,0 +1,19 @@
+{
+  "RebootOnExit": true,
+  "RunConfig": {
+    "CPUs": 20,
+    "Memory": "24g"
+  },
+  "ManifestPassthrough": {
+    "readonly_rootfs": "true"
+  },
+  "Env":{
+    "RUST_BACKTRACE": "1",
+    "RUST_LOG": "trace"
+  },
+  "Program":"./build/zkProver",
+  "Files": ["gevulot/kzg_bn254_22.srs"],
+  "Mounts": {
+    "%1": "/workspace"
+  }
+}

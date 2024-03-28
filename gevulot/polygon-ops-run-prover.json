@@ -1,0 +1,16 @@
+{
+    "RebootOnExit": true,
+    "RunConfig": {
+      "CPUs": 1,
+      "Memory": "23g"
+    },
+    "Env":{
+      "GLOG_logtostderr": "1"
+    },
+    "Dirs":["gevulot", "config"],
+    "Args": [
+      "polygon_prover",
+      "-c",
+      "config.json"],
+    "Program":"./build/zkProver"
+}
