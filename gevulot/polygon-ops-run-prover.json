@@ -7,10 +7,10 @@
     "Env":{
       "GLOG_logtostderr": "1"
     },
-    "Dirs":["gevulot", "config"],
+    "Dirs":["gevulot", "config", "testvectors"],
     "Args": [
       "polygon_prover",
       "-c",
-      "config.json"],
+      "./testvectors/hashFunctions/config_keccak_test.json "],
     "Program":"./build/zkProver"
 }
