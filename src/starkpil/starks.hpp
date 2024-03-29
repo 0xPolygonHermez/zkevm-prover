@@ -350,7 +350,7 @@ public:
 private:
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
 
-    bool canExpressionBeCalculated(ParserArgs &cHelpersArgsExpressions);
+    bool canExpressionBeCalculated(ParserParams &parserParams);
 
     void transposePolsColumns(StepsParams& params, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
     void transposePolsRows(StepsParams& params, Polinomial *transPols, Hint hint);

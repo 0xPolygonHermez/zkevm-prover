@@ -462,9 +462,42 @@ void Starks<ElementType>::computeFRIQueries(FRIProof<ElementType> &fproof, Polin
 
 
 template <typename ElementType>
-bool Starks<ElementType>::canExpressionBeCalculated(ParserArgs &cHelpersArgsExpressions) {
+bool Starks<ElementType>::canExpressionBeCalculated(ParserParams &parserParams) {
+    for(uint64_t i = 0; i < parserParams.nCmPolsUsed; i++) {
+        uint64_t cmPolUsedId = chelpers.cHelpersArgsExpressions.cmPolsIds[parserParams.cmPolsOffset + i];
+        if (!isSymbolCalculated(opType::cm, cmPolUsedId)) {
+            return false;
+        }
+    }
+
+    for(uint64_t i = 0; i < parserParams.nChallengesUsed; i++) {
+        uint64_t challengeUsedId = chelpers.cHelpersArgsExpressions.challengesIds[parserParams.challengesOffset + i];
+        if (!isSymbolCalculated(opType::challenge, challengeUsedId)) {
+            return false;
+        }
+    }
+
+    for(uint64_t i = 0; i < parserParams.nPublicsUsed; i++) {
+        uint64_t publicUsedId = chelpers.cHelpersArgsExpressions.publicsIds[parserParams.publicsOffset + i];
+        if (!isSymbolCalculated(opType::public_, publicUsedId)) {
+            return false;
+        }
+    }
+
+    for(uint64_t i = 0; i < parserParams.nConstPolsUsed; i++) {
+        uint64_t constPolUsedId = chelpers.cHelpersArgsExpressions.constPolsIds[parserParams.constPolsOffset + i];
+        if (!isSymbolCalculated(opType::const_, constPolUsedId)) {
+            return false;
+        }
+    }
+
+    for(uint64_t i = 0; i < parserParams.nSubproofValuesUsed; i++) {
+        uint64_t subproofValueUsedId = chelpers.cHelpersArgsExpressions.subproofValuesIds[parserParams.subproofValuesOffset + i];
+        if (!isSymbolCalculated(opType::subproofvalue, subproofValueUsedId)) {
+            return false;
+        }
+    }
     return true;
-    // TODO!!!
 }
 
 template <typename ElementType>
