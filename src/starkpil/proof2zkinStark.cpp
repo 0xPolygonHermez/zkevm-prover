@@ -12,9 +12,9 @@ ordered_json proof2zkinStark(ordered_json &proof, StarkInfo &starkInfo)
     uint64_t nStages = starkInfo.nStages;
     uint64_t nSubProofValues = starkInfo.nSubProofValues;
    
-    string valsQ = starkInfo.pil2 ? "s0_valsQ" : "s0_vals4";
-    string siblingsQ = starkInfo.pil2 ? "s0_siblingsQ" : "s0_siblings4";
-    string rootQ = starkInfo.pil2 ? "rootQ" : "root4";
+    string valsQ = "s0_vals" + to_string(nStages + 1);
+    string siblingsQ = "s0_siblings" + to_string(nStages + 1);
+    string rootQ = "root" + to_string(nStages + 1);
 
     ordered_json zkinOut = ordered_json::object();
 
@@ -83,9 +83,9 @@ ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &ve
     uint64_t friSteps = starkInfo.starkStruct.steps.size();
     uint64_t nStages = starkInfo.nStages;
 
-    string valsQ = starkInfo.pil2 ? "s0_valsQ" : "s0_vals4";
-    string siblingsQ = starkInfo.pil2 ? "s0_siblingsQ" : "s0_siblings4";
-    string rootQ = starkInfo.pil2 ? "rootQ" : "root4";
+    string valsQ = "s0_vals" + to_string(nStages + 1);
+    string siblingsQ = "s0_siblings" + to_string(nStages + 1);
+    string rootQ = "root" + to_string(nStages + 1);
 
     ordered_json zkinOut = ordered_json::object();
 

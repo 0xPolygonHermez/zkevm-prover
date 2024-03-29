@@ -230,13 +230,11 @@ public:
         TimerStart(CHELPERS_ALLOCATION);
         if(!starkFiles.zkevmCHelpers.empty()) {
             cHelpersBinFile = BinFileUtils::openExisting(starkFiles.zkevmCHelpers, "chps", 1);
-            chelpers.loadCHelpers(cHelpersBinFile.get(), starkInfo.pil2);
+            chelpers.loadCHelpers(cHelpersBinFile.get());
         }
         TimerStopAndLog(CHELPERS_ALLOCATION);
 
-        if(starkInfo.pil2) {
-            constsCalculated.resize(starkInfo.nConstants, true);
-        }
+        constsCalculated.resize(starkInfo.nConstants, true);
         
         if(starkInfo.mapOffsets.section[eSection::cm1_2ns] < starkInfo.mapOffsets.section[eSection::tmpExp_n]) {
             optimizeMemoryNTTCommitPols = true;
@@ -330,8 +328,8 @@ public:
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
-    void calculateExpressions(uint64_t step, bool after, StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateExpression(uint64_t expId, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpressions(uint64_t step, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpression(uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps);
     void calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps);
     
     void computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps);
@@ -351,6 +349,8 @@ public:
 
 private:
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
+
+    bool canExpressionBeCalculated(ParserArgs &cHelpersArgsExpressions);
 
     void transposePolsColumns(StepsParams& params, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
     void transposePolsRows(StepsParams& params, Polinomial *transPols, Hint hint);

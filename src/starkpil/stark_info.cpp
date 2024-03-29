@@ -17,12 +17,6 @@ StarkInfo::StarkInfo(string file)
 
 void StarkInfo::load(json j)
 {   
-    if(j.contains("pil2")) {
-        pil2 = j["pil2"];
-    } else {
-        pil2 = false;
-    }
-
     starkStruct.nBits = j["starkStruct"]["nBits"];
     starkStruct.nBitsExt = j["starkStruct"]["nBitsExt"];
     starkStruct.nQueries = j["starkStruct"]["nQueries"];
@@ -122,7 +116,7 @@ void StarkInfo::load(json j)
 
     mapTotalN = j["mapTotalN"];
     
-    std::string ext = pil2 ? "_ext" : "_2ns";
+    std::string ext = "_ext";
 
     for(uint64_t i = 1; i <= nStages + 1; i++) {
         string s = to_string(i);
@@ -153,131 +147,49 @@ void StarkInfo::load(json j)
         EvMap map;
         map.setType(j["evMap"][i]["type"]);
         map.id = j["evMap"][i]["id"];
-        if(pil2) {
-            map.prime = j["evMap"][i]["prime"];
-        } else {
-            map.prime = j["evMap"][i]["prime"] ? 1 : 0; 
-        }
+        map.prime = j["evMap"][i]["prime"];
         evMap.push_back(map);
     }
 
-    if(pil2) {
-        isVadcop = j["isVadcop"];
-        hashCommits = j["hashCommits"];
+    isVadcop = j["isVadcop"];
+    hashCommits = j["hashCommits"];
 
-        for (uint64_t i = 0; i < j["cmPolsMap"].size(); i++) 
-        {
-            CmPolMap map;
-            map.stage = j["cmPolsMap"][i]["stage"];
-            map.stageNum = j["cmPolsMap"][i]["stageNum"];
-            map.name = j["cmPolsMap"][i]["name"];
-            map.dim = j["cmPolsMap"][i]["dim"];
-            map.imPol = j["cmPolsMap"][i]["imPol"];
-            map.stagePos = j["cmPolsMap"][i]["stagePos"];
-            map.stageId = j["cmPolsMap"][i]["stageId"];
-            cmPolsMap.push_back(map);
-        }
-
-        for (uint64_t i = 0; i < j["symbolsStage"].size(); i++) 
-        {
-            symbolsStage.push_back(std::vector<Symbol>());
-            for(uint64_t k = 0; k < j["symbolsStage"][i].size(); k++) 
-            {
-                Symbol symbol;
-                symbol.setSymbol(j["symbolsStage"][i][k]);
-                symbolsStage[i].push_back(symbol);
-            }
-        }
-        
-        for(uint64_t i = 0; i < nStages; ++i) {
-            std::string stage = "stage" + to_string(i + 1);
-            stageCodeSymbols.push_back(std::vector<Symbol>());
-            expressionsCodeSymbols.push_back(std::vector<ExpressionCodeSymbol>());
-            for(uint64_t k = 0; k < j["code"][stage]["symbolsCalculated"].size(); k++) {
-                Symbol symbol;
-                symbol.setSymbol(j["code"][stage]["symbolsCalculated"][k]);
-                stageCodeSymbols[i].push_back(symbol);
-            }
-        }
-
-        for(uint64_t i = 0; i < j["expressionsCode"].size(); i++) {
-            ExpressionCodeSymbol expSymbol;
-            expSymbol.stage = j["expressionsCode"][i]["stage"];
-            expSymbol.expId = j["expressionsCode"][i]["expId"];
-            for(uint64_t k = 0; k < j["expressionsCode"][i]["code"]["symbolsUsed"].size(); k++) {
-                Symbol symbol; 
-                symbol.setSymbol(j["expressionsCode"][i]["code"]["symbolsUsed"][k]);
-                expSymbol.symbolsUsed.push_back(symbol);
-            }
-            expressionsCodeSymbols[expSymbol.stage - 1].push_back(expSymbol);
-        }
-
-    } else {
-        for (uint64_t i = 0; i < j["varPolMap"].size(); i++)
-        {
-            VarPolMap map;
-            std::string section = j["varPolMap"][i]["section"];
-            map.section = string2section(section);
-            map.sectionPos = j["varPolMap"][i]["sectionPos"];
-            map.dim = j["varPolMap"][i]["dim"];
-            varPolMap.push_back(map);
-        }
-
-        for (uint64_t i = 0; i < j["cm_n"].size(); i++)
-            cm_n.push_back(j["cm_n"][i]);
-
-        for (uint64_t i = 0; i < j["cm_2ns"].size(); i++)
-            cm_2ns.push_back(j["cm_2ns"][i]);
-        
-
-        for (auto it =  j["exp2pol"].begin(); it != j["exp2pol"].end(); ++it) {
-            uint64_t key = std::stoull(it.key()); 
-            uint64_t value = it.value();
-            exp2pol.insert(pair(key,value));
-        }
+    for (uint64_t i = 0; i < j["cmPolsMap"].size(); i++) 
+    {
+        CmPolMap map;
+        map.stage = j["cmPolsMap"][i]["stage"];
+        map.stageNum = j["cmPolsMap"][i]["stageNum"];
+        map.name = j["cmPolsMap"][i]["name"];
+        map.dim = j["cmPolsMap"][i]["dim"];
+        map.imPol = j["cmPolsMap"][i]["imPol"];
+        map.stagePos = j["cmPolsMap"][i]["stagePos"];
+        map.stageId = j["cmPolsMap"][i]["stageId"];
+        cmPolsMap.push_back(map);
     }
-}
 
-uint64_t StarkInfo::getPolinomialRef(std::string type, uint64_t index) {
-
-    if(pil2) {
-        return index;
-    } else {
-        if(type == "cm_n") 
-            return cm_n[index];
-        if (type == "cm_2ns") 
-            return cm_2ns[index];
-        if (type == "exp")
-            return exp2pol[index];
-        if (type == "q") 
-            return qs[index];
-        zklog.error("getPolinomialRef() found invalid type=" + type);
-        exitProcess();
-        exit(-1);
+    for (uint64_t i = 0; i < j["symbolsStage"].size(); i++) 
+    {
+        symbolsStage.push_back(std::vector<Symbol>());
+        for(uint64_t k = 0; k < j["symbolsStage"][i].size(); k++) 
+        {
+            Symbol symbol;
+            symbol.setSymbol(j["symbolsStage"][i][k]);
+            symbolsStage[i].push_back(symbol);
+        }
     }
 }
 
 Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg)
 {
-    if(pil2) {
-        CmPolMap polInfo = cmPolsMap[idPol];
-        uint64_t dim = polInfo.dim;
-        uint64_t N = (1 << starkStruct.nBits);
-        string stage = polInfo.stage == string("cmQ") ? "cm" + to_string(nStages + 1) : polInfo.stage;
-        eSection section = N == deg ? string2section(stage + "_n") : string2section(stage + "_2ns");
-        uint64_t nCols = mapSectionsN.section[section];
-        uint64_t offset = mapOffsets.section[section];
-        offset += polInfo.stagePos;
-        return Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
-    } else {
-        VarPolMap polInfo = varPolMap[idPol];
-        uint64_t dim = polInfo.dim;
-        uint64_t offset = mapOffsets.section[polInfo.section];
-        uint64_t nCols = mapSectionsN.section[polInfo.section];
-        offset += polInfo.sectionPos;
-        return Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
-    }
-    
+    CmPolMap polInfo = cmPolsMap[idPol];
+    uint64_t dim = polInfo.dim;
+    uint64_t N = (1 << starkStruct.nBits);
+    string stage = polInfo.stage == string("cmQ") ? "cm" + to_string(nStages + 1) : polInfo.stage;
+    eSection section = N == deg ? string2section(stage + "_n") : string2section(stage + "_2ns");
+    uint64_t nCols = mapSectionsN.section[section];
+    uint64_t offset = mapOffsets.section[section];
+    offset += polInfo.stagePos;
+    return Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
 }
 
 opType string2opType(const string s) 

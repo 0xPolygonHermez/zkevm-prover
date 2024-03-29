@@ -114,23 +114,6 @@ public:
     };
 };
 
-class ExpressionCodeSymbol 
-{
-public:
-    uint64_t stage;
-    uint64_t expId;
-    vector<Symbol> symbolsUsed;
-};
-
-
-class VarPolMap
-{
-public:
-    eSection section;
-    uint64_t dim;
-    uint64_t sectionPos;
-    uint64_t deg;
-};
 
 class EvMap
 {
@@ -166,7 +149,6 @@ private:
 public:
     StarkStruct starkStruct;
 
-    bool pil2;
     uint64_t subproofId;
     uint64_t airId;
 
@@ -205,29 +187,16 @@ public:
     PolsSections mapSectionsN;
     PolsSections mapOffsets;
 
-    // pil2-stark-js specific
     vector<CmPolMap> cmPolsMap;
     vector<vector<Symbol>> symbolsStage;
-    vector<vector<Symbol>> stageCodeSymbols;
-    vector<vector<ExpressionCodeSymbol>> expressionsCodeSymbols;
     
-    // pil-stark specific
-    vector<VarPolMap> varPolMap;
-    vector<uint64_t> cm_n;
-    vector<uint64_t> cm_2ns;
-
     vector<EvMap> evMap;
-
-
-    map<uint64_t,uint64_t> exp2pol;
     
     /* Constructor */
     StarkInfo(string file);
 
     /* Loads data from a json object */
     void load (json j);
-
-    uint64_t getPolinomialRef(std::string type, uint64_t index);
 
     /* Returns a polynomial specified by its ID */
     Polinomial getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg);
