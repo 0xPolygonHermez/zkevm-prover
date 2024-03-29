@@ -22,9 +22,6 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     Polinomial xDivXSubXi(starkInfo.openingPoints.size() * NExtended, FIELD_EXTENSION);
 
-    ElementType verkey[hashSize];
-    treesGL[starkInfo.nStages + 1]->getRoot(verkey);
-
     StepsParams params = {
         pols : mem,
         pConstPols : pConstPols,
@@ -59,7 +56,12 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     // 0.- Add const root and publics to transcript
     //--------------------------------
 
-    addTranscript(transcript, &verkey[0], hashSize);
+    if(!debug) {
+        ElementType verkey[hashSize];
+        treesGL[starkInfo.nStages + 1]->getRoot(verkey);
+        addTranscript(transcript, &verkey[0], hashSize);
+    }
+    
     addTranscriptGL(transcript, &publicInputs[0], starkInfo.nPublics);
 
     for (uint64_t step = 1; step <= starkInfo.nStages; step++)
@@ -69,11 +71,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         TimerStopAndLogExpr(STARK_STEP, step);
     }
 
-    if (debug)
-    {
-        TimerStopAndLog(STARK_PROOF);
-        return;
-    }
+    if (debug) return;
 
     TimerStart(STARK_STEP_Q);
     computeStage(starkInfo.nStages + 1, params, proof, transcript, chelpersSteps);

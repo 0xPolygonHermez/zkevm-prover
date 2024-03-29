@@ -28,12 +28,12 @@ int main(int argc, char **argv)
 
     string testName = argv[1];
 
-    if(testName != "all_pil2" && testName != "compressor_pil2") {
+    if(testName != "all" && testName != "compressor") {
         cout << "Error: unknown test name " << testName << endl;
         return -1;
     }
 
-    if(testName == "all_pil2") {
+    if(testName == "all") {
         constPols = "test/examples/all/all.const";
         constTree = "test/examples/all/all.consttree";
         starkInfoFile = "test/examples/all/all.starkinfo.json";
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         } else {
             cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
         }
-    } else if(testName == "compressor_pil2") {
+    } else if(testName == "compressor") {
         constPols = "test/examples/compressor/all.c18.const";
         constTree = "test/examples/compressor/all.c18.consttree";
         starkInfoFile = "test/examples/compressor/all.c18.starkinfo.json";
@@ -90,9 +90,9 @@ int main(int argc, char **argv)
 
     nlohmann::ordered_json jProof;
 
-    if(testName == "all_pil2") {
+    if(testName == "all") {
         FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
-        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
+        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
@@ -101,10 +101,10 @@ int main(int argc, char **argv)
             starks.genProof(fproof, &publicInputs[0], &allPil2Steps);
         }
         jProof = fproof.proofs.proof2json();
-    } else if(testName == "compressor_pil2") {
+    } else if(testName == "compressor") {
         
         FRIProof<RawFr::Element> fproof(starkInfo, 1);
-        Starks<RawFr::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
+        Starks<RawFr::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 

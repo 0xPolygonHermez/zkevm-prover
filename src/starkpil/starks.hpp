@@ -91,7 +91,7 @@ void merkelizeMemory(); // function for DBG purposes
 void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
 
 public:
-    Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
+    Starks(const Config &config, StarkFiles starkFiles, void *_pAddress, bool debug_) : config(config),
                                                                            starkInfo(starkFiles.zkevmStarkInfo),
                                                                            starkFiles(starkFiles),
                                                                            N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
@@ -104,6 +104,8 @@ public:
                                                                            pAddress(_pAddress),
                                                                            x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
     {
+        debug = debug_;
+
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
@@ -144,36 +146,38 @@ public:
         pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
-        // Map constants tree file to memory
-        TimerStart(LOAD_CONST_TREE_TO_MEMORY);
-        pConstTreeAddress = NULL;
-        if (starkFiles.zkevmConstantsTree.size() == 0)
-        {
-            zklog.error("Starks::Starks() received an empty config.zkevmConstantsTree");
-            exitProcess();
+        if(!debug) {
+            // Map constants tree file to memory
+            TimerStart(LOAD_CONST_TREE_TO_MEMORY);
+            pConstTreeAddress = NULL;
+            if (starkFiles.zkevmConstantsTree.size() == 0)
+            {
+                zklog.error("Starks::Starks() received an empty config.zkevmConstantsTree");
+                exitProcess();
+            }
+
+            uint64_t constTreeSizeBytes = getConstTreeSize();
+
+            if (config.mapConstantsTreeFile)
+            {
+                pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes, false);
+                zklog.info("Starks::Starks() successfully mapped " + to_string(constTreeSizeBytes) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
+            }
+            else
+            {
+                pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes);
+                zklog.info("Starks::Starks() successfully copied " + to_string(constTreeSizeBytes) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
+            }
+            TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
+
+            // Initialize and allocate ConstantPols2ns
+            TimerStart(LOAD_CONST_POLS_2NS_TO_MEMORY);
+            pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
+            pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
+            std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
+
+            TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);
         }
-
-        uint64_t constTreeSizeBytes = getConstTreeSize();
-
-        if (config.mapConstantsTreeFile)
-        {
-            pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes, false);
-            zklog.info("Starks::Starks() successfully mapped " + to_string(constTreeSizeBytes) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
-        }
-        else
-        {
-            pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes);
-            zklog.info("Starks::Starks() successfully copied " + to_string(constTreeSizeBytes) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
-        }
-        TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
-
-        // Initialize and allocate ConstantPols2ns
-        TimerStart(LOAD_CONST_POLS_2NS_TO_MEMORY);
-        pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-        pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
-        std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
-
-        TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);
 
         // TODO x_n and x_2ns could be precomputed
         TimerStart(COMPUTE_X_N_AND_X_2_NS);
@@ -216,14 +220,22 @@ public:
             Goldilocks::Element *pBuffExtended = &mem[starkInfo.mapOffsets.section[string2section(sectionExt)]];
             treesGL[i] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom,  NExtended, nCols, pBuffExtended);
         }
-        treesGL[starkInfo.nStages + 1] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, (Goldilocks::Element *)pConstTreeAddress);
 
-        treesFRI = new MerkleTreeType*[starkInfo.starkStruct.steps.size() - 1];
-        for(uint64_t step = 0; step < starkInfo.starkStruct.steps.size() - 1; ++step) {
-            uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
-            uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
+        if(debug) {
+            treesGL[starkInfo.nStages + 1] = new MerkleTreeType();
+        } else {
+            treesGL[starkInfo.nStages + 1] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, (Goldilocks::Element *)pConstTreeAddress);
+        }
 
-            treesFRI[step] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
+
+        if(!debug) {
+            treesFRI = new MerkleTreeType*[starkInfo.starkStruct.steps.size() - 1];
+            for(uint64_t step = 0; step < starkInfo.starkStruct.steps.size() - 1; ++step) {
+                uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
+                uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
+
+                treesFRI[step] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
+            }
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
 
@@ -258,9 +270,7 @@ public:
             return;
 
         delete pConstPols;
-        delete pConstPols2ns;
-        free(pConstPolsAddress2ns);
-
+        
         if (config.mapConstPolsFile)
         {
             unmapFile(pConstPolsAddress, constPolsSize);
@@ -269,14 +279,6 @@ public:
         {
             free(pConstPolsAddress);
         }
-        if (config.mapConstantsTreeFile)
-        {
-            unmapFile(pConstTreeAddress, constPolsSize);
-        }
-        else
-        {
-            free(pConstTreeAddress);
-        }
 
         for (uint i = 0; i < starkInfo.nStages + 2; i++)
         {
@@ -284,11 +286,25 @@ public:
         }
         delete[] treesGL;
 
-        for (uint64_t i = 0; i < starkInfo.starkStruct.steps.size() - 1; i++)
-        {
-            delete treesFRI[i];
+        if(!debug) {
+            if (config.mapConstantsTreeFile)
+            {
+                unmapFile(pConstTreeAddress, constPolsSize);
+            }
+            else
+            {
+                free(pConstTreeAddress);
+            }
+
+            delete pConstPols2ns;
+            free(pConstPolsAddress2ns);
+
+            for (uint64_t i = 0; i < starkInfo.starkStruct.steps.size() - 1; i++)
+            {
+                delete treesFRI[i];
+            }
+            delete[] treesFRI;
         }
-        delete[] treesFRI;
     };
 
     uint64_t getConstTreeSize()

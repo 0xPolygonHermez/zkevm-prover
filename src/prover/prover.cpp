@@ -169,12 +169,12 @@ Prover::Prover(Goldilocks &fr,
             string recursive2CHelpers = USE_GENERIC_PARSER ? config.recursive2GenericCHelpers : config.recursive2CHelpers;
             string recursivefCHelpers = USE_GENERIC_PARSER ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
 
-            starkZkevm = new Starks<Goldilocks::Element>(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, zkevmCHelpers}, pAddress);
+            starkZkevm = new Starks<Goldilocks::Element>(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, zkevmCHelpers}, pAddress, false);
             if(optimizeMemoryNTT) starkZkevm->optimizeMemoryNTT = true;
-            starksC12a = new Starks<Goldilocks::Element>(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, c12aCHelpers}, pAddress);
-            starksRecursive1 = new Starks<Goldilocks::Element>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, recursive1CHelpers}, pAddress);
-            starksRecursive2 = new Starks<Goldilocks::Element>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, recursive2CHelpers}, pAddress);
-            starksRecursiveF = new Starks<RawFr::Element>(config, {config.recursivefConstPols, config.mapConstPolsFile, config.recursivefConstantsTree, config.recursivefStarkInfo, recursivefCHelpers}, pAddressStarksRecursiveF);
+            starksC12a = new Starks<Goldilocks::Element>(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, c12aCHelpers}, pAddress, false);
+            starksRecursive1 = new Starks<Goldilocks::Element>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, recursive1CHelpers}, pAddress, false);
+            starksRecursive2 = new Starks<Goldilocks::Element>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, recursive2CHelpers}, pAddress, false);
+            starksRecursiveF = new Starks<RawFr::Element>(config, {config.recursivefConstPols, config.mapConstPolsFile, config.recursivefConstantsTree, config.recursivefStarkInfo, recursivefCHelpers}, pAddressStarksRecursiveF, false);
 #endif
         }
     }
