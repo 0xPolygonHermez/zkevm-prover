@@ -33,7 +33,7 @@
     "saveOutputToFile": true,
     "saveProofToFile": true,
     "saveResponseToFile": false,
-    "loadDBToMemCache": true,
+    "loadDBToMemCache": false,
     "opcodeTracer": false,
     "logRemoteDbReads": false,
     "logExecutorServerResponses": false,

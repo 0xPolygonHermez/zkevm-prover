@@ -2,7 +2,7 @@
     "RebootOnExit": true,
     "RunConfig": {
       "CPUs": 1,
-      "Memory": "23g"
+      "Memory": "512g"
     },
     "Env":{
       "GLOG_logtostderr": "1"
