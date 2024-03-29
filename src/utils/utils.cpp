@@ -223,7 +223,7 @@ void json2file(const json &j, const string &fileName)
 
 void file2json(const string &fileName, json &j)
 {
-    zklog.info("file2json" + fileName);
+    zklog.info("file2json " + fileName);
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
