@@ -1,3 +1,6 @@
+#ifndef CPOLYNOMIAL_C_HPP
+#define CPOLYNOMIAL_C_HPP
+
 #include "cpolynomial.hpp"
 
 using namespace CPlusPlusLogging;
@@ -70,3 +73,5 @@ typename Engine::G1Point CPolynomial<Engine>::multiExponentiation(G1PointAffine 
 //                            polynomials["T2"]->getDegree() + 1};
 //    G1Point C2 = multiExponentiation(polynomials["C2"], 3, lengths);
 }
+
+#endif

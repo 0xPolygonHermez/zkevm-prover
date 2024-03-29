@@ -25,7 +25,7 @@ public:
     uint out_cursor = 0;
     uint state_cursor = 0;
 
-    TranscriptGL()
+    TranscriptGL(uint64_t arity, bool custom)
     {
         std::memset(state, 0, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
         std::memset(pending, 0, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));

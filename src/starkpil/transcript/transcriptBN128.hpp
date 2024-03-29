@@ -6,10 +6,6 @@
 #include <cstring>
 #include "goldilocks_base_field.hpp"
 
-#define TRANSCRIPT_STATE_SIZE 4
-#define TRANSCRIPT_PENDING_SIZE 8
-#define TRANSCRIPT_OUT_SIZE 12
-
 // TODO: Pending to review and re-factor
 class TranscriptBN128
 {
@@ -20,12 +16,17 @@ private:
 public:
     uint typeSize = 2;
 
+    uint64_t transcriptArity;
+
     std::vector<RawFr::Element> state;
     std::vector<RawFr::Element> pending;
     std::vector<RawFr::Element> out;
     std::vector<uint64_t> out3;
 
-    TranscriptBN128() : state(1, RawFr::field.zero()), out(1, RawFr::field.zero()) {}
+    TranscriptBN128(uint64_t arity, bool custom) : state(1, RawFr::field.zero()), out(1, RawFr::field.zero()) {
+        transcriptArity = custom ? arity : 16;
+    }
+    
     void put(Goldilocks::Element *input, uint64_t size);
     void put(RawFr::Element *input, uint64_t size);
     void getField(uint64_t *output);

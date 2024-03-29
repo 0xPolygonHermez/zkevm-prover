@@ -200,6 +200,7 @@ namespace BinFileUtils
         return res;
     }
 
+
     u_int32_t BinFile::readU32LE()
     {
         u_int32_t res = *((u_int32_t *)((u_int64_t)addr + pos));
@@ -214,11 +215,43 @@ namespace BinFileUtils
         return res;
     }
 
+    bool BinFile::sectionExists(u_int32_t sectionId) {
+        return sections.find(sectionId) != sections.end();
+    }
+
     void *BinFile::read(u_int64_t len)
     {
         void *res = (void *)((u_int64_t)addr + pos);
         pos += len;
         return res;
+    }
+
+    std::string BinFile::readString()
+    {
+        uint8_t *startOfString = (uint8_t *)((u_int64_t)addr + pos);
+        uint8_t *endOfString = startOfString;
+        uint8_t *endOfSection = (uint8_t *)((uint64_t)readingSection->start + readingSection->size);
+
+        uint8_t *i;
+        for (i = endOfString; i != endOfSection; i++)
+        {
+            if (*i == 0)
+            {
+                endOfString = i;
+                break;
+            }
+        }
+
+        if (i == endOfSection)
+        {
+            endOfString = i - 1;
+        }
+
+        uint32_t len = endOfString - startOfString;
+        std::string str = std::string((const char *)startOfString, len);
+        pos += len + 1;
+
+        return str;
     }
 
     std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion)

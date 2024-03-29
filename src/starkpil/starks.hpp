@@ -17,6 +17,15 @@
 #include "exit_process.hpp"
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
+#include "hint_handler.hpp"
+#include "hint_handler_builder.hpp"
+#include "hint/h1h2_hint_handler.hpp"
+#include "hint/gprod_hint_handler.hpp"
+#include "hint/gsum_hint_handler.hpp"
+#include "hint/public_values_hint_handler.hpp"
+#include "hint/subproof_value_hint_handler.hpp"
+
+using namespace Hints;
 
 struct StarkFiles
 {
@@ -51,6 +60,7 @@ private:
     uint64_t NExtended;
     uint64_t hashSize;
     uint64_t merkleTreeArity;
+    bool merkleTreeCustom;
     NTT_Goldilocks ntt;
     NTT_Goldilocks nttExtended;
     Polinomial x_n;
@@ -61,7 +71,7 @@ private:
     MerkleTreeType **treesGL;
     MerkleTreeType **treesFRI;
 
-    map<uint64_t, uint64_t> cm2Transposed;
+    vector<int64_t> cm2Transposed;
 
     vector<bool> publicsCalculated;
     vector<bool> constsCalculated;
@@ -82,7 +92,7 @@ void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purp
 
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
-                                                                           starkInfo(config, starkFiles.zkevmStarkInfo),
+                                                                           starkInfo(starkFiles.zkevmStarkInfo),
                                                                            starkFiles(starkFiles),
                                                                            N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
@@ -100,10 +110,12 @@ public:
 
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             hashSize = 1;
-            merkleTreeArity = 16;
+            merkleTreeArity = starkInfo.merkleTreeArity;
+            merkleTreeCustom = starkInfo.merkleTreeCustom;
         } else {
             hashSize = HASH_SIZE;
             merkleTreeArity = 2;
+            merkleTreeCustom = true;
         }
 
         // Allocate an area of memory, mapped to file, to read all the constant polynomials,
@@ -202,16 +214,16 @@ public:
             std::string sectionExt = "cm" + to_string(i + 1) + "_2ns";
             uint64_t nCols = starkInfo.mapSectionsN.section[string2section(section)];
             Goldilocks::Element *pBuffExtended = &mem[starkInfo.mapOffsets.section[string2section(sectionExt)]];
-            treesGL[i] = new MerkleTreeType(NExtended, nCols, pBuffExtended);
+            treesGL[i] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom,  NExtended, nCols, pBuffExtended);
         }
-        treesGL[starkInfo.nStages + 1] = new MerkleTreeType((Goldilocks::Element *)pConstTreeAddress);
+        treesGL[starkInfo.nStages + 1] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, (Goldilocks::Element *)pConstTreeAddress);
 
         treesFRI = new MerkleTreeType*[starkInfo.starkStruct.steps.size() - 1];
         for(uint64_t step = 0; step < starkInfo.starkStruct.steps.size() - 1; ++step) {
             uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
             uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
 
-            treesFRI[step] = new MerkleTreeType(nGroups, groupSize * FIELD_EXTENSION, NULL);
+            treesFRI[step] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
 
@@ -235,6 +247,12 @@ public:
         if(currentSectionStart > nttHelperSize) {
             optimizeMemoryNTT = true;
         }
+
+        HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
+        HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
+        HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
+        HintHandlerBuilder::registerBuilder(PublicValuesHintHandler::getName(), std::make_unique<PublicValuesHintHandlerBuilder>());
+        HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
     };
     ~Starks()
     {
@@ -273,8 +291,6 @@ public:
             delete treesFRI[i];
         }
         delete[] treesFRI;
-
-        cm2Transposed.clear();
     };
 
     uint64_t getConstTreeSize()
@@ -310,13 +326,13 @@ public:
 
     void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps *chelpersSteps);
     
-    void calculateHints(uint64_t step, StepsParams& params);
+    void calculateHints(uint64_t step, StepsParams& params, vector<Hint> &hints);
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
     void calculateExpressions(uint64_t step, bool after, StepsParams &params, CHelpersSteps *chelpersSteps);
     void calculateExpression(uint64_t expId, StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateConstraint(ParserParams &constraintCode, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps);
     
     void computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps);
     void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
@@ -336,12 +352,20 @@ public:
 private:
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
 
-    void transposePolsColumns(StepsParams& params, Polinomial* transPols, uint64_t &indx, Hint hint, Goldilocks::Element *pBuffer);
-    void transposePolsRows(uint64_t step, StepsParams& params, Polinomial *transPols);
-    
+    void transposePolsColumns(StepsParams& params, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
+    void transposePolsRows(StepsParams& params, Polinomial *transPols, Hint hint);
+
+    std::vector<string> getSrcFields(std::string hintName);
+    std::vector<string> getDstFields(std::string hintName);
+    bool isHintResolved(Hint &hint, std::vector<string> dstFields);
+    bool canHintBeResolved(Hint &hint, std::vector<string> srcFields);
+
     void evmap(StepsParams &params, Polinomial &LEv);
 
     uint64_t checkSymbolsToBeCalculated(vector<Symbol> symbols);
+    bool isSymbolCalculated(opType operand, uint64_t id);
+    void setSymbolCalculated(opType operand, uint64_t id);
+
 public:
     // Following function are created to be used by the ffi interface
     void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial* pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);

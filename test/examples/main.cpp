@@ -9,7 +9,6 @@
 int main(int argc, char **argv)
 {
     Config config;
-    config.runFileGenBatchProof = true; // So that starkInfo is created
     config.mapConstPolsFile = false;
     config.mapConstantsTreeFile = false;
     
@@ -40,28 +39,42 @@ int main(int argc, char **argv)
         constTree = "test/examples/pil2/all/all.consttree";
         starkInfoFile = "test/examples/pil2/all/all.starkinfo.json";
         commitPols = "test/examples/pil2/all/all.commit";
-        cHelpersFile = "test/examples/pil2/all/all.chelpers/all.chelpers.bin";
         verkey = "test/examples/pil2/all/all.verkey.json";
         publicsFile = "test/examples/pil2/all/all.publics.json";
+
+        if(USE_GENERIC_PARSER) {
+            cHelpersFile = "test/examples/pil2/all/all.chelpers/all.chelpers_generic.bin";
+        } else {
+            cHelpersFile = "test/examples/pil2/all/all.chelpers/all.chelpers.bin";
+        }
     } else if(testName == "compressor_pil2") {
         constPols = "test/examples/pil2/compressor/all.c18.const";
         constTree = "test/examples/pil2/compressor/all.c18.consttree";
         starkInfoFile = "test/examples/pil2/compressor/all.c18.starkinfo.json";
         commitPols = "test/examples/pil2/compressor/all.c18.commit";
-        cHelpersFile = "test/examples/pil2/compressor/all.c18.chelpers/all.c18.chelpers.bin";
         verkey = "test/examples/pil2/compressor/all.c18.verkey.json";
         publicsFile = "test/examples/pil2/compressor/all.c18.publics.json";
+        if(USE_GENERIC_PARSER) {
+            cHelpersFile = "test/examples/pil2/compressor/all.c18.chelpers/all.c18.chelpers_generic.bin";
+        } else {
+            cHelpersFile = "test/examples/pil2/compressor/all.c18.chelpers/all.c18.chelpers.bin";
+        }
     } else if(testName == "all") {
         constPols = "test/examples/all/all.const";
         constTree = "test/examples/all/all.consttree";
         starkInfoFile = "test/examples/all/all.starkinfo.json";
         commitPols = "test/examples/all/all.commit";
-        cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
+        
         verkey = "test/examples/all/all.verkey.json";
         publicsFile = "test/examples/all/all.publics.json";
+        if(USE_GENERIC_PARSER) {
+            cHelpersFile = "test/examples/all/all.chelpers/all.chelpers_generic.bin";
+        } else {
+            cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
+        }
     }
    
-    StarkInfo starkInfo(config, starkInfoFile);
+    StarkInfo starkInfo(starkInfoFile);
 
     void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN.section[eSection::cm3_n] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
@@ -92,22 +105,38 @@ int main(int argc, char **argv)
     nlohmann::ordered_json jProof;
 
     if(testName == "all_pil2") {
-        AllPil2Steps allPil2Steps;
         FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
         Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
-        starks.genProof(fproof, &publicInputs[0], &allPil2Steps);
+        if(USE_GENERIC_PARSER) {
+            CHelpersSteps cHelpersSteps;
+            starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
+        } else {
+            AllPil2Steps allPil2Steps;
+            starks.genProof(fproof, &publicInputs[0], &allPil2Steps);
+        }
         jProof = fproof.proofs.proof2json();
     } else if(testName == "compressor_pil2") {
-        AllC18Pil2Steps allC18Pil2Steps;
+        
         FRIProof<RawFr::Element> fproof(starkInfo, 1);
         Starks<RawFr::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
-        starks.genProof(fproof, &publicInputs[0], &allC18Pil2Steps);
+        if(USE_GENERIC_PARSER) {
+            CHelpersSteps cHelpersSteps;
+            starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
+        } else {
+            AllC18Pil2Steps allC18Pil2Steps;
+            starks.genProof(fproof, &publicInputs[0], &allC18Pil2Steps);
+        }
         jProof = fproof.proofs.proof2json();
     } else if(testName == "all") {
-        AllSteps allSteps;
         FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
         Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
-        starks.genProof(fproof, &publicInputs[0], &allSteps);
+        if(USE_GENERIC_PARSER) {
+            CHelpersSteps cHelpersSteps;
+            starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
+        } else {
+            AllSteps allSteps;
+            starks.genProof(fproof, &publicInputs[0], &allSteps);
+        }
         jProof = fproof.proofs.proof2json();
     }
 

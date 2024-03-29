@@ -3,7 +3,7 @@
 #include <algorithm> // std::max
 #include <cassert>
 
-MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source(_source)
+MerkleTreeBN128::MerkleTreeBN128(uint64_t _arity, bool _custom, uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source(_source)
 {
 
     if (source == NULL)
@@ -12,18 +12,22 @@ MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::
         isSourceAllocated = true;
     }
 
+    arity = _arity;
+    custom = _custom;
     numNodes = getNumNodes(height);
     nodes = (RawFr::Element *)calloc(numNodes, sizeof(RawFr::Element));
     isNodesAllocated = true;
 }
 
-MerkleTreeBN128::MerkleTreeBN128(Goldilocks::Element *tree)
+MerkleTreeBN128::MerkleTreeBN128(uint64_t _arity, bool _custom, Goldilocks::Element *tree)
 {
     width = Goldilocks::toU64(tree[0]);
     height = Goldilocks::toU64(tree[1]);
     source = &tree[2];
+    arity = _arity;
+    custom = _custom;
     numNodes = getNumNodes(height);
-
+    
     nodes = (RawFr::Element *)&source[width * height];
 }
 
@@ -61,7 +65,7 @@ uint64_t MerkleTreeBN128::getMerkleProofSize()
 }
 
 uint64_t MerkleTreeBN128::getNumNodes(uint64_t n)
-{
+{   
     uint n_tmp = n;
     uint64_t nextN = floor(((double)(n_tmp - 1) / arity) + 1);
     uint64_t acc = nextN * arity;
@@ -178,6 +182,13 @@ void MerkleTreeBN128::linearHash()
                     p.hash(elements, &nodes[i]);
                     pending = pending - arity;
                 }
+                else if(custom) 
+                {
+                    std::memcpy(&elements[1], &buff[i * nElementsGL + nElementsGL - pending], pending * sizeof(RawFr::Element));
+                    std::memcpy(&elements[0], &nodes[i], sizeof(RawFr::Element));
+                    p.hash(elements, &nodes[i]);
+                    pending = 0;
+                }
                 else
                 {
                     std::vector<RawFr::Element> elements_last(pending + 1);
@@ -211,26 +222,25 @@ void MerkleTreeBN128::merkelize()
 
     RawFr::Element *cursor = &nodes[0];
     uint64_t n256 = height;
-    uint64_t nextN256 = floor((double)(n256 - 1) / 16) + 1;
-    RawFr::Element *cursorNext = &nodes[n256];
+    uint64_t nextN256 = floor((double)(n256 - 1) / arity) + 1;
+    RawFr::Element *cursorNext = &nodes[nextN256 * arity];
     while (n256 > 1)
     {
-        uint64_t batches = ceil((double)n256 / 16);
+        uint64_t batches = ceil((double)n256 / arity);
 #pragma omp parallel for
         for (uint64_t i = 0; i < batches; i++)
         {
             Poseidon_opt p;
-            vector<RawFr::Element> elements(17);
-            std::memset(&elements[0], 0, 17 * sizeof(RawFr::Element));
-            uint numHashes = 16;
-            (batches == 1) ? numHashes = n256 : numHashes = 16;
-            std::memcpy(&elements[1], &cursor[i * 16], numHashes * sizeof(RawFr::Element));
+            vector<RawFr::Element> elements(arity + 1);
+            std::memset(&elements[0], 0, (arity + 1) * sizeof(RawFr::Element));
+            uint numHashes = (i == batches - 1) ? n256 - i*arity : arity;
+            std::memcpy(&elements[1], &cursor[i * arity], numHashes * sizeof(RawFr::Element));
             p.hash(elements, &cursorNext[i]);
         }
 
         n256 = nextN256;
-        nextN256 = floor((double)(n256 - 1) / 16) + 1;
+        nextN256 = floor((double)(n256 - 1) / arity) + 1;
         cursor = cursorNext;
-        cursorNext = &cursor[std::max(n256, (uint64_t)16)];
+        cursorNext = &cursor[nextN256 * arity];
     }
 }

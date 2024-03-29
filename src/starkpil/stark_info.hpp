@@ -4,7 +4,6 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
-#include "config.hpp"
 #include "zkassert.hpp"
 #include "goldilocks_base_field.hpp"
 #include "polinomial.hpp"
@@ -73,16 +72,6 @@ typedef enum
 
 eSection string2section (const string s);
 
-typedef enum {
-    h1h2 = 0,
-    gprod = 1,
-    gsum = 2,
-    publicValue = 3,
-    subproofValue = 4,
-} hintType;
-
-hintType string2hintType (const string s);
-
 class PolsSections
 {
 public:
@@ -133,16 +122,6 @@ public:
     vector<Symbol> symbolsUsed;
 };
 
-class Hint 
-{
-public:
-    hintType type;
-    std::vector<string> fields;
-    std::map<std::string, Symbol> fieldSymbols;
-    std::vector<Symbol> destSymbols;
-    std::vector<Symbol> symbols;
-    uint64_t index;
-};
 
 class VarPolMap
 {
@@ -182,8 +161,6 @@ public:
 
 class StarkInfo
 {
-    const Config &config;
-
 private:
     Symbol setSymbol(json j);
 public:
@@ -192,6 +169,12 @@ public:
     bool pil2;
     uint64_t subproofId;
     uint64_t airId;
+
+    uint64_t merkleTreeArity;
+    bool merkleTreeCustom;
+
+    bool isVadcop;
+    bool hashCommits;
 
     uint64_t nPublics;
     uint64_t nConstants;
@@ -228,8 +211,6 @@ public:
     vector<vector<Symbol>> stageCodeSymbols;
     vector<vector<ExpressionCodeSymbol>> expressionsCodeSymbols;
     
-    std::map<uint64_t, vector<Hint>> hints;
-
     // pil-stark specific
     vector<VarPolMap> varPolMap;
     vector<uint64_t> cm_n;
@@ -241,7 +222,7 @@ public:
     map<uint64_t,uint64_t> exp2pol;
     
     /* Constructor */
-    StarkInfo(const Config &config, string file);
+    StarkInfo(string file);
 
     /* Loads data from a json object */
     void load (json j);

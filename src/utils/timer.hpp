@@ -17,10 +17,8 @@ std::string DateAndTime(struct timeval &tv);
 #ifdef LOG_TIME
 #define TimerStart(name) struct timeval name##_start; gettimeofday(&name##_start,NULL); zklog.info("--> " + string(#name) + " starting...")
 #define TimerStop(name) struct timeval name##_stop; gettimeofday(&name##_stop,NULL); zklog.info("<-- " + string(#name) + " done")
-#define TimerLog(name) zklog.info(string(#name) + ": " _ to_string(double(TimeDiff(name##_start, name##_stop))/1000000) + " s")
+#define TimerLog(name) zklog.info("<-- " + string(#name))
 #define TimerStopAndLog(name) struct timeval name##_stop; gettimeofday(&name##_stop,NULL); zklog.info("<-- " + string(#name) + " done: " + to_string(double(TimeDiff(name##_start, name##_stop))/1000000) + " s")
-#define TimerStartStep(name, step) struct timeval name##_start; gettimeofday(&name##_start, NULL); zklog.info("--> " + string(#name) + "_STEP_" + to_string(step) + " starting...")
-#define TimerStopAndLogStep(name, step) struct timeval name##_stop; gettimeofday(&name##_stop, NULL); zklog.info("<-- " + string(#name) + "_STEP_" + to_string(step) + " done: " + to_string(double(TimeDiff(name##_start, name##_stop))/1000000) + " s")
 #define TimerStartExpr(name, expId) struct timeval name##_start; gettimeofday(&name##_start, NULL); zklog.info("--> " + string(#name) + "_" + to_string(expId) + " starting...")
 #define TimerStopAndLogExpr(name, expId) struct timeval name##_stop; gettimeofday(&name##_stop, NULL); zklog.info("<-- " + string(#name) + "_" + to_string(expId) + " done: " + to_string(double(TimeDiff(name##_start, name##_stop))/1000000) + " s")
 #else
