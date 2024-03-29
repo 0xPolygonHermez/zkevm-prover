@@ -453,7 +453,6 @@ void* Sha256Thread (void* arg)
     return NULL;
 }
 
-  
 // Full version: all polynomials are evaluated, in all evaluations
 void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols, void** pSMRequests, void* pSMRequestsOut)
 {
@@ -492,6 +491,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
+
 
         if (proverRequest.result != ZKR_SUCCESS)
         {

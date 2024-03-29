@@ -829,7 +829,7 @@ int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRe
     return 1;
 }
 int zkevm_delete_sm_requests(void **pSMRequests){
-    if(pSMRequests!=NULL){
+    if(pSMRequests!= NULL && (*pSMRequests)!=NULL){
             delete (PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests[0];
         }
     return 0;

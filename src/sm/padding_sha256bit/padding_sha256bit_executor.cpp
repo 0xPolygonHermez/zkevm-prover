@@ -16,6 +16,7 @@ inline uint64_t getStateBit ( const uint32_t (&state)[8], uint64_t i )
 
 void PaddingSha256BitExecutor::execute (vector<PaddingSha256BitExecutorInput> &input, PaddingSha256BitCommitPols &pols, vector<Bits2FieldSha256ExecutorInput> &required)
 {
+
     // Check that input size does not exeed the number of slots
     if (input.size() > nSlots)
     {

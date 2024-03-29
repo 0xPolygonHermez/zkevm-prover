@@ -5,10 +5,6 @@
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/bits2field/bits2field_executor.hpp"
-#if __ZKEVM_SM__
-#include "zkevm_sm.h"
-#include "zkevm_api.hpp"
-#endif
 
 USING_PROVER_FORK_NAMESPACE;
 

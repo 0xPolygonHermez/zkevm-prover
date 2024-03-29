@@ -16,7 +16,6 @@ using namespace std;
 class PaddingPGExecutorInput
 {
 public:
-
     string data;
     vector<uint8_t> dataBytes;
     uint64_t realLen;
@@ -25,7 +24,6 @@ public:
     bool digestCalled;
     bool lenCalled;
     PaddingPGExecutorInput() : realLen(0), digestCalled(false), lenCalled(false) {};
-
 };
 
 class PaddingPGExecutor
@@ -49,7 +47,6 @@ public:
         bytesPerBlock(bytesPerElement*nElements),
         N(PROVER_FORK_NAMESPACE::PaddingPGCommitPols::pilDegree()) {};
     void execute (vector<PaddingPGExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingPGCommitPols &pols, vector<array<Goldilocks::Element, 17>> &required);
-    
 };
 
 

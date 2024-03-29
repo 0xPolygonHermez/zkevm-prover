@@ -2117,6 +2117,8 @@ bool ExecutorError_IsValid(int value) {
     case 115:
     case 116:
     case 117:
+    case 118:
+    case 119:
       return true;
     default:
       return false;

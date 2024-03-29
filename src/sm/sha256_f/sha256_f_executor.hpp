@@ -98,10 +98,6 @@ public:
     void loadScript (json j);
 
     void execute (const vector<Sha256FExecutorInput> &input, PROVER_FORK_NAMESPACE::Sha256FCommitPols &pols);
-    inline void execute (vector<Sha256FExecutorInput> &input, Goldilocks::Element *pAddress){
-        PROVER_FORK_NAMESPACE::Sha256FCommitPols pols(pAddress, N);
-        execute(input, pols);
-    }
 
 private:
     Goldilocks::Element getVal(const vector<Sha256FExecutorInput> &input, Sha256FCommitPols &pols, uint64_t block, uint64_t j, uint16_t i);

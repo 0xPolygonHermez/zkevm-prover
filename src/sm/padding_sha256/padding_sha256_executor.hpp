@@ -36,7 +36,6 @@ public:
     mpz_class hash;
     bool digestCalled;
     bool lenCalled;
-    
     PaddingSha256ExecutorInput() : realLen(0), digestCalled(false), lenCalled(false) {};
     
     inline void toDTO(DTO* dto){
@@ -111,7 +110,6 @@ public:
 
     /* Executor */
     void execute (vector<PaddingSha256ExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingSha256CommitPols &pols, vector<PaddingSha256BitExecutorInput> &required);
-    
 };
 
 

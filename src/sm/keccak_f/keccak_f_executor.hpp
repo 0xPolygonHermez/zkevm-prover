@@ -40,9 +40,6 @@ public:
     }
 };
 
-
-
-
 class KeccakFExecuteOutput
 {
 public:
@@ -85,7 +82,7 @@ public:
     void execute (GateState &S);
 
     /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-    void execute (const vector<vector<Goldilocks::Element>> &input, PROVER_FORK_NAMESPACE::KeccakFCommitPols &pols);  
+    void execute (const vector<vector<Goldilocks::Element>> &input, PROVER_FORK_NAMESPACE::KeccakFCommitPols &pols);
 
     void setPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index, uint64_t value);
     uint64_t getPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index);

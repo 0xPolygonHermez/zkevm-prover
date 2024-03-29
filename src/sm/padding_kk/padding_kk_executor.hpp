@@ -110,7 +110,6 @@ public:
 
     /* Executor */
     void execute (vector<PaddingKKExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
-    
 };
 
 #endif

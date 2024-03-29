@@ -1075,7 +1075,6 @@ void Prover::execute(ProverRequest *pProverRequest)
     TimerStart(EXECUTOR_EXECUTE_EXECUTE);
     executor.execute(*pProverRequest, cmPols, pSMRequests);
     TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE);
-    
 
     uint64_t lastN = cmPols.pilDegree() - 1;
     zklog.info("Prover::execute() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +

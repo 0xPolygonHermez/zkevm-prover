@@ -5,10 +5,6 @@
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/bits2field_sha256/bits2field_sha256_executor.hpp"
-#if __ZKEVM_SM__
-#include "zkevm_sm.h"
-#include "zkevm_api.hpp"
-#endif
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -55,4 +51,5 @@ public:
     /* Executor */
     void execute (vector<PaddingSha256BitExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols &pols, vector<Bits2FieldSha256ExecutorInput> &required);
 };
+
 #endif

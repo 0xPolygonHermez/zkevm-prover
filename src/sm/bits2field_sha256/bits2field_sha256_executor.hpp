@@ -5,10 +5,6 @@
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/sha256_f/sha256_f_executor.hpp"
-#if __ZKEVM_SM__
-#include "zkevm_sm.h"
-#include "zkevm_api.hpp"
-#endif
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -48,16 +44,6 @@ public:
 
     /* Executor */
     void execute (vector<Bits2FieldSha256ExecutorInput> &input, Bits2FieldSha256CommitPols &pols, vector<Sha256FExecutorInput> &required);
-    inline void execute(vector<Bits2FieldSha256ExecutorInput> &input, Goldilocks::Element * pAddress, void *pRequests){
-        PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols pols(pAddress, N);
-        vector<Sha256FExecutorInput> required;
-        execute(input, pols, required);
-#ifdef __ZKEVM_SM__
-        add_sha256_f_inputs(pRequests, (void *)required.data(), (uint64_t) required.size());
-#endif
-    }
-    
-
 
 private:
     enum BitType {
