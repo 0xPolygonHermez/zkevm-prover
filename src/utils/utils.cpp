@@ -211,6 +211,7 @@ string getUUID(void)
 
 void json2file(const json &j, const string &fileName)
 {
+    zklog.info("json2file " + fileName);
     ofstream outputStream(fileName);
     if (!outputStream.good())
     {
