@@ -15,6 +15,7 @@
     "runFileGenFinalProof": false,
     "runFileProcessBatch": false,
     "runFileProcessBatchMultithread": false,
+    "runHashDBServer": false,
 
     "runKeccakScriptGenerator": false,
     "runKeccakTest": false,
