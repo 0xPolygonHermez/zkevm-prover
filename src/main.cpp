@@ -519,7 +519,7 @@ int run_main(char *pConfigFile)
 
     // If there is nothing else to run, exit normally
     if (!config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
-        !config.runHashDBTest && !config.runKeccakTest &&  !config.runSHA256Test &&
+        !config.runHashDBServer && !config.runHashDBTest &&
         !config.runAggregatorServer && !config.runAggregatorClient && !config.runAggregatorClientMock &&
         !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
         !config.runFileProcessBatch && !config.runFileProcessBatchMultithread && !config.runFileExecute)
