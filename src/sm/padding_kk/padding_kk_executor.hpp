@@ -8,10 +8,6 @@
 #include "goldilocks_base_field.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "scalar.hpp"
-#if __ZKEVM_SM__
-#include "zkevm_sm.h"
-#include "zkevm_api.hpp"
-#endif
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -39,7 +35,6 @@ public:
     mpz_class hash;
     bool digestCalled;
     bool lenCalled;
-
     PaddingKKExecutorInput() : realLen(0), digestCalled(false), lenCalled(false) {};
 
     inline void toDTO(DTO* dto){
@@ -111,5 +106,6 @@ public:
     /* Executor */
     void execute (vector<PaddingKKExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
 };
+
 
 #endif

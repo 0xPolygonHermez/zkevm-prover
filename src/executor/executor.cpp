@@ -13,10 +13,6 @@
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
-#ifdef __ZKEVM_SM__
-#include "zkevm_sm.h"
-#include "zkevm_api.hpp"
-#endif
 
 // Reduced version: only 1 evaluation is allocated, and some asserts are disabled
 void Executor::process_batch (ProverRequest &proverRequest)
@@ -600,6 +596,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
     }
     else
     {
+
         ExecutorContext executorContext;
         executorContext.pExecutor = this;
         executorContext.pCommitPols = &commitPols;
@@ -633,7 +630,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             zklog.error("Executor::execute() got from main execution proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
             return;
         }
-
+#ifndef __ZKEVM_SM__
         // Execute the Storage State Machines
         pthread_t storageThread;
         pthread_create(&storageThread, NULL, StorageThread, &executorContext);
@@ -689,7 +686,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_join(keccakThread, NULL);
         pthread_join(sha256Thread, NULL);
         pthread_join(climbKeyThread, NULL);
-
+#endif
     }
     #ifndef __ZKEVM_SM__   
         delete required;  

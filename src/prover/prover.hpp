@@ -86,11 +86,10 @@ public:
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
     
-    // pSMRequests used to have a pointer to the 
+    // pSMRequests to get a pointer to the SMRequests
     // pSMRequestsOut used to to transfer requets to Rust proof manager
     inline void setSMRequestsPointer(void **pSMRequests_){pSMRequests= pSMRequests_;};
     inline void setSMRequestsOutPointer(void *pSMRequestsOut_){pSMRequestsOut= pSMRequestsOut_;};
-    inline void *getSMRequestsPointer(){return pSMRequests;};
 
     private:
     void **pSMRequests;
