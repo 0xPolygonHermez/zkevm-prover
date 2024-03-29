@@ -33,10 +33,11 @@
     "saveOutputToFile": true,
     "saveProofToFile": true,
     "saveResponseToFile": false,
-    "loadDBToMemCache": false,
+    "loadDBToMemCache": true,
     "opcodeTracer": false,
     "logRemoteDbReads": false,
     "logExecutorServerResponses": false,
+    "runHashDBServer": false,
 
     "proverServerPort": 50051,
     "proverServerMockPort": 50052,
