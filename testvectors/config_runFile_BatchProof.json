@@ -64,7 +64,6 @@
 
     "outputPath": "runtime/output",
     "configPath": "config",
-    "runHashDBServer": false,
 
     "zkevmCmPolsAfterExecutor": "",
     "zkevmCmPols_disabled": "runtime/zkevm.commit",
