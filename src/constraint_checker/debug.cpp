@@ -2,7 +2,6 @@
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
 #include "chelpers_steps.hpp"
-#include "AllPil2Steps.hpp"
 
 class ArgumentParser {
 private:
@@ -127,14 +126,11 @@ int main(int argc, char **argv)
         uint64_t hashSize = starkInfo.starkStruct.verificationHashType == "GL" ? 4 : 1;
         FRIProof<Goldilocks::Element> fproof(starkInfo, hashSize);
 
-        Starks<Goldilocks::Element> starks(config, {constFile, false, constTreeFile, starkInfoFile, cHelpersFile}, pAddress);
+        Starks<Goldilocks::Element> starks(config, {constFile, config.mapConstPolsFile, constTreeFile, starkInfoFile, cHelpersFile}, pAddress);
         starks.debug = true;
 
-        // CHelpersSteps cHelpersSteps;
-        AllPil2Steps cHelpersSteps;
+        CHelpersSteps cHelpersSteps;
         starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
-
-        // TODO PRINT REPORT
 
         return EXIT_SUCCESS;
     } catch (const exception &e) {

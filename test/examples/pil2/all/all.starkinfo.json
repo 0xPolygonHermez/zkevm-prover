@@ -18605,3342 +18605,5695 @@
    "symbolsUsed": []
   }
  },
- "constraints": {
-  "stage1": [
-   {
-    "tmpUsed": 4,
-    "code": [
-     {
-      "op": "sub",
-      "dest": {
+ "constraints": [
+  {
+   "tmpUsed": 4,
+   "code": [
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 1,
+       "prime": 1,
+       "dim": 1
+      },
+      {
+       "type": "cm",
+       "id": 0,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      },
+      {
+       "type": "const",
+       "id": 2,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 2,
+      "dim": 1
+     },
+     "src": [
+      {
        "type": "tmp",
        "id": 0,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 1,
-        "prime": 1,
-        "dim": 1
-       },
-       {
-        "type": "cm",
-        "id": 0,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "sub",
-      "dest": {
+      {
        "type": "tmp",
        "id": 1,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       },
-       {
-        "type": "const",
-        "id": 2,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 3,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 2,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 1,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 2
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 0,
+     "id": 0
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 1,
+     "id": 1
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 13,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil",
+   "stage": 1
+  },
+  {
+   "tmpUsed": 7,
+   "code": [
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 0,
        "prime": 0,
-       "id": 3,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 2,
-        "dim": 1
-       },
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       }
-      ]
-     }
-    ],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 2
+      {
+       "type": "cm",
+       "id": 0,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
      },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 0,
-      "id": 0
+     "src": [
+      {
+       "type": "cm",
+       "id": 1,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "cm",
+       "id": 1,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 5,
+      "dim": 1
      },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 1,
-      "id": 1
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 13,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
-   },
-   {
-    "tmpUsed": 7,
-    "code": [
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 0,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 0,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "cm",
-        "id": 0,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
+      {
        "type": "tmp",
        "id": 1,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 1,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "cm",
-        "id": 1,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 2,
+      "dim": 1
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "cm",
+       "id": 0,
+       "prime": 1,
+       "dim": 1
+      },
+      {
        "type": "tmp",
-       "prime": 0,
+       "expId": 2,
        "id": 5,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 3,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "number",
+       "value": "1",
        "dim": 1
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 1,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "const",
+       "id": 2,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 4,
+      "dim": 1
      },
-     {
-      "op": "sub",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 2,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 0,
-        "prime": 1,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "expId": 2,
-        "id": 5,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "sub",
-      "dest": {
+      {
        "type": "tmp",
        "id": 3,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       },
-       {
-        "type": "const",
-        "id": 2,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 6,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 4,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 2,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 3,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 2
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 0,
+     "id": 0
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 1,
+     "id": 1
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 18,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil",
+   "stage": 1
+  },
+  {
+   "tmpUsed": 3,
+   "code": [
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 1,
        "prime": 0,
-       "id": 6,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 4,
-        "dim": 1
-       },
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       }
-      ]
-     }
-    ],
-    "symbolsCalculated": [],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 2
+      {
+       "type": "public",
+       "id": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
      },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 0,
-      "id": 0
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 1,
-      "id": 1
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 18,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
-   },
-   {
-    "tmpUsed": 3,
-    "code": [
-     {
-      "op": "sub",
-      "dest": {
+     "src": [
+      {
+       "type": "const",
+       "id": 1,
+       "prime": 0,
+       "dim": 1
+      },
+      {
        "type": "tmp",
        "id": 0,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 1,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "public",
-        "id": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 2,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 1,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "const",
-        "id": 1,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 1
+    },
+    {
+     "op": "public",
+     "stage": 1,
+     "id": 0
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 1,
+     "id": 1
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 20,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil",
+   "stage": 1
+  },
+  {
+   "tmpUsed": 3,
+   "code": [
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 0,
        "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "public",
+       "id": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 1,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "tmp",
+       "id": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 2,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 1,
+       "dim": 1
+      },
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 1
+    },
+    {
+     "op": "public",
+     "stage": 1,
+     "id": 1
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 0,
+     "id": 0
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 21,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil",
+   "stage": 1
+  },
+  {
+   "tmpUsed": 3,
+   "code": [
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 0,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "public",
        "id": 2,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 1,
-        "dim": 1
-       },
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       }
-      ]
-     }
-    ],
-    "symbolsCalculated": [],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
      },
-     {
-      "op": "public",
-      "stage": 1,
-      "id": 0
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 1,
-      "id": 1
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 20,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
-   },
-   {
-    "tmpUsed": 3,
-    "code": [
-     {
-      "op": "sub",
-      "dest": {
-       "type": "tmp",
-       "id": 0,
-       "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 0,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "public",
-        "id": 1,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
-       "id": 1,
-       "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 1,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
+     "src": [
+      {
+       "type": "const",
        "id": 2,
+       "prime": 0,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 1,
-        "dim": 1
-       },
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       }
-      ]
-     }
-    ],
-    "symbolsCalculated": [],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 1
-     },
-     {
-      "op": "public",
-      "stage": 1,
-      "id": 1
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 0,
-      "id": 0
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 21,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
-   },
-   {
-    "tmpUsed": 3,
-    "code": [
-     {
-      "op": "sub",
-      "dest": {
+      {
        "type": "tmp",
        "id": 0,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 0,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "public",
-        "id": 2,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 2,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 1,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "const",
-        "id": 2,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 2
+    },
+    {
+     "op": "public",
+     "stage": 1,
+     "id": 2
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 0,
+     "id": 0
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 22,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil",
+   "stage": 1
+  },
+  {
+   "tmpUsed": 2,
+   "code": [
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 17,
        "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 1,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 0,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "tmp",
+       "id": 0,
+       "dim": 3
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 0
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 0,
+     "id": 17
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 9,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_plookup/plookup.pil",
+   "stage": 3
+  },
+  {
+   "tmpUsed": 51,
+   "code": [
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 16,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 15,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "id": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      },
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
        "id": 2,
-       "dim": 1
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 1,
-        "dim": 1
-       },
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       }
-      ]
-     }
-    ],
-    "symbolsCalculated": [],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 2
-     },
-     {
-      "op": "public",
-      "stage": 1,
-      "id": 2
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 0,
-      "id": 0
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 22,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_fibonacci/fibonacci.pil"
-   }
-  ],
-  "stage2": [],
-  "stage3": [
-   {
-    "tmpUsed": 2,
-    "code": [
-     {
-      "op": "sub",
-      "dest": {
-       "type": "tmp",
-       "id": 0,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 17,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
-       "id": 1,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 0,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 3
-       }
-      ]
-     }
-    ],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 0
-     },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 0,
-      "id": 17
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 9,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_plookup/plookup.pil"
-   },
-   {
-    "tmpUsed": 51,
-    "code": [
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
-       "id": 0,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 16,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
-     },
-     {
-      "op": "add",
-      "dest": {
-       "type": "tmp",
-       "id": 1,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 15,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 3
-       }
-      ]
-     },
-     {
-      "op": "add",
-      "dest": {
+      {
        "type": "tmp",
        "id": 2,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       },
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "tmp",
+       "id": 1,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 3,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       },
-       {
-        "type": "tmp",
-        "id": 2,
-        "dim": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
-       "type": "tmp",
-       "id": 4,
+     "src": [
+      {
+       "type": "cm",
+       "id": 15,
+       "prime": 1,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 1,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 3,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "cm",
+       "id": 16,
+       "prime": 0,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 5,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 15,
-        "prime": 1,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
-       "type": "tmp",
-       "id": 6,
-       "dim": 3
+     "src": [
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 16,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 5,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      },
+      {
        "type": "tmp",
        "id": 7,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       },
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "tmp",
+       "id": 6,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 8,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       },
-       {
-        "type": "tmp",
-        "id": 7,
-        "dim": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 28,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "tmp",
+       "id": 4,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 9,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 6,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 8,
-        "dim": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 38,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "cm",
+       "id": 12,
        "prime": 0,
-       "id": 28,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 4,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 9,
-        "dim": 3
-       }
-      ]
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 39,
+      "dim": 1
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 13,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 40,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 12,
        "prime": 0,
-       "id": 38,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 12,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
-       "id": 39,
+      {
+       "type": "cm",
+       "id": 13,
+       "prime": 1,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 13,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 41,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "const",
+       "id": 7,
        "prime": 0,
-       "id": 40,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 12,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "cm",
-        "id": 13,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 42,
+      "dim": 1
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "const",
+       "id": 8,
        "prime": 0,
-       "id": 41,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 7,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 43,
+      "dim": 1
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 14,
        "prime": 0,
-       "id": 42,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 8,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 44,
+      "dim": 1
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "const",
+       "id": 6,
        "prime": 0,
-       "id": 43,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 14,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
+       "type": "const",
+       "id": 7,
        "prime": 0,
-       "id": 44,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 6,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 10,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 0,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 2
-       },
-       {
-        "type": "const",
-        "id": 7,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "const",
+       "id": 8,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
        "type": "tmp",
        "id": 11,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 10,
-        "dim": 3
-       },
-       {
-        "type": "const",
-        "id": 8,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 12,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 0,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 2
-       },
-       {
-        "type": "tmp",
-        "id": 11,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "cm",
+       "id": 14,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 13,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 12,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "id": 14,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
      },
-     {
-      "op": "sub",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 14,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 13,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 1,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
+      {
+       "type": "const",
+       "id": 6,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 27,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 15,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 14,
-        "dim": 3
-       },
-       {
-        "type": "const",
-        "id": 6,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 45,
+      "dim": 1
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "cm",
+       "id": 11,
        "prime": 0,
-       "id": 27,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 15,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 1,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 12,
        "prime": 0,
-       "id": 45,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 11,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 16,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 12,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "challenge",
-        "id": 0,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
+      {
+       "type": "cm",
+       "id": 13,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 17,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 16,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "id": 13,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 18,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 17,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 0,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
+      {
+       "type": "tmp",
+       "expId": 21,
+       "id": 40,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 20,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 19,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 18,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "expId": 21,
-        "id": 40,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "cm",
+       "expId": 27,
+       "id": 27,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 21,
+      "dim": 3
      },
-     {
-      "op": "sub",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 20,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 19,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "expId": 27,
-        "id": 27,
-        "prime": 0,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "cm",
+       "id": 11,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 20,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 21,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 20,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "id": 11,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "add",
-      "dest": {
+      {
        "type": "cm",
+       "expId": 27,
+       "id": 27,
        "prime": 0,
-       "id": 20,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 21,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "expId": 27,
-        "id": 27,
-        "prime": 0,
-        "dim": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 1,
+      "id": 46,
+      "dim": 1
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "const",
+       "id": 7,
        "prime": 1,
-       "id": 46,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 7,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 1,
+      "id": 47,
+      "dim": 1
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "const",
+       "id": 8,
        "prime": 1,
-       "id": 47,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 8,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 1,
+      "id": 48,
+      "dim": 1
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 14,
        "prime": 1,
-       "id": 48,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 14,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 1,
+      "id": 49,
+      "dim": 1
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "const",
+       "id": 6,
        "prime": 1,
-       "id": 49,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 6,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 22,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
+       "type": "const",
+       "id": 7,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 23,
+      "dim": 3
+     },
+     "src": [
+      {
        "type": "tmp",
        "id": 22,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 0,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 2
-       },
-       {
-        "type": "const",
-        "id": 7,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "const",
+       "id": 8,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 24,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
        "type": "tmp",
        "id": 23,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 22,
-        "dim": 3
-       },
-       {
-        "type": "const",
-        "id": 8,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 25,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 24,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 0,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 2
-       },
-       {
-        "type": "tmp",
-        "id": 23,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "cm",
+       "id": 14,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 26,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 25,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 24,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "id": 14,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 27,
+      "dim": 3
      },
-     {
-      "op": "sub",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 26,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 25,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 1,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
-       "id": 27,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 26,
-        "dim": 3
-       },
-       {
-        "type": "const",
-        "id": 6,
-        "prime": 1,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "add",
-      "dest": {
-       "type": "cm",
+      {
+       "type": "const",
+       "id": 6,
        "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "cm",
+      "prime": 1,
+      "id": 27,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
        "id": 27,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 27,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 1,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 28,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
-       "type": "tmp",
-       "id": 28,
+     "src": [
+      {
+       "type": "cm",
+       "expId": 28,
+       "id": 20,
+       "prime": 0,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "expId": 28,
-        "id": 20,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 29,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "cm",
+       "expId": 27,
+       "id": 27,
+       "prime": 1,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 30,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "expId": 27,
+       "id": 27,
+       "prime": 0,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 29,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "expId": 27,
-        "id": 27,
-        "prime": 1,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 31,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      },
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 32,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "tmp",
+       "id": 31,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 33,
+      "dim": 3
+     },
+     "src": [
+      {
        "type": "tmp",
        "id": 30,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "expId": 27,
-        "id": 27,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 29,
-        "dim": 3
-       }
-      ]
-     },
-     {
-      "op": "add",
-      "dest": {
-       "type": "tmp",
-       "id": 31,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       },
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
+      {
        "type": "tmp",
        "id": 32,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       },
-       {
-        "type": "tmp",
-        "id": 31,
-        "dim": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 34,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "tmp",
+       "id": 28,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 33,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 30,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 32,
-        "dim": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 35,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      },
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 21,
+      "dim": 3
+     },
+     "src": [
+      {
        "type": "tmp",
        "id": 34,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 28,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 33,
-        "dim": 3
-       }
-      ]
-     },
-     {
-      "op": "add",
-      "dest": {
+      {
        "type": "tmp",
        "id": 35,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       },
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 36,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "cm",
-       "prime": 0,
-       "id": 21,
+       "id": 17,
+       "prime": 1,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 34,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 35,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "cm",
+       "expId": 31,
+       "id": 28,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 37,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "cm",
+       "id": 17,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "expId": 30,
+       "id": 21,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 50,
+      "dim": 3
+     },
+     "src": [
+      {
        "type": "tmp",
        "id": 36,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 17,
-        "prime": 1,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "expId": 31,
-        "id": 28,
-        "prime": 0,
-        "dim": 3
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
+      {
        "type": "tmp",
        "id": 37,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 17,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "expId": 30,
-        "id": 21,
-        "prime": 0,
-        "dim": 3
-       }
-      ]
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 6
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 7
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 8
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 11,
+     "id": 11
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 12,
+     "id": 12
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 13,
+     "id": 13
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 14,
+     "id": 14
+    },
+    {
+     "op": "cm",
+     "stage": 2,
+     "stageId": 0,
+     "id": 15
+    },
+    {
+     "op": "cm",
+     "stage": 2,
+     "stageId": 1,
+     "id": 16
+    },
+    {
+     "op": "tmp",
+     "stage": 2,
+     "stageId": 1,
+     "id": 27
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 0,
+     "id": 0
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 1,
+     "id": 1
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 0,
+     "id": 17
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 3,
+     "id": 20
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 4,
+     "id": 21
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 2,
+     "id": 28
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 0,
+     "id": 2
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 1,
+     "id": 3
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 9,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_plookup/plookup.pil",
+   "stage": 3
+  },
+  {
+   "tmpUsed": 2,
+   "code": [
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
      },
-     {
-      "op": "sub",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 18,
        "prime": 0,
-       "id": 50,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 36,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 37,
-        "dim": 3
-       }
-      ]
-     }
-    ],
-    "symbolsCalculated": [],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 6
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 1,
+      "dim": 3
      },
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 7
-     },
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 8
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 11,
-      "id": 11
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 12,
-      "id": 12
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 13,
-      "id": 13
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 14,
-      "id": 14
-     },
-     {
-      "op": "cm",
-      "stage": 2,
-      "stageId": 0,
-      "id": 15
-     },
-     {
-      "op": "cm",
-      "stage": 2,
-      "stageId": 1,
-      "id": 16
-     },
-     {
-      "op": "tmp",
-      "stage": 2,
-      "stageId": 1,
-      "id": 27
-     },
-     {
-      "op": "challenge",
-      "stage": 2,
-      "stageId": 0,
-      "id": 0
-     },
-     {
-      "op": "challenge",
-      "stage": 2,
-      "stageId": 1,
-      "id": 1
-     },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 0,
-      "id": 17
-     },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 3,
-      "id": 20
-     },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 4,
-      "id": 21
-     },
-     {
-      "op": "tmp",
-      "stage": 3,
-      "stageId": 2,
-      "id": 28
-     },
-     {
-      "op": "challenge",
-      "stage": 3,
-      "stageId": 0,
-      "id": 2
-     },
-     {
-      "op": "challenge",
-      "stage": 3,
-      "stageId": 1,
-      "id": 3
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 9,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_plookup/plookup.pil"
-   },
-   {
-    "tmpUsed": 2,
-    "code": [
-     {
-      "op": "sub",
-      "dest": {
+     "src": [
+      {
+       "type": "const",
+       "id": 0,
+       "prime": 0,
+       "dim": 1
+      },
+      {
        "type": "tmp",
        "id": 0,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 18,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 0
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 2,
+     "id": 18
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 7,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_permutation/permutation.pil",
+   "stage": 3
+  },
+  {
+   "tmpUsed": 19,
+   "code": [
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 10,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 8,
        "prime": 0,
-       "id": 1,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 0,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 3
-       }
-      ]
-     }
-    ],
-    "symbolsCalculated": [],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 0
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 11,
+      "dim": 1
      },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 2,
-      "id": 18
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 7,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_permutation/permutation.pil"
-   },
-   {
-    "tmpUsed": 19,
-    "code": [
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 8,
        "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 12,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
        "id": 10,
-       "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 8,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
        "prime": 0,
-       "id": 11,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 8,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
+       "type": "cm",
+       "id": 8,
        "prime": 0,
-       "id": 12,
        "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 10,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 0,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 0,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 2
-       },
-       {
-        "type": "cm",
-        "id": 8,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "cm",
+       "id": 8,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 1,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "id": 8,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
      },
-     {
-      "op": "sub",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 2,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 1,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 1,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
+      {
+       "type": "cm",
+       "id": 10,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 13,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 3,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 2,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "id": 10,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 30,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
-       "prime": 0,
+       "expId": 33,
        "id": 13,
+       "prime": 0,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 3,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 1,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 14,
+      "dim": 1
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "cm",
+       "id": 7,
        "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 15,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 7,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 16,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 9,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 7,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 4,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 7,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 5,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 6,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 9,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 17,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 7,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 29,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "expId": 34,
+       "id": 17,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 18,
+       "prime": 1,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "expId": 37,
        "id": 30,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "expId": 33,
-        "id": 13,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
-     },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
        "prime": 0,
-       "id": 14,
-       "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 7,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
-       "id": 15,
-       "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 7,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
-       "id": 16,
-       "dim": 1
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 9,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
-       "id": 4,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 7,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "challenge",
-        "id": 0,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
-       "type": "tmp",
-       "id": 5,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 4,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "id": 7,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "sub",
-      "dest": {
-       "type": "tmp",
-       "id": 6,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 5,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 1,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
-       "id": 7,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 6,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "id": 9,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "add",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
-       "id": 17,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 7,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 1,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 2
-       }
-      ]
-     },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "cm",
+       "id": 18,
        "prime": 0,
-       "id": 29,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "expId": 34,
-        "id": 17,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      {
+       "type": "cm",
+       "expId": 36,
+       "id": 29,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 18,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 8,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 18,
-        "prime": 1,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "expId": 37,
-        "id": 30,
-        "prime": 0,
-        "dim": 3
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
+      {
        "type": "tmp",
        "id": 9,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 18,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "expId": 36,
-        "id": 29,
-        "prime": 0,
-        "dim": 3
-       }
-      ]
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 7,
+     "id": 7
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 8,
+     "id": 8
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 9,
+     "id": 9
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 10,
+     "id": 10
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 0,
+     "id": 0
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 1,
+     "id": 1
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 1,
+     "id": 18
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 3,
+     "id": 29
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 4,
+     "id": 30
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 0,
+     "id": 2
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 7,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_permutation/permutation.pil",
+   "stage": 3
+  },
+  {
+   "tmpUsed": 2,
+   "code": [
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
      },
-     {
-      "op": "sub",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 19,
        "prime": 0,
-       "id": 18,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 8,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 9,
-        "dim": 3
-       }
-      ]
-     }
-    ],
-    "symbolsCalculated": [],
-    "symbolsUsed": [
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 7,
-      "id": 7
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 1,
+      "dim": 3
      },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 8,
-      "id": 8
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 9,
-      "id": 9
-     },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 10,
-      "id": 10
-     },
-     {
-      "op": "challenge",
-      "stage": 2,
-      "stageId": 0,
-      "id": 0
-     },
-     {
-      "op": "challenge",
-      "stage": 2,
-      "stageId": 1,
-      "id": 1
-     },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 1,
-      "id": 18
-     },
-     {
-      "op": "tmp",
-      "stage": 3,
-      "stageId": 3,
-      "id": 29
-     },
-     {
-      "op": "tmp",
-      "stage": 3,
-      "stageId": 4,
-      "id": 30
-     },
-     {
-      "op": "challenge",
-      "stage": 3,
-      "stageId": 0,
-      "id": 2
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 7,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_permutation/permutation.pil"
-   },
-   {
-    "tmpUsed": 2,
-    "code": [
-     {
-      "op": "sub",
-      "dest": {
+     "src": [
+      {
+       "type": "const",
+       "id": 0,
+       "prime": 0,
+       "dim": 1
+      },
+      {
        "type": "tmp",
        "id": 0,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 19,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "number",
-        "value": "1",
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 0
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 3,
+     "id": 19
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 7,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_connection/connection.pil",
+   "stage": 3
+  },
+  {
+   "tmpUsed": 29,
+   "code": [
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 20,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 2,
        "prime": 0,
-       "id": 1,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 0,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 3
-       }
-      ]
-     }
-    ],
-    "symbolsCalculated": [],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 0
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 21,
+      "dim": 1
      },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 3,
-      "id": 19
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 7,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_connection/connection.pil"
-   },
-   {
-    "tmpUsed": 29,
-    "code": [
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "const",
+       "id": 3,
        "prime": 0,
-       "id": 20,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "const",
+       "id": 3,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 2,
+       "prime": 0,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 2,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
-       "id": 21,
-       "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 3,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
+      {
        "type": "tmp",
        "id": 0,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       },
-       {
-        "type": "const",
-        "id": 3,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 22,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 1,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 2,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 0,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 23,
+      "dim": 1
      },
-     {
-      "op": "add",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 3,
        "prime": 0,
-       "id": 22,
-       "dim": 3
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 24,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 4,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 1,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
-     },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+      {
+       "type": "const",
+       "id": 4,
        "prime": 0,
-       "id": 23,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 3,
+       "prime": 0,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 3,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
-       "id": 24,
-       "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 4,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
+      {
        "type": "tmp",
        "id": 2,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       },
-       {
-        "type": "const",
-        "id": 4,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 3,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 3,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 2,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 32,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "tmp",
+       "expId": 40,
+       "id": 22,
+       "prime": 0,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 4,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 3,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 25,
+      "dim": 1
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "cm",
+       "id": 4,
        "prime": 0,
-       "id": 32,
-       "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "expId": 40,
-        "id": 22,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 4,
-        "dim": 3
-       }
-      ]
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 26,
+      "dim": 1
      },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "const",
+       "id": 5,
        "prime": 0,
-       "id": 25,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "const",
+       "id": 5,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 4,
+       "prime": 0,
        "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 4,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "copy",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
-       "id": 26,
-       "dim": 1
-      },
-      "src": [
-       {
-        "type": "const",
-        "id": 5,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
+      {
        "type": "tmp",
        "id": 5,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       },
-       {
-        "type": "const",
-        "id": 5,
-        "prime": 0,
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 6,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 4,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 5,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 22,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "cm",
+       "expId": 42,
+       "id": 32,
+       "prime": 0,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 7,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 6,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "x",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
+     },
+     "src": [
+      {
        "type": "cm",
+       "id": 2,
        "prime": 0,
-       "id": 22,
-       "dim": 3
+       "dim": 1
       },
-      "src": [
-       {
-        "type": "cm",
-        "expId": 42,
-        "id": 32,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 7,
-        "dim": 3
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
+      {
        "type": "tmp",
        "id": 8,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       },
-       {
-        "type": "x",
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 27,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 9,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 2,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 8,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
-       "type": "tmp",
-       "prime": 0,
-       "id": 27,
-       "dim": 3
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 9,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      {
+       "type": "number",
+       "value": "12275445934081160404",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 10,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       },
-       {
-        "type": "number",
-        "value": "12275445934081160404",
-        "dim": 1
-       }
-      ]
+      {
+       "type": "x",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "cm",
+       "id": 3,
+       "prime": 0,
+       "dim": 1
+      },
+      {
        "type": "tmp",
        "id": 11,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 10,
-        "dim": 3
-       },
-       {
-        "type": "x",
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 12,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 3,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 11,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 31,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "tmp",
+       "expId": 39,
+       "id": 27,
+       "prime": 0,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 13,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 12,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
-       "type": "cm",
-       "prime": 0,
-       "id": 31,
-       "dim": 3
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "expId": 39,
-        "id": 27,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 13,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "number",
+       "value": "4756475762779100925",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 14,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "challenge",
-        "id": 3,
-        "stageId": 1,
-        "dim": 3,
-        "stage": 3
-       },
-       {
-        "type": "number",
-        "value": "4756475762779100925",
-        "dim": 1
-       }
-      ]
+      {
+       "type": "x",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "cm",
+       "id": 4,
+       "prime": 0,
+       "dim": 1
+      },
+      {
        "type": "tmp",
        "id": 15,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 14,
-        "dim": 3
-       },
-       {
-        "type": "x",
-        "dim": 1
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
        "type": "tmp",
        "id": 16,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 4,
-        "prime": 0,
-        "dim": 1
-       },
-       {
-        "type": "tmp",
-        "id": 15,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 23,
+      "dim": 3
      },
-     {
-      "op": "add",
-      "dest": {
+     "src": [
+      {
+       "type": "cm",
+       "expId": 41,
+       "id": 31,
+       "prime": 0,
+       "dim": 3
+      },
+      {
        "type": "tmp",
        "id": 17,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 16,
-        "dim": 3
-       },
-       {
-        "type": "challenge",
-        "id": 2,
-        "stageId": 0,
-        "dim": 3,
-        "stage": 3
-       }
-      ]
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
        "type": "cm",
-       "prime": 0,
-       "id": 23,
+       "id": 19,
+       "prime": 1,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "expId": 41,
-        "id": 31,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 17,
-        "dim": 3
-       }
-      ]
+      {
+       "type": "cm",
+       "expId": 44,
+       "id": 22,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
      },
-     {
-      "op": "mul",
-      "dest": {
+     "src": [
+      {
+       "type": "cm",
+       "id": 19,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "expId": 43,
+       "id": 23,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 28,
+      "dim": 3
+     },
+     "src": [
+      {
        "type": "tmp",
        "id": 18,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "cm",
-        "id": 19,
-        "prime": 1,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "expId": 44,
-        "id": 22,
-        "prime": 0,
-        "dim": 3
-       }
-      ]
-     },
-     {
-      "op": "mul",
-      "dest": {
+      {
        "type": "tmp",
        "id": 19,
        "dim": 3
-      },
-      "src": [
-       {
-        "type": "cm",
-        "id": 19,
-        "prime": 0,
-        "dim": 3
-       },
-       {
-        "type": "cm",
-        "expId": 43,
-        "id": 23,
-        "prime": 0,
-        "dim": 3
-       }
-      ]
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 3
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 4
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 5
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 2,
+     "id": 2
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 3,
+     "id": 3
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 4,
+     "id": 4
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 2,
+     "id": 19
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 5,
+     "id": 22
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 6,
+     "id": 23
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 5,
+     "id": 31
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 6,
+     "id": 32
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 0,
+     "id": 2
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 1,
+     "id": 3
+    }
+   ],
+   "boundary": "everyRow",
+   "line": 7,
+   "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_connection/connection.pil",
+   "stage": 3
+  },
+  {
+   "tmpUsed": 22,
+   "code": [
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 13,
+      "dim": 1
      },
-     {
-      "op": "sub",
-      "dest": {
-       "type": "tmp",
+     "src": [
+      {
+       "type": "cm",
+       "id": 12,
        "prime": 0,
-       "id": 28,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 14,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 13,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 15,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 12,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "cm",
+       "id": 13,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 16,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 7,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 17,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 8,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 18,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 14,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 19,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 6,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
+       "type": "const",
+       "id": 7,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 0,
        "dim": 3
       },
-      "src": [
-       {
-        "type": "tmp",
-        "id": 18,
-        "dim": 3
-       },
-       {
-        "type": "tmp",
-        "id": 19,
-        "dim": 3
-       }
-      ]
-     }
-    ],
-    "symbolsCalculated": [],
-    "symbolsUsed": [
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 3
+      {
+       "type": "const",
+       "id": 8,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
      },
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 4
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
+       "type": "tmp",
+       "id": 1,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
      },
-     {
-      "op": "const",
-      "stage": 0,
-      "id": 5
+     "src": [
+      {
+       "type": "tmp",
+       "id": 2,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 14,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
      },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 2,
-      "id": 2
+     "src": [
+      {
+       "type": "tmp",
+       "id": 3,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
      },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 3,
-      "id": 3
+     "src": [
+      {
+       "type": "tmp",
+       "id": 4,
+       "dim": 3
+      },
+      {
+       "type": "const",
+       "id": 6,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 27,
+      "dim": 3
      },
-     {
-      "op": "cm",
-      "stage": 1,
-      "stageId": 4,
-      "id": 4
+     "src": [
+      {
+       "type": "tmp",
+       "id": 5,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 20,
+      "dim": 1
      },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 2,
-      "id": 19
+     "src": [
+      {
+       "type": "cm",
+       "id": 11,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
      },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 5,
-      "id": 22
+     "src": [
+      {
+       "type": "cm",
+       "id": 12,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
      },
-     {
-      "op": "cm",
-      "stage": 3,
-      "stageId": 6,
-      "id": 23
+     "src": [
+      {
+       "type": "tmp",
+       "id": 6,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 13,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
      },
-     {
-      "op": "tmp",
-      "stage": 3,
-      "stageId": 5,
-      "id": 31
+     "src": [
+      {
+       "type": "tmp",
+       "id": 7,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
      },
-     {
-      "op": "tmp",
-      "stage": 3,
-      "stageId": 6,
-      "id": 32
+     "src": [
+      {
+       "type": "tmp",
+       "id": 8,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "expId": 21,
+       "id": 15,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
      },
-     {
-      "op": "challenge",
-      "stage": 3,
-      "stageId": 0,
-      "id": 2
+     "src": [
+      {
+       "type": "tmp",
+       "id": 9,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "expId": 27,
+       "id": 27,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
      },
-     {
-      "op": "challenge",
-      "stage": 3,
-      "stageId": 1,
-      "id": 3
-     }
-    ],
-    "boundary": "everyRow",
-    "line": 7,
-    "filename": "/home/roger13/Escriptori/Polygon/zkEVM/pil2-stark-js/test/state_machines/sm_connection/connection.pil"
-   }
-  ]
- },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 10,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 11,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 11,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "expId": 27,
+       "id": 27,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 21,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 12,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 20,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 6
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 7
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 8
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 11,
+     "id": 11
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 12,
+     "id": 12
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 13,
+     "id": 13
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 14,
+     "id": 14
+    },
+    {
+     "op": "tmp",
+     "stage": 2,
+     "stageId": 1,
+     "id": 27
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 0,
+     "id": 0
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 1,
+     "id": 1
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 3,
+     "id": 20
+    }
+   ],
+   "boundary": "everyRow",
+   "stage": 2
+  },
+  {
+   "tmpUsed": 40,
+   "code": [
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 27,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 12,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 28,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 13,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 29,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 12,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "cm",
+       "id": 13,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 30,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 7,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 31,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 8,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 32,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 14,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 33,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 6,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
+       "type": "const",
+       "id": 7,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 0,
+       "dim": 3
+      },
+      {
+       "type": "const",
+       "id": 8,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
+       "type": "tmp",
+       "id": 1,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 2,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 14,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 3,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 4,
+       "dim": 3
+      },
+      {
+       "type": "const",
+       "id": 6,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 27,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 5,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 34,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 11,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 12,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 6,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 13,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 7,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 8,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "expId": 21,
+       "id": 29,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 9,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "expId": 27,
+       "id": 27,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 10,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 11,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 20,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 11,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "expId": 27,
+       "id": 27,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 1,
+      "id": 35,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 7,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 1,
+      "id": 36,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 8,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 1,
+      "id": 37,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 14,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 1,
+      "id": 38,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 6,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
+       "type": "const",
+       "id": 7,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 12,
+       "dim": 3
+      },
+      {
+       "type": "const",
+       "id": 8,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 0,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 2
+      },
+      {
+       "type": "tmp",
+       "id": 13,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 14,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 14,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 15,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 16,
+       "dim": 3
+      },
+      {
+       "type": "const",
+       "id": 6,
+       "prime": 1,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "cm",
+      "prime": 1,
+      "id": 27,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 17,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 1,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 2
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "expId": 28,
+       "id": 20,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "expId": 27,
+       "id": 27,
+       "prime": 1,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 20,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "expId": 27,
+       "id": 27,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "id": 19,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 21,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      },
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 22,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "tmp",
+       "id": 21,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 23,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 20,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "id": 22,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 24,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 18,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "id": 23,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 25,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "number",
+       "value": "1",
+       "dim": 1
+      },
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 26,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 24,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "id": 25,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 39,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 26,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 21,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 6
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 7
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 8
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 11,
+     "id": 11
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 12,
+     "id": 12
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 13,
+     "id": 13
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 14,
+     "id": 14
+    },
+    {
+     "op": "tmp",
+     "stage": 2,
+     "stageId": 1,
+     "id": 27
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 0,
+     "id": 0
+    },
+    {
+     "op": "challenge",
+     "stage": 2,
+     "stageId": 1,
+     "id": 1
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 3,
+     "id": 20
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 4,
+     "id": 21
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 0,
+     "id": 2
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 1,
+     "id": 3
+    }
+   ],
+   "boundary": "everyRow",
+   "stage": 3
+  },
+  {
+   "tmpUsed": 17,
+   "code": [
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 9,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 2,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 10,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 3,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "const",
+       "id": 3,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 2,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "tmp",
+       "id": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 11,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 1,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 12,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 3,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 13,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 4,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "const",
+       "id": 4,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 3,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "tmp",
+       "id": 2,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 3,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 32,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "expId": 40,
+       "id": 11,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "id": 4,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 14,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 4,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 15,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "const",
+       "id": 5,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "const",
+       "id": 5,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 4,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "tmp",
+       "id": 5,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 6,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "expId": 42,
+       "id": 32,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "id": 7,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 16,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 8,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 22,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 3
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 4
+    },
+    {
+     "op": "const",
+     "stage": 0,
+     "id": 5
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 2,
+     "id": 2
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 3,
+     "id": 3
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 4,
+     "id": 4
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 5,
+     "id": 22
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 6,
+     "id": 32
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 0,
+     "id": 2
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 1,
+     "id": 3
+    }
+   ],
+   "boundary": "everyRow",
+   "stage": 3
+  },
+  {
+   "tmpUsed": 16,
+   "code": [
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 11,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 2,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "x",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 2,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "tmp",
+       "id": 0,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 12,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 1,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 13,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 3,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "number",
+       "value": "12275445934081160404",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 2,
+       "dim": 3
+      },
+      {
+       "type": "x",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 3,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "tmp",
+       "id": 3,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 4,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "cm",
+      "prime": 0,
+      "id": 31,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "expId": 39,
+       "id": 12,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "id": 5,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 14,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 4,
+       "prime": 0,
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "challenge",
+       "id": 3,
+       "stageId": 1,
+       "dim": 3,
+       "stage": 3
+      },
+      {
+       "type": "number",
+       "value": "4756475762779100925",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 6,
+       "dim": 3
+      },
+      {
+       "type": "x",
+       "dim": 1
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 4,
+       "prime": 0,
+       "dim": 1
+      },
+      {
+       "type": "tmp",
+       "id": 7,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "add",
+     "dest": {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 8,
+       "dim": 3
+      },
+      {
+       "type": "challenge",
+       "id": 2,
+       "stageId": 0,
+       "dim": 3,
+       "stage": 3
+      }
+     ]
+    },
+    {
+     "op": "mul",
+     "dest": {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "cm",
+       "expId": 41,
+       "id": 31,
+       "prime": 0,
+       "dim": 3
+      },
+      {
+       "type": "tmp",
+       "id": 9,
+       "dim": 3
+      }
+     ]
+    },
+    {
+     "op": "sub",
+     "dest": {
+      "type": "tmp",
+      "prime": 0,
+      "id": 15,
+      "dim": 3
+     },
+     "src": [
+      {
+       "type": "tmp",
+       "id": 10,
+       "dim": 3
+      },
+      {
+       "type": "cm",
+       "id": 23,
+       "prime": 0,
+       "dim": 3
+      }
+     ]
+    }
+   ],
+   "symbolsUsed": [
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 2,
+     "id": 2
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 3,
+     "id": 3
+    },
+    {
+     "op": "cm",
+     "stage": 1,
+     "stageId": 4,
+     "id": 4
+    },
+    {
+     "op": "cm",
+     "stage": 3,
+     "stageId": 6,
+     "id": 23
+    },
+    {
+     "op": "tmp",
+     "stage": 3,
+     "stageId": 5,
+     "id": 31
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 0,
+     "id": 2
+    },
+    {
+     "op": "challenge",
+     "stage": 3,
+     "stageId": 1,
+     "id": 3
+    }
+   ],
+   "boundary": "everyRow",
+   "stage": 3
+  }
+ ],
  "expressionsCode": [
   {
    "expId": 0,
@@ -26072,7 +28425,7 @@
    "subproofId": 0
   }
  ],
- "friExpId": 48,
+ "friExpId": 52,
  "nCols": {
   "cm1": 15,
   "cm2": 2,

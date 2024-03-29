@@ -9,7 +9,6 @@
 int main(int argc, char **argv)
 {
     Config config;
-    config.runFileGenBatchProof = true; // So that starkInfo is created
     config.mapConstPolsFile = false;
     config.mapConstantsTreeFile = false;
     

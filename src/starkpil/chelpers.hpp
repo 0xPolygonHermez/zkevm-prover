@@ -85,7 +85,7 @@ public:
     std::map<string, ParserParams> stagesInfo;
     std::map<uint64_t, ParserParams> expressionsInfo;
 
-    std::vector<std::vector<ParserParams>> constraintsInfoDebug;
+    std::vector<ParserParams> constraintsInfoDebug;
 
     std::vector<Hint> hints;
     
@@ -126,7 +126,6 @@ public:
             delete[] cHelpersArgsDebug.publicsIds;
             delete[] cHelpersArgsDebug.subproofValuesIds;
 
-            constraintsInfoDebug.clear();
             expressionsInfo.clear();
         }
         

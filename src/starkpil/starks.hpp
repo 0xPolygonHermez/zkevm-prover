@@ -332,7 +332,7 @@ public:
 
     void calculateExpressions(uint64_t step, bool after, StepsParams &params, CHelpersSteps *chelpersSteps);
     void calculateExpression(uint64_t expId, StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateConstraint(ParserParams &constraintCode, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps);
     
     void computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps);
     void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);

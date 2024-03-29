@@ -266,8 +266,6 @@ void CHelpers::loadCHelpersPil2(BinFileUtils::BinFile *cHelpersBin) {
     cHelpersArgsDebug.challengesIds = new uint16_t[nChallengesIdsDebug];
     cHelpersArgsDebug.publicsIds = new uint16_t[nPublicsIdsDebug];
     cHelpersArgsDebug.subproofValuesIds = new uint16_t[nSubproofValuesIdsDebug];
-
-    constraintsInfoDebug.resize(nStages + 1);
     
     uint32_t nConstraints = cHelpersBin->readU32LE();
 
@@ -306,12 +304,8 @@ void CHelpers::loadCHelpersPil2(BinFileUtils::BinFile *cHelpersBin) {
 
         parserParamsConstraint.nSubproofValuesUsed = cHelpersBin->readU32LE();
         parserParamsConstraint.subproofValuesOffset = cHelpersBin->readU32LE();
-
-        if(constraintsInfoDebug[stage].empty()) {
-            constraintsInfoDebug[stage].emplace_back();
-        }
-
-        constraintsInfoDebug[stage].push_back(parserParamsConstraint);
+    
+        constraintsInfoDebug.push_back(parserParamsConstraint);
     }
 
 

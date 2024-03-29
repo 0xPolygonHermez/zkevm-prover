@@ -76,11 +76,11 @@ SRCS_BCT := $(shell find ./tools/starkpil/bctree/build_const_tree.cpp ./tools/st
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
-SRCS_TEST := $(shell find ./test/examples/ ./src/XKCP ./src/goldilocks/src ./src/poseidon_opt/ ./src/starkpil/proof2zkinStark.* ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/* ./src/starkpil/transcript/* ./src/starkpil/fri/* ./src/ffiasm ./src/utils -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_TEST := $(shell find ./test/examples/ ./src/hint ./src/XKCP ./src/goldilocks/src ./src/poseidon_opt/ ./src/starkpil/proof2zkinStark.* ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/* ./src/starkpil/transcript/* ./src/starkpil/fri/* ./src/ffiasm ./src/utils -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
 DEPS_TEST := $(OBJS_TEST:.o=.d)
 
-SRCS_CONSTRAINT := $(shell find ./src/constraint_checker ./src/XKCP ./src/goldilocks/src ./src/poseidon_opt/ ./src/starkpil/proof2zkinStark.* ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/* ./src/starkpil/transcript/* ./src/starkpil/fri/* ./src/ffiasm ./src/utils -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_CONSTRAINT := $(shell find ./src/constraint_checker ./src/hint ./src/XKCP ./src/goldilocks/src ./src/poseidon_opt/ ./src/starkpil/proof2zkinStark.* ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/* ./src/starkpil/transcript/* ./src/starkpil/fri/* ./src/ffiasm ./src/utils -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_CONSTRAINT := $(SRCS_CONSTRAINT:%=$(BUILD_DIR)/%.o)
 DEPS_CONSTRAINT := $(OBJS_CONSTRAINT:.o=.d)
 
