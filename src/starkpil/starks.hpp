@@ -17,11 +17,15 @@
 #include "exit_process.hpp"
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
-#include "hint.hpp"
-#include "hint_builder.hpp"
-#include "hint/h1h2_hint.hpp"
-#include "hint/gprod_hint.hpp"
-#include "hint/gsum_hint.hpp"
+#include "hint_handler.hpp"
+#include "hint_handler_builder.hpp"
+#include "hint/h1h2_hint_handler.hpp"
+#include "hint/gprod_hint_handler.hpp"
+#include "hint/gsum_hint_handler.hpp"
+#include "hint/public_values_hint_handler.hpp"
+#include "hint/subproof_value_hint_handler.hpp"
+
+using namespace Hints;
 
 struct StarkFiles
 {
@@ -244,9 +248,11 @@ public:
             optimizeMemoryNTT = true;
         }
 
-        Hints::HintBuilder::registerBuilder(Hints::H1H2Hint::getName(), std::make_unique<Hints::H1H2HintBuilder>());
-        Hints::HintBuilder::registerBuilder(Hints::GProdHint::getName(), std::make_unique<Hints::GProdHintBuilder>());
-        Hints::HintBuilder::registerBuilder(Hints::GSumHint::getName(), std::make_unique<Hints::GSumHintBuilder>());
+        HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
+        HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
+        HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
+        HintHandlerBuilder::registerBuilder(PublicValuesHintHandler::getName(), std::make_unique<PublicValuesHintHandlerBuilder>());
+        HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
     };
     ~Starks()
     {

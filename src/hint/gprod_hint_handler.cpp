@@ -1,13 +1,23 @@
-#include "gprod_hint.hpp"
+#include "gprod_hint_handler.hpp"
 
 namespace Hints
 {
-    std::string GProdHint::getName()
+    std::string GProdHintHandler::getName()
     {
         return "gprod";
     }
 
-    void GProdHint::resolveHint(int N, const std::map<std::string, Polinomial *> &polynomials)
+    std::vector<std::string> GProdHintHandler::getSources()
+    {
+        return {"numerator", "denominator"};
+    }
+
+    std::vector<std::string> GProdHintHandler::getDestinations()
+    {
+        return {"reference"};
+    }
+
+    void GProdHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials)
     {
         assert(polynomials.size() == 3);
 
@@ -29,18 +39,8 @@ namespace Hints
         Polinomial::calculateZ(zPol, numPol, denPol);
     }
 
-    std::vector<std::string> GProdHint::getFields()
+    std::unique_ptr<HintHandler> GProdHintHandlerBuilder::build() const
     {
-        return {"numerator", "denominator"};
-    }
-
-    std::vector<std::string> GProdHint::getDestination()
-    {
-        return {"reference"};
-    }
-
-    std::unique_ptr<Hint> GProdHintBuilder::build() const
-    {
-        return std::make_unique<GProdHint>();
+        return std::make_unique<GProdHintHandler>();
     }
 }

@@ -1,13 +1,23 @@
-#include "gsum_hint.hpp"
+#include "gsum_hint_handler.hpp"
 
 namespace Hints
 {
-    std::string GSumHint::getName()
+    std::string GSumHintHandler::getName()
     {
         return "gsum";
     }
 
-    void GSumHint::resolveHint(int N, const std::map<std::string, Polinomial *> &polynomials)
+    std::vector<std::string> GSumHintHandler::getSources()
+    {
+        return {"numerator", "denominator"};
+    }
+
+    std::vector<std::string> GSumHintHandler::getDestinations()
+    {
+        return {"reference"};
+    }
+
+    void GSumHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials)
     {
         assert(polynomials.size() == 3);
 
@@ -29,18 +39,8 @@ namespace Hints
         Polinomial::calculateS(zPol, numPol, denPol);
     }
 
-    std::vector<std::string> GSumHint::getFields()
+    std::unique_ptr<HintHandler> GSumHintHandlerBuilder::build() const
     {
-        return {"numerator", "denominator"};
-    }
-
-    std::vector<std::string> GSumHint::getDestination()
-    {
-        return {"reference"};
-    }
-
-    std::unique_ptr<Hint> GSumHintBuilder::build() const
-    {
-        return std::make_unique<GSumHint>();
+        return std::make_unique<GSumHintHandler>();
     }
 }
