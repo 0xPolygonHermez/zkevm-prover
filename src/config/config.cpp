@@ -232,7 +232,7 @@ void Config::load(json &config)
     ParseString(config, "zkevmCmPols", "ZKEVM_CM_POLS", zkevmCmPols, "");
     ParseString(config, "zkevmCmPolsAfterExecutor", "ZKEVM_CM_POLS_AFTER_EXECUTOR", zkevmCmPolsAfterExecutor, "");
     ParseString(config, "keccakScriptFile", "KECCAK_SCRIPT_FILE", keccakScriptFile, configPath + "/scripts/keccak_script.json");
-    ParseString(config, "sha256ScriptFile", "SHA256_SCRIPT_FILE", sha256ScriptFile, configPath + "runtime/output/sha256_script.json");
+    ParseString(config, "sha256ScriptFile", "SHA256_SCRIPT_FILE", sha256ScriptFile, "runtime/output/sha256_script.json");
     ParseString(config, "storageRomFile", "STORAGE_ROM_FILE", storageRomFile, configPath + "/scripts/storage_sm_rom.json");
     ParseString(config, "zkevmConstPols", "ZKEVM_CONST_POLS", zkevmConstPols, configPath + "/zkevm/zkevm.const");
     ParseString(config, "zkevmConstantsTree", "ZKEVM_CONSTANTS_TREE", zkevmConstantsTree, configPath + "/zkevm/zkevm.consttree");
