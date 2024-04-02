@@ -801,6 +801,8 @@ using grpc::Status;
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
         string s = "ExecutorServiceImpl::ProcessBatchV2() returns result=" + to_string(response->error()) +
+            " error_rom=" + to_string(response->error_rom()) + "=" + proverRequest.pFullTracer->get_error() +
+            " invalid_batch=" + to_string(response->invalid_batch()) +
             " old_state_root=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
             " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
             " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
@@ -1483,6 +1485,8 @@ using grpc::Status;
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
         string s = "ExecutorServiceImpl::ProcessStatelessBatchV2() returns result=" + to_string(response->error()) +
+            " error_rom=" + to_string(response->error_rom()) + "=" + proverRequest.pFullTracer->get_error() +
+            " invalid_batch=" + to_string(response->invalid_batch()) +
             " old_state_root=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
             " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
             " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +

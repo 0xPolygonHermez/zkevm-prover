@@ -54,7 +54,7 @@ SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
-SRCS_BCT := ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree/main.cpp ./src/goldilocks/src/goldilocks_base_field.cpp ./src/ffiasm/fr.cpp ./src/ffiasm/fr.asm ./src/starkpil/merkleTree/merkleTreeBN128.cpp ./src/poseidon_opt/poseidon_opt.cpp ./src/goldilocks/src/poseidon_goldilocks.cpp
+SRCS_BCT := $(shell find ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree/main.cpp ./src/goldilocks/src ./src/starkpil/merkleTree/merkleTreeBN128.cpp ./src/starkpil/merkleTree/merkleTreeGL.cpp ./src/poseidon_opt/poseidon_opt.cpp ./src/XKCP ./src/ffiasm ./src/starkpil/stark_info.* ./src/utils/* -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
@@ -62,14 +62,8 @@ SRCS_TEST := $(shell find ./test/examples/ ./src/XKCP ./src/goldilocks/src ./src
 OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
 DEPS_TEST := $(OBJS_TEST:.o=.d)
 
-SRCS_SETUP := $(shell find $(SETUP_DIRS) ! -path "./src/sm/*" ! -path "./src/main_sm/*" -name *.cpp)
-SRCS_SETUP += $(shell find src/XKCP -name *.cpp)
-SRCS_SETUP += $(shell find src/fflonk_setup -name fflonk_setup.cpp)
-SRCS_SETUP += $(addprefix $(SETUP_DPNDS_DIR)/, alt_bn128.cpp fr.cpp fq.cpp fnec.cpp fec.cpp misc.cpp naf.cpp splitparstr.cpp)
-SRCS_SETUP += $(shell find $(SETUP_DPNDS_DIR) -name *.asm)
-OBJS_SETUP := $(patsubst %,$(BUILD_DIR)/%.o,$(SRCS_SETUP))
-OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
-OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main_test.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
+SRCS_SETUP := $(shell find ./src/fflonk_setup ./src/rapidsnark ./src/ffiasm ./src/XKCP -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS_SETUP := $(SRCS_SETUP:%=$(BUILD_DIR)/%.o)
 DEPS_SETUP := $(OBJS_SETUP:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
@@ -103,7 +97,7 @@ $(BUILD_DIR)/%.cc.o: %.cc
 
 main_generator: $(BUILD_DIR)/$(TARGET_MNG)
 
-$(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp
+$(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp ./src/config/definitions.hpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/main_generator/main_generator.cpp -o $@ -lgmp
 
@@ -112,7 +106,7 @@ generate: main_generator
 
 pols_generator: $(BUILD_DIR)/$(TARGET_PLG)
 
-$(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp
+$(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp ./src/config/definitions.hpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/pols_generator/pols_generator.cpp -o $@ -lgmp
 

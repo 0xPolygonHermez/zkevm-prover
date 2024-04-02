@@ -49,6 +49,7 @@ public:
     mpz_class  pointZ;
     mpz_class  pointY;
     string     blobData;
+    mpz_class  blobL2HashData;
 
     PublicInputs() :
         forkID(0),

@@ -17,7 +17,6 @@
 #include "main_sm/fork_9/main/rom.hpp"
 #include "main_sm/fork_9/main/context.hpp"
 #include "main_sm/fork_9/main/eval_command.hpp"
-#include "main_sm/fork_9/main/main_definitions.hpp"
 #include "utils/time_metric.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
@@ -53,12 +52,10 @@ namespace fork_9
 #define FrFirst32Negative ( 0xFFFFFFFF00000001 - 0xFFFFFFFF )
 #define FrLast32Positive 0xFFFFFFFF
 
-#ifndef BLOB_INNER
 #ifdef DEBUG
 #define CHECK_MAX_CNT_ASAP
 #endif
 #define CHECK_MAX_CNT_AT_THE_END
-#endif
 
 //#define LOG_COMPLETED_STEPS_TO_FILE
 //#define LOG_COMPLETED_STEPS
@@ -68,12 +65,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
-#ifdef BLOB_INNER
-    romBatch(config, BLOB),
-#else
-    romBatch(config, BATCH),
-#endif
-    romCollection(config, COLLECTION),
+    rom(config),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
     rom_gas_limit_2147483647(config),
@@ -85,14 +77,12 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     TimerStart(ROM_LOAD);
 
-    // Load zkEVM ROM definition file
+    // Load file contents into a json instance
     json romJson;
     file2json("src/main_sm/fork_9/scripts/rom.json", romJson);
-    romBatch.load(fr, romJson);
 
-    // Load Collection (unit test) ROM definition file
-    file2json("src/main_sm/fork_9/scripts/rom_collection.json", romJson);
-    romCollection.load(fr, romJson);
+    // Load ROM data from JSON data
+    rom.load(fr, romJson);
 
 #ifdef MULTI_ROM_TEST
     romJson.clear();
@@ -105,6 +95,23 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     file2json("src/main_sm/fork_9/scripts/rom_gas_limit_89128960.json", romJson);
     rom_gas_limit_89128960.load(fr, romJson);
 #endif
+
+    // Get labels
+    finalizeExecutionLabel     = rom.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel      = rom.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel    = rom.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel          = rom.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel      = rom.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel    = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel  = rom.getLabel(string("verifyMerkleProofEnd"));
+    outOfCountersStepLabel     = rom.getLabel(string("outOfCountersStep"));
+    outOfCountersArithLabel    = rom.getLabel(string("outOfCountersArith"));
+    outOfCountersBinaryLabel   = rom.getLabel(string("outOfCountersBinary"));
+    outOfCountersKeccakLabel   = rom.getLabel(string("outOfCountersKeccak"));
+    outOfCountersSha256Label   = rom.getLabel(string("outOfCountersSha256"));
+    outOfCountersMemalignLabel = rom.getLabel(string("outOfCountersMemalign"));
+    outOfCountersPoseidonLabel = rom.getLabel(string("outOfCountersPoseidon"));
+    outOfCountersPaddingLabel  = rom.getLabel(string("outOfCountersPadding"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -164,15 +171,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     ecrecoverEndLabel         = rom.getLabel(string("ecrecover_end"));
     checkFirstTxTypeLabel     = rom.getLabel(string("checkFirstTxType"));
     writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
     
-#else
-
-    Rom &rom = config.loadCollectionRom ? romCollection : romBatch;
-
 #endif
 
     // Init execution flags
-    bool bProcessBatch = (proverRequest.type == prt_processBatch) || (proverRequest.type == prt_processBlobInner);
+    bool bProcessBatch = (proverRequest.type == prt_processBatch);
     bool bUnsignedTransaction = (proverRequest.input.from != "") && (proverRequest.input.from != "0x");
 
     // Unsigned transactions (from!=empty) are intended to be used to "estimage gas" (or "call")
@@ -219,11 +223,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pHashDB->clearCache();
         }
     }
-
-#ifdef BLOB_INNER
-        // Calculate blobL2HashData
-        keccak256((const uint8_t *)proverRequest.input.publicInputsExtended.publicInputs.blobData.c_str(), proverRequest.input.publicInputsExtended.publicInputs.blobData.size(), ctx.blobL2HashData);
-#endif
 
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
@@ -339,8 +338,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 #endif
 
-#ifndef BLOB_INNER
-        if ((zkPC == rom.labels.ecrecoverStoreArgsLabel) && config.ECRecoverPrecalc)
+        if (zkPC == ecrecoverStoreArgsLabel && config.ECRecoverPrecalc)
         {
             zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);
             mpz_class signature_, r_, s_, v_;
@@ -355,7 +353,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.ecRecoverPrecalcBuffer.filled = true;
             }
         }
-        if (zkPC == rom.labels.ecrecoverEndLabel)
+        if (zkPC == ecrecoverEndLabel)
         {
             if ( ctx.ecRecoverPrecalcBuffer.filled)
             {
@@ -363,7 +361,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.ecRecoverPrecalcBuffer.filled = false;
             }
         }
-#endif
 
         // Consolidate the state and store it in SR, just before we save SR into SMT
         if (config.hashDB64 && bProcessBatch && (zkPC == consolidateStateRootZKPC))
@@ -676,7 +673,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
-#ifdef SUPPORT_SHA256
         // If inCntSha256F, op = op + inCntSha256F*cntSha256F
         if (!fr.isZero(rom.line[zkPC].inCntSha256F))
         {
@@ -686,7 +682,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             zklog.info("inCntSha256F op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
-#endif
 
         // If inCntPoseidonG, op = op + inCntPoseidonG*cntPoseidonG
         if (!fr.isZero(rom.line[zkPC].inCntPoseidonG))
@@ -729,17 +724,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inRCX, pols.RCX[i]));
             pols.inRCX[i] = rom.line[zkPC].inRCX;
 #ifdef LOG_INX
-            zklog.info("inRCX op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
-#endif
-        }
-
-        // If inRID, op = op + inRID*RID
-        if (!fr.isZero(rom.line[zkPC].inRID))
-        {
-            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inRID, pols.RID[i]));
-            pols.inRID[i] = rom.line[zkPC].inRID;
-#ifdef LOG_INX
-            zklog.info("inRID op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
+            zklog.info("inCntPaddingPG op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -770,39 +755,52 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         // Relative and absolute address auxiliary variables
         int32_t addrRel = 0;
-        int32_t addr = 0;
+        uint64_t addr = 0;
 
         // If address is involved, load offset into addr
         if (rom.line[zkPC].mOp==1 ||
+            rom.line[zkPC].mWR==1 ||
+            rom.line[zkPC].hashK==1 ||
+            rom.line[zkPC].hashK1==1 ||
+            rom.line[zkPC].hashKLen==1 ||
+            rom.line[zkPC].hashKDigest==1 ||
+            rom.line[zkPC].hashP==1 ||
+            rom.line[zkPC].hashP1==1 ||
+            rom.line[zkPC].hashPLen==1 ||
+            rom.line[zkPC].hashPDigest==1 ||
+            rom.line[zkPC].hashS==1 ||
+            rom.line[zkPC].hashS1==1 ||
+            rom.line[zkPC].hashSLen==1 ||
+            rom.line[zkPC].hashSDigest==1 ||
             rom.line[zkPC].JMP==1 ||
             rom.line[zkPC].JMPN==1 ||
             rom.line[zkPC].JMPC==1 ||
             rom.line[zkPC].JMPZ==1 ||
             rom.line[zkPC].call==1)
         {
-            if (!fr.isZero(rom.line[zkPC].ind))
+            if (rom.line[zkPC].ind == 1)
             {
-                if (!fr.toS32(addrRel, fr.mul(rom.line[zkPC].ind, pols.E0[i])))
+                if (!fr.toS32(addrRel, pols.E0[i]))
                 {
                     proverRequest.result = ZKR_SM_MAIN_TOS32;
-                    logError(ctx, "Failed calling fr.toS32() with pols.E0[i]=" + fr.toString(pols.E0[i], 16) + " and ind=" + fr.toString(rom.line[zkPC].ind));
+                    logError(ctx, "Failed calling fr.toS32() with pols.E0[i]=" + fr.toString(pols.E0[i], 16));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
             }
-            if (!fr.isZero(rom.line[zkPC].indRR))
+            if (rom.line[zkPC].indRR == 1)
             {
-                if (!fr.toS32(addrRel, fr.mul(rom.line[zkPC].indRR, pols.RR[i])))
+                if (!fr.toS32(addrRel, pols.RR[i]))
                 {
                     proverRequest.result = ZKR_SM_MAIN_TOS32;
-                    logError(ctx, "Failed calling fr.toS32() with pols.RR[i]=" + fr.toString(pols.RR[i], 16) + " and inRR=" + fr.toString(rom.line[zkPC].inRR));
+                    logError(ctx, "Failed calling fr.toS32() with pols.RR[i]=" + fr.toString(pols.RR[i], 16));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
             }
-            if (rom.line[zkPC].bOffsetPresent && (rom.line[zkPC].offset!=0))
+            if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
-                addr += rom.line[zkPC].offset;
+                addrRel += rom.line[zkPC].offset;
             }
             if (rom.line[zkPC].isStack == 1)
             {
@@ -814,25 +812,27 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
-                addr += sp;
+                addrRel += sp;
             }
             // Check addrRel is not too big
-            int32_t memAddr = addr + (rom.line[zkPC].memUseAddrRel ? addrRel : 0);
-            if ( memAddr >= ((rom.line[zkPC].isMem == 1) ? 0x20000 : 0x10000) )
+            if ( addrRel >= ( ( (rom.line[zkPC].isMem==1) ? 0x20000 : 0x10000) - 2048 ) )
+
             {
                 proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;
-                logError(ctx, "memAddr too big memAddr=" + to_string(memAddr));
+                logError(ctx, "addrRel too big addrRel=" + to_string(addrRel));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
             // If addrRel is negative, fail
-            if (memAddr < 0)
+            if (addrRel < 0)
             {
                 proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;
-                logError(ctx, "memAddr<0 memAddr=" + to_string(memAddr));
+                logError(ctx, "addrRel<0 addrRel=" + to_string(addrRel));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
+
+            addr = addrRel;
 #ifdef LOG_ADDR
             zklog.info("Any addr=" + to_string(addr));
 #endif
@@ -873,13 +873,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.incStack[i] = fr.fromS32(rom.line[zkPC].incStack);
         }
-        if (!fr.isZero(rom.line[zkPC].ind))
+        if (rom.line[zkPC].ind == 1)
         {
-            pols.ind[i] = rom.line[zkPC].ind;
+            pols.ind[i] = fr.one();
         }
-        if (!fr.isZero(rom.line[zkPC].indRR))
+        if (rom.line[zkPC].indRR == 1)
         {
-            pols.indRR[i] = rom.line[zkPC].indRR;
+            pols.indRR[i] = fr.one();
         }
 
         // If offset, record it the committed polynomial
@@ -888,60 +888,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.offset[i] = fr.fromS32(rom.line[zkPC].offset);
         }
 
-        bool anyHash =
-#ifdef SUPPORT_SHA256
-            rom.line[zkPC].hashS ||
-            rom.line[zkPC].hashSDigest ||
-            rom.line[zkPC].hashSLen ||
-#endif
-            rom.line[zkPC].hashP ||
-            rom.line[zkPC].hashK ||
-            rom.line[zkPC].hashPDigest ||
-            rom.line[zkPC].hashKDigest ||
-            rom.line[zkPC].hashPLen ||
-            rom.line[zkPC].hashKLen;
-        int32_t memAddr = addr + (rom.line[zkPC].memUseAddrRel ? addrRel : 0);
-        int32_t hashAddr = anyHash ? ( rom.line[zkPC].hashOffset + fr.toS64(pols.E0[i]) ) : 0;
-
         /**************/
         /* FREE INPUT */
         /**************/
-
-        uint64_t rid = 0;
-        Saved dataToRestore;
-        if (rom.line[zkPC].restore)
-        {
-            rid = fr.toU64(pols.RID[i]);
-            if (!bProcessBatch)
-            {
-                pols.restore[i] = fr.one();
-            }
-
-            // Check if there is saved data with the current RID value
-            map<uint64_t, Saved>::iterator it;
-            it = ctx.saved.find(rid);
-            if (it == ctx.saved.end())
-            {
-                proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                logError(ctx, "restore could not find rid=" + to_string(rid));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-            // Verify that saved data was not restored previously
-            if (it->second.restored)
-            {
-                proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                logError(ctx, "restore found saved data was already restored rid=" + to_string(rid));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-            it->second.restored = true;
-            it->second.restoredZKPC = zkPC;
-            it->second.restoredStep = i;
-            dataToRestore = it->second;
-        }
 
         // If inFREE or inFREE0, calculate the free input value, and add it to op
         if (!fr.isZero(rom.line[zkPC].inFREE) || !fr.isZero(rom.line[zkPC].inFREE0))
@@ -957,34 +906,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Goldilocks::Element fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7;
 
             // If there is no operation specified in freeInTag.op, then get the free value directly from the corresponding source
-            if (rom.line[zkPC].freeInTag.op == op_empty)
-            {
+            if (rom.line[zkPC].freeInTag.op == op_empty) {
                 uint64_t nHits = 0;
-
-                // Restore fi from saved op
-                if (rom.line[zkPC].restore)
-                {
-                    fi0 = ctx.saved[rid].op[0];
-                    fi1 = ctx.saved[rid].op[1];
-                    fi2 = ctx.saved[rid].op[2];
-                    fi3 = ctx.saved[rid].op[3];
-                    fi4 = ctx.saved[rid].op[4];
-                    fi5 = ctx.saved[rid].op[5];
-                    fi6 = ctx.saved[rid].op[6];
-                    fi7 = ctx.saved[rid].op[7];
-                    nHits++;
-                }
 
                 // Memory read free in: get fi=mem[addr], if it exists
                 if ( (rom.line[zkPC].mOp==1) && (rom.line[zkPC].mWR==0) )
                 {
-                    int32_t memAddr = addr + (rom.line[zkPC].memUseAddrRel ? addrRel : 0);
-
                     std::unordered_map<uint64_t, Fea>::iterator memIterator;
-                    memIterator = ctx.mem.find(memAddr);
+                    memIterator = ctx.mem.find(addr);
                     if (memIterator != ctx.mem.end()) {
 #ifdef LOG_MEMORY
-                        zklog.info("Memory read mRD: memAddr:" + to_string(memAddr) + " " + fea2string(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
+                        zklog.info("Memory read mRD: addr:" + to_string(addr) + " " + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
 #endif
                         fi0 = memIterator->second.fe0;
                         fi1 = memIterator->second.fe1;
@@ -1509,36 +1441,32 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // HashK free in
-                if (rom.line[zkPC].hashK == 1)
+                if ( (rom.line[zkPC].hashK == 1) || (rom.line[zkPC].hashK1 == 1) )
                 {
                     unordered_map< uint64_t, HashValue >::iterator hashKIterator;
 
                     // If there is no entry in the hash database for this address, then create a new one
-                    hashKIterator = ctx.hashK.find(hashAddr);
+                    hashKIterator = ctx.hashK.find(addr);
                     if (hashKIterator == ctx.hashK.end())
                     {
                         HashValue hashValue;
-                        ctx.hashK[hashAddr] = hashValue;
-                        hashKIterator = ctx.hashK.find(hashAddr);
+                        ctx.hashK[addr] = hashValue;
+                        hashKIterator = ctx.hashK.find(addr);
                         zkassert(hashKIterator != ctx.hashK.end());
                     }
 
                     // Get the size of the hash from D0
-                    uint64_t size;
-                    if (rom.line[zkPC].hashBytesInD == 1)
+                    uint64_t size = 1;
+                    if (rom.line[zkPC].hashK == 1)
                     {
                         size = fr.toU64(pols.D0[i]);
-                    }
-                    else
-                    {
-                        size = rom.line[zkPC].hashBytes;
-                    }
-                    if (size > 32)
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
-                        logError(ctx, "Invalid size>32 for hashK 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
+                        if (size>32)
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
+                            logError(ctx, "Invalid size>32 for hashK 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
                     }
 
                     // Get the positon of the hash from HASHPOS
@@ -1574,7 +1502,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    zklog.info("hashK 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
+                    zklog.info("hashK 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
 #endif
                 }
 
@@ -1584,11 +1512,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     unordered_map< uint64_t, HashValue >::iterator hashKIterator;
 
                     // If there is no entry in the hash database for this address, this is an error
-                    hashKIterator = ctx.hashK.find(hashAddr);
+                    hashKIterator = ctx.hashK.find(addr);
                     if (hashKIterator == ctx.hashK.end())
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND;
-                        logError(ctx, "HashKDigest 1: digest not defined for hashAddr=" + to_string(hashAddr));
+                        logError(ctx, "HashKDigest 1: digest not defined for addr=" + to_string(addr));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -1597,7 +1525,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (!hashKIterator->second.lenCalled)
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED;
-                        logError(ctx, "HashKDigest 1: digest not calculated for hashAddr=" + to_string(hashAddr) + ".  Call hashKLen to finish digest.");
+                        logError(ctx, "HashKDigest 1: digest not calculated for addr=" + to_string(addr) + ".  Call hashKLen to finish digest.");
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -1608,41 +1536,37 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    zklog.info("hashKDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " digest=" + ctx.hashK[hashAddr].digest.get_str(16));
+                    zklog.info("hashKDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashK[addr].digest.get_str(16));
 #endif
                 }
 
                 // HashP free in
-                if (rom.line[zkPC].hashP == 1)
+                if ( (rom.line[zkPC].hashP == 1) || (rom.line[zkPC].hashP1 == 1) )
                 {
                     unordered_map< uint64_t, HashValue >::iterator hashPIterator;
 
                     // If there is no entry in the hash database for this address, then create a new one
-                    hashPIterator = ctx.hashP.find(hashAddr);
+                    hashPIterator = ctx.hashP.find(addr);
                     if (hashPIterator == ctx.hashP.end())
                     {
                         HashValue hashValue;
-                        ctx.hashP[hashAddr] = hashValue;
-                        hashPIterator = ctx.hashP.find(hashAddr);
+                        ctx.hashP[addr] = hashValue;
+                        hashPIterator = ctx.hashP.find(addr);
                         zkassert(hashPIterator != ctx.hashP.end());
                     }
 
                     // Get the size of the hash from D0
-                    uint64_t size;
-                    if (rom.line[zkPC].hashBytesInD == 1)
+                    uint64_t size = 1;
+                    if (rom.line[zkPC].hashP == 1)
                     {
                         size = fr.toU64(pols.D0[i]);
-                    }
-                    else
-                    {
-                        size = rom.line[zkPC].hashBytes;
-                    }
-                    if (size > 32)
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
-                        logError(ctx, "Invalid size>32 for hashP 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
+                        if (size>32)
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
+                            logError(ctx, "Invalid size>32 for hashP 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
                     }
 
                     // Get the positon of the hash from HASHPOS
@@ -1684,11 +1608,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     unordered_map< uint64_t, HashValue >::iterator hashPIterator;
 
                     // If there is no entry in the hash database for this address, this is an error
-                    hashPIterator = ctx.hashP.find(hashAddr);
+                    hashPIterator = ctx.hashP.find(addr);
                     if (hashPIterator == ctx.hashP.end())
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND;
-                        logError(ctx, "HashPDigest 1: digest not defined hashAddr=" + to_string(hashAddr));
+                        logError(ctx, "HashPDigest 1: digest not defined addr=" + to_string(addr));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -1708,39 +1632,33 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
                 }
 
-#ifdef SUPPORT_SHA256
-
                 // HashS free in
-                if (rom.line[zkPC].hashS == 1)
+                if ( (rom.line[zkPC].hashS == 1) || (rom.line[zkPC].hashS1 == 1) )
                 {
                     unordered_map< uint64_t, HashValue >::iterator hashSIterator;
 
                     // If there is no entry in the hash database for this address, then create a new one
-                    hashSIterator = ctx.hashS.find(hashAddr);
+                    hashSIterator = ctx.hashS.find(addr);
                     if (hashSIterator == ctx.hashS.end())
                     {
                         HashValue hashValue;
-                        ctx.hashS[hashAddr] = hashValue;
-                        hashSIterator = ctx.hashS.find(hashAddr);
+                        ctx.hashS[addr] = hashValue;
+                        hashSIterator = ctx.hashS.find(addr);
                         zkassert(hashSIterator != ctx.hashS.end());
                     }
 
                     // Get the size of the hash from D0
-                    uint64_t size;
-                    if (rom.line[zkPC].hashBytesInD == 1)
+                    uint64_t size = 1;
+                    if (rom.line[zkPC].hashS == 1)
                     {
                         size = fr.toU64(pols.D0[i]);
-                    }
-                    else
-                    {
-                        size = rom.line[zkPC].hashBytes;
-                    }
-                    if (size > 32)
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_HASHS_SIZE_OUT_OF_RANGE;
-                        logError(ctx, "Invalid size>32 for hashS 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
+                        if (size>32)
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_HASHS_SIZE_OUT_OF_RANGE;
+                            logError(ctx, "Invalid size>32 for hashS 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
                     }
 
                     // Get the positon of the hash from HASHPOS
@@ -1776,7 +1694,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHS
-                    zklog.info("hashS 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
+                    zklog.info("hashS 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
 #endif
                 }
 
@@ -1786,11 +1704,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     unordered_map< uint64_t, HashValue >::iterator hashSIterator;
 
                     // If there is no entry in the hash database for this address, this is an error
-                    hashSIterator = ctx.hashS.find(hashAddr);
+                    hashSIterator = ctx.hashS.find(addr);
                     if (hashSIterator == ctx.hashS.end())
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_ADDRESS_NOT_FOUND;
-                        logError(ctx, "HashSDigest 1: digest not defined for hashAddr=" + to_string(hashAddr));
+                        logError(ctx, "HashSDigest 1: digest not defined for addr=" + to_string(addr));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -1799,7 +1717,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (!hashSIterator->second.lenCalled)
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_NOT_COMPLETED;
-                        logError(ctx, "HashSDigest 1: digest not calculated for hashAddr=" + to_string(hashAddr) + ".  Call hashSLen to finish digest.");
+                        logError(ctx, "HashSDigest 1: digest not calculated for addr=" + to_string(addr) + ".  Call hashSLen to finish digest.");
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -1810,11 +1728,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHS
-                    zklog.info("hashSDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " digest=" + ctx.hashS[hashAddr].digest.get_str(16));
+                    zklog.info("hashSDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashS[addr].digest.get_str(16));
 #endif
                 }
-
-#endif // SUPPORT_SHA256
 
                 // Binary free in
                 if (rom.line[zkPC].bin == 1)
@@ -2184,17 +2100,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inFREE[i] = rom.line[zkPC].inFREE;
             pols.inFREE0[i] = rom.line[zkPC].inFREE0;
         }
-        else if ((rom.line[zkPC].restore == 1) && !bProcessBatch)
-        {
-            pols.FREE0[i] = ctx.saved[rid].op[0];
-            pols.FREE1[i] = ctx.saved[rid].op[1];
-            pols.FREE2[i] = ctx.saved[rid].op[2];
-            pols.FREE3[i] = ctx.saved[rid].op[3];
-            pols.FREE4[i] = ctx.saved[rid].op[4];
-            pols.FREE5[i] = ctx.saved[rid].op[5];
-            pols.FREE6[i] = ctx.saved[rid].op[6];
-            pols.FREE7[i] = ctx.saved[rid].op[7];
-        }
 
         if (!fr.isZero(op0) && !bProcessBatch)
         {
@@ -2230,38 +2135,31 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
-        // Assume free
-        if ((rom.line[zkPC].assumeFree == 1) && !bProcessBatch)
-        {
-            pols.assumeFree[i] = fr.one();
-        }
-
         // Memory operation instruction
         if (rom.line[zkPC].mOp == 1)
         {
-            if (!bProcessBatch) pols.mOp[i] = fr.one();
+            pols.mOp[i] = fr.one();
 
-            if (!bProcessBatch && (rom.line[zkPC].memUseAddrRel == 1)) pols.memUseAddrRel[i] = fr.one();
-
-            // If mWR, mem[memAddr]=op
+            // If mWR, mem[addr]=op
             if (rom.line[zkPC].mWR == 1)
             {
                 pols.mWR[i] = fr.one();
 
-                ctx.mem[memAddr].fe0 = op0;
-                ctx.mem[memAddr].fe1 = op1;
-                ctx.mem[memAddr].fe2 = op2;
-                ctx.mem[memAddr].fe3 = op3;
-                ctx.mem[memAddr].fe4 = op4;
-                ctx.mem[memAddr].fe5 = op5;
-                ctx.mem[memAddr].fe6 = op6;
-                ctx.mem[memAddr].fe7 = op7;
+                ctx.mem[addr].fe0 = op0;
+                ctx.mem[addr].fe1 = op1;
+                ctx.mem[addr].fe2 = op2;
+                ctx.mem[addr].fe3 = op3;
+                ctx.mem[addr].fe4 = op4;
+                ctx.mem[addr].fe5 = op5;
+                ctx.mem[addr].fe6 = op6;
+                ctx.mem[addr].fe7 = op7;
 
+#ifdef USE_REQUIRED 
                 if (!bProcessBatch)
                 {
                     MemoryAccess memoryAccess;
                     memoryAccess.bIsWrite = true;
-                    memoryAccess.address = memAddr;
+                    memoryAccess.address = addr;
                     memoryAccess.pc = i;
                     memoryAccess.fe0 = op0;
                     memoryAccess.fe1 = op1;
@@ -2273,85 +2171,62 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memoryAccess.fe7 = op7;
                     required.Memory.push_back(memoryAccess);
                 }
-
+#endif
 #ifdef LOG_MEMORY
-                zklog.info("Memory write mWR: memAddr:" + to_string(memAddr) + " " + fea2string(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
+                zklog.info("Memory write mWR: addr:" + to_string(addr) + " " + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
 #endif
             }
             else
             {
-                Goldilocks::Element value[8];
-                if (rom.line[zkPC].assumeFree == 1)
-                {
-                    value[0] = pols.FREE0[i];
-                    value[1] = pols.FREE1[i];
-                    value[2] = pols.FREE2[i];
-                    value[3] = pols.FREE3[i];
-                    value[4] = pols.FREE4[i];
-                    value[5] = pols.FREE5[i];
-                    value[6] = pols.FREE6[i];
-                    value[7] = pols.FREE7[i];
-                }
-                else
-                {
-                    value[0] = op0;
-                    value[1] = op1;
-                    value[2] = op2;
-                    value[3] = op3;
-                    value[4] = op4;
-                    value[5] = op5;
-                    value[6] = op6;
-                    value[7] = op7;
-                }
-
+#ifdef USE_REQUIRED 
                 if (!bProcessBatch)
                 {
                     MemoryAccess memoryAccess;
                     memoryAccess.bIsWrite = false;
-                    memoryAccess.address = memAddr;
+                    memoryAccess.address = addr;
                     memoryAccess.pc = i;
-                    memoryAccess.fe0 = value[0];
-                    memoryAccess.fe1 = value[1];
-                    memoryAccess.fe2 = value[2];
-                    memoryAccess.fe3 = value[3];
-                    memoryAccess.fe4 = value[4];
-                    memoryAccess.fe5 = value[5];
-                    memoryAccess.fe6 = value[6];
-                    memoryAccess.fe7 = value[7];
+                    memoryAccess.fe0 = op0;
+                    memoryAccess.fe1 = op1;
+                    memoryAccess.fe2 = op2;
+                    memoryAccess.fe3 = op3;
+                    memoryAccess.fe4 = op4;
+                    memoryAccess.fe5 = op5;
+                    memoryAccess.fe6 = op6;
+                    memoryAccess.fe7 = op7;
                     required.Memory.push_back(memoryAccess);
                 }
-
-                if (ctx.mem.find(memAddr) != ctx.mem.end())
+#endif
+                if (ctx.mem.find(addr) != ctx.mem.end())
                 {
-                    if ( (!fr.equal(ctx.mem[memAddr].fe0, value[0])) ||
-                         (!fr.equal(ctx.mem[memAddr].fe1, value[1])) ||
-                         (!fr.equal(ctx.mem[memAddr].fe2, value[2])) ||
-                         (!fr.equal(ctx.mem[memAddr].fe3, value[3])) ||
-                         (!fr.equal(ctx.mem[memAddr].fe4, value[4])) ||
-                         (!fr.equal(ctx.mem[memAddr].fe5, value[5])) ||
-                         (!fr.equal(ctx.mem[memAddr].fe6, value[6])) ||
-                         (!fr.equal(ctx.mem[memAddr].fe7, value[7])) )
+                    if ( (!fr.equal(ctx.mem[addr].fe0, op0)) ||
+                         (!fr.equal(ctx.mem[addr].fe1, op1)) ||
+                         (!fr.equal(ctx.mem[addr].fe2, op2)) ||
+                         (!fr.equal(ctx.mem[addr].fe3, op3)) ||
+                         (!fr.equal(ctx.mem[addr].fe4, op4)) ||
+                         (!fr.equal(ctx.mem[addr].fe5, op5)) ||
+                         (!fr.equal(ctx.mem[addr].fe6, op6)) ||
+                         (!fr.equal(ctx.mem[addr].fe7, op7)) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
-                        logError(ctx, "Memory Read does not match value=" + fea2string(fr, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7]) +
-                            " mem=" + fea2string(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
+                        logError(ctx, "Memory Read does not match op=" + fea2string(fr, op0, op1, op2, op3, op4, op5, op6, op7) +
+                            " mem=" + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
                 }
                 else
                 {
-                    if ( (!fr.isZero(value[0])) ||
-                         (!fr.isZero(value[1])) ||
-                         (!fr.isZero(value[2])) ||
-                         (!fr.isZero(value[3])) ||
-                         (!fr.isZero(value[4])) ||
-                         (!fr.isZero(value[5])) ||
-                         (!fr.isZero(value[6])) ||
-                         (!fr.isZero(value[7])) )
+                    if ( (!fr.isZero(op0)) ||
+                         (!fr.isZero(op1)) ||
+                         (!fr.isZero(op2)) ||
+                         (!fr.isZero(op3)) ||
+                         (!fr.isZero(op4)) ||
+                         (!fr.isZero(op5)) ||
+                         (!fr.isZero(op6)) ||
+                         (!fr.isZero(op7)) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
-                        logError(ctx, "Memory Read does not match (value!=0) value=" + fea2string(fr, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7]));
+                        logError(ctx, "Memory Read does not match (op!=0)");
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -2359,10 +2234,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
-#ifndef BLOB_INNER
-
         // overwrite 'op' when hiting 'checkFirstTxType' label
-        if ((zkPC == rom.labels.checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
+        if ((zkPC == checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
         {
             op0 = fr.one();
             op1 = fr.one();
@@ -2375,7 +2248,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // overwrite 'op' when hiting 'writeBlockInfoRoot' label
-        if ((zkPC == rom.labels.writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
+        if ((zkPC == writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
         {
             op0 = fr.zero();
             op1 = fr.zero();
@@ -2386,8 +2259,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op6 = fr.zero();
             op7 = fr.zero();
         }
-
-#endif
 
         // Storage read instruction
         if (rom.line[zkPC].sRD == 1)
@@ -2535,6 +2406,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
+#ifdef USE_REQUIRED 
             if (!bProcessBatch)
             {
                 SmtAction smtAction;
@@ -2542,7 +2414,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 smtAction.getResult = smtGetResult;
                 required.Storage.push_back(smtAction);
             }
-
+#endif
 #ifdef LOG_STORAGE
             zklog.info("Storage read sRD read from key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " value:" + value.get_str(16));
 #endif
@@ -2743,6 +2615,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 required.PoseidonG.push_back(pg);
             }
 
+#ifdef USE_REQUIRED 
             if (!bProcessBatch)
             {
                 SmtAction smtAction;
@@ -2750,7 +2623,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 smtAction.setResult = ctx.lastSWrite.res;
                 required.Storage.push_back(smtAction);
             }
-
+#endif
             // Check that the new root hash equals op0
             Goldilocks::Element oldRoot[4];
             sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
@@ -2787,49 +2660,45 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
-        if (!bProcessBatch)
-        {
-            if (rom.line[zkPC].hashBytesInD == 1) pols.hashBytesInD[i] = fr.one();
-            if (rom.line[zkPC].hashBytes != 0) pols.hashBytes[i] = fr.fromU64(rom.line[zkPC].hashBytes);
-            if (rom.line[zkPC].hashOffset != 0) pols.hashOffset[i] = fr.fromU64(rom.line[zkPC].hashOffset);
-        }
-
         // HashK instruction
-        if ( rom.line[zkPC].hashK == 1 )
+        if ( (rom.line[zkPC].hashK == 1) || (rom.line[zkPC].hashK1 == 1) )
         {
             if (!bProcessBatch)
             {
-                pols.hashK[i] = fr.one();
+                if (rom.line[zkPC].hashK == 1)
+                {
+                    pols.hashK[i] = fr.one();
+                }
+                else
+                {
+                    pols.hashK1[i] = fr.one();
+                }
             }
 
             unordered_map< uint64_t, HashValue >::iterator hashKIterator;
 
             // If there is no entry in the hash database for this address, then create a new one
-            hashKIterator = ctx.hashK.find(hashAddr);
+            hashKIterator = ctx.hashK.find(addr);
             if (hashKIterator == ctx.hashK.end())
             {
                 HashValue hashValue;
-                ctx.hashK[hashAddr] = hashValue;
-                hashKIterator = ctx.hashK.find(hashAddr);
+                ctx.hashK[addr] = hashValue;
+                hashKIterator = ctx.hashK.find(addr);
                 zkassert(hashKIterator != ctx.hashK.end());
             }
 
             // Get the size of the hash from D0
-            uint64_t size;
-            if (rom.line[zkPC].hashBytesInD == 1)
+            uint64_t size = 1;
+            if (rom.line[zkPC].hashK == 1)
             {
                 size = fr.toU64(pols.D0[i]);
-            }
-            else
-            {
-                size = rom.line[zkPC].hashBytes;
-            }
-            if (size > 32)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
-                logError(ctx, "Invalid size>32 for hashK 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
+                if (size>32)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "Invalid size>32 for hashK 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
             }
 
             // Get the position of the hash from HASHPOS
@@ -2846,25 +2715,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Get contents of opN into a
             mpz_class a;
-            if (rom.line[zkPC].assumeFree == 1)
+            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
             {
-                if (!fea2scalar(fr, a, pols.FREE0[i], pols.FREE1[i], pols.FREE2[i], pols.FREE3[i], pols.FREE4[i], pols.FREE5[i], pols.FREE6[i], pols.FREE7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.FREE)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-            }
-            else
-            {
-                if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
             }
 
             // Fill the hash data vector with chunks of the scalar value
@@ -2880,7 +2736,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else if (hashKIterator->second.data.size() < (pos+j))
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
-                    logError(ctx, "HashK 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashK[hashAddr].data.size()));
+                    logError(ctx, "HashK 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashK[addr].data.size()));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
@@ -2891,7 +2747,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (bm != bh)
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHK_VALUE_MISMATCH;
-                        logError(ctx, "HashK 2 bytes do not match: hashAddr=" + to_string(hashAddr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
+                        logError(ctx, "HashK 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -2916,21 +2772,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (readsIterator->second != size)
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_MISMATCH;
-                    logError(ctx, "HashK 2 different read sizes in the same position hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos) + " ctx.hashK[addr].reads[pos]=" + to_string(ctx.hashK[hashAddr].reads[pos]) + " size=" + to_string(size));
+                    logError(ctx, "HashK 2 different read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos) + " ctx.hashK[addr].reads[pos]=" + to_string(ctx.hashK[addr].reads[pos]) + " size=" + to_string(size));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
             }
             else
             {
-                hashKIterator->second.reads[pos] = size;
+                ctx.hashK[addr].reads[pos] = size;
             }
 
             // Store the size
             incHashPos = size;
 
 #ifdef LOG_HASHK
-            zklog.info("hashK 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + a.get_str(16));
+            zklog.info("hashK 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + a.get_str(16));
 #endif
         }
 
@@ -2945,7 +2801,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lm = fr.toU64(op0);
 
             // Find the entry in the hash database for this address
-            hashKIterator = ctx.hashK.find(hashAddr);
+            hashKIterator = ctx.hashK.find(addr);
 
             // If it's undefined, compute a hash of 0 bytes
             if (hashKIterator == ctx.hashK.end())
@@ -2954,32 +2810,32 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (lm != 0)
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
-                    logError(ctx, "HashKLen 2 hashK[hashAddr] is empty but lm is not 0 hashAddr=" + to_string(hashAddr) + " lm=" + to_string(lm));
+                    logError(ctx, "HashKLen 2 hashK[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
 
                 // Create an empty entry in this address slot
                 HashValue hashValue;
-                ctx.hashK[hashAddr] = hashValue;
-                hashKIterator = ctx.hashK.find(hashAddr);
+                ctx.hashK[addr] = hashValue;
+                hashKIterator = ctx.hashK.find(addr);
                 zkassert(hashKIterator != ctx.hashK.end());
             }
 
-            if (hashKIterator->second.lenCalled)
+            if (ctx.hashK[addr].lenCalled)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHKLEN_CALLED_TWICE;
-                logError(ctx, "HashKLen 2 called more than once hashAddr=" + to_string(hashAddr));
+                logError(ctx, "HashKLen 2 called more than once addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            hashKIterator->second.lenCalled = true;
+            ctx.hashK[addr].lenCalled = true;
 
             uint64_t lh = hashKIterator->second.data.size();
             if (lm != lh)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
-                logError(ctx, "HashKLen 2 length does not match hashAddr=" + to_string(hashAddr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
+                logError(ctx, "HashKLen 2 length does not match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
@@ -2995,15 +2851,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_HASHK
                 {
-                    string s = "hashKLen 2 calculate hashKLen: hashAddr:" + to_string(hashAddr) + " hash:" + ctx.hashK[hashAddr].digest.get_str(16) + " size:" + to_string(ctx.hashK[hashAddr].data.size()) + " data:";
-                    for (uint64_t k=0; k<ctx.hashK[hashAddr].data.size(); k++) s += byte2string(ctx.hashK[hashAddr].data[k]) + ":";
+                    string s = "hashKLen 2 calculate hashKLen: addr:" + to_string(addr) + " hash:" + ctx.hashK[addr].digest.get_str(16) + " size:" + to_string(ctx.hashK[addr].data.size()) + " data:";
+                    for (uint64_t k=0; k<ctx.hashK[addr].data.size(); k++) s += byte2string(ctx.hashK[addr].data[k]) + ":";
                     zklog.info(s);
                 }
 #endif
             }
 
 #ifdef LOG_HASHK
-            zklog.info("hashKLen 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr));
+            zklog.info("hashKLen 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr));
 #endif
         }
 
@@ -3015,11 +2871,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             unordered_map< uint64_t, HashValue >::iterator hashKIterator;
 
             // Find the entry in the hash database for this address
-            hashKIterator = ctx.hashK.find(hashAddr);
+            hashKIterator = ctx.hashK.find(addr);
             if (hashKIterator == ctx.hashK.end())
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND;
-                logError(ctx, "HashKDigest 2 could not find entry for hashAddr=" + to_string(hashAddr));
+                logError(ctx, "HashKDigest 2 could not find entry for addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
@@ -3042,58 +2898,61 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
 
-            if (hashKIterator->second.digestCalled)
+            if (ctx.hashK[addr].digestCalled)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_CALLED_TWICE;
-                logError(ctx, "HashKDigest 2 called more than once hashAddr=" + to_string(hashAddr));
+                logError(ctx, "HashKDigest 2 called more than once addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            hashKIterator->second.digestCalled = true;
+            ctx.hashK[addr].digestCalled = true;
 
             incCounter = ceil((double(hashKIterator->second.data.size()) + double(1)) / double(136));
 
 #ifdef LOG_HASHK
-            zklog.info("hashKDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " digest=" + ctx.hashK[hashAddr].digest.get_str(16));
+            zklog.info("hashKDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashK[addr].digest.get_str(16));
 #endif
         }
 
         // HashP instruction
-        if (rom.line[zkPC].hashP == 1)
+        if ( (rom.line[zkPC].hashP == 1) || (rom.line[zkPC].hashP1 == 1) )
         {
             if (!bProcessBatch)
             {
-                pols.hashP[i] = fr.one();
+                if (rom.line[zkPC].hashP == 1)
+                {
+                    pols.hashP[i] = fr.one();
+                }
+                else
+                {
+                    pols.hashP1[i] = fr.one();
+                }
             }
 
             unordered_map< uint64_t, HashValue >::iterator hashPIterator;
 
             // If there is no entry in the hash database for this address, then create a new one
-            hashPIterator = ctx.hashP.find(hashAddr);
+            hashPIterator = ctx.hashP.find(addr);
             if (hashPIterator == ctx.hashP.end())
             {
                 HashValue hashValue;
-                ctx.hashP[hashAddr] = hashValue;
-                hashPIterator = ctx.hashP.find(hashAddr);
+                ctx.hashP[addr] = hashValue;
+                hashPIterator = ctx.hashP.find(addr);
                 zkassert(hashPIterator != ctx.hashP.end());
             }
 
             // Get the size of the hash from D0
-            uint64_t size;
-            if (rom.line[zkPC].hashBytesInD == 1)
+            uint64_t size = 1;
+            if (rom.line[zkPC].hashP == 1)
             {
                 size = fr.toU64(pols.D0[i]);
-            }
-            else
-            {
-                size = rom.line[zkPC].hashBytes;
-            }
-            if (size > 32)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
-                logError(ctx, "Invalid size>32 for hashP 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
+                if (size>32)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "Invalid size>32 for hashP 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
             }
 
             // Get the positon of the hash from HASHPOS
@@ -3110,31 +2969,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Get contents of opN into a
             mpz_class a;
-            if (rom.line[zkPC].assumeFree == 1)
+            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
             {
-                if (!fea2scalar(fr, a, pols.FREE0[i], pols.FREE1[i], pols.FREE2[i], pols.FREE3[i], pols.FREE4[i], pols.FREE5[i], pols.FREE6[i], pols.FREE7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.FREE)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-            }
-            else
-            {
-                if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
             }
 
             // Fill the hash data vector with chunks of the scalar value
             mpz_class result;
-            for (uint64_t j=0; j<size; j++)
-            {
+            for (uint64_t j=0; j<size; j++) {
                 result = (a >> (size-j-1)*8) & ScalarMask8;
                 uint8_t bm = result.get_ui();
 
@@ -3150,13 +2995,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if ( readsIterator != hashPIterator->second.reads.end() )
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;
-                        logError(ctx, "HashP 2 zero position already existed hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos));
+                        logError(ctx, "HashP 2 zero position already existed addr=" + to_string(addr) + " pos=" + to_string(pos));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
                     else
                     {
-                        hashPIterator->second.reads[0] = 1;
+                        ctx.hashP[addr].reads[0] = 1;
                     }
                 }
 
@@ -3173,7 +3018,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else if (hashPIterator->second.data.size() < (pos+j))
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;
-                    logError(ctx, "HashP 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashP[hashAddr].data.size()));
+                    logError(ctx, "HashP 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashP[addr].data.size()));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
@@ -3184,7 +3029,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (bm != bh)
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHP_VALUE_MISMATCH;
-                        logError(ctx, "HashP 2 bytes do not match: hashAddr=" + to_string(hashAddr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
+                        logError(ctx, "HashP 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -3209,14 +3054,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (readsIterator->second != size)
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;
-                    logError(ctx, "HashP 2 diferent read sizes in the same position hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos));
+                    logError(ctx, "HashP 2 diferent read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
             }
             else
             {
-                hashPIterator->second.reads[pos] = size;
+                ctx.hashP[addr].reads[pos] = size;
             }
 
             // Store the size
@@ -3234,7 +3079,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lm = fr.toU64(op0);
 
             // Find the entry in the hash database for this address
-            hashPIterator = ctx.hashP.find(hashAddr);
+            hashPIterator = ctx.hashP.find(addr);
 
             // If it's undefined, compute a hash of 0 bytes
             if (hashPIterator == ctx.hashP.end())
@@ -3243,32 +3088,32 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (lm != 0)
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;
-                    logError(ctx, "HashPLen 2 hashP[hashAddr] is empty but lm is not 0 hashAddr=" + to_string(hashAddr) + " lm=" + to_string(lm));
+                    logError(ctx, "HashPLen 2 hashP[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
 
                 // Create an empty entry in this address slot
                 HashValue hashValue;
-                ctx.hashP[hashAddr] = hashValue;
-                hashPIterator = ctx.hashP.find(hashAddr);
+                ctx.hashP[addr] = hashValue;
+                hashPIterator = ctx.hashP.find(addr);
                 zkassert(hashPIterator != ctx.hashP.end());
             }
 
-            if (hashPIterator->second.lenCalled)
+            if (ctx.hashP[addr].lenCalled)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHPLEN_CALLED_TWICE;
-                logError(ctx, "HashPLen 2 called more than once hashAddr=" + to_string(hashAddr));
+                logError(ctx, "HashPLen 2 called more than once addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            hashPIterator->second.lenCalled = true;
+            ctx.hashP[addr].lenCalled = true;
 
             uint64_t lh = hashPIterator->second.data.size();
             if (lm != lh)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;
-                logError(ctx, "HashPLen 2 does not match match hashAddr=" + to_string(hashAddr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
+                logError(ctx, "HashPLen 2 does not match match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
@@ -3309,8 +3154,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_HASH
                 {
-                    string s = "Hash calculate hashPLen 2: hashAddr:" + to_string(hashAddr) + " hash:" + ctx.hashP[hashAddr].digest.get_str(16) + " size:" + to_string(ctx.hashP[hashAddr].data.size()) + " data:";
-                    for (uint64_t k=0; k<ctx.hashP[hashAddr].data.size(); k++) s += byte2string(ctx.hashP[hashAddr].data[k]) + ":";
+                    string s = "Hash calculate hashPLen 2: addr:" + to_string(addr) + " hash:" + ctx.hashP[addr].digest.get_str(16) + " size:" + to_string(ctx.hashP[addr].data.size()) + " data:";
+                    for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) s += byte2string(ctx.hashP[addr].data[k]) + ":";
                     zklog.info(s);
                 }
 #endif
@@ -3333,7 +3178,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
             unordered_map< uint64_t, HashValue >::iterator hashPIterator;
-            hashPIterator = ctx.hashP.find(hashAddr);
+            hashPIterator = ctx.hashP.find(addr);
             if (hashPIterator == ctx.hashP.end())
             {
                 HashValue hashValue;
@@ -3361,19 +3206,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Get program", TimeDiff(t));
 #endif
-                ctx.hashP[hashAddr] = hashValue;
-                hashPIterator = ctx.hashP.find(hashAddr);
+                ctx.hashP[addr] = hashValue;
+                hashPIterator = ctx.hashP.find(addr);
                 zkassert(hashPIterator != ctx.hashP.end());
             }
 
-            if (hashPIterator->second.digestCalled)
+            if (ctx.hashP[addr].digestCalled)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_CALLED_TWICE;
-                logError(ctx, "HashPDigest 2 called more than once hashAddr=" + to_string(hashAddr));
+                logError(ctx, "HashPDigest 2 called more than once addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            hashPIterator->second.digestCalled = true;
+            ctx.hashP[addr].digestCalled = true;
 
             incCounter = ceil((double(hashPIterator->second.data.size()) + double(1)) / double(56));
 
@@ -3381,50 +3226,51 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (dg != hashPIterator->second.digest)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;
-                logError(ctx, "HashPDigest 2: ctx.hashP[hashAddr].digest=" + ctx.hashP[hashAddr].digest.get_str(16) + " does not match op=" + dg.get_str(16));
+                logError(ctx, "HashPDigest 2: ctx.hashP[addr].digest=" + ctx.hashP[addr].digest.get_str(16) + " does not match op=" + dg.get_str(16));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
         }
 
-#ifdef SUPPORT_SHA256
-
         // HashS instruction
-        if (rom.line[zkPC].hashS == 1)
+        if ( (rom.line[zkPC].hashS == 1) || (rom.line[zkPC].hashS1 == 1) )
         {
             if (!bProcessBatch)
             {
-                pols.hashS[i] = fr.one();
+                if (rom.line[zkPC].hashS == 1)
+                {
+                    pols.hashS[i] = fr.one();
+                }
+                else
+                {
+                    pols.hashS1[i] = fr.one();
+                }
             }
 
             unordered_map< uint64_t, HashValue >::iterator hashSIterator;
 
             // If there is no entry in the hash database for this address, then create a new one
-            hashSIterator = ctx.hashS.find(hashAddr);
+            hashSIterator = ctx.hashS.find(addr);
             if (hashSIterator == ctx.hashS.end())
             {
                 HashValue hashValue;
-                ctx.hashS[hashAddr] = hashValue;
-                hashSIterator = ctx.hashS.find(hashAddr);
+                ctx.hashS[addr] = hashValue;
+                hashSIterator = ctx.hashS.find(addr);
                 zkassert(hashSIterator != ctx.hashS.end());
             }
 
             // Get the size of the hash from D0
-            uint64_t size;
-            if (rom.line[zkPC].hashBytesInD == 1)
+            uint64_t size = 1;
+            if (rom.line[zkPC].hashS == 1)
             {
                 size = fr.toU64(pols.D0[i]);
-            }
-            else
-            {
-                size = rom.line[zkPC].hashBytes;
-            }
-            if (size > 32)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHS_SIZE_OUT_OF_RANGE;
-                logError(ctx, "Invalid size>32 for hashS 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
+                if (size>32)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHS_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "Invalid size>32 for hashS 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
             }
 
             // Get the position of the hash from HASHPOS
@@ -3441,25 +3287,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Get contents of opN into a
             mpz_class a;
-            if (rom.line[zkPC].assumeFree == 1)
+            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
             {
-                if (!fea2scalar(fr, a, pols.FREE0[i], pols.FREE1[i], pols.FREE2[i], pols.FREE3[i], pols.FREE4[i], pols.FREE5[i], pols.FREE6[i], pols.FREE7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.FREE)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-            }
-            else
-            {
-                if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
             }
 
             // Fill the hash data vector with chunks of the scalar value
@@ -3475,7 +3308,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else if (hashSIterator->second.data.size() < (pos+j))
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHS_POSITION_PLUS_SIZE_OUT_OF_RANGE;
-                    logError(ctx, "HashS 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashS[hashAddr].data.size()));
+                    logError(ctx, "HashS 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashS[addr].data.size()));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
@@ -3486,7 +3319,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (bm != bh)
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHS_VALUE_MISMATCH;
-                        logError(ctx, "HashS 2 bytes do not match: hashAddr=" + to_string(hashAddr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
+                        logError(ctx, "HashS 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -3511,21 +3344,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (readsIterator->second != size)
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHS_SIZE_MISMATCH;
-                    logError(ctx, "HashS 2 different read sizes in the same position hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos) + " ctx.hashS[hashAddr].reads[pos]=" + to_string(ctx.hashS[hashAddr].reads[pos]) + " size=" + to_string(size));
+                    logError(ctx, "HashS 2 different read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos) + " ctx.hashS[addr].reads[pos]=" + to_string(ctx.hashS[addr].reads[pos]) + " size=" + to_string(size));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
             }
             else
             {
-                hashSIterator->second.reads[pos] = size;
+                ctx.hashS[addr].reads[pos] = size;
             }
 
             // Store the size
             incHashPos = size;
 
 #ifdef LOG_HASHS
-            zklog.info("hashS 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + a.get_str(16));
+            zklog.info("hashS 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + a.get_str(16));
 #endif
         }
 
@@ -3540,7 +3373,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lm = fr.toU64(op0);
 
             // Find the entry in the hash database for this address
-            hashSIterator = ctx.hashS.find(hashAddr);
+            hashSIterator = ctx.hashS.find(addr);
 
             // If it's undefined, compute a hash of 0 bytes
             if (hashSIterator == ctx.hashS.end())
@@ -3549,32 +3382,32 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (lm != 0)
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHSLEN_LENGTH_MISMATCH;
-                    logError(ctx, "HashSLen 2 hashS[hashAddr] is empty but lm is not 0 hashAddr=" + to_string(hashAddr) + " lm=" + to_string(lm));
+                    logError(ctx, "HashSLen 2 hashS[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
 
                 // Create an empty entry in this address slot
                 HashValue hashValue;
-                ctx.hashS[hashAddr] = hashValue;
-                hashSIterator = ctx.hashS.find(hashAddr);
+                ctx.hashS[addr] = hashValue;
+                hashSIterator = ctx.hashS.find(addr);
                 zkassert(hashSIterator != ctx.hashS.end());
             }
 
-            if (hashSIterator->second.lenCalled)
+            if (ctx.hashS[addr].lenCalled)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHSLEN_CALLED_TWICE;
-                logError(ctx, "HashSLen 2 called more than once hashAddr=" + to_string(hashAddr));
+                logError(ctx, "HashSLen 2 called more than once addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            hashSIterator->second.lenCalled = true;
+            ctx.hashS[addr].lenCalled = true;
 
             uint64_t lh = hashSIterator->second.data.size();
             if (lm != lh)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHSLEN_LENGTH_MISMATCH;
-                logError(ctx, "HashSLen 2 length does not match hashAddr=" + to_string(hashAddr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
+                logError(ctx, "HashSLen 2 length does not match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
@@ -3590,15 +3423,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_HASHS
                 {
-                    string s = "hashSLen 2 calculate hashSLen: hashAddr:" + to_string(hashAddr) + " hash:" + ctx.hashS[hashAddr].digest.get_str(16) + " size:" + to_string(ctx.hashS[hashAddr].data.size()) + " data:";
-                    for (uint64_t k=0; k<ctx.hashS[hashAddr].data.size(); k++) s += byte2string(ctx.hashS[hashAddr].data[k]) + ":";
+                    string s = "hashSLen 2 calculate hashSLen: addr:" + to_string(addr) + " hash:" + ctx.hashS[addr].digest.get_str(16) + " size:" + to_string(ctx.hashS[addr].data.size()) + " data:";
+                    for (uint64_t k=0; k<ctx.hashS[addr].data.size(); k++) s += byte2string(ctx.hashS[addr].data[k]) + ":";
                     zklog.info(s);
                 }
 #endif
             }
 
 #ifdef LOG_HASHS
-            zklog.info("hashSLen 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr));
+            zklog.info("hashSLen 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr));
 #endif
         }
 
@@ -3610,11 +3443,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             unordered_map< uint64_t, HashValue >::iterator hashSIterator;
 
             // Find the entry in the hash database for this address
-            hashSIterator = ctx.hashS.find(hashAddr);
+            hashSIterator = ctx.hashS.find(addr);
             if (hashSIterator == ctx.hashS.end())
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_NOT_FOUND;
-                logError(ctx, "HashSDigest 2 could not find entry for hashAddr=" + to_string(hashAddr));
+                logError(ctx, "HashSDigest 2 could not find entry for addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
@@ -3637,23 +3470,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
 
-            if (hashSIterator->second.digestCalled)
+            if (ctx.hashS[addr].digestCalled)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_CALLED_TWICE;
-                logError(ctx, "HashSDigest 2 called more than once hashAddr=" + to_string(hashAddr));
+                logError(ctx, "HashSDigest 2 called more than once addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            hashSIterator->second.digestCalled = true;
+            ctx.hashS[addr].digestCalled = true;
 
-            incCounter = ceil((double(hashSIterator->second.data.size()) + double(1)) / double(64));
+            incCounter = ceil((double(hashSIterator->second.data.size()) + double(1+8)) / double(64));
 
 #ifdef LOG_HASHS
-            zklog.info("hashSDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " digest=" + ctx.hashS[hashAddr].digest.get_str(16));
+            zklog.info("hashSDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashS[addr].digest.get_str(16));
 #endif
         }
-
-#endif // SUPPORT_SHA256
 
         // HashP or Storage write instructions, required data
         if (!bProcessBatch && (rom.line[zkPC].hashPDigest || rom.line[zkPC].sWR))
@@ -3667,6 +3498,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
 
+#ifdef USE_REQUIRED
             // Store the binary action to execute it later with the binary SM
             BinaryAction binaryAction;
             binaryAction.a = op;
@@ -3675,26 +3507,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             binaryAction.opcode = 8;
             binaryAction.type = 2;
             required.Binary.push_back(binaryAction);
+#endif
         }
 
         // Arith instruction
-        if (rom.line[zkPC].arith == 1)
+        if (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1)
         {
-            if (!bProcessBatch)
-            {
-                pols.arith[i] = fr.one();
-                if (rom.line[zkPC].arithEquation != 3)
-                {
-                    pols.arithSame12[i] = fr.one();
-                }
-                if ((rom.line[zkPC].arithEquation != 1) && (rom.line[zkPC].arithEquation != 7))
-                {
-                    pols.arithUseE[i] = fr.one();
-                }
-            }
-            
             // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
-            if (rom.line[zkPC].arithEquation == 1)
+            if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
             {
                 // Convert to scalar
                 mpz_class A, B, C, D, op;
@@ -3749,8 +3569,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arithEquation[i] = fr.one();
-
+                    pols.arithEq0[i] = fr.one();
+#ifdef USE_REQUIRED
                     ArithAction arithAction;
                     arithAction.x1 = A;
                     arithAction.y1 = B;
@@ -3766,10 +3586,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq5 = 0;
                     arithAction.selEq6 = 0;
                     required.Arith.push_back(arithAction);
+#endif
                 }
             }
             // Arithmetic FP2 multiplication
-            else if (rom.line[zkPC].arithEquation == 4)
+            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==1 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
             {
                 // Convert to scalar
                 mpz_class x1, y1, x2, y2, x3, y3;
@@ -3846,8 +3667,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arithEquation[i] = fr.fromU64(4);
+                    pols.arithEq3[i] = fr.one();
 
+#ifdef USE_REQUIRED
                     ArithAction arithAction;
                     arithAction.x1 = x1;
                     arithAction.y1 = y1;
@@ -3858,15 +3680,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq0 = 0;
                     arithAction.selEq1 = 0;
                     arithAction.selEq2 = 0;
-                    arithAction.selEq3 = 1;
-                    arithAction.selEq4 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 1;
                     arithAction.selEq5 = 0;
                     arithAction.selEq6 = 0;
                     required.Arith.push_back(arithAction);
+#endif
                 }
             }
             // Arithmetic FP2 addition
-            else if (rom.line[zkPC].arithEquation == 5)
+            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==1 && rom.line[zkPC].arithEq5==0)
             {
                 // Convert to scalar
                 mpz_class x1, y1, x2, y2, x3, y3;
@@ -3943,8 +3766,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arithEquation[i] = fr.fromU64(5);
+                    pols.arithEq4[i] = fr.one();
 
+#ifdef USE_REQUIRED
                     ArithAction arithAction;
                     arithAction.x1 = x1;
                     arithAction.y1 = y1;
@@ -3956,14 +3780,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq1 = 0;
                     arithAction.selEq2 = 0;
                     arithAction.selEq3 = 0;
-                    arithAction.selEq4 = 1;
-                    arithAction.selEq5 = 0;
+                    arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 1;
                     arithAction.selEq6 = 0;
                     required.Arith.push_back(arithAction);
+#endif
                 }
             }
             // Arithmetic FP2 subtraction
-            else if (rom.line[zkPC].arithEquation == 6)
+            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==1)
             {
                 // Convert to scalar
                 mpz_class x1, y1, x2, y2, x3, y3;
@@ -4040,8 +3865,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arithEquation[i] = fr.fromU64(6);
+                    pols.arithEq5[i] = fr.one();
 
+#ifdef USE_REQUIRED
                     ArithAction arithAction;
                     arithAction.x1 = x1;
                     arithAction.y1 = y1;
@@ -4054,94 +3880,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq2 = 0;
                     arithAction.selEq3 = 0;
                     arithAction.selEq4 = 0;
-                    arithAction.selEq5 = 1;
-                    arithAction.selEq6 = 0;
-                    required.Arith.push_back(arithAction);
-                }
-            }
-            else if (rom.line[zkPC].arithEquation == 7)
-            {
-                // Convert to scalar
-                mpz_class A, B, C, D, op;
-                if (!fea2scalar(fr, A, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-                if (!fea2scalar(fr, B, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-                if (!fea2scalar(fr, C, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.C)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-                if (!fea2scalar(fr, D, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.D)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-                if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-
-                // Check that D is not zero
-                if (D == 0)
-                {
-                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
-                    logError(ctx, "Arithmetic does not match: D=0 in modular arithmetic");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-                // A(x1) * B(y1) + C(x2) = op(y3) (mod D(y2))
-                mpz_class left = A*B + C;
-                mpz_class right = op % D;
-                if (left != right)
-                {
-                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
-                    logError(ctx, "Arithmetic does not match: (A*B) + C = " + left.get_str(16) + ", op mod D = " + right.get_str(16));
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-
-                // Store the arith action to execute it later with the arith SM
-                if (!bProcessBatch)
-                {
-                    // Copy ROM flags into the polynomials
-                    pols.arithEquation[i] = fr.fromU64(7);
-
-                    ArithAction arithAction;
-                    arithAction.x1 = A;
-                    arithAction.y1 = B;
-                    arithAction.x2 = C;
-                    arithAction.y2 = D;
-                    arithAction.x3 = 0;
-                    arithAction.y3 = op;
-                    arithAction.selEq0 = 0;
-                    arithAction.selEq1 = 0;
-                    arithAction.selEq2 = 0;
-                    arithAction.selEq3 = 0;
-                    arithAction.selEq4 = 0;
                     arithAction.selEq5 = 0;
                     arithAction.selEq6 = 1;
                     required.Arith.push_back(arithAction);
+#endif
                 }
             }
-
             // Arith instruction: check curve points
             else
             {
@@ -4199,11 +3943,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 // Check if this is a double operation
                 bool dbl = false;
-                if (rom.line[zkPC].arithEquation == 2)
+                if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
                 {
                     dbl = false;
                 }
-                else if (rom.line[zkPC].arithEquation == 3)
+                else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==1 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
                 {
                     dbl = true;
                 }
@@ -4251,8 +3995,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (!bProcessBatch)
                 {
-                    pols.arithEquation[i] = dbl ? fr.fromU64(3) : fr.fromU64(2);
+                    pols.arithEq0[i] = fr.fromU64(rom.line[zkPC].arithEq0);
+                    pols.arithEq1[i] = fr.fromU64(rom.line[zkPC].arithEq1);
+                    pols.arithEq2[i] = fr.fromU64(rom.line[zkPC].arithEq2);
 
+#ifdef USE_REQUIRED
                     // Store the arith action to execute it later with the arith SM
                     ArithAction arithAction;
                     arithAction.x1 = x1;
@@ -4264,11 +4011,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq0 = 0;
                     arithAction.selEq1 = dbl ? 0 : 1;
                     arithAction.selEq2 = dbl ? 1 : 0;
-                    arithAction.selEq3 = 0;
-                    arithAction.selEq4 = 1;
+                    arithAction.selEq3 = 1;
+                    arithAction.selEq4 = 0;
                     arithAction.selEq5 = 0;
                     arithAction.selEq6 = 0;
                     required.Arith.push_back(arithAction);
+#endif
                 }
             }
         }
@@ -4318,6 +4066,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.zero();
 
+#ifdef USE_REQUIRED
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4326,6 +4075,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 0;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 1) // SUB
@@ -4369,6 +4119,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.one();
 
+#ifdef USE_REQUIRED
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4377,6 +4128,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 1;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 2) // LT
@@ -4420,6 +4172,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(2);
 
+#ifdef USE_REQUIRED
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4428,6 +4181,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 2;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 3) // SLT
@@ -4477,6 +4231,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(3);
 
+#ifdef USE_REQUIRED
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4485,6 +4240,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 3;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 4) // EQ
@@ -4528,6 +4284,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(4);
 
+#ifdef USE_REQUIRED
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4536,6 +4293,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 4;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 5) // AND
@@ -4582,6 +4340,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(5);
 
+#ifdef USE_REQUIRED
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4590,6 +4349,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 5;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 6) // OR
@@ -4631,6 +4391,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(6);
 
+#ifdef USE_REQUIRED
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4639,6 +4400,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 6;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 7) // XOR
@@ -4680,6 +4442,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(7);
 
+#ifdef USE_REQUIRED
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4688,6 +4451,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 7;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             } else if (rom.line[zkPC].binOpcode == 8) // LT4
             {
@@ -4729,6 +4493,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(8);
 
+#ifdef USE_REQUIRED
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4737,6 +4502,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 8;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else
@@ -4823,6 +4589,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
+#ifdef USE_REQUIRED
                 if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
@@ -4836,6 +4603,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memAlignAction.wr8 = 0;
                     required.MemAlign.push_back(memAlignAction);
                 }
+#endif
             }
             else if (rom.line[zkPC].memAlignRD==0 && rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==1)
             {
@@ -4860,6 +4628,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
+#ifdef USE_REQUIRED
                 if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
@@ -4873,6 +4642,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memAlignAction.wr8 = 1;
                     required.MemAlign.push_back(memAlignAction);
                 }
+#endif
             }
             else if (rom.line[zkPC].memAlignRD==1 && rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
             {
@@ -4892,6 +4662,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
+#ifdef USE_REQUIRED
                 if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
@@ -4905,6 +4676,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memAlignAction.wr8 = 0;
                     required.MemAlign.push_back(memAlignAction);
                 }
+#endif
             }
             else
             {
@@ -4919,99 +4691,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.repeat[i] = fr.one();
         }
 
-        // Save instruction
-        if (rom.line[zkPC].save == 1)
-        {
-            uint64_t nrid = step;
-            map<uint64_t, Saved>::iterator it;
-            it = ctx.saved.find(nrid);
-            if (it != ctx.saved.end())
-            {
-                proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                logError(ctx, "Save step already occupied nrid=" + to_string(nrid));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-            Saved data;
-
-            data.op[0] = op0;
-            data.op[1] = op1;
-            data.op[2] = op2;
-            data.op[3] = op3;
-            data.op[4] = op4;
-            data.op[5] = op5;
-            data.op[6] = op6;
-            data.op[7] = op7;
-
-            data.B[0] = pols.B0[i];
-            data.B[1] = pols.B1[i];
-            data.B[2] = pols.B2[i];
-            data.B[3] = pols.B3[i];
-            data.B[4] = pols.B4[i];
-            data.B[5] = pols.B5[i];
-            data.B[6] = pols.B6[i];
-            data.B[7] = pols.B7[i];
-
-            data.C[0] = pols.C0[i];
-            data.C[1] = pols.C1[i];
-            data.C[2] = pols.C2[i];
-            data.C[3] = pols.C3[i];
-            data.C[4] = pols.C4[i];
-            data.C[5] = pols.C5[i];
-            data.C[6] = pols.C6[i];
-            data.C[7] = pols.C7[i];
-
-            data.D[0] = pols.D0[i];
-            data.D[1] = pols.D1[i];
-            data.D[2] = pols.D2[i];
-            data.D[3] = pols.D3[i];
-            data.D[4] = pols.D4[i];
-            data.D[5] = pols.D5[i];
-            data.D[6] = pols.D6[i];
-            data.D[7] = pols.D7[i];
-            
-            data.E[0] = pols.E0[i];
-            data.E[1] = pols.E1[i];
-            data.E[2] = pols.E2[i];
-            data.E[3] = pols.E3[i];
-            data.E[4] = pols.E4[i];
-            data.E[5] = pols.E5[i];
-            data.E[6] = pols.E6[i];
-            data.E[7] = pols.E7[i];
-
-            data.RCX = pols.RCX[i];
-            data.RR = pols.RR[i];
-            data.RID = pols.RID[i];
-
-            data.savedZKPC = zkPC;
-            data.savedStep = step;
-
-            ctx.saved[nrid] = data;
-
-            if (!bProcessBatch) pols.save[i] = fr.one();
-        }
-
         /***********/
         /* SETTERS */
         /***********/
 
-        // Set op
-        if (!bProcessBatch)
-        {
-            pols.op0[i] = op0;
-            pols.op1[i] = op1;
-            pols.op2[i] = op2;
-            pols.op3[i] = op3;
-            pols.op4[i] = op4;
-            pols.op5[i] = op5;
-            pols.op6[i] = op6;
-            pols.op7[i] = op7;
-        }
-
         // If setA, A'=op
-        if (rom.line[zkPC].setA == 1)
-        {
+        if (rom.line[zkPC].setA == 1) {
             pols.A0[nexti] = op0;
             pols.A1[nexti] = op1;
             pols.A2[nexti] = op2;
@@ -5024,17 +4709,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setA A[nexti]=" + fea2string(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
 #endif
-        }
-#ifndef BLOB_INNER
-        else if (bUnsignedTransaction && (zkPC == rom.labels.checkAndSaveFromLabel))
-        {
+        } else if (bUnsignedTransaction && (zkPC == checkAndSaveFromLabel)) {
             // Set A register with input.from to process unsigned transactions
             mpz_class from(proverRequest.input.from);
             scalar2fea(fr, from, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti] );
-        }
-#endif
-        else
-        {
+        } else {
             pols.A0[nexti] = pols.A0[i];
             pols.A1[nexti] = pols.A1[i];
             pols.A2[nexti] = pols.A2[i];
@@ -5046,8 +4725,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setB, B'=op
-        if (rom.line[zkPC].setB == 1)
-        {
+        if (rom.line[zkPC].setB == 1) {
             pols.B0[nexti] = op0;
             pols.B1[nexti] = op1;
             pols.B2[nexti] = op2;
@@ -5060,20 +4738,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setB B[nexti]=" + fea2string(fr, pols.B0[nexti], pols.B1[nexti], pols.B2[nexti], pols.B3[nexti], pols.B4[nexti], pols.B5[nexti], pols.B6[nexti], pols.B7[nexti]));
 #endif
-        }
-        else if (rom.line[zkPC].restore == 1)
-        {
-            pols.B0[nexti] = dataToRestore.B[0];
-            pols.B1[nexti] = dataToRestore.B[1];
-            pols.B2[nexti] = dataToRestore.B[2];
-            pols.B3[nexti] = dataToRestore.B[3];
-            pols.B4[nexti] = dataToRestore.B[4];
-            pols.B5[nexti] = dataToRestore.B[5];
-            pols.B6[nexti] = dataToRestore.B[6];
-            pols.B7[nexti] = dataToRestore.B[7];
-        }
-        else
-        {
+        } else {
             pols.B0[nexti] = pols.B0[i];
             pols.B1[nexti] = pols.B1[i];
             pols.B2[nexti] = pols.B2[i];
@@ -5085,8 +4750,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setC, C'=op
-        if (rom.line[zkPC].setC == 1)
-        {
+        if (rom.line[zkPC].setC == 1) {
             pols.C0[nexti] = op0;
             pols.C1[nexti] = op1;
             pols.C2[nexti] = op2;
@@ -5099,17 +4763,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setC C[nexti]=" + fea2string(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
-        }
-        else if (rom.line[zkPC].restore == 1)
+        }            
+        else if ((zkPC == verifyMerkleProofEndLabel) && proverRequest.input.bSkipVerifyL1InfoRoot)
         {
-            pols.C0[nexti] = dataToRestore.C[0];
-            pols.C1[nexti] = dataToRestore.C[1];
-            pols.C2[nexti] = dataToRestore.C[2];
-            pols.C3[nexti] = dataToRestore.C[3];
-            pols.C4[nexti] = dataToRestore.C[4];
-            pols.C5[nexti] = dataToRestore.C[5];
-            pols.C6[nexti] = dataToRestore.C[6];
-            pols.C7[nexti] = dataToRestore.C[7];
+            // Set C register with input.l1InfoRoot to process unsigned transactions
+            scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot,
+                pols.C0[nexti],
+                pols.C1[nexti],
+                pols.C2[nexti],
+                pols.C3[nexti],
+                pols.C4[nexti],
+                pols.C5[nexti],
+                pols.C6[nexti],
+                pols.C7[nexti]);
         }
         else
         {
@@ -5124,8 +4790,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setD, D'=op
-        if (rom.line[zkPC].setD == 1)
-        {
+        if (rom.line[zkPC].setD == 1) {
             pols.D0[nexti] = op0;
             pols.D1[nexti] = op1;
             pols.D2[nexti] = op2;
@@ -5138,20 +4803,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setD D[nexti]=" + fea2string(fr, pols.D0[nexti], pols.D1[nexti], pols.D2[nexti], pols.D3[nexti], pols.D4[nexti], pols.D5[nexti], pols.D6[nexti], pols.D7[nexti]));
 #endif
-        }
-        else if (rom.line[zkPC].restore == 1)
-        {
-            pols.D0[nexti] = dataToRestore.D[0];
-            pols.D1[nexti] = dataToRestore.D[1];
-            pols.D2[nexti] = dataToRestore.D[2];
-            pols.D3[nexti] = dataToRestore.D[3];
-            pols.D4[nexti] = dataToRestore.D[4];
-            pols.D5[nexti] = dataToRestore.D[5];
-            pols.D6[nexti] = dataToRestore.D[6];
-            pols.D7[nexti] = dataToRestore.D[7];
-        }
-        else
-        {
+        } else {
             pols.D0[nexti] = pols.D0[i];
             pols.D1[nexti] = pols.D1[i];
             pols.D2[nexti] = pols.D2[i];
@@ -5163,8 +4815,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setE, E'=op
-        if (rom.line[zkPC].setE == 1)
-        {
+        if (rom.line[zkPC].setE == 1) {
             pols.E0[nexti] = op0;
             pols.E1[nexti] = op1;
             pols.E2[nexti] = op2;
@@ -5177,20 +4828,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setE E[nexti]=" + fea2string(fr, pols.E0[nexti], pols.E1[nexti], pols.E2[nexti], pols.E3[nexti], pols.E4[nexti], pols.E5[nexti], pols.E6[nexti], pols.E7[nexti]));
 #endif
-        }
-        else if (rom.line[zkPC].restore == 1)
-        {
-            pols.E0[nexti] = dataToRestore.E[0];
-            pols.E1[nexti] = dataToRestore.E[1];
-            pols.E2[nexti] = dataToRestore.E[2];
-            pols.E3[nexti] = dataToRestore.E[3];
-            pols.E4[nexti] = dataToRestore.E[4];
-            pols.E5[nexti] = dataToRestore.E[5];
-            pols.E6[nexti] = dataToRestore.E[6];
-            pols.E7[nexti] = dataToRestore.E[7];
-        }
-        else
-        {
+        } else {
             pols.E0[nexti] = pols.E0[i];
             pols.E1[nexti] = pols.E1[i];
             pols.E2[nexti] = pols.E2[i];
@@ -5202,8 +4840,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setSR, SR'=op
-        if (rom.line[zkPC].setSR == 1)
-        {
+        if (rom.line[zkPC].setSR == 1) {
             pols.SR0[nexti] = op0;
             pols.SR1[nexti] = op1;
             pols.SR2[nexti] = op2;
@@ -5216,9 +4853,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setSR SR[nexti]=" + fea2string(fr, pols.SR0[nexti], pols.SR1[nexti], pols.SR2[nexti], pols.SR3[nexti], pols.SR4[nexti], pols.SR5[nexti], pols.SR6[nexti], pols.SR7[nexti]));
 #endif
-        }
-        else
-        {
+        } else {
             pols.SR0[nexti] = pols.SR0[i];
             pols.SR1[nexti] = pols.SR1[i];
             pols.SR2[nexti] = pols.SR2[i];
@@ -5230,45 +4865,36 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setCTX, CTX'=op
-        if (rom.line[zkPC].setCTX == 1)
-        {
+        if (rom.line[zkPC].setCTX == 1) {
             pols.CTX[nexti] = op0;
             pols.setCTX[i] = fr.one();
 #ifdef LOG_SETX
             zklog.info("setCTX CTX[nexti]=" + fr.toString(pols.CTX[nexti], 16));
 #endif
-        }
-        else
-        {
+        } else {
             pols.CTX[nexti] = pols.CTX[i];
         }
 
         // If setSP, SP'=op
-        if (rom.line[zkPC].setSP == 1)
-        {
+        if (rom.line[zkPC].setSP == 1) {
             pols.SP[nexti] = op0;
             pols.setSP[i] = fr.one();
 #ifdef LOG_SETX
             zklog.info("setSP SP[nexti]=" + fr.toString(pols.SP[nexti], 16));
 #endif
-        }
-        else
-        {
+        } else {
             // SP' = SP + incStack
             pols.SP[nexti] = fr.add(pols.SP[i], fr.fromS32(rom.line[zkPC].incStack));
         }
 
         // If setPC, PC'=op
-        if (rom.line[zkPC].setPC == 1)
-        {
+        if (rom.line[zkPC].setPC == 1) {
             pols.PC[nexti] = op0;
             pols.setPC[i] = fr.one();
 #ifdef LOG_SETX
             zklog.info("setPC PC[nexti]=" + fr.toString(pols.PC[nexti], 16));
 #endif
-        }
-        else
-        {
+        } else {
             // PC' = PC
             pols.PC[nexti] = pols.PC[i];
         }
@@ -5278,10 +4904,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.RR[nexti] = op0;
             if (!bProcessBatch) pols.setRR[i] = fr.one();
-        }
-        else if (rom.line[zkPC].restore == 1)
-        {
-            pols.RR[nexti] = dataToRestore.RR;
         }
         else if (rom.line[zkPC].call == 1)
         {
@@ -5293,8 +4915,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If arith, increment pols.cntArith
-        if (!proverRequest.input.bNoCounters && (rom.line[zkPC].arith == 1))
-        {
+        if (!proverRequest.input.bNoCounters && (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1) ) {
             pols.cntArith[nexti] = fr.inc(pols.cntArith[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntArith[nexti]) > rom.constants.MAX_CNT_ARITH_LIMIT)
@@ -5309,15 +4930,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 exitProcess();
             }
 #endif
-        }
-        else
-        {
+        } else {
             pols.cntArith[nexti] = pols.cntArith[i];
         }
 
         // If bin, increment pols.cntBinary
-        if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters)
-        {
+        if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters) {
             pols.cntBinary[nexti] = fr.inc(pols.cntBinary[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntBinary[nexti]) > rom.constants.MAX_CNT_BINARY_LIMIT)
@@ -5332,15 +4950,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 exitProcess();
             }
 #endif
-        }
-        else
-        {
+        } else {
             pols.cntBinary[nexti] = pols.cntBinary[i];
         }
 
         // If memAlign, increment pols.cntMemAlign
-        if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters)
-        {
+        if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters) {
             pols.cntMemAlign[nexti] = fr.inc(pols.cntMemAlign[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntMemAlign[nexti]) > rom.constants.MAX_CNT_MEM_ALIGN_LIMIT)
@@ -5355,30 +4970,24 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 exitProcess();
             }
 #endif
-        }
-        else
-        {
+        } else {
             pols.cntMemAlign[nexti] = pols.cntMemAlign[i];
         }
 
         // If setRCX, RCX=op, else if RCX>0, RCX--
-        if (rom.line[zkPC].setRCX == 1)
+        if (rom.line[zkPC].setRCX)
         {
             pols.RCX[nexti] = op0;
             if (!bProcessBatch)
                 pols.setRCX[i] = fr.one();
         }
-        else if (rom.line[zkPC].repeat == 1)
+        else if (rom.line[zkPC].repeat)
         {
             currentRCX = pols.RCX[i];
             if (!fr.isZero(pols.RCX[i]))
             {
                 pols.RCX[nexti] = fr.dec(pols.RCX[i]);
             }
-        }
-        else if (rom.line[zkPC].restore == 1)
-        {
-            pols.RCX[nexti] = dataToRestore.RCX;
         }
         else
         {
@@ -5394,67 +5003,31 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
-        // Record call instruction flag
-        if (!bProcessBatch && (rom.line[zkPC].call == 1))
+        if (rom.line[zkPC].bJmpAddrPresent && !bProcessBatch)
         {
-            pols.call[i] = fr.one();
+            pols.jmpAddr[i] = rom.line[zkPC].jmpAddr;
+        }
+        if (rom.line[zkPC].useJmpAddr == 1 && !bProcessBatch)
+        {
+            pols.useJmpAddr[i] = fr.one();
+        }
+        if (rom.line[zkPC].useElseAddr == 1 && !bProcessBatch)
+        {
+            pols.useElseAddr[i] = fr.one();
+        }
+
+        if (!bProcessBatch)
+        {
+            if (rom.line[zkPC].useElseAddr == 1)
+            {
+                zkassert(rom.line[zkPC].bElseAddrPresent);
+                pols.elseAddr[i] = rom.line[zkPC].elseAddr;
+            }
         }
 
         /*********/
         /* JUMPS */
         /*********/
-
-        if (rom.line[zkPC].bJmpAddrPresent && !bProcessBatch)
-        {
-            pols.jmpAddr[i] = rom.line[zkPC].jmpAddr;
-        }
-        
-        if (rom.line[zkPC].jmpUseAddrRel == 1 && !bProcessBatch)
-        {
-            pols.jmpUseAddrRel[i] = fr.one();
-        }
-
-        uint64_t finalJmpAddr = fr.toS64(rom.line[zkPC].jmpAddr) + (rom.line[zkPC].jmpUseAddrRel ? addrRel : 0);
-        uint64_t nextNoJmpZkPC = fr.toU64(pols.zkPC[i]) + ((rom.line[zkPC].repeat && !fr.isZero(pols.RCX[i])) ? 0 : 1);
-
-        if (!fr.isZero(rom.line[zkPC].elseAddr) && !bProcessBatch)
-        {
-            zkassert(rom.line[zkPC].bElseAddrPresent);
-            pols.elseAddr[i] = rom.line[zkPC].elseAddr;
-        }
-        if (rom.line[zkPC].elseUseAddrRel && !bProcessBatch)
-        {
-            pols.elseUseAddrRel[i] = fr.one();
-        }
-        uint64_t elseAddr = (!fr.isZero(rom.line[zkPC].elseAddr) ? fr.toU64(rom.line[zkPC].elseAddr) : 0) + (rom.line[zkPC].elseUseAddrRel ? addrRel : 0);
-
-#ifndef BLOB_INNER
-        // Modify JMP 'elseAddr' to continue execution in case of an unsigned transaction
-        if (bUnsignedTransaction && (fr.toU64(rom.line[zkPC].elseAddr) == rom.labels.invalidIntrinsicTxSenderCodeLabel))
-        {
-            elseAddr = finalJmpAddr;
-        }
-#endif
-
-        // Log free0IsByte in pols
-        if (!bProcessBatch && rom.line[zkPC].free0IsByte)
-        {
-            uint64_t value = fr.toU64(pols.FREE0[i]);
-
-            if (value > 255)
-            {
-                logError(ctx, "Main Executor found FREE0=" + to_string(value) + " > 255");
-                proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-            for (uint64_t index = 0; index < 8; index++)
-            {
-                pols.hJmpnCondValueBit[index][i] = fr.fromU64(value & 0x01);
-                value = value >> 1;
-            }
-            pols.free0IsByte[i] = fr.one();
-        }
 
         // If JMPN, jump conditionally if op0<0
         if (rom.line[zkPC].JMPN == 1)
@@ -5462,17 +5035,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_JMP
             zklog.info("JMPN: op0=" + fr.toString(op0));
 #endif
-            if (rom.line[zkPC].free0IsByte)
-            {
-                logError(ctx, "Main Executor JMPN=1 and free0IsByte=1, but they are incompatible");
-                proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-#ifndef BLOB_INNER
-            // Calculate reserved counters
-            if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersStepLabel))
+            if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersStepLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5481,7 +5044,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersArithLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersArithLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_ARITH) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5490,7 +5053,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersBinaryLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersBinaryLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_BINARY) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5499,7 +5062,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersKeccakLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersKeccakLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_KECCAK_F) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5508,7 +5071,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersSha256Label))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersSha256Label))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_SHA256_F) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5517,7 +5080,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersMemalignLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersMemalignLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_MEM_ALIGN) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5526,7 +5089,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersPoseidonLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPoseidonLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_POSEIDON_G) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5535,7 +5098,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersPaddingLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPaddingLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_PADDING_PG) - fr.toS64(op0);
                 if (reserve < 0)
@@ -5544,7 +5107,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, uint64_t(reserve));
             }
-#endif
 
             uint64_t jmpnCondValue = fr.toU64(op0);
 
@@ -5552,8 +5114,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (jmpnCondValue >= FrFirst32Negative)
             {
                 pols.isNeg[i] = fr.one();
+                if (rom.line[zkPC].useJmpAddr)
+                    pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+                else
+                    pols.zkPC[nexti] = fr.fromU64(addr);
                 jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(0x100000000)));
-                pols.zkPC[nexti] = fr.fromU64(finalJmpAddr);
 #ifdef LOG_JMP
                 zklog.info("JMPN next zkPC(1)=" + fr.toString(pols.zkPC[nexti]));
 #endif
@@ -5561,7 +5126,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If op>=0, simply increase zkPC'=zkPC+1
             else if (jmpnCondValue <= FrLast32Positive)
             {
-                pols.zkPC[nexti] = fr.fromU64(elseAddr);
+                if (rom.line[zkPC].useElseAddr)
+                {
+                    if (bUnsignedTransaction && (rom.line[zkPC].elseAddrLabel == "invalidIntrinsicTxSenderCode"))
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].useJmpAddr ? rom.line[zkPC].jmpAddr : fr.fromU64(addr);
+                    }
+                    else
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                    }
+                }
+                else
+                {
+                    pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
+                }
 #ifdef LOG_JMP
                 zklog.info("JMPN next zkPC(2)=" + fr.toString(pols.zkPC[nexti]));
 #endif
@@ -5588,7 +5167,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If carry, jump to addr: zkPC'=addr
             if (!fr.isZero(pols.carry[i]))
             {
-                pols.zkPC[nexti] = fr.fromU64(finalJmpAddr);
+                if (rom.line[zkPC].useJmpAddr)
+                    pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+                else
+                    pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
                zklog.info("JMPC next zkPC(3)=" + fr.toString(pols.zkPC[nexti]));
 #endif
@@ -5596,7 +5178,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If not carry, simply increase zkPC'=zkPC+1
             else
             {
-                pols.zkPC[nexti] = fr.fromU64(elseAddr);
+                if (rom.line[zkPC].useElseAddr)
+                {
+                    if (bUnsignedTransaction && (rom.line[zkPC].elseAddrLabel == "invalidIntrinsicTxSenderCode"))
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].useJmpAddr ? rom.line[zkPC].jmpAddr : fr.fromU64(addr);
+                    }
+                    else
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                    }
+                }
+                else
+                {
+                    pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
+                }
 #ifdef LOG_JMP
                 zklog.info("JMPC next zkPC(4)=" + fr.toString(pols.zkPC[nexti]));
 #endif
@@ -5608,33 +5204,67 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (fr.isZero(op0))
             {
-                pols.zkPC[nexti] = fr.fromU64(finalJmpAddr);
+                if (rom.line[zkPC].useJmpAddr)
+                    pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+                else
+                    pols.zkPC[nexti] = fr.fromU64(addr);
             }
             else
             {
-                pols.zkPC[nexti] = fr.fromU64(elseAddr);
+                if (rom.line[zkPC].useElseAddr)
+                {
+                    if (bUnsignedTransaction && (rom.line[zkPC].elseAddrLabel == "invalidIntrinsicTxSenderCode"))
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].useJmpAddr ? rom.line[zkPC].jmpAddr : fr.fromU64(addr);
+                    }
+                    else
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                    }
+                }
+                else
+                {
+                    pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
+                }
             }
             pols.JMPZ[i] = fr.one();
         }
         // If JMP, directly jump zkPC'=addr
         else if (rom.line[zkPC].JMP == 1)
         {
-            pols.zkPC[nexti] = fr.fromU64(finalJmpAddr);
+            if (rom.line[zkPC].useJmpAddr)
+                pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+            else
+                pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
             zklog.info("JMP next zkPC(5)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             pols.JMP[i] = fr.one();
         }
+        // If call, jump to finalJmpAddr
+        else if (rom.line[zkPC].call == 1)
+        {
+            if (rom.line[zkPC].useJmpAddr)
+                pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
+            else
+                pols.zkPC[nexti] = fr.fromU64(addr);
+            pols.call[i] = fr.one();
+        }
         // If return, jump back to RR
         else if (rom.line[zkPC].return_ == 1)
         {
-            pols.zkPC[nexti] = pols.RR[nexti];
+            pols.zkPC[nexti] = pols.RR[i];
             pols.return_pol[i] = fr.one();
+        }
+        // Else, repeat, leave the same zkPC
+        else if (rom.line[zkPC].repeat && !fr.isZero(currentRCX))
+        {
+            pols.zkPC[nexti] = pols.zkPC[i];
         }
         // Else, simply increase zkPC'=zkPC+1
         else
         {
-            pols.zkPC[nexti] = fr.fromU64(nextNoJmpZkPC);
+            pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
         }
 
         // If setGAS, GAS'=op
@@ -5656,35 +5286,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.HASHPOS[nexti] = fr.add( pols.HASHPOS[i], fr.fromU64(incHashPos) );
         }
 
-        if (rom.line[zkPC].setRID == 1)
-        {
-            pols.setRID[i] = fr.one();
-            pols.RID[nexti] = op0;
-        }
-        else
-        {
-            if (rom.line[zkPC].restore)
-            {
-                pols.RID[nexti] = dataToRestore.RID;
-            }
-            else if (rom.line[zkPC].save)
-            {
-                pols.RID[nexti] = fr.fromU64(step);
-            }
-            else
-            {
-                pols.RID[nexti] = pols.RID[i];
-            }
-        }
-
-        if (
-#ifdef SUPPORT_SHA256
-            rom.line[zkPC].hashSDigest ||
-#endif
-            rom.line[zkPC].sRD ||
-            rom.line[zkPC].sWR ||
-            rom.line[zkPC].hashKDigest ||
-            rom.line[zkPC].hashPDigest )
+        if (rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashKDigest || rom.line[zkPC].hashPDigest || rom.line[zkPC].hashSDigest)
         {
             pols.incCounter[i] = fr.fromU64(incCounter);
         }
@@ -5733,8 +5335,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntPaddingPG[nexti] = pols.cntPaddingPG[i];
         }
 
-#ifdef SUPPORT_SHA256
-
         if (rom.line[zkPC].hashSDigest && !proverRequest.input.bNoCounters)
         {
             pols.cntSha256F[nexti] = fr.add(pols.cntSha256F[i], fr.fromU64(incCounter));
@@ -5756,8 +5356,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.cntSha256F[nexti] = pols.cntSha256F[i];
         }
-
-#endif // SUPPORT_SHA256
 
         if ((rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest) && !proverRequest.input.bNoCounters)
         {
@@ -5836,7 +5434,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
         // When processing a txs batch, break the loop when done to complete the execution faster
-        if ( zkPC == rom.labels.finalizeExecutionLabel )
+        if ( zkPC == finalizeExecutionLabel )
         {
             if (ctx.lastStep != 0)
             {
@@ -5859,9 +5457,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.memAlign = fr.toU64(pols.cntMemAlign[0]);
     proverRequest.counters.paddingPG = fr.toU64(pols.cntPaddingPG[0]);
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
-#ifdef SUPPORT_SHA256
     proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);
-#endif
     proverRequest.counters.steps = ctx.lastStep;
     proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, proverRequest.counters.arith);
     proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, proverRequest.counters.binary);
@@ -5950,7 +5546,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
     }
-#ifdef SUPPORT_SHA256
     if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntSha256F[0]) > rom.constants.MAX_CNT_SHA256_F_LIMIT))
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_SHA256_F;
@@ -5960,7 +5555,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
     }
-#endif // SUPPORT_SHA256
 #endif
 
     //printRegs(ctx);
@@ -6143,17 +5737,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 // Initialize the first evaluation
 void MainExecutor::initState(Context &ctx)
 {
-    // Set oldStateRoot to register SR
-    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, ctx.pols.SR0[0], ctx.pols.SR1[0], ctx.pols.SR2[0], ctx.pols.SR3[0], ctx.pols.SR4[0], ctx.pols.SR5[0], ctx.pols.SR6[0], ctx.pols.SR7[0]);
+    // Set oldStateRoot to register B
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
 
     // Set oldAccInputHash to register C
     scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
 
-    // Set previousL1InfoTreeRoot to register D
-    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.previousL1InfoTreeRoot, ctx.pols.D0[0], ctx.pols.D1[0], ctx.pols.D2[0], ctx.pols.D3[0], ctx.pols.D4[0], ctx.pols.D5[0], ctx.pols.D6[0], ctx.pols.D7[0]);
-
-    // Set previousL1InfoTreeIndex to RCX register
-    ctx.pols.RCX[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.previousL1InfoTreeIndex);
+    // Set oldNumBatch to SP register
+    ctx.pols.SP[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum);
 
     // Set chainID to GAS register
     ctx.pols.GAS[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.chainID);
@@ -6199,88 +5790,70 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.SR6[0])) ||
         (!fr.isZero(ctx.pols.SR7[0])) ||
         (!fr.isZero(ctx.pols.PC[0])) ||
-        (!fr.isZero(ctx.pols.zkPC[0])) ||
-        (!fr.isZero(ctx.pols.HASHPOS[0])) ||
-        (!fr.isZero(ctx.pols.RR[0])) ||
-        (!fr.isZero(ctx.pols.RCX[0]))
+        (!fr.isZero(ctx.pols.zkPC[0]))
     )
     {
-        logError(ctx, "MainExecutor::checkFinalState() Program ended with registers A, D, E, SR, CTX, PC, zkPC, HASHPOS, RR, RCX not set to zero");
+        logError(ctx, "MainExecutor::checkFinalState() Program terminated with registers A, D, E, SR, CTX, PC, zkPC not set to zero");
         exitProcess();
     }
 
     Goldilocks::Element feaOldStateRoot[8];
     scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, feaOldStateRoot);
     if (
-        (!fr.equal(ctx.pols.SR0[0], feaOldStateRoot[0])) ||
-        (!fr.equal(ctx.pols.SR1[0], feaOldStateRoot[1])) ||
-        (!fr.equal(ctx.pols.SR2[0], feaOldStateRoot[2])) ||
-        (!fr.equal(ctx.pols.SR3[0], feaOldStateRoot[3])) ||
-        (!fr.equal(ctx.pols.SR4[0], feaOldStateRoot[4])) ||
-        (!fr.equal(ctx.pols.SR5[0], feaOldStateRoot[5])) ||
-        (!fr.equal(ctx.pols.SR6[0], feaOldStateRoot[6])) ||
-        (!fr.equal(ctx.pols.SR7[0], feaOldStateRoot[7])) )
+        (!fr.equal(ctx.pols.B0[0], feaOldStateRoot[0])) ||
+        (!fr.equal(ctx.pols.B1[0], feaOldStateRoot[1])) ||
+        (!fr.equal(ctx.pols.B2[0], feaOldStateRoot[2])) ||
+        (!fr.equal(ctx.pols.B3[0], feaOldStateRoot[3])) ||
+        (!fr.equal(ctx.pols.B4[0], feaOldStateRoot[4])) ||
+        (!fr.equal(ctx.pols.B5[0], feaOldStateRoot[5])) ||
+        (!fr.equal(ctx.pols.B6[0], feaOldStateRoot[6])) ||
+        (!fr.equal(ctx.pols.B7[0], feaOldStateRoot[7])) )
     {
-        mpz_class srScalar;
-        if (!fea2scalar(ctx.fr, srScalar, ctx.pols.SR0[0], ctx.pols.SR1[0], ctx.pols.SR2[0], ctx.pols.SR3[0], ctx.pols.SR4[0], ctx.pols.SR5[0], ctx.pols.SR6[0], ctx.pols.SR7[0]))
+        mpz_class bScalar;
+        if (!fea2scalar(ctx.fr, bScalar, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]))
         {
-            logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.SR)");
+            logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.B)");
         }
-        logError(ctx, "MainExecutor::checkFinalState() Register SR=" + srScalar.get_str(16) + " not ended equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
+        logError(ctx, "MainExecutor::checkFinalState() Register B=" + bScalar.get_str(16) + " not terminated equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
         exitProcess();
     }
 
-    Goldilocks::Element feaOldBatchAccInputHash[8];
-    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, feaOldBatchAccInputHash);
+    Goldilocks::Element feaOldAccInputHash[8];
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, feaOldAccInputHash);
     if (
-        (!fr.equal(ctx.pols.C0[0], feaOldBatchAccInputHash[0])) ||
-        (!fr.equal(ctx.pols.C1[0], feaOldBatchAccInputHash[1])) ||
-        (!fr.equal(ctx.pols.C2[0], feaOldBatchAccInputHash[2])) ||
-        (!fr.equal(ctx.pols.C3[0], feaOldBatchAccInputHash[3])) ||
-        (!fr.equal(ctx.pols.C4[0], feaOldBatchAccInputHash[4])) ||
-        (!fr.equal(ctx.pols.C5[0], feaOldBatchAccInputHash[5])) ||
-        (!fr.equal(ctx.pols.C6[0], feaOldBatchAccInputHash[6])) ||
-        (!fr.equal(ctx.pols.C7[0], feaOldBatchAccInputHash[7])) )
+        (!fr.equal(ctx.pols.C0[0], feaOldAccInputHash[0])) ||
+        (!fr.equal(ctx.pols.C1[0], feaOldAccInputHash[1])) ||
+        (!fr.equal(ctx.pols.C2[0], feaOldAccInputHash[2])) ||
+        (!fr.equal(ctx.pols.C3[0], feaOldAccInputHash[3])) ||
+        (!fr.equal(ctx.pols.C4[0], feaOldAccInputHash[4])) ||
+        (!fr.equal(ctx.pols.C5[0], feaOldAccInputHash[5])) ||
+        (!fr.equal(ctx.pols.C6[0], feaOldAccInputHash[6])) ||
+        (!fr.equal(ctx.pols.C7[0], feaOldAccInputHash[7])) )
     {
         mpz_class cScalar;
         if (!fea2scalar(ctx.fr, cScalar, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]))
         {
             logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.C)");
         }
-        logError(ctx, "MainExecutor::checkFinalState() Register C=" + cScalar.get_str(16) + " not ended equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
+        logError(ctx, "MainExecutor::checkFinalState() Register C=" + cScalar.get_str(16) + " not terminated equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
         exitProcess();
     }
 
-    Goldilocks::Element feaPreviousL1InfoTreeRoot[8];
-    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.previousL1InfoTreeRoot, feaPreviousL1InfoTreeRoot);
-    if (
-        (!fr.equal(ctx.pols.D0[0], feaPreviousL1InfoTreeRoot[0])) ||
-        (!fr.equal(ctx.pols.D1[0], feaPreviousL1InfoTreeRoot[1])) ||
-        (!fr.equal(ctx.pols.D2[0], feaPreviousL1InfoTreeRoot[2])) ||
-        (!fr.equal(ctx.pols.D3[0], feaPreviousL1InfoTreeRoot[3])) ||
-        (!fr.equal(ctx.pols.D4[0], feaPreviousL1InfoTreeRoot[4])) ||
-        (!fr.equal(ctx.pols.D5[0], feaPreviousL1InfoTreeRoot[5])) ||
-        (!fr.equal(ctx.pols.D6[0], feaPreviousL1InfoTreeRoot[6])) ||
-        (!fr.equal(ctx.pols.D7[0], feaPreviousL1InfoTreeRoot[7])) )
+    if (!fr.equal(ctx.pols.SP[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum)))
     {
-        mpz_class dScalar;
-        if (!fea2scalar(ctx.fr, dScalar, ctx.pols.D0[0], ctx.pols.D1[0], ctx.pols.D2[0], ctx.pols.D3[0], ctx.pols.D4[0], ctx.pols.D5[0], ctx.pols.D6[0], ctx.pols.D7[0]))
-        {
-            logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.D)");
-        }
-        logError(ctx, "MainExecutor::checkFinalState() Register D=" + dScalar.get_str(16) + " not ended equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.previousL1InfoTreeRoot.get_str(16));
+        logError(ctx, "MainExecutor::checkFinalState() Register SP not terminated equal as its initial value");
         exitProcess();
     }
 
     if (!fr.equal(ctx.pols.GAS[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.chainID)))
     {
-        logError(ctx, "MainExecutor::checkFinalState() Register GAS not ended equal as its initial value");
+        logError(ctx, "MainExecutor::checkFinalState() Register GAS not terminated equal as its initial value");
         exitProcess();
     }
 
     if (!fr.equal(ctx.pols.CTX[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID)))
     {
-        logError(ctx, "MainExecutor::checkFinalState() Register CTX not ended equal as its initial value");
+        logError(ctx, "MainExecutor::checkFinalState() Register CTX not terminated equal as its initial value");
         exitProcess();
     }
 }
@@ -6387,7 +5960,7 @@ void MainExecutor::logError (Context &ctx, const string &message)
     uint64_t step = (ctx.pStep != NULL) ? *ctx.pStep : INVALID_LOG_ERROR_VALUE;
     uint64_t evaluation = (ctx.pEvaluation != NULL) ? *ctx.pEvaluation : INVALID_LOG_ERROR_VALUE;
     uint64_t zkpc = (ctx.pZKPC != NULL) ? *ctx.pZKPC : INVALID_LOG_ERROR_VALUE;
-    string romLine = (ctx.pZKPC != NULL) ? ctx.rom.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+    string romLine = (ctx.pZKPC != NULL) ? rom.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
     zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) +
         " step=" + to_string(step) +
         " eval=" + to_string(evaluation) +

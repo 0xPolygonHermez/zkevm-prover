@@ -64,7 +64,8 @@ set<string> responseErrors = {
     "invalid_change_l2_block_min_timestamp",
     "invalidRLP",
     "invalidDecodeChangeL2Block",
-    "invalidNotFirstTxChangeL2Block" };
+    "invalidNotFirstTxChangeL2Block",
+    "invalid_l1_info_tree_index" };
     
 set<string> invalidBatchErrors = {
     "OOCS",
@@ -79,11 +80,13 @@ set<string> invalidBatchErrors = {
     "invalid_change_l2_block_min_timestamp",
     "invalidRLP",
     "invalidDecodeChangeL2Block",
-    "invalidNotFirstTxChangeL2Block" };
+    "invalidNotFirstTxChangeL2Block",
+    "invalid_l1_info_tree_index" };
     
 set<string> changeBlockErrors = {
     "invalid_change_l2_block_limit_timestamp",
-    "invalid_change_l2_block_min_timestamp" };
+    "invalid_change_l2_block_min_timestamp",
+    "invalid_l1_info_tree_index" };
     
 set<string> oocErrors = {
     "OOCS",
@@ -452,17 +455,15 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
          full_trace.empty() )
     {
-        if (currentBlock.responses.size() > txIndex)
-        {
-            currentBlock.responses[txIndex].error = lastError;
-        }
-        else
+        if (currentBlock.responses.empty())
         {
             zklog.error("FullTracer::onError() got error=" + lastError + " with txIndex=" + to_string(txIndex) + " but currentBlock.responses.size()=" + to_string(currentBlock.responses.size()));
             exitProcess();
         }
+        currentBlock.responses[currentBlock.responses.size() - 1].error = lastError;
+        
 #ifdef LOG_FULL_TRACER_ON_ERROR
-        zklog.info("FullTracer::onError() 4 error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
+        zklog.info("FullTracer::onError() 4 error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()) + " txIndex=" + to_string(txIndex));
 #endif
 #ifdef LOG_TIME_STATISTICS
         tms.add("onError", TimeDiff(t));
@@ -557,8 +558,20 @@ zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
         // Data length is stored in C
         mpz_class cScalar;
         getRegFromCtx(ctx, reg_C, cScalar);
+
+        // Data always should be 32 or less but limit to 32 for safety
         uint64_t size = zkmin(cScalar.get_ui(), 32);
-        string dataString = PrependZeros(data.get_str(16), size*2);
+
+        // Convert data to hex string and append zeros, left zeros are stored in logs, for example if data = 0x01c8 and size=32, data is 0x00000000000000000000000000000000000000000000000000000000000001c8
+        string dataString = data.get_str(16);
+        if ((size * 2) > dataString.size())
+        {
+            dataString = PrependZeros(dataString, size*2);
+        }
+
+        // Get only left size length from bytes, example if size=1 and data= 0xaa00000000000000000000000000000000000000000000000000000000000000, we get 0xaa
+        dataString = dataString.substr(0, size * 2);
+        
         it->second.data.push_back(dataString);
     }
 
@@ -578,8 +591,13 @@ zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
         return zkr;
     }
     it->second.block_number = auxScalar.get_ui();
-    it->second.tx_hash = currentBlock.responses[txIndex].tx_hash;
-    it->second.tx_hash_l2 = currentBlock.responses[txIndex].tx_hash_l2;
+    if (currentBlock.responses.empty())
+    {
+        zklog.error("FullTracer::onStoreLog() found currentBlock.responses empty");
+        exitProcess();
+    }
+    it->second.tx_hash = currentBlock.responses[currentBlock.responses.size() - 1].tx_hash;
+    it->second.tx_hash_l2 = currentBlock.responses[currentBlock.responses.size() - 1].tx_hash_l2;
     it->second.tx_index = txIndex;
     it->second.index = indexLog;
 
@@ -1157,7 +1175,7 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     }
 
     zkresult zkr;
-    ResponseV2 &response = currentBlock.responses[txIndex];
+    ResponseV2 &response = currentBlock.responses[currentBlock.responses.size() - 1];
 
     // Set from address
     mpz_class fromScalar;
@@ -1306,9 +1324,6 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     currentBlock.responses[currentBlock.responses.size() - 1].has_gasprice_opcode = hasGaspriceOpcode;
     currentBlock.responses[currentBlock.responses.size() - 1].has_balance_opcode = hasBalanceOpcode;
 
-    // Increase transaction index
-    txIndex++;
-
     // Check TX status
     if ((responseErrors.find(response.error) == responseErrors.end()) &&
         ( (response.error.empty() && (response.status == 0)) ||
@@ -1419,10 +1434,10 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     finalTrace.new_state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // New acc input hash
-    zkr = getVarFromCtx(ctx, true, ctx.rom.newBatchAccInputHashOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.newAccInputHashOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("FullTracer::onFinishBatch() failed calling getVarFromCtx(ctx.rom.newBatchAccInputHashOffset)");
+        zklog.error("FullTracer::onFinishBatch() failed calling getVarFromCtx(ctx.rom.newAccInputHashOffset)");
         return zkr;
     }
     finalTrace.new_acc_input_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
@@ -1593,8 +1608,13 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             return zkr;
         }
         it->second.block_number = auxScalar.get_ui();
-        it->second.tx_hash = currentBlock.responses[txIndex].tx_hash;
-        it->second.tx_hash_l2 = currentBlock.responses[txIndex].tx_hash_l2;
+        if (currentBlock.responses.empty())
+        {
+            zklog.error("FullTracer::onOpcode() found currentBlock.responses empty");
+            exitProcess();
+        }
+        it->second.tx_hash = currentBlock.responses[currentBlock.responses.size() - 1].tx_hash;
+        it->second.tx_hash_l2 = currentBlock.responses[currentBlock.responses.size() - 1].tx_hash_l2;
         it->second.tx_index = txIndex;
         it->second.index = indexLog;
     }

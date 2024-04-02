@@ -1756,6 +1756,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.mem[addr].fe6 = op6;
                 ctx.mem[addr].fe7 = op7;
 
+#ifdef USE_REQUIRED 
                 if (!bProcessBatch)
                 {
                     MemoryAccess memoryAccess;
@@ -1772,13 +1773,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memoryAccess.fe7 = op7;
                     required.Memory.push_back(memoryAccess);
                 }
-
+#endif
 #ifdef LOG_MEMORY
                 zklog.info("Memory write mWR: addr:" + to_string(addr) + " " + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
 #endif
             }
             else
             {
+#ifdef USE_REQUIRED 
                 if (!bProcessBatch)
                 {
                     MemoryAccess memoryAccess;
@@ -1795,7 +1797,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memoryAccess.fe7 = op7;
                     required.Memory.push_back(memoryAccess);
                 }
-
+#endif
                 if (ctx.mem.find(addr) != ctx.mem.end())
                 {
                     if ( (!fr.equal(ctx.mem[addr].fe0, op0)) ||
@@ -1962,6 +1964,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
+#ifdef USE_REQUIRED 
             if (!bProcessBatch)
             {
                 SmtAction smtAction;
@@ -1969,7 +1972,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 smtAction.getResult = smtGetResult;
                 required.Storage.push_back(smtAction);
             }
-
+#endif
 #ifdef LOG_STORAGE
             zklog.info("Storage read sRD read from key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " value:" + value.get_str(16));
 #endif
@@ -2145,6 +2148,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 required.PoseidonG.push_back(pg);
             }
 
+#ifdef USE_REQUIRED 
             if (!bProcessBatch)
             {
                 SmtAction smtAction;
@@ -2152,7 +2156,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 smtAction.setResult = ctx.lastSWrite.res;
                 required.Storage.push_back(smtAction);
             }
-
+#endif
             // Check that the new root hash equals op0
             Goldilocks::Element oldRoot[4];
             sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
@@ -2731,6 +2735,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             mpz_class op;
             fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
             
+#ifdef USE_REQUIRED 
             // Store the binary action to execute it later with the binary SM
             BinaryAction binaryAction;
             binaryAction.a = op;
@@ -2739,8 +2744,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             binaryAction.opcode = 1;
             binaryAction.type = 2;
             required.Binary.push_back(binaryAction);
+#endif
         }
-
         // Arith instruction
         if (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1)
         {
@@ -2772,6 +2777,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Copy ROM flags into the polynomials
                     pols.arithEq0[i] = fr.one();
 
+#ifdef USE_REQUIRED 
                     ArithAction arithAction;
                     arithAction.x1 = A;
                     arithAction.y1 = B;
@@ -2784,6 +2790,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq2 = 0;
                     arithAction.selEq3 = 0;
                     required.Arith.push_back(arithAction);
+#endif
                 }
             }
             // Arith instruction: check curve points
@@ -2906,6 +2913,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pols.arithEq1[i] = fr.fromU64(rom.line[zkPC].arithEq1);
                     pols.arithEq2[i] = fr.fromU64(rom.line[zkPC].arithEq2);
 
+#ifdef USE_REQUIRED 
                     // Store the arith action to execute it later with the arith SM
                     ArithAction arithAction;
                     arithAction.x1 = x1;
@@ -2919,6 +2927,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq2 = dbl ? 1 : 0;
                     arithAction.selEq3 = 1;
                     required.Arith.push_back(arithAction);
+#endif
                 }
             }
         }
@@ -2950,6 +2959,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.zero();
 
+#ifdef USE_REQUIRED 
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2958,6 +2968,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 0;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 1) // SUB
@@ -2983,6 +2994,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.one();
 
+#ifdef USE_REQUIRED 
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -2991,6 +3003,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 1;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 2) // LT
@@ -3016,6 +3029,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(2);
 
+#ifdef USE_REQUIRED 
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -3024,6 +3038,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 2;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 3) // SLT
@@ -3055,6 +3070,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(3);
 
+#ifdef USE_REQUIRED 
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -3063,6 +3079,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 3;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 4) // EQ
@@ -3088,6 +3105,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(4);
 
+#ifdef USE_REQUIRED 
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -3096,6 +3114,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 4;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 5) // AND
@@ -3124,6 +3143,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(5);
                     
+#ifdef USE_REQUIRED 
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -3132,6 +3152,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 5;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 6) // OR
@@ -3155,6 +3176,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(6);
 
+#ifdef USE_REQUIRED 
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -3163,6 +3185,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 6;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else if (rom.line[zkPC].binOpcode == 7) // XOR
@@ -3186,6 +3209,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     pols.binOpcode[i] = fr.fromU64(7);
 
+#ifdef USE_REQUIRED 
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -3194,6 +3218,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.opcode = 7;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
+#endif
                 }
             }
             else
@@ -3244,6 +3269,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
+#ifdef USE_REQUIRED
                 if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
@@ -3257,6 +3283,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memAlignAction.wr8 = 0;
                     required.MemAlign.push_back(memAlignAction);
                 }
+#endif
             }
             else if (rom.line[zkPC].memAlignRD==0 && rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==1)
             {
@@ -3275,6 +3302,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
+#ifdef USE_REQUIRED 
                 if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
@@ -3288,6 +3316,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memAlignAction.wr8 = 1;
                     required.MemAlign.push_back(memAlignAction);
                 }
+#endif
             }
             else if (rom.line[zkPC].memAlignRD==1 && rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
             {
@@ -3306,7 +3335,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
-
+#ifdef USE_REQUIRED
                 if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
@@ -3320,6 +3349,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memAlignAction.wr8 = 0;
                     required.MemAlign.push_back(memAlignAction);
                 }
+#endif
             }
             else
             {

@@ -103,7 +103,7 @@ using grpc::Status;
 
     // Get fork ID
     proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
-    if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 9)
+    if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 10)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatchV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID), &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
@@ -834,6 +834,8 @@ using grpc::Status;
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
         string s = "ExecutorServiceImpl::ProcessBatchV3() returns result=" + to_string(response->error()) +
+            " error_rom=" + to_string(response->error_rom()) + "=" + proverRequest.pFullTracer->get_error() +
+            " invalid_batch=" + to_string(response->invalid_batch()) +
             " old_state_root=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
             " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
             " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
@@ -1058,7 +1060,7 @@ using grpc::Status;
 
     // Get fork ID
     proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
-    if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 9)
+    if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 10)
     {
         zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID), &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
@@ -1240,36 +1242,32 @@ using grpc::Status;
     }
     
     response->set_error(zkresult2error(proverRequest.result));
-    /*
-    response->set_new_blob_state_root(proverRequest.pFullTracer->get_new_blob_state_root());
-    response->set_new_blob_acc_input_hash(proverRequest.pFullTracer->get_new_blob_acc_input_hash());
-    response->set_new_num_blob(proverRequest.pFullTracer->get_new_numb_blob());
-    response->set_final_acc_batch_hash_data(proverRequest.pFullTracer->get_final_acc_batch_hash_data());
-    response->set_local_exit_root_from_blob(proverRequest.pFullTracer->get_local_exit_root_from_blob());
-    response->set_is_invalid(proverRequest.pFullTracer->get_is_invalid());
-    response->set_batch_data() // repeated
-    */
+
+    FinalTraceBlob & finalTraceBlob = proverRequest.pFullTracer->get_final_trace_blob();
+    
+    response->set_new_blob_state_root(scalar2ba(finalTraceBlob.new_blob_state_root));
+    response->set_new_blob_acc_input_hash(scalar2ba(finalTraceBlob.new_blob_acc_input_hash));
+    response->set_new_num_blob(finalTraceBlob.new_num_blob);
+    response->set_final_acc_batch_hash_data(scalar2ba(finalTraceBlob.final_acc_batch_hash_data));
+    response->set_local_exit_root_from_blob(scalar2ba(finalTraceBlob.local_exit_root_from_blob));
+    response->set_is_invalid(finalTraceBlob.is_invalid);
+    for (uint64_t i=0; i<finalTraceBlob.batch_data.size(); i++)
+    {
+        response->add_batch_data(finalTraceBlob.batch_data[i]);
+    }
+    
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
         // TODO: log response data
         string s = "ExecutorServiceImpl::ProcessBlobInnerV3() returns result=" + to_string(response->error()) +
-            " old_state_root=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
-            " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
-            " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
-            " new_local_exit_root=" + proverRequest.pFullTracer->get_new_local_exit_root() +
-            " old_batch_num=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
-            " steps=" + to_string(proverRequest.counters.steps) +
-            " gasUsed=" + to_string(proverRequest.pFullTracer->get_gas_used()) +
-            " counters.keccakF=" + to_string(proverRequest.counters.keccakF) +
-            " counters.poseidonG=" + to_string(proverRequest.counters.poseidonG) +
-            " counters.paddingPG=" + to_string(proverRequest.counters.paddingPG) +
-            " counters.memAlign=" + to_string(proverRequest.counters.memAlign) +
-            " counters.arith=" + to_string(proverRequest.counters.arith) +
-            " counters.binary=" + to_string(proverRequest.counters.binary) +
-            " counters.sha256F=" + to_string(proverRequest.counters.sha256F) +
-            " flush_id=" + to_string(proverRequest.flushId) +
-            " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId);
+            " new_blob_state_root=" + ba2string(response->new_blob_state_root()) +
+            " new_blob_acc_input_hash=" + ba2string(response->new_blob_acc_input_hash()) +
+            " new_num_blob=" + to_string(response->new_num_blob()) +
+            " final_acc_batch_hash_data=" + ba2string(response->final_acc_batch_hash_data()) +
+            " local_exit_root_from_blob=" + ba2string(response->local_exit_root_from_blob()) +
+            " is_invalid=" + to_string(response->is_invalid()) +
+            " batch_data.size=" + to_string(response->batch_data_size());
         zklog.info(s, &proverRequest.tags);
     }
 #endif

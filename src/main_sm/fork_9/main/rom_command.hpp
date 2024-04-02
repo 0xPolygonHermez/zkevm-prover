@@ -71,12 +71,6 @@ typedef enum : int {
     f_fp2InvBN254_x,
     f_fp2InvBN254_y,
     f_fpBN254inv,
-    f_getBatchHashData,
-    f_getType,
-    f_getForcedGER,
-    f_getForcedTimestamp,
-    f_getL1HistoricRoot,
-    f_getPendingRID,
 } tFunction;
 
 // ROM command (op)
@@ -135,9 +129,7 @@ typedef enum : int {
     reg_CNT_PADDING_PG,
     reg_CNT_POSEIDON_G,
     reg_STEP,
-    reg_HASHPOS,
-    reg_RCX,
-    reg_RID
+    reg_HASHPOS
 } tReg;
 
 // Contains a ROM command data, and arrays possibly containing other ROM commands data

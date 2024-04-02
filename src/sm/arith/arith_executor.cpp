@@ -524,6 +524,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                     case 8:  eq[eqIndex] = eq8(fr, pols, step, offset); break;
                     case 9:  eq[eqIndex] = eq9(fr, pols, step, offset); break;
                     case 10: eq[eqIndex] = eq10(fr, pols, step, offset); break;
+                    case 11: eq[eqIndex] = eq11(fr, pols, step, offset); break;
                     default:
                         zklog.error("ArithExecutor::execute() invalid eqIndex=" + to_string(eqIndex));
                         exitProcess();

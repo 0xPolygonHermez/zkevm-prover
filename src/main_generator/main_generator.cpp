@@ -1889,6 +1889,15 @@ code += "    #endif\n";
                     nHits++;
                 }
 
+                if (forkID >= 10)
+                {
+                    // TODO: HashKLen free in
+                    if (rom["program"][zkPC].contains("hashKLen") && (rom["program"][zkPC]["hashKLen"] == 1)) 
+                    {
+                        nHits++;
+                    }
+                }
+
                 // HashP free in
                 if ( (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1)) ||
                      (rom["program"][zkPC].contains("hashP1") && (rom["program"][zkPC]["hashP1"] == 1)) )
@@ -1981,6 +1990,15 @@ code += "    #endif\n";
                     code += "    // Copy digest into fi\n";
                     code += "    scalar2fea(fr, hashIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
                     nHits++;
+                }
+
+                if (forkID >= 10)
+                {
+                    // TODO: HashPLen free in
+                    if (rom["program"][zkPC].contains("hashPLen") && (rom["program"][zkPC]["hashPLen"] == 1)) 
+                    {
+                        nHits++;
+                    }
                 }
 
                 if (forkID >= 7)
@@ -2092,6 +2110,16 @@ code += "    #endif\n";
                 }
 
                 }
+
+                if (forkID >= 10)
+                {
+                    // TODO: HashSLen free in
+                    if (rom["program"][zkPC].contains("hashSLen") && (rom["program"][zkPC]["hashSLen"] == 1)) 
+                    {
+                        nHits++;
+                    }
+                }
+
 
                 // Binary free in
                 if (rom["program"][zkPC].contains("bin") && (rom["program"][zkPC]["bin"] == 1))

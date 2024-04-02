@@ -4,11 +4,8 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
-StarkInfo::StarkInfo(const Config &config, string file) : config(config)
+StarkInfo::StarkInfo(string file)
 {
-    // Avoid initialization if we are not going to generate any proof
-    if (!config.generateProof())
-        return;
 
     // Load contents from json file
     TimerStart(STARK_INFO_LOAD);
@@ -43,6 +40,14 @@ void StarkInfo::load(json j)
     qDim = j["qDim"];
     qDeg = j["qDeg"];
 
+    if(starkStruct.verificationHashType == "BN128") {
+        if(j.contains("merkleTreeArity")) {
+            merkleTreeArity = j["merkleTreeArity"]; 
+        } else {
+            merkleTreeArity = 16;
+        }
+    }
+    
     mapDeg.section[cm1_n] = j["mapDeg"]["cm1_n"];
     mapDeg.section[cm2_n] = j["mapDeg"]["cm2_n"];
     mapDeg.section[cm3_n] = j["mapDeg"]["cm3_n"];

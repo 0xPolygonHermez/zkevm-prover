@@ -160,6 +160,9 @@ public:
     {
         return finalTrace.invalid_batch;
     }
+
+    FinalTraceBlob emptyTraceBlob;
+    FinalTraceBlob & get_final_trace_blob(void) { return emptyTraceBlob; };
 };
 
 void getTransactionHash( string    &to,

@@ -13,6 +13,8 @@
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_9/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_9/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_10/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_10/main_exec_generated/main_exec_generated_fast.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
 
@@ -306,6 +308,38 @@ void Executor::processBatch (ProverRequest &proverRequest)
             }
             return;
         }
+        case 10: // fork_10
+        {
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+            if (config.useMainExecGenerated)
+            {
+                //zklog.info("Executor::processBatch() fork 10 generated");
+                fork_10::main_exec_generated_fast(mainExecutor_fork_10, proverRequest);
+            }
+            else
+#endif
+            {
+                //zklog.info("Executor::processBatch() fork 10 native");
+
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_10::CommitPols::pilSize()) + ")");
+                    exitProcess();
+                }
+                fork_10::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_10::MainExecRequired required;
+
+                mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
         default:
         {
             zklog.error("Executor::processBatch() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
@@ -321,24 +355,24 @@ void Executor::processBlobInner (ProverRequest &proverRequest)
     // Execute the Main State Machine
     switch (proverRequest.input.publicInputsExtended.publicInputs.forkID)
     {
-        case 9: // fork_9
+        case 10: // fork_10
         {
             {
-                //zklog.info("Executor::processBlobInner() fork 9 native");
+                //zklog.info("Executor::processBlobInner() fork 10 native");
 
                 // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_9::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                void * pAddress = calloc(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
                     zklog.error("Executor::processBlobInner() failed calling calloc(" + to_string(fork_9::CommitPols::pilSize()) + ")");
                     exitProcess();
                 }
-                fork_9::CommitPols commitPols(pAddress,1);
+                fork_10::CommitPols commitPols(pAddress,1);
 
                 // This instance will store all data required to execute the rest of State Machines
-                fork_9::MainExecRequired required;
+                fork_10::MainExecRequired required;
 
-                mainExecutor_fork_9_blob.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_10_blob.execute(proverRequest, commitPols.Main, required);
 
                 // Free committed polynomials address space
                 free(pAddress);
@@ -542,7 +576,7 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
             else
 #endif
             {
-                mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);
             }
 
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -664,7 +698,7 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
         else
 #endif
         {
-            mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);
         }
 
         // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -748,14 +782,14 @@ void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_FORK_NAMES
     if (!config.executeInParallel)
     {
         // This instance will store all data required to execute the rest of State Machines
-        fork_9::MainExecRequired required;
+        fork_10::MainExecRequired required;
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (proverRequest.input.publicInputsExtended.publicInputs.forkID == PROVER_FORK_ID)
         {
             // Call the main executor
-            mainExecutor_fork_9_blob.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_10_blob.execute(proverRequest, commitPols.Main, required);
 
             // Save input to <timestamp>.input.json after execution including dbReadLog
             if (config.saveDbReadsToFile)
@@ -860,7 +894,7 @@ void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_FORK_NAMES
     else
     {
         // This instance will store all data required to execute the rest of State Machines
-        fork_9::MainExecRequired required;
+        fork_10::MainExecRequired required;
         ExecutorContext executorContext;
         executorContext.pExecutor = this;
         executorContext.pCommitPols = &commitPols;
@@ -868,7 +902,7 @@ void Executor::executeBlobInner (ProverRequest &proverRequest, PROVER_FORK_NAMES
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
-        mainExecutor_fork_9_blob.execute(proverRequest, commitPols.Main, required);
+        mainExecutor_fork_10_blob.execute(proverRequest, commitPols.Main, required);
 
         // Save input to <timestamp>.input.json after execution including dbReadLog
         if (config.saveDbReadsToFile)

@@ -212,6 +212,7 @@ void Config::load(json &config)
     ParseU64(config, "aggregatorClientMockTimeout", "AGGREGATOR_CLIENT_MOCK_TIMEOUT", aggregatorClientMockTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientWatchdogTimeout", "AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT", aggregatorClientWatchdogTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientMaxStreams", "AGGREGATOR_CLIENT_MAX_STREAMS", aggregatorClientMaxStreams, 0);
+    ParseU64(config, "aggregatorClientMaxRecvMsgSize", "AGGREGATOR_CLIENT_MAX_RECV_MSG_SIZE", aggregatorClientMaxRecvMsgSize, 1024*1024*1024);
 
     // Logs
     ParseBool(config, "executorROMLineTraces", "EXECUTOR_ROM_LINE_TRACES", executorROMLineTraces, false);
@@ -250,6 +251,16 @@ void Config::load(json &config)
     ParseString(config, "blobOuterCHelpers", "BLOB_OUTER_CHELPERS", blobOuterCHelpers, configPath + "/blob_outer/blob_outer.chelpers.bin");
     ParseString(config, "blobOuterRecursive2CHelpers", "BLOB_OUTER_RECURSIVE2_CHELPERS", blobOuterRecursive2CHelpers, configPath + "/blob_outer_recursive2/blob_outer_recursive2.chelpers.bin");
     ParseString(config, "recursivefCHelpers", "RECURSIVEF_CHELPERS", recursivefCHelpers, configPath + "/recursivef/recursivef.chelpers.bin");
+    ParseString(config, "zkevmGenericCHelpers", "ZKEVM_GENERIC_CHELPERS", zkevmGenericCHelpers, configPath + "/zkevm/zkevm.chelpers_generic.bin");
+    ParseString(config, "c12aGenericCHelpers", "C12A_GENERIC_CHELPERS", c12aGenericCHelpers, configPath + "/c12a/c12a.chelpers_generic.bin");
+    ParseString(config, "recursive1GenericCHelpers", "RECURSIVE1_GENERIC_CHELPERS", recursive1GenericCHelpers, configPath + "/recursive1/recursive1.chelpers_generic.bin");
+    ParseString(config, "recursive2GenericCHelpers", "RECURSIVE2_GENERIC_CHELPERS", recursive2GenericCHelpers, configPath + "/recursive2/recursive2.chelpers_generic.bin");
+    ParseString(config, "blobInnerGenericCHelpers", "BLOB_INNER_GENERIC_CHELPERS", blobInnerGenericCHelpers, configPath + "/blob_inner/blob_inner.chelpers_generic.bin");
+    ParseString(config, "blobInnerCompressorGenericCHelpers", "BLOB_INNER_COMPRESSOR_GENERIC_CHELPERS", blobInnerCompressorGenericCHelpers, configPath + "/blob_inner_compressor/blob_inner_compressor.chelpers_generic.bin");
+    ParseString(config, "blobInnerRecursive1GenericCHelpers", "BLOB_INNER_RECURSIVE1_GENERIC_CHELPERS", blobInnerRecursive1GenericCHelpers, configPath + "/blob_inner_recursive1/blob_inner_recursive1.chelpers_generic.bin");
+    ParseString(config, "blobOuterGenericCHelpers", "BLOB_OUTER_GENERIC_CHELPERS", blobOuterGenericCHelpers, configPath + "/blob_outer/blob_outer.chelpers_generic.bin");
+    ParseString(config, "blobOuterRecursive2GenericCHelpers", "BLOB_OUTER_RECURSIVE2_GENERIC_CHELPERS", blobOuterRecursive2GenericCHelpers, configPath + "/blob_outer_recursive2/blob_outer_recursive2.chelpers_generic.bin");
+    ParseString(config, "recursivefGenericCHelpers", "RECURSIVEF_GENERIC_CHELPERS", recursivefGenericCHelpers, configPath + "/recursivef/recursivef.chelpers_generic.bin");
     ParseString(config, "c12aConstPols", "C12A_CONST_POLS", c12aConstPols, configPath + "/c12a/c12a.const");
     ParseString(config, "c12aConstantsTree", "C12A_CONSTANTS_TREE", c12aConstantsTree, configPath + "/c12a/c12a.consttree");
     ParseString(config, "c12aExec", "C12A_EXEC", c12aExec, configPath + "/c12a/c12a.exec");
@@ -497,6 +508,7 @@ void Config::print(void)
     zklog.info("    aggregatorClientMockTimeout=" + to_string(aggregatorClientMockTimeout));
     zklog.info("    aggregatorClientWatchdogTimeout=" + to_string(aggregatorClientWatchdogTimeout));
     zklog.info("    aggregatorClientMaxStreams=" + to_string(aggregatorClientMaxStreams));
+    zklog.info("    aggregatorClientMaxRecvMsgSize=" + to_string(aggregatorClientMaxRecvMsgSize));
 
     zklog.info("    inputFile=" + inputFile);
     zklog.info("    inputFile2=" + inputFile2);
@@ -561,6 +573,16 @@ void Config::print(void)
     zklog.info("    blobInnerRecursive1CHelpers=" + blobInnerRecursive1CHelpers);
     zklog.info("    blobOuterCHelpers=" + blobOuterCHelpers);
     zklog.info("    blobOuterRecursive2CHelpers=" + blobOuterRecursive2CHelpers);
+    zklog.info("    zkevmGenericCHelpers=" + zkevmGenericCHelpers);
+    zklog.info("    c12aGenericCHelpers=" + c12aGenericCHelpers);
+    zklog.info("    recursive1GenericCHelpers=" + recursive1GenericCHelpers);
+    zklog.info("    recursive2GenericCHelpers=" + recursive2GenericCHelpers);
+    zklog.info("    recursivefGenericCHelpers=" + recursivefGenericCHelpers);
+    zklog.info("    blobInnerGenericCHelpers=" + blobInnerGenericCHelpers);
+    zklog.info("    blobInnerCompressorGenericCHelpers=" + blobInnerCompressorGenericCHelpers);
+    zklog.info("    blobInnerRecursive1GenericCHelpers=" + blobInnerRecursive1GenericCHelpers);
+    zklog.info("    blobOuterGenericCHelpers=" + blobOuterGenericCHelpers);
+    zklog.info("    blobOuterRecursive2GenericCHelpers=" + blobOuterRecursive2GenericCHelpers);
     zklog.info("    publicsOutput=" + publicsOutput);
     zklog.info("    proofFile=" + proofFile);
     zklog.info("    keccakScriptFile=" + keccakScriptFile);
@@ -875,54 +897,104 @@ bool Config::check (void)
             zklog.error("required file config.recursivefStarkInfo=" + recursivefStarkInfo + " does not exist");
             bError = true;
         }
-        if (!fileExists(zkevmCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(zkevmCHelpers))
         {
             zklog.error("required file config.zkevmCHelpers=" + zkevmCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(c12aCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(c12aCHelpers))
         {
             zklog.error("required file config.c12aCHelpers=" + c12aCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive1CHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(recursive1CHelpers))
         {
             zklog.error("required file config.recursive1CHelpers=" + recursive1CHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive2CHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(recursive2CHelpers))
         {
             zklog.error("required file config.recursive2CHelpers=" + recursive2CHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursivefCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(recursivefCHelpers))
         {
             zklog.error("required file config.recursivefCHelpers=" + recursivefCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobInnerCHelpers))
         {
             zklog.error("required file config.blobInnerCHelpers=" + blobInnerCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerCompressorCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobInnerCompressorCHelpers))
         {
             zklog.error("required file config.blobInnerCompressorCHelpers=" + blobInnerCompressorCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobInnerRecursive1CHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobInnerRecursive1CHelpers))
         {
             zklog.error("required file config.blobInnerRecursive1CHelpers=" + blobInnerRecursive1CHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobOuterCHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobOuterCHelpers))
         {
             zklog.error("required file config.blobOuterCHelpers=" + blobOuterCHelpers + " does not exist");
             bError = true;
         }
-        if (!fileExists(blobOuterRecursive2CHelpers))
+        if (!USE_GENERIC_PARSER && !fileExists(blobOuterRecursive2CHelpers))
         {
             zklog.error("required file config.blobOuterRecursive2CHelpers=" + blobOuterRecursive2CHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(zkevmGenericCHelpers))
+        {
+            zklog.error("required file config.zkevmGenericCHelpers=" + zkevmGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(c12aGenericCHelpers))
+        {
+            zklog.error("required file config.c12aGenericCHelpers=" + c12aGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(recursive1GenericCHelpers))
+        {
+            zklog.error("required file config.recursive1GenericCHelpers=" + recursive1GenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(recursive2GenericCHelpers))
+        {
+            zklog.error("required file config.recursive2GenericCHelpers=" + recursive2GenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(recursivefGenericCHelpers))
+        {
+            zklog.error("required file config.recursivefGenericCHelpers=" + recursivefGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(blobInnerGenericCHelpers))
+        {
+            zklog.error("required file config.blobInnerGenericCHelpers=" + blobInnerGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(blobInnerCompressorGenericCHelpers))
+        {
+            zklog.error("required file config.blobInnerCompressorGenericCHelpers=" + blobInnerCompressorGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(blobInnerRecursive1GenericCHelpers))
+        {
+            zklog.error("required file config.blobInnerRecursive1GenericCHelpers=" + blobInnerRecursive1GenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(blobOuterGenericCHelpers))
+        {
+            zklog.error("required file config.blobOuterGenericCHelpers=" + blobOuterGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (USE_GENERIC_PARSER && !fileExists(blobOuterRecursive2GenericCHelpers))
+        {
+            zklog.error("required file config.blobOuterRecursive2GenericCHelpers=" + blobOuterRecursive2GenericCHelpers + " does not exist");
             bError = true;
         }
         if (!fileExists(c12aExec))

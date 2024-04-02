@@ -101,6 +101,7 @@ public:
     uint64_t aggregatorClientMockTimeout;
     uint64_t aggregatorClientWatchdogTimeout;
     uint64_t aggregatorClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
+    uint64_t aggregatorClientMaxRecvMsgSize; // Max received message size, in bytes
 
     // Executor debugging
     bool executorROMLineTraces;
@@ -218,7 +219,17 @@ public:
     string blobInnerRecursive1CHelpers;
     string blobOuterCHelpers;
     string blobOuterRecursive2CHelpers;
-    
+
+    string zkevmGenericCHelpers;
+    string c12aGenericCHelpers;
+    string recursive1GenericCHelpers;
+    string recursive2GenericCHelpers;
+    string recursivefGenericCHelpers;
+    string blobInnerGenericCHelpers;
+    string blobInnerCompressorGenericCHelpers;
+    string blobInnerRecursive1GenericCHelpers;
+    string blobOuterGenericCHelpers;
+    string blobOuterRecursive2GenericCHelpers;
 
     // Database
     string databaseURL;
