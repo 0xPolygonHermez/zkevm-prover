@@ -12,8 +12,5 @@
     "RUST_LOG": "trace"
   },
   "Program":"./build/zkProver",
-  "Files": ["config/scripts/keccak_script.json"],
-  "Mounts": {
-    "%1": "/workspace"
-  }
+  "Files": ["config/scripts/keccak_script.json"]
 }
