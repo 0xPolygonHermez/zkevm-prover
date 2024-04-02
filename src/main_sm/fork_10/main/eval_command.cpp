@@ -1150,8 +1150,30 @@ void eval_if (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_getMemValue (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_getMemValue() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get m0 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getMemValue() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t addr = cr.scalar.get_ui();
     cr.type = crt_scalar;
-    uint64_t addr = cmd.offset;
     if (cmd.useCTX == 1)
     {
         addr += ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
@@ -1934,7 +1956,7 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         _len = 64 - offset;
     }
-    mpz_class maskV = ScalarMask256 >> (32 - _len);
+    mpz_class maskV = ScalarMask256 >> (8 * (32 - _len));
     uint64_t shiftBits = (64 - offset - _len) * 8;
 
     if (leftAlignment && _len < 32) 
@@ -2029,7 +2051,7 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         _len = 64 - offset;
     }
-    mpz_class maskV = ScalarMask256 >> (32 - _len);
+    mpz_class maskV = ScalarMask256 >> (8 * (32 - _len));
     uint64_t shiftBits = (64 - offset - _len) * 8;
 
     if (leftAlignment && _len < 32) 
@@ -2125,7 +2147,7 @@ void eval_memAlignRD (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         _len = 64 - offset;
     }
     mpz_class m = (m0 << 256) | m1;
-    mpz_class maskV = ScalarMask256 >> (32 - _len);
+    mpz_class maskV = ScalarMask256 >> (8 * (32 - _len));
     uint64_t shiftBits = (64 - offset - _len) * 8;
     if (shiftBits > 0) 
     {

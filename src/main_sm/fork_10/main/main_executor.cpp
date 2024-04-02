@@ -2149,7 +2149,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         _len = 64 - offset;
                     }
                     mpz_class m = (m0 << 256) | m1;
-                    mpz_class maskV = ScalarMask256 >> (32 - _len);
+                    mpz_class maskV = ScalarMask256 >> (8 *(32 - _len));
                     uint64_t shiftBits = (64 - offset - _len) * 8;
                     if (shiftBits > 0) 
                     {
@@ -4949,7 +4949,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 _len = 64 - offset;
             }
             mpz_class m = (m0 << 256) | m1;
-            mpz_class maskV = ScalarMask256 >> (32 - _len);
+            mpz_class maskV = ScalarMask256 >> (8 * (32 - _len));
             uint64_t shiftBits = (64 - offset - _len) * 8;
 
             if (rom.line[zkPC].memAlignRD==0 && rom.line[zkPC].memAlignWR==1)
@@ -5036,7 +5036,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     _v = _tmpv;
                 }
-            if (leftAlignment && _len < 32) 
+                if (leftAlignment && _len < 32) 
                 {
                     _v = _v << ((32 - len) * 8);
                 }
@@ -5047,7 +5047,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
-
+#ifdef USE_REQUIRED
                 if (!bProcessBatch)
                 {
                     MemAlignAction memAlignAction;
@@ -5060,6 +5060,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memAlignAction.wr = 0;
                     required.MemAlign.push_back(memAlignAction);
                 }
+#endif
             }
             else
             {

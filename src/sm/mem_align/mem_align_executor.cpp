@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "zklog.hpp"
+#include "stdio.h"
 
 uint8_t getByte (mpz_class value, uint8_t index) {
     mpz_class r = (value >> (8 * index)) & 0xFF;
@@ -17,13 +18,13 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
         exitProcess();
     }
 
-    uint64_t factors[4] = { 2 << 24, 2 << 16, 2 << 8, 1};
+    uint64_t factors[4] = { 1 << 24, 1 << 16, 1 << 8, 1};
     for (uint64_t i=0; i<input.size(); i++) 
     {
         mpz_class m0v = input[i].m0;
         mpz_class m1v = input[i].m1;
         mpz_class v = input[i].v;
-        uint8_t mode = input[i].mode;
+        uint64_t mode = input[i].mode;
         uint8_t wr = input[i].wr;
         uint8_t offset = mode & 0x7F;
         uint8_t len = (mode >> 7) & 0x3F;
@@ -101,6 +102,7 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
             pols.m0[mIndex][curIndex] = fr.fromU64(fr.toU64(pols.m0[mIndex][curIndex]) + inM0 * factor);
             pols.m1[mIndex][curIndex] = fr.fromU64(fr.toU64(pols.m1[mIndex][curIndex]) + inM1 * factor);
             pols.v[mIndex][curIndex]  = fr.fromU64(fr.toU64(pols.v[mIndex][curIndex]) + inV_V * factor);
+            // std::cout << "m0[" << (int)mIndex << "][" << curIndex << "]=" << std::hex << fr.toU64(pols.m0[mIndex][curIndex]) << " inM0=" << (int)inM0 << " factor=" << factor << "\n";
 
             uint8_t inW0 = selM0 ? inV_M : inM0;
             uint8_t inW1 = selM1 ? inV_M : inM1;
