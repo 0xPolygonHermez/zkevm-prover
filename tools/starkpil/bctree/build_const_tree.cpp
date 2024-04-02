@@ -75,7 +75,7 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
     } else if(starkInfo.starkStruct.verificationHashType == "BN128"){
         TimerStart(MERKELIZE_CONST_TREE);
         RawFr::Element rootC;
-        MerkleTreeBN128 mt(starkInfo.merkleTreeArity, starkInfo.merkleTreeCustom, NExtended, nPols, pConstPolsExt);
+        MerkleTreeBN128 mt(starkInfo.starkStruct.merkleTreeArity, starkInfo.starkStruct.merkleTreeCustom, NExtended, nPols, pConstPolsExt);
         mt.merkelize();
         mt.getRoot(&rootC);
         TimerStopAndLog(MERKELIZE_CONST_TREE);

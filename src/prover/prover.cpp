@@ -27,7 +27,7 @@
 #include "C12aSteps.hpp"
 #include "Recursive1Steps.hpp"
 #include "Recursive2Steps.hpp"
-#include "StarkRecursiveFSteps.hpp"
+#include "RecursiveFSteps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
@@ -921,7 +921,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
         CHelpersSteps cHelpersSteps;
         starksRecursiveF->genProof(fproofRecursiveF, publics, &cHelpersSteps);
     } else {
-        StarkRecursiveFSteps recursiveFChelpersSteps;
+        RecursiveFSteps recursiveFChelpersSteps;
         starksRecursiveF->genProof(fproofRecursiveF, publics, &recursiveFChelpersSteps);
     }
 

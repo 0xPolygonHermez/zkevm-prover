@@ -70,8 +70,6 @@ private:
     MerkleTreeType **treesGL;
     MerkleTreeType **treesFRI;
 
-    vector<int64_t> cm2Transposed;
-
     vector<bool> publicsCalculated;
     vector<bool> constsCalculated;
     vector<bool> subProofValuesCalculated;
@@ -245,6 +243,11 @@ public:
         TimerStopAndLog(CHELPERS_ALLOCATION);
 
         constsCalculated.resize(starkInfo.nConstants, true);
+
+        publicsCalculated.resize(starkInfo.nPublics, false);
+        subProofValuesCalculated.resize(starkInfo.nSubProofValues, false);
+        challengesCalculated.resize(starkInfo.challengesMap.size(), false);
+        witnessCalculated.resize(starkInfo.cmPolsMap.size(), false);
         
         uint64_t currentSectionStart = starkInfo.mapOffsets[std::make_pair("cm" + to_string(starkInfo.nStages), false)] * sizeof(Goldilocks::Element);
         uint64_t nttHelperSize = starkInfo.mapSectionsN["cm" + to_string(starkInfo.nStages)] * NExtended * sizeof(Goldilocks::Element);
@@ -365,8 +368,8 @@ private:
 
     bool canExpressionBeCalculated(ParserParams &parserParams);
 
-    void transposePolsColumns(StepsParams& params, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
-    void transposePolsRows(StepsParams& params, Polinomial *transPols, Hint hint);
+    void transposePolsColumns(StepsParams& params, vector<int64_t> cm2Transposed, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
+    void transposePolsRows(StepsParams& params, vector<int64_t> cm2Transposed, Polinomial *transPols, Hint hint);
 
     std::vector<string> getSrcFields(std::string hintName);
     std::vector<string> getDstFields(std::string hintName);
@@ -378,6 +381,7 @@ private:
     uint64_t isStageCalculated(uint64_t step);
     bool isSymbolCalculated(opType operand, uint64_t id);
     void setSymbolCalculated(opType operand, uint64_t id);
+    void cleanSymbolsCalculated();
 
 public:
     // Following function are created to be used by the ffi interface

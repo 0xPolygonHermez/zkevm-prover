@@ -11,6 +11,8 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 {
     TimerStart(STARK_PROOF);
 
+    cleanSymbolsCalculated();
+
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
@@ -38,13 +40,6 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         f_2ns : &mem[starkInfo.mapOffsets[std::make_pair("f", true)]]
     };
 
-    cm2Transposed.resize(starkInfo.cmPolsMap.size(), -1);
-    publicsCalculated.resize(starkInfo.nPublics, true);
-
-    subProofValuesCalculated.resize(starkInfo.nSubProofValues, false);
-    challengesCalculated.resize(starkInfo.challengesMap.size(), false);
-
-    witnessCalculated.resize(starkInfo.cmPolsMap.size(), false);
     for (uint64_t i = 0; i < starkInfo.mapSectionsN["cm1"]; ++i)
     {
         setSymbolCalculated(opType::cm, i);
@@ -548,7 +543,7 @@ bool Starks<ElementType>::canExpressionBeCalculated(ParserParams &parserParams) 
 }
 
 template <typename ElementType>
-void Starks<ElementType>::transposePolsColumns(StepsParams &params, Polinomial *transPols, Hint hint, Goldilocks::Element *pBuffer)
+void Starks<ElementType>::transposePolsColumns(StepsParams &params, vector<int64_t> cm2Transposed, Polinomial *transPols, Hint hint, Goldilocks::Element *pBuffer)
 {
     u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8;
 
@@ -569,6 +564,11 @@ void Starks<ElementType>::transposePolsColumns(StepsParams &params, Polinomial *
         {
             uint64_t id = hintField.id;
             Polinomial p = starkInfo.getPolinomial(params.pols, id, N);
+            if(cm2Transposed[id] == -1) {
+                zklog.error("Something went wrong");
+                exitProcess();
+                exit(-1);
+            }
             uint64_t indx = cm2Transposed[id];
             transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
             Polinomial::copy(transPols[indx], p);
@@ -589,6 +589,11 @@ void Starks<ElementType>::transposePolsColumns(StepsParams &params, Polinomial *
         {
             uint64_t id = hintField.id;
             Polinomial p = starkInfo.getPolinomial(params.pols, id, N);
+            if(cm2Transposed[id] == -1) {
+                zklog.error("Something went wrong");
+                exitProcess();
+                exit(-1);
+            }
             uint64_t indx = cm2Transposed[id];
             transPols[indx].potConstruct(&(pBuffer[indx * stride_pol_]), p.degree(), p.dim(), p.dim());
         }
@@ -596,7 +601,7 @@ void Starks<ElementType>::transposePolsColumns(StepsParams &params, Polinomial *
 }
 
 template <typename ElementType>
-void Starks<ElementType>::transposePolsRows(StepsParams &params, Polinomial *transPols, Hint hint)
+void Starks<ElementType>::transposePolsRows(StepsParams &params, vector<int64_t> cm2Transposed, Polinomial *transPols, Hint hint)
 {
     vector<string> dstFields = getDstFields(hint.name);
 
@@ -710,6 +715,7 @@ std::vector<string> Starks<ElementType>::getDstFields(std::string hintName)
 template <typename ElementType>
 void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vector<Hint> &hints)
 {
+    vector<int64_t> cm2Transposed(starkInfo.cmPolsMap.size(), -1);
 
     vector<Hint> hintsToCalculate;
 
@@ -764,7 +770,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vec
     TimerStartExpr(STARK_CALCULATE_TRANSPOSE_STEP, step);
     for (uint64_t i = 0; i < hintsToCalculate.size(); ++i)
     {
-        transposePolsColumns(params, transPols, hintsToCalculate[i], pBuffer);
+        transposePolsColumns(params, cm2Transposed, transPols, hintsToCalculate[i], pBuffer);
     }
     TimerStopAndLogExpr(STARK_CALCULATE_TRANSPOSE_STEP, step);
 
@@ -843,8 +849,8 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vec
             else if (hint.name == "subproofValue")
             {
             }
-            else
-            {
+            else if (hint.name != "public")
+            {           
                 zklog.error("Invalid hint type=" + hint.name);
                 exitProcess();
                 exit(-1);
@@ -857,7 +863,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vec
     for (uint64_t i = 0; i < hintsToCalculate.size(); ++i)
     {
         Hint hint = hintsToCalculate[i];
-        transposePolsRows(params, transPols, hint);
+        transposePolsRows(params, cm2Transposed, transPols, hint);
     }
     TimerStopAndLogExpr(STARK_CALCULATE_TRANSPOSE_2_STEP, step);
 
@@ -983,6 +989,25 @@ void Starks<ElementType>::evmap(StepsParams &params, Polinomial &LEv)
         free(evals_acc[i]);
     }
     free(evals_acc);
+}
+
+template <typename ElementType>
+void Starks<ElementType>::cleanSymbolsCalculated() {
+    for(uint64_t i = 0; i < starkInfo.nPublics; ++i) {
+        publicsCalculated[i] = false;
+    }
+
+    for(uint64_t i = 0; i < starkInfo.nSubProofValues; ++i) {
+        subProofValuesCalculated[i] = false;
+    }
+
+    for(uint64_t i = 0; i < starkInfo.challengesMap.size(); ++i) {
+        challengesCalculated[i] = false;
+    }
+
+    for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); ++i) {
+        witnessCalculated[i] = false;
+    }
 }
 
 template <typename ElementType>
