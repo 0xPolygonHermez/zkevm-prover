@@ -322,11 +322,13 @@ int run_main(char *pConfigFile)
     zklog.info("Config file: " + configFileName);
 
     // Print the number of cores
+    printf("gevulot: getNumberOfCores");
     zklog.info("Number of cores=" + to_string(getNumberOfCores()));
+    printf("gevulot: done getNumberOfCores");
 
     // Print the hostname and the IP address
-    string ipAddress;
-    getIPAddress(ipAddress);
+    string ipAddress = "mock IP address!";
+    // getIPAddress(ipAddress);
     zklog.info("IP address=" + ipAddress);
 
 #ifdef DEBUG
@@ -854,10 +856,12 @@ void* run_gevulot(const struct Task* task) {
         files++;
     }
     args = (char**)task->args;
+    printf("run_gevulot: A\n");
     if (strcmp(args[0],"-c") != 0) {
         printf("incorrect first arg, should be -c. Exiting");
         return new_task_result(NULL, 0);
     }
+    printf("run_gevulot: B\n");
     run_main(args[1]);
 
     printf("run_gevulot: Done with the task.\n");
