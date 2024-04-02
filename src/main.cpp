@@ -323,7 +323,7 @@ int run_main(char *pConfigFile)
 
     // Print the number of cores
     printf("gevulot: getNumberOfCores");
-    // zklog.info("Number of cores=" + to_string(getNumberOfCores()));
+    zklog.info("Number of cores=" + to_string(getNumberOfCores()));
     printf("gevulot: done getNumberOfCores");
 
     // Print the hostname and the IP address
