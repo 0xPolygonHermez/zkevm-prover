@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/time.h>
+#include <dirent.h>
 #include "goldilocks_base_field.hpp"
 #include "utils.hpp"
 #include "config.hpp"
@@ -298,11 +299,14 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
 
 int run_main(char *pConfigFile)
 {
+    zklog.info("gevulot: run_main");
 
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
     file2json(pConfigFile, configJson);
-    config.load(configJson);
+    zklog.info("gevulot: start load config");
+   config.load(configJson);
+    zklog.info("gevulot: end load config");
     zklog.setJsonLogs(config.jsonLogs);
     zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
 
@@ -862,6 +866,48 @@ void* run_gevulot(const struct Task* task) {
 }
 
 
+// int printDirContents(const char *name) {
+//   DIR *d;
+//   struct dirent *dir;
+//   printf("printDirContents for %s\n", name);
+//   d = opendir(name);
+//   if (d) {
+//     while ((dir = readdir(d)) != NULL) {
+//       printf("  %s\n", dir->d_name);
+//     }
+//     closedir(d);
+//   }
+//   return(0);
+// }
+
+#define NORMAL_COLOR  "\x1B[0m"
+#define GREEN  "\x1B[32m"
+#define BLUE  "\x1B[34m"
+
+void show_dir_content(char * path)
+{
+  printf("%show_dir_content for %s\n", NORMAL_COLOR, path);
+
+    DIR * d = opendir(path); // open the path
+  if(d==NULL) return; // if was not able, return
+  struct dirent * dir; // for the directory entries
+  while ((dir = readdir(d)) != NULL) // if we were able to read somehting from the directory
+    {
+      if(dir-> d_type != DT_DIR) // if the type is not directory just print it with blue color
+        printf("%s%s\n",BLUE, dir->d_name);
+      else
+      if(dir -> d_type == DT_DIR && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) // if it is a directory
+      {
+        printf("%s%s\n",GREEN, dir->d_name); // print its name in green
+        char d_path[255]; // here I am using sprintf which is safer than strcat
+        sprintf(d_path, "%s/%s", path, dir->d_name);
+        show_dir_content(d_path); // recall with the new path
+      }
+    }
+    closedir(d); // finally close the directory
+  printf("%s\n", NORMAL_COLOR);
+}
+
 int main(int argc, char **argv)
 {
     printf("zkProver main(): argc %d\n", argc);
@@ -870,9 +916,13 @@ int main(int argc, char **argv)
     {
         printf("    %d, %s\n", i, argv[i]);
     }
+    show_dir_content(".");
+    show_dir_content("/workspace");
+    show_dir_content("/config");
 
     if (argc == 1) 
     {
+        zklog.info("gevulot: run_main");
         // Do gevulot proof
         run(run_gevulot);
         printf("run_gevulot finished. Terminating...\n");
