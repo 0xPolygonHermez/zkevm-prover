@@ -1933,7 +1933,7 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         _len = 64 - offset;
     }
-    mpz_class maskV = ScalarMask256 >> (32 - _len);
+    mpz_class maskV = ScalarMask256 >> (8 * (32 - _len));
     uint64_t shiftBits = (64 - offset - _len) * 8;
 
     if (leftAlignment && _len < 32) 
@@ -2028,7 +2028,7 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         _len = 64 - offset;
     }
-    mpz_class maskV = ScalarMask256 >> (32 - _len);
+    mpz_class maskV = ScalarMask256 >> (8 * (32 - _len));
     uint64_t shiftBits = (64 - offset - _len) * 8;
 
     if (leftAlignment && _len < 32) 
@@ -2124,7 +2124,7 @@ void eval_memAlignRD (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         _len = 64 - offset;
     }
     mpz_class m = (m0 << 256) | m1;
-    mpz_class maskV = ScalarMask256 >> (32 - _len);
+    mpz_class maskV = ScalarMask256 >> (8 * (32 - _len));
     uint64_t shiftBits = (64 - offset - _len) * 8;
     if (shiftBits > 0) 
     {
