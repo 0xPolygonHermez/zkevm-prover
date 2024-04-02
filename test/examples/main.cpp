@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
-#include "AllPil2Steps.hpp"
-#include "AllC18Pil2Steps.hpp"
+#include "AllSteps.hpp"
+#include "AllC18Steps.hpp"
 
 
 int main(int argc, char **argv)
@@ -62,14 +62,14 @@ int main(int argc, char **argv)
    
     StarkInfo starkInfo(starkInfoFile);
 
-    void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
-    void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN.section[eSection::cm3_n] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
+    void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+    void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN["cm3"] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
 
     uint64_t N = (1 << starkInfo.starkStruct.nBits);
     #pragma omp parallel for
     for (uint64_t i = 0; i < N; i += 1)
     {
-        std::memcpy((uint8_t*)pAddress + i*starkInfo.nCm1*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.nCm1*sizeof(Goldilocks::Element), starkInfo.nCm1*sizeof(Goldilocks::Element));
+        std::memcpy((uint8_t*)pAddress + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
     }
 
 
@@ -97,8 +97,8 @@ int main(int argc, char **argv)
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
         } else {
-            AllPil2Steps allPil2Steps;
-            starks.genProof(fproof, &publicInputs[0], &allPil2Steps);
+            AllSteps allSteps;
+            starks.genProof(fproof, &publicInputs[0], &allSteps);
         }
         jProof = fproof.proofs.proof2json();
     } else if(testName == "compressor") {
@@ -109,8 +109,8 @@ int main(int argc, char **argv)
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
         } else {
-            AllC18Pil2Steps allC18Pil2Steps;
-            starks.genProof(fproof, &publicInputs[0], &allC18Pil2Steps);
+            AllC18Steps allC18Steps;
+            starks.genProof(fproof, &publicInputs[0], &allC18Steps);
         }
         jProof = fproof.proofs.proof2json();
     }

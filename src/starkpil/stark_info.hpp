@@ -54,31 +54,7 @@ typedef enum
 
 opType string2opType (const string s);
 
-typedef enum
-{
-    cm1_n = 0,
-    cm1_2ns = 1,
-    cm2_n = 2,
-    cm2_2ns = 3,
-    cm3_n = 4,
-    cm3_2ns = 5,
-    cm4_n = 6,
-    cm4_2ns = 7,
-    tmpExp_n = 8,
-    q_2ns = 9,
-    f_2ns = 10,
-    eSectionMax = 11
-} eSection;
-
-eSection string2section (const string s);
-
-class PolsSections
-{
-public:
-    uint64_t section[eSectionMax];
-};
-
-class CmPolMap
+class PolMap
 {
 public:
     std::string stage;
@@ -89,31 +65,6 @@ public:
     uint64_t stagePos;
     uint64_t stageId;
 };
-
-class Symbol 
-{
-public:
-    opType op;
-    uint64_t stage;
-    uint64_t stageId;
-    uint64_t id;
-    uint64_t value;
-
-    void setSymbol(json j) {
-        op = string2opType(j["op"]);
-        if(j.contains("stage")) stage = j["stage"];
-        if(j.contains("stageId")) stageId = j["stageId"];
-        if(j.contains("id")) id = j["id"];
-        if(j.contains("value")) value = j["value"];
-    };
-
-    void setSymbol(uint64_t stage_, uint64_t id_) {
-        op = string2opType("cm");
-        stage = stage_;
-        id = id_;
-    };
-};
-
 
 class EvMap
 {
@@ -144,8 +95,6 @@ public:
 
 class StarkInfo
 {
-private:
-    Symbol setSymbol(json j);
 public:
     StarkStruct starkStruct;
 
@@ -159,44 +108,35 @@ public:
     bool hashCommits;
 
     uint64_t nPublics;
+    uint64_t nSubProofValues;
     uint64_t nConstants;
-    uint64_t nCm1;
 
     uint64_t nStages;
 
-    vector<uint64_t> numChallenges;
+    vector<PolMap> cmPolsMap;
+    vector<PolMap> challengesMap;
+    vector<EvMap> evMap;
     
-    vector<uint64_t> stageChallengeIndex;
-    uint64_t qChallengeIndex;
-    uint64_t xiChallengeIndex;
-    uint64_t fri1ChallengeIndex;
-    uint64_t fri2ChallengeIndex;
-
-    uint64_t nChallenges;
-    uint64_t nSubProofValues;
 
     vector<uint64_t> openingPoints;
-    
     vector<Boundary> boundaries;
 
     uint64_t qDeg;
     uint64_t qDim;
-    vector<uint64_t> qs;
+    uint64_t xiChallengeIndex;
+
+    std::map<std::string, uint64_t> mapSectionsN;
+    std::map<std::pair<std::string, bool>, uint64_t> mapOffsets;
 
     uint64_t mapTotalN;
-    PolsSections mapSectionsN;
-    PolsSections mapOffsets;
-
-    vector<CmPolMap> cmPolsMap;
-    vector<vector<Symbol>> symbolsStage;
-    
-    vector<EvMap> evMap;
     
     /* Constructor */
     StarkInfo(string file);
 
     /* Loads data from a json object */
     void load (json j);
+
+    void setMapOffsets(bool optimizeCommitStage1Pols);
 
     /* Returns a polynomial specified by its ID */
     Polinomial getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg);

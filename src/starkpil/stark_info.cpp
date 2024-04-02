@@ -30,7 +30,9 @@ void StarkInfo::load(json j)
 
     nPublics = j["nPublics"];
     nConstants = j["nConstants"];
-    nCm1 = j["nCm1"];
+
+    isVadcop = j["isVadcop"];
+    hashCommits = j["hashCommits"];
 
     if(j.contains("nSubAirValues")) {
         nSubProofValues = j["nSubAirValues"];
@@ -38,36 +40,7 @@ void StarkInfo::load(json j)
         nSubProofValues = 0;
     }
 
-    if(j.contains("numChallenges")) {
-        nChallenges = 0;
-        for(uint64_t i = 0; i < j["numChallenges"].size(); i++) {
-            numChallenges.push_back(j["numChallenges"][i]);
-            nChallenges += numChallenges[i];
-            if(i == 0) {
-                stageChallengeIndex.push_back(0);
-            } else {
-                stageChallengeIndex.push_back(stageChallengeIndex[i - 1] + numChallenges[i - 1]);
-            }
-        }
-        qChallengeIndex = nChallenges++;
-        xiChallengeIndex = nChallenges++;
-        fri1ChallengeIndex = nChallenges++;
-        fri2ChallengeIndex = nChallenges++;
-    } else {
-        numChallenges.push_back(0);
-        numChallenges.push_back(2);
-        numChallenges.push_back(2);
-        stageChallengeIndex.push_back(0);
-        stageChallengeIndex.push_back(0);
-        stageChallengeIndex.push_back(2);
-        qChallengeIndex = 4;
-        xiChallengeIndex = 7;
-        fri1ChallengeIndex = 5;
-        fri2ChallengeIndex = 6; 
-        nChallenges = 8;
-    }
-
-    nStages = numChallenges.size();
+    nStages = j["nStages"];
 
     if(j.contains("openingPoints")) {
         for(uint64_t i = 0; i < j["openingPoints"].size(); i++) {
@@ -96,9 +69,6 @@ void StarkInfo::load(json j)
 
     qDeg = j["qDeg"];
     qDim = j["qDim"];
-    for (uint64_t i = 0; i < j["qs"].size(); i++) {
-        qs.push_back(j["qs"][i]);
-    }
 
     if(starkStruct.verificationHashType == "BN128") {
         if(j.contains("merkleTreeArity")) {
@@ -113,34 +83,35 @@ void StarkInfo::load(json j)
             merkleTreeCustom = false;
         }
     }
-
-    mapTotalN = j["mapTotalN"];
     
-    std::string ext = "_ext";
+    for (uint64_t i = 0; i < j["challengesMap"].size(); i++) 
+    {
+        PolMap map;
+        map.stageNum = j["challengesMap"][i]["stageNum"];
+        map.name = j["challengesMap"][i]["name"];
+        map.dim = j["challengesMap"][i]["dim"];
+        map.stageId = j["challengesMap"][i]["stageId"];
+        challengesMap.push_back(map);
 
-    for(uint64_t i = 1; i <= nStages + 1; i++) {
-        string s = to_string(i);
-        string step = "cm" + s + "_n";
-        string stepExt = "cm" + s + ext;
-        
-        eSection section = string2section("cm" + to_string(i) + "_n");
-        eSection sectionExt = string2section("cm" + to_string(i) + "_2ns");
-
-        mapSectionsN.section[section] = j["mapSectionsN"][step];
-        mapSectionsN.section[sectionExt] = j["mapSectionsN"][stepExt];
-
-        mapOffsets.section[section] = j["mapOffsets"][step];
-        mapOffsets.section[sectionExt] = j["mapOffsets"][stepExt];
+        if(map.stageNum == nStages + 2 && map.stageId == 0) {
+            xiChallengeIndex = i;
+        }
     }
 
-    mapSectionsN.section[tmpExp_n] = j["mapSectionsN"]["tmpExp_n"];
-    mapOffsets.section[tmpExp_n] = j["mapOffsets"]["tmpExp_n"];
+    for (uint64_t i = 0; i < j["cmPolsMap"].size(); i++) 
+    {
+        PolMap map;
+        map.stage = j["cmPolsMap"][i]["stage"];
+        map.stageNum = j["cmPolsMap"][i]["stageNum"];
+        map.name = j["cmPolsMap"][i]["name"];
+        map.dim = j["cmPolsMap"][i]["dim"];
+        map.imPol = j["cmPolsMap"][i]["imPol"];
+        map.stagePos = j["cmPolsMap"][i]["stagePos"];
+        map.stageId = j["cmPolsMap"][i]["stageId"];
+        cmPolsMap.push_back(map);
 
-    mapSectionsN.section[q_2ns] = j["mapSectionsN"]["q" + ext];
-    mapOffsets.section[q_2ns] = j["mapOffsets"]["q" + ext];
-
-    mapSectionsN.section[f_2ns] = j["mapSectionsN"]["f" + ext];
-    mapOffsets.section[f_2ns] = j["mapOffsets"]["f" + ext];
+        mapSectionsN[cmPolsMap[i].stage] += cmPolsMap[i].dim;
+    }
 
     for (uint64_t i = 0; i < j["evMap"].size(); i++)
     {
@@ -151,43 +122,47 @@ void StarkInfo::load(json j)
         evMap.push_back(map);
     }
 
-    isVadcop = j["isVadcop"];
-    hashCommits = j["hashCommits"];
+    setMapOffsets(true);
+}
 
-    for (uint64_t i = 0; i < j["cmPolsMap"].size(); i++) 
-    {
-        CmPolMap map;
-        map.stage = j["cmPolsMap"][i]["stage"];
-        map.stageNum = j["cmPolsMap"][i]["stageNum"];
-        map.name = j["cmPolsMap"][i]["name"];
-        map.dim = j["cmPolsMap"][i]["dim"];
-        map.imPol = j["cmPolsMap"][i]["imPol"];
-        map.stagePos = j["cmPolsMap"][i]["stagePos"];
-        map.stageId = j["cmPolsMap"][i]["stageId"];
-        cmPolsMap.push_back(map);
+void StarkInfo::setMapOffsets(bool optimizeCommitStage1Pols) {
+    uint64_t N = (1 << starkStruct.nBits);
+    uint64_t NExtended = (1 << starkStruct.nBitsExt);
+
+    mapOffsets[std::make_pair("cm1", false)] = 0;
+    for(uint64_t stage = 2; stage <= nStages; stage++) {
+        string prevStage = "cm" + to_string(stage - 1);
+        string currStage = "cm" + to_string(stage);
+        mapOffsets[std::make_pair(currStage, false)] = mapOffsets[std::make_pair(prevStage, false)] + N * mapSectionsN[prevStage];
     }
 
-    for (uint64_t i = 0; i < j["symbolsStage"].size(); i++) 
-    {
-        symbolsStage.push_back(std::vector<Symbol>());
-        for(uint64_t k = 0; k < j["symbolsStage"][i].size(); k++) 
-        {
-            Symbol symbol;
-            symbol.setSymbol(j["symbolsStage"][i][k]);
-            symbolsStage[i].push_back(symbol);
-        }
+    if(optimizeCommitStage1Pols) {
+        mapOffsets[std::make_pair("cm1", true)] = mapOffsets[std::make_pair("cm" + to_string(nStages), false)] + N * mapSectionsN["cm" + to_string(nStages)];
+        mapOffsets[std::make_pair("tmpExp", false)] = mapOffsets[std::make_pair("cm1", true)] + NExtended * mapSectionsN["cm1"];
+        mapOffsets[std::make_pair("cm2", true)] = mapOffsets[std::make_pair("tmpExp", false)] + N * mapSectionsN["tmpExp"];
+    } else {
+        mapOffsets[std::make_pair("tmpExp", false)] = mapOffsets[std::make_pair("cm" + to_string(nStages), false)] + N * mapSectionsN["cm" + to_string(nStages)];
+        mapOffsets[std::make_pair("cm1", true)] = mapOffsets[std::make_pair("tmpExp", false)] + N * mapSectionsN["tmpExp"];
+        mapOffsets[std::make_pair("cm2", true)] = mapOffsets[std::make_pair("cm1", true)] + NExtended * mapSectionsN["cm1"];
     }
+
+    for(uint64_t stage = 3; stage <= nStages + 1; stage++) {
+        string prevStage = "cm" + to_string(stage - 1);
+        string currStage = "cm" + to_string(stage);
+        mapOffsets[std::make_pair(currStage, true)] = mapOffsets[std::make_pair(prevStage, true)] + NExtended * mapSectionsN[prevStage];
+    }
+    mapOffsets[std::make_pair("q", true)] = mapOffsets[std::make_pair("cm" + to_string(nStages + 1), true)] + NExtended * mapSectionsN["cm" + to_string(nStages + 1)];
+    mapOffsets[std::make_pair("f", true)] = mapOffsets[std::make_pair("q", true)] + NExtended * qDim;
+    mapTotalN = mapOffsets[std::make_pair("f", true)] + NExtended * 3;
 }
 
 Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg)
 {
-    CmPolMap polInfo = cmPolsMap[idPol];
+    PolMap polInfo = cmPolsMap[idPol];
     uint64_t dim = polInfo.dim;
-    uint64_t N = (1 << starkStruct.nBits);
-    string stage = polInfo.stage == string("cmQ") ? "cm" + to_string(nStages + 1) : polInfo.stage;
-    eSection section = N == deg ? string2section(stage + "_n") : string2section(stage + "_2ns");
-    uint64_t nCols = mapSectionsN.section[section];
-    uint64_t offset = mapOffsets.section[section];
+    uint64_t domainExtended = deg == uint64_t(1 << starkStruct.nBitsExt);
+    uint64_t nCols = mapSectionsN[polInfo.stage];
+    uint64_t offset = mapOffsets[std::make_pair(polInfo.stage, domainExtended)];
     offset += polInfo.stagePos;
     return Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
 }
@@ -209,35 +184,6 @@ opType string2opType(const string s)
     if(s == "number")
         return number;
     zklog.error("string2opType() found invalid string=" + s);
-    exitProcess();
-    exit(-1);
-}
-
-eSection string2section(const string s)
-{
-    if (s == "cm1_n")
-        return cm1_n;
-    if (s == "cm2_n")
-        return cm2_n;
-    if (s == "cm3_n")
-        return cm3_n;
-    if (s == "cm4_n")
-        return cm4_n;
-    if (s == "tmpExp_n")
-        return tmpExp_n;
-    if (s == "f_2ns")
-        return f_2ns;
-    if (s == "cm1_2ns")
-        return cm1_2ns;
-    if (s == "cm2_2ns")
-        return cm2_2ns;
-    if (s == "cm3_2ns")
-        return cm3_2ns;
-    if (s == "cm4_2ns")
-        return cm4_2ns;
-    if (s == "q_2ns")
-        return q_2ns;
-    zklog.error("string2section() found invalid string=" + s);
     exitProcess();
     exit(-1);
 }

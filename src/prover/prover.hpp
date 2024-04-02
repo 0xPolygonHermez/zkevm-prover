@@ -59,7 +59,6 @@ private:
     void *pAddressStarksRecursiveF = NULL;
     int protocolId;
     bool optimizeMemoryNTT = false;
-    bool optimizeMemoryNTTCommitPols = false;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available

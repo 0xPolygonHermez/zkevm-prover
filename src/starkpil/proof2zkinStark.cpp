@@ -136,7 +136,7 @@ ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &ve
     zkinOut["a_s0_valsC"] = zkin1["s0_valsC"];
     zkinOut["a_s0_siblingsC"] = zkin1["s0_siblingsC"];
     for(uint64_t stage = 1; stage <= nStages; ++stage) {
-        if(starkInfo.mapSectionsN.section[string2section("cm" + to_string(stage) + "_n")] > 0) {
+        if(starkInfo.mapSectionsN["cm" + to_string(stage)] > 0) {
             zkinOut["a_s0_vals" + to_string(stage)] = zkin1["s0_vals" + to_string(stage)];
             zkinOut["a_s0_siblings" + to_string(stage)] = zkin1["s0_siblings" + to_string(stage)];
         }
@@ -162,7 +162,7 @@ ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &ve
     zkinOut["b_s0_valsC"] = zkin2["s0_valsC"];
     zkinOut["b_s0_siblingsC"] = zkin2["s0_siblingsC"];
     for(uint64_t stage = 1; stage <= nStages; ++stage) {
-        if(starkInfo.mapSectionsN.section[string2section("cm" + to_string(stage) + "_n")] > 0) {
+        if(starkInfo.mapSectionsN["cm" + to_string(stage)] > 0) {
             zkinOut["b_s0_vals" + to_string(stage)] = zkin2["s0_vals" + to_string(stage)];
             zkinOut["b_s0_siblings" + to_string(stage)] = zkin2["s0_siblings" + to_string(stage)];
         }

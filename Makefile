@@ -100,6 +100,8 @@ lib: $(TARGET) $(LIB_DIR)/$(TARGET_LIB)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
 
+fflonk_setup: $(BUILD_DIR)/$(TARGET_SETUP)
+
 test: $(BUILD_DIR)/$(TARGET_TEST)
 
 constraint_checker: $(BUILD_DIR)/$(TARGET_CONSTRAINT)
@@ -121,6 +123,9 @@ $(BUILD_DIR)/$(TARGET_TEST): $(OBJS_TEST)
 
 $(BUILD_DIR)/$(TARGET_CONSTRAINT): $(OBJS_CONSTRAINT)
 	$(CXX) $(OBJS_CONSTRAINT) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS_EXT)
+
+$(BUILD_DIR)/$(TARGET_SETUP): $(OBJS_SETUP)
+	$(CXX) $(OBJS_SETUP) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS_EXT)
 
 # assembly
 $(BUILD_DIR)/%.asm.o: %.asm
@@ -152,8 +157,6 @@ $(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp
 	g++ -g ./src/pols_generator/pols_generator.cpp -o $@ -lgmp
 
 pols_diff: $(BUILD_DIR)/$(TARGET_PLD)
-
-fflonk_setup: $(BUILD_DIR)/$(TARGET_SETUP)
 
 $(BUILD_DIR)/$(TARGET_PLD): ./src/pols_diff/pols_diff.cpp
 	$(MKDIR_P) $(BUILD_DIR)

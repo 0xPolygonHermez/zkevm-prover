@@ -82,16 +82,16 @@ int main(int argc, char **argv)
 
         StarkInfo starkInfo(starkInfoFile);
 
-        void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+        void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
 
         // TODO: pAddress should be properly calculated!!!!!
-        void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN.section[eSection::cm3_n] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
+        void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN["cm3"] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
 
         uint64_t N = (1 << starkInfo.starkStruct.nBits);
         #pragma omp parallel for
         for (uint64_t i = 0; i < N; i += 1)
         {
-            std::memcpy((uint8_t*)pAddress + i*starkInfo.nCm1*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.nCm1*sizeof(Goldilocks::Element), starkInfo.nCm1*sizeof(Goldilocks::Element));
+            std::memcpy((uint8_t*)pAddress + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
         }
 
         json publics;

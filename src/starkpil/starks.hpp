@@ -44,7 +44,6 @@ public:
     StarkInfo starkInfo;
     bool debug = false;
     bool optimizeMemoryNTT = false;
-    bool optimizeMemoryNTTCommitPols = false;
     
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
@@ -214,10 +213,9 @@ public:
         treesGL = new MerkleTreeType*[starkInfo.nStages + 2];
         for (uint64_t i = 0; i < starkInfo.nStages + 1; i++)
         {
-            std::string section = "cm" + to_string(i + 1) + "_n";
-            std::string sectionExt = "cm" + to_string(i + 1) + "_2ns";
-            uint64_t nCols = starkInfo.mapSectionsN.section[string2section(section)];
-            Goldilocks::Element *pBuffExtended = &mem[starkInfo.mapOffsets.section[string2section(sectionExt)]];
+            std::string section = "cm" + to_string(i + 1);
+            uint64_t nCols = starkInfo.mapSectionsN[section];
+            Goldilocks::Element *pBuffExtended = &mem[starkInfo.mapOffsets[std::make_pair(section, true)]];
             treesGL[i] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom,  NExtended, nCols, pBuffExtended);
         }
 
@@ -248,12 +246,8 @@ public:
 
         constsCalculated.resize(starkInfo.nConstants, true);
         
-        if(starkInfo.mapOffsets.section[eSection::cm1_2ns] < starkInfo.mapOffsets.section[eSection::tmpExp_n]) {
-            optimizeMemoryNTTCommitPols = true;
-        }
-
-        uint64_t currentSectionStart = starkInfo.mapOffsets.section[string2section("cm" + to_string(starkInfo.nStages) + "_n")] * sizeof(Goldilocks::Element);
-        uint64_t nttHelperSize = starkInfo.mapSectionsN.section[string2section("cm" + to_string(starkInfo.nStages) + "_n")] * NExtended * sizeof(Goldilocks::Element);
+        uint64_t currentSectionStart = starkInfo.mapOffsets[std::make_pair("cm" + to_string(starkInfo.nStages), false)] * sizeof(Goldilocks::Element);
+        uint64_t nttHelperSize = starkInfo.mapSectionsN["cm" + to_string(starkInfo.nStages)] * NExtended * sizeof(Goldilocks::Element);
         if(currentSectionStart > nttHelperSize) {
             optimizeMemoryNTT = true;
         }
@@ -378,7 +372,7 @@ private:
 
     void evmap(StepsParams &params, Polinomial &LEv);
 
-    uint64_t checkSymbolsToBeCalculated(vector<Symbol> symbols);
+    uint64_t isStageCalculated(uint64_t step);
     bool isSymbolCalculated(opType operand, uint64_t id);
     void setSymbolCalculated(opType operand, uint64_t id);
 

@@ -138,7 +138,7 @@ public:
 
             for(uint64_t k = 0; k < parserParams.nCmPolsUsed; ++k) {
                 uint64_t polId = cmPolsUsed[k];
-                CmPolMap polInfo = starkInfo.cmPolsMap[polId];
+                PolMap polInfo = starkInfo.cmPolsMap[polId];
                 uint64_t stage = polInfo.stage == string("tmpExp") ? nStages + 1 : polInfo.stageNum;
                 uint64_t stagePos = polInfo.stagePos;
                 for(uint64_t d = 0; d < polInfo.dim; ++d) {
