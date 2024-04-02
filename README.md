@@ -39,6 +39,8 @@ Steps to compile `zkevm-prover` locally:
 ```sh
 git clone --recursive https://github.com/0xPolygonHermez/zkevm-prover.git
 cd zkevm-prover
+git submodule init
+git submodule update
 ```
 
 ### Download necessary files
