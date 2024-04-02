@@ -47,6 +47,8 @@ public:
     Goldilocks::Element CONST;
     bool bConstLPresent;
     mpz_class CONSTL;
+    bool bCondConstPresent;
+    Goldilocks::Element condConst;
     bool bJmpAddrPresent;
     Goldilocks::Element jmpAddr;
     bool bElseAddrPresent;

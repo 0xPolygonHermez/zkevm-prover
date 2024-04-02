@@ -271,6 +271,16 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         {
             line[i].bConstLPresent = false;
         }
+        
+        if (l["condConst"].is_string())
+        {
+            line[i].bCondConstPresent = true;
+            fr.fromString(line[i].condConst, l["condConst"]);
+        }
+        else
+        {
+            line[i].bCondConstPresent = false;
+        }
 
         if (l["jmpAddr"].is_number_unsigned())
         {

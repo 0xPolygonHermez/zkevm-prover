@@ -223,6 +223,7 @@ tOp string2Op(string s)
     else if (s == "shr")             return op_shr;
     else if (s == "if")              return op_if;
     else if (s == "getMemValue")     return op_getMemValue;
+    else if (s == "getMemAddr")      return op_getMemAddr;
     else if (s == "")                return op_empty;
     else {
         zklog.error("string2op() invalid string = " + s);
@@ -264,6 +265,7 @@ string op2String(tOp op)
         case op_shr:                return  "shr";
         case op_if:                 return  "if";
         case op_getMemValue:        return  "getMemValue";
+        case op_getMemAddr:         return  "getMemAddr";
         case op_empty:              return  "";
         default:                    return  "unknown";  
     }

@@ -2310,9 +2310,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.FREE7[i] = ctx.saved[rid].op[7];
         }
 
-        if (!fr.isZero(op0) && !bProcessBatch)
+        // Set pols.op0Inv
+        if (!bProcessBatch)
         {
-            pols.op0Inv[i] = glp.inv(op0);
+            Goldilocks::Element op0CondConst;
+            if (rom.line[zkPC].bCondConstPresent)
+            {
+                op0CondConst = fr.add(op0, rom.line[zkPC].condConst);
+            }
+            else
+            {
+                op0CondConst = op0;
+            }
+            if (!fr.isZero(op0CondConst))
+            {
+                pols.op0Inv[i] = glp.inv(op0CondConst);
+            }
         }
 
         /****************/
@@ -2476,7 +2489,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifndef BLOB_INNER
 
-        // overwrite 'op' when hiting 'checkFirstTxType' label
+        // overwrite 'op' when hitting 'checkFirstTxType' label
         if ((zkPC == rom.labels.checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
         {
             op0 = fr.one();
@@ -2489,7 +2502,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op7 = fr.one();
         }
 
-        // overwrite 'op' when hiting 'writeBlockInfoRoot' label
+        // overwrite 'op' when hitting 'writeBlockInfoRoot' label
         if ((zkPC == rom.labels.writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
         {
             op0 = fr.zero();
@@ -3813,6 +3826,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             
             // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
+            // A(x1) * B(y1) + C(x2) = D (y2) * 2 ** 256 + op (y3)
             if (rom.line[zkPC].arithEquation == 1)
             {
                 // Convert to scalar
@@ -3936,8 +3950,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-                // EQ5:  x1 * x2 - y1 * y2 = x3
-                // EQ6:  y1 * x2 + x1 * y2 = y3
+                // x1 * x2 - y1 * y2 = x3
+                // y1 * x2 + x1 * y2 = y3
 
                 RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
                 fq.fromMpz(x1fe, x1.get_mpz_t());
@@ -4035,8 +4049,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-                // EQ7:  x1 + x2 = x3
-                // EQ8:  y1 + y2 = y3
+                // x1 + x2 = x3
+                // y1 + y2 = y3
 
                 RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
                 fq.fromMpz(x1fe, x1.get_mpz_t());
@@ -4134,8 +4148,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-                // EQ7:  x1 - x2 = x3
-                // EQ8:  y1 - y2 = y3
+                // x1 - x2 = x3
+                // y1 - y2 = y3
 
                 RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
                 fq.fromMpz(x1fe, x1.get_mpz_t());

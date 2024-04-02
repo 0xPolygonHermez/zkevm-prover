@@ -125,6 +125,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         case op_shr:            return eval_bit_shr(ctx, cmd, cr);
         case op_if:             return eval_if(ctx, cmd, cr);
         case op_getMemValue:    return eval_getMemValue(ctx, cmd, cr);
+        case op_getMemAddr:     return eval_getMemAddr(ctx, cmd, cr);
         default:
             zklog.error("evalCommand() found invalid operation=" + op2String(cmd.op) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
@@ -1147,6 +1148,39 @@ void eval_if (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 /***************/
 /* Memory read */
 /***************/
+
+void eval_getMemAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_getMemAddr() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get m0 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getMemAddr() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t addr = cr.scalar.get_ui();
+    if (cmd.useCTX == 1)
+    {
+        addr += ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
+    }
+    cr.type = crt_scalar;
+    cr.scalar = addr;
+}
 
 void eval_getMemValue (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {

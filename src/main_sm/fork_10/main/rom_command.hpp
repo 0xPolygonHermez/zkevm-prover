@@ -115,7 +115,8 @@ typedef enum : int {
     op_shl,
     op_shr,
     op_if,
-    op_getMemValue
+    op_getMemValue,
+    op_getMemAddr
 } tOp;
 
 // Register (reg)

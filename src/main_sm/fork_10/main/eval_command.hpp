@@ -88,6 +88,7 @@ void eval_bit_shl             (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_bit_shr             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_if                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getMemValue         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getMemAddr          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 // Forward declaration of internal callable functions
 void eval_getGlobalExitRoot   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
