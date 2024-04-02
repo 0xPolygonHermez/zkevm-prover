@@ -127,7 +127,7 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    if ((publicInputsExtended.publicInputs.forkID >= 7) && (publicInputsExtended.publicInputs.forkID <= 8))
+    if ((publicInputsExtended.publicInputs.forkID >= 7) && (publicInputsExtended.publicInputs.forkID <= 9))
     {
         // Input JSON file must contain a l1InfoRoot key at the root level
         if ( !input.contains("l1InfoRoot") ||
@@ -142,7 +142,7 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    if ((publicInputsExtended.publicInputs.forkID >= 7) && (publicInputsExtended.publicInputs.forkID <= 8))
+    if ((publicInputsExtended.publicInputs.forkID >= 7) && (publicInputsExtended.publicInputs.forkID <= 9))
     {
         // Input JSON file must contain a forcedBlockHashL1 key at the root level
         if ( !input.contains("forcedBlockHashL1") ||
@@ -299,6 +299,16 @@ void Input::loadGlobals (json &input)
         publicInputsExtended.newBatchNum = input["newNumBatch"];
 #ifdef LOG_INPUT
         zklog.info("Input::loadGlobals(): newBatchNum=" + to_string(publicInputsExtended.newBatchNum));
+#endif
+    }
+
+    // Input JSON file may contain a newLastTimestamp key at the root level
+    if ( input.contains("newLastTimestamp") &&
+         input["newLastTimestamp"].is_number_unsigned() )
+    {
+        publicInputsExtended.newLastTimestamp = input["newLastTimestamp"];
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals(): newLastTimestamp=" + to_string(publicInputsExtended.newLastTimestamp));
 #endif
     }
 
@@ -525,6 +535,26 @@ void Input::loadGlobals (json &input)
                     }
                 }
 
+                // Parse smtProofPreviousIndex
+                if ( input["l1InfoTree"][key].contains("smtProofPreviousIndex") &&
+                     input["l1InfoTree"][key]["smtProofPreviousIndex"].is_array() )
+                {
+                    uint64_t smtProofPreviousIndexSize = input["l1InfoTree"][key]["smtProofPreviousIndex"].size();
+                    for (uint64_t i=0; i<smtProofPreviousIndexSize; i++)
+                    {
+                        string auxString = input["l1InfoTree"][key]["smtProofPreviousIndex"][i];
+                        auxString = Remove0xIfPresent(auxString);
+                        if (!stringIsHex(auxString))
+                        {
+                            zklog.error("Input::loadGlobals() l1InfoTree smtProofPreviousIndex found in input JSON file is not an hexa string");
+                            exitProcess();
+                        }
+                        mpz_class auxScalar;
+                        auxScalar.set_str(auxString, 16);
+                        l1Data.smtProofPreviousIndex.emplace_back(auxScalar);
+                    }
+                }
+
                 l1InfoTreeData[index] = l1Data;
             }
         }
@@ -595,9 +625,9 @@ void Input::loadGlobals (json &input)
     // Calculate the trace configuration flags
     traceConfig.calculateFlags();
 
-    // fork 9 (Feijoa) input parameters
+    // fork 10 (Feijoa) input parameters
 
-    if (publicInputsExtended.publicInputs.forkID >= 9)
+    if (publicInputsExtended.publicInputs.forkID >= 10)
     {
         // Parse old blob state root
         if ( input.contains("oldBlobStateRoot") &&
@@ -687,7 +717,7 @@ void Input::loadGlobals (json &input)
 
         // Parse zkGasLimit
         if ( input.contains("zkGasLimit") &&
-                input["zkGasLimit"].is_string() )
+             input["zkGasLimit"].is_string() )
         {
             string zkGasLimitString = input["zkGasLimit"];
             zkGasLimitString = Remove0xIfPresent(zkGasLimitString);
@@ -701,9 +731,16 @@ void Input::loadGlobals (json &input)
                 zklog.error("Input::loadGlobals() zkGasLimit found in input JSON file is too long");
                 exitProcess();
             }
-            publicInputsExtended.publicInputs.zkGasLimit.set_str(zkGasLimitString, 10);
+            mpz_class auxScalar;
+            auxScalar.set_str(zkGasLimitString, 10);
+            if (auxScalar > ScalarMask64)
+            {
+                zklog.error("Input::loadGlobals() zkGasLimit found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.zkGasLimit = auxScalar.get_ui();
 #ifdef LOG_INPUT
-            zklog.info("Input::loadGlobals(): zkGasLimit=" + publicInputsExtended.publicInputs.zkGasLimit.get_str(16));
+            zklog.info("Input::loadGlobals(): zkGasLimit=" + to_string(publicInputsExtended.publicInputs.zkGasLimit));
 #endif
         }
 
@@ -824,7 +861,7 @@ void Input::loadGlobals (json &input)
         if ( input.contains("blobType") &&
              input["blobType"].is_number_unsigned() )
         {
-            publicInputsExtended.publicInputs.type = input["blobType"];
+            publicInputsExtended.publicInputs.blobType = input["blobType"];
         }
 
         // Parse currentL1InfoTreeRoot
@@ -1023,6 +1060,7 @@ void Input::saveGlobals (json &input) const
     if (publicInputsExtended.newAccInputHash != 0) input["newAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.newAccInputHash.get_str(16), 64);
     if (publicInputsExtended.newLocalExitRoot != 0) input["newLocalExitRoot"] = NormalizeTo0xNFormat(publicInputsExtended.newLocalExitRoot.get_str(16), 64);
     if (publicInputsExtended.newBatchNum != 0) input["newNumBatch"] = publicInputsExtended.newBatchNum;
+    if (publicInputsExtended.newLastTimestamp != 0) input["newLastTimestamp"] = publicInputsExtended.newLastTimestamp;
 
     // Root
     if (!from.empty() && (from != "0x")) input["from"] = from;
@@ -1064,6 +1102,10 @@ void Input::saveGlobals (json &input) const
             {
                 input["l1InfoTree"][index]["smtProof"][i] = NormalizeTo0xNFormat(it->second.smtProof[i].get_str(16), 64);
             }
+            for (uint64_t i=0; i<it->second.smtProofPreviousIndex.size(); i++)
+            {
+                input["l1InfoTree"][index]["smtProofPreviousIndex"][i] = NormalizeTo0xNFormat(it->second.smtProofPreviousIndex[i].get_str(16), 64);
+            }
         }
     }
 
@@ -1077,7 +1119,7 @@ void Input::saveGlobals (json &input) const
         input["txHashToGenerateFullTrace"] = traceConfig.txHashToGenerateFullTrace;
     }
 
-    if (publicInputsExtended.publicInputs.forkID >= 9)
+    if (publicInputsExtended.publicInputs.forkID >= 10)
     {
         if (publicInputsExtended.publicInputs.oldBlobStateRoot != 0)
         {
@@ -1101,7 +1143,7 @@ void Input::saveGlobals (json &input) const
         }
         if (publicInputsExtended.publicInputs.zkGasLimit != 0)
         {
-            input["zkGasLimit"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.zkGasLimit.get_str(16), 64);
+            input["zkGasLimit"] = to_string(publicInputsExtended.publicInputs.zkGasLimit);
         }
         if (publicInputsExtended.publicInputs.pointZ != 0)
         {
@@ -1146,6 +1188,10 @@ void Input::saveGlobals (json &input) const
         if (publicInputsExtended.isInvalid)
         {
             input["isInvalid"] = publicInputsExtended.isInvalid;
+        }
+        if (publicInputsExtended.publicInputs.blobType != 0)
+        {
+            input["blobType"] = publicInputsExtended.publicInputs.blobType;
         }
     }
 }

@@ -946,39 +946,38 @@ message ProcessBatchRequestV3 {
     uint64 chain_id = 5;
     uint64 fork_id = 6;
     bytes batch_l2_data = 7;
-    uint32 type = 8;
-    bytes forced_hash_data = 9;
-    ForcedData forced_data = 10;
-    string coinbase = 11;
-    uint32 update_merkle_tree = 12;
+    bytes forced_hash_data = 8;
+    ForcedData forced_data = 9;
+    string coinbase = 10;
+    uint32 update_merkle_tree = 11;
     // flag to indicate that counters should not be taken into account
-    uint32 no_counters = 13;
+    uint32 no_counters = 12;
     // from is used for unsigned transactions with sender
-    string from = 14;
+    string from = 13;
     // flag to skip the restriction to start a batch with a changeL2Block transaction
-    uint32 skip_first_change_l2_block = 15;
+    uint32 skip_first_change_l2_block = 14;
     // flag to skip writing the block info root in the state
-    uint32 skip_write_block_info_root = 16;
+    uint32 skip_write_block_info_root = 15;
     // lInfoTree information
-    map<uint32, L1DataV3> l1_info_tree_data = 17;
+    map<uint32, L1DataV3> l1_info_tree_data = 16;
     // For testing purposes only
-    map<string, string> db = 18;
-    map<string, string> contracts_bytecode = 19; // For debug/testing purpposes only. Don't fill this on production
-    TraceConfigV2 trace_config = 20;
-    string context_id = 21;
-    uint32 get_keys = 22; // if 1, the keys used to read or write storage values will be returned
+    map<string, string> db = 17;
+    map<string, string> contracts_bytecode = 18; // For debug/testing purpposes only. Don't fill this on production
+    TraceConfigV2 trace_config = 19;
+    string context_id = 20;
+    uint32 get_keys = 21; // if 1, the keys used to read or write storage values will be returned
     // The state override set is an optional address-to-state mapping,
     // where each entry specifies some state to be ephemerally overridden
     // prior to executing the call.
-    map<string, OverrideAccountV2> state_override = 23;
-    DebugV2 debug = 24;
+    map<string, OverrideAccountV2> state_override = 22;
+    DebugV2 debug = 23;
 }
 
 message L1DataV3 {
     bytes global_exit_root = 1;
     bytes block_hash_l1 = 2;
     uint64 min_timestamp = 3;
-    repeated bytes smt_proof = 4;
+    repeated bytes smt_proof_previous_index = 4;
     bytes initial_historic_root = 5;
 }
 
@@ -1038,8 +1037,8 @@ message ProcessBlobInnerRequestV3 {
     bytes last_l1_info_tree_root = 7;
     uint64 timestamp_limit = 8;
     string coinbase = 9;
-    bytes zk_gas_limit = 10;
-    uint32 type = 11;
+    uint64 zk_gas_limit = 10;
+    uint32 blob_type = 11;
     bytes point_z = 12;
     bytes point_y = 13;
     bytes blob_data = 14;
@@ -1065,4 +1064,21 @@ message ProcessBlobInnerResponseV3 {
     // extra
     repeated bytes batch_data = 7;
     ExecutorError error = 8;
+    RomBlobError error_rom_blob = 9;
+}
+
+enum RomBlobError {
+    ROM_BLOB_ERROR_UNSPECIFIED = 0;
+    // ROM_ERROR_NO_ERROR indicates the execution ended successfully
+    ROM_BLOB_ERROR_NO_ERROR = 1;
+    // ROM_BLOB_ERROR_INVALID_PARSING indicates that has been an error while parsing the blob data
+    ROM_BLOB_ERROR_INVALID_PARSING = 2;
+    // ROM_BLOB_ERROR_INVALID_MSB_BYTE indicates that the MSB on one field element is different than zero (only for blob_type = 1)
+    ROM_BLOB_ERROR_INVALID_MSB_BYTE = 3;
+    // ROM_BLOB_ERROR_INVALID_ZK_GAS_LIMIT not enough zk_gas_limit supplied to pay for batches proofs
+    ROM_BLOB_ERROR_INVALID_ZK_GAS_LIMIT = 4;
+    // ROM_BLOB_ERROR_INVALID_BLOB_TYPE blob_type not supported
+    ROM_BLOB_ERROR_INVALID_BLOB_TYPE = 5;
+    // ROM_BLOB_ERROR_INVALID_COMPRESSION_TYPE compression type not supported
+    ROM_BLOB_ERROR_INVALID_COMPRESSION_TYPE = 6;
 }

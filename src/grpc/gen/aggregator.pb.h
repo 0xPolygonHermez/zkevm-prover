@@ -4966,21 +4966,20 @@ class PublicInputs PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kL1InfoTreeDataFieldNumber = 13,
+    kL1InfoTreeDataFieldNumber = 12,
     kOldStateRootFieldNumber = 1,
     kOldBatchAccInputHashFieldNumber = 2,
     kPreviousL1InfoTreeRootFieldNumber = 3,
     kBatchL2DataFieldNumber = 7,
     kSequencerAddrFieldNumber = 8,
-    kForcedHashDataFieldNumber = 10,
-    kAggregatorAddrFieldNumber = 12,
-    kForcedDataFieldNumber = 11,
+    kForcedHashDataFieldNumber = 9,
+    kAggregatorAddrFieldNumber = 11,
+    kForcedDataFieldNumber = 10,
     kChainIdFieldNumber = 5,
     kForkIdFieldNumber = 6,
     kPreviousL1InfoTreeIndexFieldNumber = 4,
-    kTypeFieldNumber = 9,
   };
-  // map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 13;
+  // map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 12;
   int l1_info_tree_data_size() const;
   private:
   int _internal_l1_info_tree_data_size() const;
@@ -5122,7 +5121,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_sequencer_addr();
   public:
 
-  // bytes forced_hash_data = 10;
+  // bytes forced_hash_data = 9;
   void clear_forced_hash_data();
   const std::string& forced_hash_data() const;
   void set_forced_hash_data(const std::string& value);
@@ -5147,7 +5146,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_forced_hash_data();
   public:
 
-  // string aggregator_addr = 12;
+  // string aggregator_addr = 11;
   void clear_aggregator_addr();
   const std::string& aggregator_addr() const;
   void set_aggregator_addr(const std::string& value);
@@ -5172,7 +5171,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_aggregator_addr();
   public:
 
-  // .aggregator.v1.ForcedData forced_data = 11;
+  // .aggregator.v1.ForcedData forced_data = 10;
   bool has_forced_data() const;
   private:
   bool _internal_has_forced_data() const;
@@ -5217,15 +5216,6 @@ class PublicInputs PROTOBUF_FINAL :
   void _internal_set_previous_l1_info_tree_index(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 type = 9;
-  void clear_type();
-  ::PROTOBUF_NAMESPACE_ID::uint32 type() const;
-  void set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_type() const;
-  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:aggregator.v1.PublicInputs)
  private:
   class _Internal;
@@ -5250,7 +5240,6 @@ class PublicInputs PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   ::PROTOBUF_NAMESPACE_ID::uint32 previous_l1_info_tree_index_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 type_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
 };
@@ -5565,7 +5554,6 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
     kOldStateRootFieldNumber = 4,
     kLastL1InfoTreeRootFieldNumber = 7,
     kSequencerAddrFieldNumber = 8,
-    kZkGasLimitFieldNumber = 10,
     kPointZFieldNumber = 12,
     kPointYFieldNumber = 13,
     kBlobDataFieldNumber = 14,
@@ -5573,8 +5561,9 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
     kOldNumBlobFieldNumber = 3,
     kForkIdFieldNumber = 5,
     kLastL1InfoTreeIndexFieldNumber = 6,
-    kTypeFieldNumber = 11,
+    kBlobTypeFieldNumber = 11,
     kTimestampLimitFieldNumber = 9,
+    kZkGasLimitFieldNumber = 10,
   };
   // bytes old_blob_state_root = 1;
   void clear_old_blob_state_root();
@@ -5699,31 +5688,6 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   const std::string& _internal_sequencer_addr() const;
   void _internal_set_sequencer_addr(const std::string& value);
   std::string* _internal_mutable_sequencer_addr();
-  public:
-
-  // bytes zk_gas_limit = 10;
-  void clear_zk_gas_limit();
-  const std::string& zk_gas_limit() const;
-  void set_zk_gas_limit(const std::string& value);
-  void set_zk_gas_limit(std::string&& value);
-  void set_zk_gas_limit(const char* value);
-  void set_zk_gas_limit(const void* value, size_t size);
-  std::string* mutable_zk_gas_limit();
-  std::string* release_zk_gas_limit();
-  void set_allocated_zk_gas_limit(std::string* zk_gas_limit);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_zk_gas_limit();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_zk_gas_limit(
-      std::string* zk_gas_limit);
-  private:
-  const std::string& _internal_zk_gas_limit() const;
-  void _internal_set_zk_gas_limit(const std::string& value);
-  std::string* _internal_mutable_zk_gas_limit();
   public:
 
   // bytes point_z = 12;
@@ -5853,13 +5817,13 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   void _internal_set_last_l1_info_tree_index(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 type = 11;
-  void clear_type();
-  ::PROTOBUF_NAMESPACE_ID::uint32 type() const;
-  void set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  // uint32 blob_type = 11;
+  void clear_blob_type();
+  ::PROTOBUF_NAMESPACE_ID::uint32 blob_type() const;
+  void set_blob_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_type() const;
-  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_blob_type() const;
+  void _internal_set_blob_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // uint64 timestamp_limit = 9;
@@ -5869,6 +5833,15 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::uint64 _internal_timestamp_limit() const;
   void _internal_set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 zk_gas_limit = 10;
+  void clear_zk_gas_limit();
+  ::PROTOBUF_NAMESPACE_ID::uint64 zk_gas_limit() const;
+  void set_zk_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_zk_gas_limit() const;
+  void _internal_set_zk_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:aggregator.v1.PublicBlobInnerInputs)
@@ -5883,7 +5856,6 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr last_l1_info_tree_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sequencer_addr_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr zk_gas_limit_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr point_z_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr point_y_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr blob_data_;
@@ -5891,8 +5863,9 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 old_num_blob_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   ::PROTOBUF_NAMESPACE_ID::uint32 last_l1_info_tree_index_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 type_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 blob_type_;
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 zk_gas_limit_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
 };
@@ -6392,34 +6365,34 @@ class L1Data PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kSmtProofFieldNumber = 4,
+    kSmtProofPreviousIndexFieldNumber = 4,
     kGlobalExitRootFieldNumber = 1,
     kBlockHashL1FieldNumber = 2,
     kInitialHistoricRootFieldNumber = 5,
     kMinTimestampFieldNumber = 3,
   };
-  // repeated bytes smt_proof = 4;
-  int smt_proof_size() const;
+  // repeated bytes smt_proof_previous_index = 4;
+  int smt_proof_previous_index_size() const;
   private:
-  int _internal_smt_proof_size() const;
+  int _internal_smt_proof_previous_index_size() const;
   public:
-  void clear_smt_proof();
-  const std::string& smt_proof(int index) const;
-  std::string* mutable_smt_proof(int index);
-  void set_smt_proof(int index, const std::string& value);
-  void set_smt_proof(int index, std::string&& value);
-  void set_smt_proof(int index, const char* value);
-  void set_smt_proof(int index, const void* value, size_t size);
-  std::string* add_smt_proof();
-  void add_smt_proof(const std::string& value);
-  void add_smt_proof(std::string&& value);
-  void add_smt_proof(const char* value);
-  void add_smt_proof(const void* value, size_t size);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& smt_proof() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_smt_proof();
+  void clear_smt_proof_previous_index();
+  const std::string& smt_proof_previous_index(int index) const;
+  std::string* mutable_smt_proof_previous_index(int index);
+  void set_smt_proof_previous_index(int index, const std::string& value);
+  void set_smt_proof_previous_index(int index, std::string&& value);
+  void set_smt_proof_previous_index(int index, const char* value);
+  void set_smt_proof_previous_index(int index, const void* value, size_t size);
+  std::string* add_smt_proof_previous_index();
+  void add_smt_proof_previous_index(const std::string& value);
+  void add_smt_proof_previous_index(std::string&& value);
+  void add_smt_proof_previous_index(const char* value);
+  void add_smt_proof_previous_index(const void* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& smt_proof_previous_index() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_smt_proof_previous_index();
   private:
-  const std::string& _internal_smt_proof(int index) const;
-  std::string* _internal_add_smt_proof();
+  const std::string& _internal_smt_proof_previous_index(int index) const;
+  std::string* _internal_add_smt_proof_previous_index();
   public:
 
   // bytes global_exit_root = 1;
@@ -6513,7 +6486,7 @@ class L1Data PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> smt_proof_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> smt_proof_previous_index_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr block_hash_l1_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr initial_historic_root_;
@@ -12520,27 +12493,7 @@ inline void PublicInputs::unsafe_arena_set_allocated_sequencer_addr(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.sequencer_addr)
 }
 
-// uint32 type = 9;
-inline void PublicInputs::clear_type() {
-  type_ = 0u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::_internal_type() const {
-  return type_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicInputs::type() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.PublicInputs.type)
-  return _internal_type();
-}
-inline void PublicInputs::_internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  
-  type_ = value;
-}
-inline void PublicInputs::set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.PublicInputs.type)
-}
-
-// bytes forced_hash_data = 10;
+// bytes forced_hash_data = 9;
 inline void PublicInputs::clear_forced_hash_data() {
   forced_hash_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -12621,7 +12574,7 @@ inline void PublicInputs::unsafe_arena_set_allocated_forced_hash_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.forced_hash_data)
 }
 
-// .aggregator.v1.ForcedData forced_data = 11;
+// .aggregator.v1.ForcedData forced_data = 10;
 inline bool PublicInputs::_internal_has_forced_data() const {
   return this != internal_default_instance() && forced_data_ != nullptr;
 }
@@ -12702,7 +12655,7 @@ inline void PublicInputs::set_allocated_forced_data(::aggregator::v1::ForcedData
   // @@protoc_insertion_point(field_set_allocated:aggregator.v1.PublicInputs.forced_data)
 }
 
-// string aggregator_addr = 12;
+// string aggregator_addr = 11;
 inline void PublicInputs::clear_aggregator_addr() {
   aggregator_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -12783,7 +12736,7 @@ inline void PublicInputs::unsafe_arena_set_allocated_aggregator_addr(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.aggregator_addr)
 }
 
-// map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 13;
+// map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 12;
 inline int PublicInputs::_internal_l1_info_tree_data_size() const {
   return l1_info_tree_data_.size();
 }
@@ -13487,105 +13440,44 @@ inline void PublicBlobInnerInputs::set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::
   // @@protoc_insertion_point(field_set:aggregator.v1.PublicBlobInnerInputs.timestamp_limit)
 }
 
-// bytes zk_gas_limit = 10;
+// uint64 zk_gas_limit = 10;
 inline void PublicBlobInnerInputs::clear_zk_gas_limit() {
-  zk_gas_limit_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  zk_gas_limit_ = PROTOBUF_ULONGLONG(0);
 }
-inline const std::string& PublicBlobInnerInputs::zk_gas_limit() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicBlobInnerInputs::_internal_zk_gas_limit() const {
+  return zk_gas_limit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicBlobInnerInputs::zk_gas_limit() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
   return _internal_zk_gas_limit();
 }
-inline void PublicBlobInnerInputs::set_zk_gas_limit(const std::string& value) {
+inline void PublicBlobInnerInputs::_internal_set_zk_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  zk_gas_limit_ = value;
+}
+inline void PublicBlobInnerInputs::set_zk_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_zk_gas_limit(value);
   // @@protoc_insertion_point(field_set:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
 }
-inline std::string* PublicBlobInnerInputs::mutable_zk_gas_limit() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
-  return _internal_mutable_zk_gas_limit();
-}
-inline const std::string& PublicBlobInnerInputs::_internal_zk_gas_limit() const {
-  return zk_gas_limit_.Get();
-}
-inline void PublicBlobInnerInputs::_internal_set_zk_gas_limit(const std::string& value) {
-  
-  zk_gas_limit_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void PublicBlobInnerInputs::set_zk_gas_limit(std::string&& value) {
-  
-  zk_gas_limit_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
-}
-inline void PublicBlobInnerInputs::set_zk_gas_limit(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  zk_gas_limit_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
-}
-inline void PublicBlobInnerInputs::set_zk_gas_limit(const void* value,
-    size_t size) {
-  
-  zk_gas_limit_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
-}
-inline std::string* PublicBlobInnerInputs::_internal_mutable_zk_gas_limit() {
-  
-  return zk_gas_limit_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* PublicBlobInnerInputs::release_zk_gas_limit() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
-  return zk_gas_limit_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void PublicBlobInnerInputs::set_allocated_zk_gas_limit(std::string* zk_gas_limit) {
-  if (zk_gas_limit != nullptr) {
-    
-  } else {
-    
-  }
-  zk_gas_limit_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), zk_gas_limit,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
-}
-inline std::string* PublicBlobInnerInputs::unsafe_arena_release_zk_gas_limit() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return zk_gas_limit_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void PublicBlobInnerInputs::unsafe_arena_set_allocated_zk_gas_limit(
-    std::string* zk_gas_limit) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (zk_gas_limit != nullptr) {
-    
-  } else {
-    
-  }
-  zk_gas_limit_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      zk_gas_limit, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicBlobInnerInputs.zk_gas_limit)
-}
 
-// uint32 type = 11;
-inline void PublicBlobInnerInputs::clear_type() {
-  type_ = 0u;
+// uint32 blob_type = 11;
+inline void PublicBlobInnerInputs::clear_blob_type() {
+  blob_type_ = 0u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicBlobInnerInputs::_internal_type() const {
-  return type_;
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicBlobInnerInputs::_internal_blob_type() const {
+  return blob_type_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicBlobInnerInputs::type() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.PublicBlobInnerInputs.type)
-  return _internal_type();
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PublicBlobInnerInputs::blob_type() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.PublicBlobInnerInputs.blob_type)
+  return _internal_blob_type();
 }
-inline void PublicBlobInnerInputs::_internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void PublicBlobInnerInputs::_internal_set_blob_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
-  type_ = value;
+  blob_type_ = value;
 }
-inline void PublicBlobInnerInputs::set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.PublicBlobInnerInputs.type)
+inline void PublicBlobInnerInputs::set_blob_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_blob_type(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.PublicBlobInnerInputs.blob_type)
 }
 
 // bytes point_z = 12;
@@ -14720,78 +14612,78 @@ inline void L1Data::set_min_timestamp(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   // @@protoc_insertion_point(field_set:aggregator.v1.L1Data.min_timestamp)
 }
 
-// repeated bytes smt_proof = 4;
-inline int L1Data::_internal_smt_proof_size() const {
-  return smt_proof_.size();
+// repeated bytes smt_proof_previous_index = 4;
+inline int L1Data::_internal_smt_proof_previous_index_size() const {
+  return smt_proof_previous_index_.size();
 }
-inline int L1Data::smt_proof_size() const {
-  return _internal_smt_proof_size();
+inline int L1Data::smt_proof_previous_index_size() const {
+  return _internal_smt_proof_previous_index_size();
 }
-inline void L1Data::clear_smt_proof() {
-  smt_proof_.Clear();
+inline void L1Data::clear_smt_proof_previous_index() {
+  smt_proof_previous_index_.Clear();
 }
-inline std::string* L1Data::add_smt_proof() {
-  // @@protoc_insertion_point(field_add_mutable:aggregator.v1.L1Data.smt_proof)
-  return _internal_add_smt_proof();
+inline std::string* L1Data::add_smt_proof_previous_index() {
+  // @@protoc_insertion_point(field_add_mutable:aggregator.v1.L1Data.smt_proof_previous_index)
+  return _internal_add_smt_proof_previous_index();
 }
-inline const std::string& L1Data::_internal_smt_proof(int index) const {
-  return smt_proof_.Get(index);
+inline const std::string& L1Data::_internal_smt_proof_previous_index(int index) const {
+  return smt_proof_previous_index_.Get(index);
 }
-inline const std::string& L1Data::smt_proof(int index) const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.L1Data.smt_proof)
-  return _internal_smt_proof(index);
+inline const std::string& L1Data::smt_proof_previous_index(int index) const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.L1Data.smt_proof_previous_index)
+  return _internal_smt_proof_previous_index(index);
 }
-inline std::string* L1Data::mutable_smt_proof(int index) {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.L1Data.smt_proof)
-  return smt_proof_.Mutable(index);
+inline std::string* L1Data::mutable_smt_proof_previous_index(int index) {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.L1Data.smt_proof_previous_index)
+  return smt_proof_previous_index_.Mutable(index);
 }
-inline void L1Data::set_smt_proof(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:aggregator.v1.L1Data.smt_proof)
-  smt_proof_.Mutable(index)->assign(value);
+inline void L1Data::set_smt_proof_previous_index(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:aggregator.v1.L1Data.smt_proof_previous_index)
+  smt_proof_previous_index_.Mutable(index)->assign(value);
 }
-inline void L1Data::set_smt_proof(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:aggregator.v1.L1Data.smt_proof)
-  smt_proof_.Mutable(index)->assign(std::move(value));
+inline void L1Data::set_smt_proof_previous_index(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:aggregator.v1.L1Data.smt_proof_previous_index)
+  smt_proof_previous_index_.Mutable(index)->assign(std::move(value));
 }
-inline void L1Data::set_smt_proof(int index, const char* value) {
+inline void L1Data::set_smt_proof_previous_index(int index, const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  smt_proof_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.L1Data.smt_proof)
+  smt_proof_previous_index_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.L1Data.smt_proof_previous_index)
 }
-inline void L1Data::set_smt_proof(int index, const void* value, size_t size) {
-  smt_proof_.Mutable(index)->assign(
+inline void L1Data::set_smt_proof_previous_index(int index, const void* value, size_t size) {
+  smt_proof_previous_index_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.L1Data.smt_proof)
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.L1Data.smt_proof_previous_index)
 }
-inline std::string* L1Data::_internal_add_smt_proof() {
-  return smt_proof_.Add();
+inline std::string* L1Data::_internal_add_smt_proof_previous_index() {
+  return smt_proof_previous_index_.Add();
 }
-inline void L1Data::add_smt_proof(const std::string& value) {
-  smt_proof_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:aggregator.v1.L1Data.smt_proof)
+inline void L1Data::add_smt_proof_previous_index(const std::string& value) {
+  smt_proof_previous_index_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:aggregator.v1.L1Data.smt_proof_previous_index)
 }
-inline void L1Data::add_smt_proof(std::string&& value) {
-  smt_proof_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:aggregator.v1.L1Data.smt_proof)
+inline void L1Data::add_smt_proof_previous_index(std::string&& value) {
+  smt_proof_previous_index_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:aggregator.v1.L1Data.smt_proof_previous_index)
 }
-inline void L1Data::add_smt_proof(const char* value) {
+inline void L1Data::add_smt_proof_previous_index(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  smt_proof_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:aggregator.v1.L1Data.smt_proof)
+  smt_proof_previous_index_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:aggregator.v1.L1Data.smt_proof_previous_index)
 }
-inline void L1Data::add_smt_proof(const void* value, size_t size) {
-  smt_proof_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:aggregator.v1.L1Data.smt_proof)
+inline void L1Data::add_smt_proof_previous_index(const void* value, size_t size) {
+  smt_proof_previous_index_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:aggregator.v1.L1Data.smt_proof_previous_index)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-L1Data::smt_proof() const {
-  // @@protoc_insertion_point(field_list:aggregator.v1.L1Data.smt_proof)
-  return smt_proof_;
+L1Data::smt_proof_previous_index() const {
+  // @@protoc_insertion_point(field_list:aggregator.v1.L1Data.smt_proof_previous_index)
+  return smt_proof_previous_index_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-L1Data::mutable_smt_proof() {
-  // @@protoc_insertion_point(field_mutable_list:aggregator.v1.L1Data.smt_proof)
-  return &smt_proof_;
+L1Data::mutable_smt_proof_previous_index() {
+  // @@protoc_insertion_point(field_mutable_list:aggregator.v1.L1Data.smt_proof_previous_index)
+  return &smt_proof_previous_index_;
 }
 
 // bytes initial_historic_root = 5;

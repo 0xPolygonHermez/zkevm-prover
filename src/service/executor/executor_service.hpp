@@ -81,6 +81,7 @@ public:
 #endif    
     ::executor::v1::RomError string2error (string &errorString);
     ::executor::v1::ExecutorError zkresult2error (zkresult &result);
+    ::executor::v1::RomBlobError string2rombloberror (string &result);
 };
 
 #endif

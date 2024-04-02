@@ -29,8 +29,9 @@ public:
     mpz_class finalAccBatchHashData;
     mpz_class localExitRootFromBlob;
     bool      isInvalid;
+    uint64_t  newLastTimestamp;
     
-    PublicInputsExtended() : newBatchNum(0), currentL1InfoTreeIndex(0), newBlobNum(0), isInvalid(false) {};
+    PublicInputsExtended() : newBatchNum(0), currentL1InfoTreeIndex(0), newBlobNum(0), isInvalid(false), newLastTimestamp(0) {};
 
     bool operator==(PublicInputsExtended &publicInputsExtended)
     {

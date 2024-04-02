@@ -88,9 +88,10 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_signedComparisonWithConst:       return eval_signedComparisonWithConst(ctx, cmd, cr);
             case f_getFirstDiffChunkRem:            return eval_getFirstDiffChunkRem(ctx, cmd, cr);
             case f_getSmtProofPreviousIndex:        return eval_getSmtProofPreviousIndex(ctx, cmd, cr);
+            case f_getBatchHashData:                return eval_getBatchHashData(ctx, cmd, cr);
             
             default:
-                zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+                zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + "=" + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
                 exitProcess();
         }
     }
@@ -3979,7 +3980,7 @@ void eval_getType (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     cr.type = crt_fea;
-    mpz_class type = ctx.proverRequest.input.publicInputsExtended.publicInputs.type;
+    mpz_class type = ctx.proverRequest.input.publicInputsExtended.publicInputs.blobType;
     scalar2fea(fr, type, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
@@ -4467,17 +4468,32 @@ void eval_getSmtProofPreviousIndex (Context &ctx, const RomCommand &cmd, Command
         cr.zkResult = ZKR_SM_MAIN_ASSERT;
         return;
     }
-    if (level >= it->second.smtProof.size())
+    if (level >= it->second.smtProofPreviousIndex.size())
     {
-        zklog.error("eval_getSmtProofPreviousIndex() level too big index=" + to_string(index) + " level=" + to_string(level) + " smtProof.size=" + to_string(it->second.smtProof.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_getSmtProofPreviousIndex() level too big index=" + to_string(index) + " level=" + to_string(level) + " smt_proof_previous_index.size=" + to_string(it->second.smtProofPreviousIndex.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         cr.zkResult = ZKR_SM_MAIN_ASSERT;
         return;
     }
-    mpz_class leafValue = ctx.proverRequest.input.l1InfoTreeData[index].smtProof[level];
+    mpz_class leafValue = ctx.proverRequest.input.l1InfoTreeData[index].smtProofPreviousIndex[level];
 
     // Return as a fea
     cr.type = crt_fea;
     scalar2fea(fr, leafValue, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_getBatchHashData (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getBatchHashData() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    scalar2fea(fr, ctx.batchHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 } // namespace

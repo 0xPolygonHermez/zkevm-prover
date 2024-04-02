@@ -325,7 +325,6 @@ message FinalProof {
 * @param {fork_id} - fork id
 * @param {batch_l2_data} - batch l2 data
 * @param {sequencer_addr} - sequencer address
-* @param {type} - type
 * @param {forced_hash_data} - forced hash data
 * @param {forced_data} - forced data
 * @param {aggregator_addr} - aggregator address
@@ -340,11 +339,10 @@ message PublicInputs {
     uint64 fork_id = 6;
     bytes batch_l2_data = 7;
     string sequencer_addr = 8;
-    uint32 type = 9;
-    bytes forced_hash_data = 10;
-    ForcedData forced_data = 11;
-    string aggregator_addr = 12;
-    map<uint32, L1Data> l1_info_tree_data = 13;
+    bytes forced_hash_data = 9;
+    ForcedData forced_data = 10;
+    string aggregator_addr = 11;
+    map<uint32, L1Data> l1_info_tree_data = 12;
 }
 
 /**
@@ -370,7 +368,7 @@ message ForcedData {
 * @param {sequencer_addr} - sequencer address
 * @param {timestamp_limit} - timestamp limit
 * @param {zk_gas_limit} - zk gas limit
-* @param {type} - type
+* @param {blob_type} - blob type
 * @param {point_z} - point z
 * @param {point_y} - point y
 * @param {blob_data} - blob data
@@ -386,8 +384,8 @@ message PublicBlobInnerInputs {
     bytes last_l1_info_tree_root = 7;
     string sequencer_addr = 8;
     uint64 timestamp_limit = 9;
-    bytes zk_gas_limit = 10;
-    uint32 type = 11;
+    uint64 zk_gas_limit = 10;
+    uint32 blob_type = 11;
     bytes point_z = 12;
     bytes point_y = 13;
     bytes blob_data = 14;
@@ -423,14 +421,14 @@ message StatelessPublicInputs {
 * @param {global_exit_root} - global exit root
 * @param {blockhash_l1} - blockhash l1
 * @param {min_timestamp} - min timestamp
-* @param {smt_proof} - smt proof
+* @param {smt_proof_previous_index} - smt proof previous index
 * @param {initial_historic_root} - initial historic root
 */
 message L1Data {
     bytes global_exit_root = 1;
     bytes block_hash_l1 = 2;
     uint32 min_timestamp = 3;
-    repeated bytes smt_proof = 4;
+    repeated bytes smt_proof_previous_index = 4;
     bytes initial_historic_root = 5;
 }
 

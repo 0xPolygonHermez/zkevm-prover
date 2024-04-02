@@ -235,9 +235,6 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     }
     pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
 
-    // Get type
-    pProverRequest->input.publicInputsExtended.publicInputs.type = genBatchProofRequest.input().public_inputs().type();
-
     // Get forcedHashData
     if (genBatchProofRequest.input().public_inputs().forced_hash_data().size() > 32)
     {
@@ -310,17 +307,17 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         }
         ba2scalar(l1Data.blockHashL1, l1DataV3.block_hash_l1());
         l1Data.minTimestamp = l1DataV3.min_timestamp();
-        for (int64_t i=0; i<l1DataV3.smt_proof_size(); i++)
+        for (int64_t i=0; i<l1DataV3.smt_proof_previous_index_size(); i++)
         {
             mpz_class auxScalar;
-            if (l1DataV3.smt_proof(i).size() > 32)
+            if (l1DataV3.smt_proof_previous_index(i).size() > 32)
             {
-                zklog.error("AggregatorClient::GenBatchProof() got L1 Data SMT proof too long, index=" + to_string(itl->first) + " i=" + to_string(i) + " size=" + to_string(l1DataV3.smt_proof(i).size()));
+                zklog.error("AggregatorClient::GenBatchProof() got L1 Data SMT proof previous index too long, index=" + to_string(itl->first) + " i=" + to_string(i) + " size=" + to_string(l1DataV3.smt_proof_previous_index(i).size()));
                 genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
                 return false;
             }
-            ba2scalar(auxScalar, l1DataV3.smt_proof(i));
-            l1Data.smtProof.emplace_back(auxScalar);
+            ba2scalar(auxScalar, l1DataV3.smt_proof_previous_index(i));
+            l1Data.smtProofPreviousIndex.emplace_back(auxScalar);
         }
         if (l1DataV3.initial_historic_root().size() > 32)
         {
@@ -634,17 +631,17 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
         }
         ba2scalar(l1Data.blockHashL1, l1DataV2.block_hash_l1());
         l1Data.minTimestamp = l1DataV2.min_timestamp();
-        for (int64_t i=0; i<l1DataV2.smt_proof_size(); i++)
+        for (int64_t i=0; i<l1DataV2.smt_proof_previous_index_size(); i++)
         {
             mpz_class auxScalar;
-            if (l1DataV2.smt_proof(i).size() > 32)
+            if (l1DataV2.smt_proof_previous_index(i).size() > 32)
             {
-                zklog.error("AggregatorClient::GenStatelessBatchProof()() got l1DataV2.smt_proof(i) too long, size=" + to_string(l1DataV2.smt_proof(i).size()), &(pProverRequest->tags));
+                zklog.error("AggregatorClient::GenStatelessBatchProof()() got l1DataV2.smt_proof_previous_index(i) too long, size=" + to_string(l1DataV2.smt_proof_previous_index(i).size()), &(pProverRequest->tags));
                 genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
                 return false;
             }
-            ba2scalar(auxScalar, l1DataV2.smt_proof(i));
-            l1Data.smtProof.emplace_back(auxScalar);
+            ba2scalar(auxScalar, l1DataV2.smt_proof_previous_index(i));
+            l1Data.smtProofPreviousIndex.emplace_back(auxScalar);
         }
 
         // Store it
@@ -818,16 +815,10 @@ bool AggregatorClient::GenBlobInnerProof (const aggregator::v1::GenBlobInnerProo
     pProverRequest->input.publicInputsExtended.publicInputs.timestampLimit = genBlobInnerProofRequest.input().public_inputs().timestamp_limit();
 
     // Get zkGasLimit
-    if (genBlobInnerProofRequest.input().public_inputs().zk_gas_limit().size() > 32)
-    {
-        zklog.error("AggregatorClient::GenBlobInnerProof() got zkGasLimit too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().zk_gas_limit().size()));
-        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.zkGasLimit, genBlobInnerProofRequest.input().public_inputs().zk_gas_limit());
-
+    pProverRequest->input.publicInputsExtended.publicInputs.zkGasLimit = genBlobInnerProofRequest.input().public_inputs().zk_gas_limit();
+    
     // Get type
-    pProverRequest->input.publicInputsExtended.publicInputs.type = genBlobInnerProofRequest.input().public_inputs().type();
+    pProverRequest->input.publicInputsExtended.publicInputs.blobType = genBlobInnerProofRequest.input().public_inputs().blob_type();
 
     // Get pointZ
     if (genBlobInnerProofRequest.input().public_inputs().point_z().size() > 32)
@@ -1110,7 +1101,6 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainID);
                     pPublicInputs->set_fork_id(pProverRequest->proof.publicInputsExtended.publicInputs.forkID);
                     pPublicInputs->set_batch_l2_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchL2Data);
-                    pPublicInputs->set_type(pProverRequest->proof.publicInputsExtended.publicInputs.type);
                     pPublicInputs->set_sequencer_addr(Add0xIfMissing(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
                     pPublicInputs->set_forced_hash_data(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.forcedHashData));
                     //ForcedData

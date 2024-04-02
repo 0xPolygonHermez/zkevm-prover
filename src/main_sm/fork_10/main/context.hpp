@@ -188,6 +188,8 @@ public:
 
     map<uint64_t, Saved> saved;
 
+    mpz_class batchHashData;
+
     Context( Goldilocks &fr,
              const Config &config,
              RawFec &fec,

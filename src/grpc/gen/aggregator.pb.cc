@@ -966,7 +966,6 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputs, fork_id_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputs, batch_l2_data_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputs, sequencer_addr_),
-  PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputs, type_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputs, forced_hash_data_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputs, forced_data_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputs, aggregator_addr_),
@@ -994,7 +993,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicBlobInnerInputs, sequencer_addr_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicBlobInnerInputs, timestamp_limit_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicBlobInnerInputs, zk_gas_limit_),
-  PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicBlobInnerInputs, type_),
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicBlobInnerInputs, blob_type_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicBlobInnerInputs, point_z_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicBlobInnerInputs, point_y_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicBlobInnerInputs, blob_data_),
@@ -1030,7 +1029,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, global_exit_root_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, block_hash_l1_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, min_timestamp_),
-  PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, smt_proof_),
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, smt_proof_previous_index_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::L1Data, initial_historic_root_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::InputProver_DbEntry_DoNotUse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::InputProver_DbEntry_DoNotUse, _internal_metadata_),
@@ -1109,17 +1108,17 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 181, -1, sizeof(::aggregator::v1::FinalProof)},
   { 188, 195, sizeof(::aggregator::v1::PublicInputs_L1InfoTreeDataEntry_DoNotUse)},
   { 197, -1, sizeof(::aggregator::v1::PublicInputs)},
-  { 215, -1, sizeof(::aggregator::v1::ForcedData)},
-  { 223, -1, sizeof(::aggregator::v1::PublicBlobInnerInputs)},
-  { 243, 250, sizeof(::aggregator::v1::StatelessPublicInputs_L1InfoTreeDataEntry_DoNotUse)},
-  { 252, -1, sizeof(::aggregator::v1::StatelessPublicInputs)},
-  { 266, -1, sizeof(::aggregator::v1::L1Data)},
-  { 276, 283, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
-  { 285, 292, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
-  { 294, -1, sizeof(::aggregator::v1::InputProver)},
-  { 302, -1, sizeof(::aggregator::v1::InputBlobInnerProver)},
-  { 308, -1, sizeof(::aggregator::v1::StatelessInputProver)},
-  { 314, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
+  { 214, -1, sizeof(::aggregator::v1::ForcedData)},
+  { 222, -1, sizeof(::aggregator::v1::PublicBlobInnerInputs)},
+  { 242, 249, sizeof(::aggregator::v1::StatelessPublicInputs_L1InfoTreeDataEntry_DoNotUse)},
+  { 251, -1, sizeof(::aggregator::v1::StatelessPublicInputs)},
+  { 265, -1, sizeof(::aggregator::v1::L1Data)},
+  { 275, 282, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
+  { 284, 291, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
+  { 293, -1, sizeof(::aggregator::v1::InputProver)},
+  { 301, -1, sizeof(::aggregator::v1::InputBlobInnerProver)},
+  { 307, -1, sizeof(::aggregator::v1::StatelessInputProver)},
+  { 313, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -1257,69 +1256,69 @@ const char descriptor_table_protodef_aggregator_2eproto[] PROTOBUF_SECTION_VARIA
   "SULT_INTERNAL_ERROR\020\005\022\021\n\rRESULT_CANCEL\020\006"
   "B\007\n\005proof\"P\n\nFinalProof\022\r\n\005proof\030\001 \001(\t\0223"
   "\n\006public\030\002 \001(\0132#.aggregator.v1.PublicInp"
-  "utsExtended\"\356\003\n\014PublicInputs\022\026\n\016old_stat"
+  "utsExtended\"\340\003\n\014PublicInputs\022\026\n\016old_stat"
   "e_root\030\001 \001(\014\022 \n\030old_batch_acc_input_hash"
   "\030\002 \001(\014\022\"\n\032previous_l1_info_tree_root\030\003 \001"
   "(\014\022#\n\033previous_l1_info_tree_index\030\004 \001(\r\022"
   "\020\n\010chain_id\030\005 \001(\004\022\017\n\007fork_id\030\006 \001(\004\022\025\n\rba"
   "tch_l2_data\030\007 \001(\014\022\026\n\016sequencer_addr\030\010 \001("
-  "\t\022\014\n\004type\030\t \001(\r\022\030\n\020forced_hash_data\030\n \001("
-  "\014\022.\n\013forced_data\030\013 \001(\0132\031.aggregator.v1.F"
-  "orcedData\022\027\n\017aggregator_addr\030\014 \001(\t\022J\n\021l1"
-  "_info_tree_data\030\r \003(\0132/.aggregator.v1.Pu"
-  "blicInputs.L1InfoTreeDataEntry\032L\n\023L1Info"
-  "TreeDataEntry\022\013\n\003key\030\001 \001(\r\022$\n\005value\030\002 \001("
-  "\0132\025.aggregator.v1.L1Data:\0028\001\"T\n\nForcedDa"
-  "ta\022\030\n\020global_exit_root\030\001 \001(\014\022\025\n\rblock_ha"
-  "sh_l1\030\002 \001(\014\022\025\n\rmin_timestamp\030\003 \001(\004\"\371\002\n\025P"
-  "ublicBlobInnerInputs\022\033\n\023old_blob_state_r"
-  "oot\030\001 \001(\014\022\037\n\027old_blob_acc_input_hash\030\002 \001"
-  "(\014\022\024\n\014old_num_blob\030\003 \001(\004\022\026\n\016old_state_ro"
-  "ot\030\004 \001(\014\022\017\n\007fork_id\030\005 \001(\004\022\037\n\027last_l1_inf"
-  "o_tree_index\030\006 \001(\r\022\036\n\026last_l1_info_tree_"
-  "root\030\007 \001(\014\022\026\n\016sequencer_addr\030\010 \001(\t\022\027\n\017ti"
-  "mestamp_limit\030\t \001(\004\022\024\n\014zk_gas_limit\030\n \001("
-  "\014\022\014\n\004type\030\013 \001(\r\022\017\n\007point_z\030\014 \001(\014\022\017\n\007poin"
-  "t_y\030\r \001(\014\022\021\n\tblob_data\030\016 \001(\014\022\030\n\020forced_h"
-  "ash_data\030\017 \001(\014\"\371\002\n\025StatelessPublicInputs"
-  "\022\017\n\007witness\030\001 \001(\014\022\023\n\013data_stream\030\002 \001(\014\022\032"
-  "\n\022old_acc_input_hash\030\003 \001(\014\022\024\n\014l1_info_ro"
-  "ot\030\004 \001(\014\022\027\n\017timestamp_limit\030\005 \001(\004\022\026\n\016seq"
-  "uencer_addr\030\006 \001(\t\022\033\n\023forced_blockhash_l1"
-  "\030\007 \001(\014\022\027\n\017aggregator_addr\030\010 \001(\t\022S\n\021l1_in"
-  "fo_tree_data\030\t \003(\01328.aggregator.v1.State"
-  "lessPublicInputs.L1InfoTreeDataEntry\032L\n\023"
-  "L1InfoTreeDataEntry\022\013\n\003key\030\001 \001(\r\022$\n\005valu"
-  "e\030\002 \001(\0132\025.aggregator.v1.L1Data:\0028\001\"\202\001\n\006L"
-  "1Data\022\030\n\020global_exit_root\030\001 \001(\014\022\025\n\rblock"
-  "_hash_l1\030\002 \001(\014\022\025\n\rmin_timestamp\030\003 \001(\r\022\021\n"
-  "\tsmt_proof\030\004 \003(\014\022\035\n\025initial_historic_roo"
-  "t\030\005 \001(\014\"\245\002\n\013InputProver\0222\n\rpublic_inputs"
-  "\030\001 \001(\0132\033.aggregator.v1.PublicInputs\022.\n\002d"
-  "b\030\004 \003(\0132\".aggregator.v1.InputProver.DbEn"
-  "try\022M\n\022contracts_bytecode\030\005 \003(\01321.aggreg"
-  "ator.v1.InputProver.ContractsBytecodeEnt"
-  "ry\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001("
-  "\t:\0028\001\0328\n\026ContractsBytecodeEntry\022\013\n\003key\030\001"
-  " \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"S\n\024InputBlobInne"
-  "rProver\022;\n\rpublic_inputs\030\001 \001(\0132$.aggrega"
-  "tor.v1.PublicBlobInnerInputs\"S\n\024Stateles"
-  "sInputProver\022;\n\rpublic_inputs\030\001 \001(\0132$.ag"
-  "gregator.v1.StatelessPublicInputs\"\204\002\n\024Pu"
-  "blicInputsExtended\0222\n\rpublic_inputs\030\001 \001("
-  "\0132\033.aggregator.v1.PublicInputs\022\026\n\016new_st"
-  "ate_root\030\002 \001(\014\022 \n\030new_batch_acc_input_ha"
-  "sh\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 \001(\014\022\032\n"
-  "\022new_last_timestamp\030\005 \001(\004\022!\n\031current_l1_"
-  "info_tree_root\030\006 \001(\014\022\"\n\032current_l1_info_"
-  "tree_index\030\007 \001(\r*\\\n\006Result\022\026\n\022RESULT_UNS"
-  "PECIFIED\020\000\022\r\n\tRESULT_OK\020\001\022\020\n\014RESULT_ERRO"
-  "R\020\002\022\031\n\025RESULT_INTERNAL_ERROR\020\0032d\n\021Aggreg"
-  "atorService\022O\n\007Channel\022\034.aggregator.v1.P"
-  "roverMessage\032 .aggregator.v1.AggregatorM"
-  "essage\"\000(\0010\001B;Z9github.com/0xPolygonHerm"
-  "ez/zkevm-node/proverclient/proverb\006proto"
-  "3"
+  "\t\022\030\n\020forced_hash_data\030\t \001(\014\022.\n\013forced_da"
+  "ta\030\n \001(\0132\031.aggregator.v1.ForcedData\022\027\n\017a"
+  "ggregator_addr\030\013 \001(\t\022J\n\021l1_info_tree_dat"
+  "a\030\014 \003(\0132/.aggregator.v1.PublicInputs.L1I"
+  "nfoTreeDataEntry\032L\n\023L1InfoTreeDataEntry\022"
+  "\013\n\003key\030\001 \001(\r\022$\n\005value\030\002 \001(\0132\025.aggregator"
+  ".v1.L1Data:\0028\001\"T\n\nForcedData\022\030\n\020global_e"
+  "xit_root\030\001 \001(\014\022\025\n\rblock_hash_l1\030\002 \001(\014\022\025\n"
+  "\rmin_timestamp\030\003 \001(\004\"\376\002\n\025PublicBlobInner"
+  "Inputs\022\033\n\023old_blob_state_root\030\001 \001(\014\022\037\n\027o"
+  "ld_blob_acc_input_hash\030\002 \001(\014\022\024\n\014old_num_"
+  "blob\030\003 \001(\004\022\026\n\016old_state_root\030\004 \001(\014\022\017\n\007fo"
+  "rk_id\030\005 \001(\004\022\037\n\027last_l1_info_tree_index\030\006"
+  " \001(\r\022\036\n\026last_l1_info_tree_root\030\007 \001(\014\022\026\n\016"
+  "sequencer_addr\030\010 \001(\t\022\027\n\017timestamp_limit\030"
+  "\t \001(\004\022\024\n\014zk_gas_limit\030\n \001(\004\022\021\n\tblob_type"
+  "\030\013 \001(\r\022\017\n\007point_z\030\014 \001(\014\022\017\n\007point_y\030\r \001(\014"
+  "\022\021\n\tblob_data\030\016 \001(\014\022\030\n\020forced_hash_data\030"
+  "\017 \001(\014\"\371\002\n\025StatelessPublicInputs\022\017\n\007witne"
+  "ss\030\001 \001(\014\022\023\n\013data_stream\030\002 \001(\014\022\032\n\022old_acc"
+  "_input_hash\030\003 \001(\014\022\024\n\014l1_info_root\030\004 \001(\014\022"
+  "\027\n\017timestamp_limit\030\005 \001(\004\022\026\n\016sequencer_ad"
+  "dr\030\006 \001(\t\022\033\n\023forced_blockhash_l1\030\007 \001(\014\022\027\n"
+  "\017aggregator_addr\030\010 \001(\t\022S\n\021l1_info_tree_d"
+  "ata\030\t \003(\01328.aggregator.v1.StatelessPubli"
+  "cInputs.L1InfoTreeDataEntry\032L\n\023L1InfoTre"
+  "eDataEntry\022\013\n\003key\030\001 \001(\r\022$\n\005value\030\002 \001(\0132\025"
+  ".aggregator.v1.L1Data:\0028\001\"\221\001\n\006L1Data\022\030\n\020"
+  "global_exit_root\030\001 \001(\014\022\025\n\rblock_hash_l1\030"
+  "\002 \001(\014\022\025\n\rmin_timestamp\030\003 \001(\r\022 \n\030smt_proo"
+  "f_previous_index\030\004 \003(\014\022\035\n\025initial_histor"
+  "ic_root\030\005 \001(\014\"\245\002\n\013InputProver\0222\n\rpublic_"
+  "inputs\030\001 \001(\0132\033.aggregator.v1.PublicInput"
+  "s\022.\n\002db\030\004 \003(\0132\".aggregator.v1.InputProve"
+  "r.DbEntry\022M\n\022contracts_bytecode\030\005 \003(\01321."
+  "aggregator.v1.InputProver.ContractsBytec"
+  "odeEntry\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005valu"
+  "e\030\002 \001(\t:\0028\001\0328\n\026ContractsBytecodeEntry\022\013\n"
+  "\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"S\n\024InputBl"
+  "obInnerProver\022;\n\rpublic_inputs\030\001 \001(\0132$.a"
+  "ggregator.v1.PublicBlobInnerInputs\"S\n\024St"
+  "atelessInputProver\022;\n\rpublic_inputs\030\001 \001("
+  "\0132$.aggregator.v1.StatelessPublicInputs\""
+  "\204\002\n\024PublicInputsExtended\0222\n\rpublic_input"
+  "s\030\001 \001(\0132\033.aggregator.v1.PublicInputs\022\026\n\016"
+  "new_state_root\030\002 \001(\014\022 \n\030new_batch_acc_in"
+  "put_hash\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 "
+  "\001(\014\022\032\n\022new_last_timestamp\030\005 \001(\004\022!\n\031curre"
+  "nt_l1_info_tree_root\030\006 \001(\014\022\"\n\032current_l1"
+  "_info_tree_index\030\007 \001(\r*\\\n\006Result\022\026\n\022RESU"
+  "LT_UNSPECIFIED\020\000\022\r\n\tRESULT_OK\020\001\022\020\n\014RESUL"
+  "T_ERROR\020\002\022\031\n\025RESULT_INTERNAL_ERROR\020\0032d\n\021"
+  "AggregatorService\022O\n\007Channel\022\034.aggregato"
+  "r.v1.ProverMessage\032 .aggregator.v1.Aggre"
+  "gatorMessage\"\000(\0010\001B;Z9github.com/0xPolyg"
+  "onHermez/zkevm-node/proverclient/proverb"
+  "\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_aggregator_2eproto_deps[1] = {
 };
@@ -1363,7 +1362,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_agg
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_aggregator_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_aggregator_2eproto = {
-  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 6281,
+  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 6287,
   &descriptor_table_aggregator_2eproto_once, descriptor_table_aggregator_2eproto_sccs, descriptor_table_aggregator_2eproto_deps, 36, 0,
   schemas, file_default_instances, TableStruct_aggregator_2eproto::offsets,
   file_level_metadata_aggregator_2eproto, 36, file_level_enum_descriptors_aggregator_2eproto, file_level_service_descriptors_aggregator_2eproto,
@@ -8465,8 +8464,8 @@ PublicInputs::PublicInputs(const PublicInputs& from)
     forced_data_ = nullptr;
   }
   ::memcpy(&chain_id_, &from.chain_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&type_) -
-    reinterpret_cast<char*>(&chain_id_)) + sizeof(type_));
+    static_cast<size_t>(reinterpret_cast<char*>(&previous_l1_info_tree_index_) -
+    reinterpret_cast<char*>(&chain_id_)) + sizeof(previous_l1_info_tree_index_));
   // @@protoc_insertion_point(copy_constructor:aggregator.v1.PublicInputs)
 }
 
@@ -8480,8 +8479,8 @@ void PublicInputs::SharedCtor() {
   forced_hash_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   aggregator_addr_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&forced_data_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&type_) -
-      reinterpret_cast<char*>(&forced_data_)) + sizeof(type_));
+      reinterpret_cast<char*>(&previous_l1_info_tree_index_) -
+      reinterpret_cast<char*>(&forced_data_)) + sizeof(previous_l1_info_tree_index_));
 }
 
 PublicInputs::~PublicInputs() {
@@ -8536,8 +8535,8 @@ void PublicInputs::Clear() {
   }
   forced_data_ = nullptr;
   ::memset(&chain_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&type_) -
-      reinterpret_cast<char*>(&chain_id_)) + sizeof(type_));
+      reinterpret_cast<char*>(&previous_l1_info_tree_index_) -
+      reinterpret_cast<char*>(&chain_id_)) + sizeof(previous_l1_info_tree_index_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -8611,47 +8610,40 @@ const char* PublicInputs::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint32 type = 9;
+      // bytes forced_hash_data = 9;
       case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
-          type_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // bytes forced_hash_data = 10;
-      case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 82)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
           auto str = _internal_mutable_forced_hash_data();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .aggregator.v1.ForcedData forced_data = 11;
-      case 11:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 90)) {
+      // .aggregator.v1.ForcedData forced_data = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 82)) {
           ptr = ctx->ParseMessage(_internal_mutable_forced_data(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // string aggregator_addr = 12;
-      case 12:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 98)) {
+      // string aggregator_addr = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 90)) {
           auto str = _internal_mutable_aggregator_addr();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "aggregator.v1.PublicInputs.aggregator_addr"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 13;
-      case 13:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 106)) {
+      // map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 12;
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 98)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(&l1_info_tree_data_, ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<106>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<98>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -8734,37 +8726,31 @@ failure:
         8, this->_internal_sequencer_addr(), target);
   }
 
-  // uint32 type = 9;
-  if (this->type() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(9, this->_internal_type(), target);
-  }
-
-  // bytes forced_hash_data = 10;
+  // bytes forced_hash_data = 9;
   if (this->forced_hash_data().size() > 0) {
     target = stream->WriteBytesMaybeAliased(
-        10, this->_internal_forced_hash_data(), target);
+        9, this->_internal_forced_hash_data(), target);
   }
 
-  // .aggregator.v1.ForcedData forced_data = 11;
+  // .aggregator.v1.ForcedData forced_data = 10;
   if (this->has_forced_data()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        11, _Internal::forced_data(this), target, stream);
+        10, _Internal::forced_data(this), target, stream);
   }
 
-  // string aggregator_addr = 12;
+  // string aggregator_addr = 11;
   if (this->aggregator_addr().size() > 0) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_aggregator_addr().data(), static_cast<int>(this->_internal_aggregator_addr().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "aggregator.v1.PublicInputs.aggregator_addr");
     target = stream->WriteStringMaybeAliased(
-        12, this->_internal_aggregator_addr(), target);
+        11, this->_internal_aggregator_addr(), target);
   }
 
-  // map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 13;
+  // map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 12;
   if (!this->_internal_l1_info_tree_data().empty()) {
     typedef ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint32, ::aggregator::v1::L1Data >::const_pointer
         ConstPtr;
@@ -8784,13 +8770,13 @@ failure:
       }
       ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
       for (size_type i = 0; i < n; i++) {
-        target = PublicInputs_L1InfoTreeDataEntry_DoNotUse::Funcs::InternalSerialize(13, items[static_cast<ptrdiff_t>(i)].second->first, items[static_cast<ptrdiff_t>(i)].second->second, target, stream);
+        target = PublicInputs_L1InfoTreeDataEntry_DoNotUse::Funcs::InternalSerialize(12, items[static_cast<ptrdiff_t>(i)].second->first, items[static_cast<ptrdiff_t>(i)].second->second, target, stream);
       }
     } else {
       for (::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint32, ::aggregator::v1::L1Data >::const_iterator
           it = this->_internal_l1_info_tree_data().begin();
           it != this->_internal_l1_info_tree_data().end(); ++it) {
-        target = PublicInputs_L1InfoTreeDataEntry_DoNotUse::Funcs::InternalSerialize(13, it->first, it->second, target, stream);
+        target = PublicInputs_L1InfoTreeDataEntry_DoNotUse::Funcs::InternalSerialize(12, it->first, it->second, target, stream);
       }
     }
   }
@@ -8811,7 +8797,7 @@ size_t PublicInputs::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 13;
+  // map<uint32, .aggregator.v1.L1Data> l1_info_tree_data = 12;
   total_size += 1 *
       ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(this->_internal_l1_info_tree_data_size());
   for (::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint32, ::aggregator::v1::L1Data >::const_iterator
@@ -8855,21 +8841,21 @@ size_t PublicInputs::ByteSizeLong() const {
         this->_internal_sequencer_addr());
   }
 
-  // bytes forced_hash_data = 10;
+  // bytes forced_hash_data = 9;
   if (this->forced_hash_data().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
         this->_internal_forced_hash_data());
   }
 
-  // string aggregator_addr = 12;
+  // string aggregator_addr = 11;
   if (this->aggregator_addr().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_aggregator_addr());
   }
 
-  // .aggregator.v1.ForcedData forced_data = 11;
+  // .aggregator.v1.ForcedData forced_data = 10;
   if (this->has_forced_data()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -8895,13 +8881,6 @@ size_t PublicInputs::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
         this->_internal_previous_l1_info_tree_index());
-  }
-
-  // uint32 type = 9;
-  if (this->type() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-        this->_internal_type());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -8969,9 +8948,6 @@ void PublicInputs::MergeFrom(const PublicInputs& from) {
   if (from.previous_l1_info_tree_index() != 0) {
     _internal_set_previous_l1_info_tree_index(from._internal_previous_l1_info_tree_index());
   }
-  if (from.type() != 0) {
-    _internal_set_type(from._internal_type());
-  }
 }
 
 void PublicInputs::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -9004,8 +8980,8 @@ void PublicInputs::InternalSwap(PublicInputs* other) {
   forced_hash_data_.Swap(&other->forced_hash_data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   aggregator_addr_.Swap(&other->aggregator_addr_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(PublicInputs, type_)
-      + sizeof(PublicInputs::type_)
+      PROTOBUF_FIELD_OFFSET(PublicInputs, previous_l1_info_tree_index_)
+      + sizeof(PublicInputs::previous_l1_info_tree_index_)
       - PROTOBUF_FIELD_OFFSET(PublicInputs, forced_data_)>(
           reinterpret_cast<char*>(&forced_data_),
           reinterpret_cast<char*>(&other->forced_data_));
@@ -9322,11 +9298,6 @@ PublicBlobInnerInputs::PublicBlobInnerInputs(const PublicBlobInnerInputs& from)
     sequencer_addr_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_sequencer_addr(),
       GetArena());
   }
-  zk_gas_limit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_zk_gas_limit().empty()) {
-    zk_gas_limit_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_zk_gas_limit(),
-      GetArena());
-  }
   point_z_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_point_z().empty()) {
     point_z_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_point_z(),
@@ -9348,8 +9319,8 @@ PublicBlobInnerInputs::PublicBlobInnerInputs(const PublicBlobInnerInputs& from)
       GetArena());
   }
   ::memcpy(&old_num_blob_, &from.old_num_blob_,
-    static_cast<size_t>(reinterpret_cast<char*>(&timestamp_limit_) -
-    reinterpret_cast<char*>(&old_num_blob_)) + sizeof(timestamp_limit_));
+    static_cast<size_t>(reinterpret_cast<char*>(&zk_gas_limit_) -
+    reinterpret_cast<char*>(&old_num_blob_)) + sizeof(zk_gas_limit_));
   // @@protoc_insertion_point(copy_constructor:aggregator.v1.PublicBlobInnerInputs)
 }
 
@@ -9360,14 +9331,13 @@ void PublicBlobInnerInputs::SharedCtor() {
   old_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   last_l1_info_tree_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   sequencer_addr_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  zk_gas_limit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   point_z_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   point_y_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   blob_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   forced_hash_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&old_num_blob_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&timestamp_limit_) -
-      reinterpret_cast<char*>(&old_num_blob_)) + sizeof(timestamp_limit_));
+      reinterpret_cast<char*>(&zk_gas_limit_) -
+      reinterpret_cast<char*>(&old_num_blob_)) + sizeof(zk_gas_limit_));
 }
 
 PublicBlobInnerInputs::~PublicBlobInnerInputs() {
@@ -9383,7 +9353,6 @@ void PublicBlobInnerInputs::SharedDtor() {
   old_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   last_l1_info_tree_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   sequencer_addr_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  zk_gas_limit_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   point_z_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   point_y_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   blob_data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -9416,14 +9385,13 @@ void PublicBlobInnerInputs::Clear() {
   old_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   last_l1_info_tree_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   sequencer_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  zk_gas_limit_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   point_z_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   point_y_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   blob_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   forced_hash_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::memset(&old_num_blob_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&timestamp_limit_) -
-      reinterpret_cast<char*>(&old_num_blob_)) + sizeof(timestamp_limit_));
+      reinterpret_cast<char*>(&zk_gas_limit_) -
+      reinterpret_cast<char*>(&old_num_blob_)) + sizeof(zk_gas_limit_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -9504,18 +9472,17 @@ const char* PublicBlobInnerInputs::_InternalParse(const char* ptr, ::PROTOBUF_NA
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bytes zk_gas_limit = 10;
+      // uint64 zk_gas_limit = 10;
       case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 82)) {
-          auto str = _internal_mutable_zk_gas_limit();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          zk_gas_limit_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint32 type = 11;
+      // uint32 blob_type = 11;
       case 11:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
-          type_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          blob_type_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -9637,16 +9604,16 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(9, this->_internal_timestamp_limit(), target);
   }
 
-  // bytes zk_gas_limit = 10;
-  if (this->zk_gas_limit().size() > 0) {
-    target = stream->WriteBytesMaybeAliased(
-        10, this->_internal_zk_gas_limit(), target);
+  // uint64 zk_gas_limit = 10;
+  if (this->zk_gas_limit() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(10, this->_internal_zk_gas_limit(), target);
   }
 
-  // uint32 type = 11;
-  if (this->type() != 0) {
+  // uint32 blob_type = 11;
+  if (this->blob_type() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(11, this->_internal_type(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(11, this->_internal_blob_type(), target);
   }
 
   // bytes point_z = 12;
@@ -9724,13 +9691,6 @@ size_t PublicBlobInnerInputs::ByteSizeLong() const {
         this->_internal_sequencer_addr());
   }
 
-  // bytes zk_gas_limit = 10;
-  if (this->zk_gas_limit().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_zk_gas_limit());
-  }
-
   // bytes point_z = 12;
   if (this->point_z().size() > 0) {
     total_size += 1 +
@@ -9780,11 +9740,11 @@ size_t PublicBlobInnerInputs::ByteSizeLong() const {
         this->_internal_last_l1_info_tree_index());
   }
 
-  // uint32 type = 11;
-  if (this->type() != 0) {
+  // uint32 blob_type = 11;
+  if (this->blob_type() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-        this->_internal_type());
+        this->_internal_blob_type());
   }
 
   // uint64 timestamp_limit = 9;
@@ -9792,6 +9752,13 @@ size_t PublicBlobInnerInputs::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_timestamp_limit());
+  }
+
+  // uint64 zk_gas_limit = 10;
+  if (this->zk_gas_limit() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_zk_gas_limit());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -9840,9 +9807,6 @@ void PublicBlobInnerInputs::MergeFrom(const PublicBlobInnerInputs& from) {
   if (from.sequencer_addr().size() > 0) {
     _internal_set_sequencer_addr(from._internal_sequencer_addr());
   }
-  if (from.zk_gas_limit().size() > 0) {
-    _internal_set_zk_gas_limit(from._internal_zk_gas_limit());
-  }
   if (from.point_z().size() > 0) {
     _internal_set_point_z(from._internal_point_z());
   }
@@ -9864,11 +9828,14 @@ void PublicBlobInnerInputs::MergeFrom(const PublicBlobInnerInputs& from) {
   if (from.last_l1_info_tree_index() != 0) {
     _internal_set_last_l1_info_tree_index(from._internal_last_l1_info_tree_index());
   }
-  if (from.type() != 0) {
-    _internal_set_type(from._internal_type());
+  if (from.blob_type() != 0) {
+    _internal_set_blob_type(from._internal_blob_type());
   }
   if (from.timestamp_limit() != 0) {
     _internal_set_timestamp_limit(from._internal_timestamp_limit());
+  }
+  if (from.zk_gas_limit() != 0) {
+    _internal_set_zk_gas_limit(from._internal_zk_gas_limit());
   }
 }
 
@@ -9898,14 +9865,13 @@ void PublicBlobInnerInputs::InternalSwap(PublicBlobInnerInputs* other) {
   old_state_root_.Swap(&other->old_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   last_l1_info_tree_root_.Swap(&other->last_l1_info_tree_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   sequencer_addr_.Swap(&other->sequencer_addr_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  zk_gas_limit_.Swap(&other->zk_gas_limit_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   point_z_.Swap(&other->point_z_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   point_y_.Swap(&other->point_y_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   blob_data_.Swap(&other->blob_data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   forced_hash_data_.Swap(&other->forced_hash_data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(PublicBlobInnerInputs, timestamp_limit_)
-      + sizeof(PublicBlobInnerInputs::timestamp_limit_)
+      PROTOBUF_FIELD_OFFSET(PublicBlobInnerInputs, zk_gas_limit_)
+      + sizeof(PublicBlobInnerInputs::zk_gas_limit_)
       - PROTOBUF_FIELD_OFFSET(PublicBlobInnerInputs, old_num_blob_)>(
           reinterpret_cast<char*>(&old_num_blob_),
           reinterpret_cast<char*>(&other->old_num_blob_));
@@ -10439,14 +10405,14 @@ class L1Data::_Internal {
 
 L1Data::L1Data(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  smt_proof_(arena) {
+  smt_proof_previous_index_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:aggregator.v1.L1Data)
 }
 L1Data::L1Data(const L1Data& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
-      smt_proof_(from.smt_proof_) {
+      smt_proof_previous_index_(from.smt_proof_previous_index_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   global_exit_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_global_exit_root().empty()) {
@@ -10509,7 +10475,7 @@ void L1Data::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  smt_proof_.Clear();
+  smt_proof_previous_index_.Clear();
   global_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   block_hash_l1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   initial_historic_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
@@ -10548,13 +10514,13 @@ const char* L1Data::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated bytes smt_proof = 4;
+      // repeated bytes smt_proof_previous_index = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
           ptr -= 1;
           do {
             ptr += 1;
-            auto str = _internal_add_smt_proof();
+            auto str = _internal_add_smt_proof_previous_index();
             ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
@@ -10615,9 +10581,9 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(3, this->_internal_min_timestamp(), target);
   }
 
-  // repeated bytes smt_proof = 4;
-  for (int i = 0, n = this->_internal_smt_proof_size(); i < n; i++) {
-    const auto& s = this->_internal_smt_proof(i);
+  // repeated bytes smt_proof_previous_index = 4;
+  for (int i = 0, n = this->_internal_smt_proof_previous_index_size(); i < n; i++) {
+    const auto& s = this->_internal_smt_proof_previous_index(i);
     target = stream->WriteBytes(4, s, target);
   }
 
@@ -10643,12 +10609,12 @@ size_t L1Data::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated bytes smt_proof = 4;
+  // repeated bytes smt_proof_previous_index = 4;
   total_size += 1 *
-      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(smt_proof_.size());
-  for (int i = 0, n = smt_proof_.size(); i < n; i++) {
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(smt_proof_previous_index_.size());
+  for (int i = 0, n = smt_proof_previous_index_.size(); i < n; i++) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-      smt_proof_.Get(i));
+      smt_proof_previous_index_.Get(i));
   }
 
   // bytes global_exit_root = 1;
@@ -10710,7 +10676,7 @@ void L1Data::MergeFrom(const L1Data& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  smt_proof_.MergeFrom(from.smt_proof_);
+  smt_proof_previous_index_.MergeFrom(from.smt_proof_previous_index_);
   if (from.global_exit_root().size() > 0) {
     _internal_set_global_exit_root(from._internal_global_exit_root());
   }
@@ -10746,7 +10712,7 @@ bool L1Data::IsInitialized() const {
 void L1Data::InternalSwap(L1Data* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  smt_proof_.InternalSwap(&other->smt_proof_);
+  smt_proof_previous_index_.InternalSwap(&other->smt_proof_previous_index_);
   global_exit_root_.Swap(&other->global_exit_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   block_hash_l1_.Swap(&other->block_hash_l1_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   initial_historic_root_.Swap(&other->initial_historic_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());

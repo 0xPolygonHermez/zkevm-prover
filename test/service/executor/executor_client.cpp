@@ -464,7 +464,6 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
         request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         request.set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
-        request.set_type(input.publicInputsExtended.publicInputs.type);
         request.set_forced_hash_data(scalar2ba(input.publicInputsExtended.publicInputs.forcedHashData));
         executor::v1::ForcedData * pForcedData = new executor::v1::ForcedData();
         zkassertpermanent(pForcedData != NULL);
@@ -486,9 +485,9 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             l1Data.set_global_exit_root(string2ba(itL1Data->second.globalExitRoot.get_str(16)));
             l1Data.set_block_hash_l1(string2ba(itL1Data->second.blockHashL1.get_str(16)));
             l1Data.set_min_timestamp(itL1Data->second.minTimestamp);
-            for (uint64_t i=0; i<itL1Data->second.smtProof.size(); i++)
+            for (uint64_t i=0; i<itL1Data->second.smtProofPreviousIndex.size(); i++)
             {
-                l1Data.add_smt_proof(string2ba(itL1Data->second.smtProof[i].get_str(16)));
+                l1Data.add_smt_proof_previous_index(string2ba(itL1Data->second.smtProofPreviousIndex[i].get_str(16)));
             }
             l1Data.set_initial_historic_root(string2ba(itL1Data->second.initialHistoricRoot.get_str(16)));
             (*request.mutable_l1_info_tree_data())[itL1Data->first] = l1Data;
@@ -644,8 +643,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_last_l1_info_tree_root(scalar2ba(input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot));
         request.set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
         request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
-        request.set_zk_gas_limit(scalar2ba(input.publicInputsExtended.publicInputs.zkGasLimit));
-        request.set_type(input.publicInputsExtended.publicInputs.type);
+        request.set_zk_gas_limit(input.publicInputsExtended.publicInputs.zkGasLimit);
+        request.set_blob_type(input.publicInputsExtended.publicInputs.blobType);
         request.set_point_z(scalar2ba(input.publicInputsExtended.publicInputs.pointZ));
         request.set_point_y(scalar2ba(input.publicInputsExtended.publicInputs.pointY));
         request.set_blob_data(input.publicInputsExtended.publicInputs.blobData);

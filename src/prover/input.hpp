@@ -27,6 +27,7 @@ public:
     mpz_class blockHashL1;
     uint64_t minTimestamp;
     vector<mpz_class> smtProof;
+    vector<mpz_class> smtProofPreviousIndex;
     mpz_class initialHistoricRoot;
     L1Data() : bPresent(false), minTimestamp(0) {};
 };

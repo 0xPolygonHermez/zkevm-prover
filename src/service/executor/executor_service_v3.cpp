@@ -130,9 +130,6 @@ using grpc::Status;
     }
     proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = request->batch_l2_data();
 
-    // Get type
-    proverRequest.input.publicInputsExtended.publicInputs.type = request->type();
-
     // Get forcedHashData
     if (request->forced_hash_data().size() > 32)
     {
@@ -381,17 +378,17 @@ using grpc::Status;
         }
         ba2scalar(l1Data.blockHashL1, l1DataV3.block_hash_l1());
         l1Data.minTimestamp = l1DataV3.min_timestamp();
-        for (int64_t i=0; i<l1DataV3.smt_proof_size(); i++)
+        for (int64_t i=0; i<l1DataV3.smt_proof_previous_index_size(); i++)
         {
             mpz_class auxScalar;
-            if (l1DataV3.smt_proof(i).size() > 32)
+            if (l1DataV3.smt_proof_previous_index(i).size() > 32)
             {
-                zklog.error("ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.smt_proof(i) too long, size=" + to_string(l1DataV3.smt_proof(i).size()), &proverRequest.tags);
+                zklog.error("ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.smt_proof_previous_index(i) too long, size=" + to_string(l1DataV3.smt_proof_previous_index(i).size()), &proverRequest.tags);
                 response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_L1_SMT_PROOF);
                 return Status::OK;
             }
-            ba2scalar(auxScalar, l1DataV3.smt_proof(i));
-            l1Data.smtProof.emplace_back(auxScalar);
+            ba2scalar(auxScalar, l1DataV3.smt_proof_previous_index(i));
+            l1Data.smtProofPreviousIndex.emplace_back(auxScalar);
         }
         if (l1DataV3.initial_historic_root().size() > 32)
         {
@@ -1122,17 +1119,10 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
 
     // Get zkGasLimit
-    if (request->zk_gas_limit().size() > 32)
-    {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got zkGasLimit too long, size=" + to_string(request->zk_gas_limit().size()), &proverRequest.tags);
-        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_ZK_GAS_LIMIT);
-        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::OK;
-    }
-    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.zkGasLimit, request->zk_gas_limit());
+    proverRequest.input.publicInputsExtended.publicInputs.zkGasLimit = request->zk_gas_limit();
 
     // Get type
-    proverRequest.input.publicInputsExtended.publicInputs.type = request->type();
+    proverRequest.input.publicInputsExtended.publicInputs.blobType = request->blob_type();
 
     // Get pointZ
     if (request->point_z().size() > 32)
@@ -1214,8 +1204,8 @@ using grpc::Status;
         " lastL1InfoTreeIndex=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex) +
         " lastL1InfoTreeRoot=" + proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot.get_str(16) +
         " timestampLimit=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestampLimit) +
-        " zkGasLimit=" + proverRequest.input.publicInputsExtended.publicInputs.zkGasLimit.get_str(16) +
-        " type=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.type) +
+        " zkGasLimit=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.zkGasLimit) +
+        " type=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.blobType) +
         " pointZ=" + proverRequest.input.publicInputsExtended.publicInputs.pointZ.get_str(16) +
         " pointY=" + proverRequest.input.publicInputsExtended.publicInputs.pointY.get_str(16) +
         " forcedHashData=" + proverRequest.input.publicInputsExtended.publicInputs.forcedHashData.get_str(16)
@@ -1245,6 +1235,7 @@ using grpc::Status;
 
     FinalTraceBlob & finalTraceBlob = proverRequest.pFullTracer->get_final_trace_blob();
     
+    response->set_error_rom_blob(string2rombloberror(finalTraceBlob.error));
     response->set_new_blob_state_root(scalar2ba(finalTraceBlob.new_blob_state_root));
     response->set_new_blob_acc_input_hash(scalar2ba(finalTraceBlob.new_blob_acc_input_hash));
     response->set_new_num_blob(finalTraceBlob.new_num_blob);
@@ -1254,13 +1245,13 @@ using grpc::Status;
     for (uint64_t i=0; i<finalTraceBlob.batch_data.size(); i++)
     {
         response->add_batch_data(finalTraceBlob.batch_data[i]);
-    }
-    
+    }    
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
         // TODO: log response data
         string s = "ExecutorServiceImpl::ProcessBlobInnerV3() returns result=" + to_string(response->error()) +
+            " blob_error=" + to_string(response->error_rom_blob()) +
             " new_blob_state_root=" + ba2string(response->new_blob_state_root()) +
             " new_blob_acc_input_hash=" + ba2string(response->new_blob_acc_input_hash()) +
             " new_num_blob=" + to_string(response->new_num_blob()) +

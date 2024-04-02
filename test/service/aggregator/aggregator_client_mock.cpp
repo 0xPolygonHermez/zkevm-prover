@@ -265,7 +265,6 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
                 pPublicInputs->set_fork_id(1);
                 pPublicInputs->set_batch_l2_data(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 pPublicInputs->set_sequencer_addr("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D");
-                pPublicInputs->set_type(1);
                 pPublicInputs->set_forced_hash_data(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 aggregator::v1::ForcedData * pForcedData = new aggregator::v1::ForcedData();
                 pForcedData->set_global_exit_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
@@ -277,7 +276,7 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
                 l1Data.set_global_exit_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 l1Data.set_block_hash_l1(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 l1Data.set_min_timestamp(9999);
-                l1Data.add_smt_proof(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
+                l1Data.add_smt_proof_previous_index(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 l1Data.set_initial_historic_root(string2ba("0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D"));
                 google::protobuf::Map<google::protobuf::uint32, aggregator::v1::L1Data> * pL1InfoTreeData = pPublicInputs->mutable_l1_info_tree_data();
                 (*pL1InfoTreeData)[3] = l1Data;

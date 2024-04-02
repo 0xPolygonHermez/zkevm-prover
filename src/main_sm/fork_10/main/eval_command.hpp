@@ -159,6 +159,7 @@ void eval_signedComparison            (Context &ctx, const RomCommand &cmd, Comm
 void eval_signedComparisonWithConst   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getFirstDiffChunkRem        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getSmtProofPreviousIndex    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getBatchHashData            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);

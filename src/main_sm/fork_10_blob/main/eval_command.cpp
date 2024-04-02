@@ -1955,7 +1955,7 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         // reverse bytes
         mpz_class _tmpv = 0;
-        for (int ilen = 0; ilen < _len; ++ilen) 
+        for (uint64_t ilen = 0; ilen < _len; ++ilen) 
         {
             _tmpv = (_tmpv << 8) | (value & 0xFF);
             value = value >> 8;
@@ -2050,7 +2050,7 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         // reverse bytes
         mpz_class _tmpv = 0;
-        for (int ilen = 0; ilen < _len; ++ilen) 
+        for (uint64_t ilen = 0; ilen < _len; ++ilen) 
         {
             _tmpv = (_tmpv << 8) | (value & 0xFF);
             value = value >> 8;
@@ -2145,7 +2145,7 @@ void eval_memAlignRD (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         // reverse bytes
         mpz_class _tmpv = 0;
-        for (int ilen = 0; ilen < _len; ++ilen) 
+        for (uint64_t ilen = 0; ilen < _len; ++ilen) 
         {
             _tmpv = (_tmpv << 8) | (_v & 0xFF);
             _v = _v >> 8;
@@ -3995,7 +3995,7 @@ void eval_getType (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     cr.type = crt_fea;
-    cr.fea0 = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.type);
+    cr.fea0 = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.blobType);
     cr.fea1 = fr.zero();
     cr.fea2 = fr.zero();
     cr.fea3 = fr.zero();

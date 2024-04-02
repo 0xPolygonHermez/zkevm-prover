@@ -502,6 +502,36 @@ inline bool ExecutorError_Parse(
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ExecutorError>(
     ExecutorError_descriptor(), name, value);
 }
+enum RomBlobError : int {
+  ROM_BLOB_ERROR_UNSPECIFIED = 0,
+  ROM_BLOB_ERROR_NO_ERROR = 1,
+  ROM_BLOB_ERROR_INVALID_PARSING = 2,
+  ROM_BLOB_ERROR_INVALID_MSB_BYTE = 3,
+  ROM_BLOB_ERROR_INVALID_ZK_GAS_LIMIT = 4,
+  ROM_BLOB_ERROR_INVALID_BLOB_TYPE = 5,
+  ROM_BLOB_ERROR_INVALID_COMPRESSION_TYPE = 6,
+  RomBlobError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  RomBlobError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool RomBlobError_IsValid(int value);
+constexpr RomBlobError RomBlobError_MIN = ROM_BLOB_ERROR_UNSPECIFIED;
+constexpr RomBlobError RomBlobError_MAX = ROM_BLOB_ERROR_INVALID_COMPRESSION_TYPE;
+constexpr int RomBlobError_ARRAYSIZE = RomBlobError_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* RomBlobError_descriptor();
+template<typename T>
+inline const std::string& RomBlobError_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, RomBlobError>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function RomBlobError_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    RomBlobError_descriptor(), enum_t_value);
+}
+inline bool RomBlobError_Parse(
+    const std::string& name, RomBlobError* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<RomBlobError>(
+    RomBlobError_descriptor(), name, value);
+}
 // ===================================================================
 
 class ProcessBatchRequest_DbEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBatchRequest_DbEntry_DoNotUse, 
@@ -10104,32 +10134,31 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kL1InfoTreeDataFieldNumber = 17,
-    kDbFieldNumber = 18,
-    kContractsBytecodeFieldNumber = 19,
-    kStateOverrideFieldNumber = 23,
+    kL1InfoTreeDataFieldNumber = 16,
+    kDbFieldNumber = 17,
+    kContractsBytecodeFieldNumber = 18,
+    kStateOverrideFieldNumber = 22,
     kOldStateRootFieldNumber = 1,
     kOldAccInputHashFieldNumber = 2,
     kPreviousL1InfoTreeRootFieldNumber = 3,
     kBatchL2DataFieldNumber = 7,
-    kForcedHashDataFieldNumber = 9,
-    kCoinbaseFieldNumber = 11,
-    kFromFieldNumber = 14,
-    kContextIdFieldNumber = 21,
-    kForcedDataFieldNumber = 10,
-    kTraceConfigFieldNumber = 20,
-    kDebugFieldNumber = 24,
+    kForcedHashDataFieldNumber = 8,
+    kCoinbaseFieldNumber = 10,
+    kFromFieldNumber = 13,
+    kContextIdFieldNumber = 20,
+    kForcedDataFieldNumber = 9,
+    kTraceConfigFieldNumber = 19,
+    kDebugFieldNumber = 23,
     kChainIdFieldNumber = 5,
     kForkIdFieldNumber = 6,
     kPreviousL1InfoTreeIndexFieldNumber = 4,
-    kTypeFieldNumber = 8,
-    kUpdateMerkleTreeFieldNumber = 12,
-    kNoCountersFieldNumber = 13,
-    kSkipFirstChangeL2BlockFieldNumber = 15,
-    kSkipWriteBlockInfoRootFieldNumber = 16,
-    kGetKeysFieldNumber = 22,
+    kUpdateMerkleTreeFieldNumber = 11,
+    kNoCountersFieldNumber = 12,
+    kSkipFirstChangeL2BlockFieldNumber = 14,
+    kSkipWriteBlockInfoRootFieldNumber = 15,
+    kGetKeysFieldNumber = 21,
   };
-  // map<uint32, .executor.v1.L1DataV3> l1_info_tree_data = 17;
+  // map<uint32, .executor.v1.L1DataV3> l1_info_tree_data = 16;
   int l1_info_tree_data_size() const;
   private:
   int _internal_l1_info_tree_data_size() const;
@@ -10146,7 +10175,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint32, ::executor::v1::L1DataV3 >*
       mutable_l1_info_tree_data();
 
-  // map<string, string> db = 18;
+  // map<string, string> db = 17;
   int db_size() const;
   private:
   int _internal_db_size() const;
@@ -10163,7 +10192,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_db();
 
-  // map<string, string> contracts_bytecode = 19;
+  // map<string, string> contracts_bytecode = 18;
   int contracts_bytecode_size() const;
   private:
   int _internal_contracts_bytecode_size() const;
@@ -10180,7 +10209,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_contracts_bytecode();
 
-  // map<string, .executor.v1.OverrideAccountV2> state_override = 23;
+  // map<string, .executor.v1.OverrideAccountV2> state_override = 22;
   int state_override_size() const;
   private:
   int _internal_state_override_size() const;
@@ -10297,7 +10326,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   std::string* _internal_mutable_batch_l2_data();
   public:
 
-  // bytes forced_hash_data = 9;
+  // bytes forced_hash_data = 8;
   void clear_forced_hash_data();
   const std::string& forced_hash_data() const;
   void set_forced_hash_data(const std::string& value);
@@ -10322,7 +10351,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   std::string* _internal_mutable_forced_hash_data();
   public:
 
-  // string coinbase = 11;
+  // string coinbase = 10;
   void clear_coinbase();
   const std::string& coinbase() const;
   void set_coinbase(const std::string& value);
@@ -10347,7 +10376,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   std::string* _internal_mutable_coinbase();
   public:
 
-  // string from = 14;
+  // string from = 13;
   void clear_from();
   const std::string& from() const;
   void set_from(const std::string& value);
@@ -10372,7 +10401,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   std::string* _internal_mutable_from();
   public:
 
-  // string context_id = 21;
+  // string context_id = 20;
   void clear_context_id();
   const std::string& context_id() const;
   void set_context_id(const std::string& value);
@@ -10397,7 +10426,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   std::string* _internal_mutable_context_id();
   public:
 
-  // .executor.v1.ForcedData forced_data = 10;
+  // .executor.v1.ForcedData forced_data = 9;
   bool has_forced_data() const;
   private:
   bool _internal_has_forced_data() const;
@@ -10415,7 +10444,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
       ::executor::v1::ForcedData* forced_data);
   ::executor::v1::ForcedData* unsafe_arena_release_forced_data();
 
-  // .executor.v1.TraceConfigV2 trace_config = 20;
+  // .executor.v1.TraceConfigV2 trace_config = 19;
   bool has_trace_config() const;
   private:
   bool _internal_has_trace_config() const;
@@ -10433,7 +10462,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
       ::executor::v1::TraceConfigV2* trace_config);
   ::executor::v1::TraceConfigV2* unsafe_arena_release_trace_config();
 
-  // .executor.v1.DebugV2 debug = 24;
+  // .executor.v1.DebugV2 debug = 23;
   bool has_debug() const;
   private:
   bool _internal_has_debug() const;
@@ -10478,16 +10507,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   void _internal_set_previous_l1_info_tree_index(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 type = 8;
-  void clear_type();
-  ::PROTOBUF_NAMESPACE_ID::uint32 type() const;
-  void set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_type() const;
-  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // uint32 update_merkle_tree = 12;
+  // uint32 update_merkle_tree = 11;
   void clear_update_merkle_tree();
   ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree() const;
   void set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -10496,7 +10516,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   void _internal_set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 no_counters = 13;
+  // uint32 no_counters = 12;
   void clear_no_counters();
   ::PROTOBUF_NAMESPACE_ID::uint32 no_counters() const;
   void set_no_counters(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -10505,7 +10525,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   void _internal_set_no_counters(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 skip_first_change_l2_block = 15;
+  // uint32 skip_first_change_l2_block = 14;
   void clear_skip_first_change_l2_block();
   ::PROTOBUF_NAMESPACE_ID::uint32 skip_first_change_l2_block() const;
   void set_skip_first_change_l2_block(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -10514,7 +10534,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   void _internal_set_skip_first_change_l2_block(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 skip_write_block_info_root = 16;
+  // uint32 skip_write_block_info_root = 15;
   void clear_skip_write_block_info_root();
   ::PROTOBUF_NAMESPACE_ID::uint32 skip_write_block_info_root() const;
   void set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -10523,7 +10543,7 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   void _internal_set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 get_keys = 22;
+  // uint32 get_keys = 21;
   void clear_get_keys();
   ::PROTOBUF_NAMESPACE_ID::uint32 get_keys() const;
   void set_get_keys(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -10577,7 +10597,6 @@ class ProcessBatchRequestV3 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   ::PROTOBUF_NAMESPACE_ID::uint32 previous_l1_info_tree_index_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 type_;
   ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree_;
   ::PROTOBUF_NAMESPACE_ID::uint32 no_counters_;
   ::PROTOBUF_NAMESPACE_ID::uint32 skip_first_change_l2_block_;
@@ -10701,34 +10720,34 @@ class L1DataV3 PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kSmtProofFieldNumber = 4,
+    kSmtProofPreviousIndexFieldNumber = 4,
     kGlobalExitRootFieldNumber = 1,
     kBlockHashL1FieldNumber = 2,
     kInitialHistoricRootFieldNumber = 5,
     kMinTimestampFieldNumber = 3,
   };
-  // repeated bytes smt_proof = 4;
-  int smt_proof_size() const;
+  // repeated bytes smt_proof_previous_index = 4;
+  int smt_proof_previous_index_size() const;
   private:
-  int _internal_smt_proof_size() const;
+  int _internal_smt_proof_previous_index_size() const;
   public:
-  void clear_smt_proof();
-  const std::string& smt_proof(int index) const;
-  std::string* mutable_smt_proof(int index);
-  void set_smt_proof(int index, const std::string& value);
-  void set_smt_proof(int index, std::string&& value);
-  void set_smt_proof(int index, const char* value);
-  void set_smt_proof(int index, const void* value, size_t size);
-  std::string* add_smt_proof();
-  void add_smt_proof(const std::string& value);
-  void add_smt_proof(std::string&& value);
-  void add_smt_proof(const char* value);
-  void add_smt_proof(const void* value, size_t size);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& smt_proof() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_smt_proof();
+  void clear_smt_proof_previous_index();
+  const std::string& smt_proof_previous_index(int index) const;
+  std::string* mutable_smt_proof_previous_index(int index);
+  void set_smt_proof_previous_index(int index, const std::string& value);
+  void set_smt_proof_previous_index(int index, std::string&& value);
+  void set_smt_proof_previous_index(int index, const char* value);
+  void set_smt_proof_previous_index(int index, const void* value, size_t size);
+  std::string* add_smt_proof_previous_index();
+  void add_smt_proof_previous_index(const std::string& value);
+  void add_smt_proof_previous_index(std::string&& value);
+  void add_smt_proof_previous_index(const char* value);
+  void add_smt_proof_previous_index(const void* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& smt_proof_previous_index() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_smt_proof_previous_index();
   private:
-  const std::string& _internal_smt_proof(int index) const;
-  std::string* _internal_add_smt_proof();
+  const std::string& _internal_smt_proof_previous_index(int index) const;
+  std::string* _internal_add_smt_proof_previous_index();
   public:
 
   // bytes global_exit_root = 1;
@@ -10822,7 +10841,7 @@ class L1DataV3 PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> smt_proof_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> smt_proof_previous_index_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr block_hash_l1_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr initial_historic_root_;
@@ -11849,7 +11868,6 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
     kOldStateRootFieldNumber = 4,
     kLastL1InfoTreeRootFieldNumber = 7,
     kCoinbaseFieldNumber = 9,
-    kZkGasLimitFieldNumber = 10,
     kPointZFieldNumber = 12,
     kPointYFieldNumber = 13,
     kBlobDataFieldNumber = 14,
@@ -11860,7 +11878,8 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
     kForkIdFieldNumber = 5,
     kTimestampLimitFieldNumber = 8,
     kLastL1InfoTreeIndexFieldNumber = 6,
-    kTypeFieldNumber = 11,
+    kBlobTypeFieldNumber = 11,
+    kZkGasLimitFieldNumber = 10,
   };
   // bytes old_blob_state_root = 1;
   void clear_old_blob_state_root();
@@ -11985,31 +12004,6 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
   const std::string& _internal_coinbase() const;
   void _internal_set_coinbase(const std::string& value);
   std::string* _internal_mutable_coinbase();
-  public:
-
-  // bytes zk_gas_limit = 10;
-  void clear_zk_gas_limit();
-  const std::string& zk_gas_limit() const;
-  void set_zk_gas_limit(const std::string& value);
-  void set_zk_gas_limit(std::string&& value);
-  void set_zk_gas_limit(const char* value);
-  void set_zk_gas_limit(const void* value, size_t size);
-  std::string* mutable_zk_gas_limit();
-  std::string* release_zk_gas_limit();
-  void set_allocated_zk_gas_limit(std::string* zk_gas_limit);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_zk_gas_limit();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_zk_gas_limit(
-      std::string* zk_gas_limit);
-  private:
-  const std::string& _internal_zk_gas_limit() const;
-  void _internal_set_zk_gas_limit(const std::string& value);
-  std::string* _internal_mutable_zk_gas_limit();
   public:
 
   // bytes point_z = 12;
@@ -12191,13 +12185,22 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
   void _internal_set_last_l1_info_tree_index(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 type = 11;
-  void clear_type();
-  ::PROTOBUF_NAMESPACE_ID::uint32 type() const;
-  void set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  // uint32 blob_type = 11;
+  void clear_blob_type();
+  ::PROTOBUF_NAMESPACE_ID::uint32 blob_type() const;
+  void set_blob_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_type() const;
-  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_blob_type() const;
+  void _internal_set_blob_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint64 zk_gas_limit = 10;
+  void clear_zk_gas_limit();
+  ::PROTOBUF_NAMESPACE_ID::uint64 zk_gas_limit() const;
+  void set_zk_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_zk_gas_limit() const;
+  void _internal_set_zk_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBlobInnerRequestV3)
@@ -12212,7 +12215,6 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr last_l1_info_tree_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr zk_gas_limit_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr point_z_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr point_y_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr blob_data_;
@@ -12223,7 +12225,8 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit_;
   ::PROTOBUF_NAMESPACE_ID::uint32 last_l1_info_tree_index_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 type_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 blob_type_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 zk_gas_limit_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -12541,6 +12544,7 @@ class ProcessBlobInnerResponseV3 PROTOBUF_FINAL :
     kNewNumBlobFieldNumber = 3,
     kIsInvalidFieldNumber = 6,
     kErrorFieldNumber = 8,
+    kErrorRomBlobFieldNumber = 9,
   };
   // repeated bytes batch_data = 7;
   int batch_data_size() const;
@@ -12693,6 +12697,15 @@ class ProcessBlobInnerResponseV3 PROTOBUF_FINAL :
   void _internal_set_error(::executor::v1::ExecutorError value);
   public:
 
+  // .executor.v1.RomBlobError error_rom_blob = 9;
+  void clear_error_rom_blob();
+  ::executor::v1::RomBlobError error_rom_blob() const;
+  void set_error_rom_blob(::executor::v1::RomBlobError value);
+  private:
+  ::executor::v1::RomBlobError _internal_error_rom_blob() const;
+  void _internal_set_error_rom_blob(::executor::v1::RomBlobError value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBlobInnerResponseV3)
  private:
   class _Internal;
@@ -12708,6 +12721,7 @@ class ProcessBlobInnerResponseV3 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 new_num_blob_;
   ::PROTOBUF_NAMESPACE_ID::uint32 is_invalid_;
   int error_;
+  int error_rom_blob_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -27090,27 +27104,7 @@ inline void ProcessBatchRequestV3::unsafe_arena_set_allocated_batch_l2_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequestV3.batch_l2_data)
 }
 
-// uint32 type = 8;
-inline void ProcessBatchRequestV3::clear_type() {
-  type_ = 0u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequestV3::_internal_type() const {
-  return type_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequestV3::type() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequestV3.type)
-  return _internal_type();
-}
-inline void ProcessBatchRequestV3::_internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  
-  type_ = value;
-}
-inline void ProcessBatchRequestV3::set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV3.type)
-}
-
-// bytes forced_hash_data = 9;
+// bytes forced_hash_data = 8;
 inline void ProcessBatchRequestV3::clear_forced_hash_data() {
   forced_hash_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -27191,7 +27185,7 @@ inline void ProcessBatchRequestV3::unsafe_arena_set_allocated_forced_hash_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequestV3.forced_hash_data)
 }
 
-// .executor.v1.ForcedData forced_data = 10;
+// .executor.v1.ForcedData forced_data = 9;
 inline bool ProcessBatchRequestV3::_internal_has_forced_data() const {
   return this != internal_default_instance() && forced_data_ != nullptr;
 }
@@ -27272,7 +27266,7 @@ inline void ProcessBatchRequestV3::set_allocated_forced_data(::executor::v1::For
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequestV3.forced_data)
 }
 
-// string coinbase = 11;
+// string coinbase = 10;
 inline void ProcessBatchRequestV3::clear_coinbase() {
   coinbase_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -27353,7 +27347,7 @@ inline void ProcessBatchRequestV3::unsafe_arena_set_allocated_coinbase(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequestV3.coinbase)
 }
 
-// uint32 update_merkle_tree = 12;
+// uint32 update_merkle_tree = 11;
 inline void ProcessBatchRequestV3::clear_update_merkle_tree() {
   update_merkle_tree_ = 0u;
 }
@@ -27373,7 +27367,7 @@ inline void ProcessBatchRequestV3::set_update_merkle_tree(::PROTOBUF_NAMESPACE_I
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV3.update_merkle_tree)
 }
 
-// uint32 no_counters = 13;
+// uint32 no_counters = 12;
 inline void ProcessBatchRequestV3::clear_no_counters() {
   no_counters_ = 0u;
 }
@@ -27393,7 +27387,7 @@ inline void ProcessBatchRequestV3::set_no_counters(::PROTOBUF_NAMESPACE_ID::uint
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV3.no_counters)
 }
 
-// string from = 14;
+// string from = 13;
 inline void ProcessBatchRequestV3::clear_from() {
   from_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -27474,7 +27468,7 @@ inline void ProcessBatchRequestV3::unsafe_arena_set_allocated_from(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequestV3.from)
 }
 
-// uint32 skip_first_change_l2_block = 15;
+// uint32 skip_first_change_l2_block = 14;
 inline void ProcessBatchRequestV3::clear_skip_first_change_l2_block() {
   skip_first_change_l2_block_ = 0u;
 }
@@ -27494,7 +27488,7 @@ inline void ProcessBatchRequestV3::set_skip_first_change_l2_block(::PROTOBUF_NAM
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV3.skip_first_change_l2_block)
 }
 
-// uint32 skip_write_block_info_root = 16;
+// uint32 skip_write_block_info_root = 15;
 inline void ProcessBatchRequestV3::clear_skip_write_block_info_root() {
   skip_write_block_info_root_ = 0u;
 }
@@ -27514,7 +27508,7 @@ inline void ProcessBatchRequestV3::set_skip_write_block_info_root(::PROTOBUF_NAM
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV3.skip_write_block_info_root)
 }
 
-// map<uint32, .executor.v1.L1DataV3> l1_info_tree_data = 17;
+// map<uint32, .executor.v1.L1DataV3> l1_info_tree_data = 16;
 inline int ProcessBatchRequestV3::_internal_l1_info_tree_data_size() const {
   return l1_info_tree_data_.size();
 }
@@ -27543,7 +27537,7 @@ ProcessBatchRequestV3::mutable_l1_info_tree_data() {
   return _internal_mutable_l1_info_tree_data();
 }
 
-// map<string, string> db = 18;
+// map<string, string> db = 17;
 inline int ProcessBatchRequestV3::_internal_db_size() const {
   return db_.size();
 }
@@ -27572,7 +27566,7 @@ ProcessBatchRequestV3::mutable_db() {
   return _internal_mutable_db();
 }
 
-// map<string, string> contracts_bytecode = 19;
+// map<string, string> contracts_bytecode = 18;
 inline int ProcessBatchRequestV3::_internal_contracts_bytecode_size() const {
   return contracts_bytecode_.size();
 }
@@ -27601,7 +27595,7 @@ ProcessBatchRequestV3::mutable_contracts_bytecode() {
   return _internal_mutable_contracts_bytecode();
 }
 
-// .executor.v1.TraceConfigV2 trace_config = 20;
+// .executor.v1.TraceConfigV2 trace_config = 19;
 inline bool ProcessBatchRequestV3::_internal_has_trace_config() const {
   return this != internal_default_instance() && trace_config_ != nullptr;
 }
@@ -27682,7 +27676,7 @@ inline void ProcessBatchRequestV3::set_allocated_trace_config(::executor::v1::Tr
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequestV3.trace_config)
 }
 
-// string context_id = 21;
+// string context_id = 20;
 inline void ProcessBatchRequestV3::clear_context_id() {
   context_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -27763,7 +27757,7 @@ inline void ProcessBatchRequestV3::unsafe_arena_set_allocated_context_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequestV3.context_id)
 }
 
-// uint32 get_keys = 22;
+// uint32 get_keys = 21;
 inline void ProcessBatchRequestV3::clear_get_keys() {
   get_keys_ = 0u;
 }
@@ -27783,7 +27777,7 @@ inline void ProcessBatchRequestV3::set_get_keys(::PROTOBUF_NAMESPACE_ID::uint32 
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV3.get_keys)
 }
 
-// map<string, .executor.v1.OverrideAccountV2> state_override = 23;
+// map<string, .executor.v1.OverrideAccountV2> state_override = 22;
 inline int ProcessBatchRequestV3::_internal_state_override_size() const {
   return state_override_.size();
 }
@@ -27812,7 +27806,7 @@ ProcessBatchRequestV3::mutable_state_override() {
   return _internal_mutable_state_override();
 }
 
-// .executor.v1.DebugV2 debug = 24;
+// .executor.v1.DebugV2 debug = 23;
 inline bool ProcessBatchRequestV3::_internal_has_debug() const {
   return this != internal_default_instance() && debug_ != nullptr;
 }
@@ -28079,78 +28073,78 @@ inline void L1DataV3::set_min_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:executor.v1.L1DataV3.min_timestamp)
 }
 
-// repeated bytes smt_proof = 4;
-inline int L1DataV3::_internal_smt_proof_size() const {
-  return smt_proof_.size();
+// repeated bytes smt_proof_previous_index = 4;
+inline int L1DataV3::_internal_smt_proof_previous_index_size() const {
+  return smt_proof_previous_index_.size();
 }
-inline int L1DataV3::smt_proof_size() const {
-  return _internal_smt_proof_size();
+inline int L1DataV3::smt_proof_previous_index_size() const {
+  return _internal_smt_proof_previous_index_size();
 }
-inline void L1DataV3::clear_smt_proof() {
-  smt_proof_.Clear();
+inline void L1DataV3::clear_smt_proof_previous_index() {
+  smt_proof_previous_index_.Clear();
 }
-inline std::string* L1DataV3::add_smt_proof() {
-  // @@protoc_insertion_point(field_add_mutable:executor.v1.L1DataV3.smt_proof)
-  return _internal_add_smt_proof();
+inline std::string* L1DataV3::add_smt_proof_previous_index() {
+  // @@protoc_insertion_point(field_add_mutable:executor.v1.L1DataV3.smt_proof_previous_index)
+  return _internal_add_smt_proof_previous_index();
 }
-inline const std::string& L1DataV3::_internal_smt_proof(int index) const {
-  return smt_proof_.Get(index);
+inline const std::string& L1DataV3::_internal_smt_proof_previous_index(int index) const {
+  return smt_proof_previous_index_.Get(index);
 }
-inline const std::string& L1DataV3::smt_proof(int index) const {
-  // @@protoc_insertion_point(field_get:executor.v1.L1DataV3.smt_proof)
-  return _internal_smt_proof(index);
+inline const std::string& L1DataV3::smt_proof_previous_index(int index) const {
+  // @@protoc_insertion_point(field_get:executor.v1.L1DataV3.smt_proof_previous_index)
+  return _internal_smt_proof_previous_index(index);
 }
-inline std::string* L1DataV3::mutable_smt_proof(int index) {
-  // @@protoc_insertion_point(field_mutable:executor.v1.L1DataV3.smt_proof)
-  return smt_proof_.Mutable(index);
+inline std::string* L1DataV3::mutable_smt_proof_previous_index(int index) {
+  // @@protoc_insertion_point(field_mutable:executor.v1.L1DataV3.smt_proof_previous_index)
+  return smt_proof_previous_index_.Mutable(index);
 }
-inline void L1DataV3::set_smt_proof(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:executor.v1.L1DataV3.smt_proof)
-  smt_proof_.Mutable(index)->assign(value);
+inline void L1DataV3::set_smt_proof_previous_index(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.L1DataV3.smt_proof_previous_index)
+  smt_proof_previous_index_.Mutable(index)->assign(value);
 }
-inline void L1DataV3::set_smt_proof(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:executor.v1.L1DataV3.smt_proof)
-  smt_proof_.Mutable(index)->assign(std::move(value));
+inline void L1DataV3::set_smt_proof_previous_index(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.L1DataV3.smt_proof_previous_index)
+  smt_proof_previous_index_.Mutable(index)->assign(std::move(value));
 }
-inline void L1DataV3::set_smt_proof(int index, const char* value) {
+inline void L1DataV3::set_smt_proof_previous_index(int index, const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  smt_proof_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:executor.v1.L1DataV3.smt_proof)
+  smt_proof_previous_index_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:executor.v1.L1DataV3.smt_proof_previous_index)
 }
-inline void L1DataV3::set_smt_proof(int index, const void* value, size_t size) {
-  smt_proof_.Mutable(index)->assign(
+inline void L1DataV3::set_smt_proof_previous_index(int index, const void* value, size_t size) {
+  smt_proof_previous_index_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.L1DataV3.smt_proof)
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.L1DataV3.smt_proof_previous_index)
 }
-inline std::string* L1DataV3::_internal_add_smt_proof() {
-  return smt_proof_.Add();
+inline std::string* L1DataV3::_internal_add_smt_proof_previous_index() {
+  return smt_proof_previous_index_.Add();
 }
-inline void L1DataV3::add_smt_proof(const std::string& value) {
-  smt_proof_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:executor.v1.L1DataV3.smt_proof)
+inline void L1DataV3::add_smt_proof_previous_index(const std::string& value) {
+  smt_proof_previous_index_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:executor.v1.L1DataV3.smt_proof_previous_index)
 }
-inline void L1DataV3::add_smt_proof(std::string&& value) {
-  smt_proof_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:executor.v1.L1DataV3.smt_proof)
+inline void L1DataV3::add_smt_proof_previous_index(std::string&& value) {
+  smt_proof_previous_index_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:executor.v1.L1DataV3.smt_proof_previous_index)
 }
-inline void L1DataV3::add_smt_proof(const char* value) {
+inline void L1DataV3::add_smt_proof_previous_index(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  smt_proof_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:executor.v1.L1DataV3.smt_proof)
+  smt_proof_previous_index_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:executor.v1.L1DataV3.smt_proof_previous_index)
 }
-inline void L1DataV3::add_smt_proof(const void* value, size_t size) {
-  smt_proof_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:executor.v1.L1DataV3.smt_proof)
+inline void L1DataV3::add_smt_proof_previous_index(const void* value, size_t size) {
+  smt_proof_previous_index_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:executor.v1.L1DataV3.smt_proof_previous_index)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-L1DataV3::smt_proof() const {
-  // @@protoc_insertion_point(field_list:executor.v1.L1DataV3.smt_proof)
-  return smt_proof_;
+L1DataV3::smt_proof_previous_index() const {
+  // @@protoc_insertion_point(field_list:executor.v1.L1DataV3.smt_proof_previous_index)
+  return smt_proof_previous_index_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-L1DataV3::mutable_smt_proof() {
-  // @@protoc_insertion_point(field_mutable_list:executor.v1.L1DataV3.smt_proof)
-  return &smt_proof_;
+L1DataV3::mutable_smt_proof_previous_index() {
+  // @@protoc_insertion_point(field_mutable_list:executor.v1.L1DataV3.smt_proof_previous_index)
+  return &smt_proof_previous_index_;
 }
 
 // bytes initial_historic_root = 5;
@@ -30178,105 +30172,44 @@ inline void ProcessBlobInnerRequestV3::unsafe_arena_set_allocated_coinbase(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBlobInnerRequestV3.coinbase)
 }
 
-// bytes zk_gas_limit = 10;
+// uint64 zk_gas_limit = 10;
 inline void ProcessBlobInnerRequestV3::clear_zk_gas_limit() {
-  zk_gas_limit_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  zk_gas_limit_ = PROTOBUF_ULONGLONG(0);
 }
-inline const std::string& ProcessBlobInnerRequestV3::zk_gas_limit() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBlobInnerRequestV3::_internal_zk_gas_limit() const {
+  return zk_gas_limit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBlobInnerRequestV3::zk_gas_limit() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
   return _internal_zk_gas_limit();
 }
-inline void ProcessBlobInnerRequestV3::set_zk_gas_limit(const std::string& value) {
+inline void ProcessBlobInnerRequestV3::_internal_set_zk_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  zk_gas_limit_ = value;
+}
+inline void ProcessBlobInnerRequestV3::set_zk_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_zk_gas_limit(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
 }
-inline std::string* ProcessBlobInnerRequestV3::mutable_zk_gas_limit() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
-  return _internal_mutable_zk_gas_limit();
-}
-inline const std::string& ProcessBlobInnerRequestV3::_internal_zk_gas_limit() const {
-  return zk_gas_limit_.Get();
-}
-inline void ProcessBlobInnerRequestV3::_internal_set_zk_gas_limit(const std::string& value) {
-  
-  zk_gas_limit_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void ProcessBlobInnerRequestV3::set_zk_gas_limit(std::string&& value) {
-  
-  zk_gas_limit_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
-}
-inline void ProcessBlobInnerRequestV3::set_zk_gas_limit(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  zk_gas_limit_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
-}
-inline void ProcessBlobInnerRequestV3::set_zk_gas_limit(const void* value,
-    size_t size) {
-  
-  zk_gas_limit_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
-}
-inline std::string* ProcessBlobInnerRequestV3::_internal_mutable_zk_gas_limit() {
-  
-  return zk_gas_limit_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* ProcessBlobInnerRequestV3::release_zk_gas_limit() {
-  // @@protoc_insertion_point(field_release:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
-  return zk_gas_limit_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ProcessBlobInnerRequestV3::set_allocated_zk_gas_limit(std::string* zk_gas_limit) {
-  if (zk_gas_limit != nullptr) {
-    
-  } else {
-    
-  }
-  zk_gas_limit_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), zk_gas_limit,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
-}
-inline std::string* ProcessBlobInnerRequestV3::unsafe_arena_release_zk_gas_limit() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return zk_gas_limit_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void ProcessBlobInnerRequestV3::unsafe_arena_set_allocated_zk_gas_limit(
-    std::string* zk_gas_limit) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (zk_gas_limit != nullptr) {
-    
-  } else {
-    
-  }
-  zk_gas_limit_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      zk_gas_limit, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBlobInnerRequestV3.zk_gas_limit)
-}
 
-// uint32 type = 11;
-inline void ProcessBlobInnerRequestV3::clear_type() {
-  type_ = 0u;
+// uint32 blob_type = 11;
+inline void ProcessBlobInnerRequestV3::clear_blob_type() {
+  blob_type_ = 0u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBlobInnerRequestV3::_internal_type() const {
-  return type_;
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBlobInnerRequestV3::_internal_blob_type() const {
+  return blob_type_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBlobInnerRequestV3::type() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessBlobInnerRequestV3.type)
-  return _internal_type();
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBlobInnerRequestV3::blob_type() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBlobInnerRequestV3.blob_type)
+  return _internal_blob_type();
 }
-inline void ProcessBlobInnerRequestV3::_internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void ProcessBlobInnerRequestV3::_internal_set_blob_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
-  type_ = value;
+  blob_type_ = value;
 }
-inline void ProcessBlobInnerRequestV3::set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBlobInnerRequestV3.type)
+inline void ProcessBlobInnerRequestV3::set_blob_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_blob_type(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBlobInnerRequestV3.blob_type)
 }
 
 // bytes point_z = 12;
@@ -31413,6 +31346,26 @@ inline void ProcessBlobInnerResponseV3::set_error(::executor::v1::ExecutorError 
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBlobInnerResponseV3.error)
 }
 
+// .executor.v1.RomBlobError error_rom_blob = 9;
+inline void ProcessBlobInnerResponseV3::clear_error_rom_blob() {
+  error_rom_blob_ = 0;
+}
+inline ::executor::v1::RomBlobError ProcessBlobInnerResponseV3::_internal_error_rom_blob() const {
+  return static_cast< ::executor::v1::RomBlobError >(error_rom_blob_);
+}
+inline ::executor::v1::RomBlobError ProcessBlobInnerResponseV3::error_rom_blob() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBlobInnerResponseV3.error_rom_blob)
+  return _internal_error_rom_blob();
+}
+inline void ProcessBlobInnerResponseV3::_internal_set_error_rom_blob(::executor::v1::RomBlobError value) {
+  
+  error_rom_blob_ = value;
+}
+inline void ProcessBlobInnerResponseV3::set_error_rom_blob(::executor::v1::RomBlobError value) {
+  _internal_set_error_rom_blob(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBlobInnerResponseV3.error_rom_blob)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
@@ -31541,6 +31494,11 @@ template <> struct is_proto_enum< ::executor::v1::ExecutorError> : ::std::true_t
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::executor::v1::ExecutorError>() {
   return ::executor::v1::ExecutorError_descriptor();
+}
+template <> struct is_proto_enum< ::executor::v1::RomBlobError> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::executor::v1::RomBlobError>() {
+  return ::executor::v1::RomBlobError_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

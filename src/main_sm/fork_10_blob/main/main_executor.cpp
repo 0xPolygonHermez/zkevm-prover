@@ -213,7 +213,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         vector<uint8_t> blobDataVector;
         ba2ba(proverRequest.input.publicInputsExtended.publicInputs.blobData, blobDataVector);
 
-        if (proverRequest.input.publicInputsExtended.publicInputs.type == 1)
+        if (proverRequest.input.publicInputsExtended.publicInputs.blobType == 1)
         {
             // Load poseidonBlobData into DB
             Goldilocks::Element blobKey[4];
@@ -2116,7 +2116,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     {
                         // reverse bytes
                         mpz_class _tmpv = 0;
-                        for (int ilen = 0; ilen < _len; ++ilen) 
+                        for (uint64_t ilen = 0; ilen < _len; ++ilen) 
                         {
                             _tmpv = (_tmpv << 8) | (_v & 0xFF);
                             _v = _v >> 8;
@@ -4957,7 +4957,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     // reverse bytes
                     mpz_class _tmpv = 0;
-                    for (int ilen = 0; ilen < _len; ++ilen) 
+                    for (uint64_t ilen = 0; ilen < _len; ++ilen) 
                     {
                         _tmpv = (_tmpv << 8) | (_v & 0xFF);
                         _v = _v >> 8;
@@ -5004,14 +5004,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     // reverse bytes
                     mpz_class _tmpv = 0;
-                    for (int ilen = 0; ilen < _len; ++ilen) 
+                    for (uint64_t ilen = 0; ilen < _len; ++ilen) 
                     {
                     _tmpv = (_tmpv << 8) | (_v & 0xFF);
                         _v = _v >> 8;
                     }
                     _v = _tmpv;
                 }
-            if (leftAlignment && _len < 32) 
+                if (leftAlignment && _len < 32) 
                 {
                     _v = _v << ((32 - len) * 8);
                 }

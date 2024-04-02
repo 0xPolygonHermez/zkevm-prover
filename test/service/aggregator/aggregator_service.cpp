@@ -362,7 +362,6 @@ using grpc::Status;
     pPublicInputs->set_fork_id(input.publicInputsExtended.publicInputs.forkID);
     pPublicInputs->set_batch_l2_data(string2ba(input.publicInputsExtended.publicInputs.batchL2Data));
     pPublicInputs->set_sequencer_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
-    pPublicInputs->set_type(input.publicInputsExtended.publicInputs.type);
     pPublicInputs->set_forced_hash_data(scalar2ba(input.publicInputsExtended.publicInputs.forcedHashData));
     // Forced data
     aggregator::v1::ForcedData * pForcedData = new aggregator::v1::ForcedData();
@@ -382,7 +381,7 @@ using grpc::Status;
         l1Data.set_initial_historic_root(scalar2ba(itL1Data->second.initialHistoricRoot));
         for (uint64_t i=0; i<itL1Data->second.smtProof.size(); i++)
         {
-            l1Data.add_smt_proof(string2ba(itL1Data->second.smtProof[i].get_str(16)));
+            l1Data.add_smt_proof_previous_index(string2ba(itL1Data->second.smtProofPreviousIndex[i].get_str(16)));
         }
         (*pInputProver->mutable_public_inputs()->mutable_l1_info_tree_data())[itL1Data->first] = l1Data;
     }
@@ -493,8 +492,8 @@ using grpc::Status;
     pPublicInputs->set_last_l1_info_tree_root(scalar2ba(input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot));
     pPublicInputs->set_sequencer_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
     pPublicInputs->set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
-    pPublicInputs->set_zk_gas_limit(scalar2ba(input.publicInputsExtended.publicInputs.zkGasLimit));
-    pPublicInputs->set_type(input.publicInputsExtended.publicInputs.type);
+    pPublicInputs->set_zk_gas_limit(input.publicInputsExtended.publicInputs.zkGasLimit);
+    pPublicInputs->set_blob_type(input.publicInputsExtended.publicInputs.blobType);
     pPublicInputs->set_point_z(scalar2ba(input.publicInputsExtended.publicInputs.pointZ));
     pPublicInputs->set_point_y(scalar2ba(input.publicInputsExtended.publicInputs.pointY));
     pPublicInputs->set_blob_data(string2ba(input.publicInputsExtended.publicInputs.blobData));

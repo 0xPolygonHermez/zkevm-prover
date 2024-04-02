@@ -26,7 +26,7 @@ public:
     uint32_t   oldBatchNum;
     uint64_t   chainID;
     string     batchL2Data; // This is, in fact, a byte array, not a hex string(not "0xf355...")
-    uint32_t   type; // Used when forkID >= 9 (V3)
+    uint32_t   blobType; // Used when forkID >= 10 (V3)
     mpz_class  forcedHashData; // Used when forkID >= 9 (V3)
     ForcedData forcedData;
     mpz_class  globalExitRoot; // Used when forkID <= 6
@@ -45,7 +45,7 @@ public:
     uint64_t   oldBlobNum;
     uint32_t   lastL1InfoTreeIndex;
     mpz_class  lastL1InfoTreeRoot;
-    mpz_class  zkGasLimit;
+    uint64_t   zkGasLimit;
     mpz_class  pointZ;
     mpz_class  pointY;
     string     blobData;
@@ -56,11 +56,12 @@ public:
         previousL1InfoTreeIndex(0),
         oldBatchNum(0),
         chainID(0),
-        type(0),
+        blobType(0),
         timestamp(0),
         timestampLimit(0),
         oldBlobNum(0),
-        lastL1InfoTreeIndex(0)
+        lastL1InfoTreeIndex(0),
+        zkGasLimit(0)
     {
         aggregatorAddress.set_str("f39fd6e51aad88f6f4ce6ab8827279cfffb92266", 16); // Default aggregator address
     }

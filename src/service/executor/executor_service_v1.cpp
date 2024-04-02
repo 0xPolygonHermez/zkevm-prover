@@ -1011,3 +1011,17 @@ using grpc::Status;
     }
     }
 }
+
+::executor::v1::RomBlobError ExecutorServiceImpl::string2rombloberror (string &result)
+{
+    if (result == "error_invalid_compression_type")     return ::executor::v1::ROM_BLOB_ERROR_INVALID_COMPRESSION_TYPE;
+    if (result == "error_invalid_parsing")              return ::executor::v1::ROM_BLOB_ERROR_INVALID_PARSING;
+    if (result == "error_invalid_msb_byte")             return ::executor::v1::ROM_BLOB_ERROR_INVALID_MSB_BYTE;
+    if (result == "error_invalid_zkgaslimit")           return ::executor::v1::ROM_BLOB_ERROR_INVALID_ZK_GAS_LIMIT;
+    if (result == "error_invalid_blob_type")            return ::executor::v1::ROM_BLOB_ERROR_INVALID_BLOB_TYPE;
+    if (result == "")                                   return ::executor::v1::ROM_BLOB_ERROR_NO_ERROR;
+
+    zklog.error("ExecutorServiceImpl::string2rombloberror() found invalid error string=" + result);
+    exitProcess();
+    return ::executor::v1::ROM_BLOB_ERROR_UNSPECIFIED;
+}
