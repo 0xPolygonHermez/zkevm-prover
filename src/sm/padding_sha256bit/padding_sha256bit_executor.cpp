@@ -144,7 +144,7 @@ void PaddingSha256BitExecutor::execute (vector<PaddingSha256BitExecutorInput> &i
 
     uint64_t pDone = p;
 
-    zklog.info("PaddingKKBitExecutor successfully processed " + to_string(input.size()) + " Keccak actions p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
+    zklog.info("PaddingSha256BitExecutor successfully processed " + to_string(input.size()) + " Sha256 actions p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
 
 }
 

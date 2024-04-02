@@ -18,6 +18,40 @@ using namespace std;
 class Sha256FExecutorInput
 {
 public:
+    typedef struct{
+        uint64_t * stIn;
+        uint64_t stIn_size;
+        uint64_t * rIn;
+        uint64_t rIn_size;
+    } DTO;
+    inline void toDTO(DTO* dto) const{
+        dto->stIn = (uint64_t*) stIn.data();
+        dto->stIn_size = stIn.size();
+        dto->rIn = (uint64_t*) rIn.data();
+        dto->rIn_size = rIn.size();
+    }
+    inline void fromDTO(DTO* dto){
+        stIn.resize(dto->stIn_size);
+        if(dto->stIn_size > 0)
+            stIn.assign((Goldilocks::Element*)dto->stIn, (Goldilocks::Element*)dto->stIn + dto->stIn_size);
+        rIn.resize(dto->rIn_size);
+        if(dto->rIn_size > 0)
+            rIn.assign((Goldilocks::Element*)dto->rIn, (Goldilocks::Element*)dto->rIn + dto->rIn_size);
+    }
+    static inline DTO * toDTO(const vector<Sha256FExecutorInput> &input){
+        DTO * dto = new DTO[input.size()];
+        for (uint64_t i = 0; i < input.size(); i++){
+            input[i].toDTO(dto + i);
+        }
+        return dto;
+    }
+    static inline void fromDTO(DTO* dto, uint64_t dto_size, vector<Sha256FExecutorInput> &output){
+        output.resize(dto_size);
+        for (uint64_t i = 0; i < dto_size; i++){
+            output[i].fromDTO(dto +i);
+        }
+    }
+
     vector<Goldilocks::Element> stIn;
     vector<Goldilocks::Element> rIn;
 

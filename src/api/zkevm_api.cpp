@@ -293,13 +293,12 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     prover.execute(&proverRequest);
 }
 
-
-int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
+int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRequestsOut)
 {
     
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
-    file2json(pConfigFile, configJson);
+    file2json(configFile, configJson);
     config.load(configJson);
     zklog.setJsonLogs(config.jsonLogs);
     zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
@@ -312,7 +311,7 @@ int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
     zklog.warning("Checking warning channel; ignore this trace");
 
     // Print the configuration file name
-    string configFileName = pConfigFile;
+    string configFileName = configFile;
     zklog.info("Config file: " + configFileName);
 
     // Print the number of cores
@@ -541,7 +540,8 @@ int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
                   poseidon,
                   config,
                   pAddress);
-    prover.setMainSMRequestsPointer(pMainSMRquests);
+    prover.setSMRequestsPointer(pSMRequests);
+    prover.setSMRequestsOutPointer(pSMRequestsOut);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* SERVERS */
@@ -827,6 +827,278 @@ int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests)
 
     zklog.info("Done");
     return 1;
+}
+int zkevm_delete_sm_requests(void **pSMRequests){
+    if(pSMRequests!= NULL && (*pSMRequests)!=NULL){
+            delete (PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests[0];
+        }
+    return 0;
+}
+
+int zkevm_arith(void * inputs_, int ninputs, void * pAddress){
+    std::vector<ArithAction> inputs;
+    if(ninputs > 0){
+        inputs.assign((ArithAction*)inputs_, (ArithAction*)inputs_ + ninputs);
+    }
+    ArithExecutor arithExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::ArithCommitPols pols(pAddress,PROVER_FORK_NAMESPACE::ArithCommitPols::pilDegree());
+    arithExecutor.execute(inputs, pols);
+    return 0;
+}
+int zkevm_arith_req( void* pSMRequests,  void * pAddress){
+    ArithExecutor arithExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::ArithCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::ArithCommitPols::pilDegree());
+    arithExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Arith, pols);
+    return 0;
+}
+int zkevm_memory(void * inputs_, int ninputs, void * pAddress){
+   std::vector<MemoryAccess> inputs;
+    if(ninputs > 0){
+        inputs.assign((MemoryAccess*)inputs_, (MemoryAccess*)inputs_ + ninputs);
+    }
+    MemoryExecutor bits2fieldExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::MemCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::MemCommitPols::pilDegree());
+    bits2fieldExecutor.execute(inputs, pols);
+    return 0;
+}
+int zkevm_memory_req( void* pSMRequests,  void * pAddress){
+    MemoryExecutor bits2fieldExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::MemCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::MemCommitPols::pilDegree());
+    bits2fieldExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Memory, pols);
+    return 0;
+}
+int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress) {
+    MemAlignAction *pinputs = (MemAlignAction*) inputs_;
+    std::vector<MemAlignAction> inputs;
+    inputs.resize(ninputs);
+    for(int i=0; i<ninputs; i++){
+        inputs[i].m0 = pinputs[i].m0;
+        inputs[i].m1 = pinputs[i].m1;
+        inputs[i].v = pinputs[i].v;
+        inputs[i].w0 = pinputs[i].w0;
+        inputs[i].w1 = pinputs[i].w1;
+        inputs[i].offset = pinputs[i].offset;
+        inputs[i].wr8 = pinputs[i].wr8;
+        inputs[i].wr256 = pinputs[i].wr256;
+    }
+    MemAlignExecutor memAlignExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::MemAlignCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::MemAlignCommitPols::pilDegree());
+    memAlignExecutor.execute(inputs,pols);
+    return 0;
+}
+int zkevm_mem_align_req( void* pSMRequests,  void * pAddress){
+    MemAlignExecutor memAlignExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::MemAlignCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::MemAlignCommitPols::pilDegree());
+    memAlignExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->MemAlign, pols);
+    return 0;
+}
+int zkevm_binary_req( void* pSMRequests,  void * pAddress){
+    BinaryExecutor binaryExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::BinaryCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::BinaryCommitPols::pilDegree());
+    binaryExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Binary, pols);
+    return 0;
+}
+int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
+   
+    PaddingSha256ExecutorInput::DTO * p_inputs= (PaddingSha256ExecutorInput::DTO*) inputs_;
+    std::vector<PaddingSha256ExecutorInput> inputs;
+    PaddingSha256ExecutorInput::fromDTO(p_inputs, ninputs, inputs);
+    PaddingSha256Executor paddingSha256Executor(fr);
+    PROVER_FORK_NAMESPACE::PaddingSha256CommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingSha256CommitPols::pilDegree());
+    std::vector<PaddingSha256BitExecutorInput> &required = ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256Bit;
+    required.clear();
+    paddingSha256Executor.execute(inputs, pols, required);
+    #ifdef __ZKEVM_SM__
+        add_padding_sha256_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
+    #endif
+    return 0;
+}
+int zkevm_padding_sha256_req(void* pSMRequests,  void * pAddress){
+    PaddingSha256Executor paddingSha256Executor(fr);
+    PROVER_FORK_NAMESPACE::PaddingSha256CommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingSha256CommitPols::pilDegree());
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256Bit.clear();
+    paddingSha256Executor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256, 
+                                  pols,
+                                  ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256Bit);
+    return 0;
+}
+int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
+    std::vector<PaddingSha256BitExecutorInput> inputs;
+    if(ninputs > 0){
+        inputs.assign((PaddingSha256BitExecutorInput*)inputs_, (PaddingSha256BitExecutorInput*)inputs_ + ninputs);
+    }
+    PaddingSha256BitExecutor paddingSha256BitExecutor(fr);
+    PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree());
+    vector<Bits2FieldSha256ExecutorInput> &required=((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2FieldSha256;
+    required.clear();
+    paddingSha256BitExecutor.execute(inputs, pols,required);
+    #ifdef __ZKEVM_SM__
+        add_bits_2_field_sha256_inputs(pSMRequestsOut, (void *) required.data(), (uint64_t) required.size());
+    #endif
+    return 0;
+}
+int zkevm_padding_sha256_bit_req(void* pSMRequests,  void * pAddress){
+    PaddingSha256BitExecutor paddingSha256BitExecutor(fr);
+    PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree());
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2FieldSha256.clear();
+    paddingSha256BitExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingSha256Bit, pols, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2FieldSha256);
+    return 0;
+}
+int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
+    std::vector<Bits2FieldSha256ExecutorInput> inputs;
+    if(ninputs > 0){
+        inputs.assign((Bits2FieldSha256ExecutorInput*)inputs_, (Bits2FieldSha256ExecutorInput*)inputs_ + ninputs);
+    }
+    Bits2FieldSha256Executor bits2fieldSha256Executor(fr);
+    PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols::pilDegree());
+    vector<Sha256FExecutorInput> &required = ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Sha256F;
+    required.clear();
+    bits2fieldSha256Executor.execute(inputs, pols, required);
+    #ifdef __ZKEVM_SM__
+        Sha256FExecutorInput::DTO *dto = Sha256FExecutorInput::toDTO(required);
+        add_sha256_f_inputs(pSMRequestsOut, dto, (uint64_t) required.size());
+    #endif
+    return 0;
+}
+int zkevm_bits2field_sha256_req(void* pSMRequests,  void * pAddress){
+    Bits2FieldSha256Executor bits2fieldSha256Executor(fr);
+    PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Bits2FieldSha256CommitPols::pilDegree());
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Sha256F.clear();
+    bits2fieldSha256Executor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2FieldSha256, pols, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Sha256F);
+    return 0;
+}
+int zkevm_sha256_f(void * inputs_, int ninputs, void * pAddress){
+    Sha256FExecutorInput::DTO * p_inputs= (Sha256FExecutorInput::DTO*) inputs_;
+    std::vector<Sha256FExecutorInput> inputs;
+    Sha256FExecutorInput::fromDTO(p_inputs, ninputs, inputs);
+    Sha256FExecutor sha256FExecutor(fr,config);
+    PROVER_FORK_NAMESPACE::Sha256FCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Sha256FCommitPols::pilDegree());
+    sha256FExecutor.execute(inputs, pols);
+    return 0;
+}
+int zkevm_sha256_f_req( void* pSMRequests,  void * pAddress){
+    Sha256FExecutor sha256FExecutor(fr,config);
+    PROVER_FORK_NAMESPACE::Sha256FCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Sha256FCommitPols::pilDegree());
+    sha256FExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Sha256F, pols);
+    return 0;
+}
+int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
+    PaddingKKExecutorInput::DTO * p_inputs= (PaddingKKExecutorInput::DTO*) inputs_;
+    std::vector<PaddingKKExecutorInput> inputs;
+    PaddingKKExecutorInput::fromDTO(p_inputs, ninputs, inputs);
+    PaddingKKExecutor paddingKKExecutor(fr);
+    PROVER_FORK_NAMESPACE::PaddingKKCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingKKCommitPols::pilDegree());
+    std::vector<PaddingKKBitExecutorInput> &required = ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingKKBit;
+    required.clear();
+
+    paddingKKExecutor.execute(inputs, pols, required);
+    #ifdef __ZKEVM_SM__
+        add_padding_kk_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
+    #endif
+    return 0;
+}
+int zkevm_padding_kk_req(void* pSMRequests,  void * pAddress){
+    PaddingKKExecutor paddingKKExecutor(fr);
+    PROVER_FORK_NAMESPACE::PaddingKKCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingKKCommitPols::pilDegree());
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingKKBit.clear();
+    paddingKKExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingKK, 
+                              pols,
+                              ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingKKBit);
+    return 0;
+
+}
+int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
+    std::vector<PaddingKKBitExecutorInput> inputs;
+    if(ninputs > 0){
+        inputs.assign((PaddingKKBitExecutorInput*)inputs_, (PaddingKKBitExecutorInput*)inputs_ + ninputs);
+    }
+    PaddingKKBitExecutor paddingKKBitExecutor(fr);
+    PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols::pilDegree());
+    vector<Bits2FieldExecutorInput> &required=((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2Field;
+    required.clear();
+    paddingKKBitExecutor.execute(inputs, pols,required);
+    #ifdef __ZKEVM_SM__
+        add_bits_2_field_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
+    #endif
+    return 0;
+}
+int zkevm_padding_kk_bit_req(void* pSMRequests,  void * pAddress){
+    PaddingKKBitExecutor paddingKKBitExecutor(fr);
+    PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols::pilDegree());
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2Field.clear();
+    paddingKKBitExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingKKBit, pols, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2Field);
+    return 0;
+}
+int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut){
+    std::vector<Bits2FieldExecutorInput> inputs;
+    if(ninputs > 0){
+        inputs.assign((Bits2FieldExecutorInput*)inputs_, (Bits2FieldExecutorInput*)inputs_ + ninputs);
+    }
+    Bits2FieldExecutor bits2fieldExecutor(fr);
+    PROVER_FORK_NAMESPACE::Bits2FieldCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Bits2FieldCommitPols::pilDegree());
+    vector<vector<Goldilocks::Element>> &required = ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->KeccakF;
+    required.clear();
+    bits2fieldExecutor.execute(inputs, pols, required);
+    #ifdef __ZKEVM_SM__
+        KeccakFExecutorInput::DTO *dto = KeccakFExecutorInput::toDTO(required);
+        add_keccak_f_inputs(pSMRequestsOut, dto, (uint64_t) required.size());
+    #endif
+    return 0;
+}
+int zkevm_bits2field_kk_req(void* pSMRequests,  void * pAddress){
+    Bits2FieldExecutor bits2fieldExecutor(fr);
+    PROVER_FORK_NAMESPACE::Bits2FieldCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::Bits2FieldCommitPols::pilDegree());
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->KeccakF.clear();
+    bits2fieldExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Bits2Field, pols, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->KeccakF);
+    return 0;
+}
+int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress){
+    KeccakFExecutorInput::DTO * p_inputs= (KeccakFExecutorInput::DTO*) inputs_;
+    std::vector<std::vector<Goldilocks::Element>> inputs;
+    KeccakFExecutorInput::fromDTO(p_inputs, ninputs, inputs);
+    KeccakFExecutor keccakFExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::KeccakFCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::KeccakFCommitPols::pilDegree());
+    keccakFExecutor.execute(inputs, pols);
+    return 0;
+}
+int zkevm_keccak_f_req(void* pSMRequests,  void * pAddress){
+    KeccakFExecutor keccakFExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::KeccakFCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::KeccakFCommitPols::pilDegree());
+    keccakFExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->KeccakF, pols);
+    return 0;
+}
+
+int zkevm_storage_req( void* pSMRequests,  void * pAddress){
+    StorageExecutor storageExecutor(fr, poseidon, config);
+    PROVER_FORK_NAMESPACE::StorageCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::StorageCommitPols::pilDegree());
+    storageExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->Storage, pols,
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonGFromST, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->ClimbKey);
+    return 0;
+}
+
+int zkevm_padding_pg_req( void* pSMRequests,  void * pAddress){
+    PaddingPGExecutor paddingPGExecutor(fr, poseidon);
+    PROVER_FORK_NAMESPACE::PaddingPGCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PaddingPGCommitPols::pilDegree());
+    paddingPGExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PaddingPG, pols, ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonGFromPG);
+    return 0;
+}
+
+int zkevm_climb_key_req( void* pSMRequests,  void * pAddress){
+    ClimbKeyExecutor climbKeyExecutor(fr, config);
+    PROVER_FORK_NAMESPACE::ClimbKeyCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::ClimbKeyCommitPols::pilDegree());
+    climbKeyExecutor.execute(((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->ClimbKey, pols);
+    return 0;
+}
+
+int zkevm_poseidon_g_req( void* pSMRequests,  void * pAddress){
+    PoseidonGExecutor poseidonGExecutor(fr, poseidon);
+    PROVER_FORK_NAMESPACE::PoseidonGCommitPols pols(pAddress, PROVER_FORK_NAMESPACE::PoseidonGCommitPols::pilDegree());
+    poseidonGExecutor.execute(
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonG,
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonGFromPG,
+    ((PROVER_FORK_NAMESPACE::MainExecRequired*)pSMRequests)->PoseidonGFromST,
+     pols);
+    return 0;
 }
 
 void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {

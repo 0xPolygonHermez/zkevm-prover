@@ -16,14 +16,14 @@ int main(int argc, char **argv)
     }
 
     // Parse the name of the configuration file
-    char *pConfigFile = (char *)"config/config.json";
+    char *configFile = (char *)"config/config.json";
     if (argc == 3)
     {
         if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
         {
-            pConfigFile = argv[2];
+            configFile = argv[2];
         }
     }
-    zkevm_main(pConfigFile, NULL,NULL);
+    zkevm_main(configFile, NULL,NULL,NULL);
 
 }

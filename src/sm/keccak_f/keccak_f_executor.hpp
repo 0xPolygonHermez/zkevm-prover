@@ -15,15 +15,30 @@ USING_PROVER_FORK_NAMESPACE;
 
 using namespace std;
 
-/*class KeccakFExecuteInput
+class KeccakFExecutorInput
 {
 public:
-    uint8_t Sin[54][9][1600];
-    KeccakFExecuteInput ()
-    {
-        memset(Sin, 0, sizeof(Sin));
+    typedef struct{
+        uint64_t * inData;
+        uint64_t inData_size;
+    } DTO; 
+    static inline DTO*  toDTO(const vector<vector<Goldilocks::Element>> &input){
+        DTO* dto = new DTO[input.size()];
+        std::cout<<(input[0][0]).fe<<" "<<(input[0][1]).fe<<" "<<(input[0][1]).fe<<" "<<(input[0][1]).fe<<std::endl;
+        for (uint64_t i = 0; i < input.size(); i++){
+            dto[i].inData = (uint64_t*) input[i].data();
+            dto[i].inData_size = input[i].size();
+        }
+        return dto;
     }
-};*/
+    static inline void fromDTO(DTO* dto, uint64_t dto_size, vector<vector<Goldilocks::Element>> &output){
+        output.resize(dto_size);
+        for (uint64_t i = 0; i < dto_size; i++){
+            if(dto[i].inData_size > 0)
+                output[i].assign((Goldilocks::Element*)dto[i].inData, (Goldilocks::Element*)dto[i].inData + dto[i].inData_size);
+        }
+    }
+};
 
 class KeccakFExecuteOutput
 {

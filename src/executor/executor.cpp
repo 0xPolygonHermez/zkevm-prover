@@ -13,9 +13,6 @@
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
-#ifdef __ZKEVM_SM__
-#include "zkevm_sm.h"
-#endif
 
 // Reduced version: only 1 evaluation is allocated, and some asserts are disabled
 void Executor::process_batch (ProverRequest &proverRequest)
@@ -453,13 +450,14 @@ void* Sha256Thread (void* arg)
 }
 
 // Full version: all polynomials are evaluated, in all evaluations
-void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols, void* pMainSMRequests)
+void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols, void** pSMRequests, void* pSMRequestsOut)
 {
+    // This instance will store all data required to execute the rest of State Machines
+    PROVER_FORK_NAMESPACE::MainExecRequired*  required = new PROVER_FORK_NAMESPACE::MainExecRequired();
+    if(pSMRequests != NULL) *pSMRequests = (void*)required; 
+
     if (!config.executeInParallel)
     {
-        // This instance will store all data required to execute the rest of State Machines
-        PROVER_FORK_NAMESPACE::MainExecRequired required;
-
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (proverRequest.input.publicInputsExtended.publicInputs.forkID == PROVER_FORK_ID)
@@ -472,7 +470,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             else
 #endif
             {
-                mainExecutor_fork_8.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_8.execute(proverRequest, commitPols.Main, *required);
             }
 
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -490,107 +488,119 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-#ifdef __ZKEVM_SM__
-        if(pMainSMRequests!=NULL){
-            TimerStart(MAIN_SM_REQUESTS_COPY);
-            add_binary_inputs((void *)pMainSMRequests, (void *)required.Binary.data(), required.Binary.size());
-            TimerStopAndLog(MAIN_SM_REQUESTS_COPY);
-        }
-#endif
 
         if (proverRequest.result != ZKR_SUCCESS)
         {
             return;
         }
 
-        // Execute the Padding PG State Machine
-        TimerStart(PADDING_PG_SM_EXECUTE);
-        paddingPGExecutor.execute(required.PaddingPG, commitPols.PaddingPG, required.PoseidonGFromPG);
-        TimerStopAndLog(PADDING_PG_SM_EXECUTE);
-
+#ifndef __ZKEVM_SM__
+        
         // Execute the Storage State Machine
         TimerStart(STORAGE_SM_EXECUTE);
-        storageExecutor.execute(required.Storage, commitPols.Storage, required.PoseidonGFromST, required.ClimbKey);
+        storageExecutor.execute(required->Storage, commitPols.Storage, required->PoseidonGFromST, required->ClimbKey);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
+
+        // Execute the Padding PG State Machine
+        TimerStart(PADDING_PG_SM_EXECUTE);
+        paddingPGExecutor.execute(required->PaddingPG, commitPols.PaddingPG, required->PoseidonGFromPG);
+        TimerStopAndLog(PADDING_PG_SM_EXECUTE);
 
         // Execute the Arith State Machine
         TimerStart(ARITH_SM_EXECUTE);
-        arithExecutor.execute(required.Arith, commitPols.Arith);
+        arithExecutor.execute(required->Arith, commitPols.Arith);
         TimerStopAndLog(ARITH_SM_EXECUTE);
 
         // Execute the Binary State Machine
         TimerStart(BINARY_SM_EXECUTE);
-        binaryExecutor.execute(required.Binary, commitPols.Binary);
+        binaryExecutor.execute(required->Binary, commitPols.Binary);
         TimerStopAndLog(BINARY_SM_EXECUTE);
 
         // Execute the MemAlign State Machine
         TimerStart(MEM_ALIGN_SM_EXECUTE);
-        memAlignExecutor.execute(required.MemAlign, commitPols.MemAlign);
-        TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);
+        memAlignExecutor.execute(required->MemAlign, commitPols.MemAlign);
+        TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);       
 
         // Execute the Memory State Machine
         TimerStart(MEMORY_SM_EXECUTE);
-        memoryExecutor.execute(required.Memory, commitPols.Mem);
+        memoryExecutor.execute(required->Memory, commitPols.Mem);
         TimerStopAndLog(MEMORY_SM_EXECUTE);
 
         // Execute the PaddingKK State Machine
         TimerStart(PADDING_KK_SM_EXECUTE);
-        paddingKKExecutor.execute(required.PaddingKK, commitPols.PaddingKK, required.PaddingKKBit);
+        paddingKKExecutor.execute(required->PaddingKK, commitPols.PaddingKK, required->PaddingKKBit);
         TimerStopAndLog(PADDING_KK_SM_EXECUTE);
-
         // Execute the PaddingKKBit State Machine
         TimerStart(PADDING_KK_BIT_SM_EXECUTE);
-        paddingKKBitExecutor.execute(required.PaddingKKBit, commitPols.PaddingKKBit, required.Bits2Field);
+        paddingKKBitExecutor.execute(required->PaddingKKBit, commitPols.PaddingKKBit, required->Bits2Field);
         TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE);
 
         // Execute the Bits2Field State Machine
         TimerStart(BITS2FIELD_SM_EXECUTE);
-        bits2FieldExecutor.execute(required.Bits2Field, commitPols.Bits2Field, required.KeccakF);
+        bits2FieldExecutor.execute(required->Bits2Field, commitPols.Bits2Field, required->KeccakF);
         TimerStopAndLog(BITS2FIELD_SM_EXECUTE);
 
         // Execute the Keccak F State Machine
         TimerStart(KECCAK_F_SM_EXECUTE);
-        keccakFExecutor.execute(required.KeccakF, commitPols.KeccakF);
+        keccakFExecutor.execute(required->KeccakF, commitPols.KeccakF);
         TimerStopAndLog(KECCAK_F_SM_EXECUTE);
 
         // Execute the PaddingSha256 State Machine
         TimerStart(PADDING_SHA256_SM_EXECUTE);
-        paddingSha256Executor.execute(required.PaddingSha256, commitPols.PaddingSha256, required.PaddingSha256Bit);
+        paddingSha256Executor.execute(required->PaddingSha256, commitPols.PaddingSha256, required->PaddingSha256Bit);
         TimerStopAndLog(PADDING_SHA256_SM_EXECUTE);
 
         // Execute the PaddingSha256Bit State Machine
         TimerStart(PADDING_SHA256_BIT_SM_EXECUTE);
-        paddingSha256BitExecutor.execute(required.PaddingSha256Bit, commitPols.PaddingSha256Bit, required.Bits2FieldSha256);
+        paddingSha256BitExecutor.execute(required->PaddingSha256Bit, commitPols.PaddingSha256Bit, required->Bits2FieldSha256);
         TimerStopAndLog(PADDING_SHA256_BIT_SM_EXECUTE);
 
         // Execute the Bits2FieldSha256 State Machine
         TimerStart(BITS2FIELDSHA256_SM_EXECUTE);
-        bits2FieldSha256Executor.execute(required.Bits2FieldSha256, commitPols.Bits2FieldSha256, required.Sha256F);
+        bits2FieldSha256Executor.execute(required->Bits2FieldSha256, commitPols.Bits2FieldSha256, required->Sha256F);
         TimerStopAndLog(BITS2FIELDSHA256_SM_EXECUTE);
 
         // Excute the Sha256 F State Machine
         TimerStart(SHA256_F_SM_EXECUTE);
-        sha256FExecutor.execute(required.Sha256F, commitPols.Sha256F);
+        sha256FExecutor.execute(required->Sha256F, commitPols.Sha256F);
         TimerStopAndLog(SHA256_F_SM_EXECUTE);
 
         // Execute the PoseidonG State Machine
         TimerStart(POSEIDON_G_SM_EXECUTE);
-        poseidonGExecutor.execute(required.PoseidonG, required.PoseidonGFromPG, required.PoseidonGFromST, commitPols.PoseidonG);
+        poseidonGExecutor.execute(required->PoseidonG, required->PoseidonGFromPG, required->PoseidonGFromST, commitPols.PoseidonG);
         TimerStopAndLog(POSEIDON_G_SM_EXECUTE);
 
         // Execute the ClimbKey State Machine
         TimerStart(CLIMB_KEY_SM_EXECUTE);
-        climbKeyExecutor.execute(required.ClimbKey, commitPols.ClimbKey);
+        climbKeyExecutor.execute(required->ClimbKey, commitPols.ClimbKey);
         TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);
+
+#endif
+
+        #ifdef __ZKEVM_SM__
+        if(pSMRequestsOut!=NULL){
+            TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
+            add_mem_align_inputs((void *)pSMRequestsOut, (void *)required->MemAlign.data(), (uint64_t) required->MemAlign.size());
+            add_binary_inputs((void *)pSMRequestsOut, (void *)required->Binary.data(), (uint64_t) required->Binary.size());
+            PaddingSha256ExecutorInput::DTO *buffer1 = PaddingSha256ExecutorInput::toDTO(required->PaddingSha256);
+            add_padding_sha256_inputs((void *)pSMRequestsOut, (void *) buffer1, required->PaddingSha256.size());
+            delete[] buffer1;
+            PaddingKKExecutorInput::DTO *buffer2 = PaddingKKExecutorInput::toDTO(required->PaddingKK);
+            add_padding_kk_inputs((void *)pSMRequestsOut, (void *) buffer2, required->PaddingKK.size());
+            delete[] buffer2;
+            add_memory_inputs((void *)pSMRequestsOut, (void *)required->Memory.data(), (uint64_t) required->Memory.size());
+            add_arith_inputs((void *)pSMRequestsOut, (void *)required->Arith.data(), (uint64_t) required->Arith.size());
+            TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
+        }
+    #endif
     }
     else
     {
-        // This instance will store all data required to execute the rest of State Machines
-        PROVER_FORK_NAMESPACE::MainExecRequired required;
+
         ExecutorContext executorContext;
         executorContext.pExecutor = this;
         executorContext.pCommitPols = &commitPols;
-        executorContext.pRequired = &required;
+        executorContext.pRequired = &(*required);
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
@@ -602,7 +612,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         else
 #endif
         {
-            mainExecutor_fork_8.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_8.execute(proverRequest, commitPols.Main, *required);
         }
 
         // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -620,7 +630,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             zklog.error("Executor::execute() got from main execution proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
             return;
         }
-
+#ifndef __ZKEVM_SM__
         // Execute the Storage State Machines
         pthread_t storageThread;
         pthread_create(&storageThread, NULL, StorageThread, &executorContext);
@@ -676,6 +686,9 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_join(keccakThread, NULL);
         pthread_join(sha256Thread, NULL);
         pthread_join(climbKeyThread, NULL);
-
+#endif
     }
+    #ifndef __ZKEVM_SM__   
+        delete required;  
+    #endif
 }
