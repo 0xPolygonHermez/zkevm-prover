@@ -44,7 +44,6 @@ public:
     StarkInfo starkInfo;
     bool debug = false;
     bool optimizeMemoryNTT = false;
-    bool optimizeMemoryNTTCommitPols = false;
     
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
@@ -71,8 +70,6 @@ private:
     MerkleTreeType **treesGL;
     MerkleTreeType **treesFRI;
 
-    vector<int64_t> cm2Transposed;
-
     vector<bool> publicsCalculated;
     vector<bool> constsCalculated;
     vector<bool> subProofValuesCalculated;
@@ -91,7 +88,7 @@ void merkelizeMemory(); // function for DBG purposes
 void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
 
 public:
-    Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
+    Starks(const Config &config, StarkFiles starkFiles, void *_pAddress, bool debug_) : config(config),
                                                                            starkInfo(starkFiles.zkevmStarkInfo),
                                                                            starkFiles(starkFiles),
                                                                            N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
@@ -104,14 +101,16 @@ public:
                                                                            pAddress(_pAddress),
                                                                            x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
     {
+        debug = debug_;
+
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
 
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             hashSize = 1;
-            merkleTreeArity = starkInfo.merkleTreeArity;
-            merkleTreeCustom = starkInfo.merkleTreeCustom;
+            merkleTreeArity = starkInfo.starkStruct.merkleTreeArity;
+            merkleTreeCustom = starkInfo.starkStruct.merkleTreeCustom;
         } else {
             hashSize = HASH_SIZE;
             merkleTreeArity = 2;
@@ -144,36 +143,38 @@ public:
         pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
-        // Map constants tree file to memory
-        TimerStart(LOAD_CONST_TREE_TO_MEMORY);
-        pConstTreeAddress = NULL;
-        if (starkFiles.zkevmConstantsTree.size() == 0)
-        {
-            zklog.error("Starks::Starks() received an empty config.zkevmConstantsTree");
-            exitProcess();
+        if(!debug) {
+            // Map constants tree file to memory
+            TimerStart(LOAD_CONST_TREE_TO_MEMORY);
+            pConstTreeAddress = NULL;
+            if (starkFiles.zkevmConstantsTree.size() == 0)
+            {
+                zklog.error("Starks::Starks() received an empty config.zkevmConstantsTree");
+                exitProcess();
+            }
+
+            uint64_t constTreeSizeBytes = getConstTreeSize();
+
+            if (config.mapConstantsTreeFile)
+            {
+                pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes, false);
+                zklog.info("Starks::Starks() successfully mapped " + to_string(constTreeSizeBytes) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
+            }
+            else
+            {
+                pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes);
+                zklog.info("Starks::Starks() successfully copied " + to_string(constTreeSizeBytes) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
+            }
+            TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
+
+            // Initialize and allocate ConstantPols2ns
+            TimerStart(LOAD_CONST_POLS_2NS_TO_MEMORY);
+            pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
+            pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
+            std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
+
+            TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);
         }
-
-        uint64_t constTreeSizeBytes = getConstTreeSize();
-
-        if (config.mapConstantsTreeFile)
-        {
-            pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes, false);
-            zklog.info("Starks::Starks() successfully mapped " + to_string(constTreeSizeBytes) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
-        }
-        else
-        {
-            pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, constTreeSizeBytes);
-            zklog.info("Starks::Starks() successfully copied " + to_string(constTreeSizeBytes) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
-        }
-        TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
-
-        // Initialize and allocate ConstantPols2ns
-        TimerStart(LOAD_CONST_POLS_2NS_TO_MEMORY);
-        pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
-        pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
-        std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
-
-        TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);
 
         // TODO x_n and x_2ns could be precomputed
         TimerStart(COMPUTE_X_N_AND_X_2_NS);
@@ -210,40 +211,46 @@ public:
         treesGL = new MerkleTreeType*[starkInfo.nStages + 2];
         for (uint64_t i = 0; i < starkInfo.nStages + 1; i++)
         {
-            std::string section = "cm" + to_string(i + 1) + "_n";
-            std::string sectionExt = "cm" + to_string(i + 1) + "_2ns";
-            uint64_t nCols = starkInfo.mapSectionsN.section[string2section(section)];
-            Goldilocks::Element *pBuffExtended = &mem[starkInfo.mapOffsets.section[string2section(sectionExt)]];
+            std::string section = "cm" + to_string(i + 1);
+            uint64_t nCols = starkInfo.mapSectionsN[section];
+            Goldilocks::Element *pBuffExtended = &mem[starkInfo.mapOffsets[std::make_pair(section, true)]];
             treesGL[i] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom,  NExtended, nCols, pBuffExtended);
         }
-        treesGL[starkInfo.nStages + 1] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, (Goldilocks::Element *)pConstTreeAddress);
 
-        treesFRI = new MerkleTreeType*[starkInfo.starkStruct.steps.size() - 1];
-        for(uint64_t step = 0; step < starkInfo.starkStruct.steps.size() - 1; ++step) {
-            uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
-            uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
+        if(debug) {
+            treesGL[starkInfo.nStages + 1] = new MerkleTreeType();
+        } else {
+            treesGL[starkInfo.nStages + 1] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, (Goldilocks::Element *)pConstTreeAddress);
+        }
 
-            treesFRI[step] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
+
+        if(!debug) {
+            treesFRI = new MerkleTreeType*[starkInfo.starkStruct.steps.size() - 1];
+            for(uint64_t step = 0; step < starkInfo.starkStruct.steps.size() - 1; ++step) {
+                uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
+                uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
+
+                treesFRI[step] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
+            }
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
 
         TimerStart(CHELPERS_ALLOCATION);
         if(!starkFiles.zkevmCHelpers.empty()) {
             cHelpersBinFile = BinFileUtils::openExisting(starkFiles.zkevmCHelpers, "chps", 1);
-            chelpers.loadCHelpers(cHelpersBinFile.get(), starkInfo.pil2);
+            chelpers.loadCHelpers(cHelpersBinFile.get());
         }
         TimerStopAndLog(CHELPERS_ALLOCATION);
 
-        if(starkInfo.pil2) {
-            constsCalculated.resize(starkInfo.nConstants, true);
-        }
-        
-        if(starkInfo.mapOffsets.section[eSection::cm1_2ns] < starkInfo.mapOffsets.section[eSection::tmpExp_n]) {
-            optimizeMemoryNTTCommitPols = true;
-        }
+        constsCalculated.resize(starkInfo.nConstants, true);
 
-        uint64_t currentSectionStart = starkInfo.mapOffsets.section[string2section("cm" + to_string(starkInfo.nStages) + "_n")] * sizeof(Goldilocks::Element);
-        uint64_t nttHelperSize = starkInfo.mapSectionsN.section[string2section("cm" + to_string(starkInfo.nStages) + "_n")] * NExtended * sizeof(Goldilocks::Element);
+        publicsCalculated.resize(starkInfo.nPublics, false);
+        subProofValuesCalculated.resize(starkInfo.nSubProofValues, false);
+        challengesCalculated.resize(starkInfo.challengesMap.size(), false);
+        witnessCalculated.resize(starkInfo.cmPolsMap.size(), false);
+        
+        uint64_t currentSectionStart = starkInfo.mapOffsets[std::make_pair("cm" + to_string(starkInfo.nStages), false)] * sizeof(Goldilocks::Element);
+        uint64_t nttHelperSize = starkInfo.mapSectionsN["cm" + to_string(starkInfo.nStages)] * NExtended * sizeof(Goldilocks::Element);
         if(currentSectionStart > nttHelperSize) {
             optimizeMemoryNTT = true;
         }
@@ -260,9 +267,7 @@ public:
             return;
 
         delete pConstPols;
-        delete pConstPols2ns;
-        free(pConstPolsAddress2ns);
-
+        
         if (config.mapConstPolsFile)
         {
             unmapFile(pConstPolsAddress, constPolsSize);
@@ -271,14 +276,6 @@ public:
         {
             free(pConstPolsAddress);
         }
-        if (config.mapConstantsTreeFile)
-        {
-            unmapFile(pConstTreeAddress, constPolsSize);
-        }
-        else
-        {
-            free(pConstTreeAddress);
-        }
 
         for (uint i = 0; i < starkInfo.nStages + 2; i++)
         {
@@ -286,11 +283,25 @@ public:
         }
         delete[] treesGL;
 
-        for (uint64_t i = 0; i < starkInfo.starkStruct.steps.size() - 1; i++)
-        {
-            delete treesFRI[i];
+        if(!debug) {
+            if (config.mapConstantsTreeFile)
+            {
+                unmapFile(pConstTreeAddress, constPolsSize);
+            }
+            else
+            {
+                free(pConstTreeAddress);
+            }
+
+            delete pConstPols2ns;
+            free(pConstPolsAddress2ns);
+
+            for (uint64_t i = 0; i < starkInfo.starkStruct.steps.size() - 1; i++)
+            {
+                delete treesFRI[i];
+            }
+            delete[] treesFRI;
         }
-        delete[] treesFRI;
     };
 
     uint64_t getConstTreeSize()
@@ -330,8 +341,8 @@ public:
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
-    void calculateExpressions(uint64_t step, bool after, StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateExpression(uint64_t expId, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpressions(uint64_t step, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpression(uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps);
     void calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps);
     
     void computeStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps);
@@ -344,6 +355,9 @@ public:
     void computeFRIFolding(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t step, Polinomial &challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries);
 
+    void calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements);
+    void calculateHash(ElementType* hash, Polinomial &pol);
+
     void addTranscriptGL(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, Polinomial &pol);
@@ -352,8 +366,10 @@ public:
 private:
     int findIndex(std::vector<uint64_t> openingPoints, int prime);
 
-    void transposePolsColumns(StepsParams& params, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
-    void transposePolsRows(StepsParams& params, Polinomial *transPols, Hint hint);
+    bool canExpressionBeCalculated(ParserParams &parserParams);
+
+    void transposePolsColumns(StepsParams& params, vector<int64_t> cm2Transposed, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
+    void transposePolsRows(StepsParams& params, vector<int64_t> cm2Transposed, Polinomial *transPols, Hint hint);
 
     std::vector<string> getSrcFields(std::string hintName);
     std::vector<string> getDstFields(std::string hintName);
@@ -362,9 +378,10 @@ private:
 
     void evmap(StepsParams &params, Polinomial &LEv);
 
-    uint64_t checkSymbolsToBeCalculated(vector<Symbol> symbols);
+    uint64_t isStageCalculated(uint64_t step);
     bool isSymbolCalculated(opType operand, uint64_t id);
     void setSymbolCalculated(opType operand, uint64_t id);
+    void cleanSymbolsCalculated();
 
 public:
     // Following function are created to be used by the ffi interface

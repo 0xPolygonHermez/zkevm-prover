@@ -46,9 +46,7 @@ int main(int argc, char **argv)
     config.mapConstantsTreeFile = false;
     
     string constFile = "";
-    string constTreeFile = "";
     string starkInfoFile = "";
-    string verKeyFile = "";
     string cHelpersFile = "";
     string commitPols = "";
     string publicsFile = "";
@@ -66,26 +64,16 @@ int main(int argc, char **argv)
             starkInfoFile = aParser.getArgumentValue("-s", "--starkinfo");
             if (!fileExists(starkInfoFile)) throw runtime_error("constraint_checker: starkinfo file doesn't exist ("+starkInfoFile+")");
         } else throw runtime_error("constraint_checker: starkinfo file argument not specified <-s/--stark> <starkinfo_file>");
-
-        if (aParser.argumentExists("-t","--tree")) {
-            constTreeFile = aParser.getArgumentValue("-t","--tree");
-            if (constTreeFile=="") throw runtime_error("constraint_checker: constants tree file not specified");
-        } else throw runtime_error("constraint_checker: constants tree file argument not specified <-t/--tree> <consttree_file>");
-        
-        if (aParser.argumentExists("-v","--verkey")) {
-            verKeyFile = aParser.getArgumentValue("-v","--verkey");
-            if (verKeyFile=="") throw runtime_error("constraint_checker: chelpers file not specified");
-        } else throw runtime_error("constraint_checker: verkey file argument not specified <-v/--verkey> <verkey_file>");
-
+    
         if (aParser.argumentExists("-h","--chelpers")) {
             cHelpersFile = aParser.getArgumentValue("-h","--chelpers");
             if (cHelpersFile =="") throw runtime_error("constraint_checker: chelpers file not specified");
         } else throw runtime_error("constraint_checker: chelpers file argument not specified <-h/--chelpers> <chelpers_file>");
 
-        if (aParser.argumentExists("-w","--commit")) {
-            commitPols = aParser.getArgumentValue("-w","--commit");
+        if (aParser.argumentExists("-t","--commit")) {
+            commitPols = aParser.getArgumentValue("-t","--commit");
             if (commitPols =="") throw runtime_error("constraint_checker: commit file not specified");
-        } else throw runtime_error("constraint_checker: commit file argument not specified <-w/--commit> <commit_file>");
+        } else throw runtime_error("constraint_checker: commit file argument not specified <-t/--commit> <commit_file>");
 
         if (aParser.argumentExists("-p","--publics")) {
             publicsFile = aParser.getArgumentValue("-p","--publics");
@@ -94,16 +82,16 @@ int main(int argc, char **argv)
 
         StarkInfo starkInfo(starkInfoFile);
 
-        void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+        void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
 
         // TODO: pAddress should be properly calculated!!!!!
-        void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN.section[eSection::cm3_n] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
+        void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN["cm3"] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
 
         uint64_t N = (1 << starkInfo.starkStruct.nBits);
         #pragma omp parallel for
         for (uint64_t i = 0; i < N; i += 1)
         {
-            std::memcpy((uint8_t*)pAddress + i*starkInfo.nCm1*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.nCm1*sizeof(Goldilocks::Element), starkInfo.nCm1*sizeof(Goldilocks::Element));
+            std::memcpy((uint8_t*)pAddress + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
         }
 
         json publics;
@@ -126,8 +114,7 @@ int main(int argc, char **argv)
         uint64_t hashSize = starkInfo.starkStruct.verificationHashType == "GL" ? 4 : 1;
         FRIProof<Goldilocks::Element> fproof(starkInfo, hashSize);
 
-        Starks<Goldilocks::Element> starks(config, {constFile, config.mapConstPolsFile, constTreeFile, starkInfoFile, cHelpersFile}, pAddress);
-        starks.debug = true;
+        Starks<Goldilocks::Element> starks(config, {constFile, config.mapConstPolsFile, "", starkInfoFile, cHelpersFile}, pAddress, true);
 
         CHelpersSteps cHelpersSteps;
         starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
@@ -135,8 +122,8 @@ int main(int argc, char **argv)
         return EXIT_SUCCESS;
     } catch (const exception &e) {
         cerr << e.what() << endl;
-        cerr << "usage: constraint_checker <-c|--const> <const_file> <-s|--starkinfo> <starkinfo_file> <-t|--tree> <consttree_file> <-h|--chelpers> <chelpers_file> <-w|--commit> <commit_file> <-p|--publics> <public_file>" << endl;
-        cerr << "example: constraint_checker -c zkevm.const -s zkevm.starkinfo.json -t zkevm.consttree -v zkevm.verkey -h zkevm.chelpers.bin -w zkevm.commit -p zkevm.publics.json" << endl;
+        cerr << "usage: constraint_checker <-c|--const> <const_file> <-s|--starkinfo> <starkinfo_file> <-h|--chelpers> <chelpers_file> <-t|--commit> <commit_file> <-p|--publics> <public_file>" << endl;
+        cerr << "example: constraint_checker -c zkevm.const -s zkevm.starkinfo.json -h zkevm.chelpers.bin -t zkevm.commit -p zkevm.publics.json" << endl;
         return EXIT_FAILURE;        
     }        
 }

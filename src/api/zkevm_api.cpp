@@ -53,7 +53,7 @@
 #include "C12aSteps.hpp"
 #include "Recursive1Steps.hpp"
 #include "Recursive2Steps.hpp"
-#include "StarkRecursiveFSteps.hpp"
+#include "RecursiveFSteps.hpp"
 #include "proof2zkinStark.hpp"
 #include "starks.hpp"
 
@@ -1217,7 +1217,7 @@ void starkinfo_free(void *pStarkInfo) {
 
 void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, char* cHelpers,void *pAddress) {
     Config* config = (Config*)pConfig;
-    return new Starks<Goldilocks::Element>(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo, cHelpers}, pAddress);
+    // return new Starks<Goldilocks::Element>(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo, cHelpers}, pAddress);
 }
 
 void *get_stark_info(void *pStarks) {

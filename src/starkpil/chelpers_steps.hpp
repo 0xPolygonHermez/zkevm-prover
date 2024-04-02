@@ -7,7 +7,7 @@ class CHelpersSteps {
 public:
     virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
         uint32_t nrowsBatch = 4;
-        bool domainExtended = parserParams.stage > starkInfo.numChallenges.size() ? true : false;
+        bool domainExtended = parserParams.stage > starkInfo.nStages ? true : false;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         Polinomial &x = domainExtended ? params.x_2ns : params.x_n;
         ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
@@ -50,20 +50,19 @@ public:
         buffTOffsetsSteps_[0] = 0;
         for(uint64_t stage = 1; stage <= nStages; ++stage) {
             std::string section = "cm" + to_string(stage);
-            section += domainExtended ? "_2ns" : "_n";
-            offsetsSteps[stage] = starkInfo.mapOffsets.section[string2section(section)];
-            nColsSteps[stage] = starkInfo.mapSectionsN.section[string2section(section)];
+            offsetsSteps[stage] = starkInfo.mapOffsets[std::make_pair(section, domainExtended)];
+            nColsSteps[stage] = starkInfo.mapSectionsN[section];
             nColsStepsAccumulated[stage] = nColsStepsAccumulated[stage - 1] + nColsSteps[stage - 1];
             buffTOffsetsSteps_[stage] = buffTOffsetsSteps_[stage - 1] + nOpenings*nColsSteps[stage - 1];
             nCols += nColsSteps[stage];
         }
         if(parserParams.stage <= nStages) {
-            offsetsSteps[nStages + 1] = starkInfo.mapOffsets.section[eSection::tmpExp_n];
-            nColsSteps[nStages + 1] = starkInfo.mapSectionsN.section[eSection::tmpExp_n];
+            offsetsSteps[nStages + 1] = starkInfo.mapOffsets[std::make_pair("tmpExp", false)];
+            nColsSteps[nStages + 1] = starkInfo.mapSectionsN["tmpExp"];
         } else {
-            std::string section = "cm" + to_string(nStages + 1) + "_2ns";
-            offsetsSteps[nStages + 1] = starkInfo.mapOffsets.section[string2section(section)];
-            nColsSteps[nStages + 1] = starkInfo.mapSectionsN.section[string2section(section)];
+            std::string section = "cm" + to_string(nStages + 1);
+            offsetsSteps[nStages + 1] = starkInfo.mapOffsets[std::make_pair(section, true)];
+            nColsSteps[nStages + 1] = starkInfo.mapSectionsN[section];
         }
         nColsStepsAccumulated[nStages + 1] = nColsStepsAccumulated[nStages] + nColsSteps[nStages];
         buffTOffsetsSteps_[nStages + 1] = buffTOffsetsSteps_[nStages] + nOpenings*nColsSteps[nStages];
@@ -141,7 +140,7 @@ public:
 
             for(uint64_t k = 0; k < parserParams.nCmPolsUsed; ++k) {
                 uint64_t polId = cmPolsUsed[k];
-                CmPolMap polInfo = starkInfo.cmPolsMap[polId];
+                PolMap polInfo = starkInfo.cmPolsMap[polId];
                 uint64_t stage = polInfo.stage == string("tmpExp") ? nStages + 1 : polInfo.stageNum;
                 uint64_t stagePos = polInfo.stagePos;
                 for(uint64_t d = 0; d < polInfo.dim; ++d) {

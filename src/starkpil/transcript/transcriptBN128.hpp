@@ -29,6 +29,7 @@ public:
     
     void put(Goldilocks::Element *input, uint64_t size);
     void put(RawFr::Element *input, uint64_t size);
+    void getState(RawFr::Element* output);
     void getField(uint64_t *output);
 
     void getPermutations(uint64_t *res, uint64_t n, uint64_t nBits);

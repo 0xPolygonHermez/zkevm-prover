@@ -31,6 +31,15 @@ void TranscriptBN128::_add1(RawFr::Element input)
     }
 }
 
+void TranscriptBN128::getState(RawFr::Element* output) {
+
+    if(pending.size() > 0) {
+        _updateState();
+    }
+    output[0] = state[0];
+}
+
+
 void TranscriptBN128::getField(uint64_t *output)
 {
     for (int i = 0; i < 3; i++)
