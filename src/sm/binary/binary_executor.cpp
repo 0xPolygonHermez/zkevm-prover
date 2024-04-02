@@ -20,12 +20,12 @@ BinaryExecutor::BinaryExecutor (Goldilocks &fr, const Config &config) :
     N(BinaryCommitPols::pilDegree())
 {
     TimerStart(BINARY_EXECUTOR);
-#ifdef __ZKEVM_SM__
-    ZkevmSMBinaryPtr = sm_binary_new(N);
-#else
+//#ifdef __ZKEVM_SM__
+//    ZkevmSMBinaryPtr = sm_binary_new(N);
+//#else
     buildFactors();
     buildReset();
-#endif
+//#endif
     TimerStopAndLog(BINARY_EXECUTOR);
 }
 
@@ -88,9 +88,9 @@ void BinaryExecutor::buildReset (void)
 
 void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &pols)
 {
-#ifdef __ZKEVM_SM__
-    sm_binary_execute(ZkevmSMBinaryPtr, (void *)action.data(), action.size(), (void *)pols.address(), N);
-#else
+//#ifdef __ZKEVM_SM__
+    //sm_binary_execute(ZkevmSMBinaryPtr, (void *)action.data(), action.size(), (void *)pols.address(), N);
+//#else
     // Check that we have enough room in polynomials  TODO: Do this check in JS
     if (action.size()*LATCH_SIZE > N)
     {
@@ -414,7 +414,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 
     free(c0Temp);
     zklog.info("BinaryExecutor successfully processed " + to_string(action.size()) + " binary actions (" + to_string((double(action.size()) * LATCH_SIZE * 100) / N) + "%)");
-#endif
+//#endif
 }
 
 // To be used only for testing, since it allocates a lot of memory
