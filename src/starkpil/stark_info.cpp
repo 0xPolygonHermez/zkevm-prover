@@ -21,6 +21,11 @@ void StarkInfo::load(json j)
     starkStruct.nBitsExt = j["starkStruct"]["nBitsExt"];
     starkStruct.nQueries = j["starkStruct"]["nQueries"];
     starkStruct.verificationHashType = j["starkStruct"]["verificationHashType"];
+    if(starkStruct.verificationHashType == "BN128") {
+        starkStruct.merkleTreeArity = j["merkleTreeArity"]; 
+        starkStruct.merkleTreeCustom = j["merkleTreeCustom"];
+    }
+    starkStruct.hashCommits = j["hashCommits"];
     for (uint64_t i = 0; i < j["starkStruct"]["steps"].size(); i++)
     {
         StepStruct step;
@@ -30,9 +35,6 @@ void StarkInfo::load(json j)
 
     nPublics = j["nPublics"];
     nConstants = j["nConstants"];
-
-    isVadcop = j["isVadcop"];
-    hashCommits = j["hashCommits"];
 
     if(j.contains("nSubAirValues")) {
         nSubProofValues = j["nSubAirValues"];
@@ -66,23 +68,6 @@ void StarkInfo::load(json j)
         b.name = std::string("everyRow");
         boundaries.push_back(b);
     }
-
-    qDeg = j["qDeg"];
-    qDim = j["qDim"];
-
-    if(starkStruct.verificationHashType == "BN128") {
-        if(j.contains("merkleTreeArity")) {
-            merkleTreeArity = j["merkleTreeArity"]; 
-        } else {
-            merkleTreeArity = 16;
-        }
-        
-        if(j.contains("merkleTreeCustom")) {
-            merkleTreeCustom = j["merkleTreeCustom"];
-        } else {
-            merkleTreeCustom = false;
-        }
-    }
     
     for (uint64_t i = 0; i < j["challengesMap"].size(); i++) 
     {
@@ -92,10 +77,6 @@ void StarkInfo::load(json j)
         map.dim = j["challengesMap"][i]["dim"];
         map.stageId = j["challengesMap"][i]["stageId"];
         challengesMap.push_back(map);
-
-        if(map.stageNum == nStages + 2 && map.stageId == 0) {
-            xiChallengeIndex = i;
-        }
     }
 
     for (uint64_t i = 0; i < j["cmPolsMap"].size(); i++) 
@@ -109,8 +90,6 @@ void StarkInfo::load(json j)
         map.stagePos = j["cmPolsMap"][i]["stagePos"];
         map.stageId = j["cmPolsMap"][i]["stageId"];
         cmPolsMap.push_back(map);
-
-        mapSectionsN[cmPolsMap[i].stage] += cmPolsMap[i].dim;
     }
 
     for (uint64_t i = 0; i < j["evMap"].size(); i++)
@@ -122,7 +101,17 @@ void StarkInfo::load(json j)
         evMap.push_back(map);
     }
 
+    setMapSections();
+
+    // TODO: Call this function from the prover
     setMapOffsets(true);
+}
+
+void StarkInfo::setMapSections() {
+    for (uint64_t i = 0; i < cmPolsMap.size(); i++) 
+    {
+        mapSectionsN[cmPolsMap[i].stage] += cmPolsMap[i].dim;
+    }
 }
 
 void StarkInfo::setMapOffsets(bool optimizeCommitStage1Pols) {
@@ -151,8 +140,18 @@ void StarkInfo::setMapOffsets(bool optimizeCommitStage1Pols) {
         string currStage = "cm" + to_string(stage);
         mapOffsets[std::make_pair(currStage, true)] = mapOffsets[std::make_pair(prevStage, true)] + NExtended * mapSectionsN[prevStage];
     }
+    
+    auto qStage = nStages + 1;
+    auto qPol = std::find_if(cmPolsMap.begin(), cmPolsMap.end(), [qStage](const PolMap& c) {
+        return c.stageNum == qStage && c.stageId == 0;
+    });
+
+    uint64_t qDim = qPol->dim;
+
     mapOffsets[std::make_pair("q", true)] = mapOffsets[std::make_pair("cm" + to_string(nStages + 1), true)] + NExtended * mapSectionsN["cm" + to_string(nStages + 1)];
     mapOffsets[std::make_pair("f", true)] = mapOffsets[std::make_pair("q", true)] + NExtended * qDim;
+
+    // TODO: Use hints to check if enough space is reserved, otherwise add more extra space
     mapTotalN = mapOffsets[std::make_pair("f", true)] + NExtended * 3;
 }
 

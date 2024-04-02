@@ -1,6 +1,6 @@
 {
  "isVadcop": false,
- "hashCommits": false,
+ "hashCommits": true,
  "cmPolsMap": [
   {
    "stage": "cm1",

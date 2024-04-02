@@ -62,7 +62,13 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         addTranscript(transcript, &verkey[0], hashSize);
     }
     
-    addTranscriptGL(transcript, &publicInputs[0], starkInfo.nPublics);
+    if(starkInfo.starkStruct.hashCommits) {
+        ElementType hash[hashSize];
+        calculateHash(hash, &publicInputs[0], starkInfo.nPublics);
+        addTranscript(transcript, hash, hashSize);
+    } else {
+        addTranscriptGL(transcript, &publicInputs[0], starkInfo.nPublics);
+    }
 
     for (uint64_t step = 1; step <= starkInfo.nStages; step++)
     {
@@ -89,7 +95,13 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     computeEvals(params, proof);
 
-    addTranscript(transcript, evals);
+    if(starkInfo.starkStruct.hashCommits) {
+        ElementType hash[hashSize];
+        calculateHash(hash, evals);
+        addTranscript(transcript, hash, hashSize);
+    } else {
+        addTranscript(transcript, evals);
+    }    
 
     // Challenges for FRI polynomial
     for (uint64_t i = 0; i < starkInfo.challengesMap.size(); i++)
@@ -120,7 +132,13 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         }
         else
         {
-            addTranscript(transcript, *friPol);
+            if(starkInfo.starkStruct.hashCommits) {
+                ElementType hash[hashSize];
+                calculateHash(hash, *friPol);
+                addTranscript(transcript, hash, hashSize);
+            } else {
+                addTranscript(transcript, *friPol);
+            }    
         }
     }
 
@@ -299,8 +317,14 @@ template <typename ElementType>
 void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof)
 {
 
-    uint64_t qDim = starkInfo.qDim;
-    uint64_t qDeg = starkInfo.qDeg;
+    uint64_t qDeg = 0;
+    uint64_t qDim = 0;
+    for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); ++i) {
+        if(starkInfo.cmPolsMap[i].stageNum == step) {
+            qDeg += 1;
+            if(qDim == 0) qDim = starkInfo.cmPolsMap[i].dim;
+        }       
+    }
 
     Goldilocks::Element *pBuffQ = &params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]];
     Polinomial qq1 = Polinomial(pBuffQ, NExtended, qDim, qDim);
@@ -355,6 +379,13 @@ void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<
 template <typename ElementType>
 void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType> &proof)
 {
+    auto evalsStage = starkInfo.nStages + 2;
+    auto xiChallenge = std::find_if(starkInfo.challengesMap.begin(), starkInfo.challengesMap.end(), [evalsStage](const PolMap& c) {
+        return c.stageNum == evalsStage && c.stageId == 0;
+    });
+
+    uint64_t xiChallengeIndex = std::distance(starkInfo.challengesMap.begin(), xiChallenge);
+
     TimerStart(STARK_CALCULATE_LEv);
 
     vector<uint64_t> openingPoints = starkInfo.openingPoints;
@@ -381,7 +412,7 @@ void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType
             Polinomial::divElement(w, i, (Goldilocks::Element &)Goldilocks::one(), w, i);
         }
 
-        Polinomial::mulElement(c_w, i, params.challenges, starkInfo.xiChallengeIndex, w, i);
+        Polinomial::mulElement(c_w, i, params.challenges, xiChallengeIndex, w, i);
 
         Polinomial::divElement(xi, i, c_w, i, (Goldilocks::Element &)Goldilocks::shift());
 
@@ -404,6 +435,13 @@ void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType
 template <typename ElementType>
 Polinomial *Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params, CHelpersSteps *chelpersSteps)
 {
+
+    auto evalsStage = starkInfo.nStages + 2;
+    auto xiChallenge = std::find_if(starkInfo.challengesMap.begin(), starkInfo.challengesMap.end(), [evalsStage](const PolMap& c) {
+        return c.stageNum == evalsStage && c.stageId == 0;
+    });
+
+    uint64_t xiChallengeIndex = std::distance(starkInfo.challengesMap.begin(), xiChallenge);
 
     TimerStart(STARK_CALCULATE_XDIVXSUB);
 
@@ -429,7 +467,7 @@ Polinomial *Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &param
             Polinomial::divElement(w, i, (Goldilocks::Element &)Goldilocks::one(), w, i);
         }
 
-        Polinomial::mulElement(xi, i, params.challenges, starkInfo.xiChallengeIndex, w, i);
+        Polinomial::mulElement(xi, i, params.challenges, xiChallengeIndex, w, i);
 
 #pragma omp parallel for
         for (uint64_t k = 0; k < (N << extendBits); k++)
@@ -968,6 +1006,25 @@ void Starks<ElementType>::getChallenge(TranscriptType &transcript, Goldilocks::E
 {
     transcript.getField((uint64_t *)&challenge);
 }
+
+template <typename ElementType>
+void Starks<ElementType>::calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements) {
+    TranscriptType transcriptHash(merkleTreeArity, merkleTreeCustom);
+    transcriptHash.put(buffer, nElements);
+    transcriptHash.getState(hash);
+
+};
+
+template <typename ElementType>
+void Starks<ElementType>::calculateHash(ElementType* hash, Polinomial &pol) {
+    TranscriptType transcriptHash(merkleTreeArity, merkleTreeCustom);
+    for (uint64_t i = 0; i < pol.degree(); i++)
+    {
+        transcriptHash.put(pol[i], pol.dim());
+    }
+    transcriptHash.getState(hash);
+
+};
 
 template <typename ElementType>
 void Starks<ElementType>::addTranscriptGL(TranscriptType &transcript, Goldilocks::Element *buffer, uint64_t nElements)

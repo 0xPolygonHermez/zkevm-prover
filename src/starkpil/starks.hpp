@@ -111,8 +111,8 @@ public:
 
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             hashSize = 1;
-            merkleTreeArity = starkInfo.merkleTreeArity;
-            merkleTreeCustom = starkInfo.merkleTreeCustom;
+            merkleTreeArity = starkInfo.starkStruct.merkleTreeArity;
+            merkleTreeCustom = starkInfo.starkStruct.merkleTreeCustom;
         } else {
             hashSize = HASH_SIZE;
             merkleTreeArity = 2;
@@ -351,6 +351,9 @@ public:
     
     void computeFRIFolding(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t step, Polinomial &challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries);
+
+    void calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements);
+    void calculateHash(ElementType* hash, Polinomial &pol);
 
     void addTranscriptGL(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);

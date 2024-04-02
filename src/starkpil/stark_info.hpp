@@ -37,7 +37,10 @@ public:
     uint64_t nBits;
     uint64_t nBitsExt;
     uint64_t nQueries;
+    bool hashCommits;
     string verificationHashType;
+    uint64_t merkleTreeArity;
+    bool merkleTreeCustom;
     vector<StepStruct> steps;
 };
 
@@ -96,16 +99,11 @@ public:
 class StarkInfo
 {
 public:
+    // Read from starkInfo file
     StarkStruct starkStruct;
 
     uint64_t subproofId;
     uint64_t airId;
-
-    uint64_t merkleTreeArity;
-    bool merkleTreeCustom;
-
-    bool isVadcop;
-    bool hashCommits;
 
     uint64_t nPublics;
     uint64_t nSubProofValues;
@@ -117,25 +115,21 @@ public:
     vector<PolMap> challengesMap;
     vector<EvMap> evMap;
     
-
     vector<uint64_t> openingPoints;
     vector<Boundary> boundaries;
 
-    uint64_t qDeg;
-    uint64_t qDim;
-    uint64_t xiChallengeIndex;
-
+    // Precomputed
     std::map<std::string, uint64_t> mapSectionsN;
     std::map<std::pair<std::string, bool>, uint64_t> mapOffsets;
-
     uint64_t mapTotalN;
-    
+ 
     /* Constructor */
     StarkInfo(string file);
 
     /* Loads data from a json object */
     void load (json j);
 
+    void setMapSections();
     void setMapOffsets(bool optimizeCommitStage1Pols);
 
     /* Returns a polynomial specified by its ID */

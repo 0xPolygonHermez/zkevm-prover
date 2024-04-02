@@ -9,6 +9,22 @@ void TranscriptGL::put(Goldilocks::Element *input, uint64_t size)
     }
 }
 
+void TranscriptGL::_updateState() 
+{
+    while(pending_cursor < TRANSCRIPT_PENDING_SIZE) {
+        pending[pending_cursor] = Goldilocks::zero();
+        pending_cursor++;
+    }
+    Goldilocks::Element inputs[TRANSCRIPT_OUT_SIZE];
+    std::memcpy(inputs, pending, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));
+    std::memcpy(&inputs[TRANSCRIPT_PENDING_SIZE], state, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
+    PoseidonGoldilocks::hash_full_result(out, inputs);
+    out_cursor = TRANSCRIPT_OUT_SIZE;
+    std::memset(pending, 0, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));
+    pending_cursor = 0;
+    std::memcpy(state, out, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
+}
+
 void TranscriptGL::_add1(Goldilocks::Element input)
 {
     pending[pending_cursor] = input;
@@ -16,15 +32,7 @@ void TranscriptGL::_add1(Goldilocks::Element input)
     out_cursor = 0;
     if (pending_cursor == TRANSCRIPT_PENDING_SIZE)
     {
-        Goldilocks::Element inputs[TRANSCRIPT_OUT_SIZE];
-        std::memcpy(inputs, pending, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));
-        std::memcpy(&inputs[TRANSCRIPT_PENDING_SIZE], state, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
-
-        PoseidonGoldilocks::hash_full_result(out, inputs);
-        out_cursor = TRANSCRIPT_OUT_SIZE;
-        std::memset(pending, 0, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));
-        pending_cursor = 0;
-        std::memcpy(state, out, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
+        _updateState();
     }
 }
 
@@ -39,18 +47,18 @@ void TranscriptGL::getField(uint64_t* output)
 
 }
 
+void TranscriptGL::getState(Goldilocks::Element* output) {
+    if(pending_cursor > 0) {
+        _updateState();
+    }
+    std::memcpy(output, state, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
+}
+
 Goldilocks::Element TranscriptGL::getFields1()
 {
     if (out_cursor == 0)
     {
-        Goldilocks::Element inputs[TRANSCRIPT_OUT_SIZE];
-        std::memcpy(inputs, pending, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));
-        std::memcpy(&inputs[TRANSCRIPT_PENDING_SIZE], state, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
-        PoseidonGoldilocks::hash_full_result(out, inputs);
-        out_cursor = TRANSCRIPT_OUT_SIZE;
-        std::memset(pending, 0, TRANSCRIPT_PENDING_SIZE * sizeof(Goldilocks::Element));
-        pending_cursor = 0;
-        std::memcpy(state, out, TRANSCRIPT_STATE_SIZE * sizeof(Goldilocks::Element));
+        _updateState();
     }
     Goldilocks::Element res = out[(TRANSCRIPT_OUT_SIZE - out_cursor) % TRANSCRIPT_OUT_SIZE];
     out_cursor--;
