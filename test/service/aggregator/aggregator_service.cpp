@@ -29,11 +29,11 @@ using grpc::Status;
     string proof;
 
     //batch0
-    const string inputBatchFile0  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_0.json";
+    const string inputBatchFile0  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/e2e-circuits-BATCH-0-0-0-input.json";
     const string outputBatchFile0 = "testvectors/aggregatedBatchProof/recursive1.zkin.proof_0.json";
 
     //batch1
-    const string inputBatchFile1  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_1.json";
+    const string inputBatchFile1  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/e2e-circuits-BATCH-0-0-1-input.json";
     const string outputBatchFile1 = "testvectors/aggregatedBatchProof/recursive1.zkin.proof_1.json";
 
     //aggregate batches 01
@@ -42,7 +42,7 @@ using grpc::Status;
     const string outputBatchFile01 = "testvectors/aggregatedBatchProof/recursive2.zkin.proof_01.json";
 
     //batch2
-    const string inputBatchFile2  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_2.json";
+    const string inputBatchFile2  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/e2e-circuits-BATCH-0-0-2-input.json";
     const string outputBatchFile2 = "testvectors/aggregatedBatchProof/recursive1.zkin.proof_2.json";
     
     //aggregate batches 02
@@ -51,7 +51,7 @@ using grpc::Status;
     const string outputBatchFile02 = "testvectors/blobOuterProof/recursive2.zkin.proof_02.json";
 
     //blob inner for batches 02
-    const string inputBlobInnerFile02  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_blob_inner_executor_02.json";
+    const string inputBlobInnerFile02  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/e2e-circuits-INNER-0-0-input.json";
     const string outputBlobInnerFile02 = "testvectors/blobOuterProof/blob_inner_recursive1.zkin.proof_02.json";
 
     //blob outer for batches 02
@@ -60,11 +60,11 @@ using grpc::Status;
     const string outputBlobOuterFile02  = "testvectors/aggregatedBlobOuterProof/blob_outer.zkin.proof_02.json"; 
 
     //batch3
-    const string inputBatchFile3  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_3.json";
+    const string inputBatchFile3  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/e2e-circuits-BATCH-0-1-0-input.json";
     const string outputBatchFile3 = "testvectors/blobOuterProof/recursive1.zkin.proof_3.json";
 
     //blob inner for batches 33
-    const string inputBlobInnerFile33  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_blob_inner_executor_33.json";
+    const string inputBlobInnerFile33  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/e2e-circuits-INNER-0-1-input.json";
     const string outputBlobInnerFile33 = "testvectors/blobOuterProof/blob_inner_recursive1.zkin.proof_33.json";
 
     //blob outer for batches 33
@@ -73,11 +73,11 @@ using grpc::Status;
     const string outputBlobOuterFile33  = "testvectors/aggregatedBlobOuterProof/blob_outer.zkin.proof_33.json"; 
 
     //batch4
-    const string inputBatchFile4  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_4.json";
+    const string inputBatchFile4  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/e2e-circuits-BATCH-0-2-0-input.json";
     const string outputBatchFile4 = "testvectors/aggregatedBatchProof/recursive1.zkin.proof_4.json";
 
     //batch5
-    const string inputBatchFile5  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_batch_executor_5.json";
+    const string inputBatchFile5  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/e2e-circuits-BATCH-0-2-1-input.json";
     const string outputBatchFile5 = "testvectors/aggregatedBatchProof/recursive1.zkin.proof_5.json";
 
     //aggregate batches 45
@@ -86,7 +86,7 @@ using grpc::Status;
     const string outputBatchFile45 = "testvectors/blobOuterProof/recursive2.zkin.proof_45.json";
 
     //blob inner 45
-    const string inputBlobInnerFile45  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_blob_inner_executor_45.json";
+    const string inputBlobInnerFile45  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/e2e-circuits-INNER-0-2-input.json";
     const string outputBlobInnerFile45 = "testvectors/blobOuterProof/blob_inner_recursive1.zkin.proof_45.json";
 
     //blob outer for batches 45
