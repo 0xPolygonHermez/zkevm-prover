@@ -18,6 +18,8 @@ int main(int argc, char **argv)
     string cHelpersFile;
     string verkey;
     string publicsFile;
+    string proofFile;
+    string zkinProofFile;
 
     // Check arguments list
     if (argc != 2)
@@ -40,6 +42,8 @@ int main(int argc, char **argv)
         commitPols = "test/examples/all/all.commit";
         verkey = "test/examples/all/all.verkey.json";
         publicsFile = "test/examples/all/all.publics.json";
+        proofFile = "runtime/output/all_proof.json";
+        zkinProofFile = "runtime/output/all_proof.zkin.json";
 
         if(USE_GENERIC_PARSER) {
             cHelpersFile = "test/examples/all/all.chelpers/all.chelpers_generic.bin";
@@ -53,6 +57,9 @@ int main(int argc, char **argv)
         commitPols = "test/examples/compressor/all.c18.commit";
         verkey = "test/examples/compressor/all.c18.verkey.json";
         publicsFile = "test/examples/compressor/all.c18.publics.json";
+        proofFile = "runtime/output/compressor_proof.json";
+        zkinProofFile = "runtime/output/compressor_proof.zkin.json";
+
         if(USE_GENERIC_PARSER) {
             cHelpersFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers_generic.bin";
         } else {
@@ -121,9 +128,8 @@ int main(int argc, char **argv)
     jProof["publics"] = publics;
     zkin["publics"] = publics;
 
-    json2file(publicStarkJson, "runtime/output/publics.json");
-    json2file(zkin, "runtime/output/zkin.json");
-    json2file(jProof, "runtime/output/jProof.json");
+    json2file(zkin, zkinProofFile);
+    json2file(jProof, proofFile);
 
     return 0;
 }

@@ -45,6 +45,10 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         setSymbolCalculated(opType::cm, i);
     }
 
+    for(uint64_t i = 0; i < starkInfo.nPublics; ++i) {
+        setSymbolCalculated(opType::public_, i);
+    }
+
     TimerStopAndLog(STARK_INITIALIZATION);
 
     //--------------------------------
@@ -312,14 +316,8 @@ template <typename ElementType>
 void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof)
 {
 
-    uint64_t qDeg = 0;
-    uint64_t qDim = 0;
-    for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); ++i) {
-        if(starkInfo.cmPolsMap[i].stageNum == step) {
-            qDeg += 1;
-            if(qDim == 0) qDim = starkInfo.cmPolsMap[i].dim;
-        }       
-    }
+    uint64_t qDeg = starkInfo.qDeg;
+    uint64_t qDim = starkInfo.qDim;
 
     Goldilocks::Element *pBuffQ = &params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]];
     Polinomial qq1 = Polinomial(pBuffQ, NExtended, qDim, qDim);

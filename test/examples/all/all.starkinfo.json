@@ -1,6 +1,4 @@
 {
- "isVadcop": false,
- "hashCommits": true,
  "cmPolsMap": [
   {
    "stage": "cm1",
@@ -224,8 +222,8 @@
    "name": "Q0",
    "dim": 3,
    "imPol": false,
-   "stageId": 0,
-   "stagePos": 0
+   "stagePos": 0,
+   "stageId": 0
   },
   {
    "stage": "cm4",
@@ -233,17 +231,8 @@
    "name": "Q1",
    "dim": 3,
    "imPol": false,
-   "stageId": 1,
-   "stagePos": 3
-  },
-  {
-   "stage": "tmpExp",
-   "stageNum": 1,
-   "name": "tmpPol0",
-   "dim": 1,
-   "imPol": false,
-   "stagePos": 0,
-   "stageId": 0
+   "stagePos": 3,
+   "stageId": 1
   },
   {
    "stage": "tmpExp",
@@ -251,8 +240,8 @@
    "name": "tmpPol27",
    "dim": 3,
    "imPol": false,
-   "stagePos": 1,
-   "stageId": 1
+   "stagePos": 0,
+   "stageId": 0
   },
   {
    "stage": "tmpExp",
@@ -260,8 +249,8 @@
    "name": "tmpPol31",
    "dim": 3,
    "imPol": false,
-   "stagePos": 4,
-   "stageId": 2
+   "stagePos": 3,
+   "stageId": 1
   },
   {
    "stage": "tmpExp",
@@ -269,8 +258,8 @@
    "name": "tmpPol36",
    "dim": 3,
    "imPol": false,
-   "stagePos": 7,
-   "stageId": 3
+   "stagePos": 6,
+   "stageId": 2
   },
   {
    "stage": "tmpExp",
@@ -278,8 +267,8 @@
    "name": "tmpPol37",
    "dim": 3,
    "imPol": false,
-   "stagePos": 10,
-   "stageId": 4
+   "stagePos": 9,
+   "stageId": 3
   },
   {
    "stage": "tmpExp",
@@ -287,8 +276,8 @@
    "name": "tmpPol41",
    "dim": 3,
    "imPol": false,
-   "stagePos": 13,
-   "stageId": 5
+   "stagePos": 12,
+   "stageId": 4
   },
   {
    "stage": "tmpExp",
@@ -296,8 +285,8 @@
    "name": "tmpPol42",
    "dim": 3,
    "imPol": false,
-   "stagePos": 16,
-   "stageId": 6
+   "stagePos": 15,
+   "stageId": 5
   }
  ],
  "constPolsMap": [
@@ -424,10 +413,10 @@
    "stageId": 1
   }
  ],
- "subproofValuesMap": [],
+ "pil2": false,
  "mapSectionsN": {
   "const": 9,
-  "tmpExp": 19,
+  "tmpExp": 18,
   "cm1": 15,
   "cm2": 6,
   "cm3": 21,
@@ -438,7 +427,6 @@
  "nStages": 3,
  "subproofId": 0,
  "airId": 0,
- "pilPower": 10,
  "starkStruct": {
   "nBits": 10,
   "nBitsExt": 11,
@@ -456,11 +444,6 @@
    }
   ]
  },
- "publicsNames": [
-  "in1",
-  "in2",
-  "out"
- ],
  "boundaries": [
   {
    "name": "everyRow"
@@ -472,10 +455,6 @@
  ],
  "qDim": 3,
  "qDeg": 2,
- "qs": [
-  24,
-  25
- ],
  "evMap": [
   {
    "type": "cm",
@@ -692,12 +671,5 @@
    "id": 25,
    "prime": 0
   }
- ],
- "nCols": {
-  "cm1": 15,
-  "cm2": 2,
-  "cm3": 7,
-  "cm4": 2,
-  "tmpExp": 7
- }
+ ]
 }

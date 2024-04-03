@@ -48,9 +48,8 @@ public:
         buffTOffsetsSteps_[0] = 0;
         for(uint64_t stage = 1; stage <= nStages; ++stage) {
             std::string section = "cm" + to_string(stage);
-            section += domainExtended ? "_2ns" : "_n";
-            offsetsSteps[stage] = offsetsSteps[stage] = starkInfo.mapOffsets[std::make_pair(section, domainExtended)];
-            nColsSteps[stage] = starkInfo.mapSectionsN["cm" + to_string(stage)];
+            offsetsSteps[stage] = starkInfo.mapOffsets[std::make_pair(section, domainExtended)];
+            nColsSteps[stage] = starkInfo.mapSectionsN[section];
             nColsStepsAccumulated[stage] = nColsStepsAccumulated[stage - 1] + nColsSteps[stage - 1];
             buffTOffsetsSteps_[stage] = buffTOffsetsSteps_[stage - 1] + nOpenings*nColsSteps[stage - 1];
             nCols += nColsSteps[stage];
@@ -61,7 +60,7 @@ public:
         } else {
             std::string section = "cm" + to_string(nStages + 1);
             offsetsSteps[nStages + 1] = starkInfo.mapOffsets[std::make_pair(section, true)];
-            nColsSteps[nStages + 1] = starkInfo.mapSectionsN["cm" + to_string(nStages + 1)];
+            nColsSteps[nStages + 1] = starkInfo.mapSectionsN[section];
         }
         nColsStepsAccumulated[nStages + 1] = nColsStepsAccumulated[nStages] + nColsSteps[nStages];
         buffTOffsetsSteps_[nStages + 1] = buffTOffsetsSteps_[nStages] + nOpenings*nColsSteps[nStages];

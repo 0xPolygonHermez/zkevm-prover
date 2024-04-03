@@ -1,8 +1,4 @@
 {
- "merkleTreeArity": 4,
- "merkleTreeCustom": true,
- "isVadcop": false,
- "hashCommits": false,
  "cmPolsMap": [
   {
    "stage": "cm1",
@@ -433,8 +429,8 @@
    "name": "Q0",
    "dim": 3,
    "imPol": false,
-   "stageId": 0,
-   "stagePos": 0
+   "stagePos": 0,
+   "stageId": 0
   },
   {
    "stage": "cm4",
@@ -442,8 +438,8 @@
    "name": "Q1",
    "dim": 3,
    "imPol": false,
-   "stageId": 1,
-   "stagePos": 3
+   "stagePos": 3,
+   "stageId": 1
   },
   {
    "stage": "cm4",
@@ -451,8 +447,8 @@
    "name": "Q2",
    "dim": 3,
    "imPol": false,
-   "stageId": 2,
-   "stagePos": 6
+   "stagePos": 6,
+   "stageId": 2
   },
   {
    "stage": "cm4",
@@ -460,8 +456,8 @@
    "name": "Q3",
    "dim": 3,
    "imPol": false,
-   "stageId": 3,
-   "stagePos": 9
+   "stagePos": 9,
+   "stageId": 3
   },
   {
    "stage": "cm4",
@@ -469,8 +465,8 @@
    "name": "Q4",
    "dim": 3,
    "imPol": false,
-   "stageId": 4,
-   "stagePos": 12
+   "stagePos": 12,
+   "stageId": 4
   },
   {
    "stage": "cm4",
@@ -478,8 +474,8 @@
    "name": "Q5",
    "dim": 3,
    "imPol": false,
-   "stageId": 5,
-   "stagePos": 15
+   "stagePos": 15,
+   "stageId": 5
   },
   {
    "stage": "cm4",
@@ -487,8 +483,8 @@
    "name": "Q6",
    "dim": 3,
    "imPol": false,
-   "stageId": 6,
-   "stagePos": 18
+   "stagePos": 18,
+   "stageId": 6
   },
   {
    "stage": "tmpExp",
@@ -1193,7 +1189,7 @@
    "stageId": 1
   }
  ],
- "subproofValuesMap": [],
+ "pil2": false,
  "mapSectionsN": {
   "const": 49,
   "tmpExp": 90,
@@ -1207,12 +1203,14 @@
  "nStages": 3,
  "subproofId": 0,
  "airId": 0,
- "pilPower": 13,
  "starkStruct": {
   "nBits": 13,
   "nBitsExt": 17,
   "nQueries": 32,
   "verificationHashType": "BN128",
+  "merkleTreeArity": 4,
+  "merkleTreeCustom": true,
+  "hashCommits": false,
   "steps": [
    {
     "nBits": 17
@@ -1228,11 +1226,6 @@
    }
   ]
  },
- "publicsNames": [
-  "pub0",
-  "pub1",
-  "pub2"
- ],
  "boundaries": [
   {
    "name": "everyRow"
@@ -1244,15 +1237,6 @@
  ],
  "qDim": 3,
  "qDeg": 7,
- "qs": [
-  47,
-  48,
-  49,
-  50,
-  51,
-  52,
-  53
- ],
  "evMap": [
   {
    "type": "const",
@@ -1829,12 +1813,5 @@
    "id": 53,
    "prime": 0
   }
- ],
- "nCols": {
-  "cm1": 18,
-  "cm2": 0,
-  "cm3": 29,
-  "cm4": 7,
-  "tmpExp": 30
- }
+ ]
 }

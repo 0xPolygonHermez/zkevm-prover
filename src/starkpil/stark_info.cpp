@@ -22,10 +22,23 @@ void StarkInfo::load(json j)
     starkStruct.nQueries = j["starkStruct"]["nQueries"];
     starkStruct.verificationHashType = j["starkStruct"]["verificationHashType"];
     if(starkStruct.verificationHashType == "BN128") {
-        starkStruct.merkleTreeArity = j["merkleTreeArity"]; 
-        starkStruct.merkleTreeCustom = j["merkleTreeCustom"];
+        if(j["starkStruct"].contains("merkleTreeArity")) {
+            starkStruct.merkleTreeArity = j["starkStruct"]["merkleTreeArity"];
+        } else {
+            starkStruct.merkleTreeArity = 16;
+        }
+        if(j["starkStruct"].contains("merkleTreeCustom")) {
+            starkStruct.merkleTreeCustom = j["starkStruct"]["merkleTreeCustom"];
+        } else {
+            starkStruct.merkleTreeCustom = false;
+        }
     }
-    starkStruct.hashCommits = j["hashCommits"];
+    if(j["starkStruct"].contains("hashCommits")) {
+        starkStruct.hashCommits = j["starkStruct"]["hashCommits"];
+    } else {
+        starkStruct.hashCommits = false;
+    }
+
     for (uint64_t i = 0; i < j["starkStruct"]["steps"].size(); i++)
     {
         StepStruct step;
@@ -43,6 +56,9 @@ void StarkInfo::load(json j)
     }
 
     nStages = j["nStages"];
+
+    qDeg = j["qDeg"];
+    qDim = j["qDim"];
 
     if(j.contains("openingPoints")) {
         for(uint64_t i = 0; i < j["openingPoints"].size(); i++) {
@@ -101,17 +117,13 @@ void StarkInfo::load(json j)
         evMap.push_back(map);
     }
 
-    setMapSections();
+    for (auto it = j["mapSectionsN"].begin(); it != j["mapSectionsN"].end(); it++)  
+    {
+        mapSectionsN[it.key()] = it.value();
+    }
 
     // TODO: Call this function from the prover
     setMapOffsets(true);
-}
-
-void StarkInfo::setMapSections() {
-    for (uint64_t i = 0; i < cmPolsMap.size(); i++) 
-    {
-        mapSectionsN[cmPolsMap[i].stage] += cmPolsMap[i].dim;
-    }
 }
 
 void StarkInfo::setMapOffsets(bool optimizeCommitStage1Pols) {
@@ -140,13 +152,6 @@ void StarkInfo::setMapOffsets(bool optimizeCommitStage1Pols) {
         string currStage = "cm" + to_string(stage);
         mapOffsets[std::make_pair(currStage, true)] = mapOffsets[std::make_pair(prevStage, true)] + NExtended * mapSectionsN[prevStage];
     }
-    
-    auto qStage = nStages + 1;
-    auto qPol = std::find_if(cmPolsMap.begin(), cmPolsMap.end(), [qStage](const PolMap& c) {
-        return c.stageNum == qStage && c.stageId == 0;
-    });
-
-    uint64_t qDim = qPol->dim;
 
     mapOffsets[std::make_pair("q", true)] = mapOffsets[std::make_pair("cm" + to_string(nStages + 1), true)] + NExtended * mapSectionsN["cm" + to_string(nStages + 1)];
     mapOffsets[std::make_pair("f", true)] = mapOffsets[std::make_pair("q", true)] + NExtended * qDim;
@@ -176,7 +181,7 @@ opType string2opType(const string s)
         return tmp;
     if(s == "public")
         return public_;
-    if(s == "subproofvalue")
+    if(s == "subproofValue")
         return subproofvalue;
     if(s == "challenge")
         return challenge;

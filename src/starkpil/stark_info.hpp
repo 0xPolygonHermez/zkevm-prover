@@ -118,8 +118,12 @@ public:
     vector<uint64_t> openingPoints;
     vector<Boundary> boundaries;
 
-    // Precomputed
+    uint64_t qDeg;
+    uint64_t qDim;
+
     std::map<std::string, uint64_t> mapSectionsN;
+
+    // Precomputed
     std::map<std::pair<std::string, bool>, uint64_t> mapOffsets;
     uint64_t mapTotalN;
  
@@ -129,7 +133,6 @@ public:
     /* Loads data from a json object */
     void load (json j);
 
-    void setMapSections();
     void setMapOffsets(bool optimizeCommitStage1Pols);
 
     /* Returns a polynomial specified by its ID */
