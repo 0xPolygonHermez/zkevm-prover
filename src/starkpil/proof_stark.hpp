@@ -186,10 +186,12 @@ public:
     ElementType **roots;
     Fri<ElementType> fri;
     std::vector<std::vector<Goldilocks::Element>> evals;
+    std::vector<std::vector<Goldilocks::Element>> subAirValues;
     Proofs(StarkInfo starkInfo, uint64_t elementSize) :
         elementSize(elementSize),
         fri(starkInfo, elementSize),
-        evals(starkInfo.evMap.size(), std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero()))
+        evals(starkInfo.evMap.size(), std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
+        subAirValues(starkInfo.nSubProofValues, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero()))
         {
             nStages = starkInfo.nStages + 1;
             roots = new ElementType*[nStages];
@@ -211,6 +213,13 @@ public:
         for (uint64_t i = 0; i < evals.size(); i++)
         {
             std::memcpy(&evals[i][0], &_evals[i * evals[i].size()], evals[i].size() * sizeof(Goldilocks::Element));
+        }
+    }
+
+    void setSubAirValues(Goldilocks::Element *_subAirValues) {
+        for (uint64_t i = 0; i < subAirValues.size(); i++)
+        {
+            std::memcpy(&subAirValues[i][0], &_subAirValues[i * subAirValues[i].size()], subAirValues[i].size() * sizeof(Goldilocks::Element));
         }
     }
 
@@ -242,6 +251,20 @@ public:
             json_evals.push_back(element);
         }
         j["evals"] = json_evals;
+
+        ordered_json json_subAirValues = ordered_json::array();
+        for (uint i = 0; i < subAirValues.size(); i++)
+        {
+            ordered_json element = ordered_json::array();
+            for (uint j = 0; j < subAirValues[i].size(); j++)
+            {
+                element.push_back(Goldilocks::toString(subAirValues[i][j]));
+            }
+            json_subAirValues.push_back(element);
+        }
+
+        j["subAirValues"] = json_subAirValues;
+        
         j["fri"] = fri.FriP2json();
         return j;
     }

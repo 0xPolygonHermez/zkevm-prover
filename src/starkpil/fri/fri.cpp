@@ -67,7 +67,7 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinom
         {
             if (step == 0)
             {
-                Polinomial::copyElement(pol2_e, g, friPol, g);
+                Goldilocks3::copy((Goldilocks3::Element &)(*pol2_e[g]), (Goldilocks3::Element &)(*friPol[g]));
             }
             else
             {
@@ -76,7 +76,7 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinom
 
                 for (uint64_t i = 0; i < nX; i++)
                 {
-                    Polinomial::copyElement(ppar, i, friPol, (i * pol2N) + g);
+                    Goldilocks3::copy((Goldilocks3::Element &)(*ppar[i]), (Goldilocks3::Element &)(*friPol[(i * pol2N) + g]));
                 }
                 NTT_Goldilocks ntt(nX, 1);
 
@@ -171,7 +171,9 @@ void FRI<ElementType>::polMulAxi(Polinomial &pol, Goldilocks::Element init, Gold
     Goldilocks::Element r = init;
     for (uint64_t i = 0; i < pol.degree(); i++)
     {
-        Polinomial::mulElement(pol, i, pol, i, r);
+        pol[i][0] = pol[i][0] * r;
+        pol[i][1] = pol[i][1] * r;
+        pol[i][2] = pol[i][2] * r;
         r = r * acc;
     }
 }
@@ -186,12 +188,15 @@ void FRI<ElementType>::evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p,
         res[res_idx][2] = Goldilocks::zero();
         return;
     }
-    Polinomial::copyElement(res, res_idx, p, p.degree() - 1);
+    Goldilocks3::copy((Goldilocks3::Element &)(*res[res_idx]), (Goldilocks3::Element &)(*p[p.degree() - 1]));
     for (int64_t i = p.degree() - 2; i >= 0; i--)
     {
-        Polinomial aux(1, 3);
-        Polinomial::mulElement(aux, 0, res, res_idx, x, 0);
-        Polinomial::addElement(res, res_idx, aux, 0, p, i);
+        Goldilocks3::Element aux;
+        Goldilocks3::mul(aux, (Goldilocks3::Element &)(*res[res_idx]), (Goldilocks3::Element &)(*x[0]));
+
+        res[res_idx][0] = aux[0] + p[i][0];
+        res[res_idx][1] = aux[1] + p[i][1];
+        res[res_idx][2] = aux[2] + p[i][2];
     }
 }
 
@@ -212,7 +217,7 @@ void FRI<ElementType>::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t 
             assert(di < aux.degree());
             assert(fi < pol.degree());
 
-            Polinomial::copyElement(aux, di, pol, fi);
+            Goldilocks3::copy((Goldilocks3::Element &)(*aux[di]), (Goldilocks3::Element &)(*pol[fi]));
         }
     }
 }

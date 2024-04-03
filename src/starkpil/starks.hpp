@@ -203,7 +203,7 @@ public:
 
         for (uint64_t k = 1; k < (N << extendBits); k++)
         {
-            Polinomial::mulElement(x, k, x, k - 1, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
+            x[k][0] = x[k - 1][0] * Goldilocks::w(starkInfo.starkStruct.nBits + extendBits);
         }
 
         TimerStart(MERKLE_TREE_ALLOCATION);
@@ -362,8 +362,6 @@ public:
     void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
 
 private:
-    int findIndex(std::vector<uint64_t> openingPoints, int prime);
-
     bool canExpressionBeCalculated(ParserParams &parserParams);
 
     void transposePolsColumns(StepsParams& params, vector<int64_t> cm2Transposed, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);

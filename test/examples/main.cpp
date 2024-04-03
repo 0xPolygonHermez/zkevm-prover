@@ -3,7 +3,7 @@
 #include "proof2zkinStark.hpp"
 #include "AllSteps.hpp"
 #include "AllC18Steps.hpp"
-
+#include "FibonacciPil2Steps.hpp"
 
 int main(int argc, char **argv)
 {
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
     string testName = argv[1];
 
-    if(testName != "all" && testName != "compressor") {
+    if(testName != "all" && testName != "compressor" && testName != "fibonacci_pil2") {
         cout << "Error: unknown test name " << testName << endl;
         return -1;
     }
@@ -64,6 +64,21 @@ int main(int argc, char **argv)
             cHelpersFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers_generic.bin";
         } else {
             cHelpersFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers.bin";
+        }
+    } else if(testName == "fibonacci_pil2") {
+        constPols = "test/examples/fibonacci.pil2/fibonacci.pil2.const";
+        constTree = "test/examples/fibonacci.pil2/fibonacci.pil2.consttree";
+        starkInfoFile = "test/examples/fibonacci.pil2/fibonacci.pil2.starkinfo.json";
+        commitPols = "test/examples/fibonacci.pil2/fibonacci.pil2.commit";
+        verkey = "test/examples/fibonacci.pil2/fibonacci.pil2.verkey.json";
+        publicsFile = "test/examples/fibonacci.pil2/fibonacci.pil2.publics.json";
+        proofFile = "runtime/output/fibonacci_pil2_proof.json";
+        zkinProofFile = "runtime/output/fibonacci_pil2_proof.zkin.json";
+
+        if(USE_GENERIC_PARSER) {
+            cHelpersFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin";
+        } else {
+            cHelpersFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers.bin";
         }
     }
    
@@ -109,7 +124,6 @@ int main(int argc, char **argv)
         }
         jProof = fproof.proofs.proof2json();
     } else if(testName == "compressor") {
-        
         FRIProof<RawFr::Element> fproof(starkInfo, 1);
         Starks<RawFr::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress, false);
         if(USE_GENERIC_PARSER) {
@@ -118,6 +132,17 @@ int main(int argc, char **argv)
         } else {
             AllC18Steps allC18Steps;
             starks.genProof(fproof, &publicInputs[0], &allC18Steps);
+        }
+        jProof = fproof.proofs.proof2json();
+    } else if(testName == "fibonacci_pil2") {
+        FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
+        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress, false);
+        if(USE_GENERIC_PARSER) {
+            CHelpersSteps cHelpersSteps;
+            starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
+        } else {
+            FibonacciPil2Steps fibonacciPil2Steps;
+            starks.genProof(fproof, &publicInputs[0], &fibonacciPil2Steps);
         }
         jProof = fproof.proofs.proof2json();
     }

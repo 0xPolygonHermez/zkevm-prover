@@ -154,22 +154,6 @@ public:
         }
     }
 
-    static inline void subElement(Polinomial &out, uint64_t idx_out, Polinomial &in_a, uint64_t idx_a, Polinomial &in_b, uint64_t idx_b)
-    {
-        assert(out.dim() == in_a.dim());
-
-        if (in_a.dim() == 1)
-        {
-            out[idx_out][0] = in_a[idx_a][0] - in_b[idx_b][0];
-        }
-        else
-        {
-            out[idx_out][0] = in_a[idx_a][0] - in_b[idx_b][0];
-            out[idx_out][1] = in_a[idx_a][1] - in_b[idx_b][1];
-            out[idx_out][2] = in_a[idx_a][2] - in_b[idx_b][2];
-        }
-    }
-
     static inline void mulElement(Polinomial &out, uint64_t idx_out, Polinomial &in_a, uint64_t idx_a, Goldilocks::Element &b)
     {
         Polinomial polB(&b, 1, 1);
@@ -204,34 +188,6 @@ public:
             out[idx_out][0] = (C + G) - F;
             out[idx_out][1] = ((((A + C) - E) - E) - D);
             out[idx_out][2] = B - G;
-        }
-    };
-
-    static inline void divElement(Polinomial &out, uint64_t idx_out, Goldilocks::Element &a, Polinomial &in_b, uint64_t idx_b)
-    {
-        Polinomial polA(&a, 1, 1);
-        divElement(out, idx_out, polA, 0, in_b, idx_b);
-    }
-
-    static inline void divElement(Polinomial &out, uint64_t idx_out, Polinomial &in_a, uint64_t idx_a, Goldilocks::Element &b)
-    {
-        Polinomial polB(&b, 1, 1);
-        divElement(out, idx_out, in_a, idx_a, polB, 0);
-    }
-
-    static inline void divElement(Polinomial &out, uint64_t idx_out, Polinomial &in_a, uint64_t idx_a, Polinomial &in_b, uint64_t idx_b)
-    {
-        assert(out.dim() == in_a.dim() && in_b.dim() == 1);
-
-        if (in_a.dim() == 1)
-        {
-            out[idx_out][0] = in_a[idx_a][0] / in_b[idx_b][0];
-        }
-        else
-        {
-            Goldilocks::Element inv = Goldilocks::inv(*in_b[idx_b]);
-            Polinomial polInv(&inv, 1, 1);
-            mulElement(out, idx_out, in_a, idx_a, polInv, 0);
         }
     };
 
@@ -613,24 +569,24 @@ public:
         zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));
     }
 
-    static void calculateS(Polinomial &s, Polinomial &num, Polinomial &den)
+    static void calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity)
     {
-        uint64_t size = num.degree();
+        uint64_t size = den.degree();
 
         Polinomial denI(size, 3);
         Polinomial checkVal(1, 3);
-        Goldilocks::Element *pS = s[0];
-        Goldilocks3::copy((Goldilocks3::Element *)&pS[0], &Goldilocks3::zero());
 
         batchInverse(denI, den);
+        
+        Polinomial::mulElement(s, 0, denI, 0, multiplicity);
         for (uint64_t i = 1; i < size; i++)
         {
             Polinomial tmp(1, 3);
-            Polinomial::mulElement(tmp, 0, num, i - 1, denI, i - 1);
+            Polinomial::mulElement(tmp, 0, denI, i, multiplicity);
             Polinomial::addElement(s, i, s, i - 1, tmp, 0);
         }
         Polinomial tmp(1, 3);
-        Polinomial::mulElement(tmp, 0, num, size - 1, denI, size - 1);
+        Polinomial::mulElement(tmp, 0, denI, size - 1, multiplicity);
         Polinomial::addElement(checkVal, 0, s, size - 1, tmp, 0);
 
         zkassert(Goldilocks3::isZero((Goldilocks3::Element &)*checkVal[0]));

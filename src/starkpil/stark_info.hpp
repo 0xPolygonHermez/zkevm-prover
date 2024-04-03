@@ -115,7 +115,7 @@ public:
     vector<PolMap> challengesMap;
     vector<EvMap> evMap;
     
-    vector<uint64_t> openingPoints;
+    vector<int64_t> openingPoints;
     vector<Boundary> boundaries;
 
     uint64_t qDeg;

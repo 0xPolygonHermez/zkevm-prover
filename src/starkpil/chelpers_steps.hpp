@@ -29,13 +29,9 @@ public:
         uint64_t nStages = starkInfo.nStages;
         uint64_t nOpenings = starkInfo.openingPoints.size();
         int64_t nextStrides[nOpenings];
-        int64_t minStride = 0;
-        int64_t maxStride = 0;
         for(uint64_t i = 0; i < nOpenings; ++i) {
             uint64_t opening = starkInfo.openingPoints[i] < 0 ? starkInfo.openingPoints[i] + domainSize : starkInfo.openingPoints[i];
             nextStrides[i] = domainExtended ? opening << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : opening;
-            if(nextStrides[i] < minStride) minStride = nextStrides[i];
-            if(nextStrides[i] > maxStride) maxStride = nextStrides[i];
         }
         std::vector<bool> validConstraint(domainSize, true);
         uint64_t nCols = starkInfo.nConstants;
@@ -112,7 +108,7 @@ public:
 
     #pragma omp parallel for
         for (uint64_t i = 0; i < domainSize; i+= nrowsBatch) {
-            bool const needModule = (i + nrowsBatch + maxStride >= domainSize) || (i + minStride < domainSize);
+            bool const needModule = true; // TODO: IMPROVE
             uint64_t i_args = 0;
 
             uint64_t offsetsDest[4];

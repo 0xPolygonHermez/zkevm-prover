@@ -41,7 +41,7 @@ namespace Hints
         assert(numPol.dim() == denPol.dim());
         assert(numPol.dim() == zPol.dim());
 
-        Polinomial::calculateS(zPol, numPol, denPol);
+        //Polinomial::calculateS(zPol, numPol, denPol);
     }
 
     std::shared_ptr<HintHandler> GSumHintHandlerBuilder::build() const

@@ -255,8 +255,8 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams &params, FRIPr
             for (uint64_t i = 0; i < chelpers.expressionsInfo.size(); i++) {
                 if(chelpers.expressionsInfo[i].stage == step) {
                     bool isCalculated = true;
-                    for(uint64_t i = 0; i < chelpers.expressionsInfo[i].nCmPolsCalculated; i++) {
-                        uint64_t cmPolCalculatedId = chelpers.cHelpersArgsExpressions.cmPolsCalculatedIds[chelpers.stagesInfo[step - 1].cmPolsCalculatedOffset + i];
+                    for(uint64_t j = 0; j < chelpers.expressionsInfo[i].nCmPolsCalculated; j++) {
+                        uint64_t cmPolCalculatedId = chelpers.cHelpersArgsExpressions.cmPolsCalculatedIds[chelpers.expressionsInfo[i].cmPolsCalculatedOffset + j];
                         if (!isSymbolCalculated(opType::cm, cmPolCalculatedId)) {
                             isCalculated = false;
                             break;
@@ -267,6 +267,7 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams &params, FRIPr
                     }
                 }
             }
+            calculateHints(step, params, chelpers.hints);
             uint64_t newSymbolsToBeCalculated = isStageCalculated(step);
             if (newSymbolsToBeCalculated == symbolsToBeCalculated)
             {
@@ -299,6 +300,10 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams &params, FRIPr
         {
             computeQ(step, params, proof);
         }
+    }
+
+    if(step == starkInfo.nStages) {
+        proof.proofs.setSubAirValues(params.subproofValues.address());
     }
 
     if (debug)
@@ -381,37 +386,32 @@ void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType
 
     TimerStart(STARK_CALCULATE_LEv);
 
-    vector<uint64_t> openingPoints = starkInfo.openingPoints;
+    Polinomial LEv(starkInfo.openingPoints.size() * N, FIELD_EXTENSION);
 
-    Polinomial LEv(openingPoints.size() * N, FIELD_EXTENSION);
-
-    Polinomial w(openingPoints.size(), FIELD_EXTENSION);
-    Polinomial c_w(openingPoints.size(), FIELD_EXTENSION);
-    Polinomial xi(openingPoints.size(), FIELD_EXTENSION);
-
-    for (uint64_t i = 0; i < openingPoints.size(); ++i)
-    {
+    for (uint64_t i = 0; i < starkInfo.openingPoints.size(); ++i)
+    {   
+        Goldilocks::Element w = Goldilocks::one();
         uint64_t offset = i * N;
         Goldilocks3::one((Goldilocks3::Element &)*LEv[offset]);
-        uint64_t openingAbs = openingPoints[i] < 0 ? -openingPoints[i] : openingPoints[i];
-        Goldilocks3::one((Goldilocks3::Element &)*w[i]);
+        uint64_t openingAbs = starkInfo.openingPoints[i] < 0 ? -starkInfo.openingPoints[i] : starkInfo.openingPoints[i];
         for (uint64_t j = 0; j < openingAbs; ++j)
         {
-            Polinomial::mulElement(w, i, w, i, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
+            w = w * Goldilocks::w(starkInfo.starkStruct.nBits);
         }
 
-        if (openingPoints[i] < 0)
+        if (starkInfo.openingPoints[i] < 0)
         {
-            Polinomial::divElement(w, i, (Goldilocks::Element &)Goldilocks::one(), w, i);
+            w = Goldilocks::one() / w;
         }
 
-        Polinomial::mulElement(c_w, i, params.challenges, xiChallengeIndex, w, i);
-
-        Polinomial::divElement(xi, i, c_w, i, (Goldilocks::Element &)Goldilocks::shift());
+        Goldilocks3::Element xi;
+        xi[0] = params.challenges[xiChallengeIndex][0] * w * Goldilocks::inv(Goldilocks::shift());
+        xi[1] = params.challenges[xiChallengeIndex][1] * w * Goldilocks::inv(Goldilocks::shift());
+        xi[2] = params.challenges[xiChallengeIndex][2] * w * Goldilocks::inv(Goldilocks::shift());
 
         for (uint64_t k = 1; k < N; k++)
         {
-            Polinomial::mulElement(LEv, k + offset, LEv, k + offset - 1, xi, i);
+            Goldilocks3::mul((Goldilocks3::Element &)(*LEv[k + offset]), (Goldilocks3::Element &)(*LEv[k + offset - 1]), xi);
         }
 
         ntt.INTT(LEv[offset], LEv[offset], N, 3);
@@ -438,45 +438,46 @@ Polinomial *Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &param
 
     TimerStart(STARK_CALCULATE_XDIVXSUB);
 
-    vector<uint64_t> openingPoints = starkInfo.openingPoints;
-
-    Polinomial xi(openingPoints.size(), FIELD_EXTENSION);
-    Polinomial w(openingPoints.size(), FIELD_EXTENSION);
-
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
 
 #pragma omp parallel for
-    for (uint64_t i = 0; i < openingPoints.size(); ++i)
+    for (uint64_t i = 0; i < starkInfo.openingPoints.size(); ++i)
     {
-        uint64_t opening = openingPoints[i] < 0 ? -openingPoints[i] : openingPoints[i];
-        Goldilocks3::one((Goldilocks3::Element &)*w[i]);
-        for (uint64_t j = 0; j < opening; ++j)
+        uint64_t openingAbs = starkInfo.openingPoints[i] < 0 ? -starkInfo.openingPoints[i] : starkInfo.openingPoints[i];
+        Goldilocks::Element w = Goldilocks::one();
+        
+        for (uint64_t j = 0; j < openingAbs; ++j)
         {
-            Polinomial::mulElement(w, i, w, i, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
+            w = w * Goldilocks::w(starkInfo.starkStruct.nBits);
         }
 
-        if (openingPoints[i] < 0)
+        if (starkInfo.openingPoints[i] < 0)
         {
-            Polinomial::divElement(w, i, (Goldilocks::Element &)Goldilocks::one(), w, i);
+            w = Goldilocks::one() / w;
         }
 
-        Polinomial::mulElement(xi, i, params.challenges, xiChallengeIndex, w, i);
+        Goldilocks3::Element xi;
+        xi[0] = params.challenges[xiChallengeIndex][0] * w;
+        xi[1] = params.challenges[xiChallengeIndex][1] * w;
+        xi[2] = params.challenges[xiChallengeIndex][2] * w;
 
 #pragma omp parallel for
         for (uint64_t k = 0; k < (N << extendBits); k++)
         {
-            Polinomial::subElement(params.xDivXSubXi, k + i * NExtended, x, k, xi, i);
+            params.xDivXSubXi[k + i * NExtended][0] = x[k][0] - xi[0];
+            params.xDivXSubXi[k + i * NExtended][1] = x[k][1] - xi[1];
+            params.xDivXSubXi[k + i * NExtended][2] = x[k][2] - xi[2];
         }
     }
 
     Polinomial::batchInverseParallel(params.xDivXSubXi, params.xDivXSubXi);
 
 #pragma omp parallel for
-    for (uint64_t i = 0; i < openingPoints.size(); ++i)
+    for (uint64_t i = 0; i < starkInfo.openingPoints.size(); ++i)
     {
         for (uint64_t k = 0; k < (N << extendBits); k++)
         {
-            Polinomial::mulElement(params.xDivXSubXi, k + i * NExtended, params.xDivXSubXi, k + i * NExtended, x, k);
+            Goldilocks3::mul((Goldilocks3::Element &)(*params.xDivXSubXi[k + i * NExtended]), (Goldilocks3::Element &)(*params.xDivXSubXi[k + i * NExtended]), (Goldilocks3::Element &)(*x[k]));
         }
     }
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
@@ -671,13 +672,17 @@ bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields
 template <typename ElementType>
 std::vector<string> Starks<ElementType>::getSrcFields(std::string hintName)
 {
-    if (hintName == "public" || hintName == "subproofvalue")
+    if (hintName == "subproofValue")
     {
         return {"expression"};
     }
-    else if (hintName == "gsum" || hintName == "gprod")
+    else if (hintName == "gprod")
     {
         return {"numerator", "denominator"};
+    } 
+    else if (hintName == "gsum") 
+    {
+        return {"denominator"};
     }
     else if (hintName == "h1h2")
     {
@@ -694,7 +699,7 @@ std::vector<string> Starks<ElementType>::getSrcFields(std::string hintName)
 template <typename ElementType>
 std::vector<string> Starks<ElementType>::getDstFields(std::string hintName)
 {
-    if (hintName == "public" || hintName == "subproofvalue" || hintName == "gsum" || hintName == "gprod")
+    if (hintName == "subproofValue" || hintName == "gsum" || hintName == "gprod")
     {
         return {"reference"};
     }
@@ -852,11 +857,21 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vec
             }
             else if (hint.name == "gsum")
             {
+                uint64_t sId = hint.fields["reference"].id;
+                uint64_t denominatorId = hint.fields["denominator"].id;
+                Goldilocks::Element numeratorValue = Goldilocks::fromS64(hint.fields["numerator"].value);
+                numeratorValue = Goldilocks::negone(); // TODO: NOT HARDCODE THIS!
+                Polinomial::calculateS(transPols[cm2Transposed[sId]], transPols[cm2Transposed[denominatorId]], numeratorValue);
             }
             else if (hint.name == "subproofValue")
             {
+                uint64_t expressionId = hint.fields["expression"].id;
+                uint64_t row_index = hint.fields["row_index"].value;
+                uint64_t subproofValueId = hint.fields["reference"].id;
+
+                Goldilocks3::copy((Goldilocks3::Element &)(*params.subproofValues[subproofValueId]), (Goldilocks3::Element &)(*transPols[cm2Transposed[expressionId]][row_index]));
             }
-            else if (hint.name != "public")
+            else
             {           
                 zklog.error("Invalid hint type=" + hint.name);
                 exitProcess();
@@ -880,16 +895,15 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vec
 template <typename ElementType>
 void Starks<ElementType>::evmap(StepsParams &params, Polinomial &LEv)
 {
-    vector<uint64_t> openingPoints = starkInfo.openingPoints;
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
     u_int64_t size_eval = starkInfo.evMap.size();
 
-    Polinomial LEv_Helpers(openingPoints.size() * N, FIELD_EXTENSION);
+    Polinomial LEv_Helpers(starkInfo.openingPoints.size() * N, FIELD_EXTENSION);
 
 #pragma omp parallel for
     for (uint64_t k = 0; k < N; ++k)
     {
-        for (uint64_t i = 0; i < openingPoints.size(); ++i)
+        for (uint64_t i = 0; i < starkInfo.openingPoints.size(); ++i)
         {
             Goldilocks::Element *LEv_ = &LEv[i * N + k][0];
             LEv_Helpers[i * N + k][0] = LEv_[0] + LEv_[1];
@@ -935,7 +949,14 @@ void Starks<ElementType>::evmap(StepsParams &params, Polinomial &LEv)
             {
                ordPols[kk] = starkInfo.getPolinomial(params.pols, ev.id, NExtended);
             }
-            openingPos[kk] = findIndex(openingPoints, ev.prime);
+            int64_t prime = ev.prime;
+            auto openingPoint = std::find_if(starkInfo.openingPoints.begin(), starkInfo.openingPoints.end(), [prime](int p) { return p == prime; });
+            if(openingPoint == starkInfo.openingPoints.end()) {
+                zklog.error("Opening point not found");
+                exitProcess();
+                exit(-1);
+            }
+            openingPos[kk] = std::distance(starkInfo.openingPoints.begin(), openingPoint);
             indx[kk] = *it2;
             ++kk;
         }
@@ -1014,22 +1035,6 @@ void Starks<ElementType>::cleanSymbolsCalculated() {
 
     for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); ++i) {
         witnessCalculated[i] = false;
-    }
-}
-
-template <typename ElementType>
-int Starks<ElementType>::findIndex(std::vector<uint64_t> openingPoints, int prime)
-{
-    auto it = std::find_if(openingPoints.begin(), openingPoints.end(), [prime](int p)
-                           { return p == prime; });
-
-    if (it != openingPoints.end())
-    {
-        return it - openingPoints.begin();
-    }
-    else
-    {
-        return -1;
     }
 }
 

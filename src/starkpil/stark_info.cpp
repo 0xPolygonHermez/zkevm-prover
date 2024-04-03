@@ -60,28 +60,17 @@ void StarkInfo::load(json j)
     qDeg = j["qDeg"];
     qDim = j["qDim"];
 
-    if(j.contains("openingPoints")) {
-        for(uint64_t i = 0; i < j["openingPoints"].size(); i++) {
-            openingPoints.push_back(j["openingPoints"][i]);
-        }
-    } else {
-        openingPoints.push_back(0);
-        openingPoints.push_back(1);
+    for(uint64_t i = 0; i < j["openingPoints"].size(); i++) {
+        openingPoints.push_back(j["openingPoints"][i]);
     }
 
-    if(j.contains("boundaries")) {
-       for(uint64_t i = 0; i < j["boundaries"].size(); i++) {
-            Boundary b;
-            b.name = j["boundaries"][i]["name"];
-            if(b.name == string("everyFrame")) {
-                b.offsetMin = j["boundaries"][i]["offsetMin"];
-                b.offsetMax = j["boundaries"][i]["offsetMax"];
-            }
-            boundaries.push_back(b);
-        }
-    } else {
+    for(uint64_t i = 0; i < j["boundaries"].size(); i++) {
         Boundary b;
-        b.name = std::string("everyRow");
+        b.name = j["boundaries"][i]["name"];
+        if(b.name == string("everyFrame")) {
+            b.offsetMin = j["boundaries"][i]["offsetMin"];
+            b.offsetMax = j["boundaries"][i]["offsetMax"];
+        }
         boundaries.push_back(b);
     }
     
