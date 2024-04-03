@@ -88,6 +88,7 @@ void eval_bit_shl             (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_bit_shr             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_if                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getMemValue         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getMemAddr          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 // Forward declaration of internal callable functions
 void eval_getGlobalExitRoot   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -127,6 +128,7 @@ void eval_getL1InfoRoot               (Context &ctx, const RomCommand &cmd, Comm
 void eval_getL1InfoGER                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1InfoBlockHash          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1InfoTimestamp          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getL1InfoMinTimestamp       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTimestampLimit           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getForcedBlockHashL1        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getSmtProof                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -148,14 +150,12 @@ void eval_fp2InvBN254_x               (Context &ctx, const RomCommand &cmd, Comm
 void eval_fp2InvBN254_y               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_fpBN254inv                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
-// Feijoa (fork 9) new methods:
+// Feijoa (fork 10) new methods:
 void eval_getForcedTimestamp          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getType                     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getForcedGER                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1HistoricRoot           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getPendingRID               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-
-// Feijoa (fork 9 blob) new methods:
 void eval_getZkGasLimit               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getZ                        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getY                        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -168,6 +168,12 @@ void eval_check4096Root               (Context &ctx, const RomCommand &cmd, Comm
 void eval_get4096RootIndex            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getLastL1InfoTreeRoot       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getLastL1InfoTreeIndex      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_signedComparison            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_signedComparisonWithConst   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getFirstDiffChunkRem        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getSmtProofPreviousIndex    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getBatchHashData            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);
 

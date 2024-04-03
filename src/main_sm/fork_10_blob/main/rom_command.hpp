@@ -50,6 +50,7 @@ typedef enum : int {
     f_getL1InfoRoot,
     f_getL1InfoGER,
     f_getL1InfoBlockHash,
+    f_getL1InfoMinTimestamp,
     f_getL1InfoTimestamp,
     f_getTimestampLimit,
     f_getForcedBlockHashL1,
@@ -91,7 +92,11 @@ typedef enum : int {
     f_getLastL1InfoTreeIndex,
     f_onAddBatch,
     f_onStartBlob,
-    f_onFinishBlob
+    f_onFinishBlob,
+    f_signedComparison,
+    f_signedComparisonWithConst,
+    f_getFirstDiffChunkRem,
+    f_getSmtProofPreviousIndex
 } tFunction;
 
 // ROM command (op)
@@ -125,7 +130,8 @@ typedef enum : int {
     op_shl,
     op_shr,
     op_if,
-    op_getMemValue
+    op_getMemValue,
+    op_getMemAddr
 } tOp;
 
 // Register (reg)

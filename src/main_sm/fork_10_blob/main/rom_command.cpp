@@ -77,6 +77,7 @@ tFunction string2Function(string s)
     else if (s == "getL1InfoGER")                   return f_getL1InfoGER;
     else if (s == "getL1InfoBlockHash")             return f_getL1InfoBlockHash;
     else if (s == "getL1InfoTimestamp")             return f_getL1InfoTimestamp;
+    else if (s == "getL1InfoMinTimestamp")          return f_getL1InfoMinTimestamp;
     else if (s == "getTimestampLimit")              return f_getTimestampLimit;
     else if (s == "getForcedBlockHashL1")           return f_getForcedBlockHashL1;
     else if (s == "getSmtProof")                    return f_getSmtProof;
@@ -118,6 +119,10 @@ tFunction string2Function(string s)
     else if (s == "onAddBatch")                     return f_onAddBatch;
     else if (s == "onStartBlob")                    return f_onStartBlob;
     else if (s == "onFinishBlob")                   return f_onFinishBlob;
+    else if (s == "signedComparison")               return f_signedComparison;
+    else if (s == "signedComparisonWithConst")      return f_signedComparisonWithConst;
+    else if (s == "getFirstDiffChunkRem")           return f_getFirstDiffChunkRem;
+    else if (s == "getSmtProofPreviousIndex")       return f_getSmtProofPreviousIndex;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -166,6 +171,7 @@ string function2String(tFunction f)
         case f_getL1InfoGER:                    return "getL1InfoGER";
         case f_getL1InfoBlockHash:              return "getL1InfoBlockHash";
         case f_getL1InfoTimestamp:              return "getL1InfoTimestamp";
+        case f_getL1InfoMinTimestamp:           return "getL1InfoMinTimestamp";
         case f_getTimestampLimit:               return "getTimestampLimit";
         case f_getForcedBlockHashL1:            return "getForcedBlockHashL1";
         case f_getSmtProof:                     return "getSmtProof";
@@ -207,6 +213,10 @@ string function2String(tFunction f)
         case f_onAddBatch:                      return "onAddBatch";
         case f_onStartBlob:                     return "onStartBlob";
         case f_onFinishBlob:                    return "onFinishBlob";
+        case f_signedComparison:                return "signedComparison";
+        case f_signedComparisonWithConst:       return "signedComparisonWithConst";
+        case f_getFirstDiffChunkRem:            return "getFirstDiffChunkRem";
+        case f_getSmtProofPreviousIndex:        return "getSmtProofPreviousIndex";
         case f_empty:                           return "";
         default:                                return "unknown";
     }
@@ -243,6 +253,7 @@ tOp string2Op(string s)
     else if (s == "shr")             return op_shr;
     else if (s == "if")              return op_if;
     else if (s == "getMemValue")     return op_getMemValue;
+    else if (s == "getMemAddr")      return op_getMemAddr;
     else if (s == "")                return op_empty;
     else {
         zklog.error("string2op() invalid string = " + s);
@@ -284,6 +295,7 @@ string op2String(tOp op)
         case op_shr:                return  "shr";
         case op_if:                 return  "if";
         case op_getMemValue:        return  "getMemValue";
+        case op_getMemAddr:         return  "getMemAddr";
         case op_empty:              return  "";
         default:                    return  "unknown";  
     }

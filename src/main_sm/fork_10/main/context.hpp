@@ -158,6 +158,14 @@ public:
     Saved() : restored(false) {};
 };
 
+class BLS12_381Root
+{
+public:
+    mpz_class z;
+    uint64_t index;
+    BLS12_381Root() : index(0) {};
+};
+
 class Context
 {
 public:
@@ -186,9 +194,10 @@ public:
     uint64_t line; // From ROM JSON file instruction
 #endif
 
+    // Fork 10 (Feijoa) attributes
     map<uint64_t, Saved> saved;
-
     mpz_class batchHashData;
+    BLS12_381Root BLS512_381root;
 
     Context( Goldilocks &fr,
              const Config &config,

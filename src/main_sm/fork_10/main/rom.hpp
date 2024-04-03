@@ -83,6 +83,12 @@ public:
     uint64_t currentTxOffset;
     uint64_t txStatusOffset;
     uint64_t currentLogIndexOffset;
+    uint64_t newBlobStateRootOffset;
+    uint64_t newBlobAccInputHashOffset;
+    uint64_t newBlobNumberOffset;
+    uint64_t finalAccBatchHashDataOffset;
+    uint64_t localExitRootFromBlobOffset;
+    uint64_t isInvalidOffset;
 
     /* Constants */
     RomConstants constants;
@@ -143,6 +149,12 @@ public:
             currentTxOffset(0),
             txStatusOffset(0),
             currentLogIndexOffset(0),
+            newBlobStateRootOffset(0),
+            newBlobAccInputHashOffset(0),
+            newBlobNumberOffset(0),
+            finalAccBatchHashDataOffset(0),
+            localExitRootFromBlobOffset(0),
+            isInvalidOffset(0),
             type(type)
             {
                 zkassert((type == BATCH) || (type == BLOB) || (type == COLLECTION));

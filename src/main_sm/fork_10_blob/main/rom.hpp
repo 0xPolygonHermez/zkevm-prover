@@ -3,6 +3,7 @@
 
 #include <nlohmann/json.hpp>
 #include <string>
+#include "main_sm/fork_10_blob/main/main_definitions.hpp"
 #include "main_sm/fork_10_blob/main/rom_line.hpp"
 #include "main_sm/fork_10_blob/main/rom_constants.hpp"
 #include "main_sm/fork_10_blob/main/rom_labels.hpp"

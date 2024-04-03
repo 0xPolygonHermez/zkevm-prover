@@ -127,6 +127,7 @@ void eval_memAlignRD          (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_getL1InfoRoot               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1InfoGER                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1InfoBlockHash          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getL1InfoTimestamp          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1InfoMinTimestamp       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTimestampLimit           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getForcedBlockHashL1        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -149,13 +150,24 @@ void eval_fp2InvBN254_x               (Context &ctx, const RomCommand &cmd, Comm
 void eval_fp2InvBN254_y               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_fpBN254inv                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
-// Feijoa (fork 9) new methods:
+// Feijoa (fork 10) new methods:
 void eval_getForcedTimestamp          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getType                     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getForcedGER                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getL1HistoricRoot           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getPendingRID               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getZkGasLimit               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getZ                        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getY                        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getBlobL2HashData           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getForcedHashData           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getBlobLen                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_frBLS12_381inv              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_dump                        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_check4096Root               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_get4096RootIndex            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getLastL1InfoTreeRoot       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getLastL1InfoTreeIndex      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_signedComparison            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_signedComparisonWithConst   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getFirstDiffChunkRem        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
