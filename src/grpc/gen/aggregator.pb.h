@@ -7166,11 +7166,10 @@ class PublicInputsExtended PROTOBUF_FINAL :
   enum : int {
     kNewStateRootFieldNumber = 2,
     kNewBatchAccInputHashFieldNumber = 3,
-    kNewLocalExitRootFieldNumber = 4,
-    kCurrentL1InfoTreeRootFieldNumber = 6,
+    kCurrentL1InfoTreeRootFieldNumber = 5,
     kPublicInputsFieldNumber = 1,
-    kNewLastTimestampFieldNumber = 5,
-    kCurrentL1InfoTreeIndexFieldNumber = 7,
+    kNewLastTimestampFieldNumber = 4,
+    kCurrentL1InfoTreeIndexFieldNumber = 6,
   };
   // bytes new_state_root = 2;
   void clear_new_state_root();
@@ -7222,32 +7221,7 @@ class PublicInputsExtended PROTOBUF_FINAL :
   std::string* _internal_mutable_new_batch_acc_input_hash();
   public:
 
-  // bytes new_local_exit_root = 4;
-  void clear_new_local_exit_root();
-  const std::string& new_local_exit_root() const;
-  void set_new_local_exit_root(const std::string& value);
-  void set_new_local_exit_root(std::string&& value);
-  void set_new_local_exit_root(const char* value);
-  void set_new_local_exit_root(const void* value, size_t size);
-  std::string* mutable_new_local_exit_root();
-  std::string* release_new_local_exit_root();
-  void set_allocated_new_local_exit_root(std::string* new_local_exit_root);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_new_local_exit_root();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_new_local_exit_root(
-      std::string* new_local_exit_root);
-  private:
-  const std::string& _internal_new_local_exit_root() const;
-  void _internal_set_new_local_exit_root(const std::string& value);
-  std::string* _internal_mutable_new_local_exit_root();
-  public:
-
-  // bytes current_l1_info_tree_root = 6;
+  // bytes current_l1_info_tree_root = 5;
   void clear_current_l1_info_tree_root();
   const std::string& current_l1_info_tree_root() const;
   void set_current_l1_info_tree_root(const std::string& value);
@@ -7290,7 +7264,7 @@ class PublicInputsExtended PROTOBUF_FINAL :
       ::aggregator::v1::PublicInputs* public_inputs);
   ::aggregator::v1::PublicInputs* unsafe_arena_release_public_inputs();
 
-  // uint64 new_last_timestamp = 5;
+  // uint64 new_last_timestamp = 4;
   void clear_new_last_timestamp();
   ::PROTOBUF_NAMESPACE_ID::uint64 new_last_timestamp() const;
   void set_new_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -7299,7 +7273,7 @@ class PublicInputsExtended PROTOBUF_FINAL :
   void _internal_set_new_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint32 current_l1_info_tree_index = 7;
+  // uint32 current_l1_info_tree_index = 6;
   void clear_current_l1_info_tree_index();
   ::PROTOBUF_NAMESPACE_ID::uint32 current_l1_info_tree_index() const;
   void set_current_l1_info_tree_index(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -7317,7 +7291,6 @@ class PublicInputsExtended PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_batch_acc_input_hash_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_local_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr current_l1_info_tree_root_;
   ::aggregator::v1::PublicInputs* public_inputs_;
   ::PROTOBUF_NAMESPACE_ID::uint64 new_last_timestamp_;
@@ -15331,88 +15304,7 @@ inline void PublicInputsExtended::unsafe_arena_set_allocated_new_batch_acc_input
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputsExtended.new_batch_acc_input_hash)
 }
 
-// bytes new_local_exit_root = 4;
-inline void PublicInputsExtended::clear_new_local_exit_root() {
-  new_local_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& PublicInputsExtended::new_local_exit_root() const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-  return _internal_new_local_exit_root();
-}
-inline void PublicInputsExtended::set_new_local_exit_root(const std::string& value) {
-  _internal_set_new_local_exit_root(value);
-  // @@protoc_insertion_point(field_set:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-}
-inline std::string* PublicInputsExtended::mutable_new_local_exit_root() {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-  return _internal_mutable_new_local_exit_root();
-}
-inline const std::string& PublicInputsExtended::_internal_new_local_exit_root() const {
-  return new_local_exit_root_.Get();
-}
-inline void PublicInputsExtended::_internal_set_new_local_exit_root(const std::string& value) {
-  
-  new_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void PublicInputsExtended::set_new_local_exit_root(std::string&& value) {
-  
-  new_local_exit_root_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-}
-inline void PublicInputsExtended::set_new_local_exit_root(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  new_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-}
-inline void PublicInputsExtended::set_new_local_exit_root(const void* value,
-    size_t size) {
-  
-  new_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-}
-inline std::string* PublicInputsExtended::_internal_mutable_new_local_exit_root() {
-  
-  return new_local_exit_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* PublicInputsExtended::release_new_local_exit_root() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-  return new_local_exit_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void PublicInputsExtended::set_allocated_new_local_exit_root(std::string* new_local_exit_root) {
-  if (new_local_exit_root != nullptr) {
-    
-  } else {
-    
-  }
-  new_local_exit_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), new_local_exit_root,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-}
-inline std::string* PublicInputsExtended::unsafe_arena_release_new_local_exit_root() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return new_local_exit_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void PublicInputsExtended::unsafe_arena_set_allocated_new_local_exit_root(
-    std::string* new_local_exit_root) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (new_local_exit_root != nullptr) {
-    
-  } else {
-    
-  }
-  new_local_exit_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      new_local_exit_root, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputsExtended.new_local_exit_root)
-}
-
-// uint64 new_last_timestamp = 5;
+// uint64 new_last_timestamp = 4;
 inline void PublicInputsExtended::clear_new_last_timestamp() {
   new_last_timestamp_ = PROTOBUF_ULONGLONG(0);
 }
@@ -15432,7 +15324,7 @@ inline void PublicInputsExtended::set_new_last_timestamp(::PROTOBUF_NAMESPACE_ID
   // @@protoc_insertion_point(field_set:aggregator.v1.PublicInputsExtended.new_last_timestamp)
 }
 
-// bytes current_l1_info_tree_root = 6;
+// bytes current_l1_info_tree_root = 5;
 inline void PublicInputsExtended::clear_current_l1_info_tree_root() {
   current_l1_info_tree_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -15513,7 +15405,7 @@ inline void PublicInputsExtended::unsafe_arena_set_allocated_current_l1_info_tre
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputsExtended.current_l1_info_tree_root)
 }
 
-// uint32 current_l1_info_tree_index = 7;
+// uint32 current_l1_info_tree_index = 6;
 inline void PublicInputsExtended::clear_current_l1_info_tree_index() {
   current_l1_info_tree_index_ = 0u;
 }

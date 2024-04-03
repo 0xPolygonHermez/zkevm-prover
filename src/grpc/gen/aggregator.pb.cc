@@ -1077,7 +1077,6 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputsExtended, public_inputs_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputsExtended, new_state_root_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputsExtended, new_batch_acc_input_hash_),
-  PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputsExtended, new_local_exit_root_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputsExtended, new_last_timestamp_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputsExtended, current_l1_info_tree_root_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputsExtended, current_l1_info_tree_index_),
@@ -1305,20 +1304,19 @@ const char descriptor_table_protodef_aggregator_2eproto[] PROTOBUF_SECTION_VARIA
   "ggregator.v1.PublicBlobInnerInputs\"S\n\024St"
   "atelessInputProver\022;\n\rpublic_inputs\030\001 \001("
   "\0132$.aggregator.v1.StatelessPublicInputs\""
-  "\204\002\n\024PublicInputsExtended\0222\n\rpublic_input"
+  "\347\001\n\024PublicInputsExtended\0222\n\rpublic_input"
   "s\030\001 \001(\0132\033.aggregator.v1.PublicInputs\022\026\n\016"
   "new_state_root\030\002 \001(\014\022 \n\030new_batch_acc_in"
-  "put_hash\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 "
-  "\001(\014\022\032\n\022new_last_timestamp\030\005 \001(\004\022!\n\031curre"
-  "nt_l1_info_tree_root\030\006 \001(\014\022\"\n\032current_l1"
-  "_info_tree_index\030\007 \001(\r*\\\n\006Result\022\026\n\022RESU"
-  "LT_UNSPECIFIED\020\000\022\r\n\tRESULT_OK\020\001\022\020\n\014RESUL"
-  "T_ERROR\020\002\022\031\n\025RESULT_INTERNAL_ERROR\020\0032d\n\021"
-  "AggregatorService\022O\n\007Channel\022\034.aggregato"
-  "r.v1.ProverMessage\032 .aggregator.v1.Aggre"
-  "gatorMessage\"\000(\0010\001B;Z9github.com/0xPolyg"
-  "onHermez/zkevm-node/proverclient/proverb"
-  "\006proto3"
+  "put_hash\030\003 \001(\014\022\032\n\022new_last_timestamp\030\004 \001"
+  "(\004\022!\n\031current_l1_info_tree_root\030\005 \001(\014\022\"\n"
+  "\032current_l1_info_tree_index\030\006 \001(\r*\\\n\006Res"
+  "ult\022\026\n\022RESULT_UNSPECIFIED\020\000\022\r\n\tRESULT_OK"
+  "\020\001\022\020\n\014RESULT_ERROR\020\002\022\031\n\025RESULT_INTERNAL_"
+  "ERROR\020\0032d\n\021AggregatorService\022O\n\007Channel\022"
+  "\034.aggregator.v1.ProverMessage\032 .aggregat"
+  "or.v1.AggregatorMessage\"\000(\0010\001B;Z9github."
+  "com/0xPolygonHermez/zkevm-node/provercli"
+  "ent/proverb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_aggregator_2eproto_deps[1] = {
 };
@@ -1362,7 +1360,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_agg
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_aggregator_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_aggregator_2eproto = {
-  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 6287,
+  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 6258,
   &descriptor_table_aggregator_2eproto_once, descriptor_table_aggregator_2eproto_sccs, descriptor_table_aggregator_2eproto_deps, 36, 0,
   schemas, file_default_instances, TableStruct_aggregator_2eproto::offsets,
   file_level_metadata_aggregator_2eproto, 36, file_level_enum_descriptors_aggregator_2eproto, file_level_service_descriptors_aggregator_2eproto,
@@ -11579,11 +11577,6 @@ PublicInputsExtended::PublicInputsExtended(const PublicInputsExtended& from)
     new_batch_acc_input_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_new_batch_acc_input_hash(),
       GetArena());
   }
-  new_local_exit_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_new_local_exit_root().empty()) {
-    new_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_new_local_exit_root(),
-      GetArena());
-  }
   current_l1_info_tree_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_current_l1_info_tree_root().empty()) {
     current_l1_info_tree_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_current_l1_info_tree_root(),
@@ -11604,7 +11597,6 @@ void PublicInputsExtended::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_PublicInputsExtended_aggregator_2eproto.base);
   new_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   new_batch_acc_input_hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  new_local_exit_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   current_l1_info_tree_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&public_inputs_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&current_l1_info_tree_index_) -
@@ -11621,7 +11613,6 @@ void PublicInputsExtended::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   new_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   new_batch_acc_input_hash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  new_local_exit_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   current_l1_info_tree_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete public_inputs_;
 }
@@ -11649,7 +11640,6 @@ void PublicInputsExtended::Clear() {
 
   new_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   new_batch_acc_input_hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  new_local_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   current_l1_info_tree_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   if (GetArena() == nullptr && public_inputs_ != nullptr) {
     delete public_inputs_;
@@ -11692,32 +11682,24 @@ const char* PublicInputsExtended::_InternalParse(const char* ptr, ::PROTOBUF_NAM
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bytes new_local_exit_root = 4;
+      // uint64 new_last_timestamp = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
-          auto str = _internal_mutable_new_local_exit_root();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // uint64 new_last_timestamp = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
           new_last_timestamp_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bytes current_l1_info_tree_root = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+      // bytes current_l1_info_tree_root = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
           auto str = _internal_mutable_current_l1_info_tree_root();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint32 current_l1_info_tree_index = 7;
-      case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+      // uint32 current_l1_info_tree_index = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
           current_l1_info_tree_index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
@@ -11770,28 +11752,22 @@ failure:
         3, this->_internal_new_batch_acc_input_hash(), target);
   }
 
-  // bytes new_local_exit_root = 4;
-  if (this->new_local_exit_root().size() > 0) {
-    target = stream->WriteBytesMaybeAliased(
-        4, this->_internal_new_local_exit_root(), target);
-  }
-
-  // uint64 new_last_timestamp = 5;
+  // uint64 new_last_timestamp = 4;
   if (this->new_last_timestamp() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(5, this->_internal_new_last_timestamp(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_new_last_timestamp(), target);
   }
 
-  // bytes current_l1_info_tree_root = 6;
+  // bytes current_l1_info_tree_root = 5;
   if (this->current_l1_info_tree_root().size() > 0) {
     target = stream->WriteBytesMaybeAliased(
-        6, this->_internal_current_l1_info_tree_root(), target);
+        5, this->_internal_current_l1_info_tree_root(), target);
   }
 
-  // uint32 current_l1_info_tree_index = 7;
+  // uint32 current_l1_info_tree_index = 6;
   if (this->current_l1_info_tree_index() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(7, this->_internal_current_l1_info_tree_index(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(6, this->_internal_current_l1_info_tree_index(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -11824,14 +11800,7 @@ size_t PublicInputsExtended::ByteSizeLong() const {
         this->_internal_new_batch_acc_input_hash());
   }
 
-  // bytes new_local_exit_root = 4;
-  if (this->new_local_exit_root().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_new_local_exit_root());
-  }
-
-  // bytes current_l1_info_tree_root = 6;
+  // bytes current_l1_info_tree_root = 5;
   if (this->current_l1_info_tree_root().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
@@ -11845,14 +11814,14 @@ size_t PublicInputsExtended::ByteSizeLong() const {
         *public_inputs_);
   }
 
-  // uint64 new_last_timestamp = 5;
+  // uint64 new_last_timestamp = 4;
   if (this->new_last_timestamp() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_new_last_timestamp());
   }
 
-  // uint32 current_l1_info_tree_index = 7;
+  // uint32 current_l1_info_tree_index = 6;
   if (this->current_l1_info_tree_index() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
@@ -11896,9 +11865,6 @@ void PublicInputsExtended::MergeFrom(const PublicInputsExtended& from) {
   if (from.new_batch_acc_input_hash().size() > 0) {
     _internal_set_new_batch_acc_input_hash(from._internal_new_batch_acc_input_hash());
   }
-  if (from.new_local_exit_root().size() > 0) {
-    _internal_set_new_local_exit_root(from._internal_new_local_exit_root());
-  }
   if (from.current_l1_info_tree_root().size() > 0) {
     _internal_set_current_l1_info_tree_root(from._internal_current_l1_info_tree_root());
   }
@@ -11936,7 +11902,6 @@ void PublicInputsExtended::InternalSwap(PublicInputsExtended* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   new_state_root_.Swap(&other->new_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   new_batch_acc_input_hash_.Swap(&other->new_batch_acc_input_hash_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  new_local_exit_root_.Swap(&other->new_local_exit_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   current_l1_info_tree_root_.Swap(&other->current_l1_info_tree_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(PublicInputsExtended, current_l1_info_tree_index_)

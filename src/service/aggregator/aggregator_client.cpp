@@ -1110,7 +1110,6 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
                     pPublicInputsExtended->set_new_state_root(scalar2ba(pProverRequest->proof.publicInputsExtended.newStateRoot));
                     pPublicInputsExtended->set_new_batch_acc_input_hash(scalar2ba(pProverRequest->proof.publicInputsExtended.newAccInputHash));
-                    pPublicInputsExtended->set_new_local_exit_root(scalar2ba(pProverRequest->proof.publicInputsExtended.newLocalExitRoot));
                     pPublicInputsExtended->set_current_l1_info_tree_root(scalar2ba(pProverRequest->proof.publicInputsExtended.currentL1InfoTreeRoot));
                     pPublicInputsExtended->set_current_l1_info_tree_index(pProverRequest->proof.publicInputsExtended.currentL1InfoTreeIndex);
                     pFinalProof->set_allocated_public_(pPublicInputsExtended);
