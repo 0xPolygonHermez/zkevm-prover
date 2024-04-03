@@ -16,10 +16,20 @@ namespace Hints
     public:
         virtual ~HintHandler() {}
 
+        // Return the name of the hint
         static std::string getName();
-        static void resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials);
+
+        // Return the source names of the hint, so the fields needed to resolve the hint
         static std::vector<std::string> getSources();
+
+        // Return the destination names of the hint, so the fields that will be updated
         static std::vector<std::string> getDestinations();
+
+        // Returns the extra memory needed in bytes to resolve the hint
+        static size_t getMemoryNeeded(uint64_t N);
+
+        // Resolve the hint
+        static void resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void* mem);
     };
 
 }

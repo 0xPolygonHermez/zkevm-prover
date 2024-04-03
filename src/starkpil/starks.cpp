@@ -811,7 +811,16 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vec
             }
 
             // Resolve hint
-            hintHandler->resolveHint(N, hint, polynomials);
+            void *extra_mem_ptr = nullptr;
+
+            // At the time being the only hint that requires extra memory is h1h2
+            // so we have already allocated the memory for it.
+            // This must be changed in the future to be more generic.
+            if(hintHandler->getMemoryNeeded(N) > 0) {
+                extra_mem_ptr = &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N];
+            }
+
+            hintHandler->resolveHint(N, hint, polynomials, extra_mem_ptr);
         }
         else
         {

@@ -12,12 +12,12 @@ namespace Hints
     {
     public:
         virtual ~HintHandlerBuilder() {}
-        virtual std::unique_ptr<HintHandler> build() const = 0;
-        static std::unique_ptr<HintHandlerBuilder> create(const std::string &hintName);
-        static void registerBuilder(const std::string &hintName, std::unique_ptr<HintHandlerBuilder> builder);
+        virtual std::shared_ptr<HintHandler> build() const = 0;
+        static std::shared_ptr<HintHandlerBuilder> create(const std::string &hintName);
+        static void registerBuilder(const std::string &hintName, std::shared_ptr<HintHandlerBuilder> builder);
 
     private:
-        static std::unordered_map<std::string, std::unique_ptr<HintHandlerBuilder>> builders;
+        static std::unordered_map<std::string, std::shared_ptr<HintHandlerBuilder>> builders;
     };
 }
 

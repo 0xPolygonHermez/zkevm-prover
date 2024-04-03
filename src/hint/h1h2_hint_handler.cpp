@@ -2,7 +2,8 @@
 
 namespace Hints
 {
-    std::string H1H2HintHandler::getName() {
+    std::string H1H2HintHandler::getName()
+    {
         return "h1h2";
     }
 
@@ -16,7 +17,13 @@ namespace Hints
         return {"referenceH1", "referenceH2"};
     }
 
-    void H1H2HintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials)
+    size_t H1H2HintHandler::getMemoryNeeded(uint64_t N)
+    {
+        // TODO !!!!
+        return 1;
+    }
+
+    void H1H2HintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem)
     {
         assert(polynomials.size() == 4);
 
@@ -42,15 +49,15 @@ namespace Hints
 
         if (h1Pol.dim() == 1)
         {
-            // Polinomial::calculateH1H2_opt1(h1Pol, h2Pol, fPol, tPol, i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 3) * N);
+            Polinomial::calculateH1H2_opt1(h1Pol, h2Pol, fPol, tPol, 0, (uint64_t *) ptr_extra_mem, (8 - 3) * N);
         }
         else if (h1Pol.dim() == 3)
         {
-            // Polinomial::calculateH1H2_opt3(h1Pol, h2Pol, fPol, tPol, i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 5) * N);
+            Polinomial::calculateH1H2_opt3(h1Pol, h2Pol, fPol, tPol, 0, (uint64_t *) ptr_extra_mem, (8 - 5) * N);
         }
     }
 
-    std::unique_ptr<HintHandler> H1H2HintHandlerBuilder::build() const
+    std::shared_ptr<HintHandler> H1H2HintHandlerBuilder::build() const
     {
         return std::make_unique<H1H2HintHandler>();
     }

@@ -17,7 +17,12 @@ namespace Hints
         return {"reference"};
     }
 
-    void GSumHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials)
+    size_t GSumHintHandler::getMemoryNeeded(uint64_t N)
+    {
+        return 0;
+    }
+
+    void GSumHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem)
     {
         assert(polynomials.size() == 3);
 
@@ -39,7 +44,7 @@ namespace Hints
         Polinomial::calculateS(zPol, numPol, denPol);
     }
 
-    std::unique_ptr<HintHandler> GSumHintHandlerBuilder::build() const
+    std::shared_ptr<HintHandler> GSumHintHandlerBuilder::build() const
     {
         return std::make_unique<GSumHintHandler>();
     }

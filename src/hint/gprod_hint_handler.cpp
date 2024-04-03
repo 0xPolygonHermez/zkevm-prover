@@ -17,7 +17,12 @@ namespace Hints
         return {"reference"};
     }
 
-    void GProdHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials)
+    size_t GProdHintHandler::getMemoryNeeded(uint64_t N)
+    {
+        return 0;
+    }
+
+    void GProdHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem)
     {
         assert(polynomials.size() == 3);
 
@@ -39,7 +44,7 @@ namespace Hints
         Polinomial::calculateZ(zPol, numPol, denPol);
     }
 
-    std::unique_ptr<HintHandler> GProdHintHandlerBuilder::build() const
+    std::shared_ptr<HintHandler> GProdHintHandlerBuilder::build() const
     {
         return std::make_unique<GProdHintHandler>();
     }

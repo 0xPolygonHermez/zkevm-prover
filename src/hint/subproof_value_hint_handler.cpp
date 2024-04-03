@@ -17,12 +17,17 @@ namespace Hints
         return {"reference"};
     }
 
-    void SubproofValueHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials)
+    size_t SubproofValueHintHandler::getMemoryNeeded(uint64_t N)
+    {
+        return 0;
+    }
+
+    void SubproofValueHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem)
     {
         // TODO!
     }
 
-    std::unique_ptr<HintHandler> SubproofValueHintHandlerBuilder::build() const
+    std::shared_ptr<HintHandler> SubproofValueHintHandlerBuilder::build() const
     {
         return std::make_unique<SubproofValueHintHandler>();
     }

@@ -2,21 +2,24 @@
 
 namespace Hints
 {
-    std::unordered_map<std::string, std::unique_ptr<HintHandlerBuilder>> HintHandlerBuilder::builders;
+    std::unordered_map<std::string, std::shared_ptr<HintHandlerBuilder>> HintHandlerBuilder::builders;
 
-    std::unique_ptr<HintHandlerBuilder> HintHandlerBuilder::create(const std::string &hintName)
+    std::shared_ptr<HintHandlerBuilder> HintHandlerBuilder::create(const std::string &hintName)
     {
         auto it = builders.find(hintName);
         if (it != builders.end())
         {
-            return std::move(it->second);
+            return it->second;
         }
-        throw std::invalid_argument("Unknown hint name: " + hintName);
+        throw std::invalid_argument("HintHandlerBuilder not found for hint: " + hintName);
     }
 
-    void HintHandlerBuilder::registerBuilder(const std::string &hintName, std::unique_ptr<HintHandlerBuilder> builder)
+    void HintHandlerBuilder::registerBuilder(const std::string &hintName, std::shared_ptr<HintHandlerBuilder> builder)
     {
-
-        builders.emplace(hintName, std::move(builder));
+        auto result = builders.insert(std::make_pair(hintName, std::move(builder)));
+        if (!result.second)
+        {
+            throw std::runtime_error("Builder for hint " + hintName + " already registered.");
+        }
     }
 } // namespace Hints
