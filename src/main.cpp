@@ -924,6 +924,14 @@ int main(int argc, char **argv)
     show_dir_content("/workspace");
     show_dir_content("/config");
 
+    printf("get omp_get_max_threads");
+    auto nthreads = omp_get_max_threads();
+    printf("omp_get_max_threads = %d", nthreads);
+    printf("get omp_get_max_threads");
+    auto nprocs = omp_get_num_procs();
+    printf("omp_get_num_procs = %d", nprocs);
+
+
     if (argc == 1) 
     {
         zklog.info("gevulot: run_main");
