@@ -909,7 +909,7 @@ int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSM
     required.clear();
     paddingSha256Executor.execute(inputs, pols, required);
     #ifdef __ZKEVM_SM__
-        add_padding_sha256_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
+        //add_padding_sha256_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
     #endif
     return 0;
 }
@@ -933,7 +933,7 @@ int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void*
     required.clear();
     paddingSha256BitExecutor.execute(inputs, pols,required);
     #ifdef __ZKEVM_SM__
-        add_bits_2_field_sha256_inputs(pSMRequestsOut, (void *) required.data(), (uint64_t) required.size());
+        //add_bits_2_field_sha256_inputs(pSMRequestsOut, (void *) required.data(), (uint64_t) required.size());
     #endif
     return 0;
 }
@@ -956,7 +956,7 @@ int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* 
     bits2fieldSha256Executor.execute(inputs, pols, required);
     #ifdef __ZKEVM_SM__
         Sha256FExecutorInput::DTO *dto = Sha256FExecutorInput::toDTO(required);
-        add_sha256_f_inputs(pSMRequestsOut, dto, (uint64_t) required.size());
+        //add_sha256_f_inputs(pSMRequestsOut, dto, (uint64_t) required.size());
     #endif
     return 0;
 }
@@ -993,7 +993,7 @@ int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequ
 
     paddingKKExecutor.execute(inputs, pols, required);
     #ifdef __ZKEVM_SM__
-        add_padding_kk_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
+        //add_padding_kk_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
     #endif
     return 0;
 }
@@ -1018,7 +1018,7 @@ int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSM
     required.clear();
     paddingKKBitExecutor.execute(inputs, pols,required);
     #ifdef __ZKEVM_SM__
-        add_bits_2_field_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
+        //add_bits_2_field_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t) required.size());
     #endif
     return 0;
 }
@@ -1041,7 +1041,7 @@ int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMR
     bits2fieldExecutor.execute(inputs, pols, required);
     #ifdef __ZKEVM_SM__
         KeccakFExecutorInput::DTO *dto = KeccakFExecutorInput::toDTO(required);
-        add_keccak_f_inputs(pSMRequestsOut, dto, (uint64_t) required.size());
+        //add_keccak_f_inputs(pSMRequestsOut, dto, (uint64_t) required.size());
     #endif
     return 0;
 }
