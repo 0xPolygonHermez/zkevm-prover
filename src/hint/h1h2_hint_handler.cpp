@@ -19,8 +19,7 @@ namespace Hints
 
     size_t H1H2HintHandler::getMemoryNeeded(uint64_t N)
     {
-        // TODO !!!!
-        return 1;
+        return 8 * N * sizeof(Goldilocks::Element);
     }
 
     void H1H2HintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem)
@@ -49,11 +48,11 @@ namespace Hints
 
         if (h1Pol.dim() == 1)
         {
-            Polinomial::calculateH1H2_opt1(h1Pol, h2Pol, fPol, tPol, 0, (uint64_t *) ptr_extra_mem, (8 - 3) * N);
+            Polinomial::calculateH1H2_opt1(h1Pol, h2Pol, fPol, tPol, 0, (uint64_t *) ptr_extra_mem, 5 * N);
         }
         else if (h1Pol.dim() == 3)
         {
-            Polinomial::calculateH1H2_opt3(h1Pol, h2Pol, fPol, tPol, 0, (uint64_t *) ptr_extra_mem, (8 - 5) * N);
+            Polinomial::calculateH1H2_opt3(h1Pol, h2Pol, fPol, tPol, 0, (uint64_t *) ptr_extra_mem, 3 * N);
         }
     }
 
