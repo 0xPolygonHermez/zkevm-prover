@@ -7,22 +7,22 @@ namespace Hints
         return "subproofvalue";
     }
 
-    std::vector<std::string> SubproofValueHintHandler::getSources()
+    std::vector<std::string> SubproofValueHintHandler::getSources() const
     {
         return {"expression"};
     }
 
-    std::vector<std::string> SubproofValueHintHandler::getDestinations()
+    std::vector<std::string> SubproofValueHintHandler::getDestinations() const
     {
         return {"reference"};
     }
 
-    size_t SubproofValueHintHandler::getMemoryNeeded(uint64_t N)
+    size_t SubproofValueHintHandler::getMemoryNeeded(uint64_t N) const
     {
         return 0;
     }
 
-    void SubproofValueHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem)
+    void SubproofValueHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
     {
         // TODO!
     }

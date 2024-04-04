@@ -7,22 +7,22 @@ namespace Hints
         return "gprod";
     }
 
-    std::vector<std::string> GProdHintHandler::getSources()
+    std::vector<std::string> GProdHintHandler::getSources() const
     {
         return {"numerator", "denominator"};
     }
 
-    std::vector<std::string> GProdHintHandler::getDestinations()
+    std::vector<std::string> GProdHintHandler::getDestinations() const
     {
         return {"reference"};
     }
 
-    size_t GProdHintHandler::getMemoryNeeded(uint64_t N)
+    size_t GProdHintHandler::getMemoryNeeded(uint64_t N) const
     {
         return 0;
     }
 
-    void GProdHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem)
+    void GProdHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
     {
         assert(polynomials.size() == 3);
 

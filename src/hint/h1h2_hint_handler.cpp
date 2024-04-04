@@ -7,22 +7,22 @@ namespace Hints
         return "h1h2";
     }
 
-    std::vector<std::string> H1H2HintHandler::getSources()
+    std::vector<std::string> H1H2HintHandler::getSources() const
     {
         return {"f", "t"};
     }
 
-    std::vector<std::string> H1H2HintHandler::getDestinations()
+    std::vector<std::string> H1H2HintHandler::getDestinations() const
     {
         return {"referenceH1", "referenceH2"};
     }
 
-    size_t H1H2HintHandler::getMemoryNeeded(uint64_t N)
+    size_t H1H2HintHandler::getMemoryNeeded(uint64_t N) const
     {
         return 8 * N * sizeof(Goldilocks::Element);
     }
 
-    void H1H2HintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem)
+    void H1H2HintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
     {
         assert(polynomials.size() == 4);
 

@@ -7,22 +7,22 @@ namespace Hints
         return "gsum";
     }
 
-    std::vector<std::string> GSumHintHandler::getSources()
+    std::vector<std::string> GSumHintHandler::getSources() const
     {
         return {"numerator", "denominator"};
     }
 
-    std::vector<std::string> GSumHintHandler::getDestinations()
+    std::vector<std::string> GSumHintHandler::getDestinations() const
     {
         return {"reference"};
     }
 
-    size_t GSumHintHandler::getMemoryNeeded(uint64_t N)
+    size_t GSumHintHandler::getMemoryNeeded(uint64_t N) const
     {
         return 0;
     }
 
-    void GSumHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem)
+    void GSumHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
     {
         assert(polynomials.size() == 3);
 
