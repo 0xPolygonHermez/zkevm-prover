@@ -4,6 +4,8 @@
 #include "AllSteps.hpp"
 #include "AllC18Steps.hpp"
 #include "FibonacciPil2Steps.hpp"
+#include "hint_handler.hpp"
+#include "hint_handler_builder.hpp"
 
 int main(int argc, char **argv)
 {
@@ -34,6 +36,11 @@ int main(int argc, char **argv)
         cout << "Error: unknown test name " << testName << endl;
         return -1;
     }
+
+    HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
+    HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
+    HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
+    HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
 
     if(testName == "all") {
         constPols = "test/examples/all/all.const";

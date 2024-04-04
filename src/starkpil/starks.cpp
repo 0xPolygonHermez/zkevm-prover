@@ -164,7 +164,8 @@ void Starks<ElementType>::calculateExpressions(uint64_t step, StepsParams &param
     TimerStartExpr(STARK_CALCULATE_EXPS_STEP, step);
     if (chelpers.stagesInfo[step - 1].nOps > 0)
     {
-        chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo[step - 1]);
+        bool domainExtended = step > starkInfo.nStages ? true : false;
+        chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo[step - 1], nrowsBatch, domainExtended);
         for(uint64_t i = 0; i < chelpers.stagesInfo[step - 1].nCmPolsCalculated; i++) {
             uint64_t cmPolCalculatedId = chelpers.cHelpersArgs.cmPolsCalculatedIds[chelpers.stagesInfo[step - 1].cmPolsCalculatedOffset + i];
             setSymbolCalculated(opType::cm, cmPolCalculatedId);
@@ -178,7 +179,7 @@ void Starks<ElementType>::calculateExpression(uint64_t id, StepsParams &params, 
 {
     uint64_t expId = chelpers.expressionsInfo[id].expId;
     TimerStartExpr(STARK_CALCULATE_EXPRESSION, expId);
-    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgsExpressions, chelpers.expressionsInfo[id]);
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgsExpressions, chelpers.expressionsInfo[id], nrowsBatch, false);
     for(uint64_t i = 0; i < chelpers.expressionsInfo[id].nCmPolsCalculated; i++) {
         uint64_t cmPolCalculatedId = chelpers.cHelpersArgsExpressions.cmPolsCalculatedIds[chelpers.expressionsInfo[id].cmPolsCalculatedOffset + i];
         setSymbolCalculated(opType::cm, cmPolCalculatedId);
@@ -190,7 +191,7 @@ template <typename ElementType>
 void Starks<ElementType>::calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps)
 {
     TimerStartExpr(STARK_CALCULATE_CONSTRAINT, constraintId);
-    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgsDebug, chelpers.constraintsInfoDebug[constraintId]);
+    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgsDebug, chelpers.constraintsInfoDebug[constraintId], nrowsBatch, false);
     TimerStopAndLogExpr(STARK_CALCULATE_CONSTRAINT, constraintId);
 }
 
@@ -546,8 +547,10 @@ void Starks<ElementType>::transposePolsColumns(StepsParams &params, vector<int64
 {
     u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8;
 
-    vector<string> srcFields = getSrcFields(hint.name);
-    vector<string> dstFields = getDstFields(hint.name);
+    auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
+
+    vector<string> srcFields = hintHandler->getSources();
+    vector<string> dstFields = hintHandler->getDestinations();
 
     for (uint64_t i = 0; i < srcFields.size(); i++)
     {
@@ -602,7 +605,8 @@ void Starks<ElementType>::transposePolsColumns(StepsParams &params, vector<int64
 template <typename ElementType>
 void Starks<ElementType>::transposePolsRows(StepsParams &params, vector<int64_t> cm2Transposed, Polinomial *transPols, Hint hint)
 {
-    vector<string> dstFields = getDstFields(hint.name);
+    auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
+    vector<string> dstFields = hintHandler->getDestinations();
 
     for (uint64_t i = 0; i < dstFields.size(); i++)
     {
@@ -670,68 +674,41 @@ bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields
 }
 
 template <typename ElementType>
-std::vector<string> Starks<ElementType>::getSrcFields(std::string hintName)
-{
-    if (hintName == "subproofValue")
-    {
-        return {"expression"};
-    }
-    else if (hintName == "gprod")
-    {
-        return {"numerator", "denominator"};
-    } 
-    else if (hintName == "gsum") 
-    {
-        return {"denominator"};
-    }
-    else if (hintName == "h1h2")
-    {
-        return {"f", "t"};
-    }
-    else
-    {
-        zklog.error("Invalid hint name=" + hintName);
-        exitProcess();
-        exit(-1);
-    }
-}
-
-template <typename ElementType>
-std::vector<string> Starks<ElementType>::getDstFields(std::string hintName)
-{
-    if (hintName == "subproofValue" || hintName == "gsum" || hintName == "gprod")
-    {
-        return {"reference"};
-    }
-    else if (hintName == "h1h2")
-    {
-        return {"referenceH1", "referenceH2"};
-    }
-    else
-    {
-        zklog.error("Invalid hint name=" + hintName);
-        exitProcess();
-        exit(-1);
-    }
-}
-
-template <typename ElementType>
 void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vector<Hint> &hints)
 {
     vector<int64_t> cm2Transposed(starkInfo.cmPolsMap.size(), -1);
 
     vector<Hint> hintsToCalculate;
+    uint64_t numPols = 0;
 
     for (uint64_t i = 0; i < hints.size(); i++)
     {
         Hint hint = hints[i];
-
-        vector<string> srcFields = getSrcFields(hint.name);
-        vector<string> dstFields = getDstFields(hint.name);
-
+        auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
+        vector<string> srcFields = hintHandler->getSources();
+        vector<string> dstFields = hintHandler->getDestinations();
         if (!isHintResolved(hint, dstFields) && canHintBeResolved(hint, srcFields))
         {
             hintsToCalculate.push_back(hint);
+
+            vector<string> polynomialFields(srcFields.begin(), srcFields.end());
+            polynomialFields.insert(polynomialFields.end(), dstFields.begin(), dstFields.end());
+
+            for (uint64_t i = 0; i < polynomialFields.size(); i++)
+            {
+                auto it = hint.fields.find(polynomialFields[i]);
+                if (it == hint.fields.end())
+                {
+                    zklog.error("Unknown field name=" + polynomialFields[i]);
+                    exitProcess();
+                    exit(-1);
+                }
+                HintField hintField = hint.fields[polynomialFields[i]];
+                if (hintField.operand == opType::cm || hintField.operand == opType::tmp)
+                {
+                    cm2Transposed[hintField.id] = numPols++;
+                }
+            }
         }
     }
 
@@ -740,33 +717,6 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vec
 
     uint64_t sectionExtendedOffset = starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), true)];
     Goldilocks::Element *pBuffer = &params.pols[sectionExtendedOffset];
-
-    uint64_t numPols = 0;
-    for (uint64_t i = 0; i < hintsToCalculate.size(); ++i)
-    {
-        Hint hint = hintsToCalculate[i];
-        vector<string> srcFields = getSrcFields(hint.name);
-        vector<string> dstFields = getDstFields(hint.name);
-
-        vector<string> fields(srcFields.begin(), srcFields.end());
-        fields.insert(fields.end(), dstFields.begin(), dstFields.end());
-
-        for (uint64_t i = 0; i < fields.size(); i++)
-        {
-            auto it = hint.fields.find(fields[i]);
-            if (it == hint.fields.end())
-            {
-                zklog.error("Unknown field name=" + fields[i]);
-                exitProcess();
-                exit(-1);
-            }
-            HintField hintField = hint.fields[fields[i]];
-            if (hintField.operand == opType::cm || hintField.operand == opType::tmp)
-            {
-                cm2Transposed[hintField.id] = numPols++;
-            }
-        }
-    }
 
     Polinomial *transPols = new Polinomial[numPols];
 
@@ -789,96 +739,41 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vec
     {
         Hint hint = hintsToCalculate[i];
 
-        if (1 == 0)
+        // Build the Hint object
+        auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
+
+        // Get the polynomials names involved
+        auto srcPolsNames = hintHandler->getSources();
+        auto dstPolsNames = hintHandler->getDestinations();
+
+        vector<string> polsNames(srcPolsNames.size() + dstPolsNames.size());
+        polsNames.insert(polsNames.end(), srcPolsNames.begin(), srcPolsNames.end());
+        polsNames.insert(polsNames.end(), dstPolsNames.begin(), dstPolsNames.end());
+
+        // Prepare polynomials map to be sent to the hint
+        std::map<std::string, Polinomial *> polynomials;
+        for (const auto &polName : polsNames)
         {
-            // Build the Hint object
-            auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
-
-            // Get the polynomials names involved
-            auto srcPolsNames = hintHandler->getSources();
-            auto dstPolsNames = hintHandler->getDestinations();
-
-            vector<string> polsNames(srcPolsNames.size() + dstPolsNames.size());
-            polsNames.insert(polsNames.end(), srcPolsNames.begin(), srcPolsNames.end());
-            polsNames.insert(polsNames.end(), dstPolsNames.begin(), dstPolsNames.end());
-
-            // Prepare polynomials map to be sent to the hint
-            std::map<std::string, Polinomial *> polynomials;
-            for (const auto &polName : polsNames)
+            const auto &hintField = hint.fields[polName];
+            if (hintField.operand == opType::cm || hintField.operand == opType::tmp)
             {
-                const auto &hintField = hint.fields[polName];
-                if (hintField.operand == opType::cm || hintField.operand == opType::tmp)
-                {
-                    polynomials[polName] = &transPols[cm2Transposed[hintField.id]];
-                }
-            }
-
-            // Resolve hint
-            void *extra_mem_ptr = nullptr;
-
-            // At the time being the only hint that requires extra memory is h1h2
-            // so we have already allocated the memory for it.
-            // This must be changed in the future to be more generic.
-            if(hintHandler->getMemoryNeeded(N) > 0) {
-                extra_mem_ptr = &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N];
-            }
-
-            hintHandler->resolveHint(N, hint, polynomials, extra_mem_ptr);
-        }
-        else
-        {
-            if (hint.name == "h1h2")
-            {
-                uint64_t h1Id = hint.fields["referenceH1"].id;
-                uint64_t h2Id = hint.fields["referenceH2"].id;
-                uint64_t fId = hint.fields["f"].id;
-                uint64_t tId = hint.fields["t"].id;
-
-                if (transPols[cm2Transposed[h1Id]].dim() == 1)
-                {
-                    Polinomial::calculateH1H2_opt1(transPols[cm2Transposed[h1Id]], transPols[cm2Transposed[h2Id]], transPols[cm2Transposed[fId]], transPols[cm2Transposed[tId]], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 3) * N);
-                }
-                else if (transPols[cm2Transposed[h1Id]].dim() == 3)
-                {
-                    Polinomial::calculateH1H2_opt3(transPols[cm2Transposed[h1Id]], transPols[cm2Transposed[h2Id]], transPols[cm2Transposed[fId]], transPols[cm2Transposed[tId]], i, &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N], (sizeof(Goldilocks::Element) - 5) * N);
-                }
-                else
-                {
-                    std::cerr << "Error: calculateH1H2_ invalid" << std::endl;
-                    exit(-1);
-                }
-            }
-            else if (hint.name == "gprod")
-            {
-                uint64_t zId = hint.fields["reference"].id;
-                uint64_t numeratorId = hint.fields["numerator"].id;
-                uint64_t denominatorId = hint.fields["denominator"].id;
-                Polinomial::calculateZ(transPols[cm2Transposed[zId]], transPols[cm2Transposed[numeratorId]], transPols[cm2Transposed[denominatorId]]);
-            }
-            else if (hint.name == "gsum")
-            {
-                uint64_t sId = hint.fields["reference"].id;
-                uint64_t denominatorId = hint.fields["denominator"].id;
-                Goldilocks::Element numeratorValue = Goldilocks::fromS64(hint.fields["numerator"].value);
-                numeratorValue = Goldilocks::negone(); // TODO: NOT HARDCODE THIS!
-                Polinomial::calculateS(transPols[cm2Transposed[sId]], transPols[cm2Transposed[denominatorId]], numeratorValue);
-            }
-            else if (hint.name == "subproofValue")
-            {
-                uint64_t expressionId = hint.fields["expression"].id;
-                uint64_t row_index = hint.fields["row_index"].value;
-                uint64_t subproofValueId = hint.fields["reference"].id;
-
-                Goldilocks3::copy((Goldilocks3::Element &)(*params.subproofValues[subproofValueId]), (Goldilocks3::Element &)(*transPols[cm2Transposed[expressionId]][row_index]));
-            }
-            else
-            {           
-                zklog.error("Invalid hint type=" + hint.name);
-                exitProcess();
-                exit(-1);
+                polynomials[polName] = &transPols[cm2Transposed[hintField.id]];
             }
         }
+
+        // Resolve hint
+        void *extra_mem_ptr = nullptr;
+
+        // At the time being the only hint that requires extra memory is h1h2
+        // so we have already allocated the memory for it.
+        // This must be changed in the future to be more generic.
+        if(hintHandler->getMemoryNeeded(N) > 0) {
+            extra_mem_ptr = &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N];
+        }
+
+        hintHandler->resolveHint(N, params, hint, polynomials, extra_mem_ptr);
     }
+
     TimerStopAndLogExpr(STARK_CALCULATE_HINTS_STEP, step);
 
     TimerStartExpr(STARK_CALCULATE_TRANSPOSE_2_STEP, step);

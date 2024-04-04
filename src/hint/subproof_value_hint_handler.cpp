@@ -4,7 +4,7 @@ namespace Hints
 {
     std::string SubproofValueHintHandler::getName()
     {
-        return "subproofvalue";
+        return "subproofValue";
     }
 
     std::vector<std::string> SubproofValueHintHandler::getSources() const
@@ -22,9 +22,21 @@ namespace Hints
         return 0;
     }
 
-    void SubproofValueHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
+    void SubproofValueHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
     {
-        // TODO!
+        assert(polynomials.size() == 1);
+
+        auto expression = polynomials.find("expression");
+        assert(expression != polynomials.end());
+
+        auto expressionPol = *expression->second;
+
+        uint64_t row_index = hint.fields["row_index"].value;
+        uint64_t subproofValueId = hint.fields["reference"].id;
+
+        params.subproofValues[subproofValueId][0] = expressionPol[row_index][0];
+        params.subproofValues[subproofValueId][1] = expressionPol[row_index][1];
+        params.subproofValues[subproofValueId][2] = expressionPol[row_index][2];
     }
 
     std::shared_ptr<HintHandler> SubproofValueHintHandlerBuilder::build() const

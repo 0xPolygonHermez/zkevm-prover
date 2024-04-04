@@ -6,8 +6,9 @@
 #include <map>
 #include <string>
 #include <memory>
-#include "../starkpil/polinomial.hpp"
-#include "../starkpil/chelpers.hpp"
+#include "polinomial.hpp"
+#include "chelpers.hpp"
+#include "steps.hpp"
 
 namespace Hints
 {
@@ -29,7 +30,7 @@ namespace Hints
         virtual size_t getMemoryNeeded(uint64_t N) const = 0;
 
         // Resolve the hint
-        virtual void resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *mem) const = 0;
+        virtual void resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *mem) const = 0;
     };
 
 }

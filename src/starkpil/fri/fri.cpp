@@ -9,16 +9,12 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinom
 
     uint64_t polBits = log2(friPol.degree());
 
-    Polinomial polShift(1, 1);
-    Polinomial polShiftInv(1, 1);
-
-    *polShift[0] = Goldilocks::shift();
-    *polShiftInv[0] = Goldilocks::inv(Goldilocks::shift());
+    Goldilocks::Element polShiftInv = Goldilocks::inv(Goldilocks::shift());
     
     if(step > 0) {
         for (uint64_t j = 0; j < starkInfo.starkStruct.steps[0].nBits - starkInfo.starkStruct.steps[step - 1].nBits; j++)
         {
-            Goldilocks::mul(*polShiftInv[0], *polShiftInv[0], *polShiftInv[0]);
+            polShiftInv = polShiftInv * polShiftInv;
         }
     }
 
@@ -29,11 +25,7 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinom
 
     Polinomial pol2_e(pol2N, FIELD_EXTENSION);
 
-    Polinomial sinv(1, 1);
-    Polinomial wi(1, 1);
-
-    *sinv[0] = *polShiftInv[0];
-    *wi[0] = Goldilocks::inv(Goldilocks::w(polBits));
+    Goldilocks::Element wi = Goldilocks::inv(Goldilocks::w(polBits));
 
     uint64_t nn = ((1 << polBits) / nX);
     u_int64_t maxth = omp_get_max_threads();
@@ -56,13 +48,13 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinom
             end = init + chunk;
         }
         //  Evaluate the starting point for the sinv
-        Goldilocks::Element aux = *wi[0];
-        Goldilocks::Element sinv_ = *sinv[0];
-        for (uint64_t i = 0; i < chunk - 1; ++i) aux = aux * (*wi[0]);
+        Goldilocks::Element aux = wi;
+        Goldilocks::Element sinv_ = polShiftInv;
+        for (uint64_t i = 0; i < chunk - 1; ++i) aux = aux * wi;
         for (u_int64_t i = 0; i < thid; ++i) sinv_ = sinv_ * aux;   
         u_int64_t ncor = res;
         if (thid < res) ncor = thid;
-        for (u_int64_t j = 0; j < ncor; ++j) sinv_ = sinv_ * (*wi[0]);
+        for (u_int64_t j = 0; j < ncor; ++j) sinv_ = sinv_ * wi;
         for (uint64_t g = init; g < end; g++)
         {
             if (step == 0)
@@ -83,7 +75,7 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinom
                 ntt.INTT(ppar_c.address(), ppar.address(), nX, FIELD_EXTENSION);
                 polMulAxi(ppar_c, Goldilocks::one(), sinv_); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
                 evalPol(pol2_e, g, ppar_c, challenge);
-                sinv_ = sinv_ * (*wi[0]);
+                sinv_ = sinv_ * wi;
             }
         }
     }

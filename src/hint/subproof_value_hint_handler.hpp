@@ -22,7 +22,7 @@ namespace Hints
         virtual size_t getMemoryNeeded(uint64_t N) const override;
 
         // Resolve the hint
-        virtual void resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const override;
+        virtual void resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const override;
     };
 
     class SubproofValueHintHandlerBuilder : public HintHandlerBuilder

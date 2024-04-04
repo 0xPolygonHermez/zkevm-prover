@@ -43,6 +43,7 @@ public:
     StarkInfo starkInfo;
     bool debug = false;
     bool optimizeMemoryNTT = false;
+    uint32_t nrowsBatch = NROWS_BATCH;
     
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
@@ -253,11 +254,6 @@ public:
         if(currentSectionStart > nttHelperSize) {
             optimizeMemoryNTT = true;
         }
-
-        HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
-        HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
-        HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
-        HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
     };
     ~Starks()
     {
@@ -367,8 +363,6 @@ private:
     void transposePolsColumns(StepsParams& params, vector<int64_t> cm2Transposed, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
     void transposePolsRows(StepsParams& params, vector<int64_t> cm2Transposed, Polinomial *transPols, Hint hint);
 
-    std::vector<string> getSrcFields(std::string hintName);
-    std::vector<string> getDstFields(std::string hintName);
     bool isHintResolved(Hint &hint, std::vector<string> dstFields);
     bool canHintBeResolved(Hint &hint, std::vector<string> srcFields);
 

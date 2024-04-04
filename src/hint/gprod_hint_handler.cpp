@@ -22,7 +22,7 @@ namespace Hints
         return 0;
     }
 
-    void GProdHintHandler::resolveHint(int N, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
+    void GProdHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
     {
         assert(polynomials.size() == 3);
 
