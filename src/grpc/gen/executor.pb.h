@@ -510,12 +510,13 @@ enum RomBlobError : int {
   ROM_BLOB_ERROR_INVALID_ZK_GAS_LIMIT = 4,
   ROM_BLOB_ERROR_INVALID_BLOB_TYPE = 5,
   ROM_BLOB_ERROR_INVALID_COMPRESSION_TYPE = 6,
+  ROM_BLOB_ERROR_INVALID_FORCED_BATCHES = 7,
   RomBlobError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   RomBlobError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool RomBlobError_IsValid(int value);
 constexpr RomBlobError RomBlobError_MIN = ROM_BLOB_ERROR_UNSPECIFIED;
-constexpr RomBlobError RomBlobError_MAX = ROM_BLOB_ERROR_INVALID_COMPRESSION_TYPE;
+constexpr RomBlobError RomBlobError_MAX = ROM_BLOB_ERROR_INVALID_FORCED_BATCHES;
 constexpr int RomBlobError_ARRAYSIZE = RomBlobError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* RomBlobError_descriptor();

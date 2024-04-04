@@ -1019,6 +1019,7 @@ using grpc::Status;
     if (result == "error_invalid_msb_byte")             return ::executor::v1::ROM_BLOB_ERROR_INVALID_MSB_BYTE;
     if (result == "error_invalid_zkgaslimit")           return ::executor::v1::ROM_BLOB_ERROR_INVALID_ZK_GAS_LIMIT;
     if (result == "error_invalid_blob_type")            return ::executor::v1::ROM_BLOB_ERROR_INVALID_BLOB_TYPE;
+    if (result == "error_invalid_forced_batches")       return ::executor::v1::ROM_BLOB_ERROR_INVALID_FORCED_BATCHES;
     if (result == "")                                   return ::executor::v1::ROM_BLOB_ERROR_NO_ERROR;
 
     zklog.error("ExecutorServiceImpl::string2rombloberror() found invalid error string=" + result);
