@@ -1484,9 +1484,32 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     }
     finalTrace.new_local_exit_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
-    // New batch number
-    // getVarFromCtx(ctx, true, "newNumBatch", auxScalar);
-    // finalTrace.new_batch_num = auxScalar.get_ui();
+    // New last timestamp
+    zkr = getVarFromCtx(ctx, true, ctx.rom.timestampOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBatch() failed calling getVarFromCtx(ctx.rom.timestampOffset)");
+        return zkr;
+    }
+    finalTrace.new_last_timestamp = auxScalar.get_ui();
+
+    // Current L1 info tree root
+    zkr = getVarFromCtx(ctx, true, ctx.rom.currentL1InfoTreeRootOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBatch() failed calling getVarFromCtx(ctx.rom.currentL1InfoTreeRootOffset)");
+        return zkr;
+    }
+    finalTrace.current_l1_info_tree_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+    // Current L1 info tree index
+    zkr = getVarFromCtx(ctx, true, ctx.rom.currentL1InfoTreeIndexOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBatch() failed calling getVarFromCtx(ctx.rom.currentL1InfoTreeIndexOffset)");
+        return zkr;
+    }
+    finalTrace.current_l1_info_tree_index = auxScalar.get_ui();
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishBatch() new_state_root=" + finalTrace.new_state_root);

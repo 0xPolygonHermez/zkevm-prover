@@ -74,7 +74,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 #else
     romBatch(config, BATCH),
 #endif
-    romCollection(config, COLLECTION),
+    romDiagnostic(config, DIAGNOSTIC),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
     rom_gas_limit_2147483647(config),
@@ -91,9 +91,9 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     file2json("src/main_sm/fork_10/scripts/rom.json", romJson);
     romBatch.load(fr, romJson);
 
-    // Load Collection (unit test) ROM definition file
-    file2json("src/main_sm/fork_10/scripts/rom_collection.json", romJson);
-    romCollection.load(fr, romJson);
+    // Load diagnostic (unit test) ROM definition file
+    file2json("src/main_sm/fork_10/scripts/rom_diagnostic.json", romJson);
+    romDiagnostic.load(fr, romJson);
 
 #ifdef MULTI_ROM_TEST
     romJson.clear();
@@ -168,7 +168,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     
 #else
 
-    Rom &rom = config.loadCollectionRom ? romCollection : romBatch;
+    Rom &rom = config.loadDiagnosticRom ? romDiagnostic : romBatch;
 
 #endif
 
@@ -5652,7 +5652,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         uint64_t finalJmpAddr = fr.toS64(rom.line[zkPC].jmpAddr) + (rom.line[zkPC].jmpUseAddrRel ? addrRel : 0);
-        uint64_t nextNoJmpZkPC = fr.toU64(pols.zkPC[i]) + ((rom.line[zkPC].repeat && !fr.isZero(pols.RCX[i])) ? 0 : 1);
+        uint64_t nextNoJmpZkPC = fr.toU64(pols.zkPC[i]) + ((rom.line[zkPC].repeat && !fr.isZero(currentRCX)) ? 0 : 1);
 
         if (!fr.isZero(rom.line[zkPC].elseAddr) && !bProcessBatch)
         {

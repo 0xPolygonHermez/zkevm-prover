@@ -631,6 +631,9 @@ using grpc::Status;
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
     response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
+    response->set_new_last_timestamp(proverRequest.pFullTracer->get_new_last_timestamp());
+    response->set_current_l1_info_tree_index(proverRequest.pFullTracer->get_current_l1_info_tree_index());
+    response->set_current_l1_info_tree_root(string2ba(proverRequest.pFullTracer->get_current_l1_info_tree_root()));
     response->set_flush_id(proverRequest.flushId);
     response->set_stored_flush_id(proverRequest.lastSentFlushId);
     response->set_prover_id(config.proverID);
@@ -638,10 +641,6 @@ using grpc::Status;
     response->set_error_rom(string2error(proverRequest.pFullTracer->get_error()));
     response->set_invalid_batch(proverRequest.pFullTracer->get_invalid_batch());
     response->set_old_state_root(string2ba(NormalizeToNFormat(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64)));
-
-    // TODO: return these fields
-    //response->set_current_l1_info_tree_root();
-    //response->set_current_l1_info_tree_index();
     
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
@@ -837,6 +836,9 @@ using grpc::Status;
             " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
             " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
             " new_local_exit_root=" + proverRequest.pFullTracer->get_new_local_exit_root() +
+            " new_last_timestamp=" + to_string(proverRequest.pFullTracer->get_new_last_timestamp()) +
+            " current_l1_info_tree_index=" + to_string(proverRequest.pFullTracer->get_current_l1_info_tree_index()) +
+            " current_l1_info_tree_root=" + proverRequest.pFullTracer->get_current_l1_info_tree_root() +
             " old_batch_num=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
             " steps=" + to_string(proverRequest.counters.steps) +
             " gasUsed=" + to_string(proverRequest.pFullTracer->get_gas_used()) +

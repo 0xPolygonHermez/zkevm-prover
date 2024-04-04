@@ -123,6 +123,11 @@ tFunction string2Function(string s)
     else if (s == "signedComparisonWithConst")      return f_signedComparisonWithConst;
     else if (s == "getFirstDiffChunkRem")           return f_getFirstDiffChunkRem;
     else if (s == "getSmtProofPreviousIndex")       return f_getSmtProofPreviousIndex;
+    else if (s == "getMemValue")                    return f_getMemValue;
+    else if (s == "getMemAddr")                     return f_getMemAddr;
+    else if (s == "dumpRegs")                       return f_dumpRegs;
+    else if (s == "dumphex")                        return f_dumphex;
+    else if (s == "break")                          return f_break;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -217,6 +222,11 @@ string function2String(tFunction f)
         case f_signedComparisonWithConst:       return "signedComparisonWithConst";
         case f_getFirstDiffChunkRem:            return "getFirstDiffChunkRem";
         case f_getSmtProofPreviousIndex:        return "getSmtProofPreviousIndex";
+        case f_getMemValue:                     return "getMemValue";
+        case f_getMemAddr:                      return "getMemAddr";
+        case f_dumpRegs:                        return "dumpRegs";
+        case f_dumphex:                         return "dumphex";
+        case f_break:                           return "break";
         case f_empty:                           return "";
         default:                                return "unknown";
     }

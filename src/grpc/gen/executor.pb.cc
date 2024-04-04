@@ -2207,7 +2207,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "_historic_root\030\005 \001(\014\"\243\t\n\026ProcessBatchRes"
   "ponseV3\022\026\n\016new_state_root\030\001 \001(\014\022\032\n\022new_a"
   "cc_input_hash\030\002 \001(\014\022\033\n\023new_local_exit_ro"
-  "ot\030\003 \001(\014\022\032\n\022new_last_timestamp\030\004 \001(\014\022!\n\031"
+  "ot\030\003 \001(\014\022\032\n\022new_last_timestamp\030\004 \001(\004\022!\n\031"
   "current_l1_info_tree_root\030\005 \001(\014\022\"\n\032curre"
   "nt_l1_info_tree_index\030\006 \001(\r\022\031\n\021cnt_kecca"
   "k_hashes\030\007 \001(\r\022\033\n\023cnt_poseidon_hashes\030\010 "
@@ -18422,11 +18422,6 @@ ProcessBatchResponseV3::ProcessBatchResponseV3(const ProcessBatchResponseV3& fro
     new_local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_new_local_exit_root(),
       GetArena());
   }
-  new_last_timestamp_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_new_last_timestamp().empty()) {
-    new_last_timestamp_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_new_last_timestamp(),
-      GetArena());
-  }
   current_l1_info_tree_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_current_l1_info_tree_root().empty()) {
     current_l1_info_tree_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_current_l1_info_tree_root(),
@@ -18442,9 +18437,9 @@ ProcessBatchResponseV3::ProcessBatchResponseV3(const ProcessBatchResponseV3& fro
     old_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_old_state_root(),
       GetArena());
   }
-  ::memcpy(&current_l1_info_tree_index_, &from.current_l1_info_tree_index_,
+  ::memcpy(&new_last_timestamp_, &from.new_last_timestamp_,
     static_cast<size_t>(reinterpret_cast<char*>(&cnt_reserve_sha256_hashes_) -
-    reinterpret_cast<char*>(&current_l1_info_tree_index_)) + sizeof(cnt_reserve_sha256_hashes_));
+    reinterpret_cast<char*>(&new_last_timestamp_)) + sizeof(cnt_reserve_sha256_hashes_));
   // @@protoc_insertion_point(copy_constructor:executor.v1.ProcessBatchResponseV3)
 }
 
@@ -18453,13 +18448,12 @@ void ProcessBatchResponseV3::SharedCtor() {
   new_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   new_acc_input_hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   new_local_exit_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  new_last_timestamp_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   current_l1_info_tree_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   prover_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   old_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(&current_l1_info_tree_index_, 0, static_cast<size_t>(
+  ::memset(&new_last_timestamp_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&cnt_reserve_sha256_hashes_) -
-      reinterpret_cast<char*>(&current_l1_info_tree_index_)) + sizeof(cnt_reserve_sha256_hashes_));
+      reinterpret_cast<char*>(&new_last_timestamp_)) + sizeof(cnt_reserve_sha256_hashes_));
 }
 
 ProcessBatchResponseV3::~ProcessBatchResponseV3() {
@@ -18473,7 +18467,6 @@ void ProcessBatchResponseV3::SharedDtor() {
   new_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   new_acc_input_hash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   new_local_exit_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  new_last_timestamp_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   current_l1_info_tree_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   prover_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   old_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -18507,13 +18500,12 @@ void ProcessBatchResponseV3::Clear() {
   new_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   new_acc_input_hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   new_local_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  new_last_timestamp_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   current_l1_info_tree_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   old_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  ::memset(&current_l1_info_tree_index_, 0, static_cast<size_t>(
+  ::memset(&new_last_timestamp_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&cnt_reserve_sha256_hashes_) -
-      reinterpret_cast<char*>(&current_l1_info_tree_index_)) + sizeof(cnt_reserve_sha256_hashes_));
+      reinterpret_cast<char*>(&new_last_timestamp_)) + sizeof(cnt_reserve_sha256_hashes_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -18549,11 +18541,10 @@ const char* ProcessBatchResponseV3::_InternalParse(const char* ptr, ::PROTOBUF_N
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bytes new_last_timestamp = 4;
+      // uint64 new_last_timestamp = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
-          auto str = _internal_mutable_new_last_timestamp();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          new_last_timestamp_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -18848,10 +18839,10 @@ failure:
         3, this->_internal_new_local_exit_root(), target);
   }
 
-  // bytes new_last_timestamp = 4;
-  if (this->new_last_timestamp().size() > 0) {
-    target = stream->WriteBytesMaybeAliased(
-        4, this->_internal_new_last_timestamp(), target);
+  // uint64 new_last_timestamp = 4;
+  if (this->new_last_timestamp() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_new_last_timestamp(), target);
   }
 
   // bytes current_l1_info_tree_root = 5;
@@ -19152,13 +19143,6 @@ size_t ProcessBatchResponseV3::ByteSizeLong() const {
         this->_internal_new_local_exit_root());
   }
 
-  // bytes new_last_timestamp = 4;
-  if (this->new_last_timestamp().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_new_last_timestamp());
-  }
-
   // bytes current_l1_info_tree_root = 5;
   if (this->current_l1_info_tree_root().size() > 0) {
     total_size += 1 +
@@ -19178,6 +19162,13 @@ size_t ProcessBatchResponseV3::ByteSizeLong() const {
     total_size += 2 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
         this->_internal_old_state_root());
+  }
+
+  // uint64 new_last_timestamp = 4;
+  if (this->new_last_timestamp() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_new_last_timestamp());
   }
 
   // uint32 current_l1_info_tree_index = 6;
@@ -19390,9 +19381,6 @@ void ProcessBatchResponseV3::MergeFrom(const ProcessBatchResponseV3& from) {
   if (from.new_local_exit_root().size() > 0) {
     _internal_set_new_local_exit_root(from._internal_new_local_exit_root());
   }
-  if (from.new_last_timestamp().size() > 0) {
-    _internal_set_new_last_timestamp(from._internal_new_last_timestamp());
-  }
   if (from.current_l1_info_tree_root().size() > 0) {
     _internal_set_current_l1_info_tree_root(from._internal_current_l1_info_tree_root());
   }
@@ -19401,6 +19389,9 @@ void ProcessBatchResponseV3::MergeFrom(const ProcessBatchResponseV3& from) {
   }
   if (from.old_state_root().size() > 0) {
     _internal_set_old_state_root(from._internal_old_state_root());
+  }
+  if (from.new_last_timestamp() != 0) {
+    _internal_set_new_last_timestamp(from._internal_new_last_timestamp());
   }
   if (from.current_l1_info_tree_index() != 0) {
     _internal_set_current_l1_info_tree_index(from._internal_current_l1_info_tree_index());
@@ -19504,16 +19495,15 @@ void ProcessBatchResponseV3::InternalSwap(ProcessBatchResponseV3* other) {
   new_state_root_.Swap(&other->new_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   new_acc_input_hash_.Swap(&other->new_acc_input_hash_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   new_local_exit_root_.Swap(&other->new_local_exit_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  new_last_timestamp_.Swap(&other->new_last_timestamp_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   current_l1_info_tree_root_.Swap(&other->current_l1_info_tree_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   prover_id_.Swap(&other->prover_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   old_state_root_.Swap(&other->old_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ProcessBatchResponseV3, cnt_reserve_sha256_hashes_)
       + sizeof(ProcessBatchResponseV3::cnt_reserve_sha256_hashes_)
-      - PROTOBUF_FIELD_OFFSET(ProcessBatchResponseV3, current_l1_info_tree_index_)>(
-          reinterpret_cast<char*>(&current_l1_info_tree_index_),
-          reinterpret_cast<char*>(&other->current_l1_info_tree_index_));
+      - PROTOBUF_FIELD_OFFSET(ProcessBatchResponseV3, new_last_timestamp_)>(
+          reinterpret_cast<char*>(&new_last_timestamp_),
+          reinterpret_cast<char*>(&other->new_last_timestamp_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ProcessBatchResponseV3::GetMetadata() const {

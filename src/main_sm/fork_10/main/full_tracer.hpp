@@ -31,7 +31,7 @@ public:
     uint64_t prevCTX;
     uint64_t initGas;
     unordered_map<string,unordered_map<string,string>> deltaStorage;
-    FinalTraceV2 finalTrace;
+    FinalTraceV3 finalTrace;
     unordered_map<uint64_t,TxGAS> txGAS;
     uint64_t txTime; // in us
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
@@ -173,6 +173,18 @@ public:
     {
         return finalTraceBlob;
     };
+    uint64_t get_new_last_timestamp(void)
+    {
+        return finalTrace.new_last_timestamp;
+    };
+    string & get_current_l1_info_tree_root(void)
+    {
+        return finalTrace.current_l1_info_tree_root;
+    };
+    uint64_t get_current_l1_info_tree_index(void)
+    {
+        return finalTrace.current_l1_info_tree_index;
+    }
 };
 
 void getTransactionHash( string    &to,

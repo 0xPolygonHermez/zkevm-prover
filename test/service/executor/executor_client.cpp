@@ -733,7 +733,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         return false;
     }
 
-    if (!config.loadCollectionRom && (input.publicInputsExtended.newStateRoot != 0))
+    if (!config.loadDiagnosticRom && (input.publicInputsExtended.newStateRoot != 0))
     {
         mpz_class newStateRootScalar;
         newStateRootScalar.set_str(Remove0xIfPresent(newStateRoot), 16);

@@ -173,7 +173,7 @@ uint64_t mainExecutorFreeInCheck(mpz_class m0, mpz_class m1, uint64_t mode, mpz_
     {
         // reverse bytes
         mpz_class _tmpv = 0;
-        for (int ilen = 0; ilen < _len; ++ilen) 
+        for (uint64_t ilen = 0; ilen < _len; ++ilen) 
         {
             _tmpv = (_tmpv << 8) | (_v & 0xFF);
             _v = _v >> 8;
@@ -227,7 +227,7 @@ uint64_t mainExecutorCheck(mpz_class m0, mpz_class m1, uint64_t mode, mpz_class 
         {
             // reverse bytes
             mpz_class _tmpv = 0;
-            for (int ilen = 0; ilen < _len; ++ilen) 
+            for (uint64_t ilen = 0; ilen < _len; ++ilen) 
             {
                 _tmpv = (_tmpv << 8) | (_v & 0xFF);
                 _v = _v >> 8;
@@ -256,7 +256,7 @@ uint64_t mainExecutorCheck(mpz_class m0, mpz_class m1, uint64_t mode, mpz_class 
     {
         // reverse bytes
         mpz_class _tmpv = 0;
-        for (int ilen = 0; ilen < _len; ++ilen) 
+        for (uint64_t ilen = 0; ilen < _len; ++ilen) 
         {
         _tmpv = (_tmpv << 8) | (_v & 0xFF);
             _v = _v >> 8;

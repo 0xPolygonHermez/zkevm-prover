@@ -11004,10 +11004,10 @@ class ProcessBatchResponseV3 PROTOBUF_FINAL :
     kNewStateRootFieldNumber = 1,
     kNewAccInputHashFieldNumber = 2,
     kNewLocalExitRootFieldNumber = 3,
-    kNewLastTimestampFieldNumber = 4,
     kCurrentL1InfoTreeRootFieldNumber = 5,
     kProverIdFieldNumber = 20,
     kOldStateRootFieldNumber = 35,
+    kNewLastTimestampFieldNumber = 4,
     kCurrentL1InfoTreeIndexFieldNumber = 6,
     kCntKeccakHashesFieldNumber = 7,
     kCntPoseidonHashesFieldNumber = 8,
@@ -11191,31 +11191,6 @@ class ProcessBatchResponseV3 PROTOBUF_FINAL :
   std::string* _internal_mutable_new_local_exit_root();
   public:
 
-  // bytes new_last_timestamp = 4;
-  void clear_new_last_timestamp();
-  const std::string& new_last_timestamp() const;
-  void set_new_last_timestamp(const std::string& value);
-  void set_new_last_timestamp(std::string&& value);
-  void set_new_last_timestamp(const char* value);
-  void set_new_last_timestamp(const void* value, size_t size);
-  std::string* mutable_new_last_timestamp();
-  std::string* release_new_last_timestamp();
-  void set_allocated_new_last_timestamp(std::string* new_last_timestamp);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_new_last_timestamp();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_new_last_timestamp(
-      std::string* new_last_timestamp);
-  private:
-  const std::string& _internal_new_last_timestamp() const;
-  void _internal_set_new_last_timestamp(const std::string& value);
-  std::string* _internal_mutable_new_last_timestamp();
-  public:
-
   // bytes current_l1_info_tree_root = 5;
   void clear_current_l1_info_tree_root();
   const std::string& current_l1_info_tree_root() const;
@@ -11289,6 +11264,15 @@ class ProcessBatchResponseV3 PROTOBUF_FINAL :
   const std::string& _internal_old_state_root() const;
   void _internal_set_old_state_root(const std::string& value);
   std::string* _internal_mutable_old_state_root();
+  public:
+
+  // uint64 new_last_timestamp = 4;
+  void clear_new_last_timestamp();
+  ::PROTOBUF_NAMESPACE_ID::uint64 new_last_timestamp() const;
+  void set_new_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_new_last_timestamp() const;
+  void _internal_set_new_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // uint32 current_l1_info_tree_index = 6;
@@ -11526,10 +11510,10 @@ class ProcessBatchResponseV3 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_acc_input_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_local_exit_root_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_last_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr current_l1_info_tree_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr prover_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 new_last_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint32 current_l1_info_tree_index_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_keccak_hashes_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_poseidon_hashes_;
@@ -28477,85 +28461,24 @@ inline void ProcessBatchResponseV3::unsafe_arena_set_allocated_new_local_exit_ro
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchResponseV3.new_local_exit_root)
 }
 
-// bytes new_last_timestamp = 4;
+// uint64 new_last_timestamp = 4;
 inline void ProcessBatchResponseV3::clear_new_last_timestamp() {
-  new_last_timestamp_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  new_last_timestamp_ = PROTOBUF_ULONGLONG(0);
 }
-inline const std::string& ProcessBatchResponseV3::new_last_timestamp() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponseV3::_internal_new_last_timestamp() const {
+  return new_last_timestamp_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponseV3::new_last_timestamp() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
   return _internal_new_last_timestamp();
 }
-inline void ProcessBatchResponseV3::set_new_last_timestamp(const std::string& value) {
+inline void ProcessBatchResponseV3::_internal_set_new_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  new_last_timestamp_ = value;
+}
+inline void ProcessBatchResponseV3::set_new_last_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_new_last_timestamp(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
-}
-inline std::string* ProcessBatchResponseV3::mutable_new_last_timestamp() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
-  return _internal_mutable_new_last_timestamp();
-}
-inline const std::string& ProcessBatchResponseV3::_internal_new_last_timestamp() const {
-  return new_last_timestamp_.Get();
-}
-inline void ProcessBatchResponseV3::_internal_set_new_last_timestamp(const std::string& value) {
-  
-  new_last_timestamp_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void ProcessBatchResponseV3::set_new_last_timestamp(std::string&& value) {
-  
-  new_last_timestamp_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
-}
-inline void ProcessBatchResponseV3::set_new_last_timestamp(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  new_last_timestamp_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
-}
-inline void ProcessBatchResponseV3::set_new_last_timestamp(const void* value,
-    size_t size) {
-  
-  new_last_timestamp_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
-}
-inline std::string* ProcessBatchResponseV3::_internal_mutable_new_last_timestamp() {
-  
-  return new_last_timestamp_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* ProcessBatchResponseV3::release_new_last_timestamp() {
-  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
-  return new_last_timestamp_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ProcessBatchResponseV3::set_allocated_new_last_timestamp(std::string* new_last_timestamp) {
-  if (new_last_timestamp != nullptr) {
-    
-  } else {
-    
-  }
-  new_last_timestamp_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), new_last_timestamp,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
-}
-inline std::string* ProcessBatchResponseV3::unsafe_arena_release_new_last_timestamp() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return new_last_timestamp_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void ProcessBatchResponseV3::unsafe_arena_set_allocated_new_last_timestamp(
-    std::string* new_last_timestamp) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (new_last_timestamp != nullptr) {
-    
-  } else {
-    
-  }
-  new_last_timestamp_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      new_last_timestamp, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchResponseV3.new_last_timestamp)
 }
 
 // bytes current_l1_info_tree_root = 5;

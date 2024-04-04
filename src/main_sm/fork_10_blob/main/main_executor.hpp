@@ -46,7 +46,7 @@ public:
 
     // ROM JSON file data:
     Rom romBatch;
-    Rom romCollection;
+    Rom romDiagnostic;
 
 #ifdef MULTI_ROM_TEST
     Rom rom_gas_limit_100000000;

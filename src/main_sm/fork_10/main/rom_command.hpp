@@ -96,7 +96,12 @@ typedef enum : int {
     f_signedComparison,
     f_signedComparisonWithConst,
     f_getFirstDiffChunkRem,
-    f_getSmtProofPreviousIndex
+    f_getSmtProofPreviousIndex,
+    f_getMemValue,
+    f_getMemAddr,
+    f_dumpRegs,
+    f_dumphex,
+    f_break,
 } tFunction;
 
 // ROM command (op)

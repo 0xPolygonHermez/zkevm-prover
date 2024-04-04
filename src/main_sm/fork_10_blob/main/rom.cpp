@@ -99,6 +99,8 @@ void Rom::load(Goldilocks &fr, json &romJson)
         currentTxOffset              = getMemoryOffset("currentTx");
         txStatusOffset               = getMemoryOffset("txStatus");
         currentLogIndexOffset        = getMemoryOffset("currentLogIndex");
+        currentL1InfoTreeRootOffset  = getMemoryOffset("currentL1InfoTreeRoot");
+        currentL1InfoTreeIndexOffset = getMemoryOffset("currentL1InfoTreeIndex");
     }
 
     if (type == BLOB)
@@ -200,7 +202,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         constants.MAX_NONCE                           = getConstantL(romJson, "MAX_NONCE");
         constants.MAX_UINT_256                        = getConstantL(romJson, "MAX_UINT_256");
     }
-    else if (type == COLLECTION)
+    else if (type == DIAGNOSTIC)
     {
         constants.MAX_CNT_STEPS_LIMIT               = U64Mask64;
         constants.MAX_CNT_ARITH_LIMIT               = U64Mask64;

@@ -102,6 +102,12 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_getFirstDiffChunkRem:            return eval_getFirstDiffChunkRem(ctx, cmd, cr);
             case f_getSmtProofPreviousIndex:        return eval_getSmtProofPreviousIndex(ctx, cmd, cr);
             case f_getBatchHashData:                return eval_getBatchHashData(ctx, cmd, cr);
+
+            case f_getMemValue:                     return eval_getMemValue(ctx, cmd, cr);
+            case f_getMemAddr:                      return eval_getMemAddr(ctx, cmd, cr);
+            case f_dumpRegs:                        return eval_dumpRegs(ctx, cmd, cr);
+            case f_dumphex:                         return eval_dumphex(ctx, cmd, cr);
+            case f_break:                           return eval_break(ctx, cmd, cr);
             
             default:
                 zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + "=" + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
@@ -4354,6 +4360,8 @@ void eval_frBLS12_381inv (Context &ctx, const RomCommand &cmd, CommandResult &cr
 void eval_dump (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     //zklog.error("eval_dump() not implemented");
+    cr.type = crt_scalar;
+    cr.scalar = 0;
 }
 
 // Checks if the given element of the BLS12-381 scalar field is a 4096-th root of unity
@@ -4920,6 +4928,24 @@ void eval_getBatchHashData (Context &ctx, const RomCommand &cmd, CommandResult &
 
     cr.type = crt_fea;
     scalar2fea(fr, ctx.batchHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_dumpRegs                    (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    cr.type = crt_scalar;
+    cr.scalar = 0;
+}
+
+void eval_dumphex                     (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    cr.type = crt_scalar;
+    cr.scalar = 0;
+}
+
+void eval_break                       (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    cr.type = crt_scalar;
+    cr.scalar = 0;
 }
 
 } // namespace

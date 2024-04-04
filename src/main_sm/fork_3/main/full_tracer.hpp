@@ -155,6 +155,9 @@ public:
 
     FinalTraceBlob emptyTraceBlob;
     FinalTraceBlob & get_final_trace_blob(void) { return emptyTraceBlob; };
+    uint64_t get_new_last_timestamp(void) { return 0; };
+    string & get_current_l1_info_tree_root(void) { return emptyString; };
+    uint64_t get_current_l1_info_tree_index(void) { return 0; };
 };
                          
 } // namespace

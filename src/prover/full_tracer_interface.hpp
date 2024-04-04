@@ -236,6 +236,26 @@ public:
     FinalTraceV2() : bInitialized(false), numBatch(0), cumulative_gas_used(0), gas_used(0), invalid_batch(false) {};
 };
 
+class FinalTraceV3
+{
+public:
+    bool bInitialized;
+    string new_state_root;
+    string new_local_exit_root;
+    string newAccInputHash;
+    string new_acc_input_hash;
+    uint64_t numBatch;
+    uint64_t cumulative_gas_used;
+    uint64_t gas_used;
+    vector<Block> block_responses;
+    bool invalid_batch;
+    string error;
+    uint64_t new_last_timestamp;
+    string current_l1_info_tree_root;
+    uint64_t current_l1_info_tree_index;
+    FinalTraceV3() : bInitialized(false), numBatch(0), cumulative_gas_used(0), gas_used(0), invalid_batch(false), new_last_timestamp(0), current_l1_info_tree_index(0) {};
+};
+
 class InfoReadWrite
 {
 public:
@@ -307,6 +327,9 @@ public:
     virtual string & get_error(void) = 0;
     virtual bool get_invalid_batch(void) = 0;
     virtual FinalTraceBlob & get_final_trace_blob(void) = 0;
+    virtual uint64_t get_new_last_timestamp(void) = 0;
+    virtual string & get_current_l1_info_tree_root(void) = 0;
+    virtual uint64_t get_current_l1_info_tree_index(void) = 0;
 };
 
 #endif

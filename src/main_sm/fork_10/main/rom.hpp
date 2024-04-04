@@ -20,7 +20,7 @@ enum RomType
     UNSPECIFIED = 0,
     BATCH = 1,
     BLOB = 2,
-    COLLECTION = 3
+    DIAGNOSTIC = 3
 };
 
 class Rom
@@ -89,6 +89,8 @@ public:
     uint64_t finalAccBatchHashDataOffset;
     uint64_t localExitRootFromBlobOffset;
     uint64_t isInvalidOffset;
+    uint64_t currentL1InfoTreeRootOffset;
+    uint64_t currentL1InfoTreeIndexOffset;
 
     /* Constants */
     RomConstants constants;
@@ -155,9 +157,11 @@ public:
             finalAccBatchHashDataOffset(0),
             localExitRootFromBlobOffset(0),
             isInvalidOffset(0),
+            currentL1InfoTreeRootOffset(0),
+            currentL1InfoTreeIndexOffset(0),
             type(type)
             {
-                zkassert((type == BATCH) || (type == BLOB) || (type == COLLECTION));
+                zkassertpermanent((type == BATCH) || (type == BLOB) || (type == DIAGNOSTIC));
             };
 
     /* Destructor */

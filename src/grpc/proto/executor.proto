@@ -985,7 +985,7 @@ message ProcessBatchResponseV3 {
     bytes new_state_root = 1;
     bytes new_acc_input_hash = 2;
     bytes new_local_exit_root = 3;
-    bytes new_last_timestamp = 4;
+    uint64 new_last_timestamp = 4;
     bytes current_l1_info_tree_root = 5;
     uint32 current_l1_info_tree_index = 6;
     uint32 cnt_keccak_hashes = 7;

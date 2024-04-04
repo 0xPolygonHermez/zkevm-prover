@@ -224,7 +224,7 @@ void Config::load(json &config)
     ParseU64(config, "logExecutorServerInputGasThreshold", "LOG_EXECUTOR_SERVER_INPUT_GAS_THRESHOLD", logExecutorServerInputGasThreshold, 0);
     ParseBool(config, "logExecutorServerResponses", "LOG_EXECUTOR_SERVER_RESPONSES", logExecutorServerResponses, false);
     ParseBool(config, "logExecutorServerTxs", "LOG_EXECUTOR_SERVER_TXS", logExecutorServerTxs, true);
-    ParseBool(config, "loadCollectionRom", "LOAD_COLLECTION_ROM", loadCollectionRom, false);
+    ParseBool(config, "loadDiagnosticRom", "LOAD_DIAGNOSTIC_ROM", loadDiagnosticRom, false);
 
     // Files and paths
     ParseString(config, "inputFile", "INPUT_FILE", inputFile, "testvectors/batchProof/input_executor_0.json");
@@ -484,8 +484,8 @@ void Config::print(void)
         zklog.info("    logExecutorServerResponses=true");
     if (logExecutorServerTxs)
         zklog.info("    logExecutorServerTxs=true");
-    if (loadCollectionRom)
-        zklog.info("    loadCollectionRom=true");
+    if (loadDiagnosticRom)
+        zklog.info("    loadDiagnosticRom=true");
 
     zklog.info("    executorServerPort=" + to_string(executorServerPort));
     zklog.info("    executorClientPort=" + to_string(executorClientPort));
