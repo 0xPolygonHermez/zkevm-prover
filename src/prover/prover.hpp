@@ -30,6 +30,18 @@ class Prover
 
     Starks<RawFr::Element> *starksRecursiveF;
 
+    StarkInfo *starkInfoZkevm;
+    StarkInfo *starkInfoC12a;
+    StarkInfo *starkInfoRecursive1;
+    StarkInfo *starkInfoRecursive2;
+    StarkInfo *starkInfoRecursiveF;
+
+    CHelpers *cHelpersZkevm;
+    CHelpers *cHelpersC12a;
+    CHelpers *cHelpersRecursive1;
+    CHelpers *cHelpersRecursive2;
+    CHelpers *cHelpersRecursiveF;
+
     Starks<Goldilocks::Element> *starkZkevm;
     Starks<Goldilocks::Element> *starksC12a;
     Starks<Goldilocks::Element> *starksRecursive1;
@@ -58,7 +70,6 @@ private:
     bool externalAllocated;
     void *pAddressStarksRecursiveF = NULL;
     int protocolId;
-    bool optimizeMemoryNTT = false;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available

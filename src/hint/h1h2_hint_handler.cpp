@@ -19,7 +19,7 @@ namespace Hints
 
     size_t H1H2HintHandler::getMemoryNeeded(uint64_t N) const
     {
-        return 8 * N * sizeof(Goldilocks::Element);
+        return 8 * N;
     }
 
     void H1H2HintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const

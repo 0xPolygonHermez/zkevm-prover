@@ -10,6 +10,8 @@
 #include "merklehash_goldilocks.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "hint_handler.hpp"
+#include "hint_handler_builder.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -43,17 +45,6 @@ public:
     bool merkleTreeCustom;
     vector<StepStruct> steps;
 };
-
-typedef enum
-{
-    const_ = 0,
-    cm = 1,
-    tmp = 2,
-    public_ = 3,
-    subproofvalue = 4,
-    challenge = 5,
-    number = 6,
-} opType;
 
 opType string2opType (const string s);
 
@@ -133,7 +124,7 @@ public:
     /* Loads data from a json object */
     void load (json j);
 
-    void setMapOffsets(bool optimizeCommitStage1Pols);
+    void setMapOffsets(std::vector<uint16_t> cmPolsCalculatedStage1, std::vector<Hint> hints);
 
     /* Returns a polynomial specified by its ID */
     Polinomial getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg);

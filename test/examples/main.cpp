@@ -90,6 +90,9 @@ int main(int argc, char **argv)
     }
    
     StarkInfo starkInfo(starkInfoFile);
+    CHelpers cHelpers(cHelpersFile);
+
+    starkInfo.setMapOffsets(cHelpers.getCmPolsCalculatedStage1(), cHelpers.hints);
 
     void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN["cm3"] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
@@ -100,7 +103,6 @@ int main(int argc, char **argv)
     {
         std::memcpy((uint8_t*)pAddress + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
     }
-
 
     json publics;
     file2json(publicsFile, publics);
@@ -121,7 +123,7 @@ int main(int argc, char **argv)
 
     if(testName == "all") {
         FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
-        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress, false);
+        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
@@ -132,7 +134,7 @@ int main(int argc, char **argv)
         jProof = fproof.proofs.proof2json();
     } else if(testName == "compressor") {
         FRIProof<RawFr::Element> fproof(starkInfo, 1);
-        Starks<RawFr::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress, false);
+        Starks<RawFr::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
@@ -143,7 +145,7 @@ int main(int argc, char **argv)
         jProof = fproof.proofs.proof2json();
     } else if(testName == "fibonacci_pil2") {
         FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
-        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress, false);
+        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 

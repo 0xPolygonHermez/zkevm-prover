@@ -91,49 +91,40 @@ Prover::Prover(Goldilocks &fr,
             pthread_create(&proverPthread, NULL, proverThread, this);
             pthread_create(&cleanerPthread, NULL, cleanerThread, this);
 
-            StarkInfo _starkInfo(config.zkevmStarkInfo);
+            HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
+            HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
+            HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
+            HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
 
-            // Allocate an area of memory, mapped to file, to store all the committed polynomials,
-            // and create them using the allocated address
-
-            polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element);
-            for(uint64_t i = 1; i <= _starkInfo.nStages; ++i) {
-                string section = "cm" + to_string(i);
-                string nextSection = "cm" + to_string(i + 1);
-                uint64_t nttHelperSize = _starkInfo.mapSectionsN[section] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
-                uint64_t currentSectionStart = _starkInfo.mapOffsets[std::make_pair(section, false)] * sizeof(Goldilocks::Element);
-                if (i == _starkInfo.nStages && currentSectionStart > nttHelperSize) optimizeMemoryNTT = true;
-                uint64_t nttHelperBufferStart = optimizeMemoryNTT && i == _starkInfo.nStages 
-                    ? _starkInfo.mapOffsets[std::make_pair("cm1", false)] 
-                    : _starkInfo.mapOffsets[std::make_pair(nextSection, true)] * sizeof(Goldilocks::Element);
-                uint64_t totalMemSize = nttHelperBufferStart + nttHelperSize;
-                if(totalMemSize > polsSize) {
-                    polsSize = totalMemSize;
-                }
-            }
-
-            // TODO: ADD THIS CHECKS BACK!!
-            // // Check that we have enough memory for stage2 H1H2 helpers (if not add memory)
-            // uint64_t stage2Start = _starkInfo.mapOffsets.section[cm2_2ns] * sizeof(Goldilocks::Element);
-            // uint64_t buffTransposedH1H2Size = 4 * _starkInfo.puCtx.size() * ((1 << _starkInfo.starkStruct.nBits) * FIELD_EXTENSION + 8);
-            // uint64_t buffHelperH1H2Size = (1 << _starkInfo.starkStruct.nBits) * _starkInfo.puCtx.size();
-            // uint64_t buffStage2HelperSize = (buffTransposedH1H2Size + buffHelperH1H2Size)*sizeof(Goldilocks::Element);
-            // if(stage2Start + buffStage2HelperSize > polsSize) {
-            //     polsSize = stage2Start + buffStage2HelperSize;
-            // }
+            starkInfoZkevm = new StarkInfo(config.zkevmStarkInfo);
+            starkInfoC12a = new StarkInfo(config.c12aStarkInfo);
+            starkInfoRecursive1 = new StarkInfo(config.recursive1StarkInfo);
+            starkInfoRecursive2 = new StarkInfo(config.recursive2StarkInfo);
+            starkInfoRecursiveF = new StarkInfo(config.recursivefStarkInfo);
             
-            // // Check that we have enough memory for stage3 (Z) helpers (if not add memory)
-            // uint64_t stage3Start = _starkInfo.mapOffsets.section[cm3_2ns] * sizeof(Goldilocks::Element);
-            // uint64_t tot_pols = 3 * (_starkInfo.puCtx.size() + _starkInfo.peCtx.size() + _starkInfo.ciCtx.size());
-            // uint64_t buffStage3HelperSize = (tot_pols*((1 << _starkInfo.starkStruct.nBits) * FIELD_EXTENSION + 8)) * sizeof(Goldilocks::Element);
-            // if(stage3Start + buffStage3HelperSize > polsSize) {
-            //     polsSize = stage3Start + buffStage3HelperSize;
-            // }
+            string zkevmCHelpers = USE_GENERIC_PARSER ? config.zkevmGenericCHelpers : config.zkevmCHelpers;
+            string c12aCHelpers = USE_GENERIC_PARSER ? config.c12aGenericCHelpers : config.c12aCHelpers;
+            string recursive1CHelpers = USE_GENERIC_PARSER ? config.recursive1GenericCHelpers : config.recursive1CHelpers;
+            string recursive2CHelpers = USE_GENERIC_PARSER ? config.recursive2GenericCHelpers : config.recursive2CHelpers;
+            string recursivefCHelpers = USE_GENERIC_PARSER ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
 
-            zkassert(_starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) <= polsSize - _starkInfo.mapSectionsN["cm2"] * sizeof(Goldilocks::Element));
+            cHelpersZkevm = new CHelpers(zkevmCHelpers);
+            cHelpersC12a = new CHelpers(c12aCHelpers);
+            cHelpersRecursive1 = new CHelpers(recursive1CHelpers);
+            cHelpersRecursive2 = new CHelpers(recursive2CHelpers);
+            cHelpersRecursiveF = new CHelpers(recursivefCHelpers);
+        
+            // Set the map offsets
+            starkInfoZkevm->setMapOffsets(cHelpersZkevm->getCmPolsCalculatedStage1(), cHelpersZkevm->hints);
+            starkInfoC12a->setMapOffsets(cHelpersC12a->getCmPolsCalculatedStage1(), cHelpersC12a->hints);
+            starkInfoRecursive1->setMapOffsets(cHelpersRecursive1->getCmPolsCalculatedStage1(), cHelpersRecursive1->hints);
+            starkInfoRecursive2->setMapOffsets(cHelpersRecursive2->getCmPolsCalculatedStage1(), cHelpersRecursive2->hints);
+            starkInfoRecursiveF->setMapOffsets(cHelpersRecursiveF->getCmPolsCalculatedStage1(), cHelpersRecursiveF->hints);
+
+            polsSize = starkInfoZkevm->mapTotalN * sizeof(Goldilocks::Element);
 
             zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() <= polsSize);
-            zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() == _starkInfo.mapOffsets[std::make_pair("cm2", false)] * sizeof(Goldilocks::Element));
+            zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() == starkInfoZkevm.mapOffsets[std::make_pair("cm2", false)] * sizeof(Goldilocks::Element));
 
             if (config.zkevmCmPols.size() > 0)
             {
@@ -163,27 +154,12 @@ Prover::Prover(Goldilocks &fr,
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
             prover->setZkey(zkey.get());
 
-            StarkInfo _starkInfoRecursiveF(config.recursivefStarkInfo);
-            pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
-
-            string zkevmCHelpers = USE_GENERIC_PARSER ? config.zkevmGenericCHelpers : config.zkevmCHelpers;
-            string c12aCHelpers = USE_GENERIC_PARSER ? config.c12aGenericCHelpers : config.c12aCHelpers;
-            string recursive1CHelpers = USE_GENERIC_PARSER ? config.recursive1GenericCHelpers : config.recursive1CHelpers;
-            string recursive2CHelpers = USE_GENERIC_PARSER ? config.recursive2GenericCHelpers : config.recursive2CHelpers;
-            string recursivefCHelpers = USE_GENERIC_PARSER ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
-
-            starkZkevm = new Starks<Goldilocks::Element>(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, zkevmCHelpers}, pAddress, false);
-            if(optimizeMemoryNTT) starkZkevm->optimizeMemoryNTT = true;
-            starksC12a = new Starks<Goldilocks::Element>(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, c12aCHelpers}, pAddress, false);
-            starksRecursive1 = new Starks<Goldilocks::Element>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, recursive1CHelpers}, pAddress, false);
-            starksRecursive2 = new Starks<Goldilocks::Element>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, recursive2CHelpers}, pAddress, false);
-            starksRecursiveF = new Starks<RawFr::Element>(config, {config.recursivefConstPols, config.mapConstPolsFile, config.recursivefConstantsTree, config.recursivefStarkInfo, recursivefCHelpers}, pAddressStarksRecursiveF, false);
+            starkZkevm = new Starks<Goldilocks::Element>(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree}, pAddress, *starkInfoZkevm, *cHelpersZkevm, false);
+            starksC12a = new Starks<Goldilocks::Element>(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree}, pAddress, *starkInfoC12a , *cHelpersC12a, false);
+            starksRecursive1 = new Starks<Goldilocks::Element>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree}, pAddress, *starkInfoRecursive1, *cHelpersRecursive1, false);
+            starksRecursive2 = new Starks<Goldilocks::Element>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree}, pAddress, *starkInfoRecursive2, *cHelpersRecursive2, false);
+            starksRecursiveF = new Starks<RawFr::Element>(config, {config.recursivefConstPols, config.mapConstPolsFile, config.recursivefConstantsTree}, pAddress, *starkInfoRecursiveF, *cHelpersRecursiveF, false);
 #endif
-
-            HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
-            HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
-            HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
-            HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
         }
     }
     catch (std::exception &e)
@@ -232,6 +208,18 @@ Prover::~Prover()
         delete starksRecursive1;
         delete starksRecursive2;
         delete starksRecursiveF;
+
+        delete cHelpersZkevm;
+        delete cHelpersC12a;
+        delete cHelpersRecursive1;
+        delete cHelpersRecursive2;
+        delete cHelpersRecursiveF;
+
+        delete starkInfoZkevm;
+        delete starkInfoC12a;
+        delete starkInfoRecursive1;
+        delete starkInfoRecursive2;
+        delete starkInfoRecursiveF;
 #endif
     }
 

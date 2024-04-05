@@ -6,7 +6,6 @@
 
 StarkInfo::StarkInfo(string file)
 {
-
     // Load contents from json file
     TimerStart(STARK_INFO_LOAD);
     json starkInfoJson;
@@ -110,12 +109,9 @@ void StarkInfo::load(json j)
     {
         mapSectionsN[it.key()] = it.value();
     }
-
-    // TODO: Call this function from the prover
-    setMapOffsets(true);
 }
 
-void StarkInfo::setMapOffsets(bool optimizeCommitStage1Pols) {
+void StarkInfo::setMapOffsets(std::vector<uint16_t> cmPolsCalculatedStage1, std::vector<Hint> hints) {
     uint64_t N = (1 << starkStruct.nBits);
     uint64_t NExtended = (1 << starkStruct.nBitsExt);
 
@@ -126,7 +122,17 @@ void StarkInfo::setMapOffsets(bool optimizeCommitStage1Pols) {
         mapOffsets[std::make_pair(currStage, false)] = mapOffsets[std::make_pair(prevStage, false)] + N * mapSectionsN[prevStage];
     }
 
-    if(optimizeCommitStage1Pols) {
+    bool optimizeCommitPolsStage1 = true; 
+    for(uint64_t i = 0; i < cmPolsCalculatedStage1.size(); ++i) {
+        uint64_t polId = cmPolsCalculatedStage1[i];
+        PolMap polInfo = cmPolsMap[polId];
+        if(cmPolsMap[polId].stage == "tmpExp") {
+            optimizeCommitPolsStage1 = false;
+            break;
+        }
+    }
+
+    if(optimizeCommitPolsStage1) {
         mapOffsets[std::make_pair("cm1", true)] = mapOffsets[std::make_pair("cm" + to_string(nStages), false)] + N * mapSectionsN["cm" + to_string(nStages)];
         mapOffsets[std::make_pair("tmpExp", false)] = mapOffsets[std::make_pair("cm1", true)] + NExtended * mapSectionsN["cm1"];
         mapOffsets[std::make_pair("cm2", true)] = mapOffsets[std::make_pair("tmpExp", false)] + N * mapSectionsN["tmpExp"];
@@ -145,8 +151,70 @@ void StarkInfo::setMapOffsets(bool optimizeCommitStage1Pols) {
     mapOffsets[std::make_pair("q", true)] = mapOffsets[std::make_pair("cm" + to_string(nStages + 1), true)] + NExtended * mapSectionsN["cm" + to_string(nStages + 1)];
     mapOffsets[std::make_pair("f", true)] = mapOffsets[std::make_pair("q", true)] + NExtended * qDim;
 
-    // TODO: Use hints to check if enough space is reserved, otherwise add more extra space
     mapTotalN = mapOffsets[std::make_pair("f", true)] + NExtended * 3;
+
+    bool optimizeMemoryNTT = mapSectionsN["cm" + to_string(nStages)] * NExtended < mapOffsets[std::make_pair("cm" + to_string(nStages), false)] ? true : false;
+
+    u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8;
+
+    for(uint64_t stage = 1; stage <= nStages; stage++) {
+        
+        // Check that we have enough memory for performing the NTT
+        uint64_t nttHelpersBufferSize = mapSectionsN["cm" + to_string(stage)] * NExtended;
+        uint64_t nttHelpersBufferStart;
+        if(stage == nStages && optimizeMemoryNTT) {
+            nttHelpersBufferStart = mapOffsets[std::make_pair("cm1", false)];
+        } else if(stage == 1 && optimizeCommitPolsStage1) {
+            nttHelpersBufferStart = mapOffsets[std::make_pair("tmpExp", false)];
+        } else {
+            nttHelpersBufferStart =  mapOffsets[std::make_pair("cm" + to_string(stage + 1), true)];
+        }
+        if(nttHelpersBufferStart + nttHelpersBufferSize > mapTotalN) {
+            mapTotalN = nttHelpersBufferStart + nttHelpersBufferSize;
+        }
+
+        // Check that we have enough memory for the hints
+        uint64_t hintsStageTransposedPolsElements = 0;
+        uint64_t hintsStageExtraElements = 0;
+        for(uint64_t j = 0; j < hints.size(); ++j) {
+            Hint hint = hints[j];
+            auto hintHandler = Hints::HintHandlerBuilder::create(hint.name)->build();
+            vector<string> srcFields = hintHandler->getSources();
+            vector<string> dstFields = hintHandler->getDestinations();
+
+            // Check if the hint can be resolved in the current stage
+            bool isHintStage = true;
+            for(uint64_t i = 0; i < dstFields.size(); ++i) {
+                auto it = hint.fields.find(dstFields[i]);
+                if (it == hint.fields.end())
+                {
+                    zklog.error("Unknown field name=" + dstFields[i]);
+                    exitProcess();
+                    exit(-1);
+                }
+                HintField hintField = hint.fields[dstFields[i]];
+                if (hintField.operand != opType::cm && hintField.operand != opType::tmp) {
+                    zklog.error("Destination field=" + dstFields[i] + " has to be either a cm or tmp");
+                    exitProcess();
+                    exit(-1);
+                }
+                if(cmPolsMap[hintField.id].stageNum != stage) {
+                    isHintStage = false;
+                    break;
+                }
+            }
+
+            if(!isHintStage) continue;
+            
+            hintsStageTransposedPolsElements += stride_pol_ * (srcFields.size() + dstFields.size());            
+            hintsStageExtraElements += hintHandler->getMemoryNeeded(N);
+        }
+        uint64_t hintsStageElementsStart = mapOffsets[std::make_pair("cm" + to_string(stage), true)];
+
+        if(hintsStageElementsStart + hintsStageTransposedPolsElements + hintsStageExtraElements > mapTotalN) {
+            mapTotalN = hintsStageElementsStart + hintsStageTransposedPolsElements + hintsStageExtraElements;
+        }
+    }
 }
 
 Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg)

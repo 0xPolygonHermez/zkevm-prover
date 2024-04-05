@@ -31,8 +31,6 @@ struct StarkFiles
     std::string zkevmConstPols;
     bool mapConstPolsFile;
     std::string zkevmConstantsTree;
-    std::string zkevmStarkInfo;
-    std::string zkevmCHelpers;
 };
 
 template <typename ElementType>
@@ -40,7 +38,9 @@ class Starks
 {
 public:
     const Config &config;
-    StarkInfo starkInfo;
+    StarkInfo &starkInfo;
+    CHelpers &chelpers;
+
     bool debug = false;
     bool optimizeMemoryNTT = false;
     uint32_t nrowsBatch = NROWS_BATCH;
@@ -81,15 +81,13 @@ private:
 
     Polinomial x;
 
-    std::unique_ptr<BinFileUtils::BinFile> cHelpersBinFile;
-    CHelpers chelpers;
-
 void merkelizeMemory(); // function for DBG purposes
 void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
 
 public:
-    Starks(const Config &config, StarkFiles starkFiles, void *_pAddress, bool debug_) : config(config),
-                                                                           starkInfo(starkFiles.zkevmStarkInfo),
+    Starks(const Config &config, StarkFiles starkFiles, void *_pAddress, StarkInfo &starkInfo_, CHelpers &chelpers_, bool debug_) : config(config),
+                                                                           starkInfo(starkInfo_),
+                                                                           chelpers(chelpers_),
                                                                            starkFiles(starkFiles),
                                                                            N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
@@ -235,13 +233,6 @@ public:
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
 
-        TimerStart(CHELPERS_ALLOCATION);
-        if(!starkFiles.zkevmCHelpers.empty()) {
-            cHelpersBinFile = BinFileUtils::openExisting(starkFiles.zkevmCHelpers, "chps", 1);
-            chelpers.loadCHelpers(cHelpersBinFile.get());
-        }
-        TimerStopAndLog(CHELPERS_ALLOCATION);
-
         constsCalculated.resize(starkInfo.nConstants, true);
 
         publicsCalculated.resize(starkInfo.nPublics, false);
@@ -249,8 +240,8 @@ public:
         challengesCalculated.resize(starkInfo.challengesMap.size(), false);
         witnessCalculated.resize(starkInfo.cmPolsMap.size(), false);
         
-        uint64_t currentSectionStart = starkInfo.mapOffsets[std::make_pair("cm" + to_string(starkInfo.nStages), false)] * sizeof(Goldilocks::Element);
-        uint64_t nttHelperSize = starkInfo.mapSectionsN["cm" + to_string(starkInfo.nStages)] * NExtended * sizeof(Goldilocks::Element);
+        uint64_t currentSectionStart = starkInfo.mapOffsets[std::make_pair("cm" + to_string(starkInfo.nStages), false)];
+        uint64_t nttHelperSize = starkInfo.mapSectionsN["cm" + to_string(starkInfo.nStages)] * NExtended;
         if(currentSectionStart > nttHelperSize) {
             optimizeMemoryNTT = true;
         }
@@ -331,7 +322,7 @@ public:
 
     void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps *chelpersSteps);
     
-    void calculateHints(uint64_t step, StepsParams& params, vector<Hint> &hints);
+    void calculateHints(uint64_t step, StepsParams& params);
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 

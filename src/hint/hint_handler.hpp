@@ -7,8 +7,38 @@
 #include <string>
 #include <memory>
 #include "polinomial.hpp"
-#include "chelpers.hpp"
+#include "constant_pols_starks.hpp"
 #include "steps.hpp"
+
+
+typedef enum
+{
+    const_ = 0,
+    cm = 1,
+    tmp = 2,
+    public_ = 3,
+    subproofvalue = 4,
+    challenge = 5,
+    number = 6,
+} opType;
+
+
+class HintField
+{
+    
+public:
+    opType operand;
+    uint64_t id;
+    uint64_t value;    
+};
+
+
+class Hint 
+{
+public:
+    std::string name;
+    std::map<string,HintField> fields;
+};
 
 namespace Hints
 {

@@ -18,22 +18,6 @@ const int CHELPERS_EXPRESSIONS_SECTION = 3;
 const int CHELPERS_CONSTRAINTS_SECTION = 4;
 const int CHELPERS_HINTS_SECTION = 5;
 
-class HintField
-{
-public:
-    opType operand;
-    uint64_t id;
-    uint64_t value;    
-};
-
-
-class Hint 
-{
-public:
-    std::string name;
-    std::map<string,HintField> fields;    
-};
-
 struct ParserParams
 {
     uint32_t stage;
@@ -94,37 +78,42 @@ public:
     ParserArgs cHelpersArgsExpressions;
 
     ~CHelpers() {
-        delete[] cHelpersArgs.ops;
-        delete[] cHelpersArgs.args;
-        delete[] cHelpersArgs.numbers;
-        delete[] cHelpersArgs.constPolsIds;
-        delete[] cHelpersArgs.cmPolsIds;
-        delete[] cHelpersArgs.challengesIds;
-        delete[] cHelpersArgs.publicsIds;
-        delete[] cHelpersArgs.subproofValuesIds;
-        delete[] cHelpersArgs.cmPolsCalculatedIds;
+        if (cHelpersArgs.ops) delete[] cHelpersArgs.ops;
+        if (cHelpersArgs.args) delete[] cHelpersArgs.args;
+        if (cHelpersArgs.numbers) delete[] cHelpersArgs.numbers;
+        if (cHelpersArgs.constPolsIds) delete[] cHelpersArgs.constPolsIds;
+        if (cHelpersArgs.cmPolsIds) delete[] cHelpersArgs.cmPolsIds;
+        if (cHelpersArgs.challengesIds) delete[] cHelpersArgs.challengesIds;
+        if (cHelpersArgs.publicsIds) delete[] cHelpersArgs.publicsIds;
+        if (cHelpersArgs.subproofValuesIds) delete[] cHelpersArgs.subproofValuesIds;
+        if (cHelpersArgs.cmPolsCalculatedIds) delete[] cHelpersArgs.cmPolsCalculatedIds;
 
-        delete[] cHelpersArgsExpressions.ops;
-        delete[] cHelpersArgsExpressions.args;
-        delete[] cHelpersArgsExpressions.numbers;
-        delete[] cHelpersArgsExpressions.constPolsIds;
-        delete[] cHelpersArgsExpressions.cmPolsIds;
-        delete[] cHelpersArgsExpressions.challengesIds;
-        delete[] cHelpersArgsExpressions.publicsIds;
-        delete[] cHelpersArgsExpressions.subproofValuesIds;
-        delete[] cHelpersArgsExpressions.cmPolsCalculatedIds;
+        if (cHelpersArgsExpressions.ops) delete[] cHelpersArgsExpressions.ops;
+        if (cHelpersArgsExpressions.args) delete[] cHelpersArgsExpressions.args;
+        if (cHelpersArgsExpressions.numbers) delete[] cHelpersArgsExpressions.numbers;
+        if (cHelpersArgsExpressions.constPolsIds) delete[] cHelpersArgsExpressions.constPolsIds;
+        if (cHelpersArgsExpressions.cmPolsIds) delete[] cHelpersArgsExpressions.cmPolsIds;
+        if (cHelpersArgsExpressions.challengesIds) delete[] cHelpersArgsExpressions.challengesIds;
+        if (cHelpersArgsExpressions.publicsIds) delete[] cHelpersArgsExpressions.publicsIds;
+        if (cHelpersArgsExpressions.subproofValuesIds) delete[] cHelpersArgsExpressions.subproofValuesIds;
+        if (cHelpersArgsExpressions.cmPolsCalculatedIds) delete[] cHelpersArgsExpressions.cmPolsCalculatedIds;
 
-        delete[] cHelpersArgsDebug.ops;
-        delete[] cHelpersArgsDebug.args;
-        delete[] cHelpersArgsDebug.numbers;
-        delete[] cHelpersArgsDebug.constPolsIds;
-        delete[] cHelpersArgsDebug.cmPolsIds;
-        delete[] cHelpersArgsDebug.challengesIds;
-        delete[] cHelpersArgsDebug.publicsIds;
-        delete[] cHelpersArgsDebug.subproofValuesIds;        
+        if (cHelpersArgsDebug.ops) delete[] cHelpersArgsDebug.ops;
+        if (cHelpersArgsDebug.args) delete[] cHelpersArgsDebug.args;
+        if (cHelpersArgsDebug.numbers) delete[] cHelpersArgsDebug.numbers;
+        if (cHelpersArgsDebug.constPolsIds) delete[] cHelpersArgsDebug.constPolsIds;
+        if (cHelpersArgsDebug.cmPolsIds) delete[] cHelpersArgsDebug.cmPolsIds;
+        if (cHelpersArgsDebug.challengesIds) delete[] cHelpersArgsDebug.challengesIds;
+        if (cHelpersArgsDebug.publicsIds) delete[] cHelpersArgsDebug.publicsIds;
+        if (cHelpersArgsDebug.subproofValuesIds) delete[] cHelpersArgsDebug.subproofValuesIds;
     };
 
+    /* Constructor */
+    CHelpers(string file);
+
     void loadCHelpers(BinFileUtils::BinFile *cHelpersBin);
+
+    std::vector<uint16_t> getCmPolsCalculatedStage1();
 };
 
 

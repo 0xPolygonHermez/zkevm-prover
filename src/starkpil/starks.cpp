@@ -245,7 +245,7 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams &params, FRIPr
 
     calculateExpressions(step, params, chelpersSteps);
 
-    calculateHints(step, params, chelpers.hints);
+    calculateHints(step, params);
 
     if (step <= starkInfo.nStages)
     {
@@ -268,7 +268,7 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams &params, FRIPr
                     }
                 }
             }
-            calculateHints(step, params, chelpers.hints);
+            calculateHints(step, params);
             uint64_t newSymbolsToBeCalculated = isStageCalculated(step);
             if (newSymbolsToBeCalculated == symbolsToBeCalculated)
             {
@@ -674,16 +674,16 @@ bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields
 }
 
 template <typename ElementType>
-void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vector<Hint> &hints)
+void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
 {
     vector<int64_t> cm2Transposed(starkInfo.cmPolsMap.size(), -1);
 
     vector<Hint> hintsToCalculate;
     uint64_t numPols = 0;
 
-    for (uint64_t i = 0; i < hints.size(); i++)
+    for (uint64_t i = 0; i < chelpers.hints.size(); i++)
     {
-        Hint hint = hints[i];
+        Hint hint = chelpers.hints[i];
         auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
         vector<string> srcFields = hintHandler->getSources();
         vector<string> dstFields = hintHandler->getDestinations();
@@ -768,7 +768,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vec
         // so we have already allocated the memory for it.
         // This must be changed in the future to be more generic.
         if(hintHandler->getMemoryNeeded(N) > 0) {
-            extra_mem_ptr = &pbufferH[omp_get_thread_num() * sizeof(Goldilocks::Element) * N];
+            extra_mem_ptr = &pbufferH[omp_get_thread_num() * hintHandler->getMemoryNeeded(N)];
         }
 
         hintHandler->resolveHint(N, params, hint, polynomials, extra_mem_ptr);
