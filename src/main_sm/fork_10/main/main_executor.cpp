@@ -168,6 +168,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     
 #else
 
+    if (config.loadDiagnosticRom)
+    {
+        zklog.info("Using diagnostic rom");
+    }
     Rom &rom = config.loadDiagnosticRom ? romDiagnostic : romBatch;
 
 #endif
@@ -462,7 +466,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Convert consolidatedState fea to pols.SR
             fea2fea(pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], consolidatedStateRoot);
-            //zklog.info("SR=" + fea2string(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i]));
+            //zklog.info("SR=" + fea2stringchain(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i]));
         }
 
 #ifdef LOG_FILENAME
@@ -852,13 +856,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (!fr.isZero(rom.line[zkPC].indRR))
             {
-                if (!fr.toS32(addrRel, fr.mul(rom.line[zkPC].indRR, pols.RR[i])))
+                int32_t aux;
+                if (!fr.toS32(aux, fr.mul(rom.line[zkPC].indRR, pols.RR[i])))
                 {
                     proverRequest.result = ZKR_SM_MAIN_TOS32;
                     logError(ctx, "Failed calling fr.toS32() with pols.RR[i]=" + fr.toString(pols.RR[i], 16) + " and inRR=" + fr.toString(rom.line[zkPC].inRR));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
+                addrRel += aux;
             }
             if (rom.line[zkPC].bOffsetPresent && (rom.line[zkPC].offset!=0))
             {
@@ -1044,7 +1050,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memIterator = ctx.mem.find(memAddr);
                     if (memIterator != ctx.mem.end()) {
 #ifdef LOG_MEMORY
-                        zklog.info("Memory read mRD: memAddr:" + to_string(memAddr) + " " + fea2string(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
+                        zklog.info("Memory read mRD: memAddr:" + to_string(memAddr) + " " + fea2stringchain(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
 #endif
                         fi0 = memIterator->second.fe0;
                         fi1 = memIterator->second.fe1;
@@ -1196,9 +1202,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         smtGetResult.value = value;
 
 #ifdef LOG_SMT_KEY_DETAILS
-                    zklog.info("SMT get state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
-                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
-                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                    zklog.info("SMT get state override C=" + fea2stringchain(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2stringchain(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2stringchain(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
                         " oldRoot=" + fea2string(fr, oldRoot) +
                         " value=" + value.get_str(10));
 #endif
@@ -1282,9 +1288,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         incCounter = smtGetResult.proofHashCounter + 2;
 
 #ifdef LOG_SMT_KEY_DETAILS
-                        zklog.info("SMT get C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
-                            " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
-                            " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        zklog.info("SMT get C=" + fea2stringchain(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                            " A=" + fea2stringchain(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                            " B=" + fea2stringchain(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
                             " Kin0Hash=" + fea2string(fr, Kin0Hash) +
                             " Kin1Hash=" + fea2string(fr, Kin1Hash) +
                             " oldRoot=" + fea2string(fr, oldRoot) +
@@ -1418,9 +1424,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     {
 
 #ifdef LOG_SMT_KEY_DETAILS
-                    zklog.info("SMT set state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
-                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
-                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                    zklog.info("SMT set state override C=" + fea2stringchain(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2stringchain(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2stringchain(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
                         " oldRoot=" + fea2string(fr, oldRoot) +
                         " value=" + value.get_str(10));
 #endif
@@ -1521,9 +1527,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 
 #ifdef LOG_SMT_KEY_DETAILS
-                        zklog.info("SMT set C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
-                            " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
-                            " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        zklog.info("SMT set C=" + fea2stringchain(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                            " A=" + fea2stringchain(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                            " B=" + fea2stringchain(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
                             " Kin0Hash=" + fea2string(fr, Kin0Hash) +
                             " Kin1Hash=" + fea2string(fr, Kin1Hash) +
                             " oldRoot=" + fea2string(fr, oldRoot) +
@@ -2191,7 +2197,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-                    uint64_t _len = len == 0 ? 32 : len;
+                    uint64_t _len = (len == 0) ? 32 : len;
                     if ((_len + offset) > 64) 
                     {
                         _len = 64 - offset;
@@ -2217,7 +2223,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     if (leftAlignment && _len < 32) 
                     {
-                        _v = _v << ((32 - len) * 8);
+                        _v = _v << ((32 - _len) * 8);
                     }
                     scalar2fea(fr, _v, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
@@ -2451,7 +2457,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 #endif
 #ifdef LOG_MEMORY
-                zklog.info("Memory write mWR: memAddr:" + to_string(memAddr) + " " + fea2string(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
+                zklog.info("Memory write mWR: memAddr:" + to_string(memAddr) + " " + fea2stringchain(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
 #endif
             }
             else
@@ -2509,8 +2515,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                          (!fr.equal(ctx.mem[memAddr].fe7, value[7])) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
-                        logError(ctx, "Memory Read does not match value=" + fea2string(fr, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7]) +
-                            " mem=" + fea2string(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
+                        logError(ctx, "Memory Read does not match value=" + fea2stringchain(fr, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7]) +
+                            " mem=" + fea2stringchain(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -2527,7 +2533,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                          (!fr.isZero(value[7])) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
-                        logError(ctx, "Memory Read does not match (value!=0) value=" + fea2string(fr, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7]));
+                        logError(ctx, "Memory Read does not match (value!=0) value=" + fea2stringchain(fr, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7]));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -3843,10 +3849,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             hashSIterator->second.digestCalled = true;
 
-            incCounter = ceil((double(hashSIterator->second.data.size()) + double(1)) / double(64));
+            incCounter = ceil((double(hashSIterator->second.data.size()) + double(1+8)) / double(64));
 
 #ifdef LOG_HASHS
-            zklog.info("hashSDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " digest=" + ctx.hashS[hashAddr].digest.get_str(16));
+            zklog.info("hashSDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " digest=" + ctx.hashS[hashAddr].digest.get_str(16) + " data.size=" + to_string(hashSIterator->second.data.size()) + " incCounter=" + to_string(incCounter));
 #endif
         }
 
@@ -5024,7 +5030,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            uint64_t _len = len == 0 ? 32 : len;
+            uint64_t _len = (len == 0) ? 32 : len;
             if ((_len + offset) > 64) 
             {
                 _len = 64 - offset;
@@ -5056,7 +5062,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 mpz_class _v = v;
                 if (leftAlignment && _len < 32) 
                 {
-                    _v = _v >> (8* (32 - len));
+                    _v = _v >> (8* (32 - _len));
                 }
                 _v = _v & maskV;
                 if (littleEndian) 
@@ -5112,14 +5118,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     mpz_class _tmpv = 0;
                     for (uint64_t ilen = 0; ilen < _len; ++ilen) 
                     {
-                    _tmpv = (_tmpv << 8) | (_v & 0xFF);
+                        _tmpv = (_tmpv << 8) | (_v & 0xFF);
                         _v = _v >> 8;
                     }
                     _v = _tmpv;
                 }
                 if (leftAlignment && _len < 32) 
                 {
-                    _v = _v << ((32 - len) * 8);
+                    _v = _v << ((32 - _len) * 8);
                 }
                 if (v != _v)
                 {
@@ -5259,7 +5265,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.A7[nexti] = op7;
             pols.setA[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setA A[nexti]=" + fea2string(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
+            zklog.info("setA A[nexti]=" + fea2stringchain(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
 #endif
         }
 #ifndef BLOB_INNER
@@ -5295,7 +5301,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.B7[nexti] = op7;
             pols.setB[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setB B[nexti]=" + fea2string(fr, pols.B0[nexti], pols.B1[nexti], pols.B2[nexti], pols.B3[nexti], pols.B4[nexti], pols.B5[nexti], pols.B6[nexti], pols.B7[nexti]));
+            zklog.info("setB B[nexti]=" + fea2stringchain(fr, pols.B0[nexti], pols.B1[nexti], pols.B2[nexti], pols.B3[nexti], pols.B4[nexti], pols.B5[nexti], pols.B6[nexti], pols.B7[nexti]));
 #endif
         }
         else if (rom.line[zkPC].restore == 1)
@@ -5334,7 +5340,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.C7[nexti] = op7;
             pols.setC[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setC C[nexti]=" + fea2string(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
+            zklog.info("setC C[nexti]=" + fea2stringchain(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
         }
         else if (rom.line[zkPC].restore == 1)
@@ -5373,7 +5379,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.D7[nexti] = op7;
             pols.setD[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setD D[nexti]=" + fea2string(fr, pols.D0[nexti], pols.D1[nexti], pols.D2[nexti], pols.D3[nexti], pols.D4[nexti], pols.D5[nexti], pols.D6[nexti], pols.D7[nexti]));
+            zklog.info("setD D[nexti]=" + fea2stringchain(fr, pols.D0[nexti], pols.D1[nexti], pols.D2[nexti], pols.D3[nexti], pols.D4[nexti], pols.D5[nexti], pols.D6[nexti], pols.D7[nexti]));
 #endif
         }
         else if (rom.line[zkPC].restore == 1)
@@ -5412,7 +5418,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.E7[nexti] = op7;
             pols.setE[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setE E[nexti]=" + fea2string(fr, pols.E0[nexti], pols.E1[nexti], pols.E2[nexti], pols.E3[nexti], pols.E4[nexti], pols.E5[nexti], pols.E6[nexti], pols.E7[nexti]));
+            zklog.info("setE E[nexti]=" + fea2stringchain(fr, pols.E0[nexti], pols.E1[nexti], pols.E2[nexti], pols.E3[nexti], pols.E4[nexti], pols.E5[nexti], pols.E6[nexti], pols.E7[nexti]));
 #endif
         }
         else if (rom.line[zkPC].restore == 1)
@@ -5451,7 +5457,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.SR7[nexti] = op7;
             pols.setSR[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setSR SR[nexti]=" + fea2string(fr, pols.SR0[nexti], pols.SR1[nexti], pols.SR2[nexti], pols.SR3[nexti], pols.SR4[nexti], pols.SR5[nexti], pols.SR6[nexti], pols.SR7[nexti]));
+            zklog.info("setSR SR[nexti]=" + fea2stringchain(fr, pols.SR0[nexti], pols.SR1[nexti], pols.SR2[nexti], pols.SR3[nexti], pols.SR4[nexti], pols.SR5[nexti], pols.SR6[nexti], pols.SR7[nexti]));
 #endif
         }
         else
@@ -5707,11 +5713,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
 
+            Goldilocks::Element o;
+            if (rom.line[zkPC].bCondConstPresent)
+            {
+                o = fr.add(op0, rom.line[zkPC].condConst);
+            }
+            else
+            {
+                o = op0;
+            }
+
 #ifndef BLOB_INNER
             // Calculate reserved counters
             if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersStepLabel))
             {
-                int64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(op0);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(o);
                 if (reserve < 0)
                 {
                     reserve = 0;
@@ -5720,7 +5736,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersArithLabel))
             {
-                int64_t reserve = int64_t(rom.constants.MAX_CNT_ARITH) - fr.toS64(op0);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_ARITH) - fr.toS64(o);
                 if (reserve < 0)
                 {
                     reserve = 0;
@@ -5729,7 +5745,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersBinaryLabel))
             {
-                int64_t reserve = int64_t(rom.constants.MAX_CNT_BINARY) - fr.toS64(op0);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_BINARY) - fr.toS64(o);
                 if (reserve < 0)
                 {
                     reserve = 0;
@@ -5738,7 +5754,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersKeccakLabel))
             {
-                int64_t reserve = int64_t(rom.constants.MAX_CNT_KECCAK_F) - fr.toS64(op0);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_KECCAK_F) - fr.toS64(o);
                 if (reserve < 0)
                 {
                     reserve = 0;
@@ -5747,7 +5763,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersSha256Label))
             {
-                int64_t reserve = int64_t(rom.constants.MAX_CNT_SHA256_F) - fr.toS64(op0);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_SHA256_F) - fr.toS64(o);
                 if (reserve < 0)
                 {
                     reserve = 0;
@@ -5756,7 +5772,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersMemalignLabel))
             {
-                int64_t reserve = int64_t(rom.constants.MAX_CNT_MEM_ALIGN) - fr.toS64(op0);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_MEM_ALIGN) - fr.toS64(o);
                 if (reserve < 0)
                 {
                     reserve = 0;
@@ -5765,7 +5781,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersPoseidonLabel))
             {
-                int64_t reserve = int64_t(rom.constants.MAX_CNT_POSEIDON_G) - fr.toS64(op0);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_POSEIDON_G) - fr.toS64(o);
                 if (reserve < 0)
                 {
                     reserve = 0;
@@ -5774,7 +5790,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersPaddingLabel))
             {
-                int64_t reserve = int64_t(rom.constants.MAX_CNT_PADDING_PG) - fr.toS64(op0);
+                int64_t reserve = int64_t(rom.constants.MAX_CNT_PADDING_PG) - fr.toS64(o);
                 if (reserve < 0)
                 {
                     reserve = 0;
@@ -5783,13 +5799,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 #endif
 
-            uint64_t jmpnCondValue = fr.toU64(op0);
+            uint64_t jmpnCondValue = fr.toU64(o);
 
             // If op<0, jump to addr: zkPC'=addr
             if (jmpnCondValue >= FrFirst32Negative)
             {
                 pols.isNeg[i] = fr.one();
-                jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(0x100000000)));
+                jmpnCondValue = fr.toU64(fr.add(o, fr.fromU64(0x100000000)));
                 pols.zkPC[nexti] = fr.fromU64(finalJmpAddr);
 #ifdef LOG_JMP
                 zklog.info("JMPN next zkPC(1)=" + fr.toString(pols.zkPC[nexti]));
@@ -5843,7 +5859,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If JMPZ, jump
         else if (rom.line[zkPC].JMPZ)
         {
-            if (fr.isZero(op0))
+            Goldilocks::Element op0cond;
+            if (rom.line[zkPC].bCondConstPresent)
+            {
+                op0cond = fr.add(op0, rom.line[zkPC].condConst);
+            }
+            else
+            {
+                op0cond = op0;
+            }
+
+            if (fr.isZero(op0cond))
             {
                 pols.zkPC[nexti] = fr.fromU64(finalJmpAddr);
             }

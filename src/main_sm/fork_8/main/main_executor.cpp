@@ -2208,8 +2208,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                          (!fr.equal(ctx.mem[addr].fe7, op7)) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
-                        logError(ctx, "Memory Read does not match op=" + fea2string(fr, op0, op1, op2, op3, op4, op5, op6, op7) +
-                            " mem=" + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
+                        logError(ctx, "Memory Read does not match op=" + fea2stringchain(fr, op0, op1, op2, op3, op4, op5, op6, op7) +
+                            " mem=" + fea2stringchain(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }

@@ -332,7 +332,8 @@ void string2fea (Goldilocks &fr, const string& os, vector<Goldilocks::Element> &
 void string2fea (Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3);
-string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7);
+// Fea2stringchain returns fea7:fea6:...:fea0 in hexa, useful for debugging
+string fea2stringchain (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7);
 
 /* Normalized strings */
 string Remove0xIfPresent      (const string &s);

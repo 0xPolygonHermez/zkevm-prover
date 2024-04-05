@@ -1882,16 +1882,16 @@ void Prover::logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, Pr
     // note: we need /*pProverRequest->pFullTracer->get_blob_new_state_root()*/
     zklog.info("Prover::genBatchProof() called executor.executeBlobInner() oldBlobStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16) +
         " newBlobStateRoot=" /*+ pProverRequest->pFullTracer->get_blob_new_state_root()*/ +
-        " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
-        " pols.B[lastN]=" + fea2string(fr, cmPols.Main.B0[lastN], cmPols.Main.B1[lastN], cmPols.Main.B2[lastN], cmPols.Main.B3[lastN], cmPols.Main.B4[lastN], cmPols.Main.B5[lastN], cmPols.Main.B6[lastN], cmPols.Main.B7[lastN]) +
+        " pols.B[0]=" + fea2stringchain(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
+        " pols.B[lastN]=" + fea2stringchain(fr, cmPols.Main.B0[lastN], cmPols.Main.B1[lastN], cmPols.Main.B2[lastN], cmPols.Main.B3[lastN], cmPols.Main.B4[lastN], cmPols.Main.B5[lastN], cmPols.Main.B6[lastN], cmPols.Main.B7[lastN]) +
         " lastN=" + to_string(lastN));
 
     // log old and new BlobAccInputHash
     // note: we need /*pProverRequest->pFullTracer->get_new_blob_acc_input_hash() */
     zklog.info("Prover::genBatchProof() called executor.executeBlobInner() oldBlobAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16) +
         " newBlobAccInputHash=" /* + pProverRequest->pFullTracer->get_new_blob_acc_input_hash()*/ +
-        " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
-        " pols.C[lastN]=" + fea2string(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
+        " pols.C[0]=" + fea2stringchain(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
+        " pols.C[lastN]=" + fea2stringchain(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
         " lastN=" + to_string(lastN));   
 }
 
@@ -1902,15 +1902,15 @@ void Prover::logBlobInnerExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols
     // note: we need /*pProverRequest->pFullTracer->get_blob_new_state_root()*/
     zklog.info("Prover::genBlobInnerProof() called executor.executeBlobInner() oldBlobStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16) +
         " newBlobStateRoot=" /*+ pProverRequest->pFullTracer->get_blob_new_state_root()*/ +
-        " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
-        " pols.B[lastN]=" + fea2string(fr, cmPols.Main.B0[lastN], cmPols.Main.B1[lastN], cmPols.Main.B2[lastN], cmPols.Main.B3[lastN], cmPols.Main.B4[lastN], cmPols.Main.B5[lastN], cmPols.Main.B6[lastN], cmPols.Main.B7[lastN]) +
+        " pols.B[0]=" + fea2stringchain(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
+        " pols.B[lastN]=" + fea2stringchain(fr, cmPols.Main.B0[lastN], cmPols.Main.B1[lastN], cmPols.Main.B2[lastN], cmPols.Main.B3[lastN], cmPols.Main.B4[lastN], cmPols.Main.B5[lastN], cmPols.Main.B6[lastN], cmPols.Main.B7[lastN]) +
         " lastN=" + to_string(lastN));
 
     // log old and new BlobAccInputHash
     // note: we need /*pProverRequest->pFullTracer->get_new_blob_acc_input_hash() */
     zklog.info("Prover::genBlobInnerProof() called executor.executeBlobInner() oldBlobAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16) +
         " newBlobAccInputHash=" /* + pProverRequest->pFullTracer->get_new_blob_acc_input_hash()*/ +
-        " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
-        " pols.C[lastN]=" + fea2string(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
+        " pols.C[0]=" + fea2stringchain(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
+        " pols.C[lastN]=" + fea2stringchain(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
         " lastN=" + to_string(lastN));
 }

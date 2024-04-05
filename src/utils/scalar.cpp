@@ -114,13 +114,9 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
     return fea2string(fr, fea);
 }
 
-string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7)
+string fea2stringchain (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7)
 {
-    mpz_class auxScalar;
-    fea2scalar(fr, auxScalar, fea0, fea1, fea2, fea3, fea4, fea5, fea6, fea7);
-    string s = auxScalar.get_str(16);
-    PrependZerosNoCopy(s, 64);
-    return s;
+    return fr.toString(fea7,16) + ":" + fr.toString(fea6,16) + ":" + fr.toString(fea5,16) + ":" + fr.toString(fea4,16) + ":" + fr.toString(fea3,16) + ":" + fr.toString(fea2,16) + ":" + fr.toString(fea1,16) + ":" + fr.toString(fea0,16);
 }
 
 /* Normalized strings */
