@@ -264,6 +264,8 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
 
         parserParamsConstraint.nSubproofValuesUsed = cHelpersBin->readU32LE();
         parserParamsConstraint.subproofValuesOffset = cHelpersBin->readU32LE();
+
+        parserParamsConstraint.nCmPolsCalculated = 0;
     
         constraintsInfoDebug.push_back(parserParamsConstraint);
     }

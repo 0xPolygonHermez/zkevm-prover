@@ -53,6 +53,11 @@ int main(int argc, char **argv)
 
     ArgumentParser aParser (argc, argv);
 
+    HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
+    HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
+    HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
+    HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
+    
     try {
         //Input arguments
         if (aParser.argumentExists("-c","--const")) {
@@ -81,6 +86,9 @@ int main(int argc, char **argv)
         } else throw runtime_error("constraint_checker: publics file argument not specified <-p/--publics> <public_file>");
 
         StarkInfo starkInfo(starkInfoFile);
+        CHelpers cHelpers(cHelpersFile);
+
+        starkInfo.setMapOffsets(cHelpers.getCmPolsCalculatedStage1(), cHelpers.hints);
 
         void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
 
@@ -114,7 +122,7 @@ int main(int argc, char **argv)
         uint64_t hashSize = starkInfo.starkStruct.verificationHashType == "GL" ? 4 : 1;
         FRIProof<Goldilocks::Element> fproof(starkInfo, hashSize);
 
-        Starks<Goldilocks::Element> starks(config, {constFile, config.mapConstPolsFile, "", starkInfoFile, cHelpersFile}, pAddress, true);
+        Starks<Goldilocks::Element> starks(config, {constFile, config.mapConstPolsFile, ""}, pAddress, starkInfo, cHelpers, true);
 
         CHelpersSteps cHelpersSteps;
         starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 

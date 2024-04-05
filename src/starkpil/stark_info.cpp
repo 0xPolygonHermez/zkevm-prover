@@ -193,14 +193,20 @@ void StarkInfo::setMapOffsets(std::vector<uint16_t> cmPolsCalculatedStage1, std:
                     exit(-1);
                 }
                 HintField hintField = hint.fields[dstFields[i]];
-                if (hintField.operand != opType::cm && hintField.operand != opType::tmp) {
-                    zklog.error("Destination field=" + dstFields[i] + " has to be either a cm or tmp");
+                if(hintField.operand == opType::subproofvalue) {
+                    if (nStages != stage) {
+                        isHintStage = false;
+                        break;
+                    }
+                } else if(hintField.operand == opType::cm || hintField.operand == opType::tmp) {
+                    if(cmPolsMap[hintField.id].stageNum != stage) {
+                        isHintStage = false;
+                        break;
+                    }
+                } else {
+                    zklog.error("Destination field=" + dstFields[i] + " has to be either a cm or tmp or subproofvalue");
                     exitProcess();
                     exit(-1);
-                }
-                if(cmPolsMap[hintField.id].stageNum != stage) {
-                    isHintStage = false;
-                    break;
                 }
             }
 
