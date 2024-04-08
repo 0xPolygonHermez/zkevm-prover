@@ -62,9 +62,6 @@ private:
     bool merkleTreeCustom;
     NTT_Goldilocks ntt;
     NTT_Goldilocks nttExtended;
-    Polinomial x_n;
-    Polinomial x_2ns;
-    Polinomial zi;
     uint64_t constPolsSize;
     uint64_t constPolsDegree;
     MerkleTreeType **treesGL;
@@ -78,6 +75,10 @@ private:
 
     Goldilocks::Element *mem;
     void *pAddress;
+
+    Goldilocks::Element *x_n;
+    Goldilocks::Element *x_2ns;
+    Goldilocks::Element *zi;
 
     std::vector<Goldilocks::Element> x;
 
@@ -93,9 +94,6 @@ public:
                                                                            NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                                            ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                                           x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
-                                                                           x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
-                                                                           zi(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
                                                                            pAddress(_pAddress)
                                                                            
     {
@@ -174,25 +172,23 @@ public:
             TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);
         }
 
-        // TODO x_n and x_2ns could be precomputed
         TimerStart(COMPUTE_X_N_AND_X_2_NS);
-        Goldilocks::Element xx = Goldilocks::one();
-        for (uint64_t i = 0; i < N; i++)
+        x_n = new Goldilocks::Element[N];
+        x_n[0] = Goldilocks::one();
+        for (uint64_t i = 1; i < N; i++)
         {
-            *x_n[i] = xx;
-            Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBits));
+            Goldilocks::mul(x_n[i], x_n[i - 1], Goldilocks::w(starkInfo.starkStruct.nBits));
         }
-        xx = Goldilocks::shift();
-        for (uint64_t i = 0; i < NExtended; i++)
+
+        x_2ns = new Goldilocks::Element[NExtended];
+        x_2ns[0] = Goldilocks::shift();
+        for (uint64_t i = 1; i < NExtended; i++)
         {
-            *x_2ns[i] = xx;
-            Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
+            Goldilocks::mul(x_2ns[i], x_2ns[i - 1], Goldilocks::w(starkInfo.starkStruct.nBitsExt));
         }
         TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
 
-        TimerStart(COMPUTE_ZHINV);
-        Polinomial::buildZHInv(zi, starkInfo.starkStruct.nBits, starkInfo.starkStruct.nBitsExt);
-        TimerStopAndLog(COMPUTE_ZHINV);
+        buildZHInv();
 
         mem = (Goldilocks::Element *)pAddress;
         
@@ -250,6 +246,10 @@ public:
     {
         if (!config.generateProof())
             return;
+        
+        delete x_n;
+        delete x_2ns;
+        delete zi;
 
         delete pConstPols;
         
@@ -320,6 +320,32 @@ public:
         
     };
 
+    void buildZHInv()
+    {
+        TimerStart(COMPUTE_ZHINV);
+        zi = new Goldilocks::Element[NExtended];
+
+        uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
+        uint64_t extend = (1 << extendBits);
+        
+        Goldilocks::Element w = Goldilocks::one();
+        Goldilocks::Element sn = Goldilocks::shift();
+
+        for (uint64_t i = 0; i < starkInfo.starkStruct.nBits; i++) Goldilocks::square(sn, sn);
+
+        for (uint64_t i=0; i<extend; i++) {
+            Goldilocks::inv(zi[i], (sn * w) - Goldilocks::one());
+            Goldilocks::mul(w, w, Goldilocks::w(extendBits));
+        }
+
+        #pragma omp parallel for
+        for (uint64_t i=extend; i<NExtended; i++) {
+            zi[i] = zi[i % extend];
+        }
+
+        TimerStopAndLog(COMPUTE_ZHINV);
+    };
+
     void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps *chelpersSteps);
     
     void calculateHints(uint64_t step, StepsParams& params);
@@ -364,7 +390,7 @@ private:
 
 public:
     // Following function are created to be used by the ffi interface
-    void *ffi_create_steps_params(Polinomial *pChallenges, Polinomial* pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
+    void *ffi_create_steps_params(Goldilocks::Element *pChallenges, Goldilocks::Element* pSubproofValues, Goldilocks::Element *pEvals, Goldilocks::Element *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
     void ffi_extend_and_merkelize(uint64_t step, StepsParams* params, FRIProof<ElementType>* proof);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 

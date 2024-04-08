@@ -1215,9 +1215,8 @@ void starkinfo_free(void *pStarkInfo) {
     delete starkInfo;
 }
 
-void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, char* cHelpers,void *pAddress) {
-    Config* config = (Config*)pConfig;
-    // return new Starks<Goldilocks::Element>(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo, cHelpers}, pAddress);
+void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, void* starkInfo, void* cHelpers,void *pAddress) {
+    //return new Starks<Goldilocks::Element>(*(Config *)config, {constPols, mapConstPolsFile, constantsTree}, pAddress, *(StarkInfo*)starkInfo, *(CHelpers*)cHelpers, false);
 }
 
 void *get_stark_info(void *pStarks) {
@@ -1231,10 +1230,10 @@ void starks_free(void *pStarks) {
 
 void *steps_params_new(void *pStarks, void * pChallenges, void * pSubproofValues, void *pEvals, void *pXDivXSubXi, void *pPublicInputs) {
     Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
-    Polinomial* challenges = (Polinomial*)pChallenges;
-    Polinomial* subproofValues = (Polinomial*)pSubproofValues;
-    Polinomial* evals = (Polinomial*)pEvals;
-    Polinomial* xDivXSubXi = (Polinomial*)pXDivXSubXi;
+    Goldilocks::Element* challenges = (Goldilocks::Element*)pChallenges;
+    Goldilocks::Element* subproofValues = (Goldilocks::Element*)pSubproofValues;
+    Goldilocks::Element* evals = (Goldilocks::Element*)pEvals;
+    Goldilocks::Element* xDivXSubXi = (Goldilocks::Element*)pXDivXSubXi;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
 
     return starks->ffi_create_steps_params(challenges, subproofValues, evals, xDivXSubXi, publicInputs);
@@ -1297,19 +1296,19 @@ void compute_evals(void *pStarks, void *pParams, void *pProof) {
     starks->computeEvals(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof);
 }
 
-void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps) {
+void compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    return starks->computeFRIPol(step, *(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps);
+    starks->computeFRIPol(step, *(StepsParams*)pParams, (CHelpersSteps*)cHelpersSteps);
 }
 
 void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->computeFRIFolding(*(FRIProof<Goldilocks::Element>*)pProof, *(Polinomial*)pFriPol, step, *(Polinomial *)pChallenge);
+    starks->computeFRIFolding(*(FRIProof<Goldilocks::Element>*)pProof, (Goldilocks::Element*)pFriPol, step, (Goldilocks::Element*)pChallenge);
 }
 
-void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* friQueries) {
+void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    starks->computeFRIQueries(*(FRIProof<Goldilocks::Element>*)pProof, *(Polinomial*)pFriPol, friQueries);
+    starks->computeFRIQueries(*(FRIProof<Goldilocks::Element>*)pProof, friQueries);
 }
 
 void *get_vector_pointer(void *pStarks, char *name) {
@@ -1366,7 +1365,7 @@ void *zkin_new(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs,
     }
 
     nlohmann::ordered_json* jProof = new nlohmann::ordered_json();
-    nlohmann::json* zkin = new nlohmann::json();
+nlohmann::json* zkin = new nlohmann::json();
     *jProof = friProof->proofs.proof2json();
 
     *zkin = proof2zkinStark(*jProof, *(StarkInfo*)pStarkInfo);
@@ -1394,15 +1393,6 @@ void transcript_add(void *pTranscript, void *pInput, uint64_t size) {
     auto input = (Goldilocks::Element *)pInput;
 
     transcript->put(input, size);
-}
-
-void transcript_add_polinomial(void *pTranscript, void *pPolinomial) {
-    auto transcript = (TranscriptGL *)pTranscript;
-    auto pol = (Polinomial *)pPolinomial;
-
-    for (uint64_t i = 0; i < pol->degree(); i++) {
-        transcript->put(pol->operator[](i), pol->dim());
-    }
 }
 
 void transcript_free(void *pTranscript, uint32_t elementType) {

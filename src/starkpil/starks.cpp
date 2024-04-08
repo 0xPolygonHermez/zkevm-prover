@@ -22,8 +22,8 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     Goldilocks::Element challenges[starkInfo.challengesMap.size() * FIELD_EXTENSION];
     Goldilocks::Element subproofValues[starkInfo.nSubProofValues * FIELD_EXTENSION];
 
-    // TODO: REVIEW WITH RICK!
-    Polinomial xDivXSubXi(starkInfo.openingPoints.size() * NExtended, FIELD_EXTENSION);
+    // TODO: THIS CAN BE IMPROVED (maybe we can reuse memory)
+    Goldilocks::Element *xDivXSubXi = new Goldilocks::Element[starkInfo.openingPoints.size() * NExtended * FIELD_EXTENSION];
 
     StepsParams params = {
         pols : mem,
@@ -154,6 +154,8 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     TimerStopAndLog(STARK_STEP_FRI);
 
+    delete xDivXSubXi;
+    
     TimerStopAndLog(STARK_PROOF);
 }
 
@@ -386,9 +388,7 @@ void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType
     TimerStart(STARK_CALCULATE_LEv);
 
     // TODO: REVIEW WITH RICK!
-    Goldilocks::Element LEv[starkInfo.openingPoints.size() * N * FIELD_EXTENSION];
-    // Goldilocks::Element *LEv = &params.pols[starkInfo.mapOffsets[std::make_pair("cm1", false)]];
-    // zkassert(starkInfo.openingPoints.size() * N * FIELD_EXTENSION < starkInfo.mapOffsets[std::make_pair("cm1", true)]);
+    Goldilocks::Element* LEv = new Goldilocks::Element[starkInfo.openingPoints.size() * N * FIELD_EXTENSION];
 
     for (uint64_t i = 0; i < starkInfo.openingPoints.size(); ++i)
     {
@@ -426,6 +426,8 @@ void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType
     evmap(params, LEv);
     proof.proofs.setEvals(params.evals);
     TimerStopAndLog(STARK_CALCULATE_EVALS);
+
+    delete LEv;
 }
 
 template <typename ElementType>
@@ -468,22 +470,23 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params, CHel
 #pragma omp parallel for
         for (uint64_t k = 0; k < (N << extendBits); k++)
         {
-            params.xDivXSubXi[k + i * NExtended][0] = x[k] - xi[0];
-            params.xDivXSubXi[k + i * NExtended][1] = -xi[1];
-            params.xDivXSubXi[k + i * NExtended][2] = -xi[2];
+            params.xDivXSubXi[(k + i * NExtended) * FIELD_EXTENSION] = x[k] - xi[0];
+            params.xDivXSubXi[(k + i * NExtended) * FIELD_EXTENSION + 1] = -xi[1];
+            params.xDivXSubXi[(k + i * NExtended) * FIELD_EXTENSION + 2] = -xi[2];
         }
     }
 
-    Polinomial::batchInverseParallel(params.xDivXSubXi, params.xDivXSubXi);
+    Polinomial xDivXSubXi(params.xDivXSubXi, NExtended * starkInfo.openingPoints.size(), FIELD_EXTENSION, FIELD_EXTENSION);
+    Polinomial::batchInverseParallel(xDivXSubXi, xDivXSubXi);
 
 #pragma omp parallel for
     for (uint64_t i = 0; i < starkInfo.openingPoints.size(); ++i)
     {
         for (uint64_t k = 0; k < (N << extendBits); k++)
         {
-            params.xDivXSubXi[k + i * NExtended][0] = params.xDivXSubXi[k + i * NExtended][0] * x[k];
-            params.xDivXSubXi[k + i * NExtended][1] = params.xDivXSubXi[k + i * NExtended][1] * x[k];
-            params.xDivXSubXi[k + i * NExtended][2] = params.xDivXSubXi[k + i * NExtended][2] * x[k];
+            params.xDivXSubXi[(k + i * NExtended) * FIELD_EXTENSION] = params.xDivXSubXi[(k + i * NExtended) * FIELD_EXTENSION] * x[k];
+            params.xDivXSubXi[(k + i * NExtended) * FIELD_EXTENSION + 1] = params.xDivXSubXi[(k + i * NExtended) * FIELD_EXTENSION + 1] * x[k];
+            params.xDivXSubXi[(k + i * NExtended) * FIELD_EXTENSION + 2] = params.xDivXSubXi[(k + i * NExtended) * FIELD_EXTENSION + 2] * x[k];
         }
     }
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
@@ -1124,25 +1127,25 @@ void Starks<ElementType>::printPolRoot(uint64_t polId, StepsParams &params)
 }
 
 template <typename ElementType>
-void *Starks<ElementType>::ffi_create_steps_params(Polinomial *pChallenges, Polinomial *pSubproofValues, Polinomial *pEvals, Polinomial *pXDivXSubXi, Goldilocks::Element *pPublicInputs)
+void *Starks<ElementType>::ffi_create_steps_params(Goldilocks::Element *pChallenges, Goldilocks::Element *pSubproofValues, Goldilocks::Element *pEvals, Goldilocks::Element *pXDivXSubXi, Goldilocks::Element *pPublicInputs)
 {
-    // StepsParams *params = new StepsParams{
-    //     pols : mem,
-    //     pConstPols : pConstPols,
-    //     pConstPols2ns : pConstPols2ns,
-    //     challenges : *pChallenges,
-    //     subproofValues : *pSubproofValues,
-    //     x_n : x_n,
-    //     x_2ns : x_2ns,
-    //     zi : zi,
-    //     evals : *pEvals,
-    //     xDivXSubXi : *pXDivXSubXi,
-    //     publicInputs : pPublicInputs,
-    //     q_2ns : &mem[starkInfo.mapOffsets[std::make_pair("q", true)]],
-    //     f_2ns : &mem[starkInfo.mapOffsets[std::make_pair("f", true)]]
-    // };
+    StepsParams *params = new StepsParams{
+        pols : mem,
+        pConstPols : pConstPols,
+        pConstPols2ns : pConstPols2ns,
+        challenges : pChallenges,
+        subproofValues : pSubproofValues,
+        evals : pEvals,
+        x_n : x_n,
+        x_2ns : x_2ns,
+        zi : zi,
+        xDivXSubXi : pXDivXSubXi,
+        publicInputs : pPublicInputs,
+        q_2ns : &mem[starkInfo.mapOffsets[std::make_pair("q", true)]],
+        f_2ns : &mem[starkInfo.mapOffsets[std::make_pair("f", true)]]
+    };
 
-    // return params;
+    return params;
 }
 
 template <typename ElementType>

@@ -114,7 +114,6 @@
     // =================================================================================
     void *transcript_new(uint32_t elementType);
     void transcript_add(void *pTranscript, void *pInput, uint64_t size);
-    void transcript_add_polinomial(void *pTranscript, void *pPolinomial);
     void transcript_free(void *pTranscript, uint32_t elementType);
     void get_challenge(void *pStarks, void *pTranscript, void *pElement);
     void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits);

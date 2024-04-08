@@ -704,24 +704,5 @@ public:
         }
         Polinomial::copyElement(res, 0, z, 0);
     }
-
-    static void buildZHInv(Polinomial& zi, uint64_t nBits, uint64_t nBitsExt) {
-        uint64_t extendBits = nBitsExt - nBits;
-        uint64_t extend = (1 << extendBits);
-        uint64_t NExtended = (1 << nBitsExt);
-
-        Goldilocks::Element w = Goldilocks::one();
-        Goldilocks::Element sn = Goldilocks::shift();
-
-        for (uint64_t i = 0; i < nBits; i++) Goldilocks::square(sn, sn);
-
-        for (uint64_t i=0; i<extend; i++) {
-            Goldilocks::inv(*zi[i], (sn * w) - Goldilocks::one());
-            Goldilocks::mul(w, w, Goldilocks::w(extendBits));
-        }
-
-        #pragma omp parallel for
-        for (uint64_t i=extend; i<NExtended; i++) *zi[i] = zi[i % extend][0];
-    }
 };
 #endif

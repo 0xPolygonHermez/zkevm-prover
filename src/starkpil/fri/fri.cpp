@@ -23,8 +23,6 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Goldilo
     uint64_t pol2N = 1 << (polBits - reductionBits);
     uint64_t nX = (1 << polBits) / pol2N;
 
-    Goldilocks::Element pol2_e[pol2N * FIELD_EXTENSION];
-
     Goldilocks::Element wi = Goldilocks::inv(Goldilocks::w(polBits));
 
     uint64_t nn = ((1 << polBits) / nX);
@@ -57,11 +55,7 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Goldilo
         for (u_int64_t j = 0; j < ncor; ++j) sinv_ = sinv_ * wi;
         for (uint64_t g = init; g < end; g++)
         {
-            if (step == 0)
-            {
-                std::memcpy(&pol2_e[g * FIELD_EXTENSION], &pol[g * FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
-            }
-            else
+            if (step != 0)
             {
                 Goldilocks::Element ppar[nX * FIELD_EXTENSION];
                 Goldilocks::Element ppar_c[nX * FIELD_EXTENSION];
@@ -75,30 +69,27 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Goldilo
 
                 ntt.INTT(ppar_c, ppar, nX, FIELD_EXTENSION);
                 polMulAxi(ppar_c, nX, sinv_); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
-                evalPol(pol2_e, g, nX, ppar_c, challenge);
+                evalPol(pol, g, nX, ppar_c, challenge);
                 sinv_ = sinv_ * wi;
             }
         }
     }
     if (step != starkInfo.starkStruct.steps.size() - 1) {
         // Re-org in groups
-        Goldilocks::Element aux[pol2N * FIELD_EXTENSION];
-        getTransposed(aux, pol2_e, pol2N, starkInfo.starkStruct.steps[step + 1].nBits);
+        Goldilocks::Element *aux = new Goldilocks::Element[pol2N * FIELD_EXTENSION];
+        getTransposed(aux, pol, pol2N, starkInfo.starkStruct.steps[step + 1].nBits);
 
         treesFRI[step]->copySource(aux);
         treesFRI[step]->merkelize();
         treesFRI[step]->getRoot(&proof.proofs.fri.trees[step + 1].root[0]);
+
+        delete aux;
     }
     
-    #pragma omp parallel for
-    for (uint64_t i = 0; i < pol2N; i++)
-    {
-        std::memcpy(&pol[i * FIELD_EXTENSION], &pol2_e[i * FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
-    }
-
     if(step == starkInfo.starkStruct.steps.size() - 1) {
         proof.proofs.fri.setPol(pol, pol2N);
     }
+
 }
 
 template <typename ElementType>
