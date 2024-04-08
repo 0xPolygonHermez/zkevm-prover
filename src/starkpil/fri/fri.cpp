@@ -5,9 +5,9 @@
 #include "zklog.hpp"
 
 template <typename ElementType>
-void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinomial &friPol, Polinomial& challenge, StarkInfo starkInfo, MerkleTreeType** treesFRI) {
+void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Goldilocks::Element* pol, Polinomial& challenge, StarkInfo starkInfo, MerkleTreeType** treesFRI) {
 
-    uint64_t polBits = log2(friPol.degree());
+    uint64_t polBits = step == 0 ? starkInfo.starkStruct.steps[0].nBits : starkInfo.starkStruct.steps[step - 1].nBits;
 
     Goldilocks::Element polShiftInv = Goldilocks::inv(Goldilocks::shift());
     
@@ -23,7 +23,7 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinom
     uint64_t pol2N = 1 << (polBits - reductionBits);
     uint64_t nX = (1 << polBits) / pol2N;
 
-    Polinomial pol2_e(pol2N, FIELD_EXTENSION);
+    Goldilocks::Element pol2_e[pol2N * FIELD_EXTENSION];
 
     Goldilocks::Element wi = Goldilocks::inv(Goldilocks::w(polBits));
 
@@ -59,41 +59,45 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Polinom
         {
             if (step == 0)
             {
-                Goldilocks3::copy((Goldilocks3::Element &)(*pol2_e[g]), (Goldilocks3::Element &)(*friPol[g]));
+                std::memcpy(&pol2_e[g * FIELD_EXTENSION], &pol[g * FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
             }
             else
             {
-                Polinomial ppar(nX, FIELD_EXTENSION);
-                Polinomial ppar_c(nX, FIELD_EXTENSION);
+                Goldilocks::Element ppar[nX * FIELD_EXTENSION];
+                Goldilocks::Element ppar_c[nX * FIELD_EXTENSION];
 
+                #pragma omp parallel for
                 for (uint64_t i = 0; i < nX; i++)
                 {
-                    Goldilocks3::copy((Goldilocks3::Element &)(*ppar[i]), (Goldilocks3::Element &)(*friPol[(i * pol2N) + g]));
+                    std::memcpy(&ppar[i * FIELD_EXTENSION], &pol[((i * pol2N) + g) * FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
                 }
                 NTT_Goldilocks ntt(nX, 1);
 
-                ntt.INTT(ppar_c.address(), ppar.address(), nX, FIELD_EXTENSION);
-                polMulAxi(ppar_c, Goldilocks::one(), sinv_); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
-                evalPol(pol2_e, g, ppar_c, challenge);
+                ntt.INTT(ppar_c, ppar, nX, FIELD_EXTENSION);
+                polMulAxi(ppar_c, nX, sinv_); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
+                evalPol(pol2_e, g, nX, ppar_c, challenge);
                 sinv_ = sinv_ * wi;
             }
         }
     }
-
     if (step != starkInfo.starkStruct.steps.size() - 1) {
         // Re-org in groups
-        Polinomial aux(pol2N, FIELD_EXTENSION);
-        getTransposed(aux, pol2_e, starkInfo.starkStruct.steps[step + 1].nBits);
-        treesFRI[step]->copySource(aux.address());
+        Goldilocks::Element aux[pol2N * FIELD_EXTENSION];
+        getTransposed(aux, pol2_e, pol2N, starkInfo.starkStruct.steps[step + 1].nBits);
+
+        treesFRI[step]->copySource(aux);
         treesFRI[step]->merkelize();
         treesFRI[step]->getRoot(&proof.proofs.fri.trees[step + 1].root[0]);
     }
-
-    friPol.potConstruct(friPol.address(), pol2_e.degree(), friPol.dim(), friPol.offset());
-    Polinomial::copy(friPol, pol2_e);
+    
+    #pragma omp parallel for
+    for (uint64_t i = 0; i < pol2N; i++)
+    {
+        std::memcpy(&pol[i * FIELD_EXTENSION], &pol2_e[i * FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
+    }
 
     if(step == starkInfo.starkStruct.steps.size() - 1) {
-        proof.proofs.fri.setPol(friPol.address());
+        proof.proofs.fri.setPol(pol, pol2N);
     }
 }
 
@@ -158,45 +162,46 @@ void FRI<ElementType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *t
 }
 
 template <typename ElementType>
-void FRI<ElementType>::polMulAxi(Polinomial &pol, Goldilocks::Element init, Goldilocks::Element acc)
+void FRI<ElementType>::polMulAxi(Goldilocks::Element *pol, uint64_t degree, Goldilocks::Element acc)
 {
-    Goldilocks::Element r = init;
-    for (uint64_t i = 0; i < pol.degree(); i++)
-    {
-        pol[i][0] = pol[i][0] * r;
-        pol[i][1] = pol[i][1] * r;
-        pol[i][2] = pol[i][2] * r;
+    Goldilocks::Element r = Goldilocks::one();
+    for (uint64_t i = 0; i < degree; i++)
+    {   
+        pol[i * FIELD_EXTENSION] = pol[i * FIELD_EXTENSION] * r;
+        pol[i * FIELD_EXTENSION + 1] = pol[i * FIELD_EXTENSION + 1] * r;
+        pol[i * FIELD_EXTENSION + 2] = pol[i * FIELD_EXTENSION + 2] * r;
         r = r * acc;
     }
 }
 
 template <typename ElementType>
-void FRI<ElementType>::evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinomial &x)
+void FRI<ElementType>::evalPol(Goldilocks::Element* res, uint64_t res_idx, uint64_t degree, Goldilocks::Element* p, Polinomial &x)
 {
-    if (p.degree() == 0)
+    if (degree == 0)
     {
-        res[res_idx][0] = Goldilocks::zero();
-        res[res_idx][1] = Goldilocks::zero();
-        res[res_idx][2] = Goldilocks::zero();
+        res[res_idx * FIELD_EXTENSION] = Goldilocks::zero();
+        res[res_idx * FIELD_EXTENSION + 1] = Goldilocks::zero();
+        res[res_idx * FIELD_EXTENSION + 2] = Goldilocks::zero();
         return;
     }
-    Goldilocks3::copy((Goldilocks3::Element &)(*res[res_idx]), (Goldilocks3::Element &)(*p[p.degree() - 1]));
-    for (int64_t i = p.degree() - 2; i >= 0; i--)
+
+    std::memcpy(&res[res_idx * FIELD_EXTENSION], &p[(degree - 1) * FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
+    for (int64_t i = degree - 2; i >= 0; i--)
     {
         Goldilocks3::Element aux;
-        Goldilocks3::mul(aux, (Goldilocks3::Element &)(*res[res_idx]), (Goldilocks3::Element &)(*x[0]));
+        Goldilocks3::mul(aux, (Goldilocks3::Element &)(res[res_idx * FIELD_EXTENSION]), (Goldilocks3::Element &)(*x[0]));
 
-        res[res_idx][0] = aux[0] + p[i][0];
-        res[res_idx][1] = aux[1] + p[i][1];
-        res[res_idx][2] = aux[2] + p[i][2];
+        res[res_idx * FIELD_EXTENSION] = aux[0] + p[i * FIELD_EXTENSION];
+        res[res_idx * FIELD_EXTENSION + 1] = aux[1] + p[i * FIELD_EXTENSION + 1];
+        res[res_idx * FIELD_EXTENSION + 2] = aux[2] + p[i * FIELD_EXTENSION + 2];
     }
 }
 
 template <typename ElementType>
-void FRI<ElementType>::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits)
+void FRI<ElementType>::getTransposed(Goldilocks::Element *aux, Goldilocks::Element* pol, uint64_t degree, uint64_t trasposeBits)
 {
     uint64_t w = (1 << trasposeBits);
-    uint64_t h = pol.degree() / w;
+    uint64_t h = degree / w;
 
 #pragma omp parallel for
     for (uint64_t i = 0; i < w; i++)
@@ -206,10 +211,8 @@ void FRI<ElementType>::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t 
 
             uint64_t fi = j * w + i;
             uint64_t di = i * h + j;
-            assert(di < aux.degree());
-            assert(fi < pol.degree());
 
-            Goldilocks3::copy((Goldilocks3::Element &)(*aux[di]), (Goldilocks3::Element &)(*pol[fi]));
+            std::memcpy(&aux[di * FIELD_EXTENSION], &pol[fi * FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         }
     }
 }

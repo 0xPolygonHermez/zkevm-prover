@@ -79,7 +79,7 @@ private:
     Goldilocks::Element *mem;
     void *pAddress;
 
-    Polinomial x;
+    std::vector<Goldilocks::Element> x;
 
 void merkelizeMemory(); // function for DBG purposes
 void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
@@ -96,8 +96,8 @@ public:
                                                                            x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
                                                                            x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
                                                                            zi(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
-                                                                           pAddress(_pAddress),
-                                                                           x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
+                                                                           pAddress(_pAddress)
+                                                                           
     {
         debug = debug_;
 
@@ -196,13 +196,13 @@ public:
 
         mem = (Goldilocks::Element *)pAddress;
         
-        *x[0] = Goldilocks::shift();
-
         uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
 
+        x = std::vector<Goldilocks::Element>(N << extendBits);
+        x[0] = Goldilocks::shift();
         for (uint64_t k = 1; k < (N << extendBits); k++)
         {
-            x[k][0] = x[k - 1][0] * Goldilocks::w(starkInfo.starkStruct.nBits + extendBits);
+            x[k] = x[k - 1] * Goldilocks::w(starkInfo.starkStruct.nBits + extendBits);
         }
 
         TimerStart(MERKLE_TREE_ALLOCATION);
@@ -335,10 +335,10 @@ public:
     
     void computeEvals(StepsParams& params, FRIProof<ElementType> &proof);
 
-    Polinomial *computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps *chelpersSteps);
+    void computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps *chelpersSteps);
     
-    void computeFRIFolding(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t step, Polinomial &challenge);
-    void computeFRIQueries(FRIProof<ElementType> &fproof, Polinomial &friPol, uint64_t* friQueries);
+    void computeFRIFolding(FRIProof<ElementType> &fproof, Goldilocks::Element* pol, uint64_t step, Polinomial &challenge);
+    void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);
 
     void calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements);
     void calculateHash(ElementType* hash, Polinomial &pol);
@@ -357,7 +357,7 @@ private:
     bool isHintResolved(Hint &hint, std::vector<string> dstFields);
     bool canHintBeResolved(Hint &hint, std::vector<string> srcFields);
 
-    void evmap(StepsParams &params, Polinomial &LEv);
+    void evmap(StepsParams &params, Goldilocks::Element *LEv);
 
     uint64_t isStageCalculated(uint64_t step);
     bool isSymbolCalculated(opType operand, uint64_t id);

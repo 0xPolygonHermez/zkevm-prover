@@ -145,11 +145,11 @@ public:
     Fri(StarkInfo starkInfo, int64_t elementSize) : pol(1 << starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
                                                              trees(starkInfo.starkStruct.steps.size(), elementSize) {}
 
-    void setPol(Goldilocks::Element *pPol)
+    void setPol(Goldilocks::Element *pPol, uint64_t degree)
     {
-        for (uint64_t i = 0; i < pol.size(); i++)
+        for (uint64_t i = 0; i < degree; i++)
         {
-            std::memcpy(&pol[i][0], &pPol[i * pol[i].size()], pol[i].size() * sizeof(Goldilocks::Element));
+            std::memcpy(&pol[i][0], &pPol[i * FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         }
     }
 

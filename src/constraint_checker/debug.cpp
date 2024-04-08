@@ -87,13 +87,10 @@ int main(int argc, char **argv)
 
         StarkInfo starkInfo(starkInfoFile);
         CHelpers cHelpers(cHelpersFile);
-
         starkInfo.setMapOffsets(cHelpers.getCmPolsCalculatedStage1(), cHelpers.hints);
 
         void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
-
-        // TODO: pAddress should be properly calculated!!!!!
-        void *pAddress = (void *)malloc((starkInfo.mapTotalN + starkInfo.mapSectionsN["cm3"] * (1 << starkInfo.starkStruct.nBitsExt)) * sizeof(Goldilocks::Element));
+        void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
 
         uint64_t N = (1 << starkInfo.starkStruct.nBits);
         #pragma omp parallel for
