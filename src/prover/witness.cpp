@@ -425,15 +425,6 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
                 // Convert to field elements
                 scalar2fea(fr, hashScalar, hash); // TODO: return error if hashScalar is invalid, instead of killing the process
 
-                // Store the hash-value pair into db
-                vector<Goldilocks::Element> valueData;
-                valueData.reserve(12);
-                for (uint64_t i=0; i<12; i++)
-                {
-                    valueData.emplace_back(fr.zero());
-                }
-                ctx.db[fea2string(fr, hash)] = valueData;
-
                 break;
             }
             case 0x04: // CODE -> ( 0x04 CBOR(code)... )
@@ -510,6 +501,9 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
 
 zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap::ProgramMap &programs, mpz_class &stateRoot)
 {
+    db.clear();
+    programs.clear();
+    
     zkresult zkr;
 
     // Check witness is not empty
@@ -531,9 +525,8 @@ zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap:
     }
     ctx.p++;
 
-    // Calculate witness hash
+    // Calculate witness hash    
     Goldilocks::Element hash[4];
-    vector<uint8_t> bits;
     zkr = calculateWitnessHash(ctx, hash);
     if (zkr != ZKR_SUCCESS)
     {
