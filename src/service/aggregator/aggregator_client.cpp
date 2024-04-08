@@ -887,9 +887,11 @@ void* aggregatorClientThread(void* arg)
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
-                case aggregator::v1::AggregatorMessage::RequestCase::kGenStatelessBatchProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
                     zklog.info("aggregatorClientThread() got: " + aggregatorMessage.ShortDebugString());
+                    break;
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenStatelessBatchProofRequest:
+                    zklog.info("aggregatorClientThread() got genStatelessBatchProof() request");
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
                     zklog.info("aggregatorClientThread() got genAggregatedProof() request");
