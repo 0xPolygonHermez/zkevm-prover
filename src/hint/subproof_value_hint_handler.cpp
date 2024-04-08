@@ -34,9 +34,9 @@ namespace Hints
         uint64_t row_index = hint.fields["row_index"].value;
         uint64_t subproofValueId = hint.fields["reference"].id;
 
-        params.subproofValues[subproofValueId][0] = expressionPol[row_index][0];
-        params.subproofValues[subproofValueId][1] = expressionPol[row_index][1];
-        params.subproofValues[subproofValueId][2] = expressionPol[row_index][2];
+        params.subproofValues[subproofValueId * FIELD_EXTENSION] = expressionPol[row_index][0];
+        params.subproofValues[subproofValueId * FIELD_EXTENSION + 1] = expressionPol[row_index][1];
+        params.subproofValues[subproofValueId * FIELD_EXTENSION + 2] = expressionPol[row_index][2];
     }
 
     std::shared_ptr<HintHandler> SubproofValueHintHandlerBuilder::build() const

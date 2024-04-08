@@ -6,12 +6,12 @@ struct StepsParams
     Goldilocks::Element *pols;
     ConstantPolsStarks *pConstPols;
     ConstantPolsStarks *pConstPols2ns;
-    Polinomial &challenges;
-    Polinomial &subproofValues;
+    Goldilocks::Element* challenges;
+    Goldilocks::Element* subproofValues;
+    Goldilocks::Element* evals;
     Polinomial &x_n;
     Polinomial &x_2ns;
     Polinomial &zi;
-    Polinomial &evals;
     Polinomial &xDivXSubXi;
     Goldilocks::Element *publicInputs;
     Goldilocks::Element *q_2ns;

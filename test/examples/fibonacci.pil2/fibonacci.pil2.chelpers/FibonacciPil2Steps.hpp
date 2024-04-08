@@ -9,8 +9,8 @@ public:
         int64_t extend = domainExtended ? (1 << extendBits) : 1;
         Polinomial &x = domainExtended ? params.x_2ns : params.x_n;
         ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
-        Goldilocks3::Element_avx challenges[params.challenges.degree()];
-        Goldilocks3::Element_avx challenges_ops[params.challenges.degree()];
+        Goldilocks3::Element_avx challenges[starkInfo.challengesMap.size()];
+        Goldilocks3::Element_avx challenges_ops[starkInfo.challengesMap.size()];
 
         uint8_t *ops = &parserArgs.ops[parserParams.opsOffset];
 
@@ -65,15 +65,15 @@ public:
         nCols += nColsSteps[nStages + 1];
 
     #pragma omp parallel for
-        for(uint64_t i = 0; i < params.challenges.degree(); ++i) {
-            challenges[i][0] = _mm256_set1_epi64x(params.challenges[i][0].fe);
-            challenges[i][1] = _mm256_set1_epi64x(params.challenges[i][1].fe);
-            challenges[i][2] = _mm256_set1_epi64x(params.challenges[i][2].fe);
+        for(uint64_t i = 0; i < starkInfo.challengesMap.size(); ++i) {
+            challenges[i][0] = _mm256_set1_epi64x(params.challenges[i * FIELD_EXTENSION].fe);
+            challenges[i][1] = _mm256_set1_epi64x(params.challenges[i * FIELD_EXTENSION + 1].fe);
+            challenges[i][2] = _mm256_set1_epi64x(params.challenges[i * FIELD_EXTENSION + 2].fe);
 
             Goldilocks::Element challenges_aux[3];
-            challenges_aux[0] = params.challenges[i][0] + params.challenges[i][1];
-            challenges_aux[1] = params.challenges[i][0] + params.challenges[i][2];
-            challenges_aux[2] = params.challenges[i][1] + params.challenges[i][2];
+            challenges_aux[0] = params.challenges[i * FIELD_EXTENSION] + params.challenges[i * FIELD_EXTENSION + 1];
+            challenges_aux[1] = params.challenges[i * FIELD_EXTENSION] + params.challenges[i * FIELD_EXTENSION + 2];
+            challenges_aux[2] = params.challenges[i * FIELD_EXTENSION + 1] + params.challenges[i * FIELD_EXTENSION + 2];
             challenges_ops[i][0] = _mm256_set1_epi64x(challenges_aux[0].fe);
             challenges_ops[i][1] =  _mm256_set1_epi64x(challenges_aux[1].fe);
             challenges_ops[i][2] =  _mm256_set1_epi64x(challenges_aux[2].fe);
@@ -90,20 +90,20 @@ public:
             publics[i] = _mm256_set1_epi64x(params.publicInputs[i].fe);
         }
 
-        Goldilocks3::Element_avx subproofValues[params.subproofValues.degree()];
+        Goldilocks3::Element_avx subproofValues[starkInfo.nSubProofValues];
     #pragma omp parallel for
-        for(uint64_t i = 0; i < params.subproofValues.degree(); ++i) {
-            subproofValues[i][0] = _mm256_set1_epi64x(params.subproofValues[i][0].fe);
-            subproofValues[i][1] = _mm256_set1_epi64x(params.subproofValues[i][1].fe);
-            subproofValues[i][2] = _mm256_set1_epi64x(params.subproofValues[i][2].fe);
+        for(uint64_t i = 0; i < starkInfo.nSubProofValues; ++i) {
+            subproofValues[i][0] = _mm256_set1_epi64x(params.subproofValues[i * FIELD_EXTENSION].fe);
+            subproofValues[i][1] = _mm256_set1_epi64x(params.subproofValues[i * FIELD_EXTENSION + 1].fe);
+            subproofValues[i][2] = _mm256_set1_epi64x(params.subproofValues[i * FIELD_EXTENSION + 2].fe);
         }
 
-        Goldilocks3::Element_avx evals[params.evals.degree()];
+        Goldilocks3::Element_avx evals[starkInfo.evMap.size()];
     #pragma omp parallel for
-        for(uint64_t i = 0; i < params.evals.degree(); ++i) {
-            evals[i][0] = _mm256_set1_epi64x(params.evals[i][0].fe);
-            evals[i][1] = _mm256_set1_epi64x(params.evals[i][1].fe);
-            evals[i][2] = _mm256_set1_epi64x(params.evals[i][2].fe);
+        for(uint64_t i = 0; i < starkInfo.evMap.size(); ++i) {
+            evals[i][0] = _mm256_set1_epi64x(params.evals[i * FIELD_EXTENSION].fe);
+            evals[i][1] = _mm256_set1_epi64x(params.evals[i * FIELD_EXTENSION + 1].fe);
+            evals[i][2] = _mm256_set1_epi64x(params.evals[i * FIELD_EXTENSION + 2].fe);
         }
 
         uint64_t nPols = parserParams.nConstPolsUsed * nOpenings;

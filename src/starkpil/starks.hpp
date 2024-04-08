@@ -337,15 +337,13 @@ public:
 
     void computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps *chelpersSteps);
     
-    void computeFRIFolding(FRIProof<ElementType> &fproof, Goldilocks::Element* pol, uint64_t step, Polinomial &challenge);
+    void computeFRIFolding(FRIProof<ElementType> &fproof, Goldilocks::Element* pol, uint64_t step, Goldilocks::Element *challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);
 
     void calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements);
-    void calculateHash(ElementType* hash, Polinomial &pol);
 
     void addTranscriptGL(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);
-    void addTranscript(TranscriptType &transcript, Polinomial &pol);
     void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
 
 private:

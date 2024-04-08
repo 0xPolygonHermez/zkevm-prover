@@ -5,7 +5,7 @@
 #include "zklog.hpp"
 
 template <typename ElementType>
-void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Goldilocks::Element* pol, Polinomial& challenge, StarkInfo starkInfo, MerkleTreeType** treesFRI) {
+void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Goldilocks::Element* pol, Goldilocks::Element *challenge, StarkInfo starkInfo, MerkleTreeType** treesFRI) {
 
     uint64_t polBits = step == 0 ? starkInfo.starkStruct.steps[0].nBits : starkInfo.starkStruct.steps[step - 1].nBits;
 
@@ -175,7 +175,7 @@ void FRI<ElementType>::polMulAxi(Goldilocks::Element *pol, uint64_t degree, Gold
 }
 
 template <typename ElementType>
-void FRI<ElementType>::evalPol(Goldilocks::Element* res, uint64_t res_idx, uint64_t degree, Goldilocks::Element* p, Polinomial &x)
+void FRI<ElementType>::evalPol(Goldilocks::Element* res, uint64_t res_idx, uint64_t degree, Goldilocks::Element* p, Goldilocks::Element *x)
 {
     if (degree == 0)
     {
@@ -189,7 +189,7 @@ void FRI<ElementType>::evalPol(Goldilocks::Element* res, uint64_t res_idx, uint6
     for (int64_t i = degree - 2; i >= 0; i--)
     {
         Goldilocks3::Element aux;
-        Goldilocks3::mul(aux, (Goldilocks3::Element &)(res[res_idx * FIELD_EXTENSION]), (Goldilocks3::Element &)(*x[0]));
+        Goldilocks3::mul(aux, (Goldilocks3::Element &)(res[res_idx * FIELD_EXTENSION]), (Goldilocks3::Element &)x[0]);
 
         res[res_idx * FIELD_EXTENSION] = aux[0] + p[i * FIELD_EXTENSION];
         res[res_idx * FIELD_EXTENSION + 1] = aux[1] + p[i * FIELD_EXTENSION + 1];

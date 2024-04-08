@@ -115,6 +115,7 @@ void StarkInfo::setMapOffsets(std::vector<uint16_t> cmPolsCalculatedStage1, std:
     uint64_t N = (1 << starkStruct.nBits);
     uint64_t NExtended = (1 << starkStruct.nBitsExt);
 
+    // Set offsets for all stages in the basefield (cm1, cm2, ..., cmN)
     mapOffsets[std::make_pair("cm1", false)] = 0;
     for(uint64_t stage = 2; stage <= nStages; stage++) {
         string prevStage = "cm" + to_string(stage - 1);
@@ -122,6 +123,7 @@ void StarkInfo::setMapOffsets(std::vector<uint16_t> cmPolsCalculatedStage1, std:
         mapOffsets[std::make_pair(currStage, false)] = mapOffsets[std::make_pair(prevStage, false)] + N * mapSectionsN[prevStage];
     }
 
+    // Check if the first stage calculates any temporal expression
     bool optimizeCommitPolsStage1 = true; 
     for(uint64_t i = 0; i < cmPolsCalculatedStage1.size(); ++i) {
         uint64_t polId = cmPolsCalculatedStage1[i];
