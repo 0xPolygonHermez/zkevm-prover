@@ -18,9 +18,9 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     TranscriptType transcript(merkleTreeArity, merkleTreeCustom);
 
-    Goldilocks::Element evals[starkInfo.evMap.size() * FIELD_EXTENSION];
-    Goldilocks::Element challenges[starkInfo.challengesMap.size() * FIELD_EXTENSION];
-    Goldilocks::Element subproofValues[starkInfo.nSubProofValues * FIELD_EXTENSION];
+    Goldilocks::Element* evals = new Goldilocks::Element[starkInfo.evMap.size() * FIELD_EXTENSION];
+    Goldilocks::Element* challenges = new Goldilocks::Element[starkInfo.challengesMap.size() * FIELD_EXTENSION];
+    Goldilocks::Element* subproofValues = new Goldilocks::Element[starkInfo.nSubProofValues * FIELD_EXTENSION];
 
     // TODO: THIS CAN BE IMPROVED (maybe we can reuse memory)
     Goldilocks::Element *xDivXSubXi = new Goldilocks::Element[starkInfo.openingPoints.size() * NExtended * FIELD_EXTENSION];
@@ -154,6 +154,10 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     TimerStopAndLog(STARK_STEP_FRI);
 
+    delete challenges;
+    delete evals;
+    delete subproofValues;
+    
     delete xDivXSubXi;
     
     TimerStopAndLog(STARK_PROOF);
