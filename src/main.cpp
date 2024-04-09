@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/time.h>
+#include <sys/sysinfo.h>
 #include "goldilocks_base_field.hpp"
 #include "utils.hpp"
 #include "config.hpp"
@@ -574,6 +575,12 @@ int main(int argc, char **argv)
     ExecutorServer *pExecutorServer = NULL;
     if (config.runExecutorServer)
     {
+        struct sysinfo sysInfo;
+        // If configured executor is using more than 50% of available system memory, output warning.
+        if ( (config.dbProgramCacheSize + config.dbMTCacheSize) > (0.5 * sysInfo.totalram / 1048576) )
+        {
+            zklog.warning("Available system memory may not be enough for the configured option. Try reducing the dbMTCacheSize, or dbProgramCacheSize in case of OOM...");
+        }
         pExecutorServer = new ExecutorServer(fr, prover, config);
         zkassert(pExecutorServer != NULL);
         zklog.info("Launching executor server thread...");
