@@ -196,7 +196,6 @@ public:
 
     // Fork 10 (Feijoa) attributes
     map<uint64_t, Saved> saved;
-    mpz_class batchHashData;
     BLS12_381Root BLS512_381root;
 
     Context( Goldilocks &fr,

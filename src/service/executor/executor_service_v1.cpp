@@ -83,7 +83,7 @@ using grpc::Status;
 
     // Get chain ID
     proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
-    if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
+    if (!config.loadDiagnosticRom && proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() got chainID = 0", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CHAIN_ID);
@@ -1000,6 +1000,12 @@ using grpc::Status;
     case ZKR_DATA_STREAM_INVALID_DATA:                      return ::executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM;
 
     case ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_INVALID_TX_STATUS_ERROR;
+
+    case ZKR_SM_MAIN_POINT_Z_MISMATCH:                      return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_POINT_Z_MISMATCH;
+    case ZKR_SM_MAIN_BLOB_L2_HASH_DATA_MISMATCH:            return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BLOB_L2_HASH_DATA_MISMATCH;
+    case ZKR_SM_MAIN_BATCH_HASH_DATA_MISMATCH:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BATCH_HASH_DATA_MISMATCH;
+    case ZKR_SM_MAIN_INVALID_BLOB_TYPE:                     return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_INVALID_BLOB_TYPE;
+    case ZKR_SM_MAIN_UNRESTORED_SAVED_CONTEXT:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_UNRESTORED_SAVED_CONTEXT;
 
     case ZKR_AGGREGATED_PROOF_INVALID_INPUT: // Only returned when generating a proof
     case ZKR_DB_VERSION_NOT_FOUND_KVDB: // To be mapped to an executor error when HashDB64 is operative

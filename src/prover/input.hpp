@@ -104,32 +104,6 @@ public:
     void loadDatabase     (json &input);
     void saveDatabase     (json &input) const;
     void saveDatabase     (json &input, DatabaseMap &dbReadLog) const;
-
-    bool operator==(Input &input)
-    {
-        return
-            publicInputsExtended == input.publicInputsExtended &&
-            from == input.from &&
-            bUpdateMerkleTree == input.bUpdateMerkleTree &&
-            bNoCounters == input.bNoCounters &&
-            traceConfig == input.traceConfig &&
-            db == input.db &&
-            contractsBytecode == input.contractsBytecode;
-    };
-
-    bool operator!=(Input &input) { return !(*this == input); };
-    
-    Input & operator=(const Input &other)
-    {
-        publicInputsExtended = other.publicInputsExtended;
-        from = other.from;
-        bUpdateMerkleTree = other.bUpdateMerkleTree;
-        bNoCounters = other.bNoCounters;
-        traceConfig = other.traceConfig;
-        db = other.db;
-        contractsBytecode = other.contractsBytecode;
-        return *this;
-    }
 };
 
 #endif

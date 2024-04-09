@@ -216,6 +216,7 @@ void Config::load(json &config)
 
     // Logs
     ParseBool(config, "executorROMLineTraces", "EXECUTOR_ROM_LINE_TRACES", executorROMLineTraces, false);
+    ParseBool(config, "executorROMInstructions", "EXECUTOR_ROM_INSTRUCTIONS", executorROMInstructions, false);
     ParseBool(config, "executorTimeStatistics", "EXECUTOR_TIME_STATISTICS", executorTimeStatistics, false);
     ParseBool(config, "opcodeTracer", "OPCODE_TRACER", opcodeTracer, false);
     ParseBool(config, "logRemoteDbReads", "LOG_REMOTE_DB_READS", logRemoteDbReads, false);
@@ -1043,6 +1044,11 @@ bool Config::check (void)
     {
         zklog.error("hashDB64=true but stateManager=false");
         bError = true;
+    }
+
+    if (loadDiagnosticRom)
+    {
+        inputFile = "testvectors/diagnostic/input.json";
     }
 
     return bError;

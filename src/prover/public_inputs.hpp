@@ -21,25 +21,29 @@ public:
     uint64_t   forkID;
     mpz_class  oldStateRoot;
     mpz_class  oldAccInputHash;
-    mpz_class  previousL1InfoTreeRoot; // Used when forkID >= 9 (V3)
-    uint32_t   previousL1InfoTreeIndex; // Used when forkID >= 9 (V3)
     uint32_t   oldBatchNum;
     uint64_t   chainID;
     string     batchL2Data; // This is, in fact, a byte array, not a hex string(not "0xf355...")
-    uint32_t   blobType; // Used when forkID >= 10 (V3)
-    mpz_class  forcedHashData; // Used when forkID >= 9 (V3)
     ForcedData forcedData;
     mpz_class  globalExitRoot; // Used when forkID <= 6
-    mpz_class  l1InfoRoot; // Used when forkID >= 7
     uint64_t   timestamp; // Used when forkID <= 6
-    uint64_t   timestampLimit; // Used when forkID >= 7
-    mpz_class  forcedBlockHashL1; // Used when forkID >= 7
     mpz_class  sequencerAddr;
     mpz_class  aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
     string     witness; // Byte array of the SMT required data in witness (binary) format
     string     dataStream; // Byte array of the batch input required data in Data Streadm (binary) format
 
-    // Blob inner data // Used when forkID >= 9 (V3)
+    // Etrog batch data (forkID >= 7)
+    mpz_class  l1InfoRoot;
+    uint64_t   timestampLimit;
+    mpz_class  forcedBlockHashL1;
+
+    // Feijoa batch data (forkID >= 10, V3)
+    mpz_class  previousL1InfoTreeRoot;
+    uint32_t   previousL1InfoTreeIndex;
+    mpz_class  forcedHashData;
+
+    // Feijoa blob inner data (forkID >= 10, V3)
+    uint32_t   blobType;
     mpz_class  oldBlobStateRoot;
     mpz_class  oldBlobAccInputHash;
     uint64_t   oldBlobNum;
@@ -50,35 +54,24 @@ public:
     mpz_class  pointY;
     string     blobData;
     mpz_class  blobL2HashData;
+    mpz_class  batchHashData;
 
     PublicInputs() :
         forkID(0),
-        previousL1InfoTreeIndex(0),
         oldBatchNum(0),
         chainID(0),
-        blobType(0),
         timestamp(0),
+        // Etrog batch data:
         timestampLimit(0),
+        // Feijoa batch data:
+        previousL1InfoTreeIndex(0),
+        // Feijoa blob inner data:
+        blobType(0),
         oldBlobNum(0),
         lastL1InfoTreeIndex(0),
         zkGasLimit(0)
     {
         aggregatorAddress.set_str("f39fd6e51aad88f6f4ce6ab8827279cfffb92266", 16); // Default aggregator address
-    }
-
-    bool operator==(PublicInputs &publicInputs)
-    {
-        return
-            oldStateRoot      == publicInputs.oldStateRoot &&
-            oldAccInputHash   == publicInputs.oldAccInputHash &&
-            oldBatchNum       == publicInputs.oldBatchNum &&
-            chainID           == publicInputs.chainID &&
-            forkID            == publicInputs.forkID &&
-            batchL2Data       == publicInputs.batchL2Data &&
-            globalExitRoot    == publicInputs.globalExitRoot &&
-            timestamp         == publicInputs.timestamp &&
-            sequencerAddr     == publicInputs.sequencerAddr &&
-            aggregatorAddress == publicInputs.aggregatorAddress;
     }
 };
 

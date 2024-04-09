@@ -1970,14 +1970,22 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         return;
     }
+    mpz_class value;
+    if (cr.type == crt_u64)
+    {
+        value = cr.u64;
+    }
+    else if (cr.type == crt_scalar)
+    {
+        value = cr.scalar;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
+    else
     {
         zklog.error("eval_memAlignWR_W0() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
-    mpz_class value = cr.scalar;
 
     // Get offset by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
@@ -4084,8 +4092,14 @@ void eval_getForcedTimestamp (Context &ctx, const RomCommand &cmd, CommandResult
 #endif
 
     cr.type = crt_fea;
-    mpz_class timestampLimit = ctx.proverRequest.input.publicInputsExtended.publicInputs.forcedData.minTimestamp; // TODO: get min timestamp
-    scalar2fea(fr, timestampLimit, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    cr.fea0 = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.forcedData.minTimestamp);
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
 }
 
 void eval_getType (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -4717,8 +4731,8 @@ void eval_signedComparisonWithConst (Context &ctx, const RomCommand &cmd, Comman
 #endif
     uint64_t constant = cr.scalar.get_ui();
 
+    // Get input from memory[address]
     unordered_map<uint64_t, Fea>::const_iterator it;
-
     it = ctx.mem.find(addr);
     if (it == ctx.mem.end())
     {
@@ -4733,26 +4747,13 @@ void eval_signedComparisonWithConst (Context &ctx, const RomCommand &cmd, Comman
         cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
         return;
     }
-        
-    if (input != constant)
-    {
-        int64_t iResult = input < constant ? (-1) : 1;
+    
+    // Calculate iResult
+    int64_t iResult = (input == constant) ? 0 : (input < constant) ? (-1) : 1;
 
-        // Return iResult in fea0
-        cr.type = crt_fea;
-        cr.fea0 = fr.fromS64(iResult);
-        cr.fea1 = fr.zero();
-        cr.fea2 = fr.zero();
-        cr.fea3 = fr.zero();
-        cr.fea4 = fr.zero();
-        cr.fea5 = fr.zero();
-        cr.fea6 = fr.zero();
-        cr.fea7 = fr.zero();
-    }
-
-    // Return 0 in fea0
+    // Return iResult in fea0
     cr.type = crt_fea;
-    cr.fea0 = fr.zero();
+    cr.fea0 = fr.fromS64(iResult);
     cr.fea1 = fr.zero();
     cr.fea2 = fr.zero();
     cr.fea3 = fr.zero();
@@ -4927,7 +4928,7 @@ void eval_getBatchHashData (Context &ctx, const RomCommand &cmd, CommandResult &
 #endif
 
     cr.type = crt_fea;
-    scalar2fea(fr, ctx.batchHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.batchHashData, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_dumpRegs                    (Context &ctx, const RomCommand &cmd, CommandResult &cr)

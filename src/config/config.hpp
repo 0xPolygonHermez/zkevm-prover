@@ -105,6 +105,7 @@ public:
 
     // Executor debugging
     bool executorROMLineTraces;
+    bool executorROMInstructions;
     bool executorTimeStatistics;
     bool opcodeTracer;
     bool logRemoteDbReads;

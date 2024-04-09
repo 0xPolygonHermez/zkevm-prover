@@ -18,11 +18,11 @@ public:
     mpz_class newLocalExitRoot;
     mpz_class newStateRoot;
 
-    // Fork 9 batch fields
+    // Feijoa batch fields (fork 10, V3)
     mpz_class currentL1InfoTreeRoot;
     uint32_t  currentL1InfoTreeIndex;
 
-    // Blob inner fields
+    // Feijoa blob inner fields (fork 10, V3)
     mpz_class newBlobStateRoot;
     mpz_class newBlobAccInputHash;
     uint64_t  newBlobNum;
@@ -31,18 +31,13 @@ public:
     bool      isInvalid;
     uint64_t  newLastTimestamp;
     
-    PublicInputsExtended() : newBatchNum(0), currentL1InfoTreeIndex(0), newBlobNum(0), isInvalid(false), newLastTimestamp(0) {};
-
-    bool operator==(PublicInputsExtended &publicInputsExtended)
-    {
-        return
-            publicInputs     == publicInputsExtended.publicInputs &&
-            inputHash        == publicInputsExtended.inputHash &&
-            newAccInputHash  == publicInputsExtended.newAccInputHash &&
-            newBatchNum      == publicInputsExtended.newBatchNum &&
-            newLocalExitRoot == publicInputsExtended.newLocalExitRoot &&
-            newStateRoot     == publicInputsExtended.newStateRoot;
-    }
+    PublicInputsExtended() :
+        newBatchNum(0),
+        currentL1InfoTreeIndex(0),
+        newBlobNum(0),
+        isInvalid(false),
+        newLastTimestamp(0)
+        {};
 };
 
 #endif

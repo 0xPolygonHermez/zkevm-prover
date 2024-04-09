@@ -160,19 +160,30 @@ void Input::loadGlobals (json &input)
     if ((publicInputsExtended.publicInputs.forkID >= 1) && (publicInputsExtended.publicInputs.forkID <= 6))
     {
         // Input JSON file must contain a timestamp key at the root level
-        if ( !input.contains("timestamp") ||
-            !input["timestamp"].is_number_unsigned() )
+        if (config.loadDiagnosticRom)
         {
-            zklog.error("Input::loadGlobals() timestamp key not found in input JSON file");
-            exitProcess();
+            if ( input.contains("timestamp") &&
+                 input["timestamp"].is_number_unsigned() )
+            {
+                publicInputsExtended.publicInputs.timestamp = input["timestamp"];
+            }
         }
-        publicInputsExtended.publicInputs.timestamp = input["timestamp"];
+        else
+        {
+            if ( !input.contains("timestamp") ||
+                !input["timestamp"].is_number_unsigned() )
+            {
+                zklog.error("Input::loadGlobals() timestamp key not found in input JSON file");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.timestamp = input["timestamp"];
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): timestamp=" + to_string(publicInputsExtended.publicInputs.timestamp));
+            zklog.info("loadGlobals(): timestamp=" + to_string(publicInputsExtended.publicInputs.timestamp));
 #endif
+        }
     }
 
-    if (publicInputsExtended.publicInputs.forkID >= 7)
+    if ((publicInputsExtended.publicInputs.forkID >= 7) && (publicInputsExtended.publicInputs.forkID <= 9))
     {
         // Input JSON file must contain a timestampLimit key at the root level
         if ( !input.contains("timestampLimit") )
@@ -496,23 +507,23 @@ void Input::loadGlobals (json &input)
                 }
 
                 // Parse timestamp
-                if ( input["l1InfoTree"][key].contains("timestamp") &&
-                     input["l1InfoTree"][key]["timestamp"].is_string() )
+                if ( input["l1InfoTree"][key].contains("minTimestamp") &&
+                     input["l1InfoTree"][key]["minTimestamp"].is_string() )
                 {
-                    string timestampString = input["l1InfoTree"][key]["timestamp"];
-                    if (!stringIsDec(timestampString))
+                    string minTimestampString = input["l1InfoTree"][key]["minTimestamp"];
+                    if (!stringIsDec(minTimestampString))
                     {
-                        zklog.error("Input::loadGlobals() l1InfoTree timestamp found in input JSON file but not a decimal string");
+                        zklog.error("Input::loadGlobals() l1InfoTree minTimestamp found in input JSON file but not a decimal string");
                         exitProcess();
                     }
-                    mpz_class timestampScalar;
-                    timestampScalar.set_str(timestampString, 10);
-                    if (timestampScalar > ScalarMask64)
+                    mpz_class minTimestampScalar;
+                    minTimestampScalar.set_str(minTimestampString, 10);
+                    if (minTimestampScalar > ScalarMask64)
                     {
-                        zklog.error("Input::loadGlobals() l1InfoTree timestamp found in input JSON file is too big");
+                        zklog.error("Input::loadGlobals() l1InfoTree minTimestamp found in input JSON file is too big");
                         exitProcess();
                     }
-                    l1Data.minTimestamp = timestampScalar.get_ui();
+                    l1Data.minTimestamp = minTimestampScalar.get_ui();
                 }
 
                 // Parse smtProof
@@ -857,6 +868,28 @@ void Input::loadGlobals (json &input)
 #endif
         }
 
+        // Parse batchHashData
+        if ( input.contains("batchHashData") &&
+             input["batchHashData"].is_string() )
+        {
+            string batchHashDataString = input["batchHashData"];
+            batchHashDataString = Remove0xIfPresent(batchHashDataString);
+            if (!stringIsHex(batchHashDataString))
+            {
+                zklog.error("Input::loadGlobals() batchHashData found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (batchHashDataString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() batchHashData found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.batchHashData.set_str(batchHashDataString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): batchHashData=" + publicInputsExtended.publicInputs.batchHashData.get_str(16));
+#endif
+        }
+
         // Parse type
         if ( input.contains("blobType") &&
              input["blobType"].is_number_unsigned() )
@@ -1003,6 +1036,150 @@ void Input::loadGlobals (json &input)
             zklog.info("Input::loadGlobals() isInvalid=" + to_string(publicInputsExtended.isInvalid));
     #endif
         }
+
+        // Parse forcedData
+        if ( input.contains("forcedData") &&
+             input["forcedData"].is_object() )
+        {
+            // Parse forcedData.globalExitRoot
+            if ( input["forcedData"].contains("globalExitRoot") &&
+                 input["forcedData"]["globalExitRoot"].is_string() )
+            {
+                string forcedDataString = input["forcedData"]["globalExitRoot"];
+                forcedDataString = Remove0xIfPresent(forcedDataString);
+                if (!stringIsHex(forcedDataString))
+                {
+                    zklog.error("Input::loadGlobals() forcedData found in input JSON file but not an hex string");
+                    exitProcess();
+                }
+                if (forcedDataString.size() > 64)
+                {
+                    zklog.error("Input::loadGlobals() forcedData found in input JSON file is too long");
+                    exitProcess();
+                }
+                publicInputsExtended.publicInputs.forcedData.globalExitRoot.set_str(forcedDataString, 16);
+#ifdef LOG_INPUT
+                zklog.info("Input::loadGlobals(): forcedData.globalExitRoot=" + publicInputsExtended.publicInputs.forcedData.globalExitRoot.get_str(16));
+#endif
+            }
+
+            // Parse forcedData.blockHashL1
+            if ( input["forcedData"].contains("blockHashL1") &&
+                 input["forcedData"]["blockHashL1"].is_string() )
+            {
+                string blockHashL1String = input["forcedData"]["blockHashL1"];
+                blockHashL1String = Remove0xIfPresent(blockHashL1String);
+                if (!stringIsHex(blockHashL1String))
+                {
+                    zklog.error("Input::loadGlobals() forcedData.blockHashL1 found in input JSON file but not an hex string");
+                    exitProcess();
+                }
+                if (blockHashL1String.size() > 64)
+                {
+                    zklog.error("Input::loadGlobals() forcedData.blockHashL1 found in input JSON file is too long");
+                    exitProcess();
+                }
+                publicInputsExtended.publicInputs.forcedData.blockHashL1.set_str(blockHashL1String, 16);
+#ifdef LOG_INPUT
+                zklog.info("Input::loadGlobals(): forcedData.blockHashL1=" + publicInputsExtended.publicInputs.blockHashL1.get_str(16));
+#endif
+            }
+
+            // Parse forcedData.minTimestamp
+            if ( input["forcedData"].contains("minTimestamp") &&
+                 input["forcedData"]["minTimestamp"].is_string() )
+            {
+                string minTimestampString = input["forcedData"]["minTimestamp"];
+                minTimestampString = Remove0xIfPresent(minTimestampString);
+                if (stringIsDec(minTimestampString))
+                {
+                    mpz_class minTimestampScalar;
+                    minTimestampScalar.set_str(minTimestampString, 10);
+                    if (minTimestampScalar > ScalarMask64)
+                    {
+                        zklog.error("Input::loadGlobals() forcedData.minTimestamp key found in input JSON file is too big value=" + minTimestampString);
+                        exitProcess();
+                    }
+                    publicInputsExtended.publicInputs.forcedData.minTimestamp = minTimestampScalar.get_ui();
+                }
+                else if (stringIsHex(minTimestampString))
+                {
+                    mpz_class minTimestampScalar;
+                    minTimestampScalar.set_str(minTimestampString, 16);
+                    if (minTimestampScalar > ScalarMask64)
+                    {
+                        zklog.error("Input::loadGlobals() forcedData.minTimestamp key found in input JSON file is too big value=" + minTimestampString);
+                        exitProcess();
+                    }
+                    publicInputsExtended.publicInputs.forcedData.minTimestamp = minTimestampScalar.get_ui();
+                }
+                else
+                {
+                    zklog.error("Input::loadGlobals() forcedData.minTimestamp key found in input JSON file is not decimal nor hexa value=" + minTimestampString);
+                    exitProcess();
+                }
+#ifdef LOG_INPUT
+                zklog.info("Input::loadGlobals(): forcedData.minTimestamp=" + to_string(publicInputsExtended.publicInputs.forcedData.minTimestamp));
+#endif
+
+            }
+
+        }
+
+        // Parse forcedHashData
+        if ( input.contains("forcedHashData") &&
+             input["forcedHashData"].is_string() )
+        {
+            string forcedHashDataString = input["forcedHashData"];
+            forcedHashDataString = Remove0xIfPresent(forcedHashDataString);
+            if (!stringIsHex(forcedHashDataString))
+            {
+                zklog.error("Input::loadGlobals() forcedHashData found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (forcedHashDataString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() forcedHashData found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.forcedHashData.set_str(forcedHashDataString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): forcedHashData=" + publicInputsExtended.publicInputs.forcedHashData.get_str(16));
+#endif
+        }
+
+
+        // Parse previousL1InfoTreeIndex
+        if ( input.contains("previousL1InfoTreeIndex") &&
+             input["previousL1InfoTreeIndex"].is_number_unsigned() )
+        {
+            publicInputsExtended.publicInputs.previousL1InfoTreeIndex = input["previousL1InfoTreeIndex"];
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): previousL1InfoTreeIndex=" + to_string(publicInputsExtended.publicInputs.previousL1InfoTreeIndex));
+#endif
+        }
+
+        // Parse previousL1InfoTreeRoot
+        if ( input.contains("previousL1InfoTreeRoot") &&
+             input["previousL1InfoTreeRoot"].is_string() )
+        {
+            string previousL1InfoTreeRootString = input["previousL1InfoTreeRoot"];
+            previousL1InfoTreeRootString = Remove0xIfPresent(previousL1InfoTreeRootString);
+            if (!stringIsHex(previousL1InfoTreeRootString))
+            {
+                zklog.error("Input::loadGlobals() previousL1InfoTreeRoot found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (previousL1InfoTreeRootString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() previousL1InfoTreeRoot found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.previousL1InfoTreeRoot.set_str(previousL1InfoTreeRootString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): previousL1InfoTreeRoot=" + publicInputsExtended.publicInputs.previousL1InfoTreeRoot.get_str(16));
+#endif
+        }        
     }
 }
 
@@ -1096,7 +1273,7 @@ void Input::saveGlobals (json &input) const
             {
                 mpz_class auxScalar;
                 auxScalar = it->second.minTimestamp;
-                input["l1InfoTree"][index]["timestamp"] = auxScalar.get_str(10);
+                input["l1InfoTree"][index]["minTimestamp"] = auxScalar.get_str(10);
             }
             for (uint64_t i=0; i<it->second.smtProof.size(); i++)
             {
@@ -1157,6 +1334,14 @@ void Input::saveGlobals (json &input) const
         {
             input["blobData"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.blobData));
         }
+        if (publicInputsExtended.publicInputs.blobL2HashData != 0)
+        {
+            input["blobL2HashData"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.blobL2HashData.get_str(16), 64);
+        }
+        if (publicInputsExtended.publicInputs.batchHashData != 0)
+        {
+            input["batchHashData"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.batchHashData.get_str(16), 64);
+        }
         if (publicInputsExtended.currentL1InfoTreeRoot != 0)
         {
             input["currentL1InfoTreeRoot"] = NormalizeTo0xNFormat(publicInputsExtended.currentL1InfoTreeRoot.get_str(16), 64);
@@ -1189,9 +1374,33 @@ void Input::saveGlobals (json &input) const
         {
             input["isInvalid"] = publicInputsExtended.isInvalid;
         }
+        if (publicInputsExtended.publicInputs.batchHashData != 0)
+        {
+            input["batchHashData"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.batchHashData.get_str(16), 64);
+        }
         if (publicInputsExtended.publicInputs.blobType != 0)
         {
             input["blobType"] = publicInputsExtended.publicInputs.blobType;
+        }
+        if ( (publicInputsExtended.publicInputs.forcedData.globalExitRoot != 0) ||
+             (publicInputsExtended.publicInputs.forcedData.blockHashL1 != 0) ||
+             (publicInputsExtended.publicInputs.forcedData.minTimestamp != 0) )
+        {
+            input["forcedData"]["globalExitRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.forcedData.globalExitRoot.get_str(16), 64);
+            input["forcedData"]["blockHashL1"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.forcedData.blockHashL1.get_str(16), 64);
+            input["forcedData"]["minTimestamp"] = publicInputsExtended.publicInputs.forcedData.minTimestamp;
+        }
+        if (publicInputsExtended.publicInputs.forcedHashData != 0)
+        {
+            input["forcedHashData"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.forcedHashData.get_str(16), 64);
+        }
+        if (publicInputsExtended.publicInputs.previousL1InfoTreeIndex != 0)
+        {
+            input["previousL1InfoTreeIndex"] = publicInputsExtended.publicInputs.previousL1InfoTreeIndex;
+        }
+        if (publicInputsExtended.publicInputs.previousL1InfoTreeRoot != 0)
+        {
+            input["previousL1InfoTreeRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.previousL1InfoTreeRoot.get_str(16), 64);
         }
     }
 }

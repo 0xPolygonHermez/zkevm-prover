@@ -46,6 +46,8 @@ namespace fork_10_blob
 
 #define STACK_OFFSET 0x10000
 #define MEM_OFFSET   0x20000
+#define MAX_HASH_ADDRESS 0x100000000
+
 #define CTX_OFFSET   0x40000
 
 #define N_NO_COUNTERS_MULTIPLICATION_FACTOR 8
@@ -92,8 +94,11 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     romBatch.load(fr, romJson);
 
     // Load diagnostic (unit test) ROM definition file
-    file2json("src/main_sm/fork_10_blob/scripts/rom_diagnostic.json", romJson);
-    romDiagnostic.load(fr, romJson);
+    if (config.loadDiagnosticRom)
+    {
+        file2json("src/main_sm/fork_10_blob/scripts/rom_diagnostic.json", romJson);
+        romDiagnostic.load(fr, romJson);
+    }
 
 #ifdef MULTI_ROM_TEST
     romJson.clear();
@@ -215,11 +220,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef BLOB_INNER
 
+#define BLOB_TYPE_CALLDATA 0
+#define BLOB_TYPE_EIP4844 1
+#define BLOB_TYPE_FORCED 2
+
     // Convert blob data to vector
     vector<uint8_t> blobDataVector;
     ba2ba(proverRequest.input.publicInputsExtended.publicInputs.blobData, blobDataVector);
 
-    if (proverRequest.input.publicInputsExtended.publicInputs.blobType == 1)
+    if (proverRequest.input.publicInputsExtended.publicInputs.blobType == BLOB_TYPE_EIP4844)
     {
         // Load poseidonBlobData into DB
         Goldilocks::Element blobKey[4];
@@ -240,7 +249,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         proverRequest.input.contractsBytecode[blobKeyString] = blobDataVector;
         //zklog.info("Blob inner poseidon hash=" + fea2string(fr, blobKey));
     }
-    else
+    else if ((proverRequest.input.publicInputsExtended.publicInputs.blobType == BLOB_TYPE_CALLDATA) || (proverRequest.input.publicInputsExtended.publicInputs.blobType == BLOB_TYPE_FORCED))
     {
         // Load keccak256BlobData into DB
         Goldilocks::Element blobKey[4];
@@ -260,6 +269,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         proverRequest.input.contractsBytecode[fea2string(fr, blobKey)] = blobDataVector;
         //zklog.info("Blob inner keccak hash=" + fea2string(fr, blobKey));
     }
+    else
+    {
+        proverRequest.result = ZKR_SM_MAIN_INVALID_BLOB_TYPE;
+        zklog.error("MainExecutor::execute() failed called with invalid blobType=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.blobType));
+        return;
+    }
 
 #else
 
@@ -270,9 +285,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // Load poseidon batch data into DB
     Goldilocks::Element batchKey[4];
     poseidonLinearHash(batchDataVector, batchKey);
+    mpz_class batchHashDataComputed;
+    fea2scalar(fr, batchHashDataComputed, batchKey);
     string batchKeyString = fea2string(fr, batchKey);
     proverRequest.input.contractsBytecode[batchKeyString] = batchDataVector;
-    fea2scalar(fr, ctx.batchHashData, batchKey);
+    if (proverRequest.input.publicInputsExtended.publicInputs.batchHashData == 0)
+    {
+        proverRequest.input.publicInputsExtended.publicInputs.batchHashData = batchHashDataComputed;
+    }
+    else if (proverRequest.input.publicInputsExtended.publicInputs.batchHashData != batchHashDataComputed)
+    {
+        proverRequest.result = ZKR_SM_MAIN_BATCH_HASH_DATA_MISMATCH;
+        zklog.error("MainExecutor::execute() mismatch input.batchHashData=" + proverRequest.input.publicInputsExtended.publicInputs.batchHashData.get_str(16) + " batchHashDataComputed=" + batchHashDataComputed.get_str(16));
+        return;        
+    }
     //zklog.info("Batch poseidon hash=" + fea2string(fr, batchKey));
 
 #endif
@@ -393,6 +419,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (config.executorROMLineTraces)
         {
             zklog.info("step=" + to_string(step) + " rom.line[" + to_string(zkPC) + "] =[" + rom.line[zkPC].toString(fr) + "]");
+        }
+        else if (config.executorROMInstructions)
+        {
+            cout << rom.line[zkPC].lineStr << endl;
         }
 #ifdef LOG_START_STEPS_TO_FILE
         {
@@ -968,7 +998,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             rom.line[zkPC].hashKLen;
         int32_t memAddr = addr + (rom.line[zkPC].memUseAddrRel ? addrRel : 0);
         int32_t hashAddr = anyHash ? ( rom.line[zkPC].hashOffset + fr.toS64(pols.E0[i]) ) : 0;
-
+        if ((hashAddr < 0) || (hashAddr >= MAX_HASH_ADDRESS))
+        {
+            proverRequest.result = ZKR_SM_MAIN_ASSERT;
+            logError(ctx, "hashAddr out of bounds hashAddr=" + to_string(hashAddr));
+            pHashDB->cancelBatch(proverRequest.uuid);
+            return;
+        }
         /**************/
         /* FREE INPUT */
         /**************/
@@ -2352,7 +2388,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inFREE[i] = rom.line[zkPC].inFREE;
             pols.inFREE0[i] = rom.line[zkPC].inFREE0;
         }
-        else if ((rom.line[zkPC].restore == 1) && !bProcessBatch)
+        else if (rom.line[zkPC].restore == 1)
         {
             pols.FREE0[i] = ctx.saved[rid].op[0];
             pols.FREE1[i] = ctx.saved[rid].op[1];
@@ -6118,6 +6154,30 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
     } // End of main executor loop, for all evaluations
+
+    // Check that all saved contexts have been restored
+    /*map<uint64_t, Saved>::const_iterator itSaved;
+    uint64_t savedCheckFailed = 0;
+    for (itSaved = ctx.saved.begin(); itSaved != ctx.saved.end(); itSaved++)
+    {
+        if (itSaved->second.restored)
+        {
+            continue;
+        }
+        savedCheckFailed++;
+        string romLine = (itSaved->second.savedZKPC < rom.size) ? rom.line[itSaved->second.savedZKPC].lineStr : emptyString;
+        zklog.error("Main Executor found unrestored saved i=" + to_string(itSaved->first) +
+            " savedStep=" + to_string(itSaved->second.savedStep) +
+            " savedZKPC=" + to_string(itSaved->second.savedZKPC) +
+            " rom.line=" + romLine);
+    }
+    if (savedCheckFailed != 0)
+    {
+        proverRequest.result = ZKR_SM_MAIN_UNRESTORED_SAVED_CONTEXT;
+        logError(ctx, string("Some saved contests were not restored savedCheckFailed=") + zkresult2string(savedCheckFailed));
+        pHashDB->cancelBatch(proverRequest.uuid);
+        return;
+    }*/
 
     // Copy the counters
     proverRequest.counters.arith = fr.toU64(pols.cntArith[0]);

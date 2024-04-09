@@ -2292,7 +2292,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "D_TX_CHANGE_L2_BLOCK_LIMIT_TIMESTAMP\020!\0226"
   "\n2ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_M"
   "IN_TIMESTAMP\020\"\022(\n$ROM_ERROR_INVALID_L1_I"
-  "NFO_TREE_INDEX\020#*\2231\n\rExecutorError\022\036\n\032EX"
+  "NFO_TREE_INDEX\020#*\2243\n\rExecutorError\022\036\n\032EX"
   "ECUTOR_ERROR_UNSPECIFIED\020\000\022\033\n\027EXECUTOR_E"
   "RROR_NO_ERROR\020\001\022\033\n\027EXECUTOR_ERROR_DB_ERR"
   "OR\020\002\0222\n.EXECUTOR_ERROR_SM_MAIN_COUNTERS_"
@@ -2449,32 +2449,38 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "XECUTOR_ERROR_INVALID_BLOB_DATA\020\200\001\022(\n#EX"
   "ECUTOR_ERROR_INVALID_ZK_GAS_LIMIT\020\201\001\022#\n\036"
   "EXECUTOR_ERROR_INVALID_POINT_Z\020\202\001\022#\n\036EXE"
-  "CUTOR_ERROR_INVALID_POINT_Y\020\203\001*\273\002\n\014RomBl"
-  "obError\022\036\n\032ROM_BLOB_ERROR_UNSPECIFIED\020\000\022"
-  "\033\n\027ROM_BLOB_ERROR_NO_ERROR\020\001\022\"\n\036ROM_BLOB"
-  "_ERROR_INVALID_PARSING\020\002\022#\n\037ROM_BLOB_ERR"
-  "OR_INVALID_MSB_BYTE\020\003\022\'\n#ROM_BLOB_ERROR_"
-  "INVALID_ZK_GAS_LIMIT\020\004\022$\n ROM_BLOB_ERROR"
-  "_INVALID_BLOB_TYPE\020\005\022+\n\'ROM_BLOB_ERROR_I"
-  "NVALID_COMPRESSION_TYPE\020\006\022)\n%ROM_BLOB_ER"
-  "ROR_INVALID_FORCED_BATCHES\020\0072\313\004\n\017Executo"
-  "rService\022U\n\014ProcessBatch\022 .executor.v1.P"
-  "rocessBatchRequest\032!.executor.v1.Process"
-  "BatchResponse\"\000\022[\n\016ProcessBatchV2\022\".exec"
-  "utor.v1.ProcessBatchRequestV2\032#.executor"
-  ".v1.ProcessBatchResponseV2\"\000\022[\n\016ProcessB"
-  "atchV3\022\".executor.v1.ProcessBatchRequest"
-  "V3\032#.executor.v1.ProcessBatchResponseV3\""
-  "\000\022g\n\022ProcessBlobInnerV3\022&.executor.v1.Pr"
-  "ocessBlobInnerRequestV3\032\'.executor.v1.Pr"
-  "ocessBlobInnerResponseV3\"\000\022m\n\027ProcessSta"
-  "telessBatchV2\022+.executor.v1.ProcessState"
-  "lessBatchRequestV2\032#.executor.v1.Process"
-  "BatchResponseV2\"\000\022O\n\016GetFlushStatus\022\026.go"
-  "ogle.protobuf.Empty\032#.executor.v1.GetFlu"
-  "shStatusResponse\"\000B>Z<github.com/0xPolyg"
-  "onHermez/zkevm-node/state/runtime/execut"
-  "orb\006proto3"
+  "CUTOR_ERROR_INVALID_POINT_Y\020\203\001\022,\n\'EXECUT"
+  "OR_ERROR_SM_MAIN_POINT_Z_MISMATCH\020\204\001\0226\n1"
+  "EXECUTOR_ERROR_SM_MAIN_BLOB_L2_HASH_DATA"
+  "_MISMATCH\020\205\001\0224\n/EXECUTOR_ERROR_SM_MAIN_B"
+  "ATCH_HASH_DATA_MISMATCH\020\206\001\022-\n(EXECUTOR_E"
+  "RROR_SM_MAIN_INVALID_BLOB_TYPE\020\207\001\0224\n/EXE"
+  "CUTOR_ERROR_SM_MAIN_UNRESTORED_SAVED_CON"
+  "TEXT\020\210\001*\273\002\n\014RomBlobError\022\036\n\032ROM_BLOB_ERR"
+  "OR_UNSPECIFIED\020\000\022\033\n\027ROM_BLOB_ERROR_NO_ER"
+  "ROR\020\001\022\"\n\036ROM_BLOB_ERROR_INVALID_PARSING\020"
+  "\002\022#\n\037ROM_BLOB_ERROR_INVALID_MSB_BYTE\020\003\022\'"
+  "\n#ROM_BLOB_ERROR_INVALID_ZK_GAS_LIMIT\020\004\022"
+  "$\n ROM_BLOB_ERROR_INVALID_BLOB_TYPE\020\005\022+\n"
+  "\'ROM_BLOB_ERROR_INVALID_COMPRESSION_TYPE"
+  "\020\006\022)\n%ROM_BLOB_ERROR_INVALID_FORCED_BATC"
+  "HES\020\0072\313\004\n\017ExecutorService\022U\n\014ProcessBatc"
+  "h\022 .executor.v1.ProcessBatchRequest\032!.ex"
+  "ecutor.v1.ProcessBatchResponse\"\000\022[\n\016Proc"
+  "essBatchV2\022\".executor.v1.ProcessBatchReq"
+  "uestV2\032#.executor.v1.ProcessBatchRespons"
+  "eV2\"\000\022[\n\016ProcessBatchV3\022\".executor.v1.Pr"
+  "ocessBatchRequestV3\032#.executor.v1.Proces"
+  "sBatchResponseV3\"\000\022g\n\022ProcessBlobInnerV3"
+  "\022&.executor.v1.ProcessBlobInnerRequestV3"
+  "\032\'.executor.v1.ProcessBlobInnerResponseV"
+  "3\"\000\022m\n\027ProcessStatelessBatchV2\022+.executo"
+  "r.v1.ProcessStatelessBatchRequestV2\032#.ex"
+  "ecutor.v1.ProcessBatchResponseV2\"\000\022O\n\016Ge"
+  "tFlushStatus\022\026.google.protobuf.Empty\032#.e"
+  "xecutor.v1.GetFlushStatusResponse\"\000B>Z<g"
+  "ithub.com/0xPolygonHermez/zkevm-node/sta"
+  "te/runtime/executorb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -2538,7 +2544,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 21090,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 21347,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 55, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 55, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -2734,6 +2740,11 @@ bool ExecutorError_IsValid(int value) {
     case 129:
     case 130:
     case 131:
+    case 132:
+    case 133:
+    case 134:
+    case 135:
+    case 136:
       return true;
     default:
       return false;

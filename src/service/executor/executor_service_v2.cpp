@@ -83,7 +83,7 @@ using grpc::Status;
 
     // Get chain ID
     proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
-    if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
+    if (!config.loadDiagnosticRom && proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatchV2() got chainID = 0", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CHAIN_ID);

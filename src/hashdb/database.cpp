@@ -2196,9 +2196,7 @@ zkresult Database::resetDB(void)
     }
 #endif
 
-#ifdef LOG_DB
     zklog.info("Database::resetDB()");
-#endif
 
     return result;
 
