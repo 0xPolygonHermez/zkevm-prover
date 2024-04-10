@@ -1952,7 +1952,7 @@ void Prover::logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols &cmPols, Pr
         " lastN=" + to_string(lastN));   
 }
 
-void Prover::logBlobInnerExecutionInfo(PROVER_BLOB_FORK_NAMESPACE::CommitPols &cmPols, ProverRequest *pProverRequest)
+void Prover::logBlobInnerExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols &cmPols, ProverRequest *pProverRequest)
 {
     uint64_t lastN = cmPols.pilDegree() - 1;
     // log old and new BlobStateRoot
