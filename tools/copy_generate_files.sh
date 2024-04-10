@@ -122,13 +122,12 @@ cp ${CONFIG_DIR}/scripts/rom.json ./src/main_sm/$FORK_ID/scripts/
 cp ${CONFIG_DIR}/scripts/metadata-rom.txt ./src/main_sm/$FORK_ID/scripts/
 cp ${WORKING_DIR}/pil/zkevm/main.pil.json  ./src/main_sm/$FORK_ID/scripts/
 
-cp ${CONFIG_DIR}/scripts/blob-rom.json ./src/main_sm/${FORK_ID}_blob/scripts/rom.json
-cp ${CONFIG_DIR}/scripts/metadata-blob-rom.txt ./src/main_sm/${FORK_ID}_blob/scripts/metadata-rom.txt
-cp ${WORKING_DIR}/pil/blob_inner/main_blob.pil.json  ./src/main_sm/${FORK_ID}_blob/scripts/main.pil.json
+cp ${CONFIG_DIR}/scripts/blob-rom.json ./src/main_sm/${FORK_ID}_blob/scripts/
+cp ${CONFIG_DIR}/scripts/metadata-blob-rom.txt ./src/main_sm/${FORK_ID}_blob/scripts/
+cp ${WORKING_DIR}/pil/blob_inner/main_blob.pil.json  ./src/main_sm/${FORK_ID}_blob/scripts/
 
 #main generator files
 make generate
 
 #pols generator files
-make pols_generator
-./build/polsGenerator
+make pols

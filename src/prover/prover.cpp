@@ -1935,18 +1935,16 @@ void Prover::logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols &cmPols, Pr
 {
     zkassert(pProverRequest != NULL);
     uint64_t lastN = cmPols.pilDegree() - 1;
-    // log old and new BlobStateRoot
-    // note: we need /*pProverRequest->pFullTracer->get_blob_new_state_root()*/
-    zklog.info("Prover::genBatchProof() called executor.executeBlobInner() oldBlobStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16) +
-        " newBlobStateRoot=" /*+ pProverRequest->pFullTracer->get_blob_new_state_root()*/ +
-        " pols.B[0]=" + fea2stringchain(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
-        " pols.B[lastN]=" + fea2stringchain(fr, cmPols.Main.B0[lastN], cmPols.Main.B1[lastN], cmPols.Main.B2[lastN], cmPols.Main.B3[lastN], cmPols.Main.B4[lastN], cmPols.Main.B5[lastN], cmPols.Main.B6[lastN], cmPols.Main.B7[lastN]) +
+    // log old and new state root
+    zklog.info("Prover::genBatchProof() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+        " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root() +
+        " pols.SR[0]=" + fea2stringchain(fr, cmPols.Main.SR0[0], cmPols.Main.SR1[0], cmPols.Main.SR2[0], cmPols.Main.SR3[0], cmPols.Main.SR4[0], cmPols.Main.SR5[0], cmPols.Main.SR6[0], cmPols.Main.SR7[0]) +
+        " pols.SR[lastN]=" + fea2stringchain(fr, cmPols.Main.SR0[lastN], cmPols.Main.SR1[lastN], cmPols.Main.SR2[lastN], cmPols.Main.SR3[lastN], cmPols.Main.SR4[lastN], cmPols.Main.SR5[lastN], cmPols.Main.SR6[lastN], cmPols.Main.SR7[lastN]) +
         " lastN=" + to_string(lastN));
 
-    // log old and new BlobAccInputHash
-    // note: we need /*pProverRequest->pFullTracer->get_new_blob_acc_input_hash() */
-    zklog.info("Prover::genBatchProof() called executor.executeBlobInner() oldBlobAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16) +
-        " newBlobAccInputHash=" /* + pProverRequest->pFullTracer->get_new_blob_acc_input_hash()*/ +
+    // log old and new AccInputHash
+    zklog.info("Prover::genBatchProof() called executor.execute() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+        " newAccInputHash=" + pProverRequest->pFullTracer->get_new_acc_input_hash() +
         " pols.C[0]=" + fea2stringchain(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
         " pols.C[lastN]=" + fea2stringchain(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
         " lastN=" + to_string(lastN));   
@@ -1956,17 +1954,15 @@ void Prover::logBlobInnerExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols &cmPols
 {
     uint64_t lastN = cmPols.pilDegree() - 1;
     // log old and new BlobStateRoot
-    // note: we need /*pProverRequest->pFullTracer->get_blob_new_state_root()*/
     zklog.info("Prover::genBlobInnerProof() called executor.executeBlobInner() oldBlobStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16) +
-        " newBlobStateRoot=" /*+ pProverRequest->pFullTracer->get_blob_new_state_root()*/ +
+        " newBlobStateRoot=" + pProverRequest->pFullTracer->get_final_trace_blob().new_blob_state_root.get_str(16) +
         " pols.B[0]=" + fea2stringchain(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
         " pols.B[lastN]=" + fea2stringchain(fr, cmPols.Main.B0[lastN], cmPols.Main.B1[lastN], cmPols.Main.B2[lastN], cmPols.Main.B3[lastN], cmPols.Main.B4[lastN], cmPols.Main.B5[lastN], cmPols.Main.B6[lastN], cmPols.Main.B7[lastN]) +
         " lastN=" + to_string(lastN));
 
     // log old and new BlobAccInputHash
-    // note: we need /*pProverRequest->pFullTracer->get_new_blob_acc_input_hash() */
     zklog.info("Prover::genBlobInnerProof() called executor.executeBlobInner() oldBlobAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16) +
-        " newBlobAccInputHash=" /* + pProverRequest->pFullTracer->get_new_blob_acc_input_hash()*/ +
+        " newBlobAccInputHash=" + pProverRequest->pFullTracer->get_final_trace_blob().new_blob_acc_input_hash.get_str(16) +
         " pols.C[0]=" + fea2stringchain(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
         " pols.C[lastN]=" + fea2stringchain(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
         " lastN=" + to_string(lastN));

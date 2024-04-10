@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     //////////
 
     // Load main.pil.json into a memory json object
-    pilFileName = "src/main_sm/" + forkNamespace + "_blob/scripts/main.pil.json";
+    /*pilFileName = "src/main_sm/" + forkNamespace + "_blob/scripts/main_blob.pil.json";
     pols.clear();
     file2json(pols, pilFileName);
 
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     code = generate(pols, "cmP", forkNamespace + "_blob");
     string2file(code, directoryName + "/commit_pols.hpp");
     code = generate(pols, "constP", forkNamespace + "_blob");
-    string2file(code, directoryName + "/constant_pols.hpp");
+    string2file(code, directoryName + "/constant_pols.hpp");*/
 
     return 0;
 }
@@ -65,7 +65,7 @@ void file2json (ordered_json &pols, string &polsFileName)
     std::ifstream inputStream(polsFileName);
     if (!inputStream.good())
     {
-        cerr << "Error: Main generator failed loading input JSON file " << polsFileName << endl;
+        cerr << "Error: Pols generator failed loading input JSON file " << polsFileName << endl;
         exit(-1);
     }
     try
@@ -74,7 +74,7 @@ void file2json (ordered_json &pols, string &polsFileName)
     }
     catch (exception &e)
     {
-        cerr << "Error: Main generator failed parsing input JSON file " << polsFileName << " exception=" << e.what() << endl;
+        cerr << "Error: Pols generator failed parsing input JSON file " << polsFileName << " exception=" << e.what() << endl;
         exit(-1);
     }
     inputStream.close();

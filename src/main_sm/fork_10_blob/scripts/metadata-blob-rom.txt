@@ -1,0 +1,2 @@
+COMMIT=29afcedcf4fec91eca258a9926ad1fd40334168f
+SHA256SUM=3ef50f8834c8fb0fe47dedd4573e70b8b42bb0f3c97f35cd2e1c6d25e730ab1b  ./build/blob-rom.json

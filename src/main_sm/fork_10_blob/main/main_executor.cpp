@@ -90,7 +90,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     // Load zkEVM ROM definition file
     json romJson;
-    file2json("src/main_sm/fork_10_blob/scripts/rom.json", romJson);
+    file2json("src/main_sm/fork_10_blob/scripts/blob-rom.json", romJson);
     romBatch.load(fr, romJson);
 
     // Load diagnostic (unit test) ROM definition file
