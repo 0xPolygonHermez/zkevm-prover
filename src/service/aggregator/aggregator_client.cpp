@@ -460,7 +460,13 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash, genStatelessBatchProofRequest.input().public_inputs().old_acc_input_hash());
 
     // Get oldBatchNum
-    pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber;
+    if (batch.batchNumber == 0)
+    {
+        zklog.error("AggregatorClient::GenStatelessBatchProof() called dataStream2batch() but got batch.batchNumber=0", &pProverRequest->tags);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber - 1;
 
     // Get chain ID
     pProverRequest->input.publicInputsExtended.publicInputs.chainID = batch.chainId;
