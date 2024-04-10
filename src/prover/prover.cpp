@@ -1943,8 +1943,8 @@ void Prover::logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols &cmPols, Pr
         " lastN=" + to_string(lastN));
 
     // log old and new AccInputHash
-    zklog.info("Prover::genBatchProof() called executor.execute() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
-        " newAccInputHash=" + pProverRequest->pFullTracer->get_new_acc_input_hash() +
+    zklog.info("Prover::genBatchProof() called executor.execute() oldBatchAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+        " newBatchAccInputHash=" + pProverRequest->pFullTracer->get_new_acc_input_hash() +
         " pols.C[0]=" + fea2stringchain(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
         " pols.C[lastN]=" + fea2stringchain(fr, cmPols.Main.C0[lastN], cmPols.Main.C1[lastN], cmPols.Main.C2[lastN], cmPols.Main.C3[lastN], cmPols.Main.C4[lastN], cmPols.Main.C5[lastN], cmPols.Main.C6[lastN], cmPols.Main.C7[lastN]) +
         " lastN=" + to_string(lastN));   
