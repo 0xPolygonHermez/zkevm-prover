@@ -1210,13 +1210,25 @@ void *starkinfo_new(char* filename) {
     return starkInfo;
 }
 
+uint64_t get_mapTotalN(void *pStarkInfo) {
+    return ((StarkInfo*)pStarkInfo)->mapTotalN;
+}
+
+
+void set_mapOffsets(void *pStarkInfo, void *pChelpers)
+{
+    auto starkInfo = (StarkInfo*)pStarkInfo;
+    auto cHelpers = (CHelpers *)pChelpers;
+    starkInfo->setMapOffsets(cHelpers->getCmPolsCalculatedStage1(), cHelpers->hints);
+}
+
 void starkinfo_free(void *pStarkInfo) {
     auto starkInfo = (StarkInfo*)pStarkInfo;
     delete starkInfo;
 }
 
-void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, void* starkInfo, void* cHelpers,void *pAddress) {
-    //return new Starks<Goldilocks::Element>(*(Config *)config, {constPols, mapConstPolsFile, constantsTree}, pAddress, *(StarkInfo*)starkInfo, *(CHelpers*)cHelpers, false);
+void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, void* starkInfo, void* cHelpers, void *pAddress) {
+    return new Starks<Goldilocks::Element>(*(Config *)pConfig, {constPols, mapConstPolsFile, constantsTree}, pAddress, *(StarkInfo*)starkInfo, *(CHelpers*)cHelpers, false);
 }
 
 void *get_stark_info(void *pStarks) {
@@ -1228,6 +1240,23 @@ void starks_free(void *pStarks) {
     delete starks;
 }
 
+void *chelpers_new(char *cHelpers) {
+    cout << "loading " << cHelpers << endl;
+    return new CHelpers(cHelpers);
+}
+
+void chelpers_free(void *pChelpers) {
+    CHelpers* cHelpers = (CHelpers*)pChelpers;
+    delete cHelpers;
+}
+
+void init_hints() {
+    HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
+    HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
+    HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
+    HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
+}
+
 void *steps_params_new(void *pStarks, void * pChallenges, void * pSubproofValues, void *pEvals, void *pXDivXSubXi, void *pPublicInputs) {
     Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
     Goldilocks::Element* challenges = (Goldilocks::Element*)pChallenges;
@@ -1237,6 +1266,23 @@ void *steps_params_new(void *pStarks, void * pChallenges, void * pSubproofValues
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
 
     return starks->ffi_create_steps_params(challenges, subproofValues, evals, xDivXSubXi, publicInputs);
+}
+
+void *get_steps_params_field(void *pStepsParams, char *name) {
+    StepsParams* stepsParams = (StepsParams*)pStepsParams;
+
+    if (strcmp(name, "q_2ns") == 0)
+    {
+        return stepsParams->q_2ns;
+    }
+    else if (strcmp(name, "f_2ns") == 0)
+    {
+        return stepsParams->f_2ns;
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 void steps_params_free(void *pStepsParams) {
@@ -1327,6 +1373,28 @@ void set_bool_vector_value(void *pVector, uint64_t index, bool value) {
     vector->at(index) = value;
 }
 
+void clean_symbols_calculated(void *pStarks) {
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    starks->cleanSymbolsCalculated();
+}
+
+void set_symbol_calculated(void *pStarks, uint32_t operand, uint64_t id) {
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    starks->ffi_set_symbol_calculated(operand, id);
+}
+
+void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElements)
+{
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    starks->calculateHash((Goldilocks::Element*)pHhash, (Goldilocks::Element*)pBuffer, nElements);
+}
+
+void calculate_hash(void *pStarks, void *pHash, void *pPol)
+{
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
+    // starks->calculateHash((Goldilocks::Element*)pHash, (Polinomial*)pPol);
+}
+
 void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols) {
     return new CommitPolsStarks(pAddress, degree, nCommitedPols);
 }
@@ -1375,17 +1443,18 @@ nlohmann::json* zkin = new nlohmann::json();
     return zkin;
 }
 
-void *transcript_new(uint32_t elementType) {
+void *transcript_new(uint32_t elementType, uint64_t arity, bool custom)
+{
     // type == 1 => Goldilocks
     // type == 2 => BN128
-    // switch (elementType) {
-    //     case 1:
-    //         return new TranscriptGL();
-    //     case 2:
-    //         return new TranscriptBN128();
-    //     default:
-    //         return NULL;
-    // }
+    switch (elementType) {
+        case 1:
+            return new TranscriptGL(arity, custom);
+        case 2:
+            return new TranscriptBN128(arity, custom);
+        default:
+            return NULL;
+    }
 }
 
 void transcript_add(void *pTranscript, void *pInput, uint64_t size) {
@@ -1393,6 +1462,15 @@ void transcript_add(void *pTranscript, void *pInput, uint64_t size) {
     auto input = (Goldilocks::Element *)pInput;
 
     transcript->put(input, size);
+}
+
+void transcript_add_polinomial(void *pTranscript, void *pPolinomial) {
+    auto transcript = (TranscriptGL *)pTranscript;
+    auto pol = (Polinomial *)pPolinomial;
+
+    for (uint64_t i = 0; i < pol->degree(); i++) {
+        transcript->put(pol->operator[](i), pol->dim());
+    }
 }
 
 void transcript_free(void *pTranscript, uint32_t elementType) {

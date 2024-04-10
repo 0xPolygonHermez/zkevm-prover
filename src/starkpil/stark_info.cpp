@@ -160,15 +160,19 @@ void StarkInfo::setMapOffsets(std::vector<uint16_t> cmPolsCalculatedStage1, std:
     u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8;
 
     for(uint64_t stage = 1; stage <= nStages; stage++) {
-        
         // Check that we have enough memory for performing the NTT
         uint64_t nttHelpersBufferSize = mapSectionsN["cm" + to_string(stage)] * NExtended;
         uint64_t nttHelpersBufferStart;
-        if(stage == nStages && optimizeMemoryNTT) {
+        if (stage == nStages && optimizeMemoryNTT)
+        {
             nttHelpersBufferStart = mapOffsets[std::make_pair("cm1", false)];
-        } else if(stage == 1 && optimizeCommitPolsStage1) {
+        }
+        else if (stage == 1 && optimizeCommitPolsStage1)
+        {
             nttHelpersBufferStart = mapOffsets[std::make_pair("tmpExp", false)];
-        } else {
+        }
+        else
+        {
             nttHelpersBufferStart =  mapOffsets[std::make_pair("cm" + to_string(stage + 1), true)];
         }
         if(nttHelpersBufferStart + nttHelpersBufferSize > mapTotalN) {
@@ -178,7 +182,8 @@ void StarkInfo::setMapOffsets(std::vector<uint16_t> cmPolsCalculatedStage1, std:
         // Check that we have enough memory for the hints
         uint64_t hintsStageTransposedPolsElements = 0;
         uint64_t hintsStageExtraElements = 0;
-        for(uint64_t j = 0; j < hints.size(); ++j) {
+        for (uint64_t j = 0; j < hints.size(); ++j)
+        {
             Hint hint = hints[j];
             auto hintHandler = Hints::HintHandlerBuilder::create(hint.name)->build();
             vector<string> srcFields = hintHandler->getSources();
@@ -212,8 +217,9 @@ void StarkInfo::setMapOffsets(std::vector<uint16_t> cmPolsCalculatedStage1, std:
                 }
             }
 
-            if(!isHintStage) continue;
-            
+            if (!isHintStage)
+                continue;
+
             hintsStageTransposedPolsElements += stride_pol_ * (srcFields.size() + dstFields.size());            
             hintsStageExtraElements += hintHandler->getMemoryNeeded(N);
         }

@@ -4,8 +4,39 @@
 
     // FFI functions
 
-    int zkevm_main(char *pConfigFile, void* pAddress, void* pMainSMRquests);
+    int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRequestsOut);
+    int zkevm_delete_sm_requests(void **pSMRequests);
+    int zkevm_arith(void * inputs, int ninputs, void * pAddress);
+    int zkevm_arith_req(void* pSMRequests,  void * pAddress);
+    int zkevm_binary_req(void* pSMRequests,  void * pAddress);
+    int zkevm_memory(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_memory_req(void* pSMRequests,  void * pAddress);
+    int zkevm_mem_align(void * inputs_, int ninputs, void* pAddress);
+    int zkevm_mem_align_req(void* pSMRequests,  void * pAddress);
+    
+    int zkevm_padding_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut); 
+    int zkevm_padding_kk_req(void* pSMRequests,  void * pAddress); 
+    int zkevm_padding_kk_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut);
+    int zkevm_padding_kk_bit_req(void* pSMRequests,  void * pAddress);
+    int zkevm_bits2field_kk(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut);
+    int zkevm_bits2field_kk_req(void* pSMRequests,  void * pAddress);
+    int zkevm_keccak_f(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_keccak_f_req(void* pSMRequests,  void * pAddress);
 
+    int zkevm_padding_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut);
+    int zkevm_padding_sha256_req(void* pSMRequests,  void * pAddress);
+    int zkevm_padding_sha256_bit(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut);
+    int zkevm_padding_sha256_bit_req(void* pSMRequests,  void * pAddress);
+    int zkevm_bits2field_sha256(void * inputs_, int ninputs, void * pAddress, void* pSMRequests, void* pSMRequestsOut);
+    int zkevm_bits2field_sha256_req(void* pSMRequests,  void * pAddress);
+    int zkevm_sha256_f(void * inputs_, int ninputs, void * pAddress);
+    int zkevm_sha256_f_req(void* pSMRequests,  void * pAddress);
+
+    int zkevm_storage_req(void* pSMRequests,  void * pAddress);
+    int zkevm_padding_pg_req(void* pSMRequests,  void * pAddress);
+    int zkevm_climb_key_req(void* pSMRequests,  void * pAddress);
+    int zkevm_poseidon_g_req(void* pSMRequests,  void * pAddress);
+    
     // FRI Proof
     // ========================================================================================
     void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
@@ -35,16 +66,26 @@
 
     // Stark Info
     // ========================================================================================
-    void *starkinfo_new(void* pConfig, char* filename);
+    void *starkinfo_new(char* filename);
+    uint64_t get_mapTotalN(void *pStarkInfo);
+    void set_mapOffsets(void *pStarkInfo, void *pChelpers);
     void starkinfo_free(void *pStarkInfo);
 
     // Starks
     // ========================================================================================
-    void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, char* cHelpers, void *pAddress);
+    // void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, char* cHelpers, void *pAddress);
+    void *starks_new(void *pConfig, char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress);
+
     void *get_stark_info(void *pStarks);
     void starks_free(void *pStarks);
 
+    void *chelpers_new(char* cHelpers);
+    void chelpers_free(void *pChelpers);
+
+    void init_hints();
+
     void *steps_params_new(void *pStarks, void * pChallenges, void *pSubproofValues, void *pEvals, void *pXDivXSubXi, void *pPublicInputs);
+    void *get_steps_params_field(void *pStepsParams, char *name);
     void steps_params_free(void *pStepsParams);
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
@@ -59,11 +100,18 @@
 
     void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps);
     void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge);
-    void compute_fri_queries(void *pStarks, void *pProof, void *pFriPol, uint64_t* friQueries);
+    void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
 
     void* get_vector_pointer(void *pStarks, char* name);
     void resize_vector(void *pVector, uint64_t newSize, bool value);
     void set_bool_vector_value(void *pVector, uint64_t index, bool value);
+
+    void clean_symbols_calculated(void *pStarks);
+    void set_symbol_calculated(void *pStarks, uint32_t operand, uint64_t id);
+
+    void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElements);
+    void calculate_hash(void *pStarks, void *pHash, void *pPol);
+
 
     // CommitPolsStarks
     // ========================================================================================
@@ -81,9 +129,8 @@
 
     // Transcript
     // =================================================================================
-    void *transcript_new(uint32_t elementType);
+    void *transcript_new(uint32_t elementType, uint64_t arity, bool custom);
     void transcript_add(void *pTranscript, void *pInput, uint64_t size);
-    void transcript_add_polinomial(void *pTranscript, void *pPolinomial);
     void transcript_free(void *pTranscript, uint32_t elementType);
     void get_challenge(void *pStarks, void *pTranscript, void *pElement);
     void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits);

@@ -91,40 +91,44 @@ Prover::Prover(Goldilocks &fr,
             pthread_create(&proverPthread, NULL, proverThread, this);
             pthread_create(&cleanerPthread, NULL, cleanerThread, this);
 
-            HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
-            HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
-            HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
-            HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
+            externalAllocated = pExternalAddress != NULL;
 
-            starkInfoZkevm = new StarkInfo(config.zkevmStarkInfo);
-            starkInfoC12a = new StarkInfo(config.c12aStarkInfo);
-            starkInfoRecursive1 = new StarkInfo(config.recursive1StarkInfo);
-            starkInfoRecursive2 = new StarkInfo(config.recursive2StarkInfo);
-            starkInfoRecursiveF = new StarkInfo(config.recursivefStarkInfo);
+            if(!externalAllocated) {
+                HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
+                HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
+                HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
+                HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
+
+                starkInfoZkevm = new StarkInfo(config.zkevmStarkInfo);
+                starkInfoC12a = new StarkInfo(config.c12aStarkInfo);
+                starkInfoRecursive1 = new StarkInfo(config.recursive1StarkInfo);
+                starkInfoRecursive2 = new StarkInfo(config.recursive2StarkInfo);
+                starkInfoRecursiveF = new StarkInfo(config.recursivefStarkInfo);
+                
+                string zkevmCHelpers = USE_GENERIC_PARSER ? config.zkevmGenericCHelpers : config.zkevmCHelpers;
+                string c12aCHelpers = USE_GENERIC_PARSER ? config.c12aGenericCHelpers : config.c12aCHelpers;
+                string recursive1CHelpers = USE_GENERIC_PARSER ? config.recursive1GenericCHelpers : config.recursive1CHelpers;
+                string recursive2CHelpers = USE_GENERIC_PARSER ? config.recursive2GenericCHelpers : config.recursive2CHelpers;
+                string recursivefCHelpers = USE_GENERIC_PARSER ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
+
+                cHelpersZkevm = new CHelpers(zkevmCHelpers);
+                cHelpersC12a = new CHelpers(c12aCHelpers);
+                cHelpersRecursive1 = new CHelpers(recursive1CHelpers);
+                cHelpersRecursive2 = new CHelpers(recursive2CHelpers);
+                cHelpersRecursiveF = new CHelpers(recursivefCHelpers);
             
-            string zkevmCHelpers = USE_GENERIC_PARSER ? config.zkevmGenericCHelpers : config.zkevmCHelpers;
-            string c12aCHelpers = USE_GENERIC_PARSER ? config.c12aGenericCHelpers : config.c12aCHelpers;
-            string recursive1CHelpers = USE_GENERIC_PARSER ? config.recursive1GenericCHelpers : config.recursive1CHelpers;
-            string recursive2CHelpers = USE_GENERIC_PARSER ? config.recursive2GenericCHelpers : config.recursive2CHelpers;
-            string recursivefCHelpers = USE_GENERIC_PARSER ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
+                // Set the map offsets
+                starkInfoZkevm->setMapOffsets(cHelpersZkevm->getCmPolsCalculatedStage1(), cHelpersZkevm->hints);
+                starkInfoC12a->setMapOffsets(cHelpersC12a->getCmPolsCalculatedStage1(), cHelpersC12a->hints);
+                starkInfoRecursive1->setMapOffsets(cHelpersRecursive1->getCmPolsCalculatedStage1(), cHelpersRecursive1->hints);
+                starkInfoRecursive2->setMapOffsets(cHelpersRecursive2->getCmPolsCalculatedStage1(), cHelpersRecursive2->hints);
+                starkInfoRecursiveF->setMapOffsets(cHelpersRecursiveF->getCmPolsCalculatedStage1(), cHelpersRecursiveF->hints);
 
-            cHelpersZkevm = new CHelpers(zkevmCHelpers);
-            cHelpersC12a = new CHelpers(c12aCHelpers);
-            cHelpersRecursive1 = new CHelpers(recursive1CHelpers);
-            cHelpersRecursive2 = new CHelpers(recursive2CHelpers);
-            cHelpersRecursiveF = new CHelpers(recursivefCHelpers);
-        
-            // Set the map offsets
-            starkInfoZkevm->setMapOffsets(cHelpersZkevm->getCmPolsCalculatedStage1(), cHelpersZkevm->hints);
-            starkInfoC12a->setMapOffsets(cHelpersC12a->getCmPolsCalculatedStage1(), cHelpersC12a->hints);
-            starkInfoRecursive1->setMapOffsets(cHelpersRecursive1->getCmPolsCalculatedStage1(), cHelpersRecursive1->hints);
-            starkInfoRecursive2->setMapOffsets(cHelpersRecursive2->getCmPolsCalculatedStage1(), cHelpersRecursive2->hints);
-            starkInfoRecursiveF->setMapOffsets(cHelpersRecursiveF->getCmPolsCalculatedStage1(), cHelpersRecursiveF->hints);
+                polsSize = starkInfoZkevm->mapTotalN * sizeof(Goldilocks::Element);
 
-            polsSize = starkInfoZkevm->mapTotalN * sizeof(Goldilocks::Element);
-
-            zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() <= polsSize);
-            zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() == starkInfoZkevm.mapOffsets[std::make_pair("cm2", false)] * sizeof(Goldilocks::Element));
+                zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() <= polsSize);
+                zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() == starkInfoZkevm.mapOffsets[std::make_pair("cm2", false)] * sizeof(Goldilocks::Element));
+            }
 
             if (config.zkevmCmPols.size() > 0)
             {
@@ -133,8 +137,6 @@ Prover::Prover(Goldilocks &fr,
             }
             else
             {
-                externalAllocated = pExternalAddress != NULL;
-
                 if(externalAllocated)
                 {
                     pAddress = static_cast<void*>(pExternalAddress);
@@ -147,7 +149,7 @@ Prover::Prover(Goldilocks &fr,
                     }
                 }
 
-            zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
+                zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
 #ifndef __LIB__

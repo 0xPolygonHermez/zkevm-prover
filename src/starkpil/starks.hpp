@@ -386,15 +386,17 @@ private:
     uint64_t isStageCalculated(uint64_t step);
     bool isSymbolCalculated(opType operand, uint64_t id);
     void setSymbolCalculated(opType operand, uint64_t id);
-    void cleanSymbolsCalculated();
 
 public:
+    void cleanSymbolsCalculated();
+
     // Following function are created to be used by the ffi interface
     void *ffi_create_steps_params(Goldilocks::Element *pChallenges, Goldilocks::Element* pSubproofValues, Goldilocks::Element *pEvals, Goldilocks::Element *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
-    void ffi_extend_and_merkelize(uint64_t step, StepsParams* params, FRIProof<ElementType>* proof);
+    void ffi_extend_and_merkelize(uint64_t step, StepsParams *params, FRIProof<ElementType> *proof);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 
     void *ffi_get_vector_pointer(char *name);
+    void ffi_set_symbol_calculated(uint32_t operand, uint64_t id);
 };
 
 template class Starks<Goldilocks::Element>;

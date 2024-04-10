@@ -1192,3 +1192,8 @@ void *Starks<ElementType>::ffi_get_vector_pointer(char *name)
         return NULL;
     }
 }
+
+template <typename ElementType>
+void Starks<ElementType>::ffi_set_symbol_calculated(uint32_t operand, uint64_t id) {
+    setSymbolCalculated((opType)operand, id);
+}

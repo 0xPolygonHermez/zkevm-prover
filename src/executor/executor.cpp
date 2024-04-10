@@ -494,7 +494,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             return;
         }
 
-#ifndef __ZKEVM_SM__
+// #ifndef __ZKEVM_SM__
         
         // Execute the Storage State Machine
         TimerStart(STORAGE_SM_EXECUTE);
@@ -575,9 +575,9 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         climbKeyExecutor.execute(required->ClimbKey, commitPols.ClimbKey);
         TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);
 
-#endif
+// #endif
 
-        #ifdef __ZKEVM_SM__
+    #ifdef __ZKEVM_SM__
         if(pSMRequestsOut!=NULL){
             /*TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
             add_mem_align_inputs((void *)pSMRequestsOut, (void *)required->MemAlign.data(), (uint64_t) required->MemAlign.size());
@@ -630,7 +630,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             zklog.error("Executor::execute() got from main execution proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
             return;
         }
-#ifndef __ZKEVM_SM__
+// #ifndef __ZKEVM_SM__
         // Execute the Storage State Machines
         pthread_t storageThread;
         pthread_create(&storageThread, NULL, StorageThread, &executorContext);
@@ -686,9 +686,9 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_join(keccakThread, NULL);
         pthread_join(sha256Thread, NULL);
         pthread_join(climbKeyThread, NULL);
-#endif
+// #endif
     }
-    #ifndef __ZKEVM_SM__   
+    // #ifndef __ZKEVM_SM__   
         delete required;  
-    #endif
+    // #endif
 }
