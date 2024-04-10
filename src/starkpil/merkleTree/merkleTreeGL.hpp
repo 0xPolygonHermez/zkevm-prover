@@ -31,7 +31,7 @@ public:
     uint64_t arity;
     bool custom;
 
-    uint64_t elementSize = 4;
+    uint64_t nFieldElements = HASH_SIZE;
 
     uint64_t getNumSiblings(); 
     uint64_t getMerkleTreeWidth(); 

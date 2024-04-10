@@ -118,8 +118,7 @@ int main(int argc, char **argv)
 
         nlohmann::ordered_json jProof;
 
-        uint64_t hashSize = starkInfo.starkStruct.verificationHashType == "GL" ? 4 : 1;
-        FRIProof<Goldilocks::Element> fproof(starkInfo, hashSize);
+        FRIProof<Goldilocks::Element> fproof(starkInfo);
 
         Starks<Goldilocks::Element> starks(config, {constFile, config.mapConstPolsFile, ""}, pAddress, starkInfo, cHelpers, true);
 

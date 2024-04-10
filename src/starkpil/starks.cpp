@@ -54,15 +54,15 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     //--------------------------------
 
     if(!debug) {
-        ElementType verkey[hashSize];
+        ElementType verkey[nFieldElements];
         treesGL[starkInfo.nStages + 1]->getRoot(verkey);
-        addTranscript(transcript, &verkey[0], hashSize);
+        addTranscript(transcript, &verkey[0], nFieldElements);
     }
     
     if(starkInfo.starkStruct.hashCommits) {
-        ElementType hash[hashSize];
+        ElementType hash[nFieldElements];
         calculateHash(hash, &publicInputs[0], starkInfo.nPublics);
-        addTranscript(transcript, hash, hashSize);
+        addTranscript(transcript, hash, nFieldElements);
     } else {
         addTranscriptGL(transcript, &publicInputs[0], starkInfo.nPublics);
     }
@@ -82,12 +82,12 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
         if (debug)
         {
-            Goldilocks::Element randomValues[hashSize] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
-            addTranscriptGL(transcript, randomValues, hashSize);
+            Goldilocks::Element randomValues[4] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
+            addTranscriptGL(transcript, randomValues, 4);
         }
         else
         {
-            addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
+            addTranscript(transcript, &proof.proofs.roots[step - 1][0], nFieldElements);
         }
 
         TimerStopAndLogExpr(STARK_STEP, step);
@@ -109,12 +109,12 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     if (debug)
     {
-        Goldilocks::Element randomValues[hashSize] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
-        addTranscriptGL(transcript, randomValues, hashSize);
+        Goldilocks::Element randomValues[4] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
+        addTranscriptGL(transcript, randomValues, 4);
     }
     else
     {
-        addTranscript(transcript, &proof.proofs.roots[starkInfo.nStages][0], hashSize);
+        addTranscript(transcript, &proof.proofs.roots[starkInfo.nStages][0], nFieldElements);
     }
     TimerStopAndLog(STARK_STEP_Q);
 
@@ -131,9 +131,9 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     computeEvals(params, proof);
 
     if(starkInfo.starkStruct.hashCommits) {
-        ElementType hash[hashSize];
+        ElementType hash[nFieldElements];
         calculateHash(hash, params.evals, starkInfo.evMap.size() * FIELD_EXTENSION);
-        addTranscript(transcript, hash, hashSize);
+        addTranscript(transcript, hash, nFieldElements);
     } else {
         addTranscriptGL(transcript, params.evals, starkInfo.evMap.size() * FIELD_EXTENSION);
     }    
@@ -163,14 +163,14 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         computeFRIFolding(proof, params.f_2ns, step, challenge);
         if (step < starkInfo.starkStruct.steps.size() - 1)
         {
-            addTranscript(transcript, &proof.proofs.fri.trees[step + 1].root[0], hashSize);
+            addTranscript(transcript, &proof.proofs.fri.trees[step + 1].root[0], nFieldElements);
         }
         else
         {
             if(starkInfo.starkStruct.hashCommits) {
-                ElementType hash[hashSize];
+                ElementType hash[nFieldElements];
                 calculateHash(hash, params.f_2ns, (1 << starkInfo.starkStruct.steps[step].nBits) * FIELD_EXTENSION);
-                addTranscript(transcript, hash, hashSize);
+                addTranscript(transcript, hash, nFieldElements);
             } else {
                 addTranscriptGL(transcript, params.f_2ns, (1 << starkInfo.starkStruct.steps[step].nBits) * FIELD_EXTENSION);
             }    

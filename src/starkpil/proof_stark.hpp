@@ -87,13 +87,13 @@ public:
     std::vector<ElementType> root;
     std::vector<std::vector<MerkleProof<ElementType>>> polQueries;
 
-    uint64_t elementSize;
+    uint64_t nFieldElements;
 
-    ProofTree(uint64_t elementSize) : root(elementSize), elementSize(elementSize) {}
+    ProofTree(uint64_t nFieldElements_) : root(nFieldElements_), nFieldElements(nFieldElements_) {}
 
     void setRoot(ElementType *_root)
     {
-        std::memcpy(&root[0], &_root[0], elementSize * sizeof(ElementType));
+        std::memcpy(&root[0], &_root[0], nFieldElements * sizeof(ElementType));
     };
 
     ordered_json ProofTree2json()
@@ -142,8 +142,8 @@ public:
     std::vector<std::vector<Goldilocks::Element>> pol;
     std::vector<ProofTree<ElementType>> trees;
 
-    Fri(StarkInfo starkInfo, int64_t elementSize) : pol(1 << starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
-                                                             trees(starkInfo.starkStruct.steps.size(), elementSize) {}
+    Fri(StarkInfo starkInfo) : pol(1 << starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
+                                                             trees(starkInfo.starkStruct.steps.size(), starkInfo.starkStruct.verificationHashType == "GL" ? HASH_SIZE : 1) {}
 
     void setPol(Goldilocks::Element *pPol, uint64_t degree)
     {
@@ -181,23 +181,23 @@ template <typename ElementType>
 class Proofs
 {
 public:
-    uint64_t elementSize;
     uint64_t nStages;
+    uint64_t nFieldElements;
     ElementType **roots;
     Fri<ElementType> fri;
     std::vector<std::vector<Goldilocks::Element>> evals;
     std::vector<std::vector<Goldilocks::Element>> subAirValues;
-    Proofs(StarkInfo starkInfo, uint64_t elementSize) :
-        elementSize(elementSize),
-        fri(starkInfo, elementSize),
+    Proofs(StarkInfo starkInfo) :
+        fri(starkInfo),
         evals(starkInfo.evMap.size(), std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
         subAirValues(starkInfo.nSubProofValues, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero()))
         {
             nStages = starkInfo.nStages + 1;
             roots = new ElementType*[nStages];
+            nFieldElements = starkInfo.starkStruct.verificationHashType == "GL" ? HASH_SIZE : 1;
             for(uint64_t i = 0; i < nStages; i++)
             {
-                roots[i] = new ElementType[elementSize];
+                roots[i] = new ElementType[nFieldElements];
             }
         };
 
@@ -229,10 +229,10 @@ public:
 
         for(uint64_t i = 0; i < nStages; i++) {
             ordered_json json_root = ordered_json::array();
-            if(elementSize == 1) {
+            if(nFieldElements == 1) {
                 j["root" + to_string(i + 1)] = toString(roots[i][0]);
             } else {
-                for (uint k = 0; k < elementSize; k++)
+                for (uint k = 0; k < nFieldElements; k++)
                 {
                     json_root.push_back(toString(roots[i][k]));
                 }
@@ -277,7 +277,7 @@ public:
     Proofs<ElementType> proofs;
     std::vector<ElementType> publics;
 
-    FRIProof(StarkInfo starkInfo, uint64_t elementSize) : proofs(starkInfo, elementSize), publics(starkInfo.nPublics){};
+    FRIProof(StarkInfo starkInfo) : proofs(starkInfo), publics(starkInfo.nPublics){};
 };
 
 #endif

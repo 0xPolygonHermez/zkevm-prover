@@ -45,7 +45,7 @@ MerkleTreeBN128::~MerkleTreeBN128()
 
 uint64_t MerkleTreeBN128::getNumSiblings() 
 {
-    return arity * elementSize;
+    return arity * nFieldElements;
 }
 
 uint64_t MerkleTreeBN128::getMerkleTreeWidth()

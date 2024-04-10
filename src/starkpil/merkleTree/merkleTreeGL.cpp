@@ -45,7 +45,7 @@ MerkleTreeGL::~MerkleTreeGL()
 
 uint64_t MerkleTreeGL::getNumSiblings() 
 {
-    return (arity - 1) * elementSize;
+    return (arity - 1) * nFieldElements;
 }
 
 uint64_t MerkleTreeGL::getMerkleTreeWidth() 
@@ -61,17 +61,17 @@ uint64_t MerkleTreeGL::getMerkleProofLength() {
 }
 
 uint64_t MerkleTreeGL::getMerkleProofSize() {
-    return getMerkleProofLength() * elementSize;
+    return getMerkleProofLength() * nFieldElements;
 }
 
 uint64_t MerkleTreeGL::getNumNodes(uint64_t height) 
 {
-    return height * elementSize + (height - 1) * elementSize;
+    return height * nFieldElements + (height - 1) * nFieldElements;
 }
 
 void MerkleTreeGL::getRoot(Goldilocks::Element *root)
 {
-    std::memcpy(root, &nodes[numNodes - elementSize], elementSize * sizeof(Goldilocks::Element));
+    std::memcpy(root, &nodes[numNodes - nFieldElements], nFieldElements * sizeof(Goldilocks::Element));
     zklog.info("MerkleTree root: [ " + Goldilocks::toString(root[0]) + ", " + Goldilocks::toString(root[1]) + ", " + Goldilocks::toString(root[2]) + ", " + Goldilocks::toString(root[3]) + " ]");
 }
 
@@ -96,20 +96,20 @@ void MerkleTreeGL::getGroupProof(Goldilocks::Element *proof, uint64_t idx) {
         proof[i] = getElement(idx, i);
     }
 
-    genMerkleProof(&proof[width], idx, 0, height * elementSize);
+    genMerkleProof(&proof[width], idx, 0, height * nFieldElements);
 }
 
 void MerkleTreeGL::genMerkleProof(Goldilocks::Element *proof, uint64_t idx, uint64_t offset, uint64_t n)
 {
-    if (n <= elementSize) return;
+    if (n <= nFieldElements) return;
     
     uint64_t nextIdx = idx >> 1;
-    uint64_t si = (idx ^ 1) * elementSize;
+    uint64_t si = (idx ^ 1) * nFieldElements;
 
-    std::memcpy(proof, &nodes[offset + si], elementSize * sizeof(Goldilocks::Element));
+    std::memcpy(proof, &nodes[offset + si], nFieldElements * sizeof(Goldilocks::Element));
 
-    uint64_t nextN = (std::floor((n - 1) / 8) + 1) * elementSize;
-    genMerkleProof(&proof[elementSize], nextIdx, offset + nextN * 2, nextN);
+    uint64_t nextN = (std::floor((n - 1) / 8) + 1) * nFieldElements;
+    genMerkleProof(&proof[nFieldElements], nextIdx, offset + nextN * 2, nextN);
 }
 
 void MerkleTreeGL::merkelize()

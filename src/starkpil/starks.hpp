@@ -56,9 +56,7 @@ private:
     StarkFiles starkFiles;
     uint64_t N;
     uint64_t NExtended;
-    uint64_t hashSize;
-    uint64_t merkleTreeArity;
-    bool merkleTreeCustom;
+
     NTT_Goldilocks ntt;
     NTT_Goldilocks nttExtended;
     uint64_t constPolsSize;
@@ -71,6 +69,10 @@ private:
     vector<bool> subProofValuesCalculated;
     vector<bool> witnessCalculated;
     vector<bool> challengesCalculated;
+
+    uint64_t nFieldElements;
+    uint64_t merkleTreeArity;
+    bool merkleTreeCustom;
 
     Goldilocks::Element *mem;
     void *pAddress;
@@ -106,11 +108,11 @@ public:
             return;
 
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
-            hashSize = 1;
+            nFieldElements = 1;
             merkleTreeArity = starkInfo.starkStruct.merkleTreeArity;
             merkleTreeCustom = starkInfo.starkStruct.merkleTreeCustom;
         } else {
-            hashSize = HASH_SIZE;
+            nFieldElements = HASH_SIZE;
             merkleTreeArity = 2;
             merkleTreeCustom = true;
         }
@@ -311,7 +313,7 @@ public:
         }
 
         uint64_t numElements = (1 << starkInfo.starkStruct.nBitsExt) * starkInfo.nConstants * sizeof(Goldilocks::Element);
-        uint64_t total = numElements + acc * hashSize * sizeof(ElementType);
+        uint64_t total = numElements + acc * nFieldElements * sizeof(ElementType);
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             total += 16; // HEADER
         } else {

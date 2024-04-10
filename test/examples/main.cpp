@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     nlohmann::ordered_json jProof;
 
     if(testName == "all") {
-        FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
+        FRIProof<Goldilocks::Element> fproof(starkInfo);
         Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
         }
         jProof = fproof.proofs.proof2json();
     } else if(testName == "compressor") {
-        FRIProof<RawFr::Element> fproof(starkInfo, 1);
+        FRIProof<RawFr::Element> fproof(starkInfo);
         Starks<RawFr::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
         }
         jProof = fproof.proofs.proof2json();
     } else if(testName == "fibonacci_pil2") {
-        FRIProof<Goldilocks::Element> fproof(starkInfo, 4);
+        FRIProof<Goldilocks::Element> fproof(starkInfo);
         Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
