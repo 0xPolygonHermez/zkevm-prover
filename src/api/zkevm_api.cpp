@@ -1305,20 +1305,6 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst) {
     starks->ffi_treesGL_get_root(index, (Goldilocks::Element*)dst);
 }
 
-void calculate_h1_h2(void *pStarks, void *pParams) {
-    // Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    // starks->calculateH1H2(*(StepsParams*)pParams); // TODO
-}
-
-void calculate_z(void *pStarks, void *pParams) {
-    // Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    // starks->calculateZ(*(StepsParams*)pParams); // TODO
-}
-
-void calculate_expressions(void *pStarks, char* step, void *pParams, void *pChelpersSteps) {
-    // ((Starks<Goldilocks::Element>*)pStarks)->calculateExpressions(step, *(StepsParams*)pParams, (CHelpersSteps*)pChelpersSteps); // TODO
-}
-
 void compute_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pTranscript, void *pChelpersSteps) {
     // type == 1 => Goldilocks
     // type == 2 => BN128
@@ -1330,11 +1316,6 @@ void compute_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pPa
             cerr << "Invalid elementType: " << elementType << endl;
             break;
     }
-}
-
-void compute_q(void *pStarks, void *pParams, void *pProof) {
-    // Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    // starks->computeQ(*(StepsParams*)pParams, *(FRIProof<Goldilocks::Element>*)pProof); // TODO 
 }
 
 void compute_evals(void *pStarks, void *pParams, void *pProof) {
@@ -1387,12 +1368,6 @@ void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElemen
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
     starks->calculateHash((Goldilocks::Element*)pHhash, (Goldilocks::Element*)pBuffer, nElements);
-}
-
-void calculate_hash(void *pStarks, void *pHash, void *pPol)
-{
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    // starks->calculateHash((Goldilocks::Element*)pHash, (Polinomial*)pPol);
 }
 
 void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols) {
