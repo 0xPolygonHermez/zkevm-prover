@@ -75,7 +75,7 @@
 
 // #define MAIN_SM_EXECUTOR_GENERATED_CODE
 
-#define USE_GENERIC_PARSER false
+#define USE_GENERIC_PARSER true
 
 #define NROWS_BATCH 4
 

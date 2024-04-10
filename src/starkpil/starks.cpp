@@ -70,14 +70,52 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     for (uint64_t step = 1; step <= starkInfo.nStages; step++)
     {
         TimerStartExpr(STARK_STEP, step);
+        for (uint64_t i = 0; i < starkInfo.challengesMap.size(); i++)
+        {
+            if(starkInfo.challengesMap[i].stageNum == step) {
+                getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
+                setSymbolCalculated(opType::challenge, i);
+            }
+        }
+
         computeStage(step, params, proof, transcript, chelpersSteps);
+
+        if (debug)
+        {
+            Goldilocks::Element randomValues[hashSize] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
+            addTranscriptGL(transcript, randomValues, hashSize);
+        }
+        else
+        {
+            addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
+        }
+
         TimerStopAndLogExpr(STARK_STEP, step);
     }
 
     if (debug) return;
 
     TimerStart(STARK_STEP_Q);
+
+    for (uint64_t i = 0; i < starkInfo.challengesMap.size(); i++)
+    {
+        if(starkInfo.challengesMap[i].stageNum == starkInfo.nStages + 1) {
+            getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
+            setSymbolCalculated(opType::challenge, i);
+        }
+    }
+    
     computeStage(starkInfo.nStages + 1, params, proof, transcript, chelpersSteps);
+
+    if (debug)
+    {
+        Goldilocks::Element randomValues[hashSize] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
+        addTranscriptGL(transcript, randomValues, hashSize);
+    }
+    else
+    {
+        addTranscript(transcript, &proof.proofs.roots[starkInfo.nStages][0], hashSize);
+    }
     TimerStopAndLog(STARK_STEP_Q);
 
     TimerStart(STARK_STEP_EVALS);
@@ -229,14 +267,6 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams &params,
 template <typename ElementType>
 void Starks<ElementType>::computeStage(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps)
 {
-    for (uint64_t i = 0; i < starkInfo.challengesMap.size(); i++)
-    {
-        if(starkInfo.challengesMap[i].stageNum == step) {
-            getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
-            setSymbolCalculated(opType::challenge, i);
-        }
-    }
-
     calculateExpressions(step, params, chelpersSteps);
 
     calculateHints(step, params);
@@ -299,16 +329,6 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams &params, FRIPr
 
     if(step == starkInfo.nStages) {
         proof.proofs.setSubAirValues(params.subproofValues);
-    }
-
-    if (debug)
-    {
-        Goldilocks::Element randomValues[hashSize] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
-        addTranscriptGL(transcript, randomValues, hashSize);
-    }
-    else
-    {
-        addTranscript(transcript, &proof.proofs.roots[step - 1][0], hashSize);
     }
 }
 
