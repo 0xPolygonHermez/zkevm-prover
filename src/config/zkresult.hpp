@@ -119,6 +119,7 @@ typedef enum : int
     ZKR_SM_MAIN_INVALID_BLOB_TYPE = 103, // Blob type is invalid
     ZKR_SM_MAIN_UNRESTORED_SAVED_CONTEXT = 104, // At least one saved context was not restored after execution was completed
 
+    ZKR_BLOB_OUTER_PROOF_INVALID_INPUT = 105, // Invalid Blob outer proof input
 } zkresult;
 
 string zkresult2string (int code);

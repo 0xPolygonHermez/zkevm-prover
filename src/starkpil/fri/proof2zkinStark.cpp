@@ -85,45 +85,29 @@ ordered_json joinzkinBatchRecursive2(ordered_json &zkin1, ordered_json &zkin2, o
 {
     ordered_json zkinOut = ordered_json::object();
 
-    // Batch Publics
-    uint32_t oldBatchStatePos = 0;
-    uint32_t oldBatchAccInputHashPos = 8;
-    uint32_t oldBatchNumPos = 16;
-    uint32_t oldL1InfoTreeRootPos = 17;
-    uint32_t oldL1InfoTreeIndexPos = 25;
-    uint32_t chainIdPos = 26;
-    uint32_t forkIdPos = 27;
-    uint32_t newBatchStatePos = 28;
-    uint32_t newBatchAccInputHashPos = 36;
-    uint32_t newBatchNumPos = 44;
-    uint32_t newL1InfoTreeRootPos = 45;
-    uint32_t newL1InfoTreeIndexPos = 53;
-    uint32_t newLocalExitRootPos = 54;
-    uint32_t newLastTimestampPos = 62;
+    BatchPublics batchPublics;
 
     // Define output publics
     for (int i = 0; i < 8; i++)
     {
-        zkinOut["publics"][oldBatchStatePos + i] = zkin1["publics"][oldBatchStatePos + i];
-        zkinOut["publics"][oldBatchAccInputHashPos + i] = zkin1["publics"][oldBatchAccInputHashPos + i];
-        zkinOut["publics"][oldL1InfoTreeRootPos + i] = zkin1["publics"][oldL1InfoTreeRootPos + i];
+        zkinOut["publics"][batchPublics.oldStateRootPos + i] = zkin1["publics"][batchPublics.oldStateRootPos + i];
+        zkinOut["publics"][batchPublics.oldBatchAccInputHashPos + i] = zkin1["publics"][batchPublics.oldBatchAccInputHashPos + i];
+        zkinOut["publics"][batchPublics.previousL1InfoTreeRootPos + i] = zkin1["publics"][batchPublics.previousL1InfoTreeRootPos + i];
 
-        zkinOut["publics"][newBatchStatePos + i] = zkin2["publics"][newBatchStatePos + i];
-        zkinOut["publics"][newBatchAccInputHashPos + i] = zkin2["publics"][newBatchAccInputHashPos + i];
-        zkinOut["publics"][newL1InfoTreeRootPos + i] = zkin2["publics"][newL1InfoTreeRootPos + i];
+        zkinOut["publics"][batchPublics.newStateRootPos + i] = zkin2["publics"][batchPublics.newStateRootPos + i];
+        zkinOut["publics"][batchPublics.newBatchAccInputHashPos + i] = zkin2["publics"][batchPublics.newBatchAccInputHashPos + i];
+        zkinOut["publics"][batchPublics.currentL1InfoTreeRootPos + i] = zkin2["publics"][batchPublics.currentL1InfoTreeRootPos + i];
 
-        zkinOut["publics"][newLocalExitRootPos + i] = zkin2["publics"][newLocalExitRootPos + i];
+        zkinOut["publics"][batchPublics.newLocalExitRootPos + i] = zkin2["publics"][batchPublics.newLocalExitRootPos + i];
     }
 
-    zkinOut["publics"][oldBatchNumPos] = zkin1["publics"][oldBatchNumPos];
-    zkinOut["publics"][oldL1InfoTreeIndexPos] = zkin1["publics"][oldL1InfoTreeIndexPos];
+    zkinOut["publics"][batchPublics.previousL1InfoTreeIndexPos] = zkin1["publics"][batchPublics.previousL1InfoTreeIndexPos];
 
-    zkinOut["publics"][chainIdPos] = zkin1["publics"][chainIdPos];
-    zkinOut["publics"][forkIdPos] = zkin1["publics"][forkIdPos];
+    zkinOut["publics"][batchPublics.chainIdPos] = zkin1["publics"][batchPublics.chainIdPos];
+    zkinOut["publics"][batchPublics.forkIdPos] = zkin1["publics"][batchPublics.forkIdPos];
 
-    zkinOut["publics"][newBatchNumPos] = zkin2["publics"][newBatchNumPos];
-    zkinOut["publics"][newL1InfoTreeIndexPos] = zkin2["publics"][newL1InfoTreeIndexPos];
-    zkinOut["publics"][newLastTimestampPos] = zkin2["publics"][newLastTimestampPos];
+    zkinOut["publics"][batchPublics.currentL1InfoTreeIndexPos] = zkin2["publics"][batchPublics.currentL1InfoTreeIndexPos];
+    zkinOut["publics"][batchPublics.newLastTimestampPos] = zkin2["publics"][batchPublics.newLastTimestampPos];
 
     // Add first recursive proof inputs
     zkinOut["a_publics"] = zkin1["publics"];
@@ -147,6 +131,7 @@ ordered_json joinzkinBatchRecursive2(ordered_json &zkin1, ordered_json &zkin2, o
         zkinOut["a_s" + std::to_string(i) + "_vals"] = zkin1["s" + std::to_string(i) + "_vals"];
     }
     zkinOut["a_finalPol"] = zkin1["finalPol"];
+    zkinOut["a_isAggregatedCircuit"] = zkin1["isAggregatedCircuit"];
 
     // Add second recursive proof inputs
     zkinOut["b_publics"] = zkin2["publics"];
@@ -170,6 +155,7 @@ ordered_json joinzkinBatchRecursive2(ordered_json &zkin1, ordered_json &zkin2, o
         zkinOut["b_s" + std::to_string(i) + "_vals"] = zkin2["s" + std::to_string(i) + "_vals"];
     }
     zkinOut["b_finalPol"] = zkin2["finalPol"];
+    zkinOut["b_isAggregatedCircuit"] = zkin2["isAggregatedCircuit"];
 
     // Add rootC Recursive2 to publics
     zkinOut["rootC"] = ordered_json::array();
@@ -186,38 +172,28 @@ ordered_json joinzkinBlobOuterRecursive2(ordered_json &zkin1, ordered_json &zkin
     ordered_json zkinOut = ordered_json::object();
 
     // Blob outer publics
-    uint32_t oldBlobOuterStateRootPos = 0;
-    uint32_t oldBlobOuterBlobStateRootPos = 8;
-    uint32_t oldBlobOuterAccInputHashPos = 16;
-    uint32_t oldBlobOuterNumPos = 24;
-    uint32_t blobOuterChainIdPos = 25;
-    uint32_t blobOuterForkIdPos = 26;
-    uint32_t newBlobOuterStateRootPos = 27;
-    uint32_t newBlobOuterBlobStateRootPos = 35;
-    uint32_t newBlobOuterAccInputHashPos = 43;
-    uint32_t newBlobOuterNumPos = 51;
-    uint32_t newBlobOuterLocalExitRootPos = 52;
+    BlobOuterPublics blobOuterPublics;
 
     // Define output publics
     for (int i = 0; i < 8; i++)
     {
-        zkinOut["publics"][oldBlobOuterStateRootPos + i] = zkin1["publics"][oldBlobOuterStateRootPos + i];
-        zkinOut["publics"][oldBlobOuterBlobStateRootPos + i] = zkin1["publics"][oldBlobOuterBlobStateRootPos + i];
-        zkinOut["publics"][oldBlobOuterAccInputHashPos + i] = zkin1["publics"][oldBlobOuterAccInputHashPos + i];
+        zkinOut["publics"][blobOuterPublics.oldStateRootPos + i] = zkin1["publics"][blobOuterPublics.oldStateRootPos + i];
+        zkinOut["publics"][blobOuterPublics.oldBlobStateRootPos + i] = zkin1["publics"][blobOuterPublics.oldBlobStateRootPos + i];
+        zkinOut["publics"][blobOuterPublics.oldBlobAccInputHashPos + i] = zkin1["publics"][blobOuterPublics.oldBlobAccInputHashPos + i];
 
-        zkinOut["publics"][newBlobOuterStateRootPos + i] = zkin2["publics"][newBlobOuterStateRootPos + i];
-        zkinOut["publics"][newBlobOuterBlobStateRootPos + i] = zkin2["publics"][newBlobOuterBlobStateRootPos + i];
-        zkinOut["publics"][newBlobOuterAccInputHashPos + i] = zkin2["publics"][newBlobOuterAccInputHashPos + i];
+        zkinOut["publics"][blobOuterPublics.newStateRootPos + i] = zkin2["publics"][blobOuterPublics.newStateRootPos + i];
+        zkinOut["publics"][blobOuterPublics.newBlobStateRootPos + i] = zkin2["publics"][blobOuterPublics.newBlobStateRootPos + i];
+        zkinOut["publics"][blobOuterPublics.newBlobAccInputHashPos + i] = zkin2["publics"][blobOuterPublics.newBlobAccInputHashPos + i];
 
-        zkinOut["publics"][newBlobOuterLocalExitRootPos + i] = zkin2["publics"][newBlobOuterLocalExitRootPos + i];
+        zkinOut["publics"][blobOuterPublics.newLocalExitRootPos + i] = zkin2["publics"][blobOuterPublics.newLocalExitRootPos + i];
     }
 
-    zkinOut["publics"][oldBlobOuterNumPos] = zkin1["publics"][oldBlobOuterNumPos];
+    zkinOut["publics"][blobOuterPublics.oldBlobNumPos] = zkin1["publics"][blobOuterPublics.oldBlobNumPos];
 
-    zkinOut["publics"][blobOuterChainIdPos] = zkin1["publics"][blobOuterChainIdPos];
-    zkinOut["publics"][blobOuterForkIdPos] = zkin1["publics"][blobOuterForkIdPos];
+    zkinOut["publics"][blobOuterPublics.chainIdPos] = zkin1["publics"][blobOuterPublics.chainIdPos];
+    zkinOut["publics"][blobOuterPublics.forkIdPos] = zkin1["publics"][blobOuterPublics.forkIdPos];
 
-    zkinOut["publics"][newBlobOuterNumPos] = zkin2["publics"][newBlobOuterNumPos];
+    zkinOut["publics"][blobOuterPublics.newBlobNumPos] = zkin2["publics"][blobOuterPublics.newBlobNumPos];
     
     // Add first recursive proof inputs
     zkinOut["a_publics"] = zkin1["publics"];
@@ -265,7 +241,7 @@ ordered_json joinzkinBlobOuterRecursive2(ordered_json &zkin1, ordered_json &zkin
     }
     zkinOut["b_finalPol"] = zkin2["finalPol"];
 
-    // Add rootC blobOuter to publics
+    // Add rootC blobOuterRecursive2 to publics
     zkinOut["rootC"] = ordered_json::array();
     for (int i = 0; i < 4; i++)
     {
@@ -279,99 +255,58 @@ ordered_json joinzkinBlobOuter(ordered_json &zkinBatch, ordered_json &zkinBlobIn
 {
     ordered_json zkinOut = ordered_json::object();
 
-    // Batch publics
-    uint32_t oldBatchStatePos = 0;
-    uint32_t oldBatchAccInputHashPos = 8;
-    uint32_t oldBatchNumPos = 16;
-    uint32_t oldL1InfoTreeRootPos = 17;
-    uint32_t oldL1InfoTreeIndexPos = 25;
-    uint32_t chainIdPos = 26;
-    uint32_t forkIdPos = 27;
-    uint32_t newBatchStatePos = 28;
-    uint32_t newBatchAccInputHashPos = 36;
-    uint32_t newBatchNumPos = 44;
-    uint32_t newL1InfoTreeRootPos = 45;
-    uint32_t newL1InfoTreeIndexPos = 53;
-    uint32_t newLocalExitRootPos = 54;
-    uint32_t newLastTimestampPos = 62;
-
-    // Blob inner publics
-    uint32_t oldBlobInnerBlobStateRootPos = 0;
-    uint32_t oldBlobInnerAccInputHashPos = 8;
-    uint32_t oldBlobInnerNumPos = 16;
-    uint32_t oldBlobInnerStateRootPos = 17;
-    uint32_t forkIdBlobInnerPos = 25;
-    uint32_t newBlobInnerBlobStateRootPos = 26;
-    uint32_t newBlobInnerAccInputHashPos = 34;
-    uint32_t newBlobInnerNumPos = 42;
-    uint32_t finalAccBatchHashDataPos = 43;
-    uint32_t localExitRootFromBlobInnerPos = 51;
-    uint32_t isInvalidBlobInnerPos = 59;
-    uint32_t timestampLimitPos = 60;
-    uint32_t lastL1InfoTreeRootPos = 61;
-    uint32_t lastL1InfoTreeIndexPos = 69;
-
-    // Blob outer publics
-    uint32_t oldBlobOuterStateRootPos = 0;
-    uint32_t oldBlobOuterBlobStateRootPos = 8;
-    uint32_t oldBlobOuterAccInputHashPos = 16;
-    uint32_t oldBlobOuterNumPos = 24;
-    uint32_t blobOuterChainIdPos = 25;
-    uint32_t blobOuterForkIdPos = 26;
-    uint32_t newBlobOuterStateRootPos = 27;
-    uint32_t newBlobOuterBlobStateRootPos = 35;
-    uint32_t newBlobOuterAccInputHashPos = 43;
-    uint32_t newBlobOuterNumPos = 51;
-    uint32_t newBlobOuterLocalExitRootPos = 52;
+    BatchPublics batchPublics;
+    BlobInnerPublics blobInnerPublics;
+    BlobOuterPublics blobOuterPublics;
 
     // Define output publics
     for (int i = 0; i < 8; i++)
     {
-        zkinOut["publics"][oldBlobOuterBlobStateRootPos + i] = zkinBlobInnerRecursive1["publics"][oldBlobInnerBlobStateRootPos + i]; 
-        zkinOut["publics"][oldBlobOuterAccInputHashPos + i] = zkinBlobInnerRecursive1["publics"][oldBlobInnerAccInputHashPos + i];
+        zkinOut["publics"][blobOuterPublics.oldBlobStateRootPos + i] = zkinBlobInnerRecursive1["publics"][blobInnerPublics.oldBlobStateRootPos + i]; 
+        zkinOut["publics"][blobOuterPublics.oldBlobAccInputHashPos + i] = zkinBlobInnerRecursive1["publics"][blobInnerPublics.oldBlobAccInputHashPos + i];
 
-        zkinOut["publics"][newBlobOuterBlobStateRootPos + i] = zkinBlobInnerRecursive1["publics"][newBlobInnerBlobStateRootPos + i];
-        zkinOut["publics"][newBlobOuterAccInputHashPos + i] = zkinBlobInnerRecursive1["publics"][newBlobInnerAccInputHashPos + i];
+        zkinOut["publics"][blobOuterPublics.newBlobStateRootPos + i] = zkinBlobInnerRecursive1["publics"][blobInnerPublics.newBlobStateRootPos + i];
+        zkinOut["publics"][blobOuterPublics.newBlobAccInputHashPos + i] = zkinBlobInnerRecursive1["publics"][blobInnerPublics.newBlobAccInputHashPos + i];
     }
     
-    zkinOut["publics"][oldBlobOuterNumPos] = zkinBlobInnerRecursive1["publics"][oldBlobInnerNumPos];
-    zkinOut["publics"][newBlobOuterNumPos] = zkinBlobInnerRecursive1["publics"][newBlobInnerNumPos];
-    zkinOut["publics"][blobOuterForkIdPos] = zkinBatch["publics"][forkIdPos];
+    zkinOut["publics"][blobOuterPublics.oldBlobNumPos] = zkinBlobInnerRecursive1["publics"][blobInnerPublics.oldBlobNumPos];
+    zkinOut["publics"][blobOuterPublics.newBlobNumPos] = zkinBlobInnerRecursive1["publics"][blobInnerPublics.newBlobNumPos];
+    zkinOut["publics"][blobOuterPublics.forkIdPos] = zkinBatch["publics"][batchPublics.forkIdPos];
 
     bool isInvalidFinalAccBatchHashData = true;
     for(int i = 0; i < 8; i++) 
     {
-        if(zkinBlobInnerRecursive1["publics"][finalAccBatchHashDataPos + i] != to_string(0)) {
+        if(zkinBlobInnerRecursive1["publics"][blobInnerPublics.finalAccBatchHashDataPos + i] != to_string(0)) {
             isInvalidFinalAccBatchHashData = false;
             break;
         }
     }
 
-    bool isInvalidBlob = zkinBlobInnerRecursive1["publics"][isInvalidBlobInnerPos] == to_string(1);
+    bool isInvalidBlob = zkinBlobInnerRecursive1["publics"][blobInnerPublics.isInvalidPos] == to_string(1);
 
-    bool isInvalidTimestamp = zkinBatch["publics"][newLastTimestampPos] > zkinBlobInnerRecursive1["publics"][timestampLimitPos];
+    bool isInvalidTimestamp = zkinBatch["publics"][batchPublics.newLastTimestampPos] > zkinBlobInnerRecursive1["publics"][blobInnerPublics.timestampLimitPos];
 
-    bool isInvalidL1InfoTreeIndex = zkinBatch["publics"][newL1InfoTreeIndexPos] != zkinBlobInnerRecursive1["publics"][lastL1InfoTreeIndexPos];
+    bool isInvalidL1InfoTreeIndex = zkinBatch["publics"][batchPublics.currentL1InfoTreeIndexPos] != zkinBlobInnerRecursive1["publics"][blobInnerPublics.lastL1InfoTreeIndexPos];
     
     bool isInvalid = isInvalidFinalAccBatchHashData || isInvalidBlob || isInvalidTimestamp || isInvalidL1InfoTreeIndex;
 
     for(int i = 0; i < 8; i++) 
     {
         if(isInvalid) {
-            zkinOut["publics"][oldBlobOuterStateRootPos + i] = zkinBlobInnerRecursive1["publics"][oldBlobInnerStateRootPos + i];
-            zkinOut["publics"][newBlobOuterStateRootPos + i] = zkinBlobInnerRecursive1["publics"][oldBlobInnerStateRootPos + i];
-            zkinOut["publics"][newBlobOuterLocalExitRootPos + i] = zkinBlobInnerRecursive1["publics"][localExitRootFromBlobInnerPos + i];
+            zkinOut["publics"][blobOuterPublics.oldStateRootPos + i] = zkinBlobInnerRecursive1["publics"][blobInnerPublics.oldStateRootPos + i];
+            zkinOut["publics"][blobOuterPublics.newStateRootPos + i] = zkinBlobInnerRecursive1["publics"][blobInnerPublics.oldStateRootPos + i];
+            zkinOut["publics"][blobOuterPublics.newLocalExitRootPos + i] = zkinBlobInnerRecursive1["publics"][blobInnerPublics.localExitRootFromBlobPos + i];
         } else {
-            zkinOut["publics"][oldBlobOuterStateRootPos + i] = zkinBatch["publics"][oldBatchStatePos + i];
-            zkinOut["publics"][newBlobOuterStateRootPos + i] = zkinBatch["publics"][newBatchStatePos + i];
-            zkinOut["publics"][newBlobOuterLocalExitRootPos + i] = zkinBatch["publics"][newLocalExitRootPos + i];
+            zkinOut["publics"][blobOuterPublics.oldStateRootPos + i] = zkinBatch["publics"][batchPublics.oldStateRootPos + i];
+            zkinOut["publics"][blobOuterPublics.newStateRootPos + i] = zkinBatch["publics"][batchPublics.newStateRootPos + i];
+            zkinOut["publics"][blobOuterPublics.newLocalExitRootPos + i] = zkinBatch["publics"][batchPublics.newLocalExitRootPos + i];
         }
     }
 
     if(isInvalid) {
-        zkinOut["publics"][blobOuterChainIdPos] = chainId;
+        zkinOut["publics"][blobOuterPublics.chainIdPos] = chainId;
     } else {
-        zkinOut["publics"][blobOuterChainIdPos] = zkinBatch["publics"][chainIdPos];
+        zkinOut["publics"][blobOuterPublics.chainIdPos] = zkinBatch["publics"][batchPublics.chainIdPos];
     }
 
 
@@ -397,6 +332,7 @@ ordered_json joinzkinBlobOuter(ordered_json &zkinBatch, ordered_json &zkinBlobIn
         zkinOut["batch_s" + std::to_string(i) + "_vals"] = zkinBatch["s" + std::to_string(i) + "_vals"];
     }
     zkinOut["batch_finalPol"] = zkinBatch["finalPol"];
+    zkinOut["batch_isAggregatedCircuit"] = zkinBatch["isAggregatedCircuit"];
 
     // Add blob inner proof inputs
     zkinOut["blob_inner_publics"] = zkinBlobInnerRecursive1["publics"];
