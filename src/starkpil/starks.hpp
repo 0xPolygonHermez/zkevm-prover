@@ -42,7 +42,6 @@ public:
     CHelpers &chelpers;
 
     bool debug = false;
-    bool optimizeMemoryNTT = false;
     uint32_t nrowsBatch = NROWS_BATCH;
     
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
@@ -76,11 +75,14 @@ private:
     Goldilocks::Element *mem;
     void *pAddress;
 
+    Goldilocks::Element *x;
     Goldilocks::Element *x_n;
     Goldilocks::Element *x_2ns;
     Goldilocks::Element *zi;
 
-    std::vector<Goldilocks::Element> x;
+    Goldilocks::Element *q_2ns;
+    Goldilocks::Element *f_2ns;
+    Goldilocks::Element *xDivXSubXi;
 
 void merkelizeMemory(); // function for DBG purposes
 void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
@@ -194,12 +196,16 @@ public:
         
         uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
 
-        x = std::vector<Goldilocks::Element>(N << extendBits);
+        x = new Goldilocks::Element[N << extendBits];
         x[0] = Goldilocks::shift();
         for (uint64_t k = 1; k < (N << extendBits); k++)
         {
             x[k] = x[k - 1] * Goldilocks::w(starkInfo.starkStruct.nBits + extendBits);
         }
+
+        xDivXSubXi = &mem[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]];
+        q_2ns = &mem[starkInfo.mapOffsets[std::make_pair("q", true)]];
+        f_2ns = &mem[starkInfo.mapOffsets[std::make_pair("f", true)]];
 
         TimerStart(MERKLE_TREE_ALLOCATION);
         treesGL = new MerkleTreeType*[starkInfo.nStages + 2];
@@ -235,18 +241,13 @@ public:
         subProofValuesCalculated.resize(starkInfo.nSubProofValues, false);
         challengesCalculated.resize(starkInfo.challengesMap.size(), false);
         witnessCalculated.resize(starkInfo.cmPolsMap.size(), false);
-        
-        uint64_t currentSectionStart = starkInfo.mapOffsets[std::make_pair("cm" + to_string(starkInfo.nStages), false)];
-        uint64_t nttHelperSize = starkInfo.mapSectionsN["cm" + to_string(starkInfo.nStages)] * NExtended;
-        if(currentSectionStart > nttHelperSize) {
-            optimizeMemoryNTT = true;
-        }
     };
     ~Starks()
     {
         if (!config.generateProof())
             return;
         
+        delete x;
         delete x_n;
         delete x_2ns;
         delete zi;
@@ -374,9 +375,6 @@ public:
 
 private:
     bool canExpressionBeCalculated(ParserParams &parserParams);
-
-    void transposePolsColumns(StepsParams& params, vector<int64_t> cm2Transposed, Polinomial* transPols, Hint hint, Goldilocks::Element *pBuffer);
-    void transposePolsRows(StepsParams& params, vector<int64_t> cm2Transposed, Polinomial *transPols, Hint hint);
 
     bool isHintResolved(Hint &hint, std::vector<string> dstFields);
     bool canHintBeResolved(Hint &hint, std::vector<string> srcFields);

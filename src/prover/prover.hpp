@@ -68,7 +68,6 @@ private:
     pthread_mutex_t mutex;    // Mutex to protect the requests queues
     void *pAddress = NULL;
     bool externalAllocated;
-    void *pAddressStarksRecursiveF = NULL;
     int protocolId;
 public:
     const Config &config;

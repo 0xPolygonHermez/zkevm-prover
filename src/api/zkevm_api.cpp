@@ -1219,7 +1219,7 @@ void set_mapOffsets(void *pStarkInfo, void *pChelpers)
 {
     auto starkInfo = (StarkInfo*)pStarkInfo;
     auto cHelpers = (CHelpers *)pChelpers;
-    starkInfo->setMapOffsets(cHelpers->getCmPolsCalculatedStage1(), cHelpers->hints);
+    starkInfo->setMapOffsets(cHelpers->hints);
 }
 
 void starkinfo_free(void *pStarkInfo) {

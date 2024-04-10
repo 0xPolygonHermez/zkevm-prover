@@ -116,19 +116,19 @@ Prover::Prover(Goldilocks &fr,
                 cHelpersRecursive1 = new CHelpers(recursive1CHelpers);
                 cHelpersRecursive2 = new CHelpers(recursive2CHelpers);
                 cHelpersRecursiveF = new CHelpers(recursivefCHelpers);
-            
+
                 // Set the map offsets
-                starkInfoZkevm->setMapOffsets(cHelpersZkevm->getCmPolsCalculatedStage1(), cHelpersZkevm->hints);
-                starkInfoC12a->setMapOffsets(cHelpersC12a->getCmPolsCalculatedStage1(), cHelpersC12a->hints);
-                starkInfoRecursive1->setMapOffsets(cHelpersRecursive1->getCmPolsCalculatedStage1(), cHelpersRecursive1->hints);
-                starkInfoRecursive2->setMapOffsets(cHelpersRecursive2->getCmPolsCalculatedStage1(), cHelpersRecursive2->hints);
-                starkInfoRecursiveF->setMapOffsets(cHelpersRecursiveF->getCmPolsCalculatedStage1(), cHelpersRecursiveF->hints);
+                starkInfoZkevm->setMapOffsets(cHelpersZkevm->hints);
+                starkInfoC12a->setMapOffsets(cHelpersC12a->hints);
+                starkInfoRecursive1->setMapOffsets(cHelpersRecursive1->hints);
+                starkInfoRecursive2->setMapOffsets(cHelpersRecursive2->hints);
+                starkInfoRecursiveF->setMapOffsets(cHelpersRecursiveF->hints);
 
                 polsSize = starkInfoZkevm->mapTotalN * sizeof(Goldilocks::Element);
 
                 zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() <= polsSize);
-                zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() == starkInfoZkevm.mapOffsets[std::make_pair("cm2", false)] * sizeof(Goldilocks::Element));
-            }
+                zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() == starkInfoZkevm->mapOffsets[std::make_pair("cm2", false)] * sizeof(Goldilocks::Element));
+            }           
 
             if (config.zkevmCmPols.size() > 0)
             {
@@ -201,8 +201,6 @@ Prover::~Prover()
         }
 
 #ifndef __LIB__
-        free(pAddressStarksRecursiveF);
-
         delete prover;
 
         delete starkZkevm;
@@ -469,13 +467,13 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     /************/
     TimerStart(EXECUTOR_EXECUTE_INITIALIZATION);
 
-    PROVER_FORK_NAMESPACE::CommitPols cmPols(pAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
+    PROVER_FORK_NAMESPACE::CommitPols cmPols((uint8_t *)pAddress + starkInfoZkevm->mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element), PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
     uint64_t num_threads = omp_get_max_threads();
     uint64_t bytes_per_thread = cmPols.size() / num_threads;
 #pragma omp parallel for num_threads(num_threads)
     for (uint64_t i = 0; i < cmPols.size(); i += bytes_per_thread) // Each iteration processes 64 bytes at a time
     {
-        memset((uint8_t *)pAddress + i, 0, bytes_per_thread);
+        memset((uint8_t *)pAddress + starkInfoZkevm->mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i, 0, bytes_per_thread);
     }
 
     TimerStopAndLog(EXECUTOR_EXECUTE_INITIALIZATION);
@@ -631,7 +629,7 @@ void Prover::genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t l
 
     TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF);
 
-    CommitPolsStarks cmPols12a(pAddress, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.mapSectionsN["cm1"]);
+    CommitPolsStarks cmPols12a((uint8_t *)pAddress + starkInfoC12a->mapOffsets[std::make_pair("cm1", false)] * sizeof(Goldilocks::Element), (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.mapSectionsN["cm1"]);
 
     Circom::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.mapSectionsN["cm1"]);
 
@@ -672,7 +670,7 @@ void Prover::genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t l
     zkinC12a["rootC"] = rootC;
     TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
-    CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.mapSectionsN["cm1"]);
+    CommitPolsStarks cmPolsRecursive1((uint8_t *)pAddress + starkInfoRecursive1->mapOffsets[std::make_pair("cm1", false)] * sizeof(Goldilocks::Element), (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.mapSectionsN["cm1"]);
     CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.mapSectionsN["cm1"]);
 
     // void *pointerCmRecursive1Pols = mapFile("config/recursive1/recursive1.commit", cmPolsRecursive1.size(), true);
@@ -807,7 +805,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
         publics[starkZkevm->starkInfo.nPublics + i] = Goldilocks::fromU64(recursive2Verkey["constRoot"][i]);
     }
 
-    CommitPolsStarks cmPolsRecursive2(pAddress, (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.mapSectionsN["cm1"]);
+    CommitPolsStarks cmPolsRecursive2((uint8_t *)pAddress + starkInfoRecursive2->mapOffsets[std::make_pair("cm1", false)] * sizeof(Goldilocks::Element), (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.mapSectionsN["cm1"]);
     CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2, (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.mapSectionsN["cm1"]);
 
     // void *pointerCmRecursive2Pols = mapFile("config/recursive2/recursive2.commit", cmPolsRecursive2.size(), true);
@@ -903,7 +901,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
         publics[i] = Goldilocks::fromString(zkinFinal["publics"][i]);
     }
 
-    CommitPolsStarks cmPolsRecursiveF(pAddressStarksRecursiveF, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.mapSectionsN["cm1"]);
+    CommitPolsStarks cmPolsRecursiveF((uint8_t *)pAddress + starkInfoRecursiveF->mapOffsets[std::make_pair("cm1", false)] * sizeof(Goldilocks::Element), (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.mapSectionsN["cm1"]);
     CircomRecursiveF::getCommitedPols(&cmPolsRecursiveF, config.recursivefVerifier, config.recursivefExec, zkinFinal, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.mapSectionsN["cm1"]);
 
     // void *pointercmPolsRecursiveF = mapFile("config/recursivef/recursivef.commit", cmPolsRecursiveF.size(), true);

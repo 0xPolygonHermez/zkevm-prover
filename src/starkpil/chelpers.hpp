@@ -112,8 +112,6 @@ public:
     CHelpers(string file);
 
     void loadCHelpers(BinFileUtils::BinFile *cHelpersBin);
-
-    std::vector<uint16_t> getCmPolsCalculatedStage1();
 };
 
 

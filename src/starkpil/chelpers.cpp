@@ -331,13 +331,3 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
 
     cHelpersBin->endReadSection();
 }
-
-std::vector<uint16_t> CHelpers::getCmPolsCalculatedStage1() {
-    std::vector<uint16_t> cmPolsCalculatedStage1;
-    ParserParams stage1Info = stagesInfo[0];
-    for(uint64_t i = 0; i < stage1Info.nCmPolsCalculated; i++) {
-        cmPolsCalculatedStage1.push_back(cHelpersArgs.cmPolsCalculatedIds[stage1Info.cmPolsCalculatedOffset + i]);
-    }
-
-    return cmPolsCalculatedStage1;
-}

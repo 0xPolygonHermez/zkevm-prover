@@ -111,124 +111,197 @@ void StarkInfo::load(json j)
     }
 }
 
-void StarkInfo::setMapOffsets(std::vector<uint16_t> cmPolsCalculatedStage1, std::vector<Hint> hints) {
+void StarkInfo::setMapOffsets(std::vector<Hint> &hints) {
     uint64_t N = (1 << starkStruct.nBits);
     uint64_t NExtended = (1 << starkStruct.nBitsExt);
 
-    // Set offsets for all stages in the basefield (cm1, cm2, ..., cmN)
-    mapOffsets[std::make_pair("cm1", false)] = 0;
-    for(uint64_t stage = 2; stage <= nStages; stage++) {
-        string prevStage = "cm" + to_string(stage - 1);
-        string currStage = "cm" + to_string(stage);
-        mapOffsets[std::make_pair(currStage, false)] = mapOffsets[std::make_pair(prevStage, false)] + N * mapSectionsN[prevStage];
+    mapTotalN = 0;
+
+    // Set offsets for all stages in the extended field (cm1, cm2, ..., cmN)
+    for(uint64_t stage = 1; stage <= nStages + 1; stage++) {
+        mapOffsets[std::make_pair("cm" + to_string(stage), true)] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN["cm" + to_string(stage)];
     }
 
-    // Check if the first stage calculates any temporal expression
-    bool optimizeCommitPolsStage1 = true; 
-    for(uint64_t i = 0; i < cmPolsCalculatedStage1.size(); ++i) {
-        uint64_t polId = cmPolsCalculatedStage1[i];
-        PolMap polInfo = cmPolsMap[polId];
-        if(cmPolsMap[polId].stage == "tmpExp") {
-            optimizeCommitPolsStage1 = false;
-            break;
+    mapOffsets[std::make_pair("q", true)] = mapTotalN;
+    mapTotalN += NExtended * qDim;
+
+    uint64_t offsetPolsBasefield = mapOffsets[std::make_pair("cm" + to_string(nStages), true)];
+
+    // Set offsets for all stages in the basefield field (cm1, cm2, ..., tmpExp)
+    for(uint64_t stage = 1; stage <= nStages + 1; stage++) {
+        string section;
+        if(stage == 1) {
+            section = "cm" + to_string(nStages);
+        } else if(stage == nStages + 1) {
+            section = "tmpExp";
+        } else {
+            section = "cm" + to_string(stage - 1);
         }
+        mapOffsets[std::make_pair(section, false)] = offsetPolsBasefield;
+        offsetPolsBasefield += N * mapSectionsN[section];
     }
 
-    if(optimizeCommitPolsStage1) {
-        mapOffsets[std::make_pair("cm1", true)] = mapOffsets[std::make_pair("cm" + to_string(nStages), false)] + N * mapSectionsN["cm" + to_string(nStages)];
-        mapOffsets[std::make_pair("tmpExp", false)] = mapOffsets[std::make_pair("cm1", true)] + NExtended * mapSectionsN["cm1"];
-        mapOffsets[std::make_pair("cm2", true)] = mapOffsets[std::make_pair("tmpExp", false)] + N * mapSectionsN["tmpExp"];
-    } else {
-        mapOffsets[std::make_pair("tmpExp", false)] = mapOffsets[std::make_pair("cm" + to_string(nStages), false)] + N * mapSectionsN["cm" + to_string(nStages)];
-        mapOffsets[std::make_pair("cm1", true)] = mapOffsets[std::make_pair("tmpExp", false)] + N * mapSectionsN["tmpExp"];
-        mapOffsets[std::make_pair("cm2", true)] = mapOffsets[std::make_pair("cm1", true)] + NExtended * mapSectionsN["cm1"];
-    }
+    if(offsetPolsBasefield > mapTotalN) mapTotalN = offsetPolsBasefield;
 
-    for(uint64_t stage = 3; stage <= nStages + 1; stage++) {
-        string prevStage = "cm" + to_string(stage - 1);
-        string currStage = "cm" + to_string(stage);
-        mapOffsets[std::make_pair(currStage, true)] = mapOffsets[std::make_pair(prevStage, true)] + NExtended * mapSectionsN[prevStage];
-    }
+    // Stage FRIPolynomial
+    uint64_t offsetPolsFRI = mapOffsets[std::make_pair("q", true)];
+    mapOffsets[std::make_pair("xDivXSubXi", true)] = offsetPolsFRI;
+    offsetPolsFRI += openingPoints.size() * NExtended * FIELD_EXTENSION;
 
-    mapOffsets[std::make_pair("q", true)] = mapOffsets[std::make_pair("cm" + to_string(nStages + 1), true)] + NExtended * mapSectionsN["cm" + to_string(nStages + 1)];
-    mapOffsets[std::make_pair("f", true)] = mapOffsets[std::make_pair("q", true)] + NExtended * qDim;
+    mapOffsets[std::make_pair("f", true)] = offsetPolsFRI;
+    offsetPolsFRI += NExtended * FIELD_EXTENSION;
 
-    mapTotalN = mapOffsets[std::make_pair("f", true)] + NExtended * 3;
+    if(offsetPolsFRI > mapTotalN) mapTotalN = offsetPolsFRI;
 
-    bool optimizeMemoryNTT = mapSectionsN["cm" + to_string(nStages)] * NExtended < mapOffsets[std::make_pair("cm" + to_string(nStages), false)] ? true : false;
+    mapOffsetsPolsHints.resize(nStages);
+    offsetsExtraMemoryHints.resize(hints.size());
 
-    u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8;
-
+    uint64_t additionalMemoryOffsetAvailable = offsetPolsBasefield;
+    uint64_t limitMemoryOffset = mapOffsets[std::make_pair("cm" + to_string(nStages), true)];
     for(uint64_t stage = 1; stage <= nStages; stage++) {
-        // Check that we have enough memory for performing the NTT
-        uint64_t nttHelpersBufferSize = mapSectionsN["cm" + to_string(stage)] * NExtended;
-        uint64_t nttHelpersBufferStart;
-        if (stage == nStages && optimizeMemoryNTT)
-        {
-            nttHelpersBufferStart = mapOffsets[std::make_pair("cm1", false)];
-        }
-        else if (stage == 1 && optimizeCommitPolsStage1)
-        {
-            nttHelpersBufferStart = mapOffsets[std::make_pair("tmpExp", false)];
-        }
-        else
-        {
-            nttHelpersBufferStart =  mapOffsets[std::make_pair("cm" + to_string(stage + 1), true)];
-        }
-        if(nttHelpersBufferStart + nttHelpersBufferSize > mapTotalN) {
-            mapTotalN = nttHelpersBufferStart + nttHelpersBufferSize;
-        }
+        uint64_t memoryOffset = stage == nStages 
+            ? additionalMemoryOffsetAvailable
+            : mapOffsets[std::make_pair("cm" + to_string(stage), true)];
 
-        // Check that we have enough memory for the hints
-        uint64_t hintsStageTransposedPolsElements = 0;
-        uint64_t hintsStageExtraElements = 0;
-        for (uint64_t j = 0; j < hints.size(); ++j)
-        {
+        // Get hints stage 
+        vector<uint64_t> hintsStage;
+
+        for(uint64_t j = 0; j < hints.size(); ++j) {
             Hint hint = hints[j];
             auto hintHandler = Hints::HintHandlerBuilder::create(hint.name)->build();
-            vector<string> srcFields = hintHandler->getSources();
-            vector<string> dstFields = hintHandler->getDestinations();
+            std::vector<string> srcFields = hintHandler->getSources();
+            std::vector<string> dstFields = hintHandler->getDestinations();
 
-            // Check if the hint can be resolved in the current stage
-            bool isHintStage = true;
-            for(uint64_t i = 0; i < dstFields.size(); ++i) {
-                auto it = hint.fields.find(dstFields[i]);
-                if (it == hint.fields.end())
-                {
-                    zklog.error("Unknown field name=" + dstFields[i]);
-                    exitProcess();
-                    exit(-1);
-                }
-                HintField hintField = hint.fields[dstFields[i]];
-                if(hintField.operand == opType::subproofvalue) {
-                    if (nStages != stage) {
-                        isHintStage = false;
-                        break;
-                    }
-                } else if(hintField.operand == opType::cm || hintField.operand == opType::tmp) {
-                    if(cmPolsMap[hintField.id].stageNum != stage) {
-                        isHintStage = false;
-                        break;
-                    }
-                } else {
-                    zklog.error("Destination field=" + dstFields[i] + " has to be either a cm or tmp or subproofvalue");
-                    exitProcess();
-                    exit(-1);
-                }
+            if(isHintStage(stage, hint, dstFields)) {
+                hintsStage.push_back(j);
             }
-
-            if (!isHintStage)
-                continue;
-
-            hintsStageTransposedPolsElements += stride_pol_ * (srcFields.size() + dstFields.size());            
-            hintsStageExtraElements += hintHandler->getMemoryNeeded(N);
         }
-        uint64_t hintsStageElementsStart = mapOffsets[std::make_pair("cm" + to_string(stage), true)];
 
-        if(hintsStageElementsStart + hintsStageTransposedPolsElements + hintsStageExtraElements > mapTotalN) {
-            mapTotalN = hintsStageElementsStart + hintsStageTransposedPolsElements + hintsStageExtraElements;
+        // Set memory transposed pols
+        for(uint64_t j = 0; j < hintsStage.size(); ++j) {
+            Hint hint = hints[hintsStage[j]];
+            auto hintHandler = Hints::HintHandlerBuilder::create(hint.name)->build();
+            std::vector<string> srcFields = hintHandler->getSources();
+            std::vector<string> dstFields = hintHandler->getDestinations();
+            
+            setMemoryPolsHint(stage, hint, srcFields, memoryOffset, limitMemoryOffset, additionalMemoryOffsetAvailable);
+            setMemoryPolsHint(stage, hint, dstFields, memoryOffset, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        }
+
+        if(memoryOffset > mapTotalN) {
+            mapTotalN = memoryOffset;
+        }
+
+        // Set extra memory
+        for(uint64_t j = 0; j < hintsStage.size(); ++j) {
+            Hint hint = hints[hintsStage[j]];
+            auto hintHandler = Hints::HintHandlerBuilder::create(hint.name)->build();
+
+            uint64_t extraMemoryNeeded = hintHandler->getMemoryNeeded(N);
+            if(memoryOffset < limitMemoryOffset && memoryOffset + extraMemoryNeeded > limitMemoryOffset) {
+                memoryOffset = additionalMemoryOffsetAvailable;
+            }
+            offsetsExtraMemoryHints[hintsStage[j]] = memoryOffset;
+            memoryOffset += extraMemoryNeeded;
+        }
+
+        if(memoryOffset > mapTotalN) {
+            mapTotalN = memoryOffset;
         }
     }
+
+
+    for(uint64_t stage = 1; stage <= nStages + 1; stage++) {
+        uint64_t startBuffer;
+        uint64_t memoryAvailable;
+        if(stage == nStages + 1) {
+            startBuffer = mapOffsets[std::make_pair("q", true)] + NExtended * qDim;
+            memoryAvailable = mapTotalN - startBuffer;
+        } else if(stage == nStages) {
+            startBuffer = mapOffsets[std::make_pair("cm" + to_string(nStages + 1), true)];
+            memoryAvailable = mapTotalN - startBuffer;
+        } else {
+            uint64_t startBufferEnd = offsetPolsBasefield;
+            uint64_t startBufferExtended = mapOffsets[std::make_pair("cm" + to_string(stage + 1), true)];
+            uint64_t memoryAvailableEnd = mapTotalN - startBufferEnd;
+            uint64_t memoryAvailableExtended =  mapOffsets[std::make_pair("cm" + to_string(nStages), false)] - startBufferExtended;
+            if(memoryAvailableEnd > memoryAvailableExtended) {
+                memoryAvailable = memoryAvailableEnd;
+                startBuffer = startBufferEnd;
+            } else {
+                memoryAvailable = memoryAvailableExtended;
+                startBuffer = startBufferExtended;
+            }
+        }
+        
+        uint64_t minBlocks = 4;
+
+        uint64_t memoryNTTHelper = NExtended * mapSectionsN["cm" + to_string(stage)];
+        if(memoryAvailable * minBlocks < memoryNTTHelper) {
+            memoryAvailable = memoryNTTHelper / minBlocks;
+            if(startBuffer + memoryAvailable > mapTotalN) {
+                mapTotalN = startBuffer + memoryAvailable;
+            }   
+        }
+        
+        mapNTTOffsetsHelpers["cm" + to_string(stage)] = std::make_pair(startBuffer, memoryAvailable);
+    }
+}
+
+void StarkInfo::setMemoryPolsHint(uint64_t stage, Hint &hint, std::vector<string> &fields, uint64_t &memoryOffset, uint64_t limitMemoryOffset, uint64_t additionalMemoryOffset) {
+     for(uint64_t k = 0; k < fields.size(); ++k) {
+        std::string polName = fields[k];
+        auto it = hint.fields.find(polName);
+        if (it == hint.fields.end())
+        {
+            zklog.error("Unknown field name=" + polName);
+            exitProcess();
+            exit(-1);
+        }
+        HintField hintField = hint.fields[polName];
+        if(mapOffsetsPolsHints[stage - 1].find(hintField.id) != mapOffsetsPolsHints[stage - 1].end()) continue;
+        if (hintField.operand == opType::cm || hintField.operand == opType::tmp) {
+            PolMap polInfo = cmPolsMap[hintField.id];
+            uint64_t memoryUsed = (1 << starkStruct.nBits) * polInfo.dim + 8;
+            if(memoryOffset < limitMemoryOffset && memoryOffset + memoryUsed > limitMemoryOffset) {
+                memoryOffset = additionalMemoryOffset;
+            }
+            mapOffsetsPolsHints[stage - 1][hintField.id] = memoryOffset;
+            memoryOffset += memoryUsed;
+        }
+    }
+}
+
+bool StarkInfo::isHintStage(uint64_t stage, Hint &hint, std::vector<string> &dstFields) {
+    bool isHintStage_ = true;
+    for(uint64_t i = 0; i < dstFields.size(); ++i) {
+        auto it = hint.fields.find(dstFields[i]);
+        if (it == hint.fields.end())
+        {
+            zklog.error("Unknown field name=" + dstFields[i]);
+            exitProcess();
+            exit(-1);
+        }
+        HintField hintField = hint.fields[dstFields[i]];
+        if(hintField.operand == opType::subproofvalue) {
+            if (nStages != stage) {
+                isHintStage_ = false;
+                break;
+            }
+        } else if(hintField.operand == opType::cm || hintField.operand == opType::tmp) {
+            if(cmPolsMap[hintField.id].stageNum != stage) {
+                isHintStage_ = false;
+                break;
+            }
+        } else {
+            zklog.error("Destination field=" + dstFields[i] + " has to be either a cm or tmp or subproofvalue");
+            exitProcess();
+            exit(-1);
+        }
+    }
+
+    return isHintStage_;
 }
 
 Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg)
