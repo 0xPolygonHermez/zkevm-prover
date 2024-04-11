@@ -4517,7 +4517,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq1 = dbl ? 0 : 1;
                     arithAction.selEq2 = dbl ? 1 : 0;
                     arithAction.selEq3 = 0;
-                    arithAction.selEq4 = 1;
+                    arithAction.selEq4 = 0;
                     arithAction.selEq5 = 0;
                     arithAction.selEq6 = 0;
                     required.Arith.push_back(arithAction);
