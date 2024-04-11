@@ -520,6 +520,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             }
             (*request.mutable_contracts_bytecode())[key] = value;
         }
+
+        // Trace config
         if (input.traceConfig.bEnabled)
         {
             executor::v1::TraceConfigV2 * pTraceConfig = request.mutable_trace_config();
@@ -649,6 +651,34 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_point_y(scalar2ba(input.publicInputsExtended.publicInputs.pointY));
         request.set_blob_data(input.publicInputsExtended.publicInputs.blobData);
         request.set_forced_hash_data(scalar2ba(input.publicInputsExtended.publicInputs.forcedHashData));
+
+        // Parse keys map
+        DatabaseMap::MTMap::const_iterator it;
+        for (it=input.db.begin(); it!=input.db.end(); it++)
+        {
+            string key = NormalizeToNFormat(it->first, 64);
+            string value;
+            vector<Goldilocks::Element> dbValue = it->second;
+            for (uint64_t i=0; i<dbValue.size(); i++)
+            {
+                value += NormalizeToNFormat(fr.toString(dbValue[i], 16), 16);
+            }
+            (*request.mutable_db())[key] = value;
+        }
+
+        // Parse contracts data
+        DatabaseMap::ProgramMap::const_iterator itp;
+        for (itp=input.contractsBytecode.begin(); itp!=input.contractsBytecode.end(); itp++)
+        {
+            string key = NormalizeToNFormat(itp->first, 64);
+            string value;
+            vector<uint8_t> contractValue = itp->second;
+            for (uint64_t i=0; i<contractValue.size(); i++)
+            {
+                value += byte2string(contractValue[i]);
+            }
+            (*request.mutable_contracts_bytecode())[key] = value;
+        }
 
         executor::v1::DebugV3 *pDebug = NULL;
         if (input.publicInputsExtended.newBlobStateRoot != 0)
@@ -789,7 +819,7 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
              || (inputFile.find("inputs-executor/calldata/test-length-data_1.json") != string::npos)
 // 20240408_143722_247779 a417e91 469d640 zkError: ExecutorClient::ProcessBatch() returned newStateRoot=186fa1e981185d4c46bf20a01826d974e620614e800145f200b8bbe4777fe1d7 != input.publicInputsExtended.newStateRoot=c14d4d9f490cd974197f01ed1adecc4024d53fa3c7e81763a03808f65b84ae71 inputFile=../zkevm-testvectors/inputs-executor/calldata/test-length-data_1.json
 
-
+             || (inputFile.find("inputs-executor-blob/blob-invalid-9.json") != string::npos) // zkError: MainExecutor::execute() failed called with invalid blobType=3
            )
         {
             zklog.warning("ProcessDirectory() skipping file=" + inputFile + " fileCounter=" + to_string(fileCounter) + " skippedFileCounter=" + to_string(skippedFileCounter));

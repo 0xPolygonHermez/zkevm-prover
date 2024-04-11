@@ -52,7 +52,7 @@ struct TableStruct_executor_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[55]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[57]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -187,6 +187,12 @@ extern ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal 
 class ProcessBlobInnerRequestV3;
 class ProcessBlobInnerRequestV3DefaultTypeInternal;
 extern ProcessBlobInnerRequestV3DefaultTypeInternal _ProcessBlobInnerRequestV3_default_instance_;
+class ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse;
+class ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal;
+extern ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal _ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse_default_instance_;
+class ProcessBlobInnerRequestV3_DbEntry_DoNotUse;
+class ProcessBlobInnerRequestV3_DbEntry_DoNotUseDefaultTypeInternal;
+extern ProcessBlobInnerRequestV3_DbEntry_DoNotUseDefaultTypeInternal _ProcessBlobInnerRequestV3_DbEntry_DoNotUse_default_instance_;
 class ProcessBlobInnerResponseV3;
 class ProcessBlobInnerResponseV3DefaultTypeInternal;
 extern ProcessBlobInnerResponseV3DefaultTypeInternal _ProcessBlobInnerResponseV3_default_instance_;
@@ -271,6 +277,8 @@ template<> ::executor::v1::ProcessBatchResponseV3* Arena::CreateMaybeMessage<::e
 template<> ::executor::v1::ProcessBatchResponseV3_ReadWriteAddressesEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchResponseV3_ReadWriteAddressesEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBlobInnerRequestV3* Arena::CreateMaybeMessage<::executor::v1::ProcessBlobInnerRequestV3>(Arena*);
+template<> ::executor::v1::ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse>(Arena*);
+template<> ::executor::v1::ProcessBlobInnerRequestV3_DbEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBlobInnerRequestV3_DbEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBlobInnerResponseV3* Arena::CreateMaybeMessage<::executor::v1::ProcessBlobInnerResponseV3>(Arena*);
 template<> ::executor::v1::ProcessBlockResponseV2* Arena::CreateMaybeMessage<::executor::v1::ProcessBlockResponseV2>(Arena*);
 template<> ::executor::v1::ProcessStatelessBatchRequestV2* Arena::CreateMaybeMessage<::executor::v1::ProcessStatelessBatchRequestV2>(Arena*);
@@ -11740,6 +11748,74 @@ class ForcedData PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class ProcessBlobInnerRequestV3_DbEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBlobInnerRequestV3_DbEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBlobInnerRequestV3_DbEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > SuperType;
+  ProcessBlobInnerRequestV3_DbEntry_DoNotUse();
+  ProcessBlobInnerRequestV3_DbEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const ProcessBlobInnerRequestV3_DbEntry_DoNotUse& other);
+  static const ProcessBlobInnerRequestV3_DbEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const ProcessBlobInnerRequestV3_DbEntry_DoNotUse*>(&_ProcessBlobInnerRequestV3_DbEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.ProcessBlobInnerRequestV3.DbEntry.key");
+ }
+  static bool ValidateValue(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.ProcessBlobInnerRequestV3.DbEntry.value");
+ }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[52];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
+class ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > SuperType;
+  ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse();
+  ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse& other);
+  static const ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse*>(&_ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.ProcessBlobInnerRequestV3.ContractsBytecodeEntry.key");
+ }
+  static bool ValidateValue(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.ProcessBlobInnerRequestV3.ContractsBytecodeEntry.value");
+ }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[53];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
 class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.ProcessBlobInnerRequestV3) */ {
  public:
@@ -11782,7 +11858,7 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
                &_ProcessBlobInnerRequestV3_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    52;
+    54;
 
   friend void swap(ProcessBlobInnerRequestV3& a, ProcessBlobInnerRequestV3& b) {
     a.Swap(&b);
@@ -11850,9 +11926,12 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
+
   // accessors -------------------------------------------------------
 
   enum : int {
+    kDbFieldNumber = 18,
+    kContractsBytecodeFieldNumber = 19,
     kOldBlobStateRootFieldNumber = 1,
     kOldBlobAccInputHashFieldNumber = 2,
     kOldStateRootFieldNumber = 4,
@@ -11871,6 +11950,40 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
     kBlobTypeFieldNumber = 11,
     kZkGasLimitFieldNumber = 10,
   };
+  // map<string, string> db = 18;
+  int db_size() const;
+  private:
+  int _internal_db_size() const;
+  public:
+  void clear_db();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      _internal_db() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      _internal_mutable_db();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      db() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      mutable_db();
+
+  // map<string, string> contracts_bytecode = 19;
+  int contracts_bytecode_size() const;
+  private:
+  int _internal_contracts_bytecode_size() const;
+  public:
+  void clear_contracts_bytecode();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      _internal_contracts_bytecode() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      _internal_mutable_contracts_bytecode();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      contracts_bytecode() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      mutable_contracts_bytecode();
+
   // bytes old_blob_state_root = 1;
   void clear_old_blob_state_root();
   const std::string& old_blob_state_root() const;
@@ -12200,6 +12313,18 @@ class ProcessBlobInnerRequestV3 PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      ProcessBlobInnerRequestV3_DbEntry_DoNotUse,
+      std::string, std::string,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      0 > db_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      ProcessBlobInnerRequestV3_ContractsBytecodeEntry_DoNotUse,
+      std::string, std::string,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      0 > contracts_bytecode_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_blob_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_blob_acc_input_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
@@ -12264,7 +12389,7 @@ class DebugV3 PROTOBUF_FINAL :
                &_DebugV3_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    53;
+    55;
 
   friend void swap(DebugV3& a, DebugV3& b) {
     a.Swap(&b);
@@ -12455,7 +12580,7 @@ class ProcessBlobInnerResponseV3 PROTOBUF_FINAL :
                &_ProcessBlobInnerResponseV3_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    54;
+    56;
 
   friend void swap(ProcessBlobInnerResponseV3& a, ProcessBlobInnerResponseV3& b) {
     a.Swap(&b);
@@ -29614,6 +29739,10 @@ inline void ForcedData::set_min_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value)
 
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // ProcessBlobInnerRequestV3
 
 // bytes old_blob_state_root = 1;
@@ -30627,6 +30756,64 @@ inline void ProcessBlobInnerRequestV3::set_allocated_debug(::executor::v1::Debug
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBlobInnerRequestV3.debug)
 }
 
+// map<string, string> db = 18;
+inline int ProcessBlobInnerRequestV3::_internal_db_size() const {
+  return db_.size();
+}
+inline int ProcessBlobInnerRequestV3::db_size() const {
+  return _internal_db_size();
+}
+inline void ProcessBlobInnerRequestV3::clear_db() {
+  db_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+ProcessBlobInnerRequestV3::_internal_db() const {
+  return db_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+ProcessBlobInnerRequestV3::db() const {
+  // @@protoc_insertion_point(field_map:executor.v1.ProcessBlobInnerRequestV3.db)
+  return _internal_db();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+ProcessBlobInnerRequestV3::_internal_mutable_db() {
+  return db_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+ProcessBlobInnerRequestV3::mutable_db() {
+  // @@protoc_insertion_point(field_mutable_map:executor.v1.ProcessBlobInnerRequestV3.db)
+  return _internal_mutable_db();
+}
+
+// map<string, string> contracts_bytecode = 19;
+inline int ProcessBlobInnerRequestV3::_internal_contracts_bytecode_size() const {
+  return contracts_bytecode_.size();
+}
+inline int ProcessBlobInnerRequestV3::contracts_bytecode_size() const {
+  return _internal_contracts_bytecode_size();
+}
+inline void ProcessBlobInnerRequestV3::clear_contracts_bytecode() {
+  contracts_bytecode_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+ProcessBlobInnerRequestV3::_internal_contracts_bytecode() const {
+  return contracts_bytecode_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+ProcessBlobInnerRequestV3::contracts_bytecode() const {
+  // @@protoc_insertion_point(field_map:executor.v1.ProcessBlobInnerRequestV3.contracts_bytecode)
+  return _internal_contracts_bytecode();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+ProcessBlobInnerRequestV3::_internal_mutable_contracts_bytecode() {
+  return contracts_bytecode_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+ProcessBlobInnerRequestV3::mutable_contracts_bytecode() {
+  // @@protoc_insertion_point(field_mutable_map:executor.v1.ProcessBlobInnerRequestV3.contracts_bytecode)
+  return _internal_mutable_contracts_bytecode();
+}
+
 // -------------------------------------------------------------------
 
 // DebugV3
@@ -31298,6 +31485,10 @@ inline void ProcessBlobInnerResponseV3::set_error_rom_blob(::executor::v1::RomBl
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

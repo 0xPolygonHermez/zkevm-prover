@@ -1055,6 +1055,8 @@ message ProcessBlobInnerRequestV3 {
     bytes forced_hash_data = 15;
     string context_id = 16;
     DebugV3 debug = 17;
+    map<string, string> db = 18;
+    map<string, string> contracts_bytecode = 19; // For debug/testing purpposes only. Don't fill this on production
 }
 
 message DebugV3 {

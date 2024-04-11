@@ -1187,6 +1187,110 @@ using grpc::Status;
     ba2scalar(proverRequest.input.publicInputsExtended.newBlobAccInputHash, request->debug().new_blob_acc_input_hash());
     proverRequest.input.publicInputsExtended.newBlobNum = request->debug().new_blob_num();
 
+    // Parse db map
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &db = request->db();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator it;
+    string key;
+    for (it=db.begin(); it!=db.end(); it++)
+    {
+        // Get key
+        key = it->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > 64)
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got db key too long, size=" + to_string(key.size()), &proverRequest.tags);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+            //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::OK;
+        }
+        if (!stringIsHex(key))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got db key not hex, key=" + key, &proverRequest.tags);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+            //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::OK;
+        }
+        PrependZerosNoCopy(key, 64);
+
+        // Get value
+        vector<Goldilocks::Element> dbValue;
+        string concatenatedValues = it->second;
+        if (!stringIsHex(concatenatedValues))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() found db value not hex: " + concatenatedValues, &proverRequest.tags);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+            //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::OK;
+        }
+        if (concatenatedValues.size()%16!=0)
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() found invalid db value size: " + to_string(concatenatedValues.size()), &proverRequest.tags);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+            //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::OK;
+        }
+        for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
+        {
+            Goldilocks::Element fe;
+            string2fe(fr, concatenatedValues.substr(i, 16), fe);
+            dbValue.push_back(fe);
+        }
+        
+        // Save key-value
+        proverRequest.input.db[key] = dbValue;
+
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
+        //zklog.info("input.db[" + key + "]: " + proverRequest.input.db[key], &proverRequest.tags);
+#endif
+    }
+
+    // Parse contracts data
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &contractsBytecode = request->contracts_bytecode();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator itp;
+    for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
+    {
+        // Get key
+        key = itp->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > (64))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got contracts key too long, size=" + to_string(key.size()), &proverRequest.tags);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
+            //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::OK;
+        }
+        if (!stringIsHex(key))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got contracts key not hex, key=" + key, &proverRequest.tags);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
+            //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::OK;
+        }
+        PrependZerosNoCopy(key, 64);
+
+        // Get value
+        if (!stringIsHex(Remove0xIfPresent(itp->second)))
+        {
+            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got contracts value not hex, value=" + itp->second, &proverRequest.tags);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE);
+            //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+            return Status::OK;
+        }
+        vector<uint8_t> dbValue;
+        string contractValue = string2ba(itp->second);
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            dbValue.push_back(contractValue.at(i));
+        }
+
+        // Save key-value
+        proverRequest.input.contractsBytecode[key] = dbValue;
+
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
+        //zklog.info("proverRequest.input.contractsBytecode[" + itp->first + "]: " + itp->second, &proverRequest.tags);
+#endif
+    }
+
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     string l1InfoTreeDataString = " l1InfoTreeData.size=" + to_string(proverRequest.input.l1InfoTreeData.size()) + "=";
     unordered_map<uint64_t, L1Data>::const_iterator itl1;
