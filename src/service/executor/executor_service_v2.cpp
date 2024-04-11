@@ -798,6 +798,15 @@ using grpc::Status;
         }
     }
 
+    // Debug
+    if (!proverRequest.errorLog.empty())
+    {
+        executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
+        zkassertpermanent(pResponseDebug != NULL);
+        pResponseDebug->set_error_log(proverRequest.errorLog);
+        response->set_allocated_debug(pResponseDebug);
+    }
+
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
         string s = "ExecutorServiceImpl::ProcessBatchV2() returns result=" + to_string(response->error()) +
@@ -1480,6 +1489,15 @@ using grpc::Status;
         {
             response->add_program_keys(string2ba(it->c_str()));
         }
+    }
+
+    // Debug
+    if (!proverRequest.errorLog.empty())
+    {
+        executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
+        zkassertpermanent(pResponseDebug != NULL);
+        pResponseDebug->set_error_log(proverRequest.errorLog);
+        response->set_allocated_debug(pResponseDebug);
     }
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT

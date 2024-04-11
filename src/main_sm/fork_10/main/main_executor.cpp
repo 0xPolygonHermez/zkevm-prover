@@ -374,7 +374,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (zkr != ZKR_SUCCESS)
         {
             proverRequest.result = zkr;
-            logError(ctx, string("Copying timestamp from state to memory, failed calling pHashDB->get() result=") + zkresult2string(zkr));
+            logError(ctx, string("Copying timestamp from state to memory, failed calling pHashDB->get() result=") + zkresult2string(zkr) + " key=" + fea2string(fr, keyToRead));
             pHashDB->cancelBatch(proverRequest.uuid);
             return;
         }
@@ -1317,7 +1317,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         if (zkResult != ZKR_SUCCESS)
                         {
                             proverRequest.result = zkResult;
-                            logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult));
+                            logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, key));
                             pHashDB->cancelBatch(proverRequest.uuid);
                             return;
                         }
@@ -1556,7 +1556,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         if (zkResult != ZKR_SUCCESS)
                         {
                             proverRequest.result = zkResult;
-                            logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult));
+                            logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, ctx.lastSWrite.key));
                             pHashDB->cancelBatch(proverRequest.uuid);
                             return;
                         }
@@ -2731,7 +2731,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (zkResult != ZKR_SUCCESS)
             {
                 proverRequest.result = zkResult;
-                logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult));
+                logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, key));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
@@ -2899,7 +2899,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
-                    logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult));
+                    logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, ctx.lastSWrite.key));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
@@ -3537,7 +3537,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
-                    logError(ctx, string("Failed calling pHashDB->setProgram() result=") + zkresult2string(zkResult));
+                    logError(ctx, string("Failed calling pHashDB->setProgram() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, result));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
@@ -3592,7 +3592,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
-                    logError(ctx, string("Failed calling pHashDB->getProgram() result=") + zkresult2string(zkResult));
+                    logError(ctx, string("Failed calling pHashDB->getProgram() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, aux));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
@@ -7037,9 +7037,12 @@ void MainExecutor::assertOutputs(Context &ctx)
 void MainExecutor::logError (Context &ctx, const string &message)
 {
     // Log the message, if provided
+    string log0 = "MainExecutor::logError()";
+    string log1;
     if (message.size() > 0)
     {
-        zklog.error("MainExecutor::logError() " + message);
+        log1 = message;
+        zklog.error(log0 + " " + log1);
     }
 
     // Log details
@@ -7047,22 +7050,25 @@ void MainExecutor::logError (Context &ctx, const string &message)
     uint64_t step = (ctx.pStep != NULL) ? *ctx.pStep : INVALID_LOG_ERROR_VALUE;
     uint64_t evaluation = (ctx.pEvaluation != NULL) ? *ctx.pEvaluation : INVALID_LOG_ERROR_VALUE;
     uint64_t zkpc = (ctx.pZKPC != NULL) ? *ctx.pZKPC : INVALID_LOG_ERROR_VALUE;
-    string romLine = (ctx.pZKPC != NULL) ? ctx.rom.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
-    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) +
+    string romLine = (ctx.pZKPC != NULL) ? romBatch.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+    string log2 = string("proverRequest.result=") + zkresult2string(ctx.proverRequest.result) +
         " step=" + to_string(step) +
         " eval=" + to_string(evaluation) +
         " zkPC=" + to_string(zkpc) +
         " rom.line={" + romLine +
-        "} uuid=" + ctx.proverRequest.uuid,
-        &ctx.proverRequest.tags);
+        "} uuid=" + ctx.proverRequest.uuid;
+    zklog.error(log0 + " " + log2, &ctx.proverRequest.tags);
 
     // Log registers
-    ctx.printRegs();
+    string log3;
+    ctx.printRegs(log3);
 
     // Log the input file content
     json inputJson;
     ctx.proverRequest.input.save(inputJson);
     zklog.error("Input=" + inputJson.dump());
+
+    ctx.proverRequest.errorLog = log0 + " " + log1 + " " + log2 + " " + log3;
 }
 
 void MainExecutor::linearPoseidon (Context &ctx, const vector<uint8_t> &data, Goldilocks::Element (&result)[4])

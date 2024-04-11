@@ -364,6 +364,11 @@ message ProcessBatchResponseV2 {
     uint32 cnt_reserve_steps = 31;
     uint32 cnt_reserve_sha256_hashes = 32;
     bytes old_state_root = 33;
+    ResponseDebug debug = 34;
+}
+
+message ResponseDebug {
+    string error_log = 1;
 }
 
 // Trace configuration request params
@@ -1027,6 +1032,7 @@ message ProcessBatchResponseV3 {
     uint32 cnt_reserve_steps = 33;
     uint32 cnt_reserve_sha256_hashes = 34;
     bytes old_state_root = 35;
+    ResponseDebug debug = 36;
 }
 
 message ForcedData {
@@ -1077,6 +1083,7 @@ message ProcessBlobInnerResponseV3 {
     repeated bytes batch_data = 7;
     ExecutorError error = 8;
     RomBlobError error_rom_blob = 9;
+    ResponseDebug debug = 10;
 }
 
 enum RomBlobError {

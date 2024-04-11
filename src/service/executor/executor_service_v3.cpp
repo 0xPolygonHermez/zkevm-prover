@@ -827,6 +827,15 @@ using grpc::Status;
         }
     }
 
+    // Debug
+    if (!proverRequest.errorLog.empty())
+    {
+        executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
+        zkassertpermanent(pResponseDebug != NULL);
+        pResponseDebug->set_error_log(proverRequest.errorLog);
+        response->set_allocated_debug(pResponseDebug);
+    }
+
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
         string s = "ExecutorServiceImpl::ProcessBatchV3() returns result=" + to_string(response->error()) +
@@ -1351,7 +1360,16 @@ using grpc::Status;
     for (uint64_t i=0; i<finalTraceBlob.batch_data.size(); i++)
     {
         response->add_batch_data(finalTraceBlob.batch_data[i]);
-    }    
+    }
+
+    // Debug
+    if (!proverRequest.errorLog.empty())
+    {
+        executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
+        zkassertpermanent(pResponseDebug != NULL);
+        pResponseDebug->set_error_log(proverRequest.errorLog);
+        response->set_allocated_debug(pResponseDebug);
+    }
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {

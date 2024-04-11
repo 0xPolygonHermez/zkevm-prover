@@ -422,6 +422,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
                 return false;
             }
             newStateRoot = ba2string(processBatchResponse.new_state_root());
+            zklog.info("ExecutorClient::ProcessBatch() newStateRoot=" + newStateRoot);
 
     #ifdef LOG_SERVICE
             cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
