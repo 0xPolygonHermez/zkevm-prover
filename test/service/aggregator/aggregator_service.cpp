@@ -409,7 +409,7 @@ using grpc::Status;
     pPublicInputs->set_previous_l1_info_tree_index(input.publicInputsExtended.publicInputs.previousL1InfoTreeIndex); 
     pPublicInputs->set_chain_id(input.publicInputsExtended.publicInputs.chainID);
     pPublicInputs->set_fork_id(input.publicInputsExtended.publicInputs.forkID);
-    pPublicInputs->set_batch_l2_data(string2ba(input.publicInputsExtended.publicInputs.batchL2Data));
+    pPublicInputs->set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
     pPublicInputs->set_sequencer_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
     pPublicInputs->set_forced_hash_data(scalar2ba(input.publicInputsExtended.publicInputs.forcedHashData));
     // Forced data
@@ -545,7 +545,7 @@ using grpc::Status;
     pPublicInputs->set_blob_type(input.publicInputsExtended.publicInputs.blobType);
     pPublicInputs->set_point_z(scalar2ba(input.publicInputsExtended.publicInputs.pointZ));
     pPublicInputs->set_point_y(scalar2ba(input.publicInputsExtended.publicInputs.pointY));
-    pPublicInputs->set_blob_data(string2ba(input.publicInputsExtended.publicInputs.blobData));
+    pPublicInputs->set_blob_data(input.publicInputsExtended.publicInputs.blobData);
     pPublicInputs->set_forced_hash_data(scalar2ba(input.publicInputsExtended.publicInputs.forcedHashData));
 
     pInputBlobInnerProver->set_allocated_public_inputs(pPublicInputs);
