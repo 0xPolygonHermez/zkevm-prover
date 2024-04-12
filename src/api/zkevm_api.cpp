@@ -1170,7 +1170,7 @@ void recursive2_steps_free(void *pRecursive2Steps) {
 
 void *fri_proof_new(void *pStarks) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
-    FRIProof<Goldilocks::Element>* friProof = new FRIProof<Goldilocks::Element>(starks->starkInfo, 4);
+    FRIProof<Goldilocks::Element>* friProof = new FRIProof<Goldilocks::Element>(starks->starkInfo);
 
     return friProof;
 }
