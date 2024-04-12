@@ -8,7 +8,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fstream>
-#include "stark_info.hpp"
 #include <filesystem>
 #include <cstdint>
 
@@ -21,15 +20,17 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
 {
     TimerStart(BUILD_CONST_TREE);
 
-    StarkInfo starkInfo(starkInfoFile);
+    json starkInfoJson;
+    file2json(starkInfoFile, starkInfoJson);
 
-    uint64_t nBits = starkInfo.starkStruct.nBits;
-    uint64_t nBitsExt = starkInfo.starkStruct.nBitsExt;
+    uint64_t nBits = starkInfoJson["starkStruct"]["nBits"];
+    uint64_t nBitsExt = starkInfoJson["starkStruct"]["nBitsExt"];
     uint64_t N = 1 << nBits;
     uint64_t NExtended = 1 << nBitsExt;
-    uint64_t nPols = starkInfo.nConstants;
+    uint64_t nPols = starkInfoJson["nConstants"];
+    std::string verificationHashType = starkInfoJson["starkStruct"]["verificationHashType"];
 
-    uintmax_t constPolsSize = starkInfo.nConstants * sizeof(Goldilocks::Element) * N;
+    uintmax_t constPolsSize = nPols * sizeof(Goldilocks::Element) * N;
     
     TimerStart(LOADING_CONST_POLS);
     Goldilocks::Element *pConstPols = (Goldilocks::Element *)copyFile(constFile, constPolsSize);
@@ -41,7 +42,7 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
     ntt.extendPol(pConstPolsExt, pConstPols, NExtended, N, nPols);
     TimerStopAndLog(EXTEND_CONST_POLS);
 
-    if (starkInfo.starkStruct.verificationHashType == "GL") {
+    if (verificationHashType == "GL") {
         TimerStart(MERKELIZE_CONST_TREE);
         Goldilocks::Element root[4];
         MerkleTreeGL mt(2, true, NExtended, nPols, pConstPolsExt);
@@ -72,10 +73,13 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
 
         TimerStopAndLog(GENERATING_FILES);
 
-    } else if(starkInfo.starkStruct.verificationHashType == "BN128"){
+    } else if(verificationHashType == "BN128"){
         TimerStart(MERKELIZE_CONST_TREE);
         RawFr::Element rootC;
-        MerkleTreeBN128 mt(starkInfo.starkStruct.merkleTreeArity, starkInfo.starkStruct.merkleTreeCustom, NExtended, nPols, pConstPolsExt);
+        uint64_t merkleTreeArity = starkInfoJson["starkStruct"]["merkleTreeArity"];
+        uint64_t merkleTreeCustom = starkInfoJson["starkStruct"]["merkleTreeCustom"];
+
+        MerkleTreeBN128 mt(merkleTreeArity, merkleTreeCustom, NExtended, nPols, pConstPolsExt);
         mt.merkelize();
         mt.getRoot(&rootC);
         TimerStopAndLog(MERKELIZE_CONST_TREE);
@@ -99,7 +103,7 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
 
         TimerStopAndLog(GENERATING_FILES);
     } else {
-        cerr << "Invalid Hash Type: " << starkInfo.starkStruct.verificationHashType << endl;
+        cerr << "Invalid Hash Type: " << verificationHashType << endl;
         exit(-1);
     }
 
