@@ -3924,7 +3924,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (!bProcessBatch)
             {
                 pols.arith[i] = fr.one();
-                if (rom.line[zkPC].arithEquation != 3)
+                if (rom.line[zkPC].arithEquation == 3)
                 {
                     pols.arithSame12[i] = fr.one();
                 }

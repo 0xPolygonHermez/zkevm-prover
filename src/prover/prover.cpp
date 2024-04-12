@@ -675,6 +675,18 @@ void Prover::genBatchProof (ProverRequest *pProverRequest)
         // newLastTimeStamp
         publics[60] = cmPols.Main.RR[lastN];
 
+        // Save publics to file zkevm.commit
+        if (config.zkevmCmPolsAfterExecutor != "")
+        {
+            json publicStarkJsonBatch;
+            for (uint64_t i = 0; i < starkBatch->starkInfo.nPublics; i++)
+            {
+                publicStarkJsonBatch[i] = Goldilocks::toString(publics[i]);
+            }
+
+            json2file(publicStarkJsonBatch, pProverRequest->filePrefix + "publics.json");
+        }
+
         json recursive2VerkeyJson;
         file2json(config.recursive2Verkey, recursive2VerkeyJson);
         publics[61] = Goldilocks::fromU64(recursive2VerkeyJson["constRoot"][0]);
