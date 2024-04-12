@@ -553,6 +553,12 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             pols.resultEq[offset + 31] = fr.one();
         }
     }
+
+    uint64_t firstUnusedIndex = input.size() * 32;
+    for (uint64_t index = firstUnusedIndex; index < N; index ++)
+    {
+        pols.x3clock[index] = fr.fromU64(0xFFFF);
+    }
     
     zklog.info("ArithExecutor successfully processed " + to_string(action.size()) + " arith actions (" + to_string((double(action.size())*32*100)/N) + "%)");
 }
