@@ -185,7 +185,7 @@ void Input::loadGlobals (json &input)
         }
     }
 
-    if ((publicInputsExtended.publicInputs.forkID >= 7) && (publicInputsExtended.publicInputs.forkID <= 9))
+    if ((publicInputsExtended.publicInputs.forkID >= 7))
     {
         // Input JSON file must contain a timestampLimit key at the root level
         if ( !input.contains("timestampLimit") )
