@@ -97,10 +97,13 @@ $(BUILD_DIR)/gen/%.pb.cc $(BUILD_DIR)/gen/%.pb.h $(BUILD_DIR)/gen/%.grpc.pb.cc $
 	$(PROTOC) -I $(PROTOS_PATH) --grpc_out=$(dir $@) --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
 	$(PROTOC) -I $(PROTOS_PATH) --cpp_out=$(dir $@) $<
 
-# Tells that objects depends on protobuf headers (it would be nice to be more
-# fine grained than this, but it would require listing object files
-# individually).
-$(OBJS_ZKP) $(OBJS_BCT) $(OBJS_TEST): | $(PROTO_H)
+# Tells that objects depends on protobuf headers, except the objects needed by
+# the test target, which are known to not depend on protobuf.
+#
+# (it would be nice to be more fine grained than this, but it would require
+# listing object files individually).
+PROTOB_DEPENDANT_OBJS = $(filter-out $(OBJS_TEST), $(OBJS_ZKP) $(OBJS_BCT))
+$(PROTOB_DEPENDANT_OBJS): | $(PROTO_H)
 
 # assembly
 $(BUILD_DIR)/%.asm.o: %.asm
