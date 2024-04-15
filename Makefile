@@ -18,8 +18,7 @@ endif
 CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS)  -D KMP_USE_SHM #-Wfatal-errors
-LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -fopenmp -liomp5 $(GRPCPP_LIBS) $(GEVULOT_LIBS)
-CFLAGS := -fopenmp
+LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -fopenmp -lgomp $(GRPCPP_LIBS) $(GEVULOT_LIBS)
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
 

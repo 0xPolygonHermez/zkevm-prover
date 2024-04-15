@@ -913,7 +913,7 @@ void show_dir_content(char * path)
 
 int main(int argc, char **argv)
 {
-    printf("zkProver main(): argc %d\n", argc);
+    printf("zkProver linked with libgomp, main(): argc %d\n", argc);
     printf("  Args: \n");
     for (int i = 0; i < argc; i++) 
     {
@@ -923,12 +923,19 @@ int main(int argc, char **argv)
     show_dir_content("/workspace");
     show_dir_content("/config");
 
-    printf("get omp_get_max_threads");
+
+
+    auto ncpus = std::thread::hardware_concurrency();
+    printf("std::thread::hardware_concurrency %d", ncpus);
+
+
+    printf("get omp_get_max_threads\n");
     auto nthreads = omp_get_max_threads();
-    printf("omp_get_max_threads = %d", nthreads);
-    printf("get omp_get_max_threads");
+    printf("omp_get_max_threads = %d\n", nthreads);
+
+    printf("get omp_get_num_procs\n");
     auto nprocs = omp_get_num_procs();
-    printf("omp_get_num_procs = %d", nprocs);
+    printf("omp_get_num_procs = %d\n", nprocs);
 
 
     if (argc == 1) 
