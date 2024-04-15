@@ -4,7 +4,7 @@
 
     // FFI functions
 
-    int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRequestsOut);
+    int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRequestsOut, void *pStarkInfo = nullptr);
     int zkevm_delete_sm_requests(void **pSMRequests);
     int zkevm_arith(void * inputs, int ninputs, void * pAddress);
     int zkevm_arith_req(void* pSMRequests,  void * pAddress);
@@ -69,6 +69,8 @@
     void *starkinfo_new(char* filename);
     uint64_t get_mapTotalN(void *pStarkInfo);
     void set_mapOffsets(void *pStarkInfo, void *pChelpers);
+    uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag);
+    uint64_t get_map_sections_n(void *pStarkInfo, char *stage);
     void starkinfo_free(void *pStarkInfo);
 
     // Starks
@@ -83,7 +85,7 @@
 
     void init_hints();
 
-    void *steps_params_new(void *pStarks, void * pChallenges, void *pSubproofValues, void *pEvals, void *pXDivXSubXi, void *pPublicInputs);
+    void *steps_params_new(void *pStarks, void * pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs);
     void *get_steps_params_field(void *pStepsParams, char *name);
     void steps_params_free(void *pStepsParams);
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
@@ -96,7 +98,9 @@
     void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
 
-    void* get_vector_pointer(void *pStarks, char* name);
+    void *get_proof_root(void *pProof, uint64_t stage_id, uint64_t index);
+
+    void *get_vector_pointer(void *pStarks, char *name);
     void resize_vector(void *pVector, uint64_t newSize, bool value);
     void set_bool_vector_value(void *pVector, uint64_t index, bool value);
 

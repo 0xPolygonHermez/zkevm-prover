@@ -88,7 +88,7 @@ using json = nlohmann::json;
     | Circom
 */
 
-void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
+void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config, void *pStarkInfo = nullptr)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
@@ -116,7 +116,7 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
     }
 
     // Call the prover
-    prover.genBatchProof(&proverRequest);
+    prover.genBatchProof(&proverRequest, pStarkInfo);
 }
 
 void runFileGenAggregatedProof(Goldilocks fr, Prover &prover, Config &config)
@@ -293,7 +293,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     prover.execute(&proverRequest);
 }
 
-int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRequestsOut)
+int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRequestsOut, void *pStarkInfo)
 {
     
     // Create one instance of Config based on the contents of the file config.json
@@ -592,13 +592,13 @@ int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRe
                 tmpConfig.inputFile = config.inputFile + files[i];
                 zklog.info("runFileGenBatchProof inputFile=" + tmpConfig.inputFile);
                 // Call the prover
-                runFileGenBatchProof(fr, prover, tmpConfig);
+                runFileGenBatchProof(fr, prover, tmpConfig, pStarkInfo);
             }
         }
         else
         {
             // Call the prover
-            runFileGenBatchProof(fr, prover, config);
+            runFileGenBatchProof(fr, prover, config, pStarkInfo);
         }
     }
 
@@ -1222,6 +1222,17 @@ void set_mapOffsets(void *pStarkInfo, void *pChelpers)
     starkInfo->setMapOffsets(cHelpers->hints);
 }
 
+uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag) {
+    auto starkInfo = (StarkInfo *)pStarkInfo;
+    return starkInfo->mapOffsets[std::make_pair(stage, flag)];
+}
+
+uint64_t get_map_sections_n(void *pStarkInfo, char *stage)
+{
+    auto starkInfo = (StarkInfo *)pStarkInfo;
+    return starkInfo->mapSectionsN[stage];
+}
+
 void starkinfo_free(void *pStarkInfo) {
     auto starkInfo = (StarkInfo*)pStarkInfo;
     delete starkInfo;
@@ -1257,15 +1268,14 @@ void init_hints() {
     HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
 }
 
-void *steps_params_new(void *pStarks, void * pChallenges, void * pSubproofValues, void *pEvals, void *pXDivXSubXi, void *pPublicInputs) {
+void *steps_params_new(void *pStarks, void * pChallenges, void * pSubproofValues, void *pEvals, void *pPublicInputs) {
     Starks<Goldilocks::Element>* starks = (Starks<Goldilocks::Element>*)pStarks;
     Goldilocks::Element* challenges = (Goldilocks::Element*)pChallenges;
     Goldilocks::Element* subproofValues = (Goldilocks::Element*)pSubproofValues;
     Goldilocks::Element* evals = (Goldilocks::Element*)pEvals;
-    Goldilocks::Element* xDivXSubXi = (Goldilocks::Element*)pXDivXSubXi;
     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
 
-    return starks->ffi_create_steps_params(challenges, subproofValues, evals, xDivXSubXi, publicInputs);
+    return starks->ffi_create_steps_params(challenges, subproofValues, evals, publicInputs);
 }
 
 void *get_steps_params_field(void *pStepsParams, char *name) {
@@ -1336,6 +1346,12 @@ void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t st
 void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element>*)pStarks;
     starks->computeFRIQueries(*(FRIProof<Goldilocks::Element>*)pProof, friQueries);
+}
+
+void *get_proof_root(void *pProof, uint64_t stage_id, uint64_t index) {
+    FRIProof<Goldilocks::Element> *proof = (FRIProof<Goldilocks::Element>*)pProof;
+    cout << toString(proof->proofs.roots[stage_id][index]) << endl;
+    return &proof->proofs.roots[stage_id][index];
 }
 
 void *get_vector_pointer(void *pStarks, char *name) {

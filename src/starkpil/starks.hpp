@@ -391,7 +391,7 @@ public:
     void cleanSymbolsCalculated();
 
     // Following function are created to be used by the ffi interface
-    void *ffi_create_steps_params(Goldilocks::Element *pChallenges, Goldilocks::Element* pSubproofValues, Goldilocks::Element *pEvals, Goldilocks::Element *pXDivXSubXi, Goldilocks::Element *pPublicInputs);
+    void *ffi_create_steps_params(Goldilocks::Element *pChallenges, Goldilocks::Element* pSubproofValues, Goldilocks::Element *pEvals, Goldilocks::Element *pPublicInputs);
     void ffi_extend_and_merkelize(uint64_t step, StepsParams *params, FRIProof<ElementType> *proof);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 

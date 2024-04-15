@@ -436,7 +436,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     //TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
-void Prover::genBatchProof(ProverRequest *pProverRequest)
+void Prover::genBatchProof(ProverRequest *pProverRequest, void *pStarkInfo)
 {
     zkassert(config.generateProof());
     zkassert(pProverRequest != NULL);
@@ -467,7 +467,10 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     /************/
     TimerStart(EXECUTOR_EXECUTE_INITIALIZATION);
 
-    PROVER_FORK_NAMESPACE::CommitPols cmPols((uint8_t *)pAddress + starkInfoZkevm->mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element), PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
+#ifdef __LIB__
+    auto starkInfoZkevm = (StarkInfo *)pStarkInfo;
+#endif
+    PROVER_FORK_NAMESPACE::CommitPols cmPols((uint8_t *)pAddress + starkInfoZkevm->mapOffsets[std::make_pair("cm1", false)] * sizeof(Goldilocks::Element), PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
     uint64_t num_threads = omp_get_max_threads();
     uint64_t bytes_per_thread = cmPols.size() / num_threads;
 #pragma omp parallel for num_threads(num_threads)

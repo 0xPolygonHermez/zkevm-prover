@@ -1057,7 +1057,7 @@ void Starks<ElementType>::printPolRoot(uint64_t polId, StepsParams &params)
 }
 
 template <typename ElementType>
-void *Starks<ElementType>::ffi_create_steps_params(Goldilocks::Element *pChallenges, Goldilocks::Element *pSubproofValues, Goldilocks::Element *pEvals, Goldilocks::Element *pXDivXSubXi, Goldilocks::Element *pPublicInputs)
+void *Starks<ElementType>::ffi_create_steps_params(Goldilocks::Element *pChallenges, Goldilocks::Element *pSubproofValues, Goldilocks::Element *pEvals, Goldilocks::Element *pPublicInputs)
 {
     StepsParams *params = new StepsParams{
         pols : mem,
@@ -1069,7 +1069,7 @@ void *Starks<ElementType>::ffi_create_steps_params(Goldilocks::Element *pChallen
         x_n : x_n,
         x_2ns : x_2ns,
         zi : zi,
-        xDivXSubXi : pXDivXSubXi,
+        xDivXSubXi : xDivXSubXi,
         publicInputs : pPublicInputs,
         q_2ns : q_2ns,
         f_2ns : f_2ns,
