@@ -11,7 +11,7 @@ SRC_DIRS := ./src ./test ./tools
 GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
 GRPCPP_LIBS := $(shell pkg-config grpc++ --libs) -lgrpc++_reflection
 ifndef GRPCPP_LIBS
-$(error gRPC++ could not be found via pkg-config, you need to install them)
+$(warning gRPC++ could not be found via pkg-config, you need to install them)
 endif
 
 CXX := g++
