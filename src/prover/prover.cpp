@@ -143,17 +143,17 @@ Prover::Prover(Goldilocks &fr,
             if (config.zkevmCmPols.size() > 0)
             {
                 pAddress = mapFile(config.zkevmCmPols, polsSize, true);
-                zklog.info("Prover::genBatchProof() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
+                zklog.info("Prover::Prover() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
             }
             else
             {
                 pAddress = calloc(polsSize, 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Prover::genBatchProof() failed calling calloc() of size " + to_string(polsSize));
+                    zklog.error("Prover::Prover() failed calling calloc() of size " + to_string(polsSize));
                     exitProcess();
                 }
-                zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
+                zklog.info("Prover::Prover() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
@@ -526,12 +526,15 @@ void Prover::genBatchProof (ProverRequest *pProverRequest)
     // zklog.info("Prover::genBatchProof() proof file: " + pProverRequest->proofFile());
 
     // Save input to <timestamp>.input.json, as provided by client
+    string inputString;
+    json inputJson;
+    inputString = pProverRequest->input.save(inputJson);
     if (config.saveInputToFile)
     {
-        json inputJson;
-        pProverRequest->input.save(inputJson);
         json2file(inputJson, pProverRequest->inputFile());
     }
+
+    zklog.info("Prover::genBatchProof() got " + inputString);
 
     /************/
     /* Executor */
@@ -830,12 +833,15 @@ void Prover::genBlobInnerProof (ProverRequest *pProverRequest){
     // zklog.info("Prover::genBlobInnerProof() proof file: " + pProverRequest->proofFile());
 
     // Save input to <timestamp>.input.json, as provided by client
+    string inputString;
+    json inputJson;
+    inputString = pProverRequest->input.save(inputJson);
     if (config.saveInputToFile)
     {
-        json inputJson;
-        pProverRequest->input.save(inputJson);
         json2file(inputJson, pProverRequest->inputFile());
     }
+    
+    zklog.info("Prover::genBlobInnerProof() got " + inputString);
 
     /************/
     /* Executor */
@@ -1765,12 +1771,15 @@ void Prover::executeBatch (ProverRequest *pProverRequest)
     }
 
     // Save input to <timestamp>.input.json, as provided by client
+    string inputString;
+    json inputJson;
+    inputString = pProverRequest->input.save(inputJson);
     if (config.saveInputToFile)
     {
-        json inputJson;
-        pProverRequest->input.save(inputJson);
         json2file(inputJson, pProverRequest->inputFile());
     }
+
+    //zklog.info("Prover::executeBatch() got " + inputString);
 
     /*******************/
     /* Allocate memory */
@@ -1869,12 +1878,15 @@ void Prover::executeBlobInner (ProverRequest *pProverRequest)
     }
 
     // Save input to <timestamp>.input.json, as provided by client
+    string inputString;
+    json inputJson;
+    inputString = pProverRequest->input.save(inputJson);
     if (config.saveInputToFile)
     {
-        json inputJson;
-        pProverRequest->input.save(inputJson);
         json2file(inputJson, pProverRequest->inputFile());
     }
+
+    zklog.info("Prover::executeBlobInner() got " + inputString);
 
     /*******************/
     /* Allocate memory */

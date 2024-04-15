@@ -14,16 +14,18 @@ zkresult Input::load (json &input)
     return ZKR_SUCCESS;
 }
 
-void Input::save (json &input) const
+string Input::save (json &input) const
 {
-    saveGlobals(input);
-    saveDatabase(input);
+    string result = saveGlobals(input);
+    result += saveDatabase(input);
+    return result;
 }
 
-void Input::save (json &input, DatabaseMap &dbReadLog) const
+string Input::save (json &input, DatabaseMap &dbReadLog) const
 {
-    saveGlobals(input);
-    saveDatabase(input, dbReadLog);
+    string result = saveGlobals(input);
+    result += saveDatabase(input, dbReadLog);
+    return result;
 }
 
 /* Load old/new state roots, sequencer address and chain ID */
@@ -1183,79 +1185,153 @@ void Input::loadGlobals (json &input)
     }
 }
 
-void Input::saveGlobals (json &input) const
+string Input::saveGlobals (json &input) const
 {
+    string s;
+
     // Public inputs
     if (publicInputsExtended.publicInputs.forkID != 0)
     {
         input["forkID"] = publicInputsExtended.publicInputs.forkID;
+        s += "forkID=" + to_string(publicInputsExtended.publicInputs.forkID) + " ";
     }
     if (publicInputsExtended.publicInputs.oldStateRoot != 0)
     {
         input["oldStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64);
+        s += "oldStateRoot=" + publicInputsExtended.publicInputs.oldStateRoot.get_str(16) + " ";
     }
     if (publicInputsExtended.publicInputs.oldAccInputHash != 0)
     {
         input["oldAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldAccInputHash.get_str(16), 64);
+        s += "oldAccInputHash=" + publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) + " ";
     }
     if (publicInputsExtended.publicInputs.oldBatchNum != 0)
     {
         input["oldNumBatch"] = publicInputsExtended.publicInputs.oldBatchNum;
+        s += "oldBatchNum=" + to_string(publicInputsExtended.publicInputs.oldBatchNum) + " ";
     }
     input["chainID"] = publicInputsExtended.publicInputs.chainID;
+    s += "chainID=" + to_string(publicInputsExtended.publicInputs.chainID) + " ";
     if (!publicInputsExtended.publicInputs.batchL2Data.empty())
     {
         input["batchL2Data"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.batchL2Data));
+        const string &data = publicInputsExtended.publicInputs.batchL2Data;
+        s += "batchL2Data=" + ba2string(data.substr(0, 10)) + "..." + ba2string(data.substr(zkmax(int64_t(0),int64_t(data.size())-10), data.size())) + " ";
     }
     input["sequencerAddr"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.sequencerAddr.get_str(16), 40);
+    s += "sequencerAddr=" + publicInputsExtended.publicInputs.sequencerAddr.get_str(16) + " ";
     if (publicInputsExtended.publicInputs.aggregatorAddress != 0)
     {
         input["aggregatorAddress"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.aggregatorAddress.get_str(16), 40);
+        s += "aggregatorAddress=" + publicInputsExtended.publicInputs.aggregatorAddress.get_str(16) + " ";
     }
     if (publicInputsExtended.publicInputs.forkID <= 6)
     {
         input["globalExitRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.globalExitRoot.get_str(16), 64);
+        s += "globalExitRoot=" + publicInputsExtended.publicInputs.globalExitRoot.get_str(16) + " ";
+
         input["timestamp"] = publicInputsExtended.publicInputs.timestamp;
+        s += "timestamp=" + to_string(publicInputsExtended.publicInputs.timestamp) + " ";
     }
     if (publicInputsExtended.publicInputs.forkID >= 7)
     {
         input["l1InfoRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.l1InfoRoot.get_str(16), 64);
+        s += "l1InfoRoot=" + publicInputsExtended.publicInputs.l1InfoRoot.get_str(16) + " ";
+        
         input["forcedBlockHashL1"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.forcedBlockHashL1.get_str(16), 64);
+        s += "forcedBlockHashL1=" + publicInputsExtended.publicInputs.forcedBlockHashL1.get_str(16) + " ";
+        
         input["timestampLimit"] = publicInputsExtended.publicInputs.timestampLimit;
+        s += "timestampLimit=" + to_string(publicInputsExtended.publicInputs.timestampLimit) + " ";
     }
     if (!publicInputsExtended.publicInputs.witness.empty())
     {
         input["witness"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.witness));
+        const string &data = publicInputsExtended.publicInputs.witness;
+        s += "witness=" + ba2string(data.substr(0, 10)) + "..." + ba2string(data.substr(zkmax(int64_t(0),int64_t(data.size())-10), data.size())) + " ";
     }
     if (!publicInputsExtended.publicInputs.dataStream.empty())
     {
         input["dataStream"] =  Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.dataStream));
+        const string &data = publicInputsExtended.publicInputs.dataStream;
+        s += "dataStream=" + ba2string(data.substr(0, 10)) + "..." + ba2string(data.substr(zkmax(int64_t(0),int64_t(data.size())-10), data.size())) + " ";
     }
 
     // Public inputs extended
-    if (publicInputsExtended.newStateRoot != 0) input["newStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.newStateRoot.get_str(16), 64);
-    if (publicInputsExtended.newAccInputHash != 0) input["newAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.newAccInputHash.get_str(16), 64);
-    if (publicInputsExtended.newLocalExitRoot != 0) input["newLocalExitRoot"] = NormalizeTo0xNFormat(publicInputsExtended.newLocalExitRoot.get_str(16), 64);
-    if (publicInputsExtended.newBatchNum != 0) input["newNumBatch"] = publicInputsExtended.newBatchNum;
-    if (publicInputsExtended.newLastTimestamp != 0) input["newLastTimestamp"] = publicInputsExtended.newLastTimestamp;
+    if (publicInputsExtended.newStateRoot != 0)
+    {
+        input["newStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.newStateRoot.get_str(16), 64);
+        s += "newStateRoot=" + publicInputsExtended.newStateRoot.get_str(16) + " ";
+    }
+    if (publicInputsExtended.newAccInputHash != 0)
+    {
+        input["newAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.newAccInputHash.get_str(16), 64);
+        s += "newAccInputHash=" + publicInputsExtended.newAccInputHash.get_str(16) + " ";
+    }
+    if (publicInputsExtended.newLocalExitRoot != 0)
+    {
+        input["newLocalExitRoot"] = NormalizeTo0xNFormat(publicInputsExtended.newLocalExitRoot.get_str(16), 64);
+        s += "newLocalExitRoot=" + publicInputsExtended.newLocalExitRoot.get_str(16) + " ";
+    }
+    if (publicInputsExtended.newBatchNum != 0)
+    {
+        input["newNumBatch"] = publicInputsExtended.newBatchNum;
+        s += "newBatchNum=" + to_string(publicInputsExtended.newBatchNum) + " ";
+    }
+    if (publicInputsExtended.newLastTimestamp != 0)
+    {
+        input["newLastTimestamp"] = publicInputsExtended.newLastTimestamp;
+        s += "newLastTimestamp=" + to_string(publicInputsExtended.newLastTimestamp) + " ";
+    }
 
     // Root
-    if (!from.empty() && (from != "0x")) input["from"] = from;
+    if (!from.empty() && (from != "0x"))
+    {
+        input["from"] = from;
+        s += "from=" + from + " ";
+    }
     input["updateMerkleTree"] = bUpdateMerkleTree;
-    if (bNoCounters) input["noCounters"] = bNoCounters;
-    if (bGetKeys) input["getKeys"] = bGetKeys;
-    if (bSkipVerifyL1InfoRoot) input["skipVerifyL1InfoRoot"] = bSkipVerifyL1InfoRoot;
-    if (bSkipFirstChangeL2Block) input["skipFirstChangeL2Block"] = bSkipFirstChangeL2Block;
-    if (bSkipWriteBlockInfoRoot) input["skipWriteBlockInfoRoot"] = bSkipWriteBlockInfoRoot;
+    s += "updateMerkleTree=" + to_string(bUpdateMerkleTree) + " ";
+    if (bNoCounters)
+    {
+        input["noCounters"] = bNoCounters;
+        s += "noCounters=" + to_string(bNoCounters) + " ";
+    }
+    if (bGetKeys)
+    {
+        input["getKeys"] = bGetKeys;
+        s += "getKeys=" + to_string(bGetKeys) + " ";
+    }
+    if (bSkipVerifyL1InfoRoot)
+    {
+        input["skipVerifyL1InfoRoot"] = bSkipVerifyL1InfoRoot;
+        s += "skipVerifyL1InfoRoot=" + to_string(bSkipVerifyL1InfoRoot) + " ";
+    }
+    if (bSkipFirstChangeL2Block)
+    {
+        input["skipFirstChangeL2Block"] = bSkipFirstChangeL2Block;
+        s += "skipFirstChangeL2Block=" + to_string(bSkipFirstChangeL2Block) + " ";
+    }
+    if (bSkipWriteBlockInfoRoot)
+    {
+        input["skipWriteBlockInfoRoot"] = bSkipWriteBlockInfoRoot;
+        s += "skipWriteBlockInfoRoot=" + to_string(bSkipWriteBlockInfoRoot) + " ";
+    }
     if (publicInputsExtended.publicInputs.forkID >= 7)
     {
         if (stepsN != 0)
         {
             input["stepsN"] = stepsN;
+            s += "stepsN=" + to_string(stepsN) + " ";
         }
         if (debug.gasLimit != 0)
         {
             input["gasLimit"] = debug.gasLimit;
+            s += "gasLimit=" + to_string(debug.gasLimit) + " ";
+        }
+        if (!l1InfoTreeData.empty())
+        {
+            s += "l1InfoTreeData.size=" + to_string(l1InfoTreeData.size()) + " ";
         }
         unordered_map<uint64_t, L1Data>::const_iterator it;
         for (it = l1InfoTreeData.begin(); it != l1InfoTreeData.end(); it++)
@@ -1264,16 +1340,19 @@ void Input::saveGlobals (json &input) const
             if (it->second.globalExitRoot != 0)
             {
                 input["l1InfoTree"][index]["globalExitRoot"] = NormalizeTo0xNFormat(it->second.globalExitRoot.get_str(16), 64);
+                s += "liInfoTree[" + index + "].globalExitRoot=" + it->second.globalExitRoot.get_str(16) + " ";
             }
             if (it->second.blockHashL1 != 0)
             {
                 input["l1InfoTree"][index]["blockHash"] = NormalizeTo0xNFormat(it->second.blockHashL1.get_str(16), 64);
+                s += "liInfoTree[" + index + "].blockHashL1=" + it->second.blockHashL1.get_str(16) + " ";
             }
             if (it->second.minTimestamp != 0)
             {
                 mpz_class auxScalar;
                 auxScalar = it->second.minTimestamp;
                 input["l1InfoTree"][index]["minTimestamp"] = auxScalar.get_str(10);
+                s += "liInfoTree[" + index + "].minTimestamp=" + auxScalar.get_str(16) + " ";
             }
             for (uint64_t i=0; i<it->second.smtProof.size(); i++)
             {
@@ -1290,10 +1369,19 @@ void Input::saveGlobals (json &input) const
     if (traceConfig.bEnabled)
     {
         input["disableStorage"] = traceConfig.bDisableStorage;
+        s += "traceConfig.bDisableStorage=" + to_string(traceConfig.bDisableStorage) + " ";
+
         input["disableStack"] = traceConfig.bDisableStack;
+        s += "traceConfig.bDisableStack=" + to_string(traceConfig.bDisableStack) + " ";
+
         input["enableMemory"] = traceConfig.bEnableMemory;
+        s += "traceConfig.bEnableMemory=" + to_string(traceConfig.bEnableMemory) + " ";
+
         input["enableReturnData"] = traceConfig.bEnableReturnData;
+        s += "traceConfig.bEnableReturnData=" + to_string(traceConfig.bEnableReturnData) + " ";
+
         input["txHashToGenerateFullTrace"] = traceConfig.txHashToGenerateFullTrace;
+        s += "traceConfig.txHashToGenerateFullTrace=" + traceConfig.txHashToGenerateFullTrace + " ";
     }
 
     if (publicInputsExtended.publicInputs.forkID >= 10)
@@ -1301,108 +1389,135 @@ void Input::saveGlobals (json &input) const
         if (publicInputsExtended.publicInputs.oldBlobStateRoot != 0)
         {
             input["oldBlobStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16), 64);
+            s += "oldBlobStateRoot=" + publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16) + " ";
         }
         if (publicInputsExtended.publicInputs.oldBlobAccInputHash != 0)
         {
             input["oldBlobAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16), 64);
+            s += "oldBlobAccInputHash=" + publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16) + " ";
         }
         if (publicInputsExtended.publicInputs.oldBlobNum != 0)
         {
             input["oldNumBlob"] = publicInputsExtended.publicInputs.oldBlobNum;
+            s += "oldBlobNum=" + to_string(publicInputsExtended.publicInputs.oldBlobNum) + " ";
         }
         if (publicInputsExtended.publicInputs.lastL1InfoTreeIndex != 0)
         {
             input["lastL1InfoTreeIndex"] = publicInputsExtended.publicInputs.lastL1InfoTreeIndex;
+            s += "lastL1InfoTreeIndex=" + to_string(publicInputsExtended.publicInputs.lastL1InfoTreeIndex) + " ";
         }
         if (publicInputsExtended.publicInputs.lastL1InfoTreeRoot != 0)
         {
             input["lastL1InfoTreeRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.lastL1InfoTreeRoot.get_str(16), 64);
+            s += "lastL1InfoTreeRoot=" + publicInputsExtended.publicInputs.lastL1InfoTreeRoot.get_str(16) + " ";
         }
         if (publicInputsExtended.publicInputs.zkGasLimit != 0)
         {
             input["zkGasLimit"] = to_string(publicInputsExtended.publicInputs.zkGasLimit);
+            s += "zkGasLimit=" + to_string(publicInputsExtended.publicInputs.zkGasLimit) + " ";
         }
         if (publicInputsExtended.publicInputs.pointZ != 0)
         {
             input["pointZ"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.pointZ.get_str(16), 64);
+            s += "pointZ=" + publicInputsExtended.publicInputs.pointZ.get_str(16) + " ";
         }
         if (publicInputsExtended.publicInputs.pointY != 0)
         {
             input["pointY"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.pointY.get_str(16), 64);
+            s += "pointY=" + publicInputsExtended.publicInputs.pointY.get_str(16) + " ";
         }
         if (!publicInputsExtended.publicInputs.blobData.empty())
         {
             input["blobData"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.blobData));
+            const string &data = publicInputsExtended.publicInputs.blobData;
+            s += "blobData=" + ba2string(data.substr(0, 10)) + "..." + ba2string(data.substr(zkmax(int64_t(0),int64_t(data.size())-10), data.size())) + " ";
         }
         if (publicInputsExtended.publicInputs.blobL2HashData != 0)
         {
             input["blobL2HashData"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.blobL2HashData.get_str(16), 64);
+            s += "blobL2HashData=" + publicInputsExtended.publicInputs.blobL2HashData.get_str(16) + " ";
         }
         if (publicInputsExtended.publicInputs.batchHashData != 0)
         {
             input["batchHashData"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.batchHashData.get_str(16), 64);
+            s += "batchHashData=" + publicInputsExtended.publicInputs.batchHashData.get_str(16) + " ";
         }
         if (publicInputsExtended.currentL1InfoTreeRoot != 0)
         {
             input["currentL1InfoTreeRoot"] = NormalizeTo0xNFormat(publicInputsExtended.currentL1InfoTreeRoot.get_str(16), 64);
+            s += "currentL1InfoTreeRoot=" + publicInputsExtended.currentL1InfoTreeRoot.get_str(16) + " ";
         }
         if (publicInputsExtended.currentL1InfoTreeIndex != 0)
         {
             input["currentL1InfoTreeIndex"] = publicInputsExtended.currentL1InfoTreeIndex;
+            s += "currentL1InfoTreeIndex=" + to_string(publicInputsExtended.currentL1InfoTreeIndex) + " ";
         }
         if (publicInputsExtended.newBlobStateRoot != 0)
         {
             input["newBlobStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.newBlobStateRoot.get_str(16), 64);
+            s += "newBlobStateRoot=" + publicInputsExtended.newBlobStateRoot.get_str(16) + " ";
         }
         if (publicInputsExtended.newBlobAccInputHash != 0)
         {
             input["newBlobAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.newBlobAccInputHash.get_str(16), 64);
+            s += "newBlobAccInputHash=" + publicInputsExtended.newBlobAccInputHash.get_str(16) + " ";
         }
         if (publicInputsExtended.newBlobNum != 0)
         {
             input["newBlobNum"] = publicInputsExtended.newBlobNum;
+            s += "newBlobNum=" + to_string(publicInputsExtended.newBlobNum) + " ";
         }
         if (publicInputsExtended.finalAccBatchHashData != 0)
         {
             input["finalAccBatchHashData"] = NormalizeTo0xNFormat(publicInputsExtended.finalAccBatchHashData.get_str(16), 64);
+            s += "finalAccBatchHashData=" + publicInputsExtended.finalAccBatchHashData.get_str(16) + " ";
         }
         if (publicInputsExtended.localExitRootFromBlob != 0)
         {
             input["localExitRootFromBlob"] = NormalizeTo0xNFormat(publicInputsExtended.localExitRootFromBlob.get_str(16), 64);
+            s += "localExitRootFromBlob=" + publicInputsExtended.localExitRootFromBlob.get_str(16) + " ";
         }
         if (publicInputsExtended.isInvalid)
         {
             input["isInvalid"] = publicInputsExtended.isInvalid;
-        }
-        if (publicInputsExtended.publicInputs.batchHashData != 0)
-        {
-            input["batchHashData"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.batchHashData.get_str(16), 64);
+            s += "isInvalid=" + to_string(publicInputsExtended.isInvalid) + " ";
         }
         if (publicInputsExtended.publicInputs.blobType != 0)
         {
             input["blobType"] = publicInputsExtended.publicInputs.blobType;
+            s += "blobType=" + to_string(publicInputsExtended.publicInputs.blobType) + " ";
         }
         if ( (publicInputsExtended.publicInputs.forcedData.globalExitRoot != 0) ||
              (publicInputsExtended.publicInputs.forcedData.blockHashL1 != 0) ||
              (publicInputsExtended.publicInputs.forcedData.minTimestamp != 0) )
         {
             input["forcedData"]["globalExitRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.forcedData.globalExitRoot.get_str(16), 64);
+            s += "forcedData.globalExitRoot=" + publicInputsExtended.publicInputs.forcedData.globalExitRoot.get_str(16) + " ";
+
             input["forcedData"]["blockHashL1"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.forcedData.blockHashL1.get_str(16), 64);
+            s += "forcedData.blockHashL1=" + publicInputsExtended.publicInputs.forcedData.blockHashL1.get_str(16) + " ";
+
             input["forcedData"]["minTimestamp"] = publicInputsExtended.publicInputs.forcedData.minTimestamp;
+            s += "forcedData.minTimestamp=" + to_string(publicInputsExtended.publicInputs.forcedData.minTimestamp) + " ";
         }
         if (publicInputsExtended.publicInputs.forcedHashData != 0)
         {
             input["forcedHashData"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.forcedHashData.get_str(16), 64);
+            s += "forcedHashData=" + publicInputsExtended.publicInputs.forcedHashData.get_str(16) + " ";
         }
         if (publicInputsExtended.publicInputs.previousL1InfoTreeIndex != 0)
         {
             input["previousL1InfoTreeIndex"] = publicInputsExtended.publicInputs.previousL1InfoTreeIndex;
+            s += "previousL1InfoTreeIndex=" + to_string(publicInputsExtended.publicInputs.previousL1InfoTreeIndex) + " ";
         }
         if (publicInputsExtended.publicInputs.previousL1InfoTreeRoot != 0)
         {
             input["previousL1InfoTreeRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.previousL1InfoTreeRoot.get_str(16), 64);
+            s += "previousL1InfoTreeRoot=" + publicInputsExtended.publicInputs.previousL1InfoTreeRoot.get_str(16) + " ";
         }
     }
+
+    return s;
 }
 
 
@@ -1552,14 +1667,35 @@ void Input::contractsBytecode2json (json &input, const DatabaseMap::ProgramMap &
     }
 }
 
-void Input::saveDatabase (json &input) const
+string Input::saveDatabase (json &input) const
 {
     db2json(input, db, "db");
     contractsBytecode2json(input, contractsBytecode, "contractsBytecode");
+    string s;
+    if (!db.empty())
+    {
+        s += "db.size=" + to_string(db.size()) + " ";
+    }
+    if (!contractsBytecode.empty())
+    {
+        s += "contracts.size=" + to_string(contractsBytecode.size()) + " ";
+    }
+    return s;
 }
 
-void Input::saveDatabase (json &input, DatabaseMap &dbReadLog) const
+string Input::saveDatabase (json &input, DatabaseMap &dbReadLog) const
 {
     db2json(input, dbReadLog.getMTDB(), "db");
     contractsBytecode2json(input, dbReadLog.getProgramDB(), "contractsBytecode");
+    string s;
+    if (!db.empty())
+    {
+        s += "db.size=" + to_string(db.size()) + " ";
+    }
+    if (!contractsBytecode.empty())
+    {
+        s += "contracts.size=" + to_string(contractsBytecode.size()) + " ";
+    }
+    return s;
 }
+
