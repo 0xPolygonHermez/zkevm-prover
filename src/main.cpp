@@ -870,42 +870,35 @@ void* run_gevulot(const struct Task* task) {
 }
 
 
-// int printDirContents(const char *name) {
-//   DIR *d;
-//   struct dirent *dir;
-//   printf("printDirContents for %s\n", name);
-//   d = opendir(name);
-//   if (d) {
-//     while ((dir = readdir(d)) != NULL) {
-//       printf("  %s\n", dir->d_name);
-//     }
-//     closedir(d);
-//   }
-//   return(0);
-// }
+void print_indent(int indent) {
+    for (int i = 0; i < indent; i++) {
+        printf(" ");
+    }
+}
 
-// #define NORMAL_COLOR  "\x1B[0m"
-// #define GREEN  "\x1B[32m"
-// #define BLUE  "\x1B[34m"
-
-void show_dir_content(char * path)
+void show_dir_content(char * path, int indent)
 {
-  printf("show_dir_content for %s\n", path);
+  for (int i = 0; i++; i)
+  print_indent(indent);
+  printf("dir contents for %s\n", path);
 
     DIR * d = opendir(path); // open the path
   if(d==NULL) return; // if was not able, return
   struct dirent * dir; // for the directory entries
   while ((dir = readdir(d)) != NULL) // if we were able to read somehting from the directory
     {
-      if(dir-> d_type != DT_DIR) // if the type is not directory just print it with blue color
+      if(dir-> d_type != DT_DIR) {
+        // if the type is not directory just print it with blue color
+        print_indent(indent);
         printf("%s\n", dir->d_name);
-      else
-      if(dir -> d_type == DT_DIR && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) // if it is a directory
+      }
+      else  if(dir -> d_type == DT_DIR && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) // if it is a directory
       {
+        print_indent(indent+2);
         printf("%s\n", dir->d_name); // print its name in green
         char d_path[255]; // here I am using sprintf which is safer than strcat
         sprintf(d_path, "%s/%s", path, dir->d_name);
-        show_dir_content(d_path); // recall with the new path
+        show_dir_content(d_path, indent + 2); // recall with the new path
       }
     }
     closedir(d); // finally close the directory
@@ -913,21 +906,16 @@ void show_dir_content(char * path)
 
 int main(int argc, char **argv)
 {
-    printf("zkProver linked with libgomp, main(): argc %d\n", argc);
+    printf("zkProver main(): argc %d\n", argc);
     printf("  Args: \n");
     for (int i = 0; i < argc; i++) 
     {
         printf("    %d, %s\n", i, argv[i]);
     }
-    show_dir_content(".");
-    show_dir_content("/workspace");
-    show_dir_content("/config");
 
-
-
-    auto ncpus = std::thread::hardware_concurrency();
-    printf("std::thread::hardware_concurrency %d", ncpus);
-
+    show_dir_content("/workspace", 0);
+    show_dir_content("/testvectors", 0);
+    show_dir_content("/config", 0);
 
     printf("get omp_get_max_threads\n");
     auto nthreads = omp_get_max_threads();
