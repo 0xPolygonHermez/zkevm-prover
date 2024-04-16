@@ -12,7 +12,10 @@
     "RUST_LOG": "trace"
   },
   "Program":"./build/zkProver",
-  "Files": ["config/scripts/keccak_script.json"],
+  "MapDirs": {
+    "/home/ader/dev/eiger/polygon/kyle-zkevm-prover/testvectors/*": "/testvectors",
+    "/home/ader/dev/eiger/polygon/kyle-zkevm-prover/config/*": "/config"
+  },
   "Mounts": {
     "%1": "/workspace"
   }
