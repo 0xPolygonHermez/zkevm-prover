@@ -1,0 +1,15 @@
+{
+    "RebootOnExit": true,
+    "RunConfig": {
+      "CPUs": 8,
+      "Memory": "16g"
+    },
+    "Env":{
+      "GLOG_logtostderr": "1"
+    },
+    "Dirs":["gevulot", "config", "testvectors"],
+    "Args": [
+      "-c",
+      "workspace/proof_request.json"],
+    "Program":"target/debug/polygon_verifier"
+}
