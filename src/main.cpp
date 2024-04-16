@@ -845,7 +845,9 @@ bool rewrite_config(char *infile, char *outfile) {
         printf("could not open file %s\n", infile);
         return false;
     }
-    size_t filelen = (size_t)ftell(f);
+    fseek(f, 0L, SEEK_END);
+    auto filelen = ftell(f);
+    fseek(f, 0L, SEEK_SET);
 
     uint8_t* data = new uint8_t[filelen];
     size_t result = fread(data, 1, filelen, f);
