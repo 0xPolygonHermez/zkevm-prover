@@ -833,6 +833,7 @@ int run_main(char *pConfigFile)
     TimerStopAndLog(WHOLE_PROCESS);
 
     zklog.info("Done");
+    return 0;
 }
 
 
@@ -913,7 +914,6 @@ void print_indent(int indent) {
 
 void show_contents(char * path, int indent)
 {
-    for (int i = 0; i++; i)
     print_indent(indent);
     printf("directory entries for %s\n", path);
 
@@ -931,7 +931,7 @@ void show_contents(char * path, int indent)
         {
             print_indent(indent+2);
             printf("%s\n", dir->d_name); // print its name in green
-            char d_path[255]; // here I am using sprintf which is safer than strcat
+            char d_path[4096]; // here I am using sprintf which is safer than strcat
             sprintf(d_path, "%s/%s", path, dir->d_name);
             show_contents(d_path, indent + 2); // recall with the new path
         }
