@@ -970,7 +970,6 @@ int main(int argc, char **argv)
     if (argc == 1) 
     {
         zklog.info("gevulot: run_main");
-        // Do gevulot proof
         run(run_gevulot);
         printf("run_gevulot finished. Terminating...\n");
         return 0;
@@ -996,9 +995,6 @@ int main(int argc, char **argv)
         }
     }
     run_main(pConfigFile);
-    printf("Done with non-gevulot prover.\n");
-    char *out_file = (char *)"/workspace/proof_request.json";
-    rewrite_config(pConfigFile, out_file);
 
     return 0;
 }

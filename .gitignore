@@ -19,3 +19,4 @@ config/tmp
 config/config.json
 runtime/*
 !runtime/README.md
+outs
