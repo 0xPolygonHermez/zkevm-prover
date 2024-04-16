@@ -836,6 +836,36 @@ int run_main(char *pConfigFile)
 }
 
 
+bool rewrite_config(char *infile, char *outfile) {
+
+    FILE* f = fopen(infile, "rb");
+    if (!f) {
+        printf("could not open file %s\n", infile);
+        return false;
+    }
+    auto filelen = ftell(f);
+
+    uint8_t* data = new uint8_t[filelen];
+    size_t result = fread(data, 1, filelen, f);
+    fclose(f);
+    if (result != filelen) {
+        delete[] data;
+        return false;
+    }
+
+
+    f = fopen(outfile, "wb");
+    if (!f) {
+        printf("could not open file %s\n", outfile);
+        return false;
+    }
+    size_t result = fwrite(data, 1, filelen, f);
+    char *space = " ";
+    size_t result = fwrite(space, 1, 1, f);
+    fclose(f);
+}
+
+
 void* run_gevulot(const struct Task* task) {
     printf("run_gevulot: Received zkProver task with id: %s\n", task->id);
     printf("run_gevulot: Args: \n");
@@ -865,8 +895,12 @@ void* run_gevulot(const struct Task* task) {
     run_main(args[1]);
 
     printf("run_gevulot: Done with the task.\n");
+    char *out_file = (char *)"/workspace/proof_request.json";
+    rewrite_config(args[1], out_file);
 
-    return new_task_result(NULL, 0);
+    void *result =  new_task_result(NULL, 0);
+    add_file_to_result(result, out_file);
+    return result;
 }
 
 
@@ -876,30 +910,30 @@ void print_indent(int indent) {
     }
 }
 
-void show_dir_content(char * path, int indent)
+void show_contents(char * path, int indent)
 {
-  for (int i = 0; i++; i)
-  print_indent(indent);
-  printf("dir contents for %s\n", path);
+    for (int i = 0; i++; i)
+    print_indent(indent);
+    printf("directory entries for %s\n", path);
 
     DIR * d = opendir(path); // open the path
-  if(d==NULL) return; // if was not able, return
-  struct dirent * dir; // for the directory entries
-  while ((dir = readdir(d)) != NULL) // if we were able to read somehting from the directory
+    if (d==NULL) return; // if was not able, return
+    struct dirent * dir; // for the directory entries
+    while ((dir = readdir(d)) != NULL) // if we were able to read somehting from the directory
     {
-      if(dir-> d_type != DT_DIR) {
-        // if the type is not directory just print it with blue color
-        print_indent(indent);
-        printf("%s\n", dir->d_name);
-      }
-      else  if(dir -> d_type == DT_DIR && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) // if it is a directory
-      {
-        print_indent(indent+2);
-        printf("%s\n", dir->d_name); // print its name in green
-        char d_path[255]; // here I am using sprintf which is safer than strcat
-        sprintf(d_path, "%s/%s", path, dir->d_name);
-        show_dir_content(d_path, indent + 2); // recall with the new path
-      }
+        if(dir-> d_type != DT_DIR) {
+            // if the type is not directory just print it with blue color
+            print_indent(indent);
+            printf("%s\n", dir->d_name);
+        }
+        else  if(dir -> d_type == DT_DIR && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) // if it is a directory
+        {
+            print_indent(indent+2);
+            printf("%s\n", dir->d_name); // print its name in green
+            char d_path[255]; // here I am using sprintf which is safer than strcat
+            sprintf(d_path, "%s/%s", path, dir->d_name);
+            show_contents(d_path, indent + 2); // recall with the new path
+        }
     }
     closedir(d); // finally close the directory
 }
@@ -913,9 +947,9 @@ int main(int argc, char **argv)
         printf("    %d, %s\n", i, argv[i]);
     }
 
-    show_dir_content("/workspace", 0);
-    show_dir_content("/testvectors", 0);
-    show_dir_content("/config", 0);
+    show_contents("/workspace", 0);
+    show_contents("/testvectors", 0);
+    show_contents("/config", 0);
 
     printf("get omp_get_max_threads\n");
     auto nthreads = omp_get_max_threads();
