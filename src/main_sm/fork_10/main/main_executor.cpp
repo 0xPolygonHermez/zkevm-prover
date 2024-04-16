@@ -49,6 +49,8 @@ namespace fork_10
 #define MAX_HASH_ADDRESS 0x100000000
 
 #define CTX_OFFSET   0x40000
+#define ZK_INT32_MAX 0x80000000 
+#define CTX_MAX      ((ZK_INT32_MAX / CTX_OFFSET) - 1) // 8192 - 1
 
 #define N_NO_COUNTERS_MULTIPLICATION_FACTOR 8
 
@@ -937,7 +939,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If useCTX, addr = addr + CTX*CTX_OFFSET
         if (rom.line[zkPC].useCTX == 1)
         {
+            // Check context range
+            uint64_t context = fr.toU64(pols.CTX[i]);
+            if (context > CTX_MAX)
+            {
+                proverRequest.result = ZKR_SM_MAIN_INVALID_MEMORY_CTX;
+                logError(ctx, "pols.CTX=" + to_string(context) + " > CTX_MAX=" + to_string(CTX_MAX));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Add to address
             addr += fr.toU64(pols.CTX[i])*CTX_OFFSET;
+
             pols.useCTX[i] = fr.one();
 #ifdef LOG_ADDR
             zklog.info("useCTX addr=" + to_string(addr));
@@ -6141,12 +6155,23 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // When processing a txs batch, break the loop when done to complete the execution faster
         if ( zkPC == rom.labels.finalizeExecutionLabel )
         {
+            // Update last step
             if (ctx.lastStep != 0)
             {
                 logError(ctx, "Called finalizeExecutionLabel with a non-zero ctx.lastStep=" + to_string(ctx.lastStep));
                 exitProcess();
             }
             ctx.lastStep = step;
+
+            // Set last save as restored because it is not restored at end.zkasm in case of fastDebugExit
+            if (!ctx.saved.empty())
+            {
+                map<uint64_t, Saved>::iterator lastElement;
+                lastElement = prev(ctx.saved.end());
+                lastElement->second.restored = true;
+            }
+
+            // If processing, break
             if (bProcessBatch)
             {
                 break;
@@ -6156,7 +6181,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     } // End of main executor loop, for all evaluations
 
     // Check that all saved contexts have been restored
-    /*map<uint64_t, Saved>::const_iterator itSaved;
+    map<uint64_t, Saved>::const_iterator itSaved;
     uint64_t savedCheckFailed = 0;
     for (itSaved = ctx.saved.begin(); itSaved != ctx.saved.end(); itSaved++)
     {
@@ -6177,7 +6202,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         logError(ctx, string("Some saved contests were not restored savedCheckFailed=") + zkresult2string(savedCheckFailed));
         pHashDB->cancelBatch(proverRequest.uuid);
         return;
-    }*/
+    }
 
     // Copy the counters
     proverRequest.counters.arith = fr.toU64(pols.cntArith[0]);

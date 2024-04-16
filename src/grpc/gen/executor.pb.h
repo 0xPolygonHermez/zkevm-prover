@@ -497,12 +497,13 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_SM_MAIN_BATCH_HASH_DATA_MISMATCH = 134,
   EXECUTOR_ERROR_SM_MAIN_INVALID_BLOB_TYPE = 135,
   EXECUTOR_ERROR_SM_MAIN_UNRESTORED_SAVED_CONTEXT = 136,
+  EXECUTOR_ERROR_SM_MAIN_INVALID_MEMORY_CTX = 137,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_SM_MAIN_UNRESTORED_SAVED_CONTEXT;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_SM_MAIN_INVALID_MEMORY_CTX;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
@@ -528,12 +529,13 @@ enum RomBlobError : int {
   ROM_BLOB_ERROR_INVALID_BLOB_TYPE = 5,
   ROM_BLOB_ERROR_INVALID_COMPRESSION_TYPE = 6,
   ROM_BLOB_ERROR_INVALID_FORCED_BATCHES = 7,
+  ROM_BLOB_ERROR_INVALID_TOTALBODY_LEN = 8,
   RomBlobError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   RomBlobError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool RomBlobError_IsValid(int value);
 constexpr RomBlobError RomBlobError_MIN = ROM_BLOB_ERROR_UNSPECIFIED;
-constexpr RomBlobError RomBlobError_MAX = ROM_BLOB_ERROR_INVALID_FORCED_BATCHES;
+constexpr RomBlobError RomBlobError_MAX = ROM_BLOB_ERROR_INVALID_TOTALBODY_LEN;
 constexpr int RomBlobError_ARRAYSIZE = RomBlobError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* RomBlobError_descriptor();

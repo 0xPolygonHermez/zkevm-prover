@@ -120,6 +120,7 @@ typedef enum : int
     ZKR_SM_MAIN_UNRESTORED_SAVED_CONTEXT = 104, // At least one saved context was not restored after execution was completed
 
     ZKR_BLOB_OUTER_PROOF_INVALID_INPUT = 105, // Invalid Blob outer proof input
+    ZKR_SM_MAIN_INVALID_MEMORY_CTX = 106, // Invalid memory address context
 } zkresult;
 
 string zkresult2string (int code);

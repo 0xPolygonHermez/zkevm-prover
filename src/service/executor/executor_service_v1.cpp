@@ -1006,6 +1006,8 @@ using grpc::Status;
     case ZKR_SM_MAIN_BATCH_HASH_DATA_MISMATCH:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BATCH_HASH_DATA_MISMATCH;
     case ZKR_SM_MAIN_INVALID_BLOB_TYPE:                     return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_INVALID_BLOB_TYPE;
     case ZKR_SM_MAIN_UNRESTORED_SAVED_CONTEXT:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_UNRESTORED_SAVED_CONTEXT;
+    
+    case ZKR_SM_MAIN_INVALID_MEMORY_CTX:                    return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_INVALID_MEMORY_CTX;
 
     case ZKR_AGGREGATED_PROOF_INVALID_INPUT: // Only returned when generating a proof
     case ZKR_BLOB_OUTER_PROOF_INVALID_INPUT: // Only returned when generating a proof
@@ -1027,6 +1029,7 @@ using grpc::Status;
     if (result == "error_invalid_zkgaslimit")           return ::executor::v1::ROM_BLOB_ERROR_INVALID_ZK_GAS_LIMIT;
     if (result == "error_invalid_blob_type")            return ::executor::v1::ROM_BLOB_ERROR_INVALID_BLOB_TYPE;
     if (result == "error_invalid_forced_batches")       return ::executor::v1::ROM_BLOB_ERROR_INVALID_FORCED_BATCHES;
+    if (result == "error_invalid_totalbody_len")        return ::executor::v1::ROM_BLOB_ERROR_INVALID_TOTALBODY_LEN;
     if (result == "")                                   return ::executor::v1::ROM_BLOB_ERROR_NO_ERROR;
 
     zklog.error("ExecutorServiceImpl::string2rombloberror() found invalid error string=" + result);

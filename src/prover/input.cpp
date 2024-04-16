@@ -185,14 +185,8 @@ void Input::loadGlobals (json &input)
         }
     }
 
-    if ((publicInputsExtended.publicInputs.forkID >= 7))
+    if (input.contains("timestampLimit"))
     {
-        // Input JSON file must contain a timestampLimit key at the root level
-        if ( !input.contains("timestampLimit") )
-        {
-            zklog.error("Input::loadGlobals() timestampLimit key not found in input JSON file");
-            exitProcess();
-        }
         // Parse it based on its type
         if ( input["timestampLimit"].is_number_unsigned() )
         {
