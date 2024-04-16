@@ -874,6 +874,39 @@ bool rewrite_config(char *infile, char *outfile) {
 }
 
 
+void print_indent(int indent) {
+    for (int i = 0; i < indent; i++) {
+        printf(" ");
+    }
+}
+
+void show_contents(char * path, int indent)
+{
+    // print_indent(indent);
+    // printf("%s\n", path);
+    indent += 2;
+
+    DIR * d = opendir(path); // open the path
+    if (d==NULL) return; // if was not able, return
+    struct dirent * dir; // for the directory entries
+    while ((dir = readdir(d)) != NULL) // if we were able to read somehting from the directory
+    {
+        if(dir-> d_type != DT_DIR) {
+            print_indent(indent);
+            printf("%s\n", dir->d_name);
+        }
+        else  if(dir -> d_type == DT_DIR && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) // if it is a directory
+        {
+            print_indent(indent);
+            printf("/%s\n", dir->d_name); // print its name in green
+            char d_path[4096]; // here I am using sprintf which is safer than strcat
+            sprintf(d_path, "%s/%s", path, dir->d_name);
+            show_contents(d_path, indent); // recall with the new path
+        }
+    }
+    closedir(d); // finally close the directory
+}
+
 void* run_gevulot(const struct Task* task) {
     printf("run_gevulot: Received zkProver task with id: %s\n", task->id);
     printf("run_gevulot: Args: \n");
@@ -893,13 +926,19 @@ void* run_gevulot(const struct Task* task) {
         printf("  %s\n", *files);
         files++;
     }
+
+    int status = mkdir((char*)"/workspace/output",0777);
+    printf("mkdir status: %d\n", status);
+    show_contents((char*)"/workspace", 0);
+    show_contents((char*)"/testvectors", 0);
+    show_contents((char*)"/config", 0);
+
+
     args = (char**)task->args;
-    printf("run_gevulot: A\n");
     if (strcmp(args[0],"-c") != 0) {
         printf("incorrect first arg, should be -c. Exiting");
         return new_task_result(NULL, 0);
     }
-    printf("run_gevulot: B\n");
     run_main(args[1]);
 
     printf("run_gevulot: Done with the task.\n");
@@ -911,40 +950,6 @@ void* run_gevulot(const struct Task* task) {
     return result;
 }
 
-
-void print_indent(int indent) {
-    for (int i = 0; i < indent; i++) {
-        printf(" ");
-    }
-}
-
-void show_contents(char * path, int indent)
-{
-    print_indent(indent);
-    printf("directory entries for %s\n", path);
-
-    DIR * d = opendir(path); // open the path
-    if (d==NULL) return; // if was not able, return
-    struct dirent * dir; // for the directory entries
-    while ((dir = readdir(d)) != NULL) // if we were able to read somehting from the directory
-    {
-        if(dir-> d_type != DT_DIR) {
-            // if the type is not directory just print it with blue color
-            print_indent(indent);
-            printf("%s\n", dir->d_name);
-        }
-        else  if(dir -> d_type == DT_DIR && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 ) // if it is a directory
-        {
-            print_indent(indent+2);
-            printf("%s\n", dir->d_name); // print its name in green
-            char d_path[4096]; // here I am using sprintf which is safer than strcat
-            sprintf(d_path, "%s/%s", path, dir->d_name);
-            show_contents(d_path, indent + 2); // recall with the new path
-        }
-    }
-    closedir(d); // finally close the directory
-}
-
 int main(int argc, char **argv)
 {
     printf("zkProver main(): argc %d\n", argc);
@@ -953,10 +958,6 @@ int main(int argc, char **argv)
     {
         printf("    %d, %s\n", i, argv[i]);
     }
-
-    show_contents((char*)"/workspace", 0);
-    show_contents((char*)"/testvectors", 0);
-    show_contents((char*)"/config", 0);
 
     printf("get omp_get_max_threads\n");
     auto nthreads = omp_get_max_threads();
