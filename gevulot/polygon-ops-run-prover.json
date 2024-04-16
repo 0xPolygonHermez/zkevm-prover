@@ -1,16 +1,15 @@
 {
     "RebootOnExit": true,
     "RunConfig": {
-      "CPUs": 1,
-      "Memory": "512g"
+      "CPUs": 64,
+      "Memory": "256g"
     },
     "Env":{
       "GLOG_logtostderr": "1"
     },
     "Dirs":["gevulot", "config", "testvectors"],
     "Args": [
-      "polygon_prover",
       "-c",
-      "./testvectors/hashFunctions/config_keccak_test.json "],
-    "Program":"./build/zkProver"
+      "testvectors/hashFunctions/config_sha256_test.json"],
+    "Program":"build/zkProver"
 }
