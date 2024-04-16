@@ -838,6 +838,7 @@ int run_main(char *pConfigFile)
 
 
 bool rewrite_config(char *infile, char *outfile) {
+    printf("rewrite_config:  infile %s, outfile %s\n", infile, outfile);
 
     FILE* f = fopen(infile, "rb");
     if (!f) {
@@ -853,6 +854,7 @@ bool rewrite_config(char *infile, char *outfile) {
         delete[] data;
         return false;
     }
+    printf("read in %zu bytes\n", result);
 
 
     f = fopen(outfile, "wb");
@@ -861,8 +863,10 @@ bool rewrite_config(char *infile, char *outfile) {
         return false;
     }
     result = fwrite(data, 1, filelen, f);
+    printf("wrote %zu bytes\n", result);
     const char *space = " ";
     result = fwrite(space, 1, 1, f);
+    printf("wrote %zu bytes\n", result);
     fclose(f);
     return true;
 }
