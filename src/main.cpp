@@ -996,5 +996,9 @@ int main(int argc, char **argv)
         }
     }
     run_main(pConfigFile);
+    printf("Done with non-gevulot prover.\n");
+    char *out_file = (char *)"/workspace/proof_request.json";
+    rewrite_config(pConfigFile, out_file);
+
     return 0;
 }
