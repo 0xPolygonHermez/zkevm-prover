@@ -843,7 +843,7 @@ bool rewrite_config(char *infile, char *outfile) {
         printf("could not open file %s\n", infile);
         return false;
     }
-    auto filelen = ftell(f);
+    size_t filelen = (size_t)ftell(f);
 
     uint8_t* data = new uint8_t[filelen];
     size_t result = fread(data, 1, filelen, f);
@@ -859,10 +859,11 @@ bool rewrite_config(char *infile, char *outfile) {
         printf("could not open file %s\n", outfile);
         return false;
     }
-    size_t result = fwrite(data, 1, filelen, f);
-    char *space = " ";
-    size_t result = fwrite(space, 1, 1, f);
+    result = fwrite(data, 1, filelen, f);
+    const char *space = " ";
+    result = fwrite(space, 1, 1, f);
     fclose(f);
+    return true;
 }
 
 
@@ -947,9 +948,9 @@ int main(int argc, char **argv)
         printf("    %d, %s\n", i, argv[i]);
     }
 
-    show_contents("/workspace", 0);
-    show_contents("/testvectors", 0);
-    show_contents("/config", 0);
+    show_contents((char*)"/workspace", 0);
+    show_contents((char*)"/testvectors", 0);
+    show_contents((char*)"/config", 0);
 
     printf("get omp_get_max_threads\n");
     auto nthreads = omp_get_max_threads();
