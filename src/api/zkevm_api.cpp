@@ -1499,3 +1499,13 @@ void polinomial_free(void *pPolinomial) {
     Polinomial* polinomial = (Polinomial*)pPolinomial;
     delete polinomial;
 }
+
+void goldilocks_linear_hash(void *pInput, void *pOutput)
+{
+    Goldilocks::Element input[12];
+
+    memcpy(input, pInput, 8 * sizeof(Goldilocks::Element));
+    memset(&input[8], 0, 4 * sizeof(Goldilocks::Element));
+
+    PoseidonGoldilocks::hash(*(Goldilocks::Element(*)[4])pOutput, input);
+}

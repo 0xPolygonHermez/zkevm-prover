@@ -136,4 +136,9 @@
     void *polinomial_new(uint64_t degree, uint64_t dim, char* name);
     void *polinomial_get_p_element(void *pPolinomial, uint64_t index);
     void polinomial_free(void *pPolinomial);
+
+    // Poseidon
+    // =================================================================================
+    void goldilocks_linear_hash(void *pInput, void *pOutput);
+
 #endif
