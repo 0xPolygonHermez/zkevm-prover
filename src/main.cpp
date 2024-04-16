@@ -996,4 +996,5 @@ int main(int argc, char **argv)
         }
     }
     run_main(pConfigFile);
+    return 0;
 }
