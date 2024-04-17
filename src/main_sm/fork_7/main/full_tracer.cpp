@@ -1427,6 +1427,14 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     // getVarFromCtx(ctx, true, "newNumBatch", auxScalar);
     // finalTrace.new_batch_num = auxScalar.get_ui();
 
+    // Call fillInReadWriteAddresses
+    zkr = fillInReadWriteAddresses(ctx);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBatch() failed calling fillInReadWriteAddresses()");
+        return zkr;
+    }
+
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishBatch() new_state_root=" + finalTrace.new_state_root);
 #endif
@@ -2080,6 +2088,8 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
     gettimeofday(&t, NULL);
 #endif
 
+    zkassert(!fr.isZero(key[0]) || !fr.isZero(key[1]) || !fr.isZero(key[2]) || !fr.isZero(key[3]));
+
     // Get address
     mpz_class address;
     if (!fea2scalar(fr, address, address0, address1, address2, address3, address4, address5, address6, address7))
@@ -2114,6 +2124,10 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
         else
         {
             it->second.balance = value.get_str();
+            it->second.balanceKey[0]= key[0];
+            it->second.balanceKey[1]= key[1];
+            it->second.balanceKey[2]= key[2];
+            it->second.balanceKey[3]= key[3];
         }
     }
     else if (keyType == SMT_KEY_NONCE)
@@ -2132,6 +2146,10 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
         else
         {
             it->second.nonce = value.get_str();
+            it->second.nonceKey[0]= key[0];
+            it->second.nonceKey[1]= key[1];
+            it->second.nonceKey[2]= key[2];
+            it->second.nonceKey[3]= key[3];
         }
     }
 
@@ -2146,13 +2164,14 @@ zkresult FullTracer::fillInReadWriteAddresses (Context &ctx)
 {
     zkresult zkr;
 
+    // Get new state root fea
+    Goldilocks::Element newStateRoot[4];
+    string2fea(fr, NormalizeToNFormat(finalTrace.new_state_root, 64), newStateRoot);
+
     // For all entries in read_write_addresses
     unordered_map<string, InfoReadWrite>::iterator it;
     for (it = read_write_addresses.begin(); it != read_write_addresses.end(); it++)
     {
-        Goldilocks::Element newStateRoot[4];
-        string2fea(fr, finalTrace.new_state_root, newStateRoot);
-
         // Re-read balance for this state root
         if (!it->second.balance.empty())
         {
