@@ -222,6 +222,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef BLOB_INNER
 
+    zklog.info("Processing blob");
+
 #define BLOB_TYPE_CALLDATA 0
 #define BLOB_TYPE_EIP4844 1
 #define BLOB_TYPE_FORCED 2
@@ -1350,17 +1352,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                         mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
-                    }
 
-                    if (bProcessBatch)
-                    {
-                        zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value);
-                        if (zkResult != ZKR_SUCCESS)
+                        if (bProcessBatch)
                         {
-                            proverRequest.result = zkResult;
-                            logError(ctx, string("Failed calling eval_addReadWriteAddress() 1 result=") + zkresult2string(zkResult));
-                            pHashDB->cancelBatch(proverRequest.uuid);
-                            return;
+                            zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value, key);
+                            if (zkResult != ZKR_SUCCESS)
+                            {
+                                proverRequest.result = zkResult;
+                                logError(ctx, string("Failed calling eval_addReadWriteAddress() 1 result=") + zkresult2string(zkResult));
+                                pHashDB->cancelBatch(proverRequest.uuid);
+                                return;
+                            }
                         }
                     }
 
@@ -1591,7 +1593,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     if (bProcessBatch)
                     {
-                        zkResult = eval_addReadWriteAddress(ctx, value);
+                        zkResult = eval_addReadWriteAddress(ctx, value, ctx.lastSWrite.key);
                         if (zkResult != ZKR_SUCCESS)
                         {
                             proverRequest.result = zkResult;
@@ -2754,7 +2756,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (bProcessBatch)
             {
-                zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value);
+                zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value, key);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -2922,7 +2924,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (bProcessBatch)
                 {
-                    zkResult = eval_addReadWriteAddress(ctx, scalarD);
+                    zkResult = eval_addReadWriteAddress(ctx, scalarD, ctx.lastSWrite.key);
                     if (zkResult != ZKR_SUCCESS)
                     {
                         proverRequest.result = zkResult;
@@ -7075,7 +7077,15 @@ void MainExecutor::logError (Context &ctx, const string &message)
     uint64_t step = (ctx.pStep != NULL) ? *ctx.pStep : INVALID_LOG_ERROR_VALUE;
     uint64_t evaluation = (ctx.pEvaluation != NULL) ? *ctx.pEvaluation : INVALID_LOG_ERROR_VALUE;
     uint64_t zkpc = (ctx.pZKPC != NULL) ? *ctx.pZKPC : INVALID_LOG_ERROR_VALUE;
-    string romLine = (ctx.pZKPC != NULL) ? romBatch.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+    string romLine;
+    if (config.loadDiagnosticRom)
+    {
+        romLine = (ctx.pZKPC != NULL) ? romDiagnostic.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+    }
+    else
+    {
+        romLine = (ctx.pZKPC != NULL) ? romBatch.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+    }
     string log2 = string("proverRequest.result=") + zkresult2string(ctx.proverRequest.result) +
         " step=" + to_string(step) +
         " eval=" + to_string(evaluation) +

@@ -1648,7 +1648,8 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
 zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &address3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
                                            const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
-                                           const mpz_class &value )
+                                           const mpz_class &value,
+                                           const Goldilocks::Element (&key)[4] )
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
@@ -1679,6 +1680,10 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
         {
             InfoReadWrite infoReadWrite;
             infoReadWrite.balance = value.get_str();
+            infoReadWrite.balanceKey[0]= key[0];
+            infoReadWrite.balanceKey[1]= key[1];
+            infoReadWrite.balanceKey[2]= key[2];
+            infoReadWrite.balanceKey[3]= key[3];
             read_write_addresses[addressHex] = infoReadWrite;
         }
         else
@@ -1693,6 +1698,10 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
         {
             InfoReadWrite infoReadWrite;
             infoReadWrite.nonce = value.get_str();
+            infoReadWrite.nonceKey[0]= key[0];
+            infoReadWrite.nonceKey[1]= key[1];
+            infoReadWrite.nonceKey[2]= key[2];
+            infoReadWrite.nonceKey[3]= key[3];
             read_write_addresses[addressHex] = infoReadWrite;
         }
         else
@@ -1704,6 +1713,49 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
 #ifdef LOG_TIME_STATISTICS
     tms.add("addReadWriteAddress", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
+}
+
+zkresult FullTracer::fillInReadWriteAddresses (Context &ctx)
+{
+    zkresult zkr;
+
+    // For all entries in read_write_addresses
+    unordered_map<string, InfoReadWrite>::iterator it;
+    for (it = read_write_addresses.begin(); it != read_write_addresses.end(); it++)
+    {
+        Goldilocks::Element newStateRoot[4];
+        string2fea(fr, finalTrace.new_state_root, newStateRoot);
+
+        // Re-read balance for this state root
+        if (!it->second.balance.empty())
+        {
+            zkassert(!fr.isZero(it->second.balanceKey[0]) || !fr.isZero(it->second.balanceKey[1]) || !fr.isZero(it->second.balanceKey[2])|| !fr.isZero(it->second.balanceKey[3]));
+            mpz_class balance;
+            zkr = ctx.pHashDB->get(ctx.proverRequest.uuid, newStateRoot, it->second.balanceKey, balance, NULL, NULL);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::fillInReadWriteAddresses() failed calling ctx.pHashDB->get(balance) result=" + zkresult2string(zkr));
+                return zkr;
+            }
+            it->second.balance = balance.get_str();
+        }
+
+        // Re-read nonce for this state root
+        if (!it->second.nonce.empty())
+        {
+            zkassert(!fr.isZero(it->second.nonceKey[0]) || !fr.isZero(it->second.nonceKey[1]) || !fr.isZero(it->second.nonceKey[2]) || !fr.isZero(it->second.nonceKey[3]));
+            mpz_class nonce;
+            zkr = ctx.pHashDB->get(ctx.proverRequest.uuid, newStateRoot, it->second.nonceKey, nonce, NULL, NULL);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::fillInReadWriteAddresses() failed calling ctx.pHashDB->get(nonce) result=" + zkresult2string(zkr));
+                return zkr;
+            }
+            it->second.nonce = nonce.get_str();
+        }
+    }
 
     return ZKR_SUCCESS;
 }

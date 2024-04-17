@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include "zkglobals.hpp"
 
 using namespace std;
 
@@ -260,10 +261,26 @@ class InfoReadWrite
 {
 public:
     string nonce;
+    Goldilocks::Element nonceKey[4];
     string balance;
+    Goldilocks::Element balanceKey[4];
     string sc_code;
     unordered_map<string, string> sc_storage;
     string sc_length;
+    InfoReadWrite()
+    {
+        // Reset nonce key
+        nonceKey[0] = fr.zero();
+        nonceKey[1] = fr.zero();
+        nonceKey[2] = fr.zero();
+        nonceKey[3] = fr.zero();
+
+        // Reset balance key
+        balanceKey[0] = fr.zero();
+        balanceKey[1] = fr.zero();
+        balanceKey[2] = fr.zero();
+        balanceKey[3] = fr.zero();
+    }
 };
 
 class TxGAS
