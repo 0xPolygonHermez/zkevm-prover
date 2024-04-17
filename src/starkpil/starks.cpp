@@ -409,7 +409,7 @@ void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType
 
     TimerStart(STARK_CALCULATE_LEv);
     
-    Goldilocks::Element* LEv = &params.xDivXSubXi[0];
+    Goldilocks::Element* LEv = &params.pols[starkInfo.mapOffsets[make_pair("LEv", true)]];
     
     Goldilocks::Element xisShifted[starkInfo.openingPoints.size() * FIELD_EXTENSION];
 
@@ -444,7 +444,10 @@ void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType
         }
     }
 
-    ntt.INTT(&LEv[0], &LEv[0], N, FIELD_EXTENSION * starkInfo.openingPoints.size());
+    std::pair<uint64_t, uint64_t> nttOffsetHelper = starkInfo.mapNTTOffsetsHelpers["LEv"];
+    Goldilocks::Element *pBuffHelper = &params.pols[nttOffsetHelper.first];
+    
+    ntt.INTT(&LEv[0], &LEv[0], N, FIELD_EXTENSION * starkInfo.openingPoints.size(), pBuffHelper);
 
     TimerStopAndLog(STARK_CALCULATE_LEv);
 
@@ -784,18 +787,12 @@ void Starks<ElementType>::evmap(StepsParams &params, Goldilocks::Element *LEv)
     assert(kk == size_eval);
     // Build buffer for partial results of the matrix-vector product (columns distribution)  .
     int num_threads = omp_get_max_threads();
-    Goldilocks::Element **evals_acc = (Goldilocks::Element **)malloc(num_threads * sizeof(Goldilocks::Element *));
-    for (int i = 0; i < num_threads; ++i)
-    {
-        evals_acc[i] = (Goldilocks::Element *)malloc(size_eval * FIELD_EXTENSION * sizeof(Goldilocks::Element));
-    }
+    int size_thread = size_eval * FIELD_EXTENSION;
+    Goldilocks::Element *evals_acc = &params.pols[starkInfo.mapOffsets[std::make_pair("evals", true)]];
+    memset(&evals_acc[0], 0, num_threads * size_thread * sizeof(Goldilocks::Element));
 #pragma omp parallel
     {
         int thread_idx = omp_get_thread_num();
-        for (uint64_t i = 0; i < size_eval * FIELD_EXTENSION; ++i)
-        {
-            evals_acc[thread_idx][i] = Goldilocks::zero();
-        }
 #pragma omp for
         for (uint64_t k = 0; k < N; k++)
         {
@@ -808,7 +805,7 @@ void Starks<ElementType>::evmap(StepsParams &params, Goldilocks::Element *LEv)
                 } else {
                     Goldilocks3::mul(res, (Goldilocks3::Element &)(LEv[(index + k * starkInfo.openingPoints.size()) * FIELD_EXTENSION]), (Goldilocks3::Element &)(*ordPols[i][k * (1 << extendBits)]));
                 }
-                Goldilocks3::add((Goldilocks3::Element &)(evals_acc[thread_idx][i * FIELD_EXTENSION]), (Goldilocks3::Element &)(evals_acc[thread_idx][i * FIELD_EXTENSION]), res);
+                Goldilocks3::add((Goldilocks3::Element &)(evals_acc[thread_idx * size_thread + i * FIELD_EXTENSION]), (Goldilocks3::Element &)(evals_acc[thread_idx * size_thread + i * FIELD_EXTENSION]), res);
             }
         }
 #pragma omp for
@@ -817,22 +814,17 @@ void Starks<ElementType>::evmap(StepsParams &params, Goldilocks::Element *LEv)
             Goldilocks3::Element sum = { Goldilocks::zero(), Goldilocks::zero(), Goldilocks::zero() };
             for (int k = 0; k < num_threads; ++k)
             {
-                Goldilocks3::add(sum, sum, (Goldilocks3::Element &)(evals_acc[k][i * FIELD_EXTENSION]));
+                Goldilocks3::add(sum, sum, (Goldilocks3::Element &)(evals_acc[k * size_thread + i * FIELD_EXTENSION]));
             }
-            std::memcpy((Goldilocks3::Element &)(evals_acc[0][i * FIELD_EXTENSION]), sum, FIELD_EXTENSION * sizeof(Goldilocks::Element));
+            std::memcpy((Goldilocks3::Element &)(evals_acc[i * FIELD_EXTENSION]), sum, FIELD_EXTENSION * sizeof(Goldilocks::Element));
         }
 #pragma omp single
         for (uint64_t i = 0; i < size_eval; ++i)
         {
-            std::memcpy((Goldilocks3::Element &)(params.evals[indx[i] * FIELD_EXTENSION]), (Goldilocks3::Element &)(evals_acc[0][i * FIELD_EXTENSION]), FIELD_EXTENSION * sizeof(Goldilocks::Element));
+            std::memcpy((Goldilocks3::Element &)(params.evals[indx[i] * FIELD_EXTENSION]), (Goldilocks3::Element &)(evals_acc[i * FIELD_EXTENSION]), FIELD_EXTENSION * sizeof(Goldilocks::Element));
         }
     }
     delete[] ordPols;
-    for (int i = 0; i < num_threads; ++i)
-    {
-        free(evals_acc[i]);
-    }
-    free(evals_acc);
 }
 
 template <typename ElementType>

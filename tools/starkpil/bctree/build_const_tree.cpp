@@ -76,8 +76,8 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
     } else if(verificationHashType == "BN128"){
         TimerStart(MERKELIZE_CONST_TREE);
         RawFr::Element rootC;
-        uint64_t merkleTreeArity = starkInfoJson["starkStruct"]["merkleTreeArity"];
-        bool merkleTreeCustom = starkInfoJson["starkStruct"]["merkleTreeCustom"];
+        uint64_t merkleTreeArity = starkInfoJson["starkStruct"].contains("merkleTreeArity") ? starkInfoJson["starkStruct"]["merkleTreeArity"].get<uint64_t>() : 16;
+        bool merkleTreeCustom = starkInfoJson["starkStruct"].contains("merkleTreeCustom") ? starkInfoJson["starkStruct"]["merkleTreeCustom"].get<bool>() : false;
 
         MerkleTreeBN128 mt(merkleTreeArity, merkleTreeCustom, NExtended, nPols, pConstPolsExt);
         mt.merkelize();

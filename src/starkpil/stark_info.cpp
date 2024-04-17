@@ -148,11 +148,23 @@ void StarkInfo::setMapOffsets(std::vector<Hint> &hints) {
     uint64_t offsetPolsFRI = mapOffsets[std::make_pair("q", true)];
     mapOffsets[std::make_pair("xDivXSubXi", true)] = offsetPolsFRI;
     offsetPolsFRI += openingPoints.size() * NExtended * FIELD_EXTENSION;
-
+    
     mapOffsets[std::make_pair("f", true)] = offsetPolsFRI;
     offsetPolsFRI += NExtended * FIELD_EXTENSION;
 
     if(offsetPolsFRI > mapTotalN) mapTotalN = offsetPolsFRI;
+
+    uint64_t offsetPolsEvals = mapOffsets[std::make_pair("q", true)];
+    mapOffsets[std::make_pair("LEv", true)] = offsetPolsEvals;
+    offsetPolsEvals += N * openingPoints.size() * FIELD_EXTENSION;
+    
+    mapOffsets[std::make_pair("evals", true)] = offsetPolsEvals;
+    offsetPolsEvals += evMap.size() * omp_get_max_threads() * FIELD_EXTENSION;
+
+    mapNTTOffsetsHelpers["LEv"] = std::make_pair(offsetPolsEvals, N * FIELD_EXTENSION * openingPoints.size());
+    offsetPolsEvals += N * FIELD_EXTENSION * openingPoints.size();
+   
+    if(offsetPolsEvals > mapTotalN) mapTotalN = offsetPolsEvals;
 
     mapOffsetsPolsHints.resize(nStages);
     offsetsExtraMemoryHints.resize(hints.size());
