@@ -554,7 +554,7 @@ public:
         Polinomial checkVal(1, 3);
         Goldilocks::Element *pZ = z[0];
         Goldilocks3::copy((Goldilocks3::Element *)&pZ[0], &Goldilocks3::one());
-
+        
         batchInverse(denI, den);
         for (uint64_t i = 1; i < size; i++)
         {
@@ -612,7 +612,7 @@ public:
             uint64_t threadOffset = partitionSize / (2 * nThreadsPartition) * (thread_idx % nThreadsPartition) + offset;
             for (uint64_t j = 0; j < partitionSize / (2 * nThreadsPartition); j++)
             {
-                Polinomial::mulElement(src, threadOffset + j, src, threadOffset + j, src, offset - 1);
+                Goldilocks3::mul((Goldilocks3::Element *)src[threadOffset + j], (Goldilocks3::Element *)src[threadOffset + j], (Goldilocks3::Element *)src[offset - 1]);
             }
         }
         computeMuls(src, srcSize, partitionSize * 2, nThreads);

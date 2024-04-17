@@ -3,6 +3,46 @@
 
 class C12aSteps : public CHelpersSteps {
 public:
+    void storePolinomial(Goldilocks::Element *pols, __m256i *bufferT, uint64_t* mapBufferT, uint64_t* nColsSteps, uint64_t *offsetsSteps, uint64_t *buffTOffsetsSteps, uint64_t *nextStrides, uint64_t nOpenings, uint64_t domainSize, bool domainExtended, uint64_t nStages, bool needModule, uint64_t row, uint64_t stage, uint64_t stagePos, uint64_t openingPointIndex, uint64_t dim) {
+        bool isTmpPol = !domainExtended && nStages + 1 == stage;
+        if(needModule) {
+            uint64_t offsetsDest[4];
+            uint64_t nextStrideOffset = row + nextStrides[openingPointIndex];
+            if(isTmpPol) {
+                uint64_t stepOffset = offsetsSteps[stage] + stagePos * domainSize;
+                offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * dim;
+                offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * dim;
+                offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * dim;
+                offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * dim;
+            } else {
+                uint64_t stepOffset = offsetsSteps[stage] + stagePos;
+                offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[stage];
+                offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[stage];
+                offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[stage];
+                offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[stage];
+            }
+            if(dim == 1) {
+                Goldilocks::store_avx(&pols[0], offsetsDest, bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]]);
+            } else {
+                Goldilocks3::store_avx(&pols[0], offsetsDest, &bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]], nOpenings);
+            }
+        } else {
+            if(dim == 1) {
+                if(isTmpPol) {
+                    Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex])], uint64_t(1), bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]]);
+                } else {
+                    Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]]);
+                }
+            } else {
+                if(isTmpPol) {
+                    Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex]) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), &bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]], nOpenings);
+                } else {
+                    Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]], nOpenings);
+                }
+            }
+        }
+    }
+
     void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint32_t nrowsBatch, bool domainExtended) {
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint64_t extendBits = (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits);
@@ -161,7 +201,6 @@ public:
             bool const needModule = ((static_cast<int64_t>(i + nrowsBatch) + extend*starkInfo.openingPoints[nOpenings - 1]) >= static_cast<int64_t>(domainSize)) || ((static_cast<int64_t>(i) + extend*starkInfo.openingPoints[0]) < 0);
             uint64_t i_args = 0;
 
-            uint64_t offsetsDest[4];
             __m256i tmp1[parserParams.nTemp1];
             Goldilocks3::Element_avx tmp3[parserParams.nTemp3];
             Goldilocks3::Element_avx tmp3_;
@@ -186,13 +225,19 @@ public:
             for(uint64_t k = 0; k < parserParams.nCmPolsUsed; ++k) {
                 uint64_t polId = cmPolsUsed[k];
                 PolMap polInfo = starkInfo.cmPolsMap[polId];
-                uint64_t stage = polInfo.stage == string("tmpExp") ? nStages + 1 : polInfo.stageNum;
+                bool isTmpPol = polInfo.stage == string("tmpExp") && !domainExtended;
+                uint64_t stage = isTmpPol ? nStages + 1 : polInfo.stageNum;
                 uint64_t stagePos = polInfo.stagePos;
+                uint64_t dim = polInfo.dim;
                 for(uint64_t d = 0; d < polInfo.dim; ++d) {
                     for(uint64_t o = 0; o < nOpenings; ++o) {
                         for(uint64_t j = 0; j < nrowsBatch; ++j) {
                             uint64_t l = (i + j + nextStrides[o]) % domainSize;
-                            bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[stage] + l * nColsSteps[stage] + stagePos + d];
+                            if(isTmpPol) {
+                                bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[stage] + stagePos * domainSize + l*dim + d];
+                            } else {
+                                bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[stage] + l * nColsSteps[stage] + stagePos + d];
+                            }
                         }
                         Goldilocks::load_avx(bufferT_[mapBufferT_[nOpenings * nColsStepsAccumulated[stage] + nOpenings * (stagePos + d) + o]], &bufferT[nrowsBatch*o]);
                     }
@@ -205,34 +250,14 @@ public:
             case 0: {
                 // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: tmp1
                 Goldilocks::op_avx(args[i_args], bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 4]] + nOpenings * args[i_args + 5] + args[i_args + 6]]], tmp1[args[i_args + 7]]);
-                if(needModule) {
-                    uint64_t stepOffset = offsetsSteps[args[i_args + 1]] + args[i_args + 2];
-                    uint64_t nextStrideOffset = i + nextStrides[args[i_args + 3]];
-                    offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[args[i_args + 1]];
-                    Goldilocks::store_avx(&params.pols[0], offsetsDest, bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]]);
-                } else {
-                    Goldilocks::store_avx(&params.pols[offsetsSteps[args[i_args + 1]] + args[i_args + 2] + (i + nextStrides[args[i_args + 3]]) * nColsSteps[args[i_args + 1]]], nColsSteps[args[i_args + 1]], bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]]);
-                }
+                storePolinomial(params.pols, bufferT_, mapBufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, nOpenings, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                 i_args += 8;
                 break;
             }
             case 1: {
                 // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: tmp1
                 Goldilocks::op_avx(args[i_args], bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], tmp1[args[i_args + 4]], tmp1[args[i_args + 5]]);
-                if(needModule) {
-                    uint64_t stepOffset = offsetsSteps[args[i_args + 1]] + args[i_args + 2];
-                    uint64_t nextStrideOffset = i + nextStrides[args[i_args + 3]];
-                    offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[args[i_args + 1]];
-                    Goldilocks::store_avx(&params.pols[0], offsetsDest, bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]]);
-                } else {
-                    Goldilocks::store_avx(&params.pols[offsetsSteps[args[i_args + 1]] + args[i_args + 2] + (i + nextStrides[args[i_args + 3]]) * nColsSteps[args[i_args + 1]]], nColsSteps[args[i_args + 1]], bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]]);
-                }
+                storePolinomial(params.pols, bufferT_, mapBufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, nOpenings, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                 i_args += 6;
                 break;
             }
@@ -283,17 +308,7 @@ public:
                 Goldilocks3::op_avx(args[i_args], &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], nOpenings, 
                         &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 4]] + nOpenings * args[i_args + 5] + args[i_args + 6]]], nOpenings, 
                         &(tmp3[args[i_args + 7]][0]), 1);
-                if(needModule) {
-                    uint64_t stepOffset = offsetsSteps[args[i_args + 1]] + args[i_args + 2];
-                    uint64_t nextStrideOffset = i + nextStrides[args[i_args + 3]];
-                    offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[args[i_args + 1]];
-                    Goldilocks3::store_avx(&params.pols[0], offsetsDest, &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], nOpenings);
-                } else {
-                    Goldilocks3::store_avx(&params.pols[offsetsSteps[args[i_args + 1]] + args[i_args + 2] + (i + nextStrides[args[i_args + 3]]) * nColsSteps[args[i_args + 1]]], nColsSteps[args[i_args + 1]], &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], nOpenings);
-                }
+                storePolinomial(params.pols, bufferT_, mapBufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, nOpenings, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                 i_args += 8;
                 break;
             }
@@ -302,17 +317,7 @@ public:
                 Goldilocks3::op_avx(args[i_args], &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], nOpenings, 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         &(tmp3[args[i_args + 5]][0]), 1);
-                if(needModule) {
-                    uint64_t stepOffset = offsetsSteps[args[i_args + 1]] + args[i_args + 2];
-                    uint64_t nextStrideOffset = i + nextStrides[args[i_args + 3]];
-                    offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[args[i_args + 1]];
-                    Goldilocks3::store_avx(&params.pols[0], offsetsDest, &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], nOpenings);
-                } else {
-                    Goldilocks3::store_avx(&params.pols[offsetsSteps[args[i_args + 1]] + args[i_args + 2] + (i + nextStrides[args[i_args + 3]]) * nColsSteps[args[i_args + 1]]], nColsSteps[args[i_args + 1]], &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], nOpenings);
-                }
+                storePolinomial(params.pols, bufferT_, mapBufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, nOpenings, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                 i_args += 6;
                 break;
             }
@@ -436,7 +441,7 @@ public:
                     tmp_inv[0] = ti0[j];
                     tmp_inv[1] = ti1[j];
                     tmp_inv[2] = ti2[j];
-                    Goldilocks3::mul((Goldilocks3::Element &)(params.q_2ns[(i + j) * 3]), params.zi[i + j],(Goldilocks3::Element &)tmp_inv);
+                    Goldilocks3::mul((Goldilocks3::Element &)(params.q_2ns[(i + j) * FIELD_EXTENSION]), params.zi[i + j],(Goldilocks3::Element &)tmp_inv);
                 }
                 i_args += 1;
                 break;
@@ -444,7 +449,7 @@ public:
             case 28: {
                 // OPERATION WITH DEST: f - SRC0: tmp3 - SRC1: tmp3
                 Goldilocks3::op_avx(args[i_args], tmp3_, tmp3[args[i_args + 1]], tmp3[args[i_args + 2]]);
-                Goldilocks3::store_avx(&params.f_2ns[i*3], uint64_t(FIELD_EXTENSION), tmp3_);
+                Goldilocks3::store_avx(&params.f_2ns[i*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3_);
                 i_args += 3;
                 break;
             }

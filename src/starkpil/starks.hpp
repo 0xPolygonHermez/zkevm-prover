@@ -77,6 +77,8 @@ private:
     Goldilocks::Element *mem;
     void *pAddress;
 
+    Goldilocks::Element *S;
+    Goldilocks::Element *xis;
     Goldilocks::Element *x;
     Goldilocks::Element *x_n;
     Goldilocks::Element *x_2ns;
@@ -205,6 +207,14 @@ public:
             x[k] = x[k - 1] * Goldilocks::w(starkInfo.starkStruct.nBits + extendBits);
         }
 
+        S = new Goldilocks::Element[starkInfo.qDeg];
+        xis = new Goldilocks::Element[starkInfo.openingPoints.size() * FIELD_EXTENSION];
+        Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
+        S[0] = Goldilocks::one();
+        for(uint64_t i = 1; i < starkInfo.qDeg; i++) {
+            S[i] = Goldilocks::mul(S[i - 1], shiftIn);
+        }
+
         xDivXSubXi = &mem[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]];
         q_2ns = &mem[starkInfo.mapOffsets[std::make_pair("q", true)]];
         f_2ns = &mem[starkInfo.mapOffsets[std::make_pair("f", true)]];
@@ -249,6 +259,8 @@ public:
         if (!config.generateProof())
             return;
         
+        delete S;
+        delete xis;
         delete x;
         delete x_n;
         delete x_2ns;

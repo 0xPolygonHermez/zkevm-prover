@@ -3,6 +3,29 @@
 
 class AllSteps : public CHelpersSteps {
 public:
+    void storePolinomial(Goldilocks::Element *pols, __m256i *bufferT, uint64_t* mapBufferT, uint64_t* nColsSteps, uint64_t *offsetsSteps, uint64_t *buffTOffsetsSteps, uint64_t *nextStrides, uint64_t nOpenings, uint64_t domainSize, bool needModule, bool tmpPol, uint64_t row, uint64_t stage, uint64_t stagePos, uint64_t openingPointIndex, uint64_t dim) {
+        if(needModule) {
+            uint64_t stepOffset = offsetsSteps[stage] + stagePos;
+            uint64_t nextStrideOffset = row + nextStrides[openingPointIndex];
+            uint64_t offsetsDest[4];
+            offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[stage];
+            offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[stage];
+            offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[stage];
+            offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[stage];
+            if(dim == 1) {
+                Goldilocks::store_avx(&pols[0], offsetsDest, bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]]);
+            } else {
+                Goldilocks3::store_avx(&pols[0], offsetsDest, &bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]], nOpenings);
+            }
+        } else {
+            if(dim == 1) {
+                Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]]);
+            } else {
+                Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[mapBufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]], nOpenings);
+            }
+        }
+    }
+
     void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint32_t nrowsBatch, bool domainExtended) {
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint64_t extendBits = (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits);
@@ -249,17 +272,7 @@ public:
                 Goldilocks3::op_avx(args[i_args], &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], nOpenings, 
                         &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 4]] + nOpenings * args[i_args + 5] + args[i_args + 6]]], nOpenings, 
                         &(tmp3[args[i_args + 7]][0]), 1);
-                if(needModule) {
-                    uint64_t stepOffset = offsetsSteps[args[i_args + 1]] + args[i_args + 2];
-                    uint64_t nextStrideOffset = i + nextStrides[args[i_args + 3]];
-                    offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[args[i_args + 1]];
-                    offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[args[i_args + 1]];
-                    Goldilocks3::store_avx(&params.pols[0], offsetsDest, &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], nOpenings);
-                } else {
-                    Goldilocks3::store_avx(&params.pols[offsetsSteps[args[i_args + 1]] + args[i_args + 2] + (i + nextStrides[args[i_args + 3]]) * nColsSteps[args[i_args + 1]]], nColsSteps[args[i_args + 1]], &bufferT_[mapBufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]]], nOpenings);
-                }
+                storePolinomial(params.pols, bufferT_, mapBufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, nOpenings, domainSize, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 3);
                 i_args += 8;
                 break;
             }

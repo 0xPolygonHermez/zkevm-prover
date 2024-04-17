@@ -158,9 +158,7 @@ void FRI<ElementType>::polMulAxi(Goldilocks::Element *pol, uint64_t degree, Gold
     Goldilocks::Element r = Goldilocks::one();
     for (uint64_t i = 0; i < degree; i++)
     {   
-        pol[i * FIELD_EXTENSION] = pol[i * FIELD_EXTENSION] * r;
-        pol[i * FIELD_EXTENSION + 1] = pol[i * FIELD_EXTENSION + 1] * r;
-        pol[i * FIELD_EXTENSION + 2] = pol[i * FIELD_EXTENSION + 2] * r;
+        Goldilocks3::mul((Goldilocks3::Element &)(pol[i * FIELD_EXTENSION]), (Goldilocks3::Element &)(pol[i * FIELD_EXTENSION]), r);
         r = r * acc;
     }
 }
@@ -181,10 +179,7 @@ void FRI<ElementType>::evalPol(Goldilocks::Element* res, uint64_t res_idx, uint6
     {
         Goldilocks3::Element aux;
         Goldilocks3::mul(aux, (Goldilocks3::Element &)(res[res_idx * FIELD_EXTENSION]), (Goldilocks3::Element &)x[0]);
-
-        res[res_idx * FIELD_EXTENSION] = aux[0] + p[i * FIELD_EXTENSION];
-        res[res_idx * FIELD_EXTENSION + 1] = aux[1] + p[i * FIELD_EXTENSION + 1];
-        res[res_idx * FIELD_EXTENSION + 2] = aux[2] + p[i * FIELD_EXTENSION + 2];
+        Goldilocks3::add((Goldilocks3::Element &)(res[res_idx * FIELD_EXTENSION]), aux, (Goldilocks3::Element &)p[i * FIELD_EXTENSION]);
     }
 }
 

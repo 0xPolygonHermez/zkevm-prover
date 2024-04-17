@@ -22,7 +22,7 @@ ordered_json proof2zkinStark(ordered_json &proof, StarkInfo &starkInfo)
         zkinOut["root" + to_string(stage)] = proof["root" + to_string(stage)];
     }
 
-    zkinOut[rootQ] = proof["root4"];
+    zkinOut[rootQ] = proof["root" + to_string(nStages + 1)];
     zkinOut["evals"] = proof["evals"];
 
     ordered_json friProof = proof["fri"];

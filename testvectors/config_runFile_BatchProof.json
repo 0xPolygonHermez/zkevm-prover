@@ -59,7 +59,7 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/batchProof_fork7/",
+    "inputFile": "testvectors/e2e/fork_8/input_executor_0.json",
     "inputFile2": "testvectors/batchProof_fork7/",
 
     "outputPath": "runtime/output",

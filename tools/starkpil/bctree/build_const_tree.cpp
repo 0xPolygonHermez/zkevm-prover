@@ -77,7 +77,7 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
         TimerStart(MERKELIZE_CONST_TREE);
         RawFr::Element rootC;
         uint64_t merkleTreeArity = starkInfoJson["starkStruct"]["merkleTreeArity"];
-        uint64_t merkleTreeCustom = starkInfoJson["starkStruct"]["merkleTreeCustom"];
+        bool merkleTreeCustom = starkInfoJson["starkStruct"]["merkleTreeCustom"];
 
         MerkleTreeBN128 mt(merkleTreeArity, merkleTreeCustom, NExtended, nPols, pConstPolsExt);
         mt.merkelize();
