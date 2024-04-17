@@ -151,7 +151,7 @@ void eval_fpBN254inv                  (Context &ctx, const RomCommand &cmd, Comm
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);
 
-zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value);
+zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value, const Goldilocks::Element (&key)[4]);
 
 mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p );
 
