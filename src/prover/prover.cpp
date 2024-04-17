@@ -152,7 +152,7 @@ Prover::Prover(Goldilocks &fr,
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
-#ifndef __LIB__
+#ifndef __ZKEVM_LIB__
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
             prover->setZkey(zkey.get());
 
@@ -200,7 +200,7 @@ Prover::~Prover()
             if(!externalAllocated) free(pAddress);
         }
 
-#ifndef __LIB__
+#ifndef __ZKEVM_LIB__
         delete prover;
 
         delete starkZkevm;
@@ -467,7 +467,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest, void *pStarkInfo)
     /************/
     TimerStart(EXECUTOR_EXECUTE_INITIALIZATION);
 
-#ifdef __LIB__
+#ifdef __ZKEVM_LIB__
     auto starkInfoZkevm = (StarkInfo *)pStarkInfo;
 #endif
     PROVER_FORK_NAMESPACE::CommitPols cmPols((uint8_t *)pAddress + starkInfoZkevm->mapOffsets[std::make_pair("cm1", false)] * sizeof(Goldilocks::Element), PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
@@ -507,7 +507,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest, void *pStarkInfo)
         unmapFile(pointerCmPols, cmPols.size());
     }
 
-#ifndef __LIB__
+#ifndef __ZKEVM_LIB__
     if (pProverRequest->result == ZKR_SUCCESS)
     {
         genStarkProof(cmPols, lastN, pProverRequest);
@@ -690,7 +690,9 @@ void Prover::genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t l
 
     if(USE_GENERIC_PARSER) {
         starksRecursive1->genProof(fproofRecursive1, publics, &cHelpersSteps);
-    } else {
+    }
+    else
+    {
         Recursive1Steps recursive1ChelpersSteps;
         starksRecursive1->genProof(fproofRecursive1, publics, &recursive1ChelpersSteps);
     }

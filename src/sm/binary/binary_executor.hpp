@@ -18,9 +18,6 @@ private:
     const uint64_t N;
     vector<vector<uint64_t>> FACTOR;
     vector<uint64_t> RESET;
-#ifdef __ZKEVM_SM__
-    void *ZkevmSMBinaryPtr;
-#endif
 
 public:
     BinaryExecutor (Goldilocks &fr, const Config &config);

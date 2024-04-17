@@ -13,286 +13,289 @@
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
+#ifdef __ZKEVM_LIB__
+#include "zkevm_sm.h"
+#endif
 
 // Reduced version: only 1 evaluation is allocated, and some asserts are disabled
-void Executor::process_batch (ProverRequest &proverRequest)
+void Executor::process_batch(ProverRequest &proverRequest)
 {
     // Execute the Main State Machine
     switch (proverRequest.input.publicInputsExtended.publicInputs.forkID)
     {
-        case 1: // fork_1
+    case 1: // fork_1
+    {
+        /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
         {
-            /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
-            {
-                fork_1::main_exec_generated_fast(mainExecutor_fork_1, proverRequest);
-            }
-            else*/
-            {
-                //zklog.info("Executor::process_batch() fork 1 native");
-
-                // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_1::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-                if (pAddress == NULL)
-                {
-                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_1::CommitPols::pilSize()) + ")");
-                    exitProcess();
-                }
-                fork_1::CommitPols commitPols(pAddress,1);
-
-                // This instance will store all data required to execute the rest of State Machines
-                fork_1::MainExecRequired required;
-
-                mainExecutor_fork_1.execute(proverRequest, commitPols.Main, required);
-
-                // Free committed polynomials address space
-                free(pAddress);
-            }
-            return;
+            fork_1::main_exec_generated_fast(mainExecutor_fork_1, proverRequest);
         }
-        case 2: // fork_2
+        else*/
         {
-            /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
+            // zklog.info("Executor::process_batch() fork 1 native");
+
+            // Allocate committed polynomials for only 1 evaluation
+            void *pAddress = calloc(fork_1::CommitPols::numPols() * sizeof(Goldilocks::Element), 1);
+            if (pAddress == NULL)
             {
-                fork_2::main_exec_generated_fast(mainExecutor_fork_2, proverRequest);
+                zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_1::CommitPols::pilSize()) + ")");
+                exitProcess();
             }
-            else*/
-            {
-                //zklog.info("Executor::process_batch() fork 2 native");
+            fork_1::CommitPols commitPols(pAddress, 1);
 
-                // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_2::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-                if (pAddress == NULL)
-                {
-                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_2::CommitPols::pilSize()) + ")");
-                    exitProcess();
-                }
-                fork_2::CommitPols commitPols(pAddress,1);
+            // This instance will store all data required to execute the rest of State Machines
+            fork_1::MainExecRequired required;
 
-                // This instance will store all data required to execute the rest of State Machines
-                fork_2::MainExecRequired required;
+            mainExecutor_fork_1.execute(proverRequest, commitPols.Main, required);
 
-                mainExecutor_fork_2.execute(proverRequest, commitPols.Main, required);
-
-                // Free committed polynomials address space
-                free(pAddress);
-            }
-            return;
+            // Free committed polynomials address space
+            free(pAddress);
         }
-        case 3: // fork_3
+        return;
+    }
+    case 2: // fork_2
+    {
+        /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
         {
-            /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
-            {
-                fork_3::main_exec_generated_fast(mainExecutor_fork_3, proverRequest);
-            }
-            else*/
-            {
-                //zklog.info("Executor::process_batch() fork 3 native");
-
-                // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_3::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-                if (pAddress == NULL)
-                {
-                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_3::CommitPols::pilSize()) + ")");
-                    exitProcess();
-                }
-                fork_3::CommitPols commitPols(pAddress,1);
-
-                // This instance will store all data required to execute the rest of State Machines
-                fork_3::MainExecRequired required;
-
-                mainExecutor_fork_3.execute(proverRequest, commitPols.Main, required);
-
-                // Free committed polynomials address space
-                free(pAddress);
-            }
-            return;
+            fork_2::main_exec_generated_fast(mainExecutor_fork_2, proverRequest);
         }
-        case 4: // fork_4
+        else*/
         {
+            // zklog.info("Executor::process_batch() fork 2 native");
+
+            // Allocate committed polynomials for only 1 evaluation
+            void *pAddress = calloc(fork_2::CommitPols::numPols() * sizeof(Goldilocks::Element), 1);
+            if (pAddress == NULL)
+            {
+                zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_2::CommitPols::pilSize()) + ")");
+                exitProcess();
+            }
+            fork_2::CommitPols commitPols(pAddress, 1);
+
+            // This instance will store all data required to execute the rest of State Machines
+            fork_2::MainExecRequired required;
+
+            mainExecutor_fork_2.execute(proverRequest, commitPols.Main, required);
+
+            // Free committed polynomials address space
+            free(pAddress);
+        }
+        return;
+    }
+    case 3: // fork_3
+    {
+        /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
+        {
+            fork_3::main_exec_generated_fast(mainExecutor_fork_3, proverRequest);
+        }
+        else*/
+        {
+            // zklog.info("Executor::process_batch() fork 3 native");
+
+            // Allocate committed polynomials for only 1 evaluation
+            void *pAddress = calloc(fork_3::CommitPols::numPols() * sizeof(Goldilocks::Element), 1);
+            if (pAddress == NULL)
+            {
+                zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_3::CommitPols::pilSize()) + ")");
+                exitProcess();
+            }
+            fork_3::CommitPols commitPols(pAddress, 1);
+
+            // This instance will store all data required to execute the rest of State Machines
+            fork_3::MainExecRequired required;
+
+            mainExecutor_fork_3.execute(proverRequest, commitPols.Main, required);
+
+            // Free committed polynomials address space
+            free(pAddress);
+        }
+        return;
+    }
+    case 4: // fork_4
+    {
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            if (config.useMainExecGenerated)
-            {
-                //zklog.info("Executor::process_batch() fork 4 generated");
-                fork_4::main_exec_generated_fast(mainExecutor_fork_4, proverRequest);
-            }
-            else
-#endif
-            {
-                //zklog.info("Executor::process_batch() fork 4 native");
-
-                // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_4::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-                if (pAddress == NULL)
-                {
-                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_4::CommitPols::pilSize()) + ")");
-                    exitProcess();
-                }
-                fork_4::CommitPols commitPols(pAddress,1);
-
-                // This instance will store all data required to execute the rest of State Machines
-                fork_4::MainExecRequired required;
-
-                mainExecutor_fork_4.execute(proverRequest, commitPols.Main, required);
-
-                // Free committed polynomials address space
-                free(pAddress);
-            }
-            return;
-        }
-        case 5: // fork_5
+        if (config.useMainExecGenerated)
         {
+            // zklog.info("Executor::process_batch() fork 4 generated");
+            fork_4::main_exec_generated_fast(mainExecutor_fork_4, proverRequest);
+        }
+        else
+#endif
+        {
+            // zklog.info("Executor::process_batch() fork 4 native");
+
+            // Allocate committed polynomials for only 1 evaluation
+            void *pAddress = calloc(fork_4::CommitPols::numPols() * sizeof(Goldilocks::Element), 1);
+            if (pAddress == NULL)
+            {
+                zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_4::CommitPols::pilSize()) + ")");
+                exitProcess();
+            }
+            fork_4::CommitPols commitPols(pAddress, 1);
+
+            // This instance will store all data required to execute the rest of State Machines
+            fork_4::MainExecRequired required;
+
+            mainExecutor_fork_4.execute(proverRequest, commitPols.Main, required);
+
+            // Free committed polynomials address space
+            free(pAddress);
+        }
+        return;
+    }
+    case 5: // fork_5
+    {
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            if (config.useMainExecGenerated)
-            {
-                //zklog.info("Executor::process_batch() fork 5 generated");
-                fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
-            }
-            else
-#endif
-            {
-                //zklog.info("Executor::process_batch() fork 5 native");
-
-                // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_5::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-                if (pAddress == NULL)
-                {
-                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_5::CommitPols::pilSize()) + ")");
-                    exitProcess();
-                }
-                fork_5::CommitPols commitPols(pAddress,1);
-
-                // This instance will store all data required to execute the rest of State Machines
-                fork_5::MainExecRequired required;
-
-                mainExecutor_fork_5.execute(proverRequest, commitPols.Main, required);
-
-                // Free committed polynomials address space
-                free(pAddress);
-            }
-            return;
-        }
-        case 6: // fork_6
+        if (config.useMainExecGenerated)
         {
+            // zklog.info("Executor::process_batch() fork 5 generated");
+            fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
+        }
+        else
+#endif
+        {
+            // zklog.info("Executor::process_batch() fork 5 native");
+
+            // Allocate committed polynomials for only 1 evaluation
+            void *pAddress = calloc(fork_5::CommitPols::numPols() * sizeof(Goldilocks::Element), 1);
+            if (pAddress == NULL)
+            {
+                zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_5::CommitPols::pilSize()) + ")");
+                exitProcess();
+            }
+            fork_5::CommitPols commitPols(pAddress, 1);
+
+            // This instance will store all data required to execute the rest of State Machines
+            fork_5::MainExecRequired required;
+
+            mainExecutor_fork_5.execute(proverRequest, commitPols.Main, required);
+
+            // Free committed polynomials address space
+            free(pAddress);
+        }
+        return;
+    }
+    case 6: // fork_6
+    {
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            if (config.useMainExecGenerated)
-            {
-                //zklog.info("Executor::process_batch() fork 6 generated");
-                fork_6::main_exec_generated_fast(mainExecutor_fork_6, proverRequest);
-            }
-            else
-#endif
-            {
-                //zklog.info("Executor::process_batch() fork 6 native");
-
-                // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_6::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-                if (pAddress == NULL)
-                {
-                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_6::CommitPols::pilSize()) + ")");
-                    exitProcess();
-                }
-                fork_6::CommitPols commitPols(pAddress,1);
-
-                // This instance will store all data required to execute the rest of State Machines
-                fork_6::MainExecRequired required;
-
-                mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
-
-                // Free committed polynomials address space
-                free(pAddress);
-            }
-            return;
-        }
-        case 7: // fork_7
+        if (config.useMainExecGenerated)
         {
+            // zklog.info("Executor::process_batch() fork 6 generated");
+            fork_6::main_exec_generated_fast(mainExecutor_fork_6, proverRequest);
+        }
+        else
+#endif
+        {
+            // zklog.info("Executor::process_batch() fork 6 native");
+
+            // Allocate committed polynomials for only 1 evaluation
+            void *pAddress = calloc(fork_6::CommitPols::numPols() * sizeof(Goldilocks::Element), 1);
+            if (pAddress == NULL)
+            {
+                zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_6::CommitPols::pilSize()) + ")");
+                exitProcess();
+            }
+            fork_6::CommitPols commitPols(pAddress, 1);
+
+            // This instance will store all data required to execute the rest of State Machines
+            fork_6::MainExecRequired required;
+
+            mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
+
+            // Free committed polynomials address space
+            free(pAddress);
+        }
+        return;
+    }
+    case 7: // fork_7
+    {
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            if (config.useMainExecGenerated)
-            {
-                //zklog.info("Executor::process_batch() fork 7 generated");
-                fork_7::main_exec_generated_fast(mainExecutor_fork_7, proverRequest);
-            }
-            else
-#endif
-            {
-                //zklog.info("Executor::process_batch() fork 7 native");
-
-                // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_7::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-                if (pAddress == NULL)
-                {
-                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_7::CommitPols::pilSize()) + ")");
-                    exitProcess();
-                }
-                fork_7::CommitPols commitPols(pAddress,1);
-
-                // This instance will store all data required to execute the rest of State Machines
-                fork_7::MainExecRequired required;
-
-                mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
-
-                // Free committed polynomials address space
-                free(pAddress);
-            }
-            return;
-        }
-        case 8: // fork_8
+        if (config.useMainExecGenerated)
         {
-            if (config.useMainExecC) // Do not use in production; under development
+            // zklog.info("Executor::process_batch() fork 7 generated");
+            fork_7::main_exec_generated_fast(mainExecutor_fork_7, proverRequest);
+        }
+        else
+#endif
+        {
+            // zklog.info("Executor::process_batch() fork 7 native");
+
+            // Allocate committed polynomials for only 1 evaluation
+            void *pAddress = calloc(fork_7::CommitPols::numPols() * sizeof(Goldilocks::Element), 1);
+            if (pAddress == NULL)
             {
-                //zklog.info("Executor::process_batch() fork 8 C");
-                mainExecutorC_fork_8.execute(proverRequest);
+                zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_7::CommitPols::pilSize()) + ")");
+                exitProcess();
             }
+            fork_7::CommitPols commitPols(pAddress, 1);
+
+            // This instance will store all data required to execute the rest of State Machines
+            fork_7::MainExecRequired required;
+
+            mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
+
+            // Free committed polynomials address space
+            free(pAddress);
+        }
+        return;
+    }
+    case 8: // fork_8
+    {
+        if (config.useMainExecC) // Do not use in production; under development
+        {
+            // zklog.info("Executor::process_batch() fork 8 C");
+            mainExecutorC_fork_8.execute(proverRequest);
+        }
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            else if (config.useMainExecGenerated)
-            {
-                //zklog.info("Executor::process_batch() fork 8 generated");
-                fork_8::main_exec_generated_fast(mainExecutor_fork_8, proverRequest);
-            }
-            else
-#endif
-            {
-                //zklog.info("Executor::process_batch() fork 8 native");
-
-                // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_8::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-                if (pAddress == NULL)
-                {
-                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_8::CommitPols::pilSize()) + ")");
-                    exitProcess();
-                }
-                fork_8::CommitPols commitPols(pAddress,1);
-
-                // This instance will store all data required to execute the rest of State Machines
-                fork_8::MainExecRequired required;
-
-                mainExecutor_fork_8.execute(proverRequest, commitPols.Main, required);
-
-                // Free committed polynomials address space
-                free(pAddress);
-            }
-            return;
-        }
-        default:
+        else if (config.useMainExecGenerated)
         {
-            zklog.error("Executor::process_batch() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
-            proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
-            return;
+            // zklog.info("Executor::process_batch() fork 8 generated");
+            fork_8::main_exec_generated_fast(mainExecutor_fork_8, proverRequest);
         }
+        else
+#endif
+        {
+            // zklog.info("Executor::process_batch() fork 8 native");
+
+            // Allocate committed polynomials for only 1 evaluation
+            void *pAddress = calloc(fork_8::CommitPols::numPols() * sizeof(Goldilocks::Element), 1);
+            if (pAddress == NULL)
+            {
+                zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_8::CommitPols::pilSize()) + ")");
+                exitProcess();
+            }
+            fork_8::CommitPols commitPols(pAddress, 1);
+
+            // This instance will store all data required to execute the rest of State Machines
+            fork_8::MainExecRequired required;
+
+            mainExecutor_fork_8.execute(proverRequest, commitPols.Main, required);
+
+            // Free committed polynomials address space
+            free(pAddress);
+        }
+        return;
+    }
+    default:
+    {
+        zklog.error("Executor::process_batch() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
+        proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
+        return;
+    }
     }
 }
 
 class ExecutorContext
 {
 public:
-    Executor * pExecutor;
-    PROVER_FORK_NAMESPACE::MainExecRequired * pRequired;
-    PROVER_FORK_NAMESPACE::CommitPols * pCommitPols;
+    Executor *pExecutor;
+    PROVER_FORK_NAMESPACE::MainExecRequired *pRequired;
+    PROVER_FORK_NAMESPACE::CommitPols *pCommitPols;
 };
 
-void* BinaryThread (void* arg)
+void *BinaryThread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Binary State Machine
     TimerStart(BINARY_SM_EXECUTE_THREAD);
@@ -302,10 +305,10 @@ void* BinaryThread (void* arg)
     return NULL;
 }
 
-void* MemAlignThread (void* arg)
+void *MemAlignThread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the MemAlign State Machine
     TimerStart(MEM_ALIGN_SM_EXECUTE_THREAD);
@@ -315,10 +318,10 @@ void* MemAlignThread (void* arg)
     return NULL;
 }
 
-void* MemoryThread (void* arg)
+void *MemoryThread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Binary State Machine
     TimerStart(MEMORY_SM_EXECUTE_THREAD);
@@ -328,10 +331,10 @@ void* MemoryThread (void* arg)
     return NULL;
 }
 
-void* ArithThread (void* arg)
+void *ArithThread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Binary State Machine
     TimerStart(ARITH_SM_EXECUTE_THREAD);
@@ -341,10 +344,10 @@ void* ArithThread (void* arg)
     return NULL;
 }
 
-void* PaddingPGThread (void* arg)
+void *PaddingPGThread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Padding PG State Machine
     TimerStart(PADDING_PG_SM_EXECUTE_THREAD);
@@ -354,10 +357,10 @@ void* PaddingPGThread (void* arg)
     return NULL;
 }
 
-void* StorageThread (void* arg)
+void *StorageThread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Storage State Machine
     TimerStart(STORAGE_SM_EXECUTE_THREAD);
@@ -367,10 +370,10 @@ void* StorageThread (void* arg)
     return NULL;
 }
 
-void* ClimbKeyThread (void* arg)
+void *ClimbKeyThread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the ClimbKey State Machine
     TimerStart(CLIMB_KEY_SM_EXECUTE_THREAD);
@@ -380,10 +383,10 @@ void* ClimbKeyThread (void* arg)
     return NULL;
 }
 
-void* PoseidonThread (void* arg)
+void *PoseidonThread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Poseidon G State Machine
     TimerStart(POSEIDON_G_SM_EXECUTE_THREAD);
@@ -393,10 +396,10 @@ void* PoseidonThread (void* arg)
     return NULL;
 }
 
-void* KeccakThread (void* arg)
+void *KeccakThread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Padding KK State Machine
     TimerStart(PADDING_KK_SM_EXECUTE_THREAD);
@@ -421,10 +424,10 @@ void* KeccakThread (void* arg)
     return NULL;
 }
 
-void* Sha256Thread (void* arg)
+void *Sha256Thread(void *arg)
 {
     // Get the context
-    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+    ExecutorContext *pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Padding SHA256 State Machine
     TimerStart(PADDING_SHA256_SM_EXECUTE_THREAD);
@@ -450,11 +453,12 @@ void* Sha256Thread (void* arg)
 }
 
 // Full version: all polynomials are evaluated, in all evaluations
-void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols, void** pSMRequests, void* pSMRequestsOut)
+void Executor::execute(ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols &commitPols, void **pSMRequests, void *pSMRequestsOut)
 {
     // This instance will store all data required to execute the rest of State Machines
-    PROVER_FORK_NAMESPACE::MainExecRequired*  required = new PROVER_FORK_NAMESPACE::MainExecRequired();
-    if(pSMRequests != NULL) *pSMRequests = (void*)required; 
+    PROVER_FORK_NAMESPACE::MainExecRequired *required = new PROVER_FORK_NAMESPACE::MainExecRequired();
+    if (pSMRequests != NULL)
+        *pSMRequests = (void *)required;
 
     if (!config.executeInParallel)
     {
@@ -488,14 +492,13 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-
         if (proverRequest.result != ZKR_SUCCESS)
         {
             return;
         }
 
-// #ifndef __ZKEVM_SM__
-        
+#ifndef __ZKEVM_LIB__
+
         // Execute the Storage State Machine
         TimerStart(STORAGE_SM_EXECUTE);
         storageExecutor.execute(required->Storage, commitPols.Storage, required->PoseidonGFromST, required->ClimbKey);
@@ -519,7 +522,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         // Execute the MemAlign State Machine
         TimerStart(MEM_ALIGN_SM_EXECUTE);
         memAlignExecutor.execute(required->MemAlign, commitPols.MemAlign);
-        TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);       
+        TimerStopAndLog(MEM_ALIGN_SM_EXECUTE);
 
         // Execute the Memory State Machine
         TimerStart(MEMORY_SM_EXECUTE);
@@ -575,24 +578,25 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         climbKeyExecutor.execute(required->ClimbKey, commitPols.ClimbKey);
         TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);
 
-// #endif
+#endif
 
-    #ifdef __ZKEVM_SM__
-        if(pSMRequestsOut!=NULL){
-            /*TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
-            add_mem_align_inputs((void *)pSMRequestsOut, (void *)required->MemAlign.data(), (uint64_t) required->MemAlign.size());
-            add_binary_inputs((void *)pSMRequestsOut, (void *)required->Binary.data(), (uint64_t) required->Binary.size());
+#ifdef __ZKEVM_LIB__
+        if (pSMRequestsOut != NULL)
+        {
+            TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
+            add_mem_align_inputs((void *)pSMRequestsOut, (void *)required->MemAlign.data(), (uint64_t)required->MemAlign.size());
+            add_binary_inputs((void *)pSMRequestsOut, (void *)required->Binary.data(), (uint64_t)required->Binary.size());
             PaddingSha256ExecutorInput::DTO *buffer1 = PaddingSha256ExecutorInput::toDTO(required->PaddingSha256);
-            add_padding_sha256_inputs((void *)pSMRequestsOut, (void *) buffer1, required->PaddingSha256.size());
+            add_padding_sha256_inputs((void *)pSMRequestsOut, (void *)buffer1, required->PaddingSha256.size());
             delete[] buffer1;
             PaddingKKExecutorInput::DTO *buffer2 = PaddingKKExecutorInput::toDTO(required->PaddingKK);
-            add_padding_kk_inputs((void *)pSMRequestsOut, (void *) buffer2, required->PaddingKK.size());
+            add_padding_kk_inputs((void *)pSMRequestsOut, (void *)buffer2, required->PaddingKK.size());
             delete[] buffer2;
-            add_memory_inputs((void *)pSMRequestsOut, (void *)required->Memory.data(), (uint64_t) required->Memory.size());
-            add_arith_inputs((void *)pSMRequestsOut, (void *)required->Arith.data(), (uint64_t) required->Arith.size());
-            TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);*/
+            add_memory_inputs((void *)pSMRequestsOut, (void *)required->Memory.data(), (uint64_t)required->Memory.size());
+            add_arith_inputs((void *)pSMRequestsOut, (void *)required->Arith.data(), (uint64_t)required->Arith.size());
+            TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
         }
-    #endif
+#endif
     }
     else
     {
@@ -630,7 +634,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             zklog.error("Executor::execute() got from main execution proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
             return;
         }
-// #ifndef __ZKEVM_SM__
+#ifndef __ZKEVM_LIB__
         // Execute the Storage State Machines
         pthread_t storageThread;
         pthread_create(&storageThread, NULL, StorageThread, &executorContext);
@@ -686,9 +690,9 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_join(keccakThread, NULL);
         pthread_join(sha256Thread, NULL);
         pthread_join(climbKeyThread, NULL);
-// #endif
+#endif
     }
-    // #ifndef __ZKEVM_SM__   
-        delete required;  
-    // #endif
+#ifndef __ZKEVM_LIB__
+    delete required;
+#endif
 }

@@ -26,15 +26,6 @@ CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rd
 LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -fopenmp -liomp5 $(GRPCPP_LIBS)
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
-INCFLAGS_EXT :=
-LDFLAGS_EXT :=
-
-# Debug build flags
-ifeq ($(dbg),1)
-      CXXFLAGS += -g -D DEBUG
-else
-      CXXFLAGS += -O3
-endif
 
 # Verify if AVX-512 is supported
 # for now disabled, to enable it, you only need to uncomment these lines
@@ -44,19 +35,17 @@ endif
 #	CXXFLAGS += -mavx512f -D__AVX512__
 #endif
 
-# Enable link with zkevm_sm rust library
-ifeq ($(zkevm_sm),1)
-	  LDFLAGS_EXT += -L../zkevm-prover-rust/target/release -lzkevm_sm
-	  INCFLAGS_EXT += -I./../zkevm-prover-rust/include
-	  CXXFLAGS += -D__ZKEVM_SM__ -D__LIB__
+# Debug build flags
+ifeq ($(dbg),1)
+      CXXFLAGS += -g -D__DEBUG__
+else
+      CXXFLAGS += -O3
 endif
-
-
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-CPPFLAGS ?= $(INC_FLAGS) $(INCFLAGS_EXT) -MMD -MP
+CPPFLAGS ?= $(INC_FLAGS) $(INC_FLAGS_EXT) -MMD -MP
 
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
@@ -96,6 +85,9 @@ DEPS_SETUP := $(OBJS_SETUP:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
+lib: CXXFLAGS_EXT := -D__ZKEVM_LIB__
+lib: LDFLAGS_EXT  := -L../zkevm-prover-rust/target/release -lzkevm_sm
+lib: INC_FLAGS_EXT := -I./../zkevm-prover-rust/include
 lib: $(TARGET) $(LIB_DIR)/$(TARGET_LIB)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
@@ -113,19 +105,19 @@ $(LIB_DIR)/$(TARGET_LIB): $(OBJS_LIB)
 	cp src/api/zkevm_api.hpp $(LIB_DIR)/include/zkevm-prover.h
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
-	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS_EXT)
+	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) $(CXXFLAGS_EXT) -o $@ $(LDFLAGS) $(LDFLAGS_EXT) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_EXT)
 
 $(BUILD_DIR)/$(TARGET_BCT): $(OBJS_BCT)
-	$(CXX) $(OBJS_BCT) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS_EXT)
+	$(CXX) $(OBJS_BCT) $(CXXFLAGS) $(CXXFLAGS_EXT) -o $@ $(LDFLAGS) $(LDFLAGS_EXT) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_EXT)
 
 $(BUILD_DIR)/$(TARGET_TEST): $(OBJS_TEST)
-	$(CXX) $(OBJS_TEST) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS_EXT)
+	$(CXX) $(OBJS_TEST) $(CXXFLAGS) $(CXXFLAGS_EXT) -o $@ $(LDFLAGS) $(LDFLAGS_EXT) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_EXT)
 
 $(BUILD_DIR)/$(TARGET_CONSTRAINT): $(OBJS_CONSTRAINT)
-	$(CXX) $(OBJS_CONSTRAINT) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS_EXT)
+	$(CXX) $(OBJS_CONSTRAINT) $(CXXFLAGS) $(CXXFLAGS_EXT) -o $@ $(LDFLAGS) $(LDFLAGS_EXT) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_EXT)
 
 $(BUILD_DIR)/$(TARGET_SETUP): $(OBJS_SETUP)
-	$(CXX) $(OBJS_SETUP) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS_EXT)
+	$(CXX) $(OBJS_SETUP) $(CXXFLAGS) $(CXXFLAGS_EXT) -o $@ $(LDFLAGS) $(LDFLAGS_EXT) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_EXT)
 
 # assembly
 $(BUILD_DIR)/%.asm.o: %.asm
@@ -135,11 +127,11 @@ $(BUILD_DIR)/%.asm.o: %.asm
 # c++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_EXT) -c $< -o $@
 
 $(BUILD_DIR)/%.cc.o: %.cc
 	$(MKDIR_P) $(dir $@)
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_EXT) -c $< -o $@
 
 main_generator: $(BUILD_DIR)/$(TARGET_MNG)
 
@@ -160,7 +152,7 @@ pols_diff: $(BUILD_DIR)/$(TARGET_PLD)
 
 $(BUILD_DIR)/$(TARGET_PLD): ./src/pols_diff/pols_diff.cpp
 	$(MKDIR_P) $(BUILD_DIR)
-	g++ -g ./src/pols_diff/pols_diff.cpp $(CXXFLAGS) $(INC_FLAGS) -o $@ $(LDFLAGS) 
+	g++ -g ./src/pols_diff/pols_diff.cpp $(CXXFLAGS) $(CXXFLAGS_EXT) $(INC_FLAGS) $(INC_FLAGS_EXT) -o $@ $(LDFLAGS) $(LDFLAGS_EXT)
 
 .PHONY: clean
 
