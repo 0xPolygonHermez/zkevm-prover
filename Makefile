@@ -18,7 +18,7 @@ CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 $(GRPCPP_FLAGS) #-Wfatal-errors
 LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid $(GRPCPP_LIBS)
-CFLAGS := -fopenmp -Wall -pthread -Wno-unused-label -fopenmp -mavx2 -MD
+CFLAGS := -fopenmp -Wall -pthread -Wno-unused-label -fopenmp -MD
 ASFLAGS := -felf64
 
 # Debug build flags

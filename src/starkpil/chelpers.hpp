@@ -10,7 +10,6 @@
 #include "goldilocks_cubic_extension.hpp"
 #include "constant_pols_starks.hpp"
 #include "stark_info.hpp"
-#include <immintrin.h>
 #include <cassert>
 
 
