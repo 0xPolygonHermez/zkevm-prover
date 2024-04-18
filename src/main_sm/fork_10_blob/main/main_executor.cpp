@@ -5751,6 +5751,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.free0IsByte[i] = fr.one();
         }
 
+        if (!bProcessBatch && rom.line[zkPC].bCondConstPresent)
+        {
+            pols.condConst[i] = rom.line[zkPC].condConst;
+        }
+
         // If JMPN, jump conditionally if op0<0
         if (rom.line[zkPC].JMPN == 1)
         {
