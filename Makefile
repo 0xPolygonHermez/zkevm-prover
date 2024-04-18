@@ -67,7 +67,7 @@ SRCS_BCT := ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o) $(PROTO_OBJS)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
-LDFLAGS_TEST := -rdynamic -lgmp -luuid -lcrypto -ldl
+LDFLAGS_TEST := -rdynamic -lgmp -luuid -lcrypto -ldl -lpqxx
 OBJS_TEST := ./build/./test/examples/main.cpp.o ./build/./src/goldilocks/src/ntt_goldilocks.cpp.o ./build/./src/goldilocks/src/poseidon_goldilocks.cpp.o ./build/./src/goldilocks/src/goldilocks_cubic_extension.cpp.o ./build/./src/goldilocks/src/goldilocks_base_field.cpp.o ./build/./src/starkpil/stark_info.cpp.o ./build/./src/starkpil/starks.cpp.o ./build/./src/starkpil/chelpers.cpp.o ./build/./src/rapidsnark/binfile_utils.cpp.o ./build/./src/starkpil/merkleTree/merkleTreeGL.cpp.o ./build/./src/starkpil/transcript/transcript.cpp.o ./build/./src/starkpil/fri/friProve.cpp.o ./build/./src/starkpil/fri/proof2zkinStark.cpp.o ./build/./src/ffiasm/fnec.asm.o ./build/./src/ffiasm/fq.asm.o ./build/./src/ffiasm/fq.cpp.o ./build/./src/ffiasm/splitparstr.cpp.o ./build/./src/ffiasm/fec.asm.o ./build/./src/ffiasm/fnec.cpp.o ./build/./src/ffiasm/fr.asm.o ./build/./src/ffiasm/fec.cpp.o ./build/./src/ffiasm/fr.cpp.o ./build/./src/utils/exit_process.cpp.o ./build/./src/utils/timer.cpp.o ./build/./src/utils/zklog.cpp.o ./build/./src/utils/utils.cpp.o
 DEPS_TEST := $(OBJS_TEST:.o=.d) ./build/dynamic_chelpers.d
 
