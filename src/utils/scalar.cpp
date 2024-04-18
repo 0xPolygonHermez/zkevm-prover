@@ -16,6 +16,7 @@ mpz_class ScalarMask8   ("FF", 16);
 mpz_class ScalarMask16  ("FFFF", 16);
 mpz_class ScalarMask20  ("FFFFF", 16);
 mpz_class ScalarMask32  ("FFFFFFFF", 16);
+mpz_class ScalarMask48  ("FFFFFFFFFFFF", 16);
 mpz_class ScalarMask64  ("FFFFFFFFFFFFFFFF", 16);
 mpz_class ScalarMask160 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
 mpz_class ScalarMask256 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
