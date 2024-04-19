@@ -55,26 +55,29 @@ void DatabaseMTAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
     log2CacheSize = log2CacheSize_;
     if (log2CacheSize_ > 31)
     {
-        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2CacheSize_ > 32");
+        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2CacheSize_ > 31");
         exitProcess();
     }
-    cacheSize = 1 << log2CacheSize_;
+    cacheSize = 1 << log2CacheSize;
 
-    if ( indexesSize / cacheSize < 4)
+    if ( indexesSize / cacheSize < 8)
     {
+        // This forces that the maximum occupancy of the table of indexes is 12.5%
         zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() indexesSize/ cacheSize < 4");
         exitProcess();
     }
 
     if(indexes != NULL) delete[] indexes;
     indexes = new uint32_t[indexesSize];
-    //initialization of indexes array
+    //initialization of indexes array with UINT32_MAX-cacheSize: the value that is at distance
+    //cacheSize+1 from the initial currentCacheIndex, i.e. 0
     uint32_t initValue = UINT32_MAX-cacheSize;
     #pragma omp parallel for schedule(static) num_threads(4)
     for (size_t i = 0; i < indexesSize; i++)
     {
         indexes[i] = initValue;
     }
+
     if(keys != NULL) delete[] keys;
     keys = new Goldilocks::Element[4 * cacheSize];
 
@@ -173,13 +176,16 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     //
     if(!present && !emptySlot){
         int iters = 0;
-        vector<uint32_t> usedRawCacheIndexes;
-        usedRawCacheIndexes.push_back(currentCacheIndex-1);
+        uint32_t usedRawCacheIndexes[20];
+        usedRawCacheIndexes[0] = currentCacheIndex-1;
         forcedInsertion(usedRawCacheIndexes, iters);
     }
 }
-
-void DatabaseMTAssociativeCache::forcedInsertion(vector<uint32_t> &usedRawCacheIndexes, int &iters)
+// This function is called recursively a maximum of 20 times. Note that the probability of not finding a free slot at
+// each call is multiplied by roughly 1/2**9 (three new keys are checks and I assume the ratio cacheSize/indexesSize 
+// is 1/8). With this rough estimation the probablilty of requiring 20 iterations would be 1/2**180. If, after 20 
+// iterations is not possible to find a free slot, the entry is added to the auxBufferKeysValues vector.
+void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], int &iters)
 {
     
     uint32_t inputRawCacheIndex = usedRawCacheIndexes[iters];
@@ -206,6 +212,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(vector<uint32_t> &usedRawCacheI
             //consider minimum not used rawCacheIndex_
             bool used = false;
             for(int k=0; k<iters; k++){
+                // remember that with vergy high probability iters < 3
                 if(usedRawCacheIndexes[k] == rawCacheIndex_){
                     used = true;
                     break;
@@ -218,24 +225,17 @@ void DatabaseMTAssociativeCache::forcedInsertion(vector<uint32_t> &usedRawCacheI
             }
         }
     }
-
-    if (pos < 0)
-    {
-        zklog.error("forcedInsertion() could not continue the recursion: " + to_string(inputRawCacheIndex));
-        exitProcess();
-    } 
-    indexes[(uint32_t)(inputKey[pos].fe & indexesMask)] = inputRawCacheIndex;
     
-    usedRawCacheIndexes[iters] = minRawCacheIndex; //new cache element to add in the indexes table
     //
-    // avoid infinite loop, only 16 iterations allowed
+    // avoid infinite loop, only 20 iterations allowed
     //
-    if (iters > 15)
+    if (iters >=20 || pos < 0)
     {
         zklog.warning("forcedInsertion() maxForcedInsertionIterations reached");
-        Goldilocks::Element *buffKey = &keys[(minRawCacheIndex & cacheMask) * 4];
-        Goldilocks::Element *buffValue = &values[(minRawCacheIndex & cacheMask) * 12];
+        Goldilocks::Element *buffKey = &keys[(inputRawCacheIndex & cacheMask) * 4];
+        Goldilocks::Element *buffValue = &values[(inputRawCacheIndex & cacheMask) * 12];
         
+        // check first if there is an slot in the vector
         for(int i=0; i<auxBufferKeysValues.size(); i+=17){
             if( emptyCacheSlot(((uint32_t)(auxBufferKeysValues[i].fe)))){
                 auxBufferKeysValues[i]=Goldilocks::fromU64((uint64_t)(minRawCacheIndex));
@@ -277,6 +277,8 @@ void DatabaseMTAssociativeCache::forcedInsertion(vector<uint32_t> &usedRawCacheI
         auxBufferKeysValues.push_back(buffValue[11]);
         return;
     }else{
+        indexes[(uint32_t)(inputKey[pos].fe & indexesMask)] = inputRawCacheIndex;
+        usedRawCacheIndexes[iters] = minRawCacheIndex; //new cache element to add in the indexes table
         forcedInsertion(usedRawCacheIndexes, iters);
     }
 }
@@ -291,6 +293,9 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
     if (attempts<<40 == 0)
     {
         zklog.info("DatabaseMTAssociativeCache::findKey() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
+        if(auxBufferKeysValues.size()>0){
+            zklog.warning("DatabaseMTAssociativeCache using auxBufferKeysValues" + to_string(auxBufferKeysValues.size()));
+        }
     }
     //
     // Find the value
@@ -327,11 +332,12 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
         }
     }
     //
-    // find in the auxBufferKeysValues (chances that this buffer has any entry are almost zero),
-    // for this reason this search is not optimized
+    // look at the auxBufferKeysValues (chances that this buffer has any entry are negligible),
+    // for this reason this search is not optimized at all
     //
     for(int i=0; i<auxBufferKeysValues.size(); i+=17){
-        if( auxBufferKeysValues[i].fe == key[0].fe &&
+
+        if( !emptyCacheSlot(((uint32_t)(auxBufferKeysValues[i].fe))) &&
             auxBufferKeysValues[i+1].fe == key[0].fe &&
             auxBufferKeysValues[i+2].fe == key[1].fe &&
             auxBufferKeysValues[i+3].fe == key[2].fe &&

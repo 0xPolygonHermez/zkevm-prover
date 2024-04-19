@@ -55,6 +55,6 @@ class DatabaseMTAssociativeCache
             return (currentCacheIndex >= cacheIndexRaw &&  currentCacheIndex - cacheIndexRaw > cacheSize) ||
             (currentCacheIndex < cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex + 1 > cacheSize);
          };
-        void forcedInsertion(vector<uint32_t> &usedRawCacheIndexes, int &iters);
+        void forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], int &iters);
 };
 #endif
