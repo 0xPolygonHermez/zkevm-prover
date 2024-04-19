@@ -52,7 +52,7 @@ struct TableStruct_executor_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[44]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[45]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -160,6 +160,9 @@ extern ProcessBlockResponseV2DefaultTypeInternal _ProcessBlockResponseV2_default
 class ProcessStatelessBatchRequestV2;
 class ProcessStatelessBatchRequestV2DefaultTypeInternal;
 extern ProcessStatelessBatchRequestV2DefaultTypeInternal _ProcessStatelessBatchRequestV2_default_instance_;
+class ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse;
+class ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUseDefaultTypeInternal;
+extern ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUseDefaultTypeInternal _ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse_default_instance_;
 class ProcessTransactionResponse;
 class ProcessTransactionResponseDefaultTypeInternal;
 extern ProcessTransactionResponseDefaultTypeInternal _ProcessTransactionResponse_default_instance_;
@@ -229,6 +232,7 @@ template<> ::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotU
 template<> ::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBlockResponseV2* Arena::CreateMaybeMessage<::executor::v1::ProcessBlockResponseV2>(Arena*);
 template<> ::executor::v1::ProcessStatelessBatchRequestV2* Arena::CreateMaybeMessage<::executor::v1::ProcessStatelessBatchRequestV2>(Arena*);
+template<> ::executor::v1::ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessTransactionResponse* Arena::CreateMaybeMessage<::executor::v1::ProcessTransactionResponse>(Arena*);
 template<> ::executor::v1::ProcessTransactionResponseV2* Arena::CreateMaybeMessage<::executor::v1::ProcessTransactionResponseV2>(Arena*);
 template<> ::executor::v1::ResponseDebug* Arena::CreateMaybeMessage<::executor::v1::ResponseDebug>(Arena*);
@@ -5068,6 +5072,36 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse, 
+    ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse, 
+    ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64,
+    0 > SuperType;
+  ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse();
+  ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse& other);
+  static const ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse*>(&_ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(void*) { return true; }
+  static bool ValidateValue(void*) { return true; }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[24];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
 class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.ProcessStatelessBatchRequestV2) */ {
  public:
@@ -5110,7 +5144,7 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
                &_ProcessStatelessBatchRequestV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(ProcessStatelessBatchRequestV2& a, ProcessStatelessBatchRequestV2& b) {
     a.Swap(&b);
@@ -5178,9 +5212,11 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
+
   // accessors -------------------------------------------------------
 
   enum : int {
+    kL1InfoTreeIndexMinTimestampFieldNumber = 10,
     kWitnessFieldNumber = 1,
     kDataStreamFieldNumber = 2,
     kCoinbaseFieldNumber = 3,
@@ -5191,6 +5227,23 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
     kTraceConfigFieldNumber = 9,
     kTimestampLimitFieldNumber = 6,
   };
+  // map<uint64, uint64> l1_info_tree_index_min_timestamp = 10;
+  int l1_info_tree_index_min_timestamp_size() const;
+  private:
+  int _internal_l1_info_tree_index_min_timestamp_size() const;
+  public:
+  void clear_l1_info_tree_index_min_timestamp();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      _internal_l1_info_tree_index_min_timestamp() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      _internal_mutable_l1_info_tree_index_min_timestamp();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      l1_info_tree_index_min_timestamp() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      mutable_l1_info_tree_index_min_timestamp();
+
   // bytes witness = 1;
   void clear_witness();
   const std::string& witness() const;
@@ -5400,6 +5453,12 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      ProcessStatelessBatchRequestV2_L1InfoTreeIndexMinTimestampEntry_DoNotUse,
+      ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64,
+      0 > l1_info_tree_index_min_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr witness_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_stream_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
@@ -5456,7 +5515,7 @@ class L1DataV2 PROTOBUF_FINAL :
                &_L1DataV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(L1DataV2& a, L1DataV2& b) {
     a.Swap(&b);
@@ -5673,7 +5732,7 @@ class DebugV2 PROTOBUF_FINAL :
                &_DebugV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(DebugV2& a, DebugV2& b) {
     a.Swap(&b);
@@ -5884,7 +5943,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[27];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[28];
   }
 
   public:
@@ -5934,7 +5993,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
                &_ProcessBatchResponseV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    29;
 
   friend void swap(ProcessBatchResponseV2& a, ProcessBatchResponseV2& b) {
     a.Swap(&b);
@@ -6576,7 +6635,7 @@ class ResponseDebug PROTOBUF_FINAL :
                &_ResponseDebug_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    30;
 
   friend void swap(ResponseDebug& a, ResponseDebug& b) {
     a.Swap(&b);
@@ -6729,7 +6788,7 @@ class TraceConfigV2 PROTOBUF_FINAL :
                &_TraceConfigV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(TraceConfigV2& a, TraceConfigV2& b) {
     a.Swap(&b);
@@ -6910,7 +6969,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[31];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[32];
   }
 
   public:
@@ -6944,7 +7003,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[32];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[33];
   }
 
   public:
@@ -6994,7 +7053,7 @@ class OverrideAccountV2 PROTOBUF_FINAL :
                &_OverrideAccountV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    34;
 
   friend void swap(OverrideAccountV2& a, OverrideAccountV2& b) {
     a.Swap(&b);
@@ -7218,7 +7277,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[34];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[35];
   }
 
   public:
@@ -7268,7 +7327,7 @@ class InfoReadWriteV2 PROTOBUF_FINAL :
                &_InfoReadWriteV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    36;
 
   friend void swap(InfoReadWriteV2& a, InfoReadWriteV2& b) {
     a.Swap(&b);
@@ -7527,7 +7586,7 @@ class FullTraceV2 PROTOBUF_FINAL :
                &_FullTraceV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    37;
 
   friend void swap(FullTraceV2& a, FullTraceV2& b) {
     a.Swap(&b);
@@ -7693,7 +7752,7 @@ class TransactionContextV2 PROTOBUF_FINAL :
                &_TransactionContextV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    38;
 
   friend void swap(TransactionContextV2& a, TransactionContextV2& b) {
     a.Swap(&b);
@@ -8112,7 +8171,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[38];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[39];
   }
 
   public:
@@ -8162,7 +8221,7 @@ class TransactionStepV2 PROTOBUF_FINAL :
                &_TransactionStepV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    40;
 
   friend void swap(TransactionStepV2& a, TransactionStepV2& b) {
     a.Swap(&b);
@@ -8539,7 +8598,7 @@ class ContractV2 PROTOBUF_FINAL :
                &_ContractV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    41;
 
   friend void swap(ContractV2& a, ContractV2& b) {
     a.Swap(&b);
@@ -8811,7 +8870,7 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
                &_ProcessBlockResponseV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    42;
 
   friend void swap(ProcessBlockResponseV2& a, ProcessBlockResponseV2& b) {
     a.Swap(&b);
@@ -9194,7 +9253,7 @@ class ProcessTransactionResponseV2 PROTOBUF_FINAL :
                &_ProcessTransactionResponseV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    43;
 
   friend void swap(ProcessTransactionResponseV2& a, ProcessTransactionResponseV2& b) {
     a.Swap(&b);
@@ -9697,7 +9756,7 @@ class LogV2 PROTOBUF_FINAL :
                &_LogV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    44;
 
   friend void swap(LogV2& a, LogV2& b) {
     a.Swap(&b);
@@ -16638,6 +16697,8 @@ inline void ProcessBatchRequestV2::set_allocated_debug(::executor::v1::DebugV2* 
 
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+
 // ProcessStatelessBatchRequestV2
 
 // bytes witness = 1;
@@ -17306,6 +17367,35 @@ inline void ProcessStatelessBatchRequestV2::set_allocated_trace_config(::executo
   }
   trace_config_ = trace_config;
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.trace_config)
+}
+
+// map<uint64, uint64> l1_info_tree_index_min_timestamp = 10;
+inline int ProcessStatelessBatchRequestV2::_internal_l1_info_tree_index_min_timestamp_size() const {
+  return l1_info_tree_index_min_timestamp_.size();
+}
+inline int ProcessStatelessBatchRequestV2::l1_info_tree_index_min_timestamp_size() const {
+  return _internal_l1_info_tree_index_min_timestamp_size();
+}
+inline void ProcessStatelessBatchRequestV2::clear_l1_info_tree_index_min_timestamp() {
+  l1_info_tree_index_min_timestamp_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64 >&
+ProcessStatelessBatchRequestV2::_internal_l1_info_tree_index_min_timestamp() const {
+  return l1_info_tree_index_min_timestamp_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64 >&
+ProcessStatelessBatchRequestV2::l1_info_tree_index_min_timestamp() const {
+  // @@protoc_insertion_point(field_map:executor.v1.ProcessStatelessBatchRequestV2.l1_info_tree_index_min_timestamp)
+  return _internal_l1_info_tree_index_min_timestamp();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64 >*
+ProcessStatelessBatchRequestV2::_internal_mutable_l1_info_tree_index_min_timestamp() {
+  return l1_info_tree_index_min_timestamp_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::uint64 >*
+ProcessStatelessBatchRequestV2::mutable_l1_info_tree_index_min_timestamp() {
+  // @@protoc_insertion_point(field_mutable_map:executor.v1.ProcessStatelessBatchRequestV2.l1_info_tree_index_min_timestamp)
+  return _internal_mutable_l1_info_tree_index_min_timestamp();
 }
 
 // -------------------------------------------------------------------
@@ -24125,6 +24215,8 @@ inline void LogV2::set_index(::PROTOBUF_NAMESPACE_ID::uint32 value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
