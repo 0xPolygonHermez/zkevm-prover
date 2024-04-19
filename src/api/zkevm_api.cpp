@@ -547,9 +547,7 @@ int zkevm_main(char *configFile, void *pAddress, void **pSMRequests, void *pSMRe
                   config,
                   pAddress);
     prover.setSMRequestsPointer(pSMRequests);
-    std::cout << "abans" << std::endl;
     prover.setSMRequestsOutPointer(pSMRequestsOut);
-    std::cout << "holaaaaaaaa" << std::endl;
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* SERVERS */
@@ -1429,7 +1427,7 @@ void compute_fri_queries(void *pStarks, void *pProof, uint64_t *friQueries)
 void *get_proof_root(void *pProof, uint64_t stage_id, uint64_t index)
 {
     FRIProof<Goldilocks::Element> *proof = (FRIProof<Goldilocks::Element> *)pProof;
-    cout << toString(proof->proofs.roots[stage_id][index]) << endl;
+
     return &proof->proofs.roots[stage_id][index];
 }
 
