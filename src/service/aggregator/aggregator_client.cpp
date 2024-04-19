@@ -820,6 +820,34 @@ bool AggregatorClient::GenBlobInnerProof (const aggregator::v1::GenBlobInnerProo
     // Get type
     pProverRequest->input.publicInputsExtended.publicInputs.blobType = genBlobInnerProofRequest.input().public_inputs().blob_type();
 
+    // Get versioned_hash
+    if (genBlobInnerProofRequest.input().public_inputs().versioned_hash().size() > 32)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got versioned_hash too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().versioned_hash().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.versionedHash, genBlobInnerProofRequest.input().public_inputs().versioned_hash());
+
+    // Get kzg_commitment
+    if (genBlobInnerProofRequest.input().public_inputs().kzg_commitment().size() > 48)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got kzg_commitment too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().versioned_hash().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    pProverRequest->input.publicInputsExtended.publicInputs.kzgCommitment = genBlobInnerProofRequest.input().public_inputs().kzg_commitment();
+
+    // Get kzg_proof
+    if (genBlobInnerProofRequest.input().public_inputs().kzg_proof().size() > 48)
+    {
+        zklog.error("AggregatorClient::GenBlobInnerProof() got kzg_proof too long, size=" + to_string(genBlobInnerProofRequest.input().public_inputs().kzg_proof().size()));
+        genBlobInnerProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.kzgProof, genBlobInnerProofRequest.input().public_inputs().kzg_proof());
+
+
     // Get pointZ
     if (genBlobInnerProofRequest.input().public_inputs().point_z().size() > 32)
     {

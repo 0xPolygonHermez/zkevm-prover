@@ -50,6 +50,10 @@ public:
     uint32_t   lastL1InfoTreeIndex;
     mpz_class  lastL1InfoTreeRoot;
     uint64_t   zkGasLimit;
+    mpz_class  versionedHash;
+    string     kzgCommitment; // 48-byte array
+    mpz_class  kzgCommitmentHash; // hash of kzgCommitment
+    mpz_class  kzgProof;
     mpz_class  pointZ;
     mpz_class  pointY;
     string     blobData;

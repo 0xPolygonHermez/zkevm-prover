@@ -751,6 +751,72 @@ void Input::loadGlobals (json &input)
 #endif
         }
 
+        // Parse versionedHash
+        if ( input.contains("versionedHash") &&
+             input["versionedHash"].is_string() )
+        {
+            string versionedHashString = input["versionedHash"];
+            versionedHashString = Remove0xIfPresent(versionedHashString);
+            if (!stringIsHex(versionedHashString))
+            {
+                zklog.error("Input::loadGlobals() versionedHash found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (versionedHashString.size() > 64)
+            {
+                zklog.error("Input::loadGlobals() versionedHash found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.versionedHash.set_str(versionedHashString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): versionedHash=" + publicInputsExtended.publicInputs.versionedHash.get_str(16));
+#endif
+        }
+
+        // Parse kzgCommitment
+        if ( input.contains("kzgCommitment") &&
+             input["kzgCommitment"].is_string() )
+        {
+            string kzgCommitmentString = input["kzgCommitment"];
+            kzgCommitmentString = Remove0xIfPresent(kzgCommitmentString);
+            if (!stringIsHex(kzgCommitmentString))
+            {
+                zklog.error("Input::loadGlobals() kzgCommitment found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (kzgCommitmentString.size() > (48*2))
+            {
+                zklog.error("Input::loadGlobals() kzgCommitment found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.kzgCommitment = string2ba(kzgCommitmentString);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): kzgCommitment=" + kzgCommitmentString);
+#endif
+        }
+
+        // Parse kzgProof
+        if ( input.contains("kzgProof") &&
+             input["kzgProof"].is_string() )
+        {
+            string kzgProofString = input["kzgProof"];
+            kzgProofString = Remove0xIfPresent(kzgProofString);
+            if (!stringIsHex(kzgProofString))
+            {
+                zklog.error("Input::loadGlobals() kzgProof found in input JSON file but not an hex string");
+                exitProcess();
+            }
+            if (kzgProofString.size() > 96)
+            {
+                zklog.error("Input::loadGlobals() kzgProof found in input JSON file is too long");
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.kzgProof.set_str(kzgProofString, 16);
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): kzgProof=" + publicInputsExtended.publicInputs.kzgProof.get_str(16));
+#endif
+        }
+
         // Parse pointZ
         if ( input.contains("pointZ") &&
              input["pointZ"].is_string() )
@@ -1409,6 +1475,21 @@ string Input::saveGlobals (json &input) const
         {
             input["zkGasLimit"] = to_string(publicInputsExtended.publicInputs.zkGasLimit);
             s += "zkGasLimit=" + to_string(publicInputsExtended.publicInputs.zkGasLimit) + " ";
+        }
+        if (publicInputsExtended.publicInputs.versionedHash != 0)
+        {
+            input["versionedHash"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.versionedHash.get_str(16), 64);
+            s += "versionedHash=" + publicInputsExtended.publicInputs.versionedHash.get_str(16) + " ";
+        }
+        if (!publicInputsExtended.publicInputs.kzgCommitment.empty())
+        {
+            input["kzgCommitment"] = ba2string(publicInputsExtended.publicInputs.kzgCommitment);
+            s += "kzgCommitment=" + ba2string(publicInputsExtended.publicInputs.kzgCommitment) + " ";
+        }
+        if (publicInputsExtended.publicInputs.kzgProof != 0)
+        {
+            input["kzgProof"] = publicInputsExtended.publicInputs.kzgProof.get_str(16);
+            s += "kzgProof=" + publicInputsExtended.publicInputs.kzgProof.get_str(16) + " ";
         }
         if (publicInputsExtended.publicInputs.pointZ != 0)
         {

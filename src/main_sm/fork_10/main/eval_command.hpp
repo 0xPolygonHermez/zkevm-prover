@@ -177,7 +177,9 @@ void eval_getBatchHashData            (Context &ctx, const RomCommand &cmd, Comm
 void eval_dumpRegs                    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_dumphex                     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_break                       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-
+void eval_getVersionedHash            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getKzgCommitmentHash        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getKzgProof                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);
 

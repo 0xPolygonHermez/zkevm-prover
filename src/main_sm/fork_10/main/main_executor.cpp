@@ -232,12 +232,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     if (proverRequest.input.publicInputsExtended.publicInputs.blobType == BLOB_TYPE_EIP4844)
     {
-        // Load poseidonBlobData into DB
-        Goldilocks::Element blobKey[4];
-        poseidonLinearHash(blobDataVector, blobKey);
-        string blobKeyString = fea2string(fr, blobKey);
+        // Get point Z data
+        string pointZData = proverRequest.input.publicInputsExtended.publicInputs.kzgCommitment + proverRequest.input.publicInputsExtended.publicInputs.blobData;
+
+        // Convert point Z data to vector
+        vector<uint8_t> pointZDataVector;
+        ba2ba(pointZData, pointZDataVector);
+
+        // Call poseidon
+        Goldilocks::Element pointZKey[4];
+        poseidonLinearHash(pointZDataVector, pointZKey);
+        string pointZKeyString = fea2string(fr, pointZKey);
         mpz_class pointZ;
-        pointZ.set_str(blobKeyString, 16);
+        pointZ.set_str(pointZKeyString, 16);
+
+        // Check input point Z, if provided
         if (proverRequest.input.publicInputsExtended.publicInputs.pointZ == 0)
         {
             proverRequest.input.publicInputsExtended.publicInputs.pointZ = pointZ;
@@ -248,8 +257,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             zklog.error("MainExecutor::execute() mismatch input.pointZ=" + proverRequest.input.publicInputsExtended.publicInputs.pointZ.get_str(16) + " pointZ=" + pointZ.get_str(16));
             return;
         }
-        proverRequest.input.contractsBytecode[blobKeyString] = blobDataVector;
-        //zklog.info("Blob inner poseidon hash=" + fea2string(fr, blobKey));
+
+        // Keep it to store into DB
+        proverRequest.input.contractsBytecode[pointZKeyString] = pointZDataVector;
+
+        mpz_class kzgCommitmentHash;
+        SHA256((uint8_t *)proverRequest.input.publicInputsExtended.publicInputs.kzgCommitment.data(), proverRequest.input.publicInputsExtended.publicInputs.kzgCommitment.size(), kzgCommitmentHash);
+        proverRequest.input.publicInputsExtended.publicInputs.kzgCommitmentHash = kzgCommitmentHash;
+
+        // Keep it to store into DB
+        vector<uint8_t> kzgCommitmentVector;
+        ba2ba(proverRequest.input.publicInputsExtended.publicInputs.kzgCommitment, kzgCommitmentVector);
+        proverRequest.input.contractsBytecode[NormalizeToNFormat(kzgCommitmentHash.get_str(16), 64)] = kzgCommitmentVector;
     }
     else if ((proverRequest.input.publicInputsExtended.publicInputs.blobType == BLOB_TYPE_CALLDATA) || (proverRequest.input.publicInputsExtended.publicInputs.blobType == BLOB_TYPE_FORCED))
     {
@@ -3860,18 +3879,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (!bProcessBatch) pols.hashSDigest[i] = fr.one();
 
-            unordered_map< uint64_t, HashValue >::iterator hashSIterator;
-
-            // Find the entry in the hash database for this address
-            hashSIterator = ctx.hashS.find(hashAddr);
-            if (hashSIterator == ctx.hashS.end())
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_NOT_FOUND;
-                logError(ctx, "HashSDigest 2 could not find entry for hashAddr=" + to_string(hashAddr));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
             // Get contents of op into dg
             mpz_class dg;
             if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
@@ -3880,6 +3887,42 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 logError(ctx, "Failed calling fea2scalar(op)");
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
+            }
+
+            unordered_map< uint64_t, HashValue >::iterator hashSIterator;
+
+            // Find the entry in the hash database for this address
+            hashSIterator = ctx.hashS.find(hashAddr);
+            if (hashSIterator == ctx.hashS.end())
+            {
+                HashValue hashValue;
+                hashValue.digest = dg;
+                Goldilocks::Element aux[4];
+                scalar2fea(fr, dg, aux);
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                gettimeofday(&t, NULL);
+#endif
+                // Collect the keys used to read or write store data
+                if (proverRequest.input.bGetKeys)
+                {
+                    proverRequest.programKeys.insert(fea2string(fr, aux));
+                }
+
+                zkresult zkResult = pHashDB->getProgram(proverRequest.uuid, aux, hashValue.data, proverRequest.dbReadLog);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    proverRequest.result = zkResult;
+                    logError(ctx, string("Failed calling pHashDB->getProgram() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, aux));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                mainMetrics.add("Get program", TimeDiff(t));
+#endif
+                ctx.hashS[hashAddr] = hashValue;
+                hashSIterator = ctx.hashS.find(hashAddr);
+                zkassert(hashSIterator != ctx.hashS.end());
             }
 
             if (dg != hashSIterator->second.digest)

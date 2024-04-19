@@ -108,6 +108,9 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_dumpRegs:                        return eval_dumpRegs(ctx, cmd, cr);
             case f_dumphex:                         return eval_dumphex(ctx, cmd, cr);
             case f_break:                           return eval_break(ctx, cmd, cr);
+            case f_getVersionedHash:                return eval_getVersionedHash(ctx, cmd, cr);
+            case f_getKzgCommitmentHash:            return eval_getKzgCommitmentHash(ctx, cmd, cr);
+            case f_getKzgProof:                     return eval_getKzgProof(ctx, cmd, cr);
             
             default:
                 zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + "=" + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
@@ -4277,6 +4280,68 @@ void eval_getY (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.type = crt_fea;
     mpz_class pointY = ctx.proverRequest.input.publicInputsExtended.publicInputs.pointY;
     scalar2fea(fr, pointY, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_getVersionedHash (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getVersionedHash() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    mpz_class versionedHash = ctx.proverRequest.input.publicInputsExtended.publicInputs.versionedHash;
+    scalar2fea(fr, versionedHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_getKzgCommitmentHash (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getKzgCommitmentHash() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    mpz_class kzgCommitmentHash = ctx.proverRequest.input.publicInputsExtended.publicInputs.kzgCommitmentHash;
+    scalar2fea(fr, kzgCommitmentHash, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_getKzgProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_getKzgProof() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    cr.type = crt_fea;
+    mpz_class kzgProof;
+    if (cmd.params[0]->varName == "high")
+    {
+        kzgProof = (ctx.proverRequest.input.publicInputsExtended.publicInputs.kzgProof >> 32);
+    }
+    else if (cmd.params[0]->varName == "low")
+    {
+        kzgProof = (ctx.proverRequest.input.publicInputsExtended.publicInputs.kzgProof & ScalarMask256);
+    }
+    else
+    {
+        zklog.error("eval_getKzgProof() cmd.params[0].varName=" + cmd.params[0]->varName + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+
+    }
+    scalar2fea(fr, kzgProof, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getBlobL2HashData (Context &ctx, const RomCommand &cmd, CommandResult &cr)

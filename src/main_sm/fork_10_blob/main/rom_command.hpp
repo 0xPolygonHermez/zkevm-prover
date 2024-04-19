@@ -102,6 +102,9 @@ typedef enum : int {
     f_dumpRegs,
     f_dumphex,
     f_break,
+    f_getVersionedHash,
+    f_getKzgCommitmentHash,
+    f_getKzgProof,
 } tFunction;
 
 // ROM command (op)

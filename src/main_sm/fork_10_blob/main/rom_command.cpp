@@ -128,6 +128,9 @@ tFunction string2Function(string s)
     else if (s == "dumpRegs")                       return f_dumpRegs;
     else if (s == "dumphex")                        return f_dumphex;
     else if (s == "break")                          return f_break;
+    else if (s == "getVersionedHash")               return f_getVersionedHash;
+    else if (s == "getKzgCommitmentHash")           return f_getKzgCommitmentHash;
+    else if (s == "getKzgProof")                    return f_getKzgProof;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -227,6 +230,9 @@ string function2String(tFunction f)
         case f_dumpRegs:                        return "dumpRegs";
         case f_dumphex:                         return "dumphex";
         case f_break:                           return "break";
+        case f_getVersionedHash:                return "getVersionedHash";
+        case f_getKzgCommitmentHash:            return "getKzgCommitmentHash";
+        case f_getKzgProof:                     return "getKzgProof";
         case f_empty:                           return "";
         default:                                return "unknown";
     }

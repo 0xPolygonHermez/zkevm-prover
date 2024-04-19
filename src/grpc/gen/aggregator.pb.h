@@ -5554,10 +5554,13 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
     kOldStateRootFieldNumber = 4,
     kLastL1InfoTreeRootFieldNumber = 7,
     kSequencerAddrFieldNumber = 8,
-    kPointZFieldNumber = 12,
-    kPointYFieldNumber = 13,
-    kBlobDataFieldNumber = 14,
-    kForcedHashDataFieldNumber = 15,
+    kVersionedHashFieldNumber = 12,
+    kKzgCommitmentFieldNumber = 13,
+    kKzgProofFieldNumber = 14,
+    kPointZFieldNumber = 15,
+    kPointYFieldNumber = 16,
+    kBlobDataFieldNumber = 17,
+    kForcedHashDataFieldNumber = 18,
     kOldNumBlobFieldNumber = 3,
     kForkIdFieldNumber = 5,
     kLastL1InfoTreeIndexFieldNumber = 6,
@@ -5690,7 +5693,82 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_sequencer_addr();
   public:
 
-  // bytes point_z = 12;
+  // bytes versioned_hash = 12;
+  void clear_versioned_hash();
+  const std::string& versioned_hash() const;
+  void set_versioned_hash(const std::string& value);
+  void set_versioned_hash(std::string&& value);
+  void set_versioned_hash(const char* value);
+  void set_versioned_hash(const void* value, size_t size);
+  std::string* mutable_versioned_hash();
+  std::string* release_versioned_hash();
+  void set_allocated_versioned_hash(std::string* versioned_hash);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_versioned_hash();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_versioned_hash(
+      std::string* versioned_hash);
+  private:
+  const std::string& _internal_versioned_hash() const;
+  void _internal_set_versioned_hash(const std::string& value);
+  std::string* _internal_mutable_versioned_hash();
+  public:
+
+  // bytes kzg_commitment = 13;
+  void clear_kzg_commitment();
+  const std::string& kzg_commitment() const;
+  void set_kzg_commitment(const std::string& value);
+  void set_kzg_commitment(std::string&& value);
+  void set_kzg_commitment(const char* value);
+  void set_kzg_commitment(const void* value, size_t size);
+  std::string* mutable_kzg_commitment();
+  std::string* release_kzg_commitment();
+  void set_allocated_kzg_commitment(std::string* kzg_commitment);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_kzg_commitment();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_kzg_commitment(
+      std::string* kzg_commitment);
+  private:
+  const std::string& _internal_kzg_commitment() const;
+  void _internal_set_kzg_commitment(const std::string& value);
+  std::string* _internal_mutable_kzg_commitment();
+  public:
+
+  // bytes kzg_proof = 14;
+  void clear_kzg_proof();
+  const std::string& kzg_proof() const;
+  void set_kzg_proof(const std::string& value);
+  void set_kzg_proof(std::string&& value);
+  void set_kzg_proof(const char* value);
+  void set_kzg_proof(const void* value, size_t size);
+  std::string* mutable_kzg_proof();
+  std::string* release_kzg_proof();
+  void set_allocated_kzg_proof(std::string* kzg_proof);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_kzg_proof();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_kzg_proof(
+      std::string* kzg_proof);
+  private:
+  const std::string& _internal_kzg_proof() const;
+  void _internal_set_kzg_proof(const std::string& value);
+  std::string* _internal_mutable_kzg_proof();
+  public:
+
+  // bytes point_z = 15;
   void clear_point_z();
   const std::string& point_z() const;
   void set_point_z(const std::string& value);
@@ -5715,7 +5793,7 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_point_z();
   public:
 
-  // bytes point_y = 13;
+  // bytes point_y = 16;
   void clear_point_y();
   const std::string& point_y() const;
   void set_point_y(const std::string& value);
@@ -5740,7 +5818,7 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_point_y();
   public:
 
-  // bytes blob_data = 14;
+  // bytes blob_data = 17;
   void clear_blob_data();
   const std::string& blob_data() const;
   void set_blob_data(const std::string& value);
@@ -5765,7 +5843,7 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_blob_data();
   public:
 
-  // bytes forced_hash_data = 15;
+  // bytes forced_hash_data = 18;
   void clear_forced_hash_data();
   const std::string& forced_hash_data() const;
   void set_forced_hash_data(const std::string& value);
@@ -5856,6 +5934,9 @@ class PublicBlobInnerInputs PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr last_l1_info_tree_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sequencer_addr_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr versioned_hash_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr kzg_commitment_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr kzg_proof_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr point_z_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr point_y_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr blob_data_;
@@ -13453,7 +13534,250 @@ inline void PublicBlobInnerInputs::set_blob_type(::PROTOBUF_NAMESPACE_ID::uint32
   // @@protoc_insertion_point(field_set:aggregator.v1.PublicBlobInnerInputs.blob_type)
 }
 
-// bytes point_z = 12;
+// bytes versioned_hash = 12;
+inline void PublicBlobInnerInputs::clear_versioned_hash() {
+  versioned_hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& PublicBlobInnerInputs::versioned_hash() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+  return _internal_versioned_hash();
+}
+inline void PublicBlobInnerInputs::set_versioned_hash(const std::string& value) {
+  _internal_set_versioned_hash(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+}
+inline std::string* PublicBlobInnerInputs::mutable_versioned_hash() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+  return _internal_mutable_versioned_hash();
+}
+inline const std::string& PublicBlobInnerInputs::_internal_versioned_hash() const {
+  return versioned_hash_.Get();
+}
+inline void PublicBlobInnerInputs::_internal_set_versioned_hash(const std::string& value) {
+  
+  versioned_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void PublicBlobInnerInputs::set_versioned_hash(std::string&& value) {
+  
+  versioned_hash_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+}
+inline void PublicBlobInnerInputs::set_versioned_hash(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  versioned_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+}
+inline void PublicBlobInnerInputs::set_versioned_hash(const void* value,
+    size_t size) {
+  
+  versioned_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+}
+inline std::string* PublicBlobInnerInputs::_internal_mutable_versioned_hash() {
+  
+  return versioned_hash_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* PublicBlobInnerInputs::release_versioned_hash() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+  return versioned_hash_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PublicBlobInnerInputs::set_allocated_versioned_hash(std::string* versioned_hash) {
+  if (versioned_hash != nullptr) {
+    
+  } else {
+    
+  }
+  versioned_hash_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), versioned_hash,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+}
+inline std::string* PublicBlobInnerInputs::unsafe_arena_release_versioned_hash() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return versioned_hash_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void PublicBlobInnerInputs::unsafe_arena_set_allocated_versioned_hash(
+    std::string* versioned_hash) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (versioned_hash != nullptr) {
+    
+  } else {
+    
+  }
+  versioned_hash_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      versioned_hash, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicBlobInnerInputs.versioned_hash)
+}
+
+// bytes kzg_commitment = 13;
+inline void PublicBlobInnerInputs::clear_kzg_commitment() {
+  kzg_commitment_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& PublicBlobInnerInputs::kzg_commitment() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+  return _internal_kzg_commitment();
+}
+inline void PublicBlobInnerInputs::set_kzg_commitment(const std::string& value) {
+  _internal_set_kzg_commitment(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+}
+inline std::string* PublicBlobInnerInputs::mutable_kzg_commitment() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+  return _internal_mutable_kzg_commitment();
+}
+inline const std::string& PublicBlobInnerInputs::_internal_kzg_commitment() const {
+  return kzg_commitment_.Get();
+}
+inline void PublicBlobInnerInputs::_internal_set_kzg_commitment(const std::string& value) {
+  
+  kzg_commitment_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void PublicBlobInnerInputs::set_kzg_commitment(std::string&& value) {
+  
+  kzg_commitment_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+}
+inline void PublicBlobInnerInputs::set_kzg_commitment(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  kzg_commitment_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+}
+inline void PublicBlobInnerInputs::set_kzg_commitment(const void* value,
+    size_t size) {
+  
+  kzg_commitment_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+}
+inline std::string* PublicBlobInnerInputs::_internal_mutable_kzg_commitment() {
+  
+  return kzg_commitment_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* PublicBlobInnerInputs::release_kzg_commitment() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+  return kzg_commitment_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PublicBlobInnerInputs::set_allocated_kzg_commitment(std::string* kzg_commitment) {
+  if (kzg_commitment != nullptr) {
+    
+  } else {
+    
+  }
+  kzg_commitment_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), kzg_commitment,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+}
+inline std::string* PublicBlobInnerInputs::unsafe_arena_release_kzg_commitment() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return kzg_commitment_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void PublicBlobInnerInputs::unsafe_arena_set_allocated_kzg_commitment(
+    std::string* kzg_commitment) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (kzg_commitment != nullptr) {
+    
+  } else {
+    
+  }
+  kzg_commitment_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      kzg_commitment, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicBlobInnerInputs.kzg_commitment)
+}
+
+// bytes kzg_proof = 14;
+inline void PublicBlobInnerInputs::clear_kzg_proof() {
+  kzg_proof_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& PublicBlobInnerInputs::kzg_proof() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+  return _internal_kzg_proof();
+}
+inline void PublicBlobInnerInputs::set_kzg_proof(const std::string& value) {
+  _internal_set_kzg_proof(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+}
+inline std::string* PublicBlobInnerInputs::mutable_kzg_proof() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+  return _internal_mutable_kzg_proof();
+}
+inline const std::string& PublicBlobInnerInputs::_internal_kzg_proof() const {
+  return kzg_proof_.Get();
+}
+inline void PublicBlobInnerInputs::_internal_set_kzg_proof(const std::string& value) {
+  
+  kzg_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void PublicBlobInnerInputs::set_kzg_proof(std::string&& value) {
+  
+  kzg_proof_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+}
+inline void PublicBlobInnerInputs::set_kzg_proof(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  kzg_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+}
+inline void PublicBlobInnerInputs::set_kzg_proof(const void* value,
+    size_t size) {
+  
+  kzg_proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+}
+inline std::string* PublicBlobInnerInputs::_internal_mutable_kzg_proof() {
+  
+  return kzg_proof_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* PublicBlobInnerInputs::release_kzg_proof() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+  return kzg_proof_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PublicBlobInnerInputs::set_allocated_kzg_proof(std::string* kzg_proof) {
+  if (kzg_proof != nullptr) {
+    
+  } else {
+    
+  }
+  kzg_proof_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), kzg_proof,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+}
+inline std::string* PublicBlobInnerInputs::unsafe_arena_release_kzg_proof() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return kzg_proof_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void PublicBlobInnerInputs::unsafe_arena_set_allocated_kzg_proof(
+    std::string* kzg_proof) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (kzg_proof != nullptr) {
+    
+  } else {
+    
+  }
+  kzg_proof_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      kzg_proof, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicBlobInnerInputs.kzg_proof)
+}
+
+// bytes point_z = 15;
 inline void PublicBlobInnerInputs::clear_point_z() {
   point_z_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -13534,7 +13858,7 @@ inline void PublicBlobInnerInputs::unsafe_arena_set_allocated_point_z(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicBlobInnerInputs.point_z)
 }
 
-// bytes point_y = 13;
+// bytes point_y = 16;
 inline void PublicBlobInnerInputs::clear_point_y() {
   point_y_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -13615,7 +13939,7 @@ inline void PublicBlobInnerInputs::unsafe_arena_set_allocated_point_y(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicBlobInnerInputs.point_y)
 }
 
-// bytes blob_data = 14;
+// bytes blob_data = 17;
 inline void PublicBlobInnerInputs::clear_blob_data() {
   blob_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -13696,7 +14020,7 @@ inline void PublicBlobInnerInputs::unsafe_arena_set_allocated_blob_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicBlobInnerInputs.blob_data)
 }
 
-// bytes forced_hash_data = 15;
+// bytes forced_hash_data = 18;
 inline void PublicBlobInnerInputs::clear_forced_hash_data() {
   forced_hash_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
