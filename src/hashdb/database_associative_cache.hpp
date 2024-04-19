@@ -53,7 +53,7 @@ class DatabaseMTAssociativeCache
     private:
         inline bool emptyCacheSlot(uint32_t cacheIndexRaw) const { 
             return (currentCacheIndex >= cacheIndexRaw &&  currentCacheIndex - cacheIndexRaw > cacheSize) ||
-            (currentCacheIndex < cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex > cacheSize);
+            (currentCacheIndex < cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex + 1 > cacheSize);
          };
         void forcedInsertion(vector<uint32_t> &usedRawCacheIndexes, int &iters);
 };

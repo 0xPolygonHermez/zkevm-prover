@@ -69,7 +69,7 @@ void DatabaseMTAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
     if(indexes != NULL) delete[] indexes;
     indexes = new uint32_t[indexesSize];
     //initialization of indexes array
-    uint32_t initValue = UINT32_MAX-cacheSize-(uint32_t)1;
+    uint32_t initValue = UINT32_MAX-cacheSize;
     #pragma omp parallel for schedule(static) num_threads(4)
     for (size_t i = 0; i < indexesSize; i++)
     {
