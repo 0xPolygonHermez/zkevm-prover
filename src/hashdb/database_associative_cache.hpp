@@ -30,6 +30,7 @@ class DatabaseMTAssociativeCache
         uint64_t indexesMask;
         uint64_t cacheMask;
 
+        vector<Goldilocks::Element> auxBufferKeysValues;
 
     public:
 
@@ -54,6 +55,6 @@ class DatabaseMTAssociativeCache
             return (currentCacheIndex >= cacheIndexRaw &&  currentCacheIndex - cacheIndexRaw > cacheSize) ||
             (currentCacheIndex < cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex > cacheSize);
          };
-        void forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters);
+        void forcedInsertion(vector<uint32_t> &usedRawCacheIndexes, int &iters);
 };
 #endif
