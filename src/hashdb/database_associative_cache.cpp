@@ -332,9 +332,10 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
     //
     for(int i=0; i<auxBufferKeysValues.size(); i+=17){
         if( auxBufferKeysValues[i].fe == key[0].fe &&
-            auxBufferKeysValues[i+1].fe == key[1].fe &&
-            auxBufferKeysValues[i+2].fe == key[2].fe &&
-            auxBufferKeysValues[i+3].fe == key[3].fe){
+            auxBufferKeysValues[i+1].fe == key[0].fe &&
+            auxBufferKeysValues[i+2].fe == key[1].fe &&
+            auxBufferKeysValues[i+3].fe == key[2].fe &&
+            auxBufferKeysValues[i+4].fe == key[3].fe){
             ++hits;
             value.resize(12);
             value[0] = auxBufferKeysValues[i+5];
