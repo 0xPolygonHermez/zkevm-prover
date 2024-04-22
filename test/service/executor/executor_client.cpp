@@ -648,6 +648,9 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
         request.set_zk_gas_limit(input.publicInputsExtended.publicInputs.zkGasLimit);
         request.set_blob_type(input.publicInputsExtended.publicInputs.blobType);
+        request.set_versioned_hash(scalar2ba(input.publicInputsExtended.publicInputs.versionedHash));
+        request.set_kzg_commitment(input.publicInputsExtended.publicInputs.kzgCommitment);
+        request.set_kzg_proof(scalar2ba48(input.publicInputsExtended.publicInputs.kzgProof));
         request.set_point_z(scalar2ba(input.publicInputsExtended.publicInputs.pointZ));
         request.set_point_y(scalar2ba(input.publicInputsExtended.publicInputs.pointY));
         request.set_blob_data(input.publicInputsExtended.publicInputs.blobData);

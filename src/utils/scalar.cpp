@@ -678,6 +678,27 @@ string scalar2ba(const mpz_class &s)
     return result;
 }
 
+string scalar2ba48(const mpz_class &s)
+{
+    uint64_t size = mpz_sizeinbase(s.get_mpz_t(), 256);
+    if (size > 48)
+    {
+        zklog.error("scalar2ba48() failed, size=" + to_string(size) + " is > 48");
+        exitProcess();
+    }
+
+    uint8_t buffer[48] = {0};
+    mpz_export(buffer, NULL, 1, 1, 1, 0, s.get_mpz_t());
+
+    string result;
+    for (uint64_t i = 0; i < size; i++)
+    {
+        result.push_back(buffer[i]);
+    }
+    
+    return result;
+}
+
 /* Converts a scalar to a vector of bits of the scalar, with value 1 or 0; bits[0] is least significant bit */
 
 void scalar2bits(mpz_class s, vector<uint8_t> &bits)

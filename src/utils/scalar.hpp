@@ -570,6 +570,7 @@ void scalar2bytesBE(mpz_class s, uint8_t *pBytes); // pBytes must be a 32-bytes 
 
 /* Scalar to byte array string conversion */
 string scalar2ba(const mpz_class &s);
+string scalar2ba48(const mpz_class &s);
 
 inline void ba2scalar(mpz_class &s, const string &ba)
 {
