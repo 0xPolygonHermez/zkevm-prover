@@ -1962,6 +1962,28 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.newLocalExitRoot = "0x0";
     proverRequest.input.publicInputsExtended.newBatchNum = 0;
 
+    // l1_info_tree_index_min_timestamp
+    google::protobuf::Map<google::protobuf::uint64, google::protobuf::uint64>::const_iterator minTimestampIt;
+    for (minTimestampIt = request->l1_info_tree_index_min_timestamp().begin(); minTimestampIt != request->l1_info_tree_index_min_timestamp().end(); minTimestampIt++)
+    {
+        proverRequest.input.minTimestampMap[minTimestampIt->first] = minTimestampIt->second;
+    }
+
+    // Generate l1InfoTreeData from data stream and from l1_info_tree_index_min_timestamp
+    for (uint64_t i = 0; i < batch.blocks.size(); i++)
+    {
+        L1Data data;
+        data.blockHashL1.set_str(batch.blocks[i].l1BlockHash, 16);
+        data.globalExitRoot.set_str(batch.blocks[i].globalExitRoot, 16);
+        unordered_map<uint64_t, uint64_t>::const_iterator it;
+        it = proverRequest.input.minTimestampMap.find(batch.blocks[i].l1InfoTreeIndex);
+        if (it != proverRequest.input.minTimestampMap.end())
+        {
+            data.minTimestamp = it->second;
+        }
+        proverRequest.input.l1InfoTreeData[batch.blocks[i].l1InfoTreeIndex] = data;
+    }
+
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     string l1InfoTreeDataString = " l1InfoTreeData.size=" + to_string(proverRequest.input.l1InfoTreeData.size()) + "=";
     unordered_map<uint64_t, L1Data>::const_iterator itl1;
@@ -2389,6 +2411,8 @@ using grpc::Status;
         " totalTime=" + to_string(totalTime) +
         " filedesc=" + to_string(nfd),
         &proverRequest.tags);
+
+    //zklog.info("ExecutorServiceImpl::ProcessStatelessBatchV2() response.ByteSizeLong=" + to_string(response->ByteSizeLong()));
     
     // If the TP in gas/s is < threshold, log the input, unless it has been done before
     if (!config.logExecutorServerInput && (config.logExecutorServerInputGasThreshold > 0) && ((double(execGas)/execTime) < config.logExecutorServerInputGasThreshold))
