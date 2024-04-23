@@ -14,6 +14,65 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
+
+ExecutorServiceImpl::ExecutorServiceImpl (Goldilocks &fr, Config &config, Prover &prover) :
+    fr(fr),
+    config(config),
+    prover(prover),
+    pHashDB(NULL),
+    counter(0),
+    totalGas(0),
+    totalBytes(0),
+    totalTX(0),
+    totalTime(0),
+    lastTotalGas(0),
+    lastTotalBytes(0),
+    lastTotalTX(0),
+    totalTPG(0),
+    totalTPB(0),
+    totalTPTX(0)
+{
+    pthread_mutex_init(&mutex, NULL);
+    lastTotalTime = {0,0};
+    firstTotalTime = {0, 0};
+
+    /* Get a HashDBInterface interface, according to the configuration */
+    pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+    if (pHashDB == NULL)
+    {
+        zklog.error("ExecutorServiceImpl::ExecutorServiceImpl() failed calling HashDBClientFactory::createHashDBClient()");
+        exitProcess();
+    }
+
+    romerrors2map(romErrors);
+    executorerrors2map(executorErrors);
+    rombloberrors2map(romBlobErrors);
+    if (config.saveExecutorErrors)
+    {
+        ordered_json j;
+        string s;
+        map<uint64_t, std::string>::const_iterator it;
+        for (it = romErrors.begin(); it != romErrors.end(); it++)
+        {
+            j["romErrors"][to_string(it->first)] = it->second;
+        }
+        for (it = executorErrors.begin(); it != executorErrors.end(); it++)
+        {
+            j["executorErrors"][to_string(it->first)] = it->second;
+        }
+        for (it = romBlobErrors.begin(); it != romBlobErrors.end(); it++)
+        {
+            j["romBlobErrors"][to_string(it->first)] = it->second;
+        }
+        json2file(j, "runtime/output/executor_errors.json");
+    }
+};
+
+ExecutorServiceImpl::~ExecutorServiceImpl()
+{
+    HashDBClientFactory::freeHashDBClient(pHashDB);
+}
+
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
     // If the process is exiting, do not start new activities
@@ -1035,4 +1094,46 @@ using grpc::Status;
     zklog.error("ExecutorServiceImpl::string2rombloberror() found invalid error string=" + result);
     exitProcess();
     return ::executor::v1::ROM_BLOB_ERROR_UNSPECIFIED;
+}
+
+string ExecutorServiceImpl::romerror2string (::executor::v1::RomError error)
+{
+    return ::executor::v1::RomError_Name(error);
+}
+
+void ExecutorServiceImpl::romerrors2map(map<uint64_t,string> &errors)
+{
+    for (uint64_t error = ::executor::v1::RomError_MIN; error <= ::executor::v1::RomError_MAX; error++)
+    {
+        errors[error] = ::executor::v1::RomError_Name(error);
+        //zklog.info("ExecutorServiceImpl::romerrors2map() error=" + to_string(error) + "=" + ::executor::v1::RomError_Name(error));
+    }
+}
+
+string ExecutorServiceImpl::executorerror2string (::executor::v1::ExecutorError error)
+{
+    return ::executor::v1::ExecutorError_Name(error);
+}
+
+void ExecutorServiceImpl::executorerrors2map(map<uint64_t,string> &errors)
+{
+    for (uint64_t error = ::executor::v1::ExecutorError_MIN; error <= ::executor::v1::ExecutorError_MAX; error++)
+    {
+        errors[error] = ::executor::v1::ExecutorError_Name(error);
+        //zklog.info("ExecutorServiceImpl::executorerrors2map() error=" + to_string(error) + "=" + ::executor::v1::ExecutorError_Name(error));
+    }
+}
+
+string ExecutorServiceImpl::rombloberror2string (::executor::v1::RomBlobError error)
+{
+    return ::executor::v1::RomBlobError_Name(error);
+}
+
+void ExecutorServiceImpl::rombloberrors2map(map<uint64_t,string> &errors)
+{
+    for (uint64_t error = ::executor::v1::RomBlobError_MIN; error <= ::executor::v1::RomBlobError_MAX; error++)
+    {
+        errors[error] = ::executor::v1::RomBlobError_Name(error);
+        //zklog.info("ExecutorServiceImpl::rombloberrors2map() error=" + to_string(error) + "=" + ::executor::v1::RomBlobError_Name(error));
+    }
 }

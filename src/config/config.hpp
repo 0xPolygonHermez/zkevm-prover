@@ -61,6 +61,7 @@ public:
     bool saveProofToFile; // Saves the proof, in json format
     bool saveResponseToFile; // Saves the grpc service response, in text format
     bool saveFilesInSubfolders; // Saves output files in folders per hour, e.g. output/2023/01/10/18
+    bool saveExecutorErrors; // Saves executor service errors in executor_errors.json
 
     bool loadDBToMemCache;
     bool loadDBToMemCacheInParallel;

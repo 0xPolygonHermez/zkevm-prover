@@ -35,39 +35,8 @@ class ExecutorServiceImpl final : public executor::v1::ExecutorService::Service
     pthread_mutex_t mutex; // Mutex to protect the access to the throughput attributes
 
 public:
-    ExecutorServiceImpl (Goldilocks &fr, Config &config, Prover &prover) :
-        fr(fr),
-        config(config),
-        prover(prover),
-        pHashDB(NULL),
-        counter(0),
-        totalGas(0),
-        totalBytes(0),
-        totalTX(0),
-        totalTime(0),
-        lastTotalGas(0),
-        lastTotalBytes(0),
-        lastTotalTX(0),
-        totalTPG(0),
-        totalTPB(0),
-        totalTPTX(0)
-    {
-        pthread_mutex_init(&mutex, NULL);
-        lastTotalTime = {0,0};
-        firstTotalTime = {0, 0};
-
-        /* Get a HashDBInterface interface, according to the configuration */
-        pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
-        if (pHashDB == NULL)
-        {
-            zklog.error("ExecutorServiceImpl::ExecutorServiceImpl() failed calling HashDBClientFactory::createHashDBClient()");
-            exitProcess();
-        }
-    };
-    ~ExecutorServiceImpl()
-    {
-        HashDBClientFactory::freeHashDBClient(pHashDB);
-    }
+    ExecutorServiceImpl (Goldilocks &fr, Config &config, Prover &prover);
+    ~ExecutorServiceImpl();
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
     ::grpc::Status ProcessBatch   (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest*   request, ::executor::v1::ProcessBatchResponse*   response) override;
@@ -78,10 +47,24 @@ public:
     ::grpc::Status GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response) override;
 #ifdef PROCESS_BATCH_STREAM
     ::grpc::Status ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream) override;
-#endif    
-    ::executor::v1::RomError string2error (string &errorString);
+#endif
+
+    // Map one error to another
+    ::executor::v1::RomError      string2error (string &errorString);
     ::executor::v1::ExecutorError zkresult2error (zkresult &result);
-    ::executor::v1::RomBlobError string2rombloberror (string &result);
+    ::executor::v1::RomBlobError  string2rombloberror (string &result);
+
+    // Map one error to its string representation, or all errors to a map
+    string romerror2string (::executor::v1::RomError error);
+    void   romerrors2map (map<uint64_t,string> &errors);
+    string executorerror2string (::executor::v1::ExecutorError error);
+    void   executorerrors2map (map<uint64_t,string> &errors);
+    string rombloberror2string (::executor::v1::RomBlobError error);
+    void   rombloberrors2map (map<uint64_t,string> &errors);
+
+    map<uint64_t,string> romErrors;
+    map<uint64_t,string> executorErrors;
+    map<uint64_t,string> romBlobErrors;
 };
 
 #endif

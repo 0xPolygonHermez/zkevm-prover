@@ -167,6 +167,7 @@ void Config::load(json &config)
     ParseBool(config, "saveResponseToFile", "SAVE_RESPONSE_TO_FILE", saveResponseToFile, false);
     ParseBool(config, "saveProofToFile", "SAVE_PROOF_TO_FILE", saveProofToFile, false);
     ParseBool(config, "saveFilesInSubfolders", "SAVE_FILES_IN_SUBFOLDERS", saveFilesInSubfolders, false);
+    ParseBool(config, "saveExecutorErrors", "SAVE_EXECUTOR_ERRORS", saveExecutorErrors, false);
 
     // Load DB to mem cache TODO: Discontinue this functionality
     //ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
@@ -466,6 +467,8 @@ void Config::print(void)
         zklog.info("    saveProofToFile=true");
     if (saveFilesInSubfolders)
         zklog.info("    saveFilesInSubfolders=true");
+    if (saveExecutorErrors)
+        zklog.info("    saveExecutorErrors=true");
     if (saveResponseToFile)
         zklog.info("    saveResponseToFile=true");
     zklog.info("    loadDBToMemCache=" + to_string(loadDBToMemCache));
