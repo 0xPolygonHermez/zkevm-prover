@@ -242,9 +242,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Call poseidon
         Goldilocks::Element pointZKey[4];
         poseidonLinearHash(pointZDataVector, pointZKey);
-        string pointZKeyString = fea2string(fr, pointZKey);
+
+        // Get the hash as a scalar module BLS prime
         mpz_class pointZ;
-        pointZ.set_str(pointZKeyString, 16);
+        fea2scalar(fr, pointZ, pointZKey);
+        pointZ = pointZ % BLS_12_381_prime;
 
         // Check input point Z, if provided
         if (proverRequest.input.publicInputsExtended.publicInputs.pointZ == 0)
@@ -259,8 +261,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // Keep it to store into DB
+        string pointZKeyString = NormalizeToNFormat(pointZ.get_str(16), 64);
         proverRequest.input.contractsBytecode[pointZKeyString] = pointZDataVector;
 
+        // Calculate the commitment hash
         mpz_class kzgCommitmentHash;
         SHA256((uint8_t *)proverRequest.input.publicInputsExtended.publicInputs.kzgCommitment.data(), proverRequest.input.publicInputsExtended.publicInputs.kzgCommitment.size(), kzgCommitmentHash);
         proverRequest.input.publicInputsExtended.publicInputs.kzgCommitmentHash = kzgCommitmentHash;

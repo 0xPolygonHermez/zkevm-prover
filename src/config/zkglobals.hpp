@@ -19,4 +19,7 @@ extern RawFq fq;
 extern RawBLS12_381 bls12_381;
 extern Config config;
 
+#include "scalar.hpp"
+extern mpz_class BLS_12_381_prime;
+
 #endif

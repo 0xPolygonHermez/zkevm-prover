@@ -823,7 +823,7 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
              || (inputFile.find("inputs-executor/calldata/test-length-data_1.json") != string::npos)
 // 20240408_143722_247779 a417e91 469d640 zkError: ExecutorClient::ProcessBatch() returned newStateRoot=186fa1e981185d4c46bf20a01826d974e620614e800145f200b8bbe4777fe1d7 != input.publicInputsExtended.newStateRoot=c14d4d9f490cd974197f01ed1adecc4024d53fa3c7e81763a03808f65b84ae71 inputFile=../zkevm-testvectors/inputs-executor/calldata/test-length-data_1.json
 
-             || (inputFile.find("inputs-executor-blob/blob-invalid-9.json") != string::npos) // zkError: MainExecutor::execute() failed called with invalid blobType=3
+             || (inputFile.find("inputs-executor-blob/blob-invalid-8.json") != string::npos) // zkError: MainExecutor::execute() failed called with invalid blobType=3
            )
         {
             zklog.warning("ProcessDirectory() skipping file=" + inputFile + " fileCounter=" + to_string(fileCounter) + " skippedFileCounter=" + to_string(skippedFileCounter));
