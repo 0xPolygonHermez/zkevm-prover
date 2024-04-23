@@ -73,6 +73,7 @@ public:
     unordered_map<string, OverrideEntry> stateOverride;
     uint64_t stepsN;
     InputDebug debug;
+    unordered_map<uint64_t, uint64_t> minTimestampMap;
 
     // Constructor
     Input (Goldilocks &fr) :

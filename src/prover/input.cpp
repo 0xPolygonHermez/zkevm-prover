@@ -1243,6 +1243,26 @@ void Input::loadGlobals (json &input)
 #endif
         }        
     }
+
+    // minTimestampMap
+    if ( input.contains("minTimestampMap") &&
+         input["minTimestampMap"].is_array() )
+    {
+        for (uint64_t i = 0; i < input["minTimestampMap"].size(); i++)
+        {
+            if (!input["minTimestampMap"][i].is_array())
+            {
+                zklog.error("Input::loadGlobals() minTimestampMap[" + to_string(i) + "] is not an array");
+                exitProcess();
+            }
+            if (input["minTimestampMap"][i].size() != 2)
+            {
+                zklog.error("Input::loadGlobals() minTimestampMap[" + to_string(i) + "] is an array but size=" + to_string(input["minTimestampMap"][i].size()) + " != 2");
+                exitProcess();
+            }
+            minTimestampMap[input["minTimestampMap"][i][0]] = input["minTimestampMap"][i][1];
+        }
+    }
 }
 
 string Input::saveGlobals (json &input) const
@@ -1590,6 +1610,22 @@ string Input::saveGlobals (json &input) const
             input["previousL1InfoTreeRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.previousL1InfoTreeRoot.get_str(16), 64);
             s += "previousL1InfoTreeRoot=" + publicInputsExtended.publicInputs.previousL1InfoTreeRoot.get_str(16) + " ";
         }
+    }
+
+    // minTimestampMap
+    if (!minTimestampMap.empty())
+    {
+        s += "minTimestampMap=[";
+        unordered_map<uint64_t, uint64_t>::const_iterator minTimestampMapIt;
+        uint64_t minTimestampCounter = 0;
+        for (minTimestampMapIt = minTimestampMap.begin(); minTimestampMapIt != minTimestampMap.end(); minTimestampMapIt++)
+        {
+            input["minTimestampMap"][minTimestampCounter][0] = minTimestampMapIt->first;
+            input["minTimestampMap"][minTimestampCounter][1] = minTimestampMapIt->second;
+            s += "[" + to_string(minTimestampMapIt->first) + "," + to_string(minTimestampMapIt->second) + "]";
+            minTimestampCounter++;
+        }
+        s += "] ";
     }
 
     return s;
