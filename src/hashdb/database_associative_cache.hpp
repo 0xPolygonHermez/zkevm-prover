@@ -44,6 +44,7 @@ class DatabaseMTAssociativeCache
         inline bool enabled() const { return (log2IndexesSize > 0); };
         inline uint32_t getCacheSize()  const { return cacheSize; };
         inline uint32_t getIndexesSize() const { return indexesSize; };
+        inline uint32_t getAuxBufferKeysValuesSize() const { return auxBufferKeysValues.size(); };
         inline void clear(){
             if(enabled()){
                 postConstruct(log2IndexesSize, log2CacheSize, name);                
@@ -52,9 +53,9 @@ class DatabaseMTAssociativeCache
 
     private:
         inline bool emptyCacheSlot(uint32_t cacheIndexRaw) const { 
-            return (currentCacheIndex >= cacheIndexRaw &&  currentCacheIndex - cacheIndexRaw > cacheSize) ||
+            return (currentCacheIndex > cacheIndexRaw &&  currentCacheIndex - cacheIndexRaw > cacheSize) ||
             (currentCacheIndex < cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex + 1 > cacheSize);
          };
-        void forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], int &iters);
+        void forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], int &iters, bool update);
 };
 #endif
