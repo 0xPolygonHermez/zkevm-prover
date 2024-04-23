@@ -67,18 +67,17 @@ public:
     {
         cm = 0,
         _const = 1,
-        q = 2
     } eType;
 
     eType type;
     uint64_t id;
     int64_t prime;
+    uint64_t openingPos;
 
     void setType (string s)
     {
         if (s == "cm") type = cm;
         else if (s == "const") type = _const;
-        else if (s == "q") type = q;
         else
         {
             zklog.error("EvMap::setType() found invalid type: " + s);
@@ -98,8 +97,9 @@ public:
 
     uint64_t nPublics;
     uint64_t nSubProofValues;
+    uint64_t nCommitmentsStage1;
     uint64_t nConstants;
-
+    
     uint64_t nStages;
 
     vector<PolMap> cmPolsMap;

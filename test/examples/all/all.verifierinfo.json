@@ -12,12 +12,12 @@
     "src": [
      {
       "type": "eval",
-      "id": 0,
+      "id": 15,
       "dim": 3
      },
      {
       "type": "eval",
-      "id": 1,
+      "id": 12,
       "dim": 3
      }
     ]
@@ -93,12 +93,12 @@
     "src": [
      {
       "type": "eval",
-      "id": 1,
+      "id": 12,
       "dim": 3
      },
      {
       "type": "eval",
-      "id": 1,
+      "id": 12,
       "dim": 3
      }
     ]
@@ -113,12 +113,12 @@
     "src": [
      {
       "type": "eval",
-      "id": 3,
+      "id": 14,
       "dim": 3
      },
      {
       "type": "eval",
-      "id": 3,
+      "id": 14,
       "dim": 3
      }
     ]
@@ -154,7 +154,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 4,
+      "id": 13,
       "dim": 3
      },
      {
@@ -237,7 +237,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 3,
+      "id": 14,
       "dim": 3
      },
      {
@@ -257,7 +257,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 5,
+      "id": 1,
       "dim": 3
      },
      {
@@ -298,7 +298,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 1,
+      "id": 12,
       "dim": 3
      },
      {
@@ -318,7 +318,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 5,
+      "id": 1,
       "dim": 3
      },
      {
@@ -359,7 +359,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 1,
+      "id": 12,
       "dim": 3
      },
      {
@@ -420,7 +420,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 7,
+      "id": 31,
       "dim": 3
      },
      {
@@ -441,7 +441,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 6,
+      "id": 0,
       "dim": 3
      },
      {
@@ -461,12 +461,12 @@
     "src": [
      {
       "type": "eval",
-      "id": 9,
+      "id": 30,
       "dim": 3
      },
      {
       "type": "challenge",
-      "id": 3,
+      "id": 4,
       "stageId": 1,
       "dim": 3,
       "stage": 3
@@ -483,7 +483,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 8,
+      "id": 28,
       "dim": 3
      },
      {
@@ -508,7 +508,7 @@
      },
      {
       "type": "challenge",
-      "id": 3,
+      "id": 4,
       "stageId": 1,
       "dim": 3,
       "stage": 3
@@ -525,7 +525,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 2,
+      "id": 3,
       "stageId": 0,
       "dim": 3,
       "stage": 3
@@ -567,12 +567,12 @@
     "src": [
      {
       "type": "eval",
-      "id": 10,
+      "id": 29,
       "dim": 3
      },
      {
       "type": "challenge",
-      "id": 3,
+      "id": 4,
       "stageId": 1,
       "dim": 3,
       "stage": 3
@@ -589,7 +589,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 9,
+      "id": 30,
       "dim": 3
      },
      {
@@ -614,7 +614,7 @@
      },
      {
       "type": "challenge",
-      "id": 3,
+      "id": 4,
       "stageId": 1,
       "dim": 3,
       "stage": 3
@@ -631,7 +631,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 2,
+      "id": 3,
       "stageId": 0,
       "dim": 3,
       "stage": 3
@@ -694,7 +694,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 11,
+      "id": 32,
       "dim": 3
      },
      {
@@ -716,13 +716,13 @@
     "src": [
      {
       "type": "eval",
-      "id": 7,
+      "id": 31,
       "dim": 3
      },
      {
       "type": "eval",
       "expId": 30,
-      "id": 12,
+      "id": 38,
       "dim": 3
      }
     ]
@@ -758,7 +758,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 13,
+      "id": 33,
       "dim": 3
      },
      {
@@ -779,7 +779,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 6,
+      "id": 0,
       "dim": 3
      },
      {
@@ -800,7 +800,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 14,
+      "id": 20,
       "dim": 3
      }
     ]
@@ -816,7 +816,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 14,
+      "id": 20,
       "dim": 3
      }
     ]
@@ -832,7 +832,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 15,
+      "id": 22,
       "dim": 3
      }
     ]
@@ -854,7 +854,7 @@
      },
      {
       "type": "eval",
-      "id": 14,
+      "id": 20,
       "dim": 3
      }
     ]
@@ -874,7 +874,7 @@
      },
      {
       "type": "eval",
-      "id": 14,
+      "id": 20,
       "dim": 3
      }
     ]
@@ -916,7 +916,7 @@
      },
      {
       "type": "eval",
-      "id": 15,
+      "id": 22,
       "dim": 3
      }
     ]
@@ -963,9 +963,9 @@
      {
       "type": "challenge",
       "id": 2,
-      "stageId": 0,
+      "stageId": 2,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      }
     ]
    },
@@ -980,7 +980,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 16,
+      "id": 19,
       "dim": 3
      }
     ]
@@ -996,7 +996,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 16,
+      "id": 19,
       "dim": 3
      }
     ]
@@ -1012,7 +1012,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 17,
+      "id": 21,
       "dim": 3
      }
     ]
@@ -1027,7 +1027,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 16,
+      "id": 19,
       "dim": 3
      },
      {
@@ -1054,7 +1054,7 @@
      },
      {
       "type": "eval",
-      "id": 16,
+      "id": 19,
       "dim": 3
      }
     ]
@@ -1096,7 +1096,7 @@
      },
      {
       "type": "eval",
-      "id": 17,
+      "id": 21,
       "dim": 3
      }
     ]
@@ -1143,9 +1143,9 @@
      {
       "type": "challenge",
       "id": 2,
-      "stageId": 0,
+      "stageId": 2,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      }
     ]
    },
@@ -1159,7 +1159,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 18,
+      "id": 34,
       "dim": 3
      },
      {
@@ -1181,7 +1181,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 13,
+      "id": 33,
       "dim": 3
      },
      {
@@ -1224,7 +1224,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 19,
+      "id": 35,
       "dim": 3
      },
      {
@@ -1245,7 +1245,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 6,
+      "id": 0,
       "dim": 3
      },
      {
@@ -1265,13 +1265,13 @@
     "src": [
      {
       "type": "eval",
-      "id": 20,
+      "id": 36,
       "dim": 3
      },
      {
       "type": "eval",
       "expId": 44,
-      "id": 21,
+      "id": 39,
       "dim": 3
      }
     ]
@@ -1286,13 +1286,13 @@
     "src": [
      {
       "type": "eval",
-      "id": 19,
+      "id": 35,
       "dim": 3
      },
      {
       "type": "eval",
       "expId": 43,
-      "id": 22,
+      "id": 40,
       "dim": 3
      }
     ]
@@ -1329,7 +1329,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 23,
+      "id": 24,
       "dim": 3
      }
     ]
@@ -1345,7 +1345,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 24,
+      "id": 25,
       "dim": 3
      }
     ]
@@ -1361,12 +1361,12 @@
     "src": [
      {
       "type": "eval",
-      "id": 23,
+      "id": 24,
       "dim": 3
      },
      {
       "type": "eval",
-      "id": 24,
+      "id": 25,
       "dim": 3
      }
     ]
@@ -1382,7 +1382,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 25,
+      "id": 8,
       "dim": 3
      }
     ]
@@ -1398,7 +1398,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 26,
+      "id": 10,
       "dim": 3
      }
     ]
@@ -1414,7 +1414,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 27,
+      "id": 26,
       "dim": 3
      }
     ]
@@ -1430,7 +1430,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 28,
+      "id": 6,
       "dim": 3
      }
     ]
@@ -1452,7 +1452,7 @@
      },
      {
       "type": "eval",
-      "id": 25,
+      "id": 8,
       "dim": 3
      }
     ]
@@ -1472,7 +1472,7 @@
      },
      {
       "type": "eval",
-      "id": 26,
+      "id": 10,
       "dim": 3
      }
     ]
@@ -1514,7 +1514,7 @@
      },
      {
       "type": "eval",
-      "id": 27,
+      "id": 26,
       "dim": 3
      }
     ]
@@ -1556,7 +1556,7 @@
      },
      {
       "type": "eval",
-      "id": 28,
+      "id": 6,
       "dim": 3
      }
     ]
@@ -1595,7 +1595,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 29,
+      "id": 23,
       "dim": 3
      }
     ]
@@ -1611,7 +1611,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 30,
+      "id": 9,
       "dim": 3
      }
     ]
@@ -1627,7 +1627,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 31,
+      "id": 11,
       "dim": 3
      }
     ]
@@ -1643,7 +1643,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 32,
+      "id": 27,
       "dim": 3
      }
     ]
@@ -1659,7 +1659,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 33,
+      "id": 7,
       "dim": 3
      }
     ]
@@ -1681,7 +1681,7 @@
      },
      {
       "type": "eval",
-      "id": 30,
+      "id": 9,
       "dim": 3
      }
     ]
@@ -1701,7 +1701,7 @@
      },
      {
       "type": "eval",
-      "id": 31,
+      "id": 11,
       "dim": 3
      }
     ]
@@ -1743,7 +1743,7 @@
      },
      {
       "type": "eval",
-      "id": 32,
+      "id": 27,
       "dim": 3
      }
     ]
@@ -1785,7 +1785,7 @@
      },
      {
       "type": "eval",
-      "id": 33,
+      "id": 7,
       "dim": 3
      }
     ]
@@ -1824,7 +1824,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 34,
+      "id": 16,
       "dim": 3
      }
     ]
@@ -1840,7 +1840,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 35,
+      "id": 3,
       "dim": 3
      }
     ]
@@ -1855,14 +1855,14 @@
     "src": [
      {
       "type": "challenge",
-      "id": 3,
+      "id": 1,
       "stageId": 1,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      },
      {
       "type": "eval",
-      "id": 35,
+      "id": 3,
       "dim": 3
      }
     ]
@@ -1877,7 +1877,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 34,
+      "id": 16,
       "dim": 3
      },
      {
@@ -1903,10 +1903,10 @@
      },
      {
       "type": "challenge",
-      "id": 2,
+      "id": 0,
       "stageId": 0,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      }
     ]
    },
@@ -1921,7 +1921,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 36,
+      "id": 17,
       "dim": 3
      }
     ]
@@ -1937,7 +1937,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 37,
+      "id": 4,
       "dim": 3
      }
     ]
@@ -1952,14 +1952,14 @@
     "src": [
      {
       "type": "challenge",
-      "id": 3,
+      "id": 1,
       "stageId": 1,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      },
      {
       "type": "eval",
-      "id": 37,
+      "id": 4,
       "dim": 3
      }
     ]
@@ -1974,7 +1974,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 36,
+      "id": 17,
       "dim": 3
      },
      {
@@ -1999,10 +1999,10 @@
      },
      {
       "type": "challenge",
-      "id": 2,
+      "id": 0,
       "stageId": 0,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      }
     ]
    },
@@ -2040,7 +2040,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 38,
+      "id": 18,
       "dim": 3
      }
     ]
@@ -2056,7 +2056,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 39,
+      "id": 5,
       "dim": 3
      }
     ]
@@ -2071,10 +2071,10 @@
     "src": [
      {
       "type": "challenge",
-      "id": 3,
+      "id": 1,
       "stageId": 1,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      },
      {
       "type": "x",
@@ -2092,7 +2092,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 34,
+      "id": 16,
       "dim": 3
      },
      {
@@ -2118,10 +2118,10 @@
      },
      {
       "type": "challenge",
-      "id": 2,
+      "id": 0,
       "stageId": 0,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      }
     ]
    },
@@ -2135,10 +2135,10 @@
     "src": [
      {
       "type": "challenge",
-      "id": 3,
+      "id": 1,
       "stageId": 1,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      },
      {
       "type": "number",
@@ -2176,7 +2176,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 36,
+      "id": 17,
       "dim": 3
      },
      {
@@ -2201,10 +2201,10 @@
      },
      {
       "type": "challenge",
-      "id": 2,
+      "id": 0,
       "stageId": 0,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      }
     ]
    },
@@ -2241,7 +2241,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2287,7 +2287,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2331,7 +2331,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2375,7 +2375,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2419,7 +2419,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2463,7 +2463,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2507,7 +2507,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2551,7 +2551,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2595,7 +2595,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2639,7 +2639,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2683,7 +2683,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2705,7 +2705,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 23,
+      "id": 24,
       "dim": 3
      },
      {
@@ -2732,7 +2732,7 @@
      },
      {
       "type": "eval",
-      "id": 24,
+      "id": 25,
       "dim": 3
      }
     ]
@@ -2818,7 +2818,7 @@
      },
      {
       "type": "eval",
-      "id": 29,
+      "id": 23,
       "dim": 3
      }
     ]
@@ -2860,7 +2860,7 @@
      },
      {
       "type": "eval",
-      "id": 40,
+      "id": 37,
       "dim": 3
      }
     ]
@@ -2895,7 +2895,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -2918,12 +2918,12 @@
      {
       "type": "eval",
       "expId": 28,
-      "id": 40,
+      "id": 37,
       "dim": 3
      },
      {
       "type": "challenge",
-      "id": 2,
+      "id": 3,
       "stageId": 0,
       "dim": 3,
       "stage": 3
@@ -2947,7 +2947,7 @@
      },
      {
       "type": "challenge",
-      "id": 3,
+      "id": 4,
       "stageId": 1,
       "dim": 3,
       "stage": 3
@@ -2991,7 +2991,7 @@
      },
      {
       "type": "challenge",
-      "id": 3,
+      "id": 4,
       "stageId": 1,
       "dim": 3,
       "stage": 3
@@ -3008,7 +3008,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 2,
+      "id": 3,
       "stageId": 0,
       "dim": 3,
       "stage": 3
@@ -3075,7 +3075,7 @@
      },
      {
       "type": "challenge",
-      "id": 3,
+      "id": 4,
       "stageId": 1,
       "dim": 3,
       "stage": 3
@@ -3117,7 +3117,7 @@
      },
      {
       "type": "eval",
-      "id": 12,
+      "id": 38,
       "dim": 3
      }
     ]
@@ -3152,7 +3152,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -3174,14 +3174,14 @@
     "src": [
      {
       "type": "challenge",
-      "id": 3,
+      "id": 1,
       "stageId": 1,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      },
      {
       "type": "eval",
-      "id": 39,
+      "id": 5,
       "dim": 3
      }
     ]
@@ -3196,7 +3196,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 38,
+      "id": 18,
       "dim": 3
      },
      {
@@ -3221,10 +3221,10 @@
      },
      {
       "type": "challenge",
-      "id": 2,
+      "id": 0,
       "stageId": 0,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      }
     ]
    },
@@ -3265,7 +3265,7 @@
      },
      {
       "type": "eval",
-      "id": 21,
+      "id": 39,
       "dim": 3
      }
     ]
@@ -3300,7 +3300,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 4,
+      "id": 5,
       "stageId": 0,
       "dim": 3,
       "stage": 4
@@ -3322,10 +3322,10 @@
     "src": [
      {
       "type": "challenge",
-      "id": 3,
+      "id": 1,
       "stageId": 1,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      },
      {
       "type": "number",
@@ -3363,7 +3363,7 @@
     "src": [
      {
       "type": "eval",
-      "id": 38,
+      "id": 18,
       "dim": 3
      },
      {
@@ -3388,10 +3388,10 @@
      },
      {
       "type": "challenge",
-      "id": 2,
+      "id": 0,
       "stageId": 0,
       "dim": 3,
-      "stage": 3
+      "stage": 2
      }
     ]
    },
@@ -3432,7 +3432,7 @@
      },
      {
       "type": "eval",
-      "id": 22,
+      "id": 40,
       "dim": 3
      }
     ]
@@ -3473,7 +3473,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3521,7 +3521,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3566,7 +3566,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3611,7 +3611,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3656,7 +3656,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3701,7 +3701,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3746,7 +3746,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3791,7 +3791,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3836,7 +3836,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3881,7 +3881,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3926,7 +3926,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -3971,7 +3971,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4016,7 +4016,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4061,7 +4061,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4106,7 +4106,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4151,7 +4151,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4196,7 +4196,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4241,7 +4241,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4267,12 +4267,12 @@
       "dim": 3
      },
      {
-      "type": "tree3",
+      "type": "tree2",
       "id": 18,
       "prime": 0,
       "dim": 3,
-      "stageId": 1,
-      "treePos": 3
+      "stageId": 2,
+      "treePos": 6
      }
     ]
    },
@@ -4286,7 +4286,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4312,12 +4312,12 @@
       "dim": 3
      },
      {
-      "type": "tree3",
+      "type": "tree2",
       "id": 19,
       "prime": 0,
       "dim": 3,
-      "stageId": 2,
-      "treePos": 6
+      "stageId": 3,
+      "treePos": 9
      }
     ]
    },
@@ -4331,7 +4331,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4357,12 +4357,12 @@
       "dim": 3
      },
      {
-      "type": "tree3",
+      "type": "tree2",
       "id": 20,
       "prime": 0,
       "dim": 3,
-      "stageId": 3,
-      "treePos": 9
+      "stageId": 4,
+      "treePos": 12
      }
     ]
    },
@@ -4376,7 +4376,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4406,8 +4406,8 @@
       "id": 21,
       "prime": 0,
       "dim": 3,
-      "stageId": 4,
-      "treePos": 12
+      "stageId": 1,
+      "treePos": 3
      }
     ]
    },
@@ -4421,7 +4421,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4447,7 +4447,7 @@
       "dim": 3
      },
      {
-      "type": "tree3",
+      "type": "tree2",
       "id": 22,
       "prime": 0,
       "dim": 3,
@@ -4466,7 +4466,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4492,7 +4492,7 @@
       "dim": 3
      },
      {
-      "type": "tree3",
+      "type": "tree2",
       "id": 23,
       "prime": 0,
       "dim": 3,
@@ -4511,7 +4511,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4556,7 +4556,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4601,7 +4601,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -4622,16 +4622,14 @@
     },
     "src": [
      {
-      "type": "tree1",
+      "type": "const",
       "id": 0,
       "prime": 0,
-      "dim": 1,
-      "stageId": 0,
-      "treePos": 0
+      "dim": 1
      },
      {
       "type": "eval",
-      "id": 1,
+      "id": 0,
       "dim": 3
      }
     ]
@@ -4651,7 +4649,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -4668,13 +4666,13 @@
     "src": [
      {
       "type": "const",
-      "id": 2,
+      "id": 1,
       "prime": 0,
       "dim": 1
      },
      {
       "type": "eval",
-      "id": 2,
+      "id": 1,
       "dim": 3
      }
     ]
@@ -4714,7 +4712,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -4730,16 +4728,14 @@
     },
     "src": [
      {
-      "type": "tree1",
-      "id": 1,
+      "type": "const",
+      "id": 2,
       "prime": 0,
-      "dim": 1,
-      "stageId": 1,
-      "treePos": 1
+      "dim": 1
      },
      {
       "type": "eval",
-      "id": 3,
+      "id": 2,
       "dim": 3
      }
     ]
@@ -4779,7 +4775,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -4796,13 +4792,13 @@
     "src": [
      {
       "type": "const",
-      "id": 1,
+      "id": 3,
       "prime": 0,
       "dim": 1
      },
      {
       "type": "eval",
-      "id": 5,
+      "id": 3,
       "dim": 3
      }
     ]
@@ -4842,7 +4838,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -4859,13 +4855,13 @@
     "src": [
      {
       "type": "const",
-      "id": 0,
+      "id": 4,
       "prime": 0,
       "dim": 1
      },
      {
       "type": "eval",
-      "id": 6,
+      "id": 4,
       "dim": 3
      }
     ]
@@ -4905,7 +4901,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -4921,16 +4917,14 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 17,
+      "type": "const",
+      "id": 5,
       "prime": 0,
-      "dim": 3,
-      "stageId": 0,
-      "treePos": 0
+      "dim": 1
      },
      {
       "type": "eval",
-      "id": 7,
+      "id": 5,
       "dim": 3
      }
     ]
@@ -4970,7 +4964,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -4986,16 +4980,14 @@
     },
     "src": [
      {
-      "type": "tree2",
-      "id": 15,
+      "type": "const",
+      "id": 6,
       "prime": 0,
-      "dim": 3,
-      "stageId": 0,
-      "treePos": 0
+      "dim": 1
      },
      {
       "type": "eval",
-      "id": 8,
+      "id": 6,
       "dim": 3
      }
     ]
@@ -5035,7 +5027,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5051,16 +5043,14 @@
     },
     "src": [
      {
-      "type": "tree2",
-      "id": 16,
+      "type": "const",
+      "id": 7,
       "prime": 0,
-      "dim": 3,
-      "stageId": 1,
-      "treePos": 3
+      "dim": 1
      },
      {
       "type": "eval",
-      "id": 9,
+      "id": 8,
       "dim": 3
      }
     ]
@@ -5100,7 +5090,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5116,16 +5106,14 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 21,
+      "type": "const",
+      "id": 8,
       "prime": 0,
-      "dim": 3,
-      "stageId": 4,
-      "treePos": 12
+      "dim": 1
      },
      {
       "type": "eval",
-      "id": 12,
+      "id": 10,
       "dim": 3
      }
     ]
@@ -5165,7 +5153,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5181,16 +5169,16 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 18,
+      "type": "tree1",
+      "id": 0,
       "prime": 0,
-      "dim": 3,
-      "stageId": 1,
-      "treePos": 3
+      "dim": 1,
+      "stageId": 0,
+      "treePos": 0
      },
      {
       "type": "eval",
-      "id": 13,
+      "id": 12,
       "dim": 3
      }
     ]
@@ -5230,7 +5218,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5247,11 +5235,11 @@
     "src": [
      {
       "type": "tree1",
-      "id": 8,
+      "id": 1,
       "prime": 0,
       "dim": 1,
-      "stageId": 8,
-      "treePos": 8
+      "stageId": 1,
+      "treePos": 1
      },
      {
       "type": "eval",
@@ -5295,7 +5283,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5312,15 +5300,15 @@
     "src": [
      {
       "type": "tree1",
-      "id": 10,
+      "id": 2,
       "prime": 0,
       "dim": 1,
-      "stageId": 10,
-      "treePos": 10
+      "stageId": 2,
+      "treePos": 2
      },
      {
       "type": "eval",
-      "id": 15,
+      "id": 16,
       "dim": 3
      }
     ]
@@ -5360,7 +5348,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5377,15 +5365,15 @@
     "src": [
      {
       "type": "tree1",
-      "id": 7,
+      "id": 3,
       "prime": 0,
       "dim": 1,
-      "stageId": 7,
-      "treePos": 7
+      "stageId": 3,
+      "treePos": 3
      },
      {
       "type": "eval",
-      "id": 16,
+      "id": 17,
       "dim": 3
      }
     ]
@@ -5425,7 +5413,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5442,15 +5430,15 @@
     "src": [
      {
       "type": "tree1",
-      "id": 9,
+      "id": 4,
       "prime": 0,
       "dim": 1,
-      "stageId": 9,
-      "treePos": 9
+      "stageId": 4,
+      "treePos": 4
      },
      {
       "type": "eval",
-      "id": 17,
+      "id": 18,
       "dim": 3
      }
     ]
@@ -5490,7 +5478,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5506,12 +5494,12 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 19,
+      "type": "tree1",
+      "id": 7,
       "prime": 0,
-      "dim": 3,
-      "stageId": 2,
-      "treePos": 6
+      "dim": 1,
+      "stageId": 7,
+      "treePos": 7
      },
      {
       "type": "eval",
@@ -5555,7 +5543,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5571,16 +5559,16 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 22,
+      "type": "tree1",
+      "id": 8,
       "prime": 0,
-      "dim": 3,
-      "stageId": 5,
-      "treePos": 15
+      "dim": 1,
+      "stageId": 8,
+      "treePos": 8
      },
      {
       "type": "eval",
-      "id": 21,
+      "id": 20,
       "dim": 3
      }
     ]
@@ -5620,7 +5608,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5636,16 +5624,16 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 23,
+      "type": "tree1",
+      "id": 9,
       "prime": 0,
-      "dim": 3,
-      "stageId": 6,
-      "treePos": 18
+      "dim": 1,
+      "stageId": 9,
+      "treePos": 9
      },
      {
       "type": "eval",
-      "id": 22,
+      "id": 21,
       "dim": 3
      }
     ]
@@ -5685,7 +5673,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5702,15 +5690,15 @@
     "src": [
      {
       "type": "tree1",
-      "id": 12,
+      "id": 10,
       "prime": 0,
       "dim": 1,
-      "stageId": 12,
-      "treePos": 12
+      "stageId": 10,
+      "treePos": 10
      },
      {
       "type": "eval",
-      "id": 23,
+      "id": 22,
       "dim": 3
      }
     ]
@@ -5750,7 +5738,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5766,14 +5754,16 @@
     },
     "src": [
      {
-      "type": "const",
-      "id": 7,
+      "type": "tree1",
+      "id": 11,
       "prime": 0,
-      "dim": 1
+      "dim": 1,
+      "stageId": 11,
+      "treePos": 11
      },
      {
       "type": "eval",
-      "id": 25,
+      "id": 23,
       "dim": 3
      }
     ]
@@ -5813,7 +5803,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5829,14 +5819,16 @@
     },
     "src": [
      {
-      "type": "const",
-      "id": 8,
+      "type": "tree1",
+      "id": 12,
       "prime": 0,
-      "dim": 1
+      "dim": 1,
+      "stageId": 12,
+      "treePos": 12
      },
      {
       "type": "eval",
-      "id": 26,
+      "id": 24,
       "dim": 3
      }
     ]
@@ -5876,7 +5868,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5901,7 +5893,7 @@
      },
      {
       "type": "eval",
-      "id": 27,
+      "id": 26,
       "dim": 3
      }
     ]
@@ -5941,7 +5933,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -5957,10 +5949,12 @@
     },
     "src": [
      {
-      "type": "const",
-      "id": 6,
+      "type": "tree2",
+      "id": 15,
       "prime": 0,
-      "dim": 1
+      "dim": 3,
+      "stageId": 0,
+      "treePos": 0
      },
      {
       "type": "eval",
@@ -6004,7 +5998,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6020,16 +6014,16 @@
     },
     "src": [
      {
-      "type": "tree1",
-      "id": 11,
+      "type": "tree2",
+      "id": 16,
       "prime": 0,
-      "dim": 1,
-      "stageId": 11,
-      "treePos": 11
+      "dim": 3,
+      "stageId": 1,
+      "treePos": 3
      },
      {
       "type": "eval",
-      "id": 29,
+      "id": 30,
       "dim": 3
      }
     ]
@@ -6069,7 +6063,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6085,16 +6079,16 @@
     },
     "src": [
      {
-      "type": "tree1",
-      "id": 2,
+      "type": "tree3",
+      "id": 17,
       "prime": 0,
-      "dim": 1,
-      "stageId": 2,
-      "treePos": 2
+      "dim": 3,
+      "stageId": 0,
+      "treePos": 0
      },
      {
       "type": "eval",
-      "id": 34,
+      "id": 31,
       "dim": 3
      }
     ]
@@ -6134,7 +6128,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6150,14 +6144,16 @@
     },
     "src": [
      {
-      "type": "const",
-      "id": 3,
+      "type": "tree2",
+      "id": 18,
       "prime": 0,
-      "dim": 1
+      "dim": 3,
+      "stageId": 2,
+      "treePos": 6
      },
      {
       "type": "eval",
-      "id": 35,
+      "id": 33,
       "dim": 3
      }
     ]
@@ -6197,7 +6193,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6213,16 +6209,16 @@
     },
     "src": [
      {
-      "type": "tree1",
-      "id": 3,
+      "type": "tree2",
+      "id": 19,
       "prime": 0,
-      "dim": 1,
+      "dim": 3,
       "stageId": 3,
-      "treePos": 3
+      "treePos": 9
      },
      {
       "type": "eval",
-      "id": 36,
+      "id": 35,
       "dim": 3
      }
     ]
@@ -6262,7 +6258,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6278,10 +6274,12 @@
     },
     "src": [
      {
-      "type": "const",
-      "id": 4,
+      "type": "tree2",
+      "id": 20,
       "prime": 0,
-      "dim": 1
+      "dim": 3,
+      "stageId": 4,
+      "treePos": 12
      },
      {
       "type": "eval",
@@ -6325,7 +6323,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6341,12 +6339,12 @@
     },
     "src": [
      {
-      "type": "tree1",
-      "id": 4,
+      "type": "tree3",
+      "id": 21,
       "prime": 0,
-      "dim": 1,
-      "stageId": 4,
-      "treePos": 4
+      "dim": 3,
+      "stageId": 1,
+      "treePos": 3
      },
      {
       "type": "eval",
@@ -6390,7 +6388,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6406,10 +6404,12 @@
     },
     "src": [
      {
-      "type": "const",
-      "id": 5,
+      "type": "tree2",
+      "id": 22,
       "prime": 0,
-      "dim": 1
+      "dim": 3,
+      "stageId": 5,
+      "treePos": 15
      },
      {
       "type": "eval",
@@ -6453,7 +6453,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6469,12 +6469,12 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 20,
+      "type": "tree2",
+      "id": 23,
       "prime": 0,
       "dim": 3,
-      "stageId": 3,
-      "treePos": 9
+      "stageId": 6,
+      "treePos": 18
      },
      {
       "type": "eval",
@@ -6518,7 +6518,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6583,7 +6583,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6684,7 +6684,7 @@
     "src": [
      {
       "type": "challenge",
-      "id": 6,
+      "id": 7,
       "stageId": 0,
       "dim": 3,
       "stage": 6
@@ -6705,16 +6705,14 @@
     },
     "src": [
      {
-      "type": "tree1",
-      "id": 1,
+      "type": "const",
+      "id": 6,
       "prime": 0,
-      "dim": 1,
-      "stageId": 1,
-      "treePos": 1
+      "dim": 1
      },
      {
       "type": "eval",
-      "id": 0,
+      "id": 7,
       "dim": 3
      }
     ]
@@ -6734,7 +6732,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6750,16 +6748,14 @@
     },
     "src": [
      {
-      "type": "tree1",
-      "id": 0,
+      "type": "const",
+      "id": 7,
       "prime": 0,
-      "dim": 1,
-      "stageId": 0,
-      "treePos": 0
+      "dim": 1
      },
      {
       "type": "eval",
-      "id": 4,
+      "id": 9,
       "dim": 3
      }
     ]
@@ -6799,7 +6795,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6815,16 +6811,14 @@
     },
     "src": [
      {
-      "type": "tree2",
-      "id": 15,
+      "type": "const",
+      "id": 8,
       "prime": 0,
-      "dim": 3,
-      "stageId": 0,
-      "treePos": 0
+      "dim": 1
      },
      {
       "type": "eval",
-      "id": 10,
+      "id": 11,
       "dim": 3
      }
     ]
@@ -6864,7 +6858,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6880,16 +6874,16 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 17,
+      "type": "tree1",
+      "id": 0,
       "prime": 0,
-      "dim": 3,
+      "dim": 1,
       "stageId": 0,
       "treePos": 0
      },
      {
       "type": "eval",
-      "id": 11,
+      "id": 13,
       "dim": 3
      }
     ]
@@ -6929,7 +6923,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -6945,16 +6939,16 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 18,
+      "type": "tree1",
+      "id": 1,
       "prime": 0,
-      "dim": 3,
+      "dim": 1,
       "stageId": 1,
-      "treePos": 3
+      "treePos": 1
      },
      {
       "type": "eval",
-      "id": 18,
+      "id": 15,
       "dim": 3
      }
     ]
@@ -6994,7 +6988,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -7010,16 +7004,16 @@
     },
     "src": [
      {
-      "type": "tree3",
-      "id": 19,
+      "type": "tree1",
+      "id": 13,
       "prime": 0,
-      "dim": 3,
-      "stageId": 2,
-      "treePos": 6
+      "dim": 1,
+      "stageId": 13,
+      "treePos": 13
      },
      {
       "type": "eval",
-      "id": 20,
+      "id": 25,
       "dim": 3
      }
     ]
@@ -7059,7 +7053,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -7076,15 +7070,15 @@
     "src": [
      {
       "type": "tree1",
-      "id": 13,
+      "id": 14,
       "prime": 0,
       "dim": 1,
-      "stageId": 13,
-      "treePos": 13
+      "stageId": 14,
+      "treePos": 14
      },
      {
       "type": "eval",
-      "id": 24,
+      "id": 27,
       "dim": 3
      }
     ]
@@ -7124,7 +7118,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -7140,14 +7134,16 @@
     },
     "src": [
      {
-      "type": "const",
-      "id": 7,
+      "type": "tree2",
+      "id": 15,
       "prime": 0,
-      "dim": 1
+      "dim": 3,
+      "stageId": 0,
+      "treePos": 0
      },
      {
       "type": "eval",
-      "id": 30,
+      "id": 29,
       "dim": 3
      }
     ]
@@ -7187,7 +7183,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -7203,14 +7199,16 @@
     },
     "src": [
      {
-      "type": "const",
-      "id": 8,
+      "type": "tree3",
+      "id": 17,
       "prime": 0,
-      "dim": 1
+      "dim": 3,
+      "stageId": 0,
+      "treePos": 0
      },
      {
       "type": "eval",
-      "id": 31,
+      "id": 32,
       "dim": 3
      }
     ]
@@ -7250,7 +7248,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -7266,16 +7264,16 @@
     },
     "src": [
      {
-      "type": "tree1",
-      "id": 14,
+      "type": "tree2",
+      "id": 18,
       "prime": 0,
-      "dim": 1,
-      "stageId": 14,
-      "treePos": 14
+      "dim": 3,
+      "stageId": 2,
+      "treePos": 6
      },
      {
       "type": "eval",
-      "id": 32,
+      "id": 34,
       "dim": 3
      }
     ]
@@ -7315,7 +7313,7 @@
      },
      {
       "type": "challenge",
-      "id": 7,
+      "id": 8,
       "stageId": 1,
       "dim": 3,
       "stage": 6
@@ -7331,14 +7329,16 @@
     },
     "src": [
      {
-      "type": "const",
-      "id": 6,
+      "type": "tree2",
+      "id": 19,
       "prime": 0,
-      "dim": 1
+      "dim": 3,
+      "stageId": 3,
+      "treePos": 9
      },
      {
       "type": "eval",
-      "id": 33,
+      "id": 36,
       "dim": 3
      }
     ]
