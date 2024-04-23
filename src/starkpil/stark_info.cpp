@@ -47,6 +47,7 @@ void StarkInfo::load(json j)
 
     nPublics = j["nPublics"];
     nConstants = j["nConstants"];
+    nCommitmentsStage1 = j["nCommitmentsStage1"];
 
     if(j.contains("nSubAirValues")) {
         nSubProofValues = j["nSubAirValues"];
@@ -102,6 +103,18 @@ void StarkInfo::load(json j)
         map.setType(j["evMap"][i]["type"]);
         map.id = j["evMap"][i]["id"];
         map.prime = j["evMap"][i]["prime"];
+        if(j["evMap"][i].contains("openingPos")) {
+            map.openingPos = j["evMap"][i]["openingPos"];
+        } else {
+            int64_t prime = map.prime;
+            auto openingPoint = std::find_if(openingPoints.begin(), openingPoints.end(), [prime](int p) { return p == prime; });
+            if(openingPoint == openingPoints.end()) {
+                zklog.error("Opening point not found");
+                exitProcess();
+                exit(-1);
+            }
+            map.openingPos = std::distance(openingPoints.begin(), openingPoint);
+        }
         evMap.push_back(map);
     }
 

@@ -6,6 +6,7 @@
    "name": "Fibonacci.l1",
    "dim": 1,
    "imPol": false,
+   "id": 0,
    "stagePos": 0,
    "stageId": 0
   },
@@ -15,6 +16,7 @@
    "name": "Fibonacci.l2",
    "dim": 1,
    "imPol": false,
+   "id": 1,
    "stagePos": 1,
    "stageId": 1
   },
@@ -24,6 +26,7 @@
    "name": "Connection.a",
    "dim": 1,
    "imPol": false,
+   "id": 2,
    "stagePos": 2,
    "stageId": 2
   },
@@ -33,6 +36,7 @@
    "name": "Connection.b",
    "dim": 1,
    "imPol": false,
+   "id": 3,
    "stagePos": 3,
    "stageId": 3
   },
@@ -42,6 +46,7 @@
    "name": "Connection.c",
    "dim": 1,
    "imPol": false,
+   "id": 4,
    "stagePos": 4,
    "stageId": 4
   },
@@ -51,6 +56,7 @@
    "name": "Permutation.a",
    "dim": 1,
    "imPol": false,
+   "id": 5,
    "stagePos": 5,
    "stageId": 5
   },
@@ -60,6 +66,7 @@
    "name": "Permutation.b",
    "dim": 1,
    "imPol": false,
+   "id": 6,
    "stagePos": 6,
    "stageId": 6
   },
@@ -69,6 +76,7 @@
    "name": "Permutation.c",
    "dim": 1,
    "imPol": false,
+   "id": 7,
    "stagePos": 7,
    "stageId": 7
   },
@@ -78,6 +86,7 @@
    "name": "Permutation.d",
    "dim": 1,
    "imPol": false,
+   "id": 8,
    "stagePos": 8,
    "stageId": 8
   },
@@ -87,6 +96,7 @@
    "name": "Permutation.selC",
    "dim": 1,
    "imPol": false,
+   "id": 9,
    "stagePos": 9,
    "stageId": 9
   },
@@ -96,6 +106,7 @@
    "name": "Permutation.selD",
    "dim": 1,
    "imPol": false,
+   "id": 10,
    "stagePos": 10,
    "stageId": 10
   },
@@ -105,6 +116,7 @@
    "name": "Plookup.sel",
    "dim": 1,
    "imPol": false,
+   "id": 11,
    "stagePos": 11,
    "stageId": 11
   },
@@ -114,6 +126,7 @@
    "name": "Plookup.a",
    "dim": 1,
    "imPol": false,
+   "id": 12,
    "stagePos": 12,
    "stageId": 12
   },
@@ -123,6 +136,7 @@
    "name": "Plookup.b",
    "dim": 1,
    "imPol": false,
+   "id": 13,
    "stagePos": 13,
    "stageId": 13
   },
@@ -132,6 +146,7 @@
    "name": "Plookup.cc",
    "dim": 1,
    "imPol": false,
+   "id": 14,
    "stagePos": 14,
    "stageId": 14
   },
@@ -141,6 +156,7 @@
    "name": "Plookup0.h1",
    "dim": 3,
    "imPol": false,
+   "id": 15,
    "stagePos": 0,
    "stageId": 0
   },
@@ -150,6 +166,7 @@
    "name": "Plookup0.h2",
    "dim": 3,
    "imPol": false,
+   "id": 16,
    "stagePos": 3,
    "stageId": 1
   },
@@ -159,35 +176,39 @@
    "name": "Plookup0.z",
    "dim": 3,
    "imPol": false,
+   "id": 17,
    "stagePos": 0,
    "stageId": 0
   },
   {
-   "stage": "cm3",
-   "stageNum": 3,
+   "stage": "cm2",
+   "stageNum": 2,
    "name": "Permutation0.z",
    "dim": 3,
    "imPol": false,
-   "stagePos": 3,
-   "stageId": 1
-  },
-  {
-   "stage": "cm3",
-   "stageNum": 3,
-   "name": "Connection0.z",
-   "dim": 3,
-   "imPol": false,
+   "id": 18,
    "stagePos": 6,
    "stageId": 2
   },
   {
-   "stage": "cm3",
-   "stageNum": 3,
+   "stage": "cm2",
+   "stageNum": 2,
+   "name": "Connection0.z",
+   "dim": 3,
+   "imPol": false,
+   "id": 19,
+   "stagePos": 9,
+   "stageId": 3
+  },
+  {
+   "stage": "cm2",
+   "stageNum": 2,
    "name": "ImPol.28",
    "dim": 3,
    "imPol": true,
-   "stagePos": 9,
-   "stageId": 3
+   "id": 20,
+   "stagePos": 12,
+   "stageId": 4
   },
   {
    "stage": "cm3",
@@ -195,24 +216,27 @@
    "name": "ImPol.30",
    "dim": 3,
    "imPol": true,
-   "stagePos": 12,
-   "stageId": 4
+   "id": 21,
+   "stagePos": 3,
+   "stageId": 1
   },
   {
-   "stage": "cm3",
-   "stageNum": 3,
+   "stage": "cm2",
+   "stageNum": 2,
    "name": "ImPol.44",
    "dim": 3,
    "imPol": true,
+   "id": 22,
    "stagePos": 15,
    "stageId": 5
   },
   {
-   "stage": "cm3",
-   "stageNum": 3,
+   "stage": "cm2",
+   "stageNum": 2,
    "name": "ImPol.43",
    "dim": 3,
    "imPol": true,
+   "id": 23,
    "stagePos": 18,
    "stageId": 6
   },
@@ -222,6 +246,7 @@
    "name": "Q0",
    "dim": 3,
    "imPol": false,
+   "id": 24,
    "stagePos": 0,
    "stageId": 0
   },
@@ -231,6 +256,7 @@
    "name": "Q1",
    "dim": 3,
    "imPol": false,
+   "id": 25,
    "stagePos": 3,
    "stageId": 1
   },
@@ -240,6 +266,7 @@
    "name": "tmpPol27",
    "dim": 3,
    "imPol": false,
+   "id": 26,
    "stagePos": 0,
    "stageId": 0
   },
@@ -249,42 +276,47 @@
    "name": "tmpPol31",
    "dim": 3,
    "imPol": false,
+   "id": 27,
    "stagePos": 3,
    "stageId": 1
   },
   {
    "stage": "tmpExp",
-   "stageNum": 3,
+   "stageNum": 2,
    "name": "tmpPol36",
    "dim": 3,
    "imPol": false,
+   "id": 28,
    "stagePos": 6,
    "stageId": 2
   },
   {
    "stage": "tmpExp",
-   "stageNum": 3,
+   "stageNum": 2,
    "name": "tmpPol37",
    "dim": 3,
    "imPol": false,
+   "id": 29,
    "stagePos": 9,
    "stageId": 3
   },
   {
    "stage": "tmpExp",
-   "stageNum": 3,
+   "stageNum": 2,
    "name": "tmpPol41",
    "dim": 3,
    "imPol": false,
+   "id": 30,
    "stagePos": 12,
    "stageId": 4
   },
   {
    "stage": "tmpExp",
-   "stageNum": 3,
+   "stageNum": 2,
    "name": "tmpPol42",
    "dim": 3,
    "imPol": false,
+   "id": 31,
    "stagePos": 15,
    "stageId": 5
   }
@@ -296,6 +328,7 @@
    "name": "Global.L1",
    "dim": 1,
    "imPol": false,
+   "id": 0,
    "stageId": 0
   },
   {
@@ -304,6 +337,7 @@
    "name": "Fibonacci.L1",
    "dim": 1,
    "imPol": false,
+   "id": 1,
    "stageId": 1
   },
   {
@@ -312,6 +346,7 @@
    "name": "Fibonacci.LLAST",
    "dim": 1,
    "imPol": false,
+   "id": 2,
    "stageId": 2
   },
   {
@@ -320,6 +355,7 @@
    "name": "Connection.S1",
    "dim": 1,
    "imPol": false,
+   "id": 3,
    "stageId": 3
   },
   {
@@ -328,6 +364,7 @@
    "name": "Connection.S2",
    "dim": 1,
    "imPol": false,
+   "id": 4,
    "stageId": 4
   },
   {
@@ -336,6 +373,7 @@
    "name": "Connection.S3",
    "dim": 1,
    "imPol": false,
+   "id": 5,
    "stageId": 5
   },
   {
@@ -344,6 +382,7 @@
    "name": "Plookup.SEL",
    "dim": 1,
    "imPol": false,
+   "id": 6,
    "stageId": 6
   },
   {
@@ -352,6 +391,7 @@
    "name": "Plookup.A",
    "dim": 1,
    "imPol": false,
+   "id": 7,
    "stageId": 7
   },
   {
@@ -360,6 +400,7 @@
    "name": "Plookup.B",
    "dim": 1,
    "imPol": false,
+   "id": 8,
    "stageId": 8
   }
  ],
@@ -375,6 +416,12 @@
    "stageNum": 2,
    "dim": 3,
    "stageId": 1
+  },
+  {
+   "name": "std_gamma",
+   "stageNum": 2,
+   "dim": 3,
+   "stageId": 2
   },
   {
    "name": "std_gamma",
@@ -418,8 +465,8 @@
   "const": 9,
   "tmpExp": 18,
   "cm1": 15,
-  "cm2": 6,
-  "cm3": 21,
+  "cm2": 21,
+  "cm3": 6,
   "cm4": 6
  },
  "nPublics": 3,
@@ -455,221 +502,265 @@
  ],
  "qDim": 3,
  "qDeg": 2,
+ "nCommitmentsStage1": 15,
  "evMap": [
   {
-   "type": "cm",
-   "id": 1,
-   "prime": 1
+   "type": "const",
+   "id": 0,
+   "prime": 0,
+   "openingPos": 0
   },
   {
-   "type": "cm",
-   "id": 0,
-   "prime": 0
+   "type": "const",
+   "id": 1,
+   "prime": 0,
+   "openingPos": 0
   },
   {
    "type": "const",
    "id": 2,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 1,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 0,
-   "prime": 1
-  },
-  {
-   "type": "const",
-   "id": 1,
-   "prime": 0
-  },
-  {
-   "type": "const",
-   "id": 0,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 17,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 15,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 16,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 15,
-   "prime": 1
-  },
-  {
-   "type": "cm",
-   "id": 17,
-   "prime": 1
-  },
-  {
-   "type": "cm",
-   "id": 21,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 18,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 8,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 10,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 7,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 9,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 18,
-   "prime": 1
-  },
-  {
-   "type": "cm",
-   "id": 19,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 19,
-   "prime": 1
-  },
-  {
-   "type": "cm",
-   "id": 22,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 23,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 12,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 13,
-   "prime": 1
-  },
-  {
-   "type": "const",
-   "id": 7,
-   "prime": 0
-  },
-  {
-   "type": "const",
-   "id": 8,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 14,
-   "prime": 0
-  },
-  {
-   "type": "const",
-   "id": 6,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 11,
-   "prime": 0
-  },
-  {
-   "type": "const",
-   "id": 7,
-   "prime": 1
-  },
-  {
-   "type": "const",
-   "id": 8,
-   "prime": 1
-  },
-  {
-   "type": "cm",
-   "id": 14,
-   "prime": 1
-  },
-  {
-   "type": "const",
-   "id": 6,
-   "prime": 1
-  },
-  {
-   "type": "cm",
-   "id": 2,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 0
   },
   {
    "type": "const",
    "id": 3,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 3,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 0
   },
   {
    "type": "const",
    "id": 4,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 4,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 0
   },
   {
    "type": "const",
    "id": 5,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "const",
+   "id": 6,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "const",
+   "id": 6,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "const",
+   "id": 7,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "const",
+   "id": 7,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "const",
+   "id": 8,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "const",
+   "id": 8,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 0,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 0,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 1,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 1,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 2,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 3,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 4,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 7,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 8,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 9,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 10,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 11,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 12,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 13,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 14,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 14,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 15,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 15,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 16,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 17,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 17,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 18,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 18,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 19,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 19,
+   "prime": 1,
+   "openingPos": 1
   },
   {
    "type": "cm",
    "id": 20,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 21,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 22,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 23,
+   "prime": 0,
+   "openingPos": 0
   },
   {
    "type": "cm",
    "id": 24,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 0
   },
   {
    "type": "cm",
    "id": 25,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 0
   }
  ]
 }
