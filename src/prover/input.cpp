@@ -599,6 +599,26 @@ void Input::loadGlobals (json &input)
 
     // Calculate the trace configuration flags
     traceConfig.calculateFlags();
+
+    // minTimestampMap
+    if ( input.contains("minTimestampMap") &&
+         input["minTimestampMap"].is_array() )
+    {
+        for (uint64_t i = 0; i < input["minTimestampMap"].size(); i++)
+        {
+            if (!input["minTimestampMap"][i].is_array())
+            {
+                zklog.error("Input::loadGlobals() minTimestampMap[" + to_string(i) + "] is not an array");
+                exitProcess();
+            }
+            if (input["minTimestampMap"][i].size() != 2)
+            {
+                zklog.error("Input::loadGlobals() minTimestampMap[" + to_string(i) + "] is an array but size=" + to_string(input["minTimestampMap"][i].size()) + " != 2");
+                exitProcess();
+            }
+            minTimestampMap[input["minTimestampMap"][i][0]] = input["minTimestampMap"][i][1];
+        }
+    }
 }
 
 void Input::saveGlobals (json &input) const
@@ -707,6 +727,16 @@ void Input::saveGlobals (json &input) const
         input["enableMemory"] = traceConfig.bEnableMemory;
         input["enableReturnData"] = traceConfig.bEnableReturnData;
         input["txHashToGenerateFullTrace"] = traceConfig.txHashToGenerateFullTrace;
+    }
+
+    // minTimestampMap
+    unordered_map<uint64_t, uint64_t>::const_iterator minTimestampMapIt;
+    uint64_t minTimestampCounter = 0;
+    for (minTimestampMapIt = minTimestampMap.begin(); minTimestampMapIt != minTimestampMap.end(); minTimestampMapIt++)
+    {
+        input["minTimestampMap"][minTimestampCounter][0] = minTimestampMapIt->first;
+        input["minTimestampMap"][minTimestampCounter][1] = minTimestampMapIt->second;
+        minTimestampCounter++;
     }
 }
 
