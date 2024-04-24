@@ -6818,6 +6818,7 @@ class ResponseDebug PROTOBUF_FINAL :
 
   enum : int {
     kErrorLogFieldNumber = 1,
+    kVersionFieldNumber = 2,
   };
   // string error_log = 1;
   void clear_error_log();
@@ -6844,6 +6845,31 @@ class ResponseDebug PROTOBUF_FINAL :
   std::string* _internal_mutable_error_log();
   public:
 
+  // string version = 2;
+  void clear_version();
+  const std::string& version() const;
+  void set_version(const std::string& value);
+  void set_version(std::string&& value);
+  void set_version(const char* value);
+  void set_version(const char* value, size_t size);
+  std::string* mutable_version();
+  std::string* release_version();
+  void set_allocated_version(std::string* version);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_version();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_version(
+      std::string* version);
+  private:
+  const std::string& _internal_version() const;
+  void _internal_set_version(const std::string& value);
+  std::string* _internal_mutable_version();
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ResponseDebug)
  private:
   class _Internal;
@@ -6852,6 +6878,7 @@ class ResponseDebug PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr error_log_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr version_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -22386,6 +22413,87 @@ inline void ResponseDebug::unsafe_arena_set_allocated_error_log(
   error_log_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       error_log, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ResponseDebug.error_log)
+}
+
+// string version = 2;
+inline void ResponseDebug::clear_version() {
+  version_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ResponseDebug::version() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ResponseDebug.version)
+  return _internal_version();
+}
+inline void ResponseDebug::set_version(const std::string& value) {
+  _internal_set_version(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ResponseDebug.version)
+}
+inline std::string* ResponseDebug::mutable_version() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ResponseDebug.version)
+  return _internal_mutable_version();
+}
+inline const std::string& ResponseDebug::_internal_version() const {
+  return version_.Get();
+}
+inline void ResponseDebug::_internal_set_version(const std::string& value) {
+  
+  version_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ResponseDebug::set_version(std::string&& value) {
+  
+  version_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ResponseDebug.version)
+}
+inline void ResponseDebug::set_version(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  version_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ResponseDebug.version)
+}
+inline void ResponseDebug::set_version(const char* value,
+    size_t size) {
+  
+  version_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ResponseDebug.version)
+}
+inline std::string* ResponseDebug::_internal_mutable_version() {
+  
+  return version_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ResponseDebug::release_version() {
+  // @@protoc_insertion_point(field_release:executor.v1.ResponseDebug.version)
+  return version_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ResponseDebug::set_allocated_version(std::string* version) {
+  if (version != nullptr) {
+    
+  } else {
+    
+  }
+  version_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), version,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ResponseDebug.version)
+}
+inline std::string* ResponseDebug::unsafe_arena_release_version() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ResponseDebug.version)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return version_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ResponseDebug::unsafe_arena_set_allocated_version(
+    std::string* version) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (version != nullptr) {
+    
+  } else {
+    
+  }
+  version_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      version, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ResponseDebug.version)
 }
 
 // -------------------------------------------------------------------

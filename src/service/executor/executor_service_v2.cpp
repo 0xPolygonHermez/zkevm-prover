@@ -8,6 +8,7 @@
 #include "utils.hpp"
 #include "witness.hpp"
 #include "data_stream.hpp"
+#include "version.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -799,13 +800,14 @@ using grpc::Status;
     }
 
     // Debug
+    executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
+    zkassertpermanent(pResponseDebug != NULL);
     if (!proverRequest.errorLog.empty())
     {
-        executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
-        zkassertpermanent(pResponseDebug != NULL);
         pResponseDebug->set_error_log(proverRequest.errorLog);
-        response->set_allocated_debug(pResponseDebug);
     }
+    pResponseDebug->set_version(ZKEVM_PROVER_VERSION);
+    response->set_allocated_debug(pResponseDebug);
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
@@ -1514,13 +1516,14 @@ using grpc::Status;
     }
 
     // Debug
+    executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
+    zkassertpermanent(pResponseDebug != NULL);
     if (!proverRequest.errorLog.empty())
     {
-        executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
-        zkassertpermanent(pResponseDebug != NULL);
         pResponseDebug->set_error_log(proverRequest.errorLog);
-        response->set_allocated_debug(pResponseDebug);
     }
+    pResponseDebug->set_version(ZKEVM_PROVER_VERSION);
+    response->set_allocated_debug(pResponseDebug);
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
