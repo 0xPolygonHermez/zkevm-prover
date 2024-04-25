@@ -672,14 +672,14 @@ using grpc::Status;
     response->set_cnt_sha256_hashes(proverRequest.counters.sha256F);
     response->set_cnt_steps(proverRequest.counters.steps);
     
-    response->set_cnt_reserve_keccak_hashes(proverRequest.counters_reserve.keccakF);
-    response->set_cnt_reserve_poseidon_hashes(proverRequest.counters_reserve.poseidonG);
-    response->set_cnt_reserve_poseidon_paddings(proverRequest.counters_reserve.paddingPG);
-    response->set_cnt_reserve_mem_aligns(proverRequest.counters_reserve.memAlign);
-    response->set_cnt_reserve_arithmetics(proverRequest.counters_reserve.arith);
-    response->set_cnt_reserve_binaries(proverRequest.counters_reserve.binary);
-    response->set_cnt_reserve_sha256_hashes(proverRequest.counters_reserve.sha256F);
-    response->set_cnt_reserve_steps(proverRequest.counters_reserve.steps);
+    response->set_cnt_reserve_keccak_hashes(proverRequest.countersReserve.keccakF);
+    response->set_cnt_reserve_poseidon_hashes(proverRequest.countersReserve.poseidonG);
+    response->set_cnt_reserve_poseidon_paddings(proverRequest.countersReserve.paddingPG);
+    response->set_cnt_reserve_mem_aligns(proverRequest.countersReserve.memAlign);
+    response->set_cnt_reserve_arithmetics(proverRequest.countersReserve.arith);
+    response->set_cnt_reserve_binaries(proverRequest.countersReserve.binary);
+    response->set_cnt_reserve_sha256_hashes(proverRequest.countersReserve.sha256F);
+    response->set_cnt_reserve_steps(proverRequest.countersReserve.steps);
 
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
@@ -896,15 +896,17 @@ using grpc::Status;
             " current_l1_info_tree_index=" + to_string(proverRequest.pFullTracer->get_current_l1_info_tree_index()) +
             " current_l1_info_tree_root=" + proverRequest.pFullTracer->get_current_l1_info_tree_root() +
             " old_batch_num=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
-            " steps=" + to_string(proverRequest.counters.steps) +
             " gasUsed=" + to_string(proverRequest.pFullTracer->get_gas_used()) +
-            " counters.keccakF=" + to_string(proverRequest.counters.keccakF) +
-            " counters.poseidonG=" + to_string(proverRequest.counters.poseidonG) +
-            " counters.paddingPG=" + to_string(proverRequest.counters.paddingPG) +
-            " counters.memAlign=" + to_string(proverRequest.counters.memAlign) +
-            " counters.arith=" + to_string(proverRequest.counters.arith) +
-            " counters.binary=" + to_string(proverRequest.counters.binary) +
-            " counters.sha256F=" + to_string(proverRequest.counters.sha256F) +
+            " counters=["
+                " steps=" + to_string(proverRequest.counters.steps) + "/" + to_string(proverRequest.countersReserve.steps) + "/" + to_string(proverRequest.countersReserveZkpc.steps) +
+                " keccakF=" + to_string(proverRequest.counters.keccakF) + "/" + to_string(proverRequest.countersReserve.keccakF) + "/" + to_string(proverRequest.countersReserveZkpc.keccakF) +
+                " poseidonG=" + to_string(proverRequest.counters.poseidonG) + "/" + to_string(proverRequest.countersReserve.poseidonG) + "/" + to_string(proverRequest.countersReserveZkpc.poseidonG) +
+                " paddingPG=" + to_string(proverRequest.counters.paddingPG) + "/" + to_string(proverRequest.countersReserve.paddingPG) + "/" + to_string(proverRequest.countersReserveZkpc.paddingPG) +
+                " memAlign=" + to_string(proverRequest.counters.memAlign) + "/" + to_string(proverRequest.countersReserve.memAlign) + "/" + to_string(proverRequest.countersReserveZkpc.memAlign) +
+                " arith=" + to_string(proverRequest.counters.arith) + "/" + to_string(proverRequest.countersReserve.arith) + "/" + to_string(proverRequest.countersReserveZkpc.arith) +
+                " binary=" + to_string(proverRequest.counters.binary) + "/" + to_string(proverRequest.countersReserve.binary) + "/" + to_string(proverRequest.countersReserveZkpc.binary) +
+                " sha256F=" + to_string(proverRequest.counters.sha256F) + "/" + to_string(proverRequest.countersReserve.sha256F) + "/" + to_string(proverRequest.countersReserveZkpc.sha256F) +
+                " ]" +
             " flush_id=" + to_string(proverRequest.flushId) +
             " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
             " nBlocks=" + to_string(block_responses.size()) +

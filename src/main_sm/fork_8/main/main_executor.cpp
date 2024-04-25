@@ -5042,7 +5042,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, uint64_t(reserve));
+                proverRequest.countersReserve.steps = zkmax(proverRequest.countersReserve.steps, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersArithLabel))
             {
@@ -5051,7 +5051,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, uint64_t(reserve));
+                proverRequest.countersReserve.arith = zkmax(proverRequest.countersReserve.arith, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersBinaryLabel))
             {
@@ -5060,7 +5060,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, uint64_t(reserve));
+                proverRequest.countersReserve.binary = zkmax(proverRequest.countersReserve.binary, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersKeccakLabel))
             {
@@ -5069,7 +5069,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, uint64_t(reserve));
+                proverRequest.countersReserve.keccakF = zkmax(proverRequest.countersReserve.keccakF, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersSha256Label))
             {
@@ -5078,7 +5078,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, uint64_t(reserve));
+                proverRequest.countersReserve.sha256F = zkmax(proverRequest.countersReserve.sha256F, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersMemalignLabel))
             {
@@ -5087,7 +5087,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, uint64_t(reserve));
+                proverRequest.countersReserve.memAlign = zkmax(proverRequest.countersReserve.memAlign, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPoseidonLabel))
             {
@@ -5096,7 +5096,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, uint64_t(reserve));
+                proverRequest.countersReserve.poseidonG = zkmax(proverRequest.countersReserve.poseidonG, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPaddingLabel))
             {
@@ -5105,7 +5105,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, uint64_t(reserve));
+                proverRequest.countersReserve.paddingPG = zkmax(proverRequest.countersReserve.paddingPG, uint64_t(reserve));
             }
 
             uint64_t jmpnCondValue = fr.toU64(op0);
@@ -5459,14 +5459,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
     proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);
     proverRequest.counters.steps = ctx.lastStep;
-    proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, proverRequest.counters.arith);
-    proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, proverRequest.counters.binary);
-    proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, proverRequest.counters.keccakF);
-    proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, proverRequest.counters.memAlign);
-    proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, proverRequest.counters.paddingPG);
-    proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, proverRequest.counters.poseidonG);
-    proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, proverRequest.counters.sha256F);
-    proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, proverRequest.counters.steps);
+    proverRequest.countersReserve.arith = zkmax(proverRequest.countersReserve.arith, proverRequest.counters.arith);
+    proverRequest.countersReserve.binary = zkmax(proverRequest.countersReserve.binary, proverRequest.counters.binary);
+    proverRequest.countersReserve.keccakF = zkmax(proverRequest.countersReserve.keccakF, proverRequest.counters.keccakF);
+    proverRequest.countersReserve.memAlign = zkmax(proverRequest.countersReserve.memAlign, proverRequest.counters.memAlign);
+    proverRequest.countersReserve.paddingPG = zkmax(proverRequest.countersReserve.paddingPG, proverRequest.counters.paddingPG);
+    proverRequest.countersReserve.poseidonG = zkmax(proverRequest.countersReserve.poseidonG, proverRequest.counters.poseidonG);
+    proverRequest.countersReserve.sha256F = zkmax(proverRequest.countersReserve.sha256F, proverRequest.counters.sha256F);
+    proverRequest.countersReserve.steps = zkmax(proverRequest.countersReserve.steps, proverRequest.counters.steps);
 
     // Set the error (all previous errors generated a return)
     proverRequest.result = ZKR_SUCCESS;
