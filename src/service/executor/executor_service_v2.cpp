@@ -800,14 +800,7 @@ using grpc::Status;
     }
 
     // Debug
-    executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
-    zkassertpermanent(pResponseDebug != NULL);
-    if (!proverRequest.errorLog.empty())
-    {
-        pResponseDebug->set_error_log(proverRequest.errorLog);
-    }
-    pResponseDebug->set_version(ZKEVM_PROVER_VERSION);
-    response->set_allocated_debug(pResponseDebug);
+    response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {

@@ -65,6 +65,18 @@ public:
     map<uint64_t,string> romErrors;
     map<uint64_t,string> executorErrors;
     map<uint64_t,string> romBlobErrors;
+
+    executor::v1::ResponseDebug * AllocateResponseDebug (const string &errorLog, const string &version)
+    {
+        executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
+        zkassertpermanent(pResponseDebug != NULL);
+        if (!errorLog.empty())
+        {
+            pResponseDebug->set_error_log(errorLog);
+        }
+        pResponseDebug->set_version(version);
+        return pResponseDebug;
+    }
 };
 
 #endif

@@ -62,7 +62,9 @@ using grpc::Status;
     // Get oldStateRoot
     if (request->old_state_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got oldStateRoot too long, size=" + to_string(request->old_state_root().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got oldStateRoot too long, size=" + to_string(request->old_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_STATE_ROOT);
         return Status::OK;
     }
@@ -71,7 +73,9 @@ using grpc::Status;
     // Get oldAccInputHash
     if (request->old_acc_input_hash().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got oldAccInputHash too long, size=" + to_string(request->old_acc_input_hash().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got oldAccInputHash too long, size=" + to_string(request->old_acc_input_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_ACC_INPUT_HASH);
         return Status::OK;
     }
@@ -80,7 +84,9 @@ using grpc::Status;
     // Get previousL1InfoTreeRoot
     if (request->previous_l1_info_tree_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got previousL1InfoTreeRoot too long, size=" + to_string(request->previous_l1_info_tree_root().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got previousL1InfoTreeRoot too long, size=" + to_string(request->previous_l1_info_tree_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_PREVIOUS_L1_INFO_TREE_ROOT);
         return Status::OK;
     }
@@ -93,7 +99,9 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
     if (!config.loadDiagnosticRom && proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got chainID = 0", &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got chainID = 0";
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CHAIN_ID);
         return Status::OK;
     }
@@ -102,7 +110,9 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
     if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 10)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
         return Status::OK;
     }
@@ -111,6 +121,9 @@ using grpc::Status;
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
     {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() failed calling proverRequest.CreateFullTracer() result=" + zkresult2string(proverRequest.result);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(zkresult2error(proverRequest.result));
         return Status::OK;
     }
@@ -118,7 +131,9 @@ using grpc::Status;
     // Get batchL2Data
     if (request->batch_l2_data().size() > MAX_BATCH_L2_DATA_SIZE)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() found batchL2Data.size()=" + to_string(request->batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() found batchL2Data.size()=" + to_string(request->batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BATCH_L2_DATA);
         return Status::OK;
     }
@@ -127,7 +142,9 @@ using grpc::Status;
     // Get forcedHashData
     if (request->forced_hash_data().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got forcedHashData too long, size=" + to_string(request->forced_hash_data().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got forcedHashData too long, size=" + to_string(request->forced_hash_data().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FORCED_HASH_DATA);
         return Status::OK;
     }
@@ -136,7 +153,9 @@ using grpc::Status;
     // Get forced data global exit root
     if (request->forced_data().global_exit_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got forced data global exit root too long, size=" + to_string(request->forced_data().global_exit_root().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got forced data global exit root too long, size=" + to_string(request->forced_data().global_exit_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FORCED_DATA_GLOBAL_EXIT_ROOT);
         return Status::OK;
     }
@@ -145,7 +164,9 @@ using grpc::Status;
     // Get forced data block hash L1
     if (request->forced_data().block_hash_l1().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got forced data block hash L1 too long, size=" + to_string(request->forced_data().block_hash_l1().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got forced data block hash L1 too long, size=" + to_string(request->forced_data().block_hash_l1().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FORCED_DATA_BLOCK_HASH_L1);
         return Status::OK;
     }
@@ -158,13 +179,17 @@ using grpc::Status;
     string auxString = Remove0xIfPresent(request->coinbase());
     if (auxString.size() > 40)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got sequencer address too long, size=" + to_string(auxString.size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got sequencer address too long, size=" + to_string(auxString.size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
         return Status::OK;
     }
     if (!stringIsHex(auxString))
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got sequencer address not hex, coinbase=" + auxString, &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got sequencer address not hex, coinbase=" + auxString;
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
         return Status::OK;
     }
@@ -176,13 +201,17 @@ using grpc::Status;
     proverRequest.input.from = Add0xIfMissing(request->from());
     if (proverRequest.input.from.size() > (2 + 40))
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got from too long, size=" + to_string(proverRequest.input.from.size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got from too long, size=" + to_string(proverRequest.input.from.size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FROM);
         return Status::OK;
     }
     if (!stringIs0xHex(proverRequest.input.from))
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got from not hex, size=" + proverRequest.input.from, &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got from not hex, size=" + proverRequest.input.from;
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FROM);
         return Status::OK;
     }
@@ -191,7 +220,9 @@ using grpc::Status;
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
     if (proverRequest.input.bUpdateMerkleTree && config.dbReadOnly)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got bUpdateMerkleTree=true while dbReadOnly=true", &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got bUpdateMerkleTree=true while dbReadOnly=true";
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE);
         return Status::OK;
     }
@@ -245,13 +276,17 @@ using grpc::Status;
         Remove0xIfPresentNoCopy(key);
         if (key.size() > 64)
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() got db key too long, size=" + to_string(key.size()), &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got db key too long, size=" + to_string(key.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
             return Status::OK;
         }
         if (!stringIsHex(key))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() got db key not hex, key=" + key, &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got db key not hex, key=" + key;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
             return Status::OK;
         }
@@ -262,13 +297,17 @@ using grpc::Status;
         string concatenatedValues = it->second;
         if (!stringIsHex(concatenatedValues))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() found db value not hex: " + concatenatedValues, &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() found db value not hex: " + concatenatedValues;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
             return Status::OK;
         }
         if (concatenatedValues.size()%16!=0)
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() found invalid db value size: " + to_string(concatenatedValues.size()), &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() found invalid db value size: " + to_string(concatenatedValues.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
             return Status::OK;
         }
@@ -297,13 +336,17 @@ using grpc::Status;
         Remove0xIfPresentNoCopy(key);
         if (key.size() > (64))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() got contracts key too long, size=" + to_string(key.size()), &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got contracts key too long, size=" + to_string(key.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
             return Status::OK;
         }
         if (!stringIsHex(key))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() got contracts key not hex, key=" + key, &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got contracts key not hex, key=" + key;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
             return Status::OK;
         }
@@ -312,7 +355,9 @@ using grpc::Status;
         // Get value
         if (!stringIsHex(Remove0xIfPresent(itp->second)))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() got contracts value not hex, value=" + itp->second, &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got contracts value not hex, value=" + itp->second;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE);
             return Status::OK;
         }
@@ -344,14 +389,18 @@ using grpc::Status;
         const executor::v1::L1DataV3 &l1DataV3 = itl->second;
         if (l1DataV3.global_exit_root().size() > 32)
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.global_exit_root() too long, size=" + to_string(l1DataV3.global_exit_root().size()), &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.global_exit_root() too long, size=" + to_string(l1DataV3.global_exit_root().size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_L1_DATA_V2_GLOBAL_EXIT_ROOT);
             return Status::OK;
         }
         ba2scalar(l1Data.globalExitRoot, l1DataV3.global_exit_root());
         if (l1DataV3.block_hash_l1().size() > 32)
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.block_hash_l1() too long, size=" + to_string(l1DataV3.block_hash_l1().size()), &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.block_hash_l1() too long, size=" + to_string(l1DataV3.block_hash_l1().size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_L1_DATA_V2_BLOCK_HASH_L1);
             return Status::OK;
         }
@@ -362,7 +411,9 @@ using grpc::Status;
             mpz_class auxScalar;
             if (l1DataV3.smt_proof_previous_index(i).size() > 32)
             {
-                zklog.error("ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.smt_proof_previous_index(i) too long, size=" + to_string(l1DataV3.smt_proof_previous_index(i).size()), &proverRequest.tags);
+                proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.smt_proof_previous_index(i) too long, size=" + to_string(l1DataV3.smt_proof_previous_index(i).size());
+                zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                 response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_L1_SMT_PROOF);
                 return Status::OK;
             }
@@ -371,7 +422,9 @@ using grpc::Status;
         }
         if (l1DataV3.initial_historic_root().size() > 32)
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.initial_historic_root() too long, size=" + to_string(l1DataV3.initial_historic_root().size()), &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.initial_historic_root() too long, size=" + to_string(l1DataV3.initial_historic_root().size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_L1_DATA_V3_INITIAL_HISTORIC_ROOT);
             return Status::OK;
         }
@@ -391,7 +444,9 @@ using grpc::Status;
             // Get balance
             if (it->second.balance().size() > 32)
             {
-                zklog.error("ExecutorServiceImpl::ProcessBatchV3() got state override balance too long, size=" + to_string(it->second.balance().size()), &proverRequest.tags);
+                proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got state override balance too long, size=" + to_string(it->second.balance().size());
+                zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                 response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BALANCE);
                 return Status::OK;
             }
@@ -418,13 +473,17 @@ using grpc::Status;
                     string keyString = Remove0xIfPresent(itState->first);
                     if (keyString.size() > 64)
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size()), &proverRequest.tags);
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size());
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
                         return Status::OK;
                     }
                     if (!stringIsHex(keyString))
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString, &proverRequest.tags);
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString;
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
                         return Status::OK;
                     }
@@ -434,13 +493,17 @@ using grpc::Status;
                     string valueString = Remove0xIfPresent(itState->second);
                     if (valueString.size() > 64)
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size()), &proverRequest.tags);
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size());
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
                         return Status::OK;
                     }
                     if (!stringIsHex(valueString))
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString, &proverRequest.tags);
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString;
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
                         return Status::OK;
                     }
@@ -462,13 +525,17 @@ using grpc::Status;
                     string keyString = Remove0xIfPresent(itState->first);
                     if (keyString.size() > 64)
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size()), &proverRequest.tags);
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size());
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
                         return Status::OK;
                     }
                     if (!stringIsHex(keyString))
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString, &proverRequest.tags);
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString;
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
                         return Status::OK;
                     }
@@ -478,13 +545,17 @@ using grpc::Status;
                     string valueString = Remove0xIfPresent(itState->second);
                     if (valueString.size() > 64)
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size()), &proverRequest.tags);
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size());
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
                         return Status::OK;
                     }
                     if (!stringIsHex(valueString))
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString, &proverRequest.tags);
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString;
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
                         return Status::OK;
                     }
@@ -505,21 +576,27 @@ using grpc::Status;
     
     if (request->debug().new_state_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got new_state_root too long, size=" + to_string(request->debug().new_state_root().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got new_state_root too long, size=" + to_string(request->debug().new_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_STATE_ROOT);
         return Status::OK;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.newStateRoot, request->debug().new_state_root());
     if (request->debug().new_acc_input_hash().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got new_acc_input_hash too long, size=" + to_string(request->debug().new_acc_input_hash().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got new_acc_input_hash too long, size=" + to_string(request->debug().new_acc_input_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_ACC_INPUT_HASH);
         return Status::OK;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.newAccInputHash, request->debug().new_acc_input_hash());
     if (request->debug().new_local_exit_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatchV3() got new_local_exit_root too long, size=" + to_string(request->debug().new_local_exit_root().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got new_local_exit_root too long, size=" + to_string(request->debug().new_local_exit_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_LOCAL_EXIT_ROOT);
         return Status::OK;
     }
@@ -804,14 +881,7 @@ using grpc::Status;
     }
 
     // Debug
-    executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
-    zkassertpermanent(pResponseDebug != NULL);
-    if (!proverRequest.errorLog.empty())
-    {
-        pResponseDebug->set_error_log(proverRequest.errorLog);
-    }
-    pResponseDebug->set_version(ZKEVM_PROVER_VERSION);
-    response->set_allocated_debug(pResponseDebug);
+    response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
@@ -1023,7 +1093,9 @@ using grpc::Status;
     // Get oldBlobStateRoot
     if (request->old_blob_state_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got oldBlobStateRoot too long, size=" + to_string(request->old_blob_state_root().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got oldBlobStateRoot too long, size=" + to_string(request->old_blob_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_BLOB_STATE_ROOT);
         return Status::OK;
     }
@@ -1032,7 +1104,9 @@ using grpc::Status;
     // Get oldBlobAccInputHash
     if (request->old_blob_acc_input_hash().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got oldBlobAccInputHash too long, size=" + to_string(request->old_blob_acc_input_hash().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got oldBlobAccInputHash too long, size=" + to_string(request->old_blob_acc_input_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_BLOB_ACC_INPUT_HASH);
         return Status::OK;
     }
@@ -1045,7 +1119,9 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
     if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 10)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
         return Status::OK;
     }
@@ -1053,7 +1129,9 @@ using grpc::Status;
     // Get oldStateRoot
     if (request->old_state_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got oldStateRoot too long, size=" + to_string(request->old_state_root().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got oldStateRoot too long, size=" + to_string(request->old_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_STATE_ROOT);
         return Status::OK;
     }
@@ -1065,7 +1143,9 @@ using grpc::Status;
     // Get lastL1InfoTreeRoot
     if (request->last_l1_info_tree_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got lastL1InfoTreeRoot too long, size=" + to_string(request->last_l1_info_tree_root().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got lastL1InfoTreeRoot too long, size=" + to_string(request->last_l1_info_tree_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_LAST_L1_INFO_TREE_ROOT);
         return Status::OK;
     }
@@ -1075,6 +1155,9 @@ using grpc::Status;
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
     {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() failed calling proverRequest.CreateFullTracer() result=" + zkresult2string(proverRequest.result);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(zkresult2error(proverRequest.result));
         return Status::OK;
     }
@@ -1086,13 +1169,17 @@ using grpc::Status;
     string auxString = Remove0xIfPresent(request->coinbase());
     if (auxString.size() > 40)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got sequencer address too long, size=" + to_string(auxString.size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got sequencer address too long, size=" + to_string(auxString.size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
         return Status::OK;
     }
     if (!stringIsHex(auxString))
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got sequencer address not hex, coinbase=" + auxString, &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got sequencer address not hex, coinbase=" + auxString;
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
         return Status::OK;
     }
@@ -1107,7 +1194,9 @@ using grpc::Status;
     // Get versioned_hash
     if (request->versioned_hash().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got versioned_hash too long, size=" + to_string(request->versioned_hash().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got versioned_hash too long, size=" + to_string(request->versioned_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_VERSIONED_HASH);
         return Status::OK;
     }
@@ -1116,7 +1205,9 @@ using grpc::Status;
     // Get kzg_commitment
     if (request->kzg_commitment().size() > 48)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got kzg_commitment too long, size=" + to_string(request->kzg_commitment().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got kzg_commitment too long, size=" + to_string(request->kzg_commitment().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_KZG_COMMITMENT);
         return Status::OK;
     }
@@ -1125,7 +1216,9 @@ using grpc::Status;
     // Get kzg_proof
     if (request->kzg_proof().size() > 48)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got kzg_proof too long, size=" + to_string(request->kzg_proof().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got kzg_proof too long, size=" + to_string(request->kzg_proof().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_KZG_PROOF);
         return Status::OK;
     }
@@ -1134,7 +1227,9 @@ using grpc::Status;
     // Get pointZ
     if (request->point_z().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got pointZ too long, size=" + to_string(request->point_z().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got pointZ too long, size=" + to_string(request->point_z().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_POINT_Z);
         return Status::OK;
     }
@@ -1143,7 +1238,9 @@ using grpc::Status;
     // Get pointY
     if (request->point_y().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got pointY too long, size=" + to_string(request->point_y().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got pointY too long, size=" + to_string(request->point_y().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_POINT_Y);
         return Status::OK;
     }
@@ -1152,7 +1249,9 @@ using grpc::Status;
     // Get blobData
     if (request->blob_data().size() > MAX_BLOB_DATA_SIZE)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() found blobData.size()=" + to_string(request->blob_data().size()) + " > MAX_BLOB_DATA_SIZE=" + to_string(MAX_BLOB_DATA_SIZE), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() found blobData.size()=" + to_string(request->blob_data().size()) + " > MAX_BLOB_DATA_SIZE=" + to_string(MAX_BLOB_DATA_SIZE);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BLOB_DATA);
         return Status::OK;
     }
@@ -1161,7 +1260,9 @@ using grpc::Status;
     // Get forcedHashData
     if (request->forced_hash_data().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got forcedHashData too long, size=" + to_string(request->forced_hash_data().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got forcedHashData too long, size=" + to_string(request->forced_hash_data().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FORCED_HASH_DATA);
         return Status::OK;
     }
@@ -1172,14 +1273,18 @@ using grpc::Status;
     // Debug data
     if (request->debug().new_blob_state_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got new_blob_state_root too long, size=" + to_string(request->debug().new_blob_state_root().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got new_blob_state_root too long, size=" + to_string(request->debug().new_blob_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_BLOB_STATE_ROOT);
         return Status::OK;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.newBlobStateRoot, request->debug().new_blob_state_root());
     if (request->debug().new_blob_acc_input_hash().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got new_blob_acc_input_hash too long, size=" + to_string(request->debug().new_blob_acc_input_hash().size()), &proverRequest.tags);
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got new_blob_acc_input_hash too long, size=" + to_string(request->debug().new_blob_acc_input_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_BLOB_ACC_INPUT_HASH);
         return Status::OK;
     }
@@ -1197,13 +1302,17 @@ using grpc::Status;
         Remove0xIfPresentNoCopy(key);
         if (key.size() > 64)
         {
-            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got db key too long, size=" + to_string(key.size()), &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got db key too long, size=" + to_string(key.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
             return Status::OK;
         }
         if (!stringIsHex(key))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got db key not hex, key=" + key, &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got db key not hex, key=" + key;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
             return Status::OK;
         }
@@ -1214,13 +1323,17 @@ using grpc::Status;
         string concatenatedValues = it->second;
         if (!stringIsHex(concatenatedValues))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() found db value not hex: " + concatenatedValues, &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() found db value not hex: " + concatenatedValues;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
             return Status::OK;
         }
         if (concatenatedValues.size()%16!=0)
         {
-            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() found invalid db value size: " + to_string(concatenatedValues.size()), &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() found invalid db value size: " + to_string(concatenatedValues.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
             return Status::OK;
         }
@@ -1249,13 +1362,17 @@ using grpc::Status;
         Remove0xIfPresentNoCopy(key);
         if (key.size() > (64))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got contracts key too long, size=" + to_string(key.size()), &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got contracts key too long, size=" + to_string(key.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
             return Status::OK;
         }
         if (!stringIsHex(key))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got contracts key not hex, key=" + key, &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got contracts key not hex, key=" + key;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
             return Status::OK;
         }
@@ -1264,7 +1381,9 @@ using grpc::Status;
         // Get value
         if (!stringIsHex(Remove0xIfPresent(itp->second)))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() got contracts value not hex, value=" + itp->second, &proverRequest.tags);
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got contracts value not hex, value=" + itp->second;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE);
             return Status::OK;
         }
@@ -1346,14 +1465,7 @@ using grpc::Status;
     }
 
     // Debug
-    executor::v1::ResponseDebug *pResponseDebug = new executor::v1::ResponseDebug;
-    zkassertpermanent(pResponseDebug != NULL);
-    if (!proverRequest.errorLog.empty())
-    {
-        pResponseDebug->set_error_log(proverRequest.errorLog);
-    }
-    pResponseDebug->set_version(ZKEVM_PROVER_VERSION);
-    response->set_allocated_debug(pResponseDebug);
+    response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
