@@ -27,7 +27,7 @@ DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
     auxBufferKeysValues.clear();
 };
 
-DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(int log2IndexesSize_, int cacheSize_, string name_)
+DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t cacheSize_, string name_)
 {
     postConstruct(log2IndexesSize_, cacheSize_, name_);
 };
@@ -44,20 +44,23 @@ DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
 
 };
 
-void DatabaseMTAssociativeCache::postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_)
+void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_)
 {
     lock_guard<recursive_mutex> guard(mlock);
     log2IndexesSize = log2IndexesSize_;
     if (log2IndexesSize_ > 31)
     {
+        // if log2IndexesSize_ >=32, we would need to use uint64_t values to refere to positions in the indexes array
         zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2IndexesSize_ > 31");
         exitProcess();
     }
     indexesSize = 1 << log2IndexesSize;
 
     log2CacheSize = log2CacheSize_;
-    if (log2CacheSize_ > 31)
+    if (log2CacheSize_ > 28)
     {
+        // if log2CacheSize_ > 28, we would need to use uint64_t values to refere to positions in the keys and values arrays
+        // note thar for each cacheIndex we have 4 keys and 12 values
         zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2CacheSize_ > 31");
         exitProcess();
     }
@@ -112,7 +115,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     //
     for (int i = 0; i < 4; ++i)
     {
-        uint32_t tableIndex = (uint32_t)(key[i].fe & indexesMask);
+        uint32_t tableIndex = key[i].fe & indexesMask;
         uint32_t cacheIndexRaw = indexes[tableIndex];
 
         if (!emptyCacheSlot(cacheIndexRaw)){
@@ -139,7 +142,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
         if(emptySlot == true){
             indexes[tableIndexEmpty] = currentCacheIndex;
         }
-        cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
+        cacheIndex = currentCacheIndex & cacheMask;
         currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
     }
     uint64_t cacheIndexKey, cacheIndexValue;
@@ -178,9 +181,9 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     // Forced index insertion
     //
     if(!present && !emptySlot){
-        int iters = 0;
+        uint32_t iters = 0;
         uint32_t usedRawCacheIndexes[20];
-        usedRawCacheIndexes[0] = currentCacheIndex-1;
+        usedRawCacheIndexes[0] = (currentCacheIndex == 0) ? UINT32_MAX : currentCacheIndex-1;
         forcedInsertion(usedRawCacheIndexes, iters, update);
     }
     //
@@ -205,7 +208,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
 // each call is multiplied by roughly 1/2**9 (three new keys are checks and I assume the ratio cacheSize/indexesSize 
 // is 1/8). With this rough estimation the probablilty of requiring 20 iterations would be 1/2**180. If, after 20 
 // iterations is not possible to find a free slot, the entry is added to the auxBufferKeysValues vector.
-void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], int &iters, bool update)
+void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], uint32_t &iters, bool update)
 {
     
     uint32_t inputRawCacheIndex = usedRawCacheIndexes[iters];
@@ -220,8 +223,8 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
 
     for (int i = 0; i < 4; ++i)
     {
-        uint32_t tableIndex_ = (uint32_t)(inputKey[i].fe & indexesMask);
-        uint32_t rawCacheIndex_ = (uint32_t)(indexes[tableIndex_]);
+        uint32_t tableIndex_ = inputKey[i].fe & indexesMask;
+        uint32_t rawCacheIndex_ = indexes[tableIndex_];
         if (emptyCacheSlot(rawCacheIndex_))
         {
             indexes[tableIndex_] = inputRawCacheIndex;
@@ -231,7 +234,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
         {
             //consider minimum not used rawCacheIndex_
             bool used = false;
-            for(int k=0; k<iters; k++){
+            for(uint32_t k=0; k<iters; k++){
                 // remember that with vergy high probability iters < 3
                 if(usedRawCacheIndexes[k] == rawCacheIndex_){
                     used = true;
@@ -247,7 +250,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     }
     
     //
-    // avoid infinite loop, only 20 iterations allowed
+    // avoid infinite loop, only 20 iterations allowed, pox < 0 means that there is no unused slot to continue iterating
     //
     if (iters >=20 || pos < 0)
     {
@@ -255,7 +258,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
         Goldilocks::Element *buffKey = &keys[(inputRawCacheIndex & cacheMask) * 4];
         Goldilocks::Element *buffValue = &values[(inputRawCacheIndex & cacheMask) * 12];
         
-        // check first if there is an slot in the vector or the key is present
+        // check first if there is an slot in the vector if the key is already present
         int pos = -1;
         for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
             if( emptyCacheSlot(((uint32_t)(auxBufferKeysValues[i].fe)))){
@@ -310,7 +313,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
         }
         return;
     }else{
-        indexes[(uint32_t)(inputKey[pos].fe & indexesMask)] = inputRawCacheIndex;
+        indexes[minRawCacheIndex] = inputRawCacheIndex;
         usedRawCacheIndexes[iters] = minRawCacheIndex; //new cache element to add in the indexes table
         forcedInsertion(usedRawCacheIndexes, iters, update);
     }

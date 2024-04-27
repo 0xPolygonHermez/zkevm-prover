@@ -13,9 +13,9 @@ class DatabaseMTAssociativeCache
     private:
         recursive_mutex mlock;
 
-        int log2IndexesSize;
+        uint32_t log2IndexesSize;
         uint32_t indexesSize;
-        int log2CacheSize;
+        uint32_t log2CacheSize;
         uint32_t cacheSize;
 
         uint32_t *indexes;
@@ -27,18 +27,18 @@ class DatabaseMTAssociativeCache
         uint64_t hits;
         string name;
 
-        uint64_t indexesMask;
-        uint64_t cacheMask;
+        uint32_t indexesMask;
+        uint32_t cacheMask;
 
         vector<Goldilocks::Element> auxBufferKeysValues;
 
     public:
 
         DatabaseMTAssociativeCache();
-        DatabaseMTAssociativeCache(int log2IndexesSize_, int log2CacheSize_, string name_);
+        DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_);
         ~DatabaseMTAssociativeCache();
 
-        void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
+        void postConstruct(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_);
         void addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
         bool findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
         inline bool enabled() const { return (log2IndexesSize > 0); };
@@ -54,8 +54,8 @@ class DatabaseMTAssociativeCache
     private:
         inline bool emptyCacheSlot(uint32_t cacheIndexRaw) const { 
             return (currentCacheIndex > cacheIndexRaw &&  currentCacheIndex - cacheIndexRaw > cacheSize) ||
-            (currentCacheIndex <= cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex + 1 > cacheSize);
+            (currentCacheIndex <= cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex > cacheSize - 1);
          };
-        void forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], int &iters, bool update);
+        void forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], uint32_t &iters, bool update);
 };
 #endif
