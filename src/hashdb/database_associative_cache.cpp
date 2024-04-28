@@ -327,7 +327,7 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
     //
     //  Statistics
     //
-    if (attempts<<40 == 0)
+    if (attempts<<34 == 0)
     {
         zklog.info("DatabaseMTAssociativeCache::findKey() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
         if(auxBufferKeysValues.size()>0){
