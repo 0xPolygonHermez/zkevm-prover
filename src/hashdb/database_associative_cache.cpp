@@ -27,7 +27,8 @@ DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
     auxBufferKeysValues.clear();
 };
 
-DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t cacheSize_, string name_)
+DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t cacheSize_, string name_) :
+    indexes(NULL), keys(NULL), values(NULL), currentCacheIndex(0), attempts(0), hits(0), name(name_)
 {
     postConstruct(log2IndexesSize_, cacheSize_, name_);
 };
@@ -313,7 +314,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
         }
         return;
     }else{
-        indexes[minRawCacheIndex] = inputRawCacheIndex;
+        indexes[(uint32_t)(inputKey[pos].fe & indexesMask)] = inputRawCacheIndex;
         usedRawCacheIndexes[iters] = minRawCacheIndex; //new cache element to add in the indexes table
         forcedInsertion(usedRawCacheIndexes, iters, update);
     }
