@@ -4,6 +4,7 @@
 #include "scalar.hpp"
 
 #define NUMBER_OF_DB_CACHE_ADDS 1000
+#define NUMBER_OF_DB_CACHE_BENCHS 20000000 
 
 uint64_t DatabaseCacheTest (void)
 {
@@ -269,4 +270,82 @@ uint64_t DatabaseCacheTest (void)
     TimerStopAndLog(DATABASE_ASSOCIATIVE_CACHE_TEST);
     assert(numberOfFailed == 0);
     return numberOfFailed;
+}
+
+uint64_t DatabaseCacheBenchmark (void){
+
+    // Generate 10M of hashes
+    PoseidonGoldilocks poseidon_test;
+    Goldilocks::Element* keys= new Goldilocks::Element[NUMBER_OF_DB_CACHE_BENCHS*4];
+    vector<string> keyStrings(NUMBER_OF_DB_CACHE_BENCHS);
+    for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> InputValue;
+        for(int k=0; k<12; ++k){
+            InputValue.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(InputValue.data()[0]));
+        keys[i*4] = key[0];
+        keys[i*4+1] = key[1];
+        keys[i*4+2] = key[2];
+        keys[i*4+3] = key[3];
+        keyStrings[i] = fea2string(fr, (Goldilocks::Element(&)[4]) key);
+    }
+    vector<Goldilocks::Element> value(12);
+
+    DatabaseMTCache cache_map;
+    cache_map.setMaxSize(uint64_t(8)*uint64_t(1024)*uint64_t(1024)*uint64_t(1024));
+    DatabaseMTAssociativeCache cache_ass(28, 25, "associativeCache");
+    
+    TimerStart(DATABASE_CACHE_BENCHMARK);
+    int count_hits = 0;
+    for(int k=0; k<4; k++){
+        for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
+        {
+            string keyString = fea2string(fr, (Goldilocks::Element(&)[4]) keys[4*i]); 
+            cache_map.add(keyString,value, false);
+            //cache_map.add(keyStrings[i],value, false);
+
+        }
+    }
+    for(int k=0; k<4; k++){
+        for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
+        {
+            string keyString = fea2string(fr, (Goldilocks::Element(&)[4]) keys[4*i]); 
+            /*if(cache_map.find(keyStrings[i], value)){
+                ++count_hits;
+            }*/
+            if(cache_map.find(keyString, value)){
+                ++count_hits;
+            }
+
+        }
+    }
+    //std::cout<<"Hits with cache map:"<<count_hits<<::endl;
+    count_hits = 0;
+    TimerStopAndLog(DATABASE_CACHE_BENCHMARK);
+    cache_map.clear();
+    TimerStart(DATABASE_CACHE_ASSOCIATIVE_BENCHMARK);
+    for(int k=0; k<4; k++){
+        for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
+        {
+            cache_ass.addKeyValue((Goldilocks::Element(&)[4]) keys[4*i], value, false);
+
+        }
+    }
+    for(int k=0; k<4; k++){
+        for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
+        {
+            if(cache_ass.findKey((Goldilocks::Element(&)[4]) keys[4*i], value)){
+                ++count_hits;
+            }
+
+        }
+    }
+    //std::cout<<"Hits with cache associative:"<<count_hits<<::endl;
+    TimerStopAndLog(DATABASE_CACHE_ASSOCIATIVE_BENCHMARK);
+    delete[] keys;
+    return 1;
+
 }
