@@ -9,6 +9,8 @@
 
 using namespace std;
 
+#define USE_DATA_STREAM_PROTOBUF
+
 class DataStreamTx
 {
 public:
@@ -30,33 +32,51 @@ public:
 class DataStreamBlock
 {
 public:
+    string coinbase; // 20 bytes = 40 characters
+#ifndef USE_DATA_STREAM_PROTOBUF
+    uint64_t forkId;
+    uint32_t chainId;
+#endif
     uint64_t blockNumber;
     uint64_t timestamp;
     uint32_t deltaTimestamp;
-    uint32_t l1InfoTreeIndex;
+#ifdef USE_DATA_STREAM_PROTOBUF
+    uint32_t minTimestamp;
+#endif
+    uint64_t l1InfoTreeIndex;
     string l1BlockHash; // 32 bytes = 64 characters
     string globalExitRoot; // 32 bytes = 64 characters
-    string coinbase; // 20 bytes = 40 characters
-    uint64_t forkId;
     string l2BlockHash; // 32 bytes = 64 characters
     string stateRoot; // 32 bytes = 64 characters
-    uint32_t chainId;
     vector<DataStreamTx> txs;
-    DataStreamBlock() : blockNumber(0), timestamp(0), deltaTimestamp(0), l1InfoTreeIndex(0), forkId(0), chainId(0) {};
+    DataStreamBlock() :
+#ifndef USE_DATA_STREAM_PROTOBUF
+        forkId(0),
+        chainId(0),
+#endif
+        blockNumber(0),
+        timestamp(0),
+        deltaTimestamp(0),
+        l1InfoTreeIndex(0) {};
     string toString(void)
     {
         return
             "blockNumber=" + to_string(blockNumber) +
             " timestamp=" + to_string(timestamp) +
             " deltaTimestamp=" + to_string(deltaTimestamp) +
+#ifdef USE_DATA_STREAM_PROTOBUF
+            " minTimestamp=" + to_string(minTimestamp) +
+#endif
             " l1InfoTreeIndex=" + to_string(l1InfoTreeIndex) +
             " l1BlockHash=" + l1BlockHash +
             " globalExitRoot=" + globalExitRoot +
+#ifndef USE_DATA_STREAM_PROTOBUF
             " coinbase=" + coinbase +
             " forkId=" + to_string(forkId) +
+            " chainId=" + to_string(chainId) +
+#endif
             " l2BlockHash=" + l2BlockHash +
             " stateRoot=" + stateRoot +
-            " chainId=" + to_string(chainId) +
             " txs.size=" + to_string(txs.size());
     }
 };
@@ -65,6 +85,11 @@ class DataStreamBatch
 {
 public:
     uint64_t batchNumber;
+#ifdef USE_DATA_STREAM_PROTOBUF
+    string localExitRoot;
+    string stateRoot;
+    string globalExitRoot;
+#endif
     vector<DataStreamBlock> blocks; // In order of appearance, block numbers must be consecutive: N, N+1, N+2, etc.
     uint16_t forkId; // It comes from the blocks, and must be the same in all blocks
     uint32_t chainId; // I comes from the blocks, and must be the same in all blocks
@@ -82,7 +107,14 @@ public:
             "batchNumber=" + to_string(batchNumber) +
             " forkId=" + to_string(forkId) +
             " chainId=" + to_string(chainId) +
-            " blocks.size=" + to_string(blocks.size());
+            " blocks.size=" + to_string(blocks.size())
+#ifdef USE_DATA_STREAM_PROTOBUF
+            +
+            " localExitRoot=" + localExitRoot +
+            " stateRoot=" + stateRoot +
+            " globalExitRoot=" + globalExitRoot 
+#endif
+            ;
     }
 };
 
