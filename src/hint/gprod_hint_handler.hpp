@@ -23,6 +23,8 @@ namespace Hints
 
         // Resolve the hint
         virtual void resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const override;
+
+        void calculateZ(Polinomial &z, Polinomial &num, Polinomial &den) const;
     };
 
     class GProdHintHandlerBuilder : public HintHandlerBuilder
