@@ -47,7 +47,6 @@ void StarkInfo::load(json j)
 
     nPublics = j["nPublics"];
     nConstants = j["nConstants"];
-    nCommitmentsStage1 = j["nCommitmentsStage1"];
 
     if(j.contains("nSubAirValues")) {
         nSubProofValues = j["nSubAirValues"];

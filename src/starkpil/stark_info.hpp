@@ -97,7 +97,6 @@ public:
 
     uint64_t nPublics;
     uint64_t nSubProofValues;
-    uint64_t nCommitmentsStage1;
     uint64_t nConstants;
     
     uint64_t nStages;

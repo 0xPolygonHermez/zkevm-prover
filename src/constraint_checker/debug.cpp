@@ -89,7 +89,7 @@ int main(int argc, char **argv)
         CHelpers cHelpers(cHelpersFile);
         starkInfo.setMapOffsets(cHelpers.hints);
 
-        void *pCommit = copyFile(commitPols, starkInfo.nCommitmentsStage1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+        void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
         void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
 
         uint64_t N = (1 << starkInfo.starkStruct.nBits);
@@ -97,8 +97,8 @@ int main(int argc, char **argv)
         for (uint64_t i = 0; i < N; i += 1)
         {
             std::memcpy((uint8_t*)pAddress + starkInfo.mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-                (uint8_t*)pCommit + i*starkInfo.nCommitmentsStage1*sizeof(Goldilocks::Element), 
-                starkInfo.nCommitmentsStage1*sizeof(Goldilocks::Element));
+                (uint8_t*)pCommit + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
+                starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
         }
 
         json publics;

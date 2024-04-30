@@ -38,7 +38,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         f_2ns : f_2ns,
     };
 
-    for (uint64_t i = 0; i < starkInfo.nCommitmentsStage1; ++i)
+    for (uint64_t i = 0; i < starkInfo.mapSectionsN["cm1"]; ++i)
     {
         setSymbolCalculated(opType::cm, i);
     }
@@ -594,8 +594,8 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
 {
     Polinomial* polynomials = new Polinomial[starkInfo.cmPolsMap.size()];
 
-    vector<uint64_t> srcPolinomial;
-    vector<uint64_t> dstPolinomial;    
+    vector<uint64_t> srcPolsNames;
+    vector<uint64_t> dstPolsNames;    
 
     vector<uint64_t> hintsToCalculate;
 
@@ -616,9 +616,8 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
                 if(hintField.operand != opType::tmp && hintField.operand != opType::cm) continue;
                 PolMap polInfo = starkInfo.cmPolsMap[hintField.id];
                 if (polInfo.stage != "tmpExp") {
-                    srcPolinomial.push_back(hintField.id);
-                    Polinomial p = starkInfo.getPolinomial(params.pols, hintField.id, N);
-                    polynomials[hintField.id].potConstruct(&params.pols[starkInfo.mapOffsetsPolsHints[step - 1][hintField.id]], p.degree(), p.dim(), p.dim());
+                    srcPolsNames.push_back(hintField.id);
+                    polynomials[hintField.id].potConstruct(&params.pols[starkInfo.mapOffsetsPolsHints[step - 1][hintField.id]], N, polInfo.dim, polInfo.dim);
                 } else {
                     polynomials[hintField.id] = starkInfo.getPolinomial(params.pols, hintField.id, N); 
                 }
@@ -627,16 +626,14 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
             for (uint64_t i = 0; i < dstFields.size(); i++)
             {
                 HintField hintField = hint.fields[dstFields[i]];
-                if(hintField.operand == opType::tmp || hintField.operand == opType::cm) {
-                    PolMap polInfo = starkInfo.cmPolsMap[hintField.id];
-                    if (polInfo.stage != "tmpExp") {
-                        dstPolinomial.push_back(hintField.id);
-                        Polinomial p = starkInfo.getPolinomial(params.pols, hintField.id, N);
-                        polynomials[hintField.id].potConstruct(&params.pols[starkInfo.mapOffsetsPolsHints[step - 1][hintField.id]], p.degree(), p.dim(), p.dim());
-                    } else {
-                        polynomials[hintField.id] = starkInfo.getPolinomial(params.pols, hintField.id, N);
-                    } 
-                }
+                if(hintField.operand != opType::tmp && hintField.operand != opType::cm) continue;
+                PolMap polInfo = starkInfo.cmPolsMap[hintField.id];
+                if (polInfo.stage != "tmpExp") {
+                    dstPolsNames.push_back(hintField.id);
+                    polynomials[hintField.id].potConstruct(&params.pols[starkInfo.mapOffsetsPolsHints[step - 1][hintField.id]], N, polInfo.dim, polInfo.dim);
+                } else {
+                    polynomials[hintField.id] = starkInfo.getPolinomial(params.pols, hintField.id, N);
+                } 
             }
         }
     }
@@ -647,15 +644,15 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
 
 
     TimerStartExpr(STARK_CALCULATE_TRANSPOSE_STEP, step);
-    Polinomial *srcTransposedPols = new Polinomial[srcPolinomial.size()];
-    for(uint64_t i = 0; i < srcPolinomial.size(); i++) {
-        srcTransposedPols[i] = starkInfo.getPolinomial(params.pols, srcPolinomial[i], N);
+    Polinomial *srcTransposedPols = new Polinomial[srcPolsNames.size()];
+    for(uint64_t i = 0; i < srcPolsNames.size(); i++) {
+        srcTransposedPols[i] = starkInfo.getPolinomial(params.pols, srcPolsNames[i], N);
     }
 #pragma omp parallel for
     for(uint64_t j = 0; j < N; ++j) {
-        for (uint64_t i = 0; i < srcPolinomial.size(); ++i)
+        for (uint64_t i = 0; i < srcPolsNames.size(); ++i)
         {
-            std::memcpy(polynomials[srcPolinomial[i]][j], srcTransposedPols[i][j], srcTransposedPols[i].dim() * sizeof(Goldilocks::Element));
+            std::memcpy(polynomials[srcPolsNames[i]][j], srcTransposedPols[i][j], srcTransposedPols[i].dim() * sizeof(Goldilocks::Element));
         }
     }
     delete[] srcTransposedPols;
@@ -708,15 +705,15 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
     TimerStopAndLogExpr(STARK_CALCULATE_HINTS_STEP, step);
 
     TimerStartExpr(STARK_CALCULATE_TRANSPOSE_2_STEP, step);
-    Polinomial *dstTransposedPols = new Polinomial[dstPolinomial.size()];
-    for(uint64_t i = 0; i < dstPolinomial.size(); i++) {
-        dstTransposedPols[i] = starkInfo.getPolinomial(params.pols, dstPolinomial[i], N);
+    Polinomial *dstTransposedPols = new Polinomial[dstPolsNames.size()];
+    for(uint64_t i = 0; i < dstPolsNames.size(); i++) {
+        dstTransposedPols[i] = starkInfo.getPolinomial(params.pols, dstPolsNames[i], N);
     }
 #pragma omp parallel for
     for(uint64_t j = 0; j < N; ++j) {
-        for (uint64_t i = 0; i < dstPolinomial.size(); ++i)
+        for (uint64_t i = 0; i < dstPolsNames.size(); ++i)
         {
-            std::memcpy(dstTransposedPols[i][j], polynomials[dstPolinomial[i]][j], dstTransposedPols[i].dim() * sizeof(Goldilocks::Element));
+            std::memcpy(dstTransposedPols[i][j], polynomials[dstPolsNames[i]][j], dstTransposedPols[i].dim() * sizeof(Goldilocks::Element));
         }
     }
     delete[] dstTransposedPols;
@@ -1068,11 +1065,11 @@ void Starks<ElementType>::printPolRoot(uint64_t polId, StepsParams &params)
     Polinomial p = starkInfo.getPolinomial(params.pols, polId, N);
 
     Polinomial pCol;
-    Goldilocks::Element *pBuffCol = new Goldilocks::Element[p.dim() * N];
-    pCol.potConstruct(pBuffCol, p.degree(), p.dim(), p.dim());
+    Goldilocks::Element *pBuffCol = new Goldilocks::Element[polInfo.dim * N];
+    pCol.potConstruct(pBuffCol, N, polInfo.dim, polInfo.dim);
     Polinomial::copy(pCol, p);
 
-    MerkleTreeGL *mt_ = new MerkleTreeGL(merkleTreeArity, true, N, p.dim(), pBuffCol);
+    MerkleTreeGL *mt_ = new MerkleTreeGL(merkleTreeArity, true, N, polInfo.dim, pBuffCol);
     mt_->merkelize();
 
     Goldilocks::Element root[4];

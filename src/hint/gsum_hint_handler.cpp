@@ -40,7 +40,30 @@ namespace Hints
         Goldilocks::Element numeratorValue = Goldilocks::fromS64(hint.fields["numerator"].value);
         numeratorValue = Goldilocks::negone(); // TODO: NOT HARDCODE THIS!
 
-        Polinomial::calculateS(sPol, denPol, numeratorValue);
+        calculateS(sPol, denPol, numeratorValue);
+    }
+
+    void GSumHintHandler::calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity) const
+    {
+        uint64_t size = den.degree();
+
+        Polinomial denI(size, 3);
+        Polinomial checkVal(1, 3);
+
+        Polinomial::batchInverse(denI, den);
+        
+        Polinomial::mulElement(s, 0, denI, 0, multiplicity);
+        for (uint64_t i = 1; i < size; i++)
+        {
+            Polinomial tmp(1, 3);
+            Polinomial::mulElement(tmp, 0, denI, i, multiplicity);
+            Polinomial::addElement(s, i, s, i - 1, tmp, 0);
+        }
+        Polinomial tmp(1, 3);
+        Polinomial::mulElement(tmp, 0, denI, size - 1, multiplicity);
+        Polinomial::addElement(checkVal, 0, s, size - 1, tmp, 0);
+
+        zkassert(Goldilocks3::isZero((Goldilocks3::Element &)*checkVal[0]));
     }
 
     std::shared_ptr<HintHandler> GSumHintHandlerBuilder::build() const
