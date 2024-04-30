@@ -57,7 +57,7 @@
 #include "proof2zkinStark.hpp"
 #include "starks.hpp"
 #ifdef __ZKEVM_LIB__
-#include "zkevm_sm.h"
+// #include "zkevm_sm.h"
 #endif
 using namespace std;
 using json = nlohmann::json;
@@ -928,7 +928,7 @@ int zkevm_padding_sha256(void *inputs_, int ninputs, void *pAddress, void *pSMRe
     required.clear();
     paddingSha256Executor.execute(inputs, pols, required);
 #ifdef __ZKEVM_LIB__
-    add_padding_sha256_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t)required.size());
+    // add_padding_sha256_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t)required.size());
 #endif
     return 0;
 }
@@ -955,7 +955,7 @@ int zkevm_padding_sha256_bit(void *inputs_, int ninputs, void *pAddress, void *p
     required.clear();
     paddingSha256BitExecutor.execute(inputs, pols, required);
 #ifdef __ZKEVM_LIB__
-    add_bits_2_field_sha256_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t)required.size());
+    // add_bits_2_field_sha256_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t)required.size());
 #endif
     return 0;
 }
@@ -980,8 +980,8 @@ int zkevm_bits2field_sha256(void *inputs_, int ninputs, void *pAddress, void *pS
     required.clear();
     bits2fieldSha256Executor.execute(inputs, pols, required);
 #ifdef __ZKEVM_LIB__
-    Sha256FExecutorInput::DTO *dto = Sha256FExecutorInput::toDTO(required);
-    add_sha256_f_inputs(pSMRequestsOut, dto, (uint64_t)required.size());
+    // Sha256FExecutorInput::DTO *dto = Sha256FExecutorInput::toDTO(required);
+    // add_sha256_f_inputs(pSMRequestsOut, dto, (uint64_t)required.size());
 #endif
     return 0;
 }
@@ -1022,7 +1022,7 @@ int zkevm_padding_kk(void *inputs_, int ninputs, void *pAddress, void *pSMReques
 
     paddingKKExecutor.execute(inputs, pols, required);
 #ifdef __ZKEVM_LIB__
-    add_padding_kk_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t)required.size());
+    // add_padding_kk_bit_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t)required.size());
 #endif
     return 0;
 }
@@ -1049,7 +1049,7 @@ int zkevm_padding_kk_bit(void *inputs_, int ninputs, void *pAddress, void *pSMRe
     required.clear();
     paddingKKBitExecutor.execute(inputs, pols, required);
 #ifdef __ZKEVM_LIB__
-    add_bits_2_field_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t)required.size());
+    // add_bits_2_field_inputs(pSMRequestsOut, (void *)required.data(), (uint64_t)required.size());
 #endif
     return 0;
 }
@@ -1074,8 +1074,8 @@ int zkevm_bits2field_kk(void *inputs_, int ninputs, void *pAddress, void *pSMReq
     required.clear();
     bits2fieldExecutor.execute(inputs, pols, required);
 #ifdef __ZKEVM_LIB__
-    KeccakFExecutorInput::DTO *dto = KeccakFExecutorInput::toDTO(required);
-    add_keccak_f_inputs(pSMRequestsOut, dto, (uint64_t)required.size());
+    // KeccakFExecutorInput::DTO *dto = KeccakFExecutorInput::toDTO(required);
+    // add_keccak_f_inputs(pSMRequestsOut, dto, (uint64_t)required.size());
 #endif
     return 0;
 }
@@ -1216,6 +1216,15 @@ void recursive2_steps_free(void *pRecursive2Steps)
 {
     Recursive2Steps *recursive2Steps = (Recursive2Steps *)pRecursive2Steps;
     delete recursive2Steps;
+}
+
+void *generic_steps_new() {
+    CHelpersSteps *genericSteps = new CHelpersSteps();
+    return genericSteps;
+}
+void generic_steps_free(void *pGenericSteps) {
+    CHelpersSteps *genericSteps = (CHelpersSteps *)pGenericSteps;
+    delete genericSteps;
 }
 
 void *fri_proof_new(void *pStarks)

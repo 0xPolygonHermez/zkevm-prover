@@ -14,7 +14,7 @@
 #include "timer.hpp"
 #include "zklog.hpp"
 #ifdef __ZKEVM_LIB__
-#include "zkevm_sm.h"
+// #include "zkevm_sm.h"
 #endif
 
 // Reduced version: only 1 evaluation is allocated, and some asserts are disabled
@@ -581,21 +581,21 @@ void Executor::execute(ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Comm
 #endif
 
 #ifdef __ZKEVM_LIB__
-        if (pSMRequestsOut != NULL)
-        {
-            TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
-            add_mem_align_inputs((void *)pSMRequestsOut, (void *)required->MemAlign.data(), (uint64_t)required->MemAlign.size());
-            add_binary_inputs((void *)pSMRequestsOut, (void *)required->Binary.data(), (uint64_t)required->Binary.size());
-            PaddingSha256ExecutorInput::DTO *buffer1 = PaddingSha256ExecutorInput::toDTO(required->PaddingSha256);
-            add_padding_sha256_inputs((void *)pSMRequestsOut, (void *)buffer1, required->PaddingSha256.size());
-            delete[] buffer1;
-            PaddingKKExecutorInput::DTO *buffer2 = PaddingKKExecutorInput::toDTO(required->PaddingKK);
-            add_padding_kk_inputs((void *)pSMRequestsOut, (void *)buffer2, required->PaddingKK.size());
-            delete[] buffer2;
-            add_memory_inputs((void *)pSMRequestsOut, (void *)required->Memory.data(), (uint64_t)required->Memory.size());
-            add_arith_inputs((void *)pSMRequestsOut, (void *)required->Arith.data(), (uint64_t)required->Arith.size());
-            TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
-        }
+        // if (pSMRequestsOut != NULL)
+        // {
+        //     TimerStart(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
+        //     add_mem_align_inputs((void *)pSMRequestsOut, (void *)required->MemAlign.data(), (uint64_t)required->MemAlign.size());
+        //     add_binary_inputs((void *)pSMRequestsOut, (void *)required->Binary.data(), (uint64_t)required->Binary.size());
+        //     PaddingSha256ExecutorInput::DTO *buffer1 = PaddingSha256ExecutorInput::toDTO(required->PaddingSha256);
+        //     add_padding_sha256_inputs((void *)pSMRequestsOut, (void *)buffer1, required->PaddingSha256.size());
+        //     delete[] buffer1;
+        //     PaddingKKExecutorInput::DTO *buffer2 = PaddingKKExecutorInput::toDTO(required->PaddingKK);
+        //     add_padding_kk_inputs((void *)pSMRequestsOut, (void *)buffer2, required->PaddingKK.size());
+        //     delete[] buffer2;
+        //     add_memory_inputs((void *)pSMRequestsOut, (void *)required->Memory.data(), (uint64_t)required->Memory.size());
+        //     add_arith_inputs((void *)pSMRequestsOut, (void *)required->Arith.data(), (uint64_t)required->Arith.size());
+        //     TimerStopAndLog(COPY_SECONDARY_SM_INPUTS_TO_RUST_STRUCT);
+        // }
 #endif
     }
     else

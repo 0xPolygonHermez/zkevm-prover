@@ -2,8 +2,6 @@
 #define ZKEVM_API_H
     #include <stdint.h>
 
-    // FFI functions
-
     int zkevm_main(char *configFile, void* pAddress, void** pSMRequests, void* pSMRequestsOut, void *pStarkInfo = nullptr);
     int zkevm_delete_sm_requests(void **pSMRequests);
     int zkevm_arith(void * inputs, int ninputs, void * pAddress);
@@ -36,7 +34,9 @@
     int zkevm_padding_pg_req(void* pSMRequests,  void * pAddress);
     int zkevm_climb_key_req(void* pSMRequests,  void * pAddress);
     int zkevm_poseidon_g_req(void* pSMRequests,  void * pAddress);
-    
+
+    // FFI functions
+
     // FRI Proof
     // ========================================================================================
     void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
@@ -51,6 +51,8 @@
     void recursive1_steps_free(void *pRecursive1Steps);
     void *recursive2_steps_new();
     void recursive2_steps_free(void *Recursive2Steps);
+    void *generic_steps_new();
+    void generic_steps_free(void *pGenericSteps);
 
     // FRIProof
     // ========================================================================================
