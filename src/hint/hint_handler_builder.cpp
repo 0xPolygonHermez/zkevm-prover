@@ -19,7 +19,7 @@ namespace Hints
         auto result = builders.insert(std::make_pair(hintName, std::move(builder)));
         if (!result.second)
         {
-            throw std::runtime_error("Builder for hint " + hintName + " already registered.");
+            zklog.warning("Hint builder for hint " + hintName + " already registered.");
         }
     }
 } // namespace Hints

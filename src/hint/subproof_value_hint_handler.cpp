@@ -4,7 +4,7 @@ namespace Hints
 {
     std::string SubproofValueHintHandler::getName()
     {
-        return "subproofValue";
+        return "subproofvalue";
     }
 
     std::vector<std::string> SubproofValueHintHandler::getSources() const
