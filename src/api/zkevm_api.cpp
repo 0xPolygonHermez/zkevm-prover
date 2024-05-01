@@ -20,35 +20,39 @@
 #include "service/aggregator/aggregator_client.hpp"
 #include "service/aggregator/aggregator_client_mock.hpp"
 #include "sm/keccak_f/keccak.hpp"
-#include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
-#include "sm/storage/storage_test.hpp"
 #include "sm/climb_key/climb_key_executor.hpp"
+
+#ifndef __ZKEVM_LIB__
+#include "sm/keccak_f/keccak_executor_test.hpp"
+#include "sm/storage/storage_test.hpp"
 #include "sm/climb_key/climb_key_test.hpp"
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
-#include "timer.hpp"
-#include "hashdb/hashdb_server.hpp"
 #include "service/hashdb/hashdb_test.hpp"
-#include "service/hashdb/hashdb.hpp"
 #include "sha256_test.hpp"
 #include "blake_test.hpp"
-#include "goldilocks_precomputed.hpp"
-#include "zklog.hpp"
 #include "ecrecover_test.hpp"
-#include "hashdb_singleton.hpp"
-#include "unit_test.hpp"
 #include "database_cache_test.hpp"
-#include "main_sm/fork_8/main_exec_c/account.hpp"
-#include "state_manager.hpp"
-#include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
 #include "database_performance_test.hpp"
 #include "smt_64_test.hpp"
-#include "sha256.hpp"
 #include "page_manager_test.hpp"
-#include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
+#endif
+
+#include "timer.hpp"
+#include "hashdb/hashdb_server.hpp"
+#include "service/hashdb/hashdb.hpp"
+#include "goldilocks_precomputed.hpp"
+#include "zklog.hpp"
+#include "hashdb_singleton.hpp"
+#include "unit_test.hpp"
+#include "main_sm/fork_8/main_exec_c/account.hpp"
+#include "state_manager.hpp"
+#include "state_manager_64.hpp"
+#include "sha256.hpp"
+#include "zkglobals.hpp"
 #include "ZkevmSteps.hpp"
 #include "C12aSteps.hpp"
 #include "Recursive1Steps.hpp"
@@ -428,6 +432,7 @@ int zkevm_main(char *configFile, void *pAddress, void **pSMRequests, void *pSMRe
 
 #endif // DATABASE_USE_CACHE
 
+#ifndef __ZKEVM_LIB__
     /* TESTS */
 
     // Test Keccak SM
@@ -519,6 +524,7 @@ int zkevm_main(char *configFile, void *pAddress, void **pSMRequests, void *pSMRe
     {
         UnitTest(fr, poseidon, config);
     }
+#endif
 
     // If there is nothing else to run, exit normally
     if (!config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
@@ -715,12 +721,14 @@ int zkevm_main(char *configFile, void *pAddress, void **pSMRequests, void *pSMRe
         pExecutorClient->runThreads();
     }
 
+#ifndef __ZKEVM_LIB__
     // Run the hashDB test, if configured
     if (config.runHashDBTest)
     {
         zklog.info("Launching HashDB test thread...");
         HashDBTest(config);
     }
+#endif
 
     // Create the aggregator client and run it, if configured
     AggregatorClient *pAggregatorClient = NULL;
@@ -1216,6 +1224,17 @@ void recursive2_steps_free(void *pRecursive2Steps)
 {
     Recursive2Steps *recursive2Steps = (Recursive2Steps *)pRecursive2Steps;
     delete recursive2Steps;
+}
+
+void *generic_steps_new()
+{
+    CHelpersSteps *genericSteps = new CHelpersSteps();
+    return genericSteps;
+}
+void generic_steps_free(void *pGenericSteps)
+{
+    CHelpersSteps *genericSteps = (CHelpersSteps *)pGenericSteps;
+    delete genericSteps;
 }
 
 void *fri_proof_new(void *pStarks)

@@ -51,6 +51,8 @@
     void recursive1_steps_free(void *pRecursive1Steps);
     void *recursive2_steps_new();
     void recursive2_steps_free(void *Recursive2Steps);
+    void *generic_steps_new();
+    void generic_steps_free(void *pGenericSteps);
 
     // FRIProof
     // ========================================================================================
