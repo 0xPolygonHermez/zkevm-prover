@@ -914,10 +914,14 @@ zkresult dataStreamBatch2batchL2Data (const DataStreamBatch &batch, string &batc
     return ZKR_SUCCESS;
 }
 
+//#define LOG_TX_FIELDS
+
 // Decodes tx from Ethereum RLP format, and encodes it into ROM RLP format
 // From: RLP(fields, v, r, s) --> To: RLP(fields, chainId, 0, 0) | r | s | v
 zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcodedTx)
 {
+    //zklog.info("tx original=" + ba2string(tx));
+    
     // Decode the TX RLP list
     bool bResult;
     vector<string> fields;
@@ -946,6 +950,20 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
         return ZKR_DATA_STREAM_INVALID_DATA;
     }
 
+#ifdef LOG_TX_FIELDS
+    mpz_class auxScalar;
+    ba2scalar(auxScalar, fields[0]);
+    zklog.info("TX nonce=" + auxScalar.get_str(10));
+    ba2scalar(auxScalar, fields[1]);
+    zklog.info("TX gas price=" + auxScalar.get_str(10));
+    ba2scalar(auxScalar, fields[2]);
+    zklog.info("TX gas limit=" + auxScalar.get_str(10));
+    ba2scalar(auxScalar, fields[3]);
+    zklog.info("TX to=" + auxScalar.get_str(16));
+    ba2scalar(auxScalar, fields[4]);
+    zklog.info("TX value=" + auxScalar.get_str(10));
+#endif
+
     // Get TX v
     mpz_class vScalar;
     ba2scalar(vScalar, fields[6]);
@@ -955,15 +973,29 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
         return ZKR_DATA_STREAM_INVALID_DATA;
     }
     uint64_t txv = vScalar.get_ui();
+
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX v original=" + to_string(txv));
+#endif
     
     // Get ROM v
     uint64_t v;
+    bool isPreEIP155;
     if ((txv == 27) || (txv == 28)) // This is a pre-EIP-155
     {
+        isPreEIP155 = true;
+
         v = txv;
+
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX pre-EIP-155 v rom=" + to_string(v));
+#endif
+
     }
     else
     {
+        isPreEIP155 = false;
+
         // Get chain ID
         uint64_t chainId = (txv - 35) / 2;
         if (chainId != batchChainId)
@@ -974,6 +1006,10 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
 
         // Get ROM v
         v = txv - chainId*2 - 35 + 27;
+
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX EIP-155 v rom=" + to_string(v) + " chainID=" + to_string(chainId));
+#endif
     }
 
     // Get r
@@ -984,6 +1020,10 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
         zklog.error("transcodeTx() called decodeList() and got too big r=" + r.get_str(16));
         return ZKR_DATA_STREAM_INVALID_DATA;
     }
+    
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX r =" + r.get_str(16) + "=" + r.get_str(10));
+#endif
 
     // Get s
     mpz_class s;
@@ -993,25 +1033,44 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
         zklog.error("transcodeTx() called decodeList() and got too big r=" + r.get_str(16));
         return ZKR_DATA_STREAM_INVALID_DATA;
     }
+    
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX s =" + s.get_str(16) + "=" + s.get_str(10));
+#endif
 
-    // Set fields[6] = chain ID
-    fields[6].clear();
-    const uint8_t * pChainId = (const uint8_t *)&batchChainId;
-    bool writing = false;
-    for (int64_t i = 3; i >= 0; i--)
+    // preEIP155 format: [rlp(nonce,gasprice,gaslimit,to,value,data)|r|s|v|effectivePercentage]
+    if (isPreEIP155)
     {
-        if (writing || (pChainId[i] != 0))
-        {
-            fields[6] += pChainId[i];
-            writing = true;
-        }
+        fields.pop_back();
+        fields.pop_back();
+        fields.pop_back();
     }
+    // Legacy format: [rlp(nonce,gasprice,gaslimit,to,value,data,chainId,0,0)|r|s|v|effectivePercentage]
+    else
+    {
+        // Set fields[6] = chain ID
+        fields[6].clear();
+        const uint8_t * pChainId = (const uint8_t *)&batchChainId;
+        bool writing = false;
+        for (int64_t i = 3; i >= 0; i--)
+        {
+            if (writing || (pChainId[i] != 0))
+            {
+                fields[6] += pChainId[i];
+                writing = true;
+            }
+        }
+        
+#ifdef LOG_TX_FIELDS
+        zklog.info("TX chain ID=" + to_string(batchChainId));
+#endif
 
-    // Clear fields[7]
-    fields[7].clear();
+        // Clear fields[7]
+        fields[7].clear();
 
-    // Clear fields[8]
-    fields[8].clear();
+        // Clear fields[8]
+        fields[8].clear();
+    }
 
     // Encode RLP list
     bResult = rlp::encodeList(fields, transcodedTx);
@@ -1037,6 +1096,8 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
     uint8_t d = v;
     transcodedTx += d;
     //zklog.info("v=" + to_string(v));
+
+    //zklog.info("transcoded tx=" + ba2string(transcodedTx));
 
     return ZKR_SUCCESS;
 }
