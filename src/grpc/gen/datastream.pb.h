@@ -48,7 +48,7 @@ struct TableStruct_datastream_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[5]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[6]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -57,9 +57,12 @@ struct TableStruct_datastream_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_datastream_2eproto;
 namespace datastream {
 namespace v1 {
-class Batch;
-class BatchDefaultTypeInternal;
-extern BatchDefaultTypeInternal _Batch_default_instance_;
+class BatchEnd;
+class BatchEndDefaultTypeInternal;
+extern BatchEndDefaultTypeInternal _BatchEnd_default_instance_;
+class BatchStart;
+class BatchStartDefaultTypeInternal;
+extern BatchStartDefaultTypeInternal _BatchStart_default_instance_;
 class BookMark;
 class BookMarkDefaultTypeInternal;
 extern BookMarkDefaultTypeInternal _BookMark_default_instance_;
@@ -75,7 +78,8 @@ extern UpdateGERDefaultTypeInternal _UpdateGER_default_instance_;
 }  // namespace v1
 }  // namespace datastream
 PROTOBUF_NAMESPACE_OPEN
-template<> ::datastream::v1::Batch* Arena::CreateMaybeMessage<::datastream::v1::Batch>(Arena*);
+template<> ::datastream::v1::BatchEnd* Arena::CreateMaybeMessage<::datastream::v1::BatchEnd>(Arena*);
+template<> ::datastream::v1::BatchStart* Arena::CreateMaybeMessage<::datastream::v1::BatchStart>(Arena*);
 template<> ::datastream::v1::BookMark* Arena::CreateMaybeMessage<::datastream::v1::BookMark>(Arena*);
 template<> ::datastream::v1::L2Block* Arena::CreateMaybeMessage<::datastream::v1::L2Block>(Arena*);
 template<> ::datastream::v1::Transaction* Arena::CreateMaybeMessage<::datastream::v1::Transaction>(Arena*);
@@ -112,10 +116,11 @@ inline bool BookmarkType_Parse(
 }
 enum EntryType : int {
   ENTRY_TYPE_UNSPECIFIED = 0,
-  ENTRY_TYPE_BATCH = 1,
+  ENTRY_TYPE_BATCH_START = 1,
   ENTRY_TYPE_L2_BLOCK = 2,
   ENTRY_TYPE_TRANSACTION = 3,
-  ENTRY_TYPE_UPDATE_GER = 4,
+  ENTRY_TYPE_BATCH_END = 4,
+  ENTRY_TYPE_UPDATE_GER = 5,
   EntryType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   EntryType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
@@ -140,23 +145,23 @@ inline bool EntryType_Parse(
 }
 // ===================================================================
 
-class Batch PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:datastream.v1.Batch) */ {
+class BatchStart PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:datastream.v1.BatchStart) */ {
  public:
-  inline Batch() : Batch(nullptr) {};
-  virtual ~Batch();
+  inline BatchStart() : BatchStart(nullptr) {};
+  virtual ~BatchStart();
 
-  Batch(const Batch& from);
-  Batch(Batch&& from) noexcept
-    : Batch() {
+  BatchStart(const BatchStart& from);
+  BatchStart(BatchStart&& from) noexcept
+    : BatchStart() {
     *this = ::std::move(from);
   }
 
-  inline Batch& operator=(const Batch& from) {
+  inline BatchStart& operator=(const BatchStart& from) {
     CopyFrom(from);
     return *this;
   }
-  inline Batch& operator=(Batch&& from) noexcept {
+  inline BatchStart& operator=(BatchStart&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -174,20 +179,20 @@ class Batch PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const Batch& default_instance();
+  static const BatchStart& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const Batch* internal_default_instance() {
-    return reinterpret_cast<const Batch*>(
-               &_Batch_default_instance_);
+  static inline const BatchStart* internal_default_instance() {
+    return reinterpret_cast<const BatchStart*>(
+               &_BatchStart_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     0;
 
-  friend void swap(Batch& a, Batch& b) {
+  friend void swap(BatchStart& a, BatchStart& b) {
     a.Swap(&b);
   }
-  inline void Swap(Batch* other) {
+  inline void Swap(BatchStart* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -195,7 +200,7 @@ class Batch PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(Batch* other) {
+  void UnsafeArenaSwap(BatchStart* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -203,17 +208,17 @@ class Batch PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline Batch* New() const final {
-    return CreateMaybeMessage<Batch>(nullptr);
+  inline BatchStart* New() const final {
+    return CreateMaybeMessage<BatchStart>(nullptr);
   }
 
-  Batch* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<Batch>(arena);
+  BatchStart* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<BatchStart>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const Batch& from);
-  void MergeFrom(const Batch& from);
+  void CopyFrom(const BatchStart& from);
+  void MergeFrom(const BatchStart& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -227,13 +232,172 @@ class Batch PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(Batch* other);
+  void InternalSwap(BatchStart* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "datastream.v1.Batch";
+    return "datastream.v1.BatchStart";
   }
   protected:
-  explicit Batch(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit BatchStart(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_datastream_2eproto);
+    return ::descriptor_table_datastream_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNumberFieldNumber = 1,
+    kForkIdFieldNumber = 4,
+    kChainIdFieldNumber = 5,
+  };
+  // uint64 number = 1;
+  void clear_number();
+  ::PROTOBUF_NAMESPACE_ID::uint64 number() const;
+  void set_number(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_number() const;
+  void _internal_set_number(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 fork_id = 4;
+  void clear_fork_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id() const;
+  void set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fork_id() const;
+  void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 chain_id = 5;
+  void clear_chain_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id() const;
+  void set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_chain_id() const;
+  void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:datastream.v1.BatchStart)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 number_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_datastream_2eproto;
+};
+// -------------------------------------------------------------------
+
+class BatchEnd PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:datastream.v1.BatchEnd) */ {
+ public:
+  inline BatchEnd() : BatchEnd(nullptr) {};
+  virtual ~BatchEnd();
+
+  BatchEnd(const BatchEnd& from);
+  BatchEnd(BatchEnd&& from) noexcept
+    : BatchEnd() {
+    *this = ::std::move(from);
+  }
+
+  inline BatchEnd& operator=(const BatchEnd& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline BatchEnd& operator=(BatchEnd&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const BatchEnd& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const BatchEnd* internal_default_instance() {
+    return reinterpret_cast<const BatchEnd*>(
+               &_BatchEnd_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  friend void swap(BatchEnd& a, BatchEnd& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(BatchEnd* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(BatchEnd* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline BatchEnd* New() const final {
+    return CreateMaybeMessage<BatchEnd>(nullptr);
+  }
+
+  BatchEnd* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<BatchEnd>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const BatchEnd& from);
+  void MergeFrom(const BatchEnd& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(BatchEnd* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "datastream.v1.BatchEnd";
+  }
+  protected:
+  explicit BatchEnd(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -256,8 +420,6 @@ class Batch PROTOBUF_FINAL :
     kLocalExitRootFieldNumber = 2,
     kStateRootFieldNumber = 3,
     kNumberFieldNumber = 1,
-    kForkIdFieldNumber = 4,
-    kChainIdFieldNumber = 5,
   };
   // bytes local_exit_root = 2;
   void clear_local_exit_root();
@@ -318,25 +480,7 @@ class Batch PROTOBUF_FINAL :
   void _internal_set_number(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 fork_id = 4;
-  void clear_fork_id();
-  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id() const;
-  void set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fork_id() const;
-  void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 chain_id = 5;
-  void clear_chain_id();
-  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id() const;
-  void set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_chain_id() const;
-  void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:datastream.v1.Batch)
+  // @@protoc_insertion_point(class_scope:datastream.v1.BatchEnd)
  private:
   class _Internal;
 
@@ -346,8 +490,6 @@ class Batch PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr local_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
   ::PROTOBUF_NAMESPACE_ID::uint64 number_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_datastream_2eproto;
 };
@@ -395,7 +537,7 @@ class L2Block PROTOBUF_FINAL :
                &_L2Block_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    2;
 
   friend void swap(L2Block& a, L2Block& b) {
     a.Swap(&b);
@@ -722,7 +864,7 @@ class Transaction PROTOBUF_FINAL :
                &_Transaction_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    3;
 
   friend void swap(Transaction& a, Transaction& b) {
     a.Swap(&b);
@@ -935,7 +1077,7 @@ class UpdateGER PROTOBUF_FINAL :
                &_UpdateGER_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(UpdateGER& a, UpdateGER& b) {
     a.Swap(&b);
@@ -1186,7 +1328,7 @@ class BookMark PROTOBUF_FINAL :
                &_BookMark_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    5;
 
   friend void swap(BookMark& a, BookMark& b) {
     a.Swap(&b);
@@ -1299,80 +1441,144 @@ class BookMark PROTOBUF_FINAL :
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
-// Batch
+// BatchStart
 
 // uint64 number = 1;
-inline void Batch::clear_number() {
+inline void BatchStart::clear_number() {
   number_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 Batch::_internal_number() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 BatchStart::_internal_number() const {
   return number_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 Batch::number() const {
-  // @@protoc_insertion_point(field_get:datastream.v1.Batch.number)
+inline ::PROTOBUF_NAMESPACE_ID::uint64 BatchStart::number() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.BatchStart.number)
   return _internal_number();
 }
-inline void Batch::_internal_set_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void BatchStart::_internal_set_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   number_ = value;
 }
-inline void Batch::set_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void BatchStart::set_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_number(value);
-  // @@protoc_insertion_point(field_set:datastream.v1.Batch.number)
+  // @@protoc_insertion_point(field_set:datastream.v1.BatchStart.number)
+}
+
+// uint64 fork_id = 4;
+inline void BatchStart::clear_fork_id() {
+  fork_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 BatchStart::_internal_fork_id() const {
+  return fork_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 BatchStart::fork_id() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.BatchStart.fork_id)
+  return _internal_fork_id();
+}
+inline void BatchStart::_internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  fork_id_ = value;
+}
+inline void BatchStart::set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fork_id(value);
+  // @@protoc_insertion_point(field_set:datastream.v1.BatchStart.fork_id)
+}
+
+// uint64 chain_id = 5;
+inline void BatchStart::clear_chain_id() {
+  chain_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 BatchStart::_internal_chain_id() const {
+  return chain_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 BatchStart::chain_id() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.BatchStart.chain_id)
+  return _internal_chain_id();
+}
+inline void BatchStart::_internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  chain_id_ = value;
+}
+inline void BatchStart::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_chain_id(value);
+  // @@protoc_insertion_point(field_set:datastream.v1.BatchStart.chain_id)
+}
+
+// -------------------------------------------------------------------
+
+// BatchEnd
+
+// uint64 number = 1;
+inline void BatchEnd::clear_number() {
+  number_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 BatchEnd::_internal_number() const {
+  return number_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 BatchEnd::number() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.BatchEnd.number)
+  return _internal_number();
+}
+inline void BatchEnd::_internal_set_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  number_ = value;
+}
+inline void BatchEnd::set_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_number(value);
+  // @@protoc_insertion_point(field_set:datastream.v1.BatchEnd.number)
 }
 
 // bytes local_exit_root = 2;
-inline void Batch::clear_local_exit_root() {
+inline void BatchEnd::clear_local_exit_root() {
   local_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& Batch::local_exit_root() const {
-  // @@protoc_insertion_point(field_get:datastream.v1.Batch.local_exit_root)
+inline const std::string& BatchEnd::local_exit_root() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.BatchEnd.local_exit_root)
   return _internal_local_exit_root();
 }
-inline void Batch::set_local_exit_root(const std::string& value) {
+inline void BatchEnd::set_local_exit_root(const std::string& value) {
   _internal_set_local_exit_root(value);
-  // @@protoc_insertion_point(field_set:datastream.v1.Batch.local_exit_root)
+  // @@protoc_insertion_point(field_set:datastream.v1.BatchEnd.local_exit_root)
 }
-inline std::string* Batch::mutable_local_exit_root() {
-  // @@protoc_insertion_point(field_mutable:datastream.v1.Batch.local_exit_root)
+inline std::string* BatchEnd::mutable_local_exit_root() {
+  // @@protoc_insertion_point(field_mutable:datastream.v1.BatchEnd.local_exit_root)
   return _internal_mutable_local_exit_root();
 }
-inline const std::string& Batch::_internal_local_exit_root() const {
+inline const std::string& BatchEnd::_internal_local_exit_root() const {
   return local_exit_root_.Get();
 }
-inline void Batch::_internal_set_local_exit_root(const std::string& value) {
+inline void BatchEnd::_internal_set_local_exit_root(const std::string& value) {
   
   local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void Batch::set_local_exit_root(std::string&& value) {
+inline void BatchEnd::set_local_exit_root(std::string&& value) {
   
   local_exit_root_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:datastream.v1.Batch.local_exit_root)
+  // @@protoc_insertion_point(field_set_rvalue:datastream.v1.BatchEnd.local_exit_root)
 }
-inline void Batch::set_local_exit_root(const char* value) {
+inline void BatchEnd::set_local_exit_root(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
   local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:datastream.v1.Batch.local_exit_root)
+  // @@protoc_insertion_point(field_set_char:datastream.v1.BatchEnd.local_exit_root)
 }
-inline void Batch::set_local_exit_root(const void* value,
+inline void BatchEnd::set_local_exit_root(const void* value,
     size_t size) {
   
   local_exit_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:datastream.v1.Batch.local_exit_root)
+  // @@protoc_insertion_point(field_set_pointer:datastream.v1.BatchEnd.local_exit_root)
 }
-inline std::string* Batch::_internal_mutable_local_exit_root() {
+inline std::string* BatchEnd::_internal_mutable_local_exit_root() {
   
   return local_exit_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* Batch::release_local_exit_root() {
-  // @@protoc_insertion_point(field_release:datastream.v1.Batch.local_exit_root)
+inline std::string* BatchEnd::release_local_exit_root() {
+  // @@protoc_insertion_point(field_release:datastream.v1.BatchEnd.local_exit_root)
   return local_exit_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void Batch::set_allocated_local_exit_root(std::string* local_exit_root) {
+inline void BatchEnd::set_allocated_local_exit_root(std::string* local_exit_root) {
   if (local_exit_root != nullptr) {
     
   } else {
@@ -1380,16 +1586,16 @@ inline void Batch::set_allocated_local_exit_root(std::string* local_exit_root) {
   }
   local_exit_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), local_exit_root,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:datastream.v1.Batch.local_exit_root)
+  // @@protoc_insertion_point(field_set_allocated:datastream.v1.BatchEnd.local_exit_root)
 }
-inline std::string* Batch::unsafe_arena_release_local_exit_root() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:datastream.v1.Batch.local_exit_root)
+inline std::string* BatchEnd::unsafe_arena_release_local_exit_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:datastream.v1.BatchEnd.local_exit_root)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
   return local_exit_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void Batch::unsafe_arena_set_allocated_local_exit_root(
+inline void BatchEnd::unsafe_arena_set_allocated_local_exit_root(
     std::string* local_exit_root) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (local_exit_root != nullptr) {
@@ -1399,61 +1605,61 @@ inline void Batch::unsafe_arena_set_allocated_local_exit_root(
   }
   local_exit_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       local_exit_root, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.Batch.local_exit_root)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.BatchEnd.local_exit_root)
 }
 
 // bytes state_root = 3;
-inline void Batch::clear_state_root() {
+inline void BatchEnd::clear_state_root() {
   state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& Batch::state_root() const {
-  // @@protoc_insertion_point(field_get:datastream.v1.Batch.state_root)
+inline const std::string& BatchEnd::state_root() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.BatchEnd.state_root)
   return _internal_state_root();
 }
-inline void Batch::set_state_root(const std::string& value) {
+inline void BatchEnd::set_state_root(const std::string& value) {
   _internal_set_state_root(value);
-  // @@protoc_insertion_point(field_set:datastream.v1.Batch.state_root)
+  // @@protoc_insertion_point(field_set:datastream.v1.BatchEnd.state_root)
 }
-inline std::string* Batch::mutable_state_root() {
-  // @@protoc_insertion_point(field_mutable:datastream.v1.Batch.state_root)
+inline std::string* BatchEnd::mutable_state_root() {
+  // @@protoc_insertion_point(field_mutable:datastream.v1.BatchEnd.state_root)
   return _internal_mutable_state_root();
 }
-inline const std::string& Batch::_internal_state_root() const {
+inline const std::string& BatchEnd::_internal_state_root() const {
   return state_root_.Get();
 }
-inline void Batch::_internal_set_state_root(const std::string& value) {
+inline void BatchEnd::_internal_set_state_root(const std::string& value) {
   
   state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void Batch::set_state_root(std::string&& value) {
+inline void BatchEnd::set_state_root(std::string&& value) {
   
   state_root_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:datastream.v1.Batch.state_root)
+  // @@protoc_insertion_point(field_set_rvalue:datastream.v1.BatchEnd.state_root)
 }
-inline void Batch::set_state_root(const char* value) {
+inline void BatchEnd::set_state_root(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
   state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:datastream.v1.Batch.state_root)
+  // @@protoc_insertion_point(field_set_char:datastream.v1.BatchEnd.state_root)
 }
-inline void Batch::set_state_root(const void* value,
+inline void BatchEnd::set_state_root(const void* value,
     size_t size) {
   
   state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:datastream.v1.Batch.state_root)
+  // @@protoc_insertion_point(field_set_pointer:datastream.v1.BatchEnd.state_root)
 }
-inline std::string* Batch::_internal_mutable_state_root() {
+inline std::string* BatchEnd::_internal_mutable_state_root() {
   
   return state_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* Batch::release_state_root() {
-  // @@protoc_insertion_point(field_release:datastream.v1.Batch.state_root)
+inline std::string* BatchEnd::release_state_root() {
+  // @@protoc_insertion_point(field_release:datastream.v1.BatchEnd.state_root)
   return state_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void Batch::set_allocated_state_root(std::string* state_root) {
+inline void BatchEnd::set_allocated_state_root(std::string* state_root) {
   if (state_root != nullptr) {
     
   } else {
@@ -1461,16 +1667,16 @@ inline void Batch::set_allocated_state_root(std::string* state_root) {
   }
   state_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), state_root,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:datastream.v1.Batch.state_root)
+  // @@protoc_insertion_point(field_set_allocated:datastream.v1.BatchEnd.state_root)
 }
-inline std::string* Batch::unsafe_arena_release_state_root() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:datastream.v1.Batch.state_root)
+inline std::string* BatchEnd::unsafe_arena_release_state_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:datastream.v1.BatchEnd.state_root)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
   return state_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void Batch::unsafe_arena_set_allocated_state_root(
+inline void BatchEnd::unsafe_arena_set_allocated_state_root(
     std::string* state_root) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (state_root != nullptr) {
@@ -1480,47 +1686,7 @@ inline void Batch::unsafe_arena_set_allocated_state_root(
   }
   state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       state_root, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.Batch.state_root)
-}
-
-// uint64 fork_id = 4;
-inline void Batch::clear_fork_id() {
-  fork_id_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 Batch::_internal_fork_id() const {
-  return fork_id_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 Batch::fork_id() const {
-  // @@protoc_insertion_point(field_get:datastream.v1.Batch.fork_id)
-  return _internal_fork_id();
-}
-inline void Batch::_internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  fork_id_ = value;
-}
-inline void Batch::set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_fork_id(value);
-  // @@protoc_insertion_point(field_set:datastream.v1.Batch.fork_id)
-}
-
-// uint64 chain_id = 5;
-inline void Batch::clear_chain_id() {
-  chain_id_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 Batch::_internal_chain_id() const {
-  return chain_id_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 Batch::chain_id() const {
-  // @@protoc_insertion_point(field_get:datastream.v1.Batch.chain_id)
-  return _internal_chain_id();
-}
-inline void Batch::_internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  chain_id_ = value;
-}
-inline void Batch::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_chain_id(value);
-  // @@protoc_insertion_point(field_set:datastream.v1.Batch.chain_id)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.BatchEnd.state_root)
 }
 
 // -------------------------------------------------------------------
@@ -2652,6 +2818,8 @@ inline void BookMark::set_value(::PROTOBUF_NAMESPACE_ID::uint64 value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

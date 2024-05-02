@@ -469,75 +469,49 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
 
 #ifdef USE_DATA_STREAM_PROTOBUF
 
-            case datastream::v1::ENTRY_TYPE_BATCH: // Batch
+            case datastream::v1::ENTRY_TYPE_BATCH_START: // Batch start
             {
                 // Check that batch has not been previously parsed
                 if (batch.forkId != 0)
                 {
-                    zklog.error("dataStream2batch() batch called with batch.forkId=" + to_string(batch.forkId) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    zklog.error("dataStream2batch() batch start called with batch.forkId=" + to_string(batch.forkId) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
                     return ZKR_DATA_STREAM_INVALID_DATA;
                 }
 
                 // Parse the data stream entry as a protobuf
-                datastream::v1::Batch dsBatch;
-                if (!dsBatch.ParseFromString(dataStream.substr(p, dataLength)))
+                datastream::v1::BatchStart dsBatchStart;
+                if (!dsBatchStart.ParseFromString(dataStream.substr(p, dataLength)))
                 {
-                    zklog.error("dataStream2batch() batch failed calling dsBatch.ParseFromString() p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    zklog.error("dataStream2batch() batch start failed calling dsBatchStart.ParseFromString() p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
                     return ZKR_DATA_STREAM_INVALID_DATA;
                 }
                 p += dataLength;
 
                 // Get batch number
-                uint64_t batchNumber = dsBatch.number();
+                uint64_t batchNumber = dsBatchStart.number();
                 if (batchNumber == 0)
                 {
-                    zklog.error("dataStream2batch() batch invalid batch number=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    zklog.error("dataStream2batch() batch start invalid batch number=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
                     return ZKR_DATA_STREAM_INVALID_DATA;
-                }
-                else if (batch.batchNumber != 0)
-                {
-                    if (batchNumber != batch.batchNumber)
-                    {
-                        zklog.error("dataStream2batch() found batchNumber=" + to_string(batchNumber) + " != batch.batchNumber=" + to_string(batch.batchNumber) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
-                        return ZKR_DATA_STREAM_INVALID_DATA;
-                    }
                 }
                 else
                 {
                     batch.batchNumber = batchNumber;
                 }
 
-                // Get local exit root
-                auxString = dsBatch.local_exit_root();
-                if (auxString.size() > 32)
-                {
-                    zklog.error("dataStream2batch() batch, found dsBatch.local_exit_root.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
-                    return ZKR_DATA_STREAM_INVALID_DATA;
-                }
-                ba2string(auxString, batch.localExitRoot);
-
-                // Get state root
-                auxString = dsBatch.state_root();
-                if (auxString.size() > 32)
-                {
-                    zklog.error("dataStream2batch() batch, found dsBatch.state_root.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
-                    return ZKR_DATA_STREAM_INVALID_DATA;
-                }
-                ba2string(auxString, batch.stateRoot);
-
                 // Get fork ID
-                batch.forkId = dsBatch.fork_id();
+                batch.forkId = dsBatchStart.fork_id();
                 if (batch.forkId == 0)
                 {
-                    zklog.error("dataStream2batch() batch invalid fork ID=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    zklog.error("dataStream2batch() batch start invalid fork ID=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
                     return ZKR_DATA_STREAM_INVALID_DATA;
                 }
 
                 // Get chain ID
-                batch.chainId = dsBatch.chain_id();
+                batch.chainId = dsBatchStart.chain_id();
 
 #ifdef LOG_DATA_STREAM
-                zklog.info("dataStream2batch() BATCH " + batch.toString());
+                zklog.info("dataStream2batch() BATCH START " + batch.toString());
 #endif
 
                 continue;
@@ -546,9 +520,9 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
             case datastream::v1::ENTRY_TYPE_L2_BLOCK: // L2 block
             {
                 // Check that batch has been previously parsed
-                if (batch.forkId != 0)
+                if (batch.forkId == 0)
                 {
-                    zklog.error("dataStream2batch() batch called with batch.forkId=" + to_string(batch.forkId) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    zklog.error("dataStream2batch() L2 block called with batch.forkId=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
                     return ZKR_DATA_STREAM_INVALID_DATA;
                 }
 
@@ -817,6 +791,62 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                 }
                 ba2string(dsUpdateGER.global_exit_root(), batch.globalExitRoot);
                 
+                continue;
+            }
+
+            case datastream::v1::ENTRY_TYPE_BATCH_END: // Batch end
+            {
+                // Check that batch has not been previously parsed
+                if (batch.forkId == 0)
+                {
+                    zklog.error("dataStream2batch() batch end called with batch.forkId=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Parse the data stream entry as a protobuf
+                datastream::v1::BatchEnd dsBatchEnd;
+                if (!dsBatchEnd.ParseFromString(dataStream.substr(p, dataLength)))
+                {
+                    zklog.error("dataStream2batch() batch end failed calling dsBatchStart.ParseFromString() p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                p += dataLength;
+
+                // Get batch number
+                uint64_t batchNumber = dsBatchEnd.number();
+                if (batchNumber == 0)
+                {
+                    zklog.error("dataStream2batch() batch end invalid batch number=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                else if (batchNumber != batch.batchNumber)
+                {
+                    zklog.error("dataStream2batch() batch end found batchNumber=" + to_string(batchNumber) + " != batch.batchNumber=" + to_string(batch.batchNumber) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Get local exit root
+                auxString = dsBatchEnd.local_exit_root();
+                if (auxString.size() > 32)
+                {
+                    zklog.error("dataStream2batch() batch end found dsBatch.local_exit_root.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(auxString, batch.localExitRoot);
+
+                // Get state root
+                auxString = dsBatchEnd.state_root();
+                if (auxString.size() > 32)
+                {
+                    zklog.error("dataStream2batch() batch end found dsBatch.state_root.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(auxString, batch.stateRoot);
+
+#ifdef LOG_DATA_STREAM
+                zklog.info("dataStream2batch() BATCH END " + batch.toString());
+#endif
+
                 continue;
             }
 #endif
