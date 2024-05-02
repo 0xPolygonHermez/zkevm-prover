@@ -27,10 +27,10 @@ DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
     auxBufferKeysValues.clear();
 };
 
-DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t cacheSize_, string name_) :
+DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_) :
     indexes(NULL), keys(NULL), values(NULL), currentCacheIndex(0), attempts(0), hits(0), name(name_)
 {
-    postConstruct(log2IndexesSize_, cacheSize_, name_);
+    postConstruct(log2IndexesSize_, log2CacheSize_, name_);
 };
 
 DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
@@ -47,7 +47,7 @@ DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
 
 void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_)
 {
-    lock_guard<recursive_mutex> guard(mlock);
+    unique_lock<shared_mutex> guard(mlock);
     log2IndexesSize = log2IndexesSize_;
     if (log2IndexesSize_ > 31)
     {
@@ -74,8 +74,9 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
         exitProcess();
     }
 
-    if(indexes != NULL) delete[] indexes;
-    indexes = new uint32_t[indexesSize];
+    if(indexes == NULL){
+        indexes = new uint32_t[indexesSize];
+    }
     //initialization of indexes array with UINT32_MAX-cacheSize: the value that is at distance
     //cacheSize+1 from the initial currentCacheIndex, i.e. 0
     uint32_t initValue = UINT32_MAX-cacheSize;
@@ -85,11 +86,13 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
         indexes[i] = initValue;
     }
 
-    if(keys != NULL) delete[] keys;
-    keys = new Goldilocks::Element[4 * cacheSize];
+    if(keys == NULL){
+        keys = new Goldilocks::Element[4 * cacheSize];
+    }
 
-    if(values != NULL) delete[] values;
-    values = new Goldilocks::Element[12 * cacheSize];
+    if(values == NULL){ 
+        values = new Goldilocks::Element[12 * cacheSize];
+    }
 
     currentCacheIndex = 0;
     attempts = 0;
@@ -105,7 +108,7 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
 
 void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
 {
-    lock_guard<recursive_mutex> guard(mlock);
+    unique_lock<shared_mutex> guard(mlock);
     bool emptySlot = false;
     bool present = false;
     uint32_t cacheIndex;
@@ -322,7 +325,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
 
 bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
 {
-    lock_guard<recursive_mutex> guard(mlock);
+    shared_lock<shared_mutex> guard(mlock);
     attempts++; 
     //
     //  Statistics

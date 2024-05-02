@@ -4,6 +4,7 @@
 #include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
 #include <mutex>
+#include <shared_mutex>
 #include "zklog.hpp"
 #include "zkmax.hpp"
 
@@ -11,8 +12,8 @@ using namespace std;
 class DatabaseMTAssociativeCache
 {
     private:
-        recursive_mutex mlock;
-
+        shared_mutex mlock;
+        
         uint32_t log2IndexesSize;
         uint32_t indexesSize;
         uint32_t log2CacheSize;
