@@ -1,6 +1,7 @@
 TARGET_ZKP := zkProver
 TARGET_BCT := bctree
-TARGET_LIB := libzkProver.a
+TARGET_ZKEVM_LIB := libzkevm.a
+TARGET_STARKS_LIB := libstarks.a
 TARGET_MNG += mainGenerator
 TARGET_PLG += polsGenerator
 TARGET_PLD += polsDiff
@@ -57,9 +58,44 @@ SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./src/constraint_checker/*" ! -pat
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
-SRCS_LIB := $(shell find $(SRC_DIRS)  ! -path "./src/constraint_checker/*" ! -path "./src/main.cpp" ! -path "./tools/starkpil/bctree/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
-OBJS_LIB := $(SRCS_LIB:%=$(BUILD_DIR)/%.o)
-DEPS_LIB := $(OBJS_LIB:.o=.d)
+SRCS_ZKEVM_LIB := $(shell find $(SRC_DIRS) \
+	! -path "./src/constraint_checker/*" \
+	! -path "./src/main.cpp" \
+	! -path "./tools/starkpil/bctree/*" \
+	! -path "./test/prover/*" \
+	! -path "./src/goldilocks/benchs/*" \
+	! -path "./src/goldilocks/benchs/*" \
+	! -path "./src/goldilocks/tests/*" \
+	! -path "./src/main_generator/*" \
+	! -path "./src/pols_generator/*" \
+	! -path "./src/pols_diff/*" \
+	-name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS_ZKEVM_LIB := $(SRCS_ZKEVM_LIB:%=$(BUILD_DIR)/%.o)
+DEPS_ZKEVM_LIB := $(OBJS_ZKEVM_LIB:.o=.d)
+
+SRCS_STARKS_LIB := $(shell find $(SRC_DIRS) \
+	! -path "./tools/*" \
+	! -path "./test/*" \
+	! -path "./src/api/zkevm_api.*" \
+	! -path "./src/constraint_checker/*" \
+	! -path "./src/ecrecover/*" \
+	! -path "./src/executor/*" \
+	! -path "./src/fflonk_setup/*" \
+	! -path "./src/goldilocks/benchs/*" \
+	! -path "./src/goldilocks/tests/*" \
+	! -path "./src/grpc/*" \
+	! -path "./src/hashdb/*" \
+	! -path "./src/hashdb64/*" \
+	! -path "./src/main_generator/*" \
+	! -path "./src/main_sm/*" \
+	! -path "./src/pols_diff/*" \
+	! -path "./src/pols_generator/*" \
+	! -path "./src/service/*" \
+	! -path "./src/sm/*" \
+	! -path "./src/main.cpp" \
+	-name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS_STARKS_LIB := $(SRCS_STARKS_LIB:%=$(BUILD_DIR)/%.o)
+DEPS_STARKS_LIB := $(OBJS_STARKS_LIB:.o=.d)
 
 SRCS_BCT := $(shell find ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree/main.cpp ./src/goldilocks/src ./src/starkpil/merkleTree/merkleTreeBN128.cpp ./src/starkpil/merkleTree/merkleTreeGL.cpp ./src/poseidon_opt/poseidon_opt.cpp ./src/XKCP ./src/ffiasm ./src/utils/* -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
@@ -85,10 +121,13 @@ DEPS_SETUP := $(OBJS_SETUP:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
-lib: CXXFLAGS_EXT := -D__ZKEVM_LIB__
-lib: LDFLAGS_EXT  := -L../zkevm-prover-rust/target/release -lzkevm_sm
-lib: INC_FLAGS_EXT := -I./../zkevm-prover-rust/include
-lib: $(TARGET) $(LIB_DIR)/$(TARGET_LIB)
+zkevm_lib: CXXFLAGS_EXT := -D__ZKEVM_LIB__
+zkevm_lib: LDFLAGS_EXT  := -L../zkevm-prover-rust/target/release -lzkevm_sm
+zkevm_lib: INC_FLAGS_EXT := -I./../zkevm-prover-rust/include
+zkevm_lib: $(LIB_DIR)/$(TARGET_ZKEVM_LIB)
+
+starks_lib: CXXFLAGS_EXT := -D__ZKEVM_LIB__ #we decided to use the same flags for both libraries
+starks_lib: $(LIB_DIR)/$(TARGET_STARKS_LIB)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
 
@@ -98,11 +137,17 @@ test: $(BUILD_DIR)/$(TARGET_TEST)
 
 constraint_checker: $(BUILD_DIR)/$(TARGET_CONSTRAINT)
 
-$(LIB_DIR)/$(TARGET_LIB): $(OBJS_LIB)
+$(LIB_DIR)/$(TARGET_ZKEVM_LIB): $(OBJS_ZKEVM_LIB)
 	mkdir -p $(LIB_DIR)
 	mkdir -p $(LIB_DIR)/include
 	$(AR) rcs $@ $^
-	cp src/api/zkevm_api.hpp $(LIB_DIR)/include/zkevm-prover.h
+	cp src/api/zkevm_api.hpp $(LIB_DIR)/include/zkevm_lib.h
+
+$(LIB_DIR)/$(TARGET_STARKS_LIB): $(OBJS_STARKS_LIB)
+	mkdir -p $(LIB_DIR)
+	mkdir -p $(LIB_DIR)/include
+	$(AR) rcs $@ $^
+	cp src/api/starks_api.hpp $(LIB_DIR)/include/starks_lib.h
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
 	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) $(CXXFLAGS_EXT) -o $@ $(LDFLAGS) $(LDFLAGS_EXT) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_EXT)
