@@ -62,13 +62,13 @@ SRCS_ZKEVM_LIB := $(shell find $(SRC_DIRS) \
 	! -path "./src/constraint_checker/*" \
 	! -path "./src/main.cpp" \
 	! -path "./tools/starkpil/bctree/*" \
-	! -path "./test/prover/*" \
-	! -path "./src/goldilocks/benchs/*" \
+	! \( -path "./test/*" -and ! \( -path "./test/service/*" -o -path "./test/utils/*" \) \) \
 	! -path "./src/goldilocks/benchs/*" \
 	! -path "./src/goldilocks/tests/*" \
 	! -path "./src/main_generator/*" \
 	! -path "./src/pols_generator/*" \
 	! -path "./src/pols_diff/*" \
+	! -path "./src/rapidsnark/*" \
 	-name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_ZKEVM_LIB := $(SRCS_ZKEVM_LIB:%=$(BUILD_DIR)/%.o)
 DEPS_ZKEVM_LIB := $(OBJS_ZKEVM_LIB:.o=.d)
