@@ -15,7 +15,6 @@
     "runFileGenFinalProof": false,
     "runFileProcessBatch": false,
     "runFileProcessBatchMultithread": false,
-    "runHashDBServer": false,
 
     "runKeccakScriptGenerator": false,
     "runKeccakTest": false,
@@ -25,8 +24,6 @@
     "runSHA256ScriptGenerator": true,
     "runSHA256Test": true,
     "runBlakeTest": false,
-    "sha256PolsFile": "workspace/sha256_connections.json",
-    "sha256ScriptFile": "workspace/sha256_script.json",
 
     "executeInParallel": false,
     "useMainExecGenerated": true,
