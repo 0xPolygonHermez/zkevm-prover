@@ -88,6 +88,7 @@ using json = nlohmann::json;
 
 void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
 {
+    zklog.info("runFileGenBatchProof");
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
