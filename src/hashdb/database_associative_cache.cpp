@@ -7,6 +7,7 @@
 #include "zkmax.hpp"
 #include "exit_process.hpp"
 #include "scalar.hpp"
+#include "zkassert.hpp"
 
 
 
@@ -104,6 +105,13 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
     indexesMask = indexesSize - 1;
 
     auxBufferKeysValues.clear();
+    
+    //all elements in the indexes buffer point to a single position of the keys buffer wich is initialized to zero
+    uint32_t cacheIndex = initValue & cacheMask;
+    keys[initValue & cacheMask] = Goldilocks::zero();
+    keys[(initValue & cacheMask) + 1] = Goldilocks::zero();
+    keys[(initValue & cacheMask) + 2] = Goldilocks::zero();
+    keys[(initValue & cacheMask) + 3] = Goldilocks::zero();
 };
 
 void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
@@ -136,6 +144,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
         }else if (emptySlot == false){
             emptySlot = true;
             tableIndexEmpty = tableIndex;
+            // I can not break because I need to check if the key is present in the other slots
         }
     }
 
@@ -160,6 +169,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     keys[cacheIndexKey + 1].fe = key[1].fe;
     keys[cacheIndexKey + 2].fe = key[2].fe;
     keys[cacheIndexKey + 3].fe = key[3].fe;
+    zkassert(values.size() == 12 || values.size() == 8);
     values[cacheIndexValue + 0] = value[0];
     values[cacheIndexValue + 1] = value[1];
     values[cacheIndexValue + 2] = value[2];
@@ -169,7 +179,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     values[cacheIndexValue + 6] = value[6];
     values[cacheIndexValue + 7] = value[7];
     if (value.size() > 8)
-    {
+    {   
         values[cacheIndexValue + 8] = value[8];
         values[cacheIndexValue + 9] = value[9];
         values[cacheIndexValue + 10] = value[10];
@@ -185,26 +195,17 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     // Forced index insertion
     //
     if(!present && !emptySlot){
-        uint32_t iters = 0;
-        uint32_t usedRawCacheIndexes[20];
+        uint32_t iter = 0;
+        uint32_t usedRawCacheIndexes[20]; // we will do at maximum 20 iterations
         usedRawCacheIndexes[0] = (currentCacheIndex == 0) ? UINT32_MAX : currentCacheIndex-1;
-        forcedInsertion(usedRawCacheIndexes, iters, update);
+        forcedInsertion(usedRawCacheIndexes, iter, update);
     }
     //
     // Clear empty auxBufferKeysValues slots (the probability of auxBufferKeysValues.size() > 0 is almost negligible)
     //
-    auto it = auxBufferKeysValues.begin();
-    while (it < auxBufferKeysValues.end()) {
-        if (emptyCacheSlot(static_cast<uint32_t>(it->fe))) {
-            auto next_it = (std::distance(it, auxBufferKeysValues.end()) >= 17) ? it + 17 : auxBufferKeysValues.end();
-            it = auxBufferKeysValues.erase(it, next_it);
-        } else {
-            if (std::distance(it, auxBufferKeysValues.end()) >= 17) {
-                it += 17;
-            } else {
-                it = auxBufferKeysValues.end();
-            }
-        }
+    if(auxBufferKeysValues.size() > 0){
+        cleanAuxBufferKeysValues();
+
     }
 }
 
@@ -256,13 +257,13 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     //
     // avoid infinite loop, only 20 iterations allowed, pox < 0 means that there is no unused slot to continue iterating
     //
-    if (iters >=20 || pos < 0)
+    if (iters >=20 || pos == -1)
     {
         zklog.warning("forcedInsertion() maxForcedInsertionIterations reached");
         Goldilocks::Element *buffKey = &keys[(inputRawCacheIndex & cacheMask) * 4];
         Goldilocks::Element *buffValue = &values[(inputRawCacheIndex & cacheMask) * 12];
         
-        // check first if there is an slot in the vector if the key is already present
+        // check first if there is an slot in the vector where the key is already present
         int pos = -1;
         for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
             if( emptyCacheSlot(((uint32_t)(auxBufferKeysValues[i].fe)))){
@@ -277,7 +278,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
                 }
             }
         }
-        if(pos > 0){
+        if(pos != -1){
             auxBufferKeysValues[pos] = Goldilocks::fromU64((uint64_t)(inputRawCacheIndex));
             auxBufferKeysValues[pos + 1] = buffKey[0];
             auxBufferKeysValues[pos + 2] = buffKey[1];
@@ -375,30 +376,31 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
     // look at the auxBufferKeysValues (chances that this buffer has any entry are almost negligible),
     // for this reason this search is not optimized at all
     //
-    for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
+    if(auxBufferKeysValues.size() > 0){ 
+        for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
 
-        if( !emptyCacheSlot(((uint32_t)(auxBufferKeysValues[i].fe))) &&
-            auxBufferKeysValues[i+1].fe == key[0].fe &&
-            auxBufferKeysValues[i+2].fe == key[1].fe &&
-            auxBufferKeysValues[i+3].fe == key[2].fe &&
-            auxBufferKeysValues[i+4].fe == key[3].fe){
-            ++hits;
-            value.resize(12);
-            value[0] = auxBufferKeysValues[i+5];
-            value[1] = auxBufferKeysValues[i+6];
-            value[2] = auxBufferKeysValues[i+7];
-            value[3] = auxBufferKeysValues[i+8];
-            value[4] = auxBufferKeysValues[i+9];
-            value[5] = auxBufferKeysValues[i+10];
-            value[6] = auxBufferKeysValues[i+11];
-            value[7] = auxBufferKeysValues[i+12];
-            value[8] = auxBufferKeysValues[i+13];
-            value[9] = auxBufferKeysValues[i+14];
-            value[10] = auxBufferKeysValues[i+15];
-            value[11] = auxBufferKeysValues[i+16];
-            return true;
-        }
-    } 
-    
+            if( !emptyCacheSlot(((uint32_t)(auxBufferKeysValues[i].fe))) &&
+                auxBufferKeysValues[i+1].fe == key[0].fe &&
+                auxBufferKeysValues[i+2].fe == key[1].fe &&
+                auxBufferKeysValues[i+3].fe == key[2].fe &&
+                auxBufferKeysValues[i+4].fe == key[3].fe){
+                ++hits;
+                value.resize(12);
+                value[0] = auxBufferKeysValues[i+5];
+                value[1] = auxBufferKeysValues[i+6];
+                value[2] = auxBufferKeysValues[i+7];
+                value[3] = auxBufferKeysValues[i+8];
+                value[4] = auxBufferKeysValues[i+9];
+                value[5] = auxBufferKeysValues[i+10];
+                value[6] = auxBufferKeysValues[i+11];
+                value[7] = auxBufferKeysValues[i+12];
+                value[8] = auxBufferKeysValues[i+13];
+                value[9] = auxBufferKeysValues[i+14];
+                value[10] = auxBufferKeysValues[i+15];
+                value[11] = auxBufferKeysValues[i+16];
+                return true;
+            }
+        } 
+    }
     return false;
 }

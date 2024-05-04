@@ -58,5 +58,20 @@ class DatabaseMTAssociativeCache
             (currentCacheIndex <= cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex > cacheSize - 1);
          };
         void forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], uint32_t &iters, bool update);
+        inline void cleanAuxBufferKeysValues(){
+            auto it = auxBufferKeysValues.begin();
+            while (it < auxBufferKeysValues.end()) {
+                if (emptyCacheSlot(static_cast<uint32_t>(it->fe))) {
+                    auto next_it = (std::distance(it, auxBufferKeysValues.end()) >= 17) ? it + 17 : auxBufferKeysValues.end();
+                    it = auxBufferKeysValues.erase(it, next_it);
+                } else {
+                    if (std::distance(it, auxBufferKeysValues.end()) >= 17) {
+                        it += 17;
+                    } else {
+                        it = auxBufferKeysValues.end();
+                    }
+                }
+            }
+        };
 };
 #endif
