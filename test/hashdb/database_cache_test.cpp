@@ -82,17 +82,18 @@ uint64_t DatabaseCacheTest (void)
         poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
         value.clear();
         bResult = cache1.findKey(key, value);
-        //check the value is found
         if (!bResult)
         {
             zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
             numberOfFailed++;
         }
-        //check the value is correct
-        for(int k=0; k<12; ++k){
-            if(value[k].fe != fr.fromU64(i).fe){
-                zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
-                numberOfFailed++;
+        if(bResult){
+            //check the value is correct
+            for(int k=0; k<12; ++k){
+                if(value[k].fe != fr.fromU64(i).fe){
+                    zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+                    numberOfFailed++;
+                }
             }
         }
 
@@ -244,7 +245,7 @@ uint64_t DatabaseCacheTest (void)
     }
 
     //check that after doing a round to the cache the elements are not anymore into de auxBufferKeysValues
-    for (uint64_t i=0; i<cache1.getCacheSize()-2; i++)
+    for (uint64_t i=0; i<2*cache1.getCacheSize(); i++)
     {
         Goldilocks::Element key[4];
         vector<Goldilocks::Element> value;
@@ -257,16 +258,16 @@ uint64_t DatabaseCacheTest (void)
             value[k] = fr.fromU64(i+1);
         }
         cache1.addKeyValue(key, value, true);
-        if(cache1.getAuxBufferKeysValuesSize()==0){
-            zklog.error("DatabaseCacheTest() auxBufferKeysValues should not be cleaned");
+        if(cache1.getAuxBufferKeysValuesSize()==0 && i<cache1.getCacheSize()-2){
+            zklog.error("DatabaseCacheTest() auxBufferKeysValues should not be cleaned" + to_string(cache1.getAuxBufferKeysValuesSize()));
             numberOfFailed++;
         }
     }
-    /*if(cache1.getAuxBufferKeysValuesSize()!=0){
-        zklog.error("DatabaseCacheTest() failed the cleaning of auxBufferKeysValues");
+    
+    if(cache1.getAuxBufferKeysValuesSize()!=0){
+        zklog.error("DatabaseCacheTest() failed the cleaning of auxBufferKeysValues"+ to_string(cache1.getAuxBufferKeysValuesSize()));
         numberOfFailed++;
-    }*/
-
+    }
     TimerStopAndLog(DATABASE_ASSOCIATIVE_CACHE_TEST);
     assert(numberOfFailed == 0);
     return numberOfFailed;
