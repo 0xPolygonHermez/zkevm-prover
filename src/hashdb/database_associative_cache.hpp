@@ -45,7 +45,8 @@ class DatabaseMTAssociativeCache
         DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_ = "associative_cache");
         DatabaseMTAssociativeCache(uint64_t cacheBytes_, string name_ = "associative_cache");
         ~DatabaseMTAssociativeCache();
-        void postConstruct(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_);
+        void postConstruct(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_= "associative_cache");
+        void postConstruct(uint64_t cacheBytes_, string name_ = "associative_cache");
         void clear();
         
         inline void addKeyValue(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
