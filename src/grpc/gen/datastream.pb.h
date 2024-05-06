@@ -48,7 +48,7 @@ struct TableStruct_datastream_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[6]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[7]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -66,6 +66,9 @@ extern BatchStartDefaultTypeInternal _BatchStart_default_instance_;
 class BookMark;
 class BookMarkDefaultTypeInternal;
 extern BookMarkDefaultTypeInternal _BookMark_default_instance_;
+class Debug;
+class DebugDefaultTypeInternal;
+extern DebugDefaultTypeInternal _Debug_default_instance_;
 class L2Block;
 class L2BlockDefaultTypeInternal;
 extern L2BlockDefaultTypeInternal _L2Block_default_instance_;
@@ -81,6 +84,7 @@ PROTOBUF_NAMESPACE_OPEN
 template<> ::datastream::v1::BatchEnd* Arena::CreateMaybeMessage<::datastream::v1::BatchEnd>(Arena*);
 template<> ::datastream::v1::BatchStart* Arena::CreateMaybeMessage<::datastream::v1::BatchStart>(Arena*);
 template<> ::datastream::v1::BookMark* Arena::CreateMaybeMessage<::datastream::v1::BookMark>(Arena*);
+template<> ::datastream::v1::Debug* Arena::CreateMaybeMessage<::datastream::v1::Debug>(Arena*);
 template<> ::datastream::v1::L2Block* Arena::CreateMaybeMessage<::datastream::v1::L2Block>(Arena*);
 template<> ::datastream::v1::Transaction* Arena::CreateMaybeMessage<::datastream::v1::Transaction>(Arena*);
 template<> ::datastream::v1::UpdateGER* Arena::CreateMaybeMessage<::datastream::v1::UpdateGER>(Arena*);
@@ -142,6 +146,33 @@ inline bool EntryType_Parse(
     const std::string& name, EntryType* value) {
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<EntryType>(
     EntryType_descriptor(), name, value);
+}
+enum BatchType : int {
+  BATCH_TYPE_UNSPECIFIED = 0,
+  BATCH_TYPE_REGULAR = 1,
+  BATCH_TYPE_FORCED = 2,
+  BATCH_TYPE_INJECTED = 3,
+  BatchType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  BatchType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool BatchType_IsValid(int value);
+constexpr BatchType BatchType_MIN = BATCH_TYPE_UNSPECIFIED;
+constexpr BatchType BatchType_MAX = BATCH_TYPE_INJECTED;
+constexpr int BatchType_ARRAYSIZE = BatchType_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* BatchType_descriptor();
+template<typename T>
+inline const std::string& BatchType_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, BatchType>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function BatchType_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    BatchType_descriptor(), enum_t_value);
+}
+inline bool BatchType_Parse(
+    const std::string& name, BatchType* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<BatchType>(
+    BatchType_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -258,10 +289,30 @@ class BatchStart PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kDebugFieldNumber = 5,
     kNumberFieldNumber = 1,
-    kForkIdFieldNumber = 4,
-    kChainIdFieldNumber = 5,
+    kForkIdFieldNumber = 3,
+    kChainIdFieldNumber = 4,
+    kTypeFieldNumber = 2,
   };
+  // .datastream.v1.Debug debug = 5;
+  bool has_debug() const;
+  private:
+  bool _internal_has_debug() const;
+  public:
+  void clear_debug();
+  const ::datastream::v1::Debug& debug() const;
+  ::datastream::v1::Debug* release_debug();
+  ::datastream::v1::Debug* mutable_debug();
+  void set_allocated_debug(::datastream::v1::Debug* debug);
+  private:
+  const ::datastream::v1::Debug& _internal_debug() const;
+  ::datastream::v1::Debug* _internal_mutable_debug();
+  public:
+  void unsafe_arena_set_allocated_debug(
+      ::datastream::v1::Debug* debug);
+  ::datastream::v1::Debug* unsafe_arena_release_debug();
+
   // uint64 number = 1;
   void clear_number();
   ::PROTOBUF_NAMESPACE_ID::uint64 number() const;
@@ -271,7 +322,7 @@ class BatchStart PROTOBUF_FINAL :
   void _internal_set_number(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 fork_id = 4;
+  // uint64 fork_id = 3;
   void clear_fork_id();
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id() const;
   void set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -280,13 +331,22 @@ class BatchStart PROTOBUF_FINAL :
   void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 chain_id = 5;
+  // uint64 chain_id = 4;
   void clear_chain_id();
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id() const;
   void set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
   ::PROTOBUF_NAMESPACE_ID::uint64 _internal_chain_id() const;
   void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // .datastream.v1.BatchType type = 2;
+  void clear_type();
+  ::datastream::v1::BatchType type() const;
+  void set_type(::datastream::v1::BatchType value);
+  private:
+  ::datastream::v1::BatchType _internal_type() const;
+  void _internal_set_type(::datastream::v1::BatchType value);
   public:
 
   // @@protoc_insertion_point(class_scope:datastream.v1.BatchStart)
@@ -296,9 +356,11 @@ class BatchStart PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::datastream::v1::Debug* debug_;
   ::PROTOBUF_NAMESPACE_ID::uint64 number_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
+  int type_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_datastream_2eproto;
 };
@@ -419,6 +481,7 @@ class BatchEnd PROTOBUF_FINAL :
   enum : int {
     kLocalExitRootFieldNumber = 2,
     kStateRootFieldNumber = 3,
+    kDebugFieldNumber = 4,
     kNumberFieldNumber = 1,
   };
   // bytes local_exit_root = 2;
@@ -471,6 +534,24 @@ class BatchEnd PROTOBUF_FINAL :
   std::string* _internal_mutable_state_root();
   public:
 
+  // .datastream.v1.Debug debug = 4;
+  bool has_debug() const;
+  private:
+  bool _internal_has_debug() const;
+  public:
+  void clear_debug();
+  const ::datastream::v1::Debug& debug() const;
+  ::datastream::v1::Debug* release_debug();
+  ::datastream::v1::Debug* mutable_debug();
+  void set_allocated_debug(::datastream::v1::Debug* debug);
+  private:
+  const ::datastream::v1::Debug& _internal_debug() const;
+  ::datastream::v1::Debug* _internal_mutable_debug();
+  public:
+  void unsafe_arena_set_allocated_debug(
+      ::datastream::v1::Debug* debug);
+  ::datastream::v1::Debug* unsafe_arena_release_debug();
+
   // uint64 number = 1;
   void clear_number();
   ::PROTOBUF_NAMESPACE_ID::uint64 number() const;
@@ -489,6 +570,7 @@ class BatchEnd PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr local_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
+  ::datastream::v1::Debug* debug_;
   ::PROTOBUF_NAMESPACE_ID::uint64 number_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_datastream_2eproto;
@@ -613,12 +695,15 @@ class L2Block PROTOBUF_FINAL :
     kStateRootFieldNumber = 9,
     kGlobalExitRootFieldNumber = 10,
     kCoinbaseFieldNumber = 11,
+    kBlockInfoRootFieldNumber = 13,
+    kDebugFieldNumber = 14,
     kNumberFieldNumber = 1,
     kBatchNumberFieldNumber = 2,
     kTimestampFieldNumber = 3,
     kMinTimestampFieldNumber = 5,
     kDeltaTimestampFieldNumber = 4,
     kL1InfotreeIndexFieldNumber = 7,
+    kBlockGasLimitFieldNumber = 12,
   };
   // bytes l1_blockhash = 6;
   void clear_l1_blockhash();
@@ -745,6 +830,49 @@ class L2Block PROTOBUF_FINAL :
   std::string* _internal_mutable_coinbase();
   public:
 
+  // bytes block_info_root = 13;
+  void clear_block_info_root();
+  const std::string& block_info_root() const;
+  void set_block_info_root(const std::string& value);
+  void set_block_info_root(std::string&& value);
+  void set_block_info_root(const char* value);
+  void set_block_info_root(const void* value, size_t size);
+  std::string* mutable_block_info_root();
+  std::string* release_block_info_root();
+  void set_allocated_block_info_root(std::string* block_info_root);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_block_info_root();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_block_info_root(
+      std::string* block_info_root);
+  private:
+  const std::string& _internal_block_info_root() const;
+  void _internal_set_block_info_root(const std::string& value);
+  std::string* _internal_mutable_block_info_root();
+  public:
+
+  // .datastream.v1.Debug debug = 14;
+  bool has_debug() const;
+  private:
+  bool _internal_has_debug() const;
+  public:
+  void clear_debug();
+  const ::datastream::v1::Debug& debug() const;
+  ::datastream::v1::Debug* release_debug();
+  ::datastream::v1::Debug* mutable_debug();
+  void set_allocated_debug(::datastream::v1::Debug* debug);
+  private:
+  const ::datastream::v1::Debug& _internal_debug() const;
+  ::datastream::v1::Debug* _internal_mutable_debug();
+  public:
+  void unsafe_arena_set_allocated_debug(
+      ::datastream::v1::Debug* debug);
+  ::datastream::v1::Debug* unsafe_arena_release_debug();
+
   // uint64 number = 1;
   void clear_number();
   ::PROTOBUF_NAMESPACE_ID::uint64 number() const;
@@ -799,6 +927,15 @@ class L2Block PROTOBUF_FINAL :
   void _internal_set_l1_infotree_index(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
+  // uint64 block_gas_limit = 12;
+  void clear_block_gas_limit();
+  ::PROTOBUF_NAMESPACE_ID::uint64 block_gas_limit() const;
+  void set_block_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_block_gas_limit() const;
+  void _internal_set_block_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:datastream.v1.L2Block)
  private:
   class _Internal;
@@ -811,12 +948,15 @@ class L2Block PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr block_info_root_;
+  ::datastream::v1::Debug* debug_;
   ::PROTOBUF_NAMESPACE_ID::uint64 number_;
   ::PROTOBUF_NAMESPACE_ID::uint64 batch_number_;
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint64 min_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint32 delta_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint32 l1_infotree_index_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 block_gas_limit_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_datastream_2eproto;
 };
@@ -935,13 +1075,15 @@ class Transaction PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kEncodedFieldNumber = 3,
-    kImStateRootFieldNumber = 5,
+    kEncodedFieldNumber = 4,
+    kImStateRootFieldNumber = 6,
+    kDebugFieldNumber = 7,
     kL2BlockNumberFieldNumber = 1,
-    kIsValidFieldNumber = 2,
-    kEffectiveGasPricePercentageFieldNumber = 4,
+    kIndexFieldNumber = 2,
+    kIsValidFieldNumber = 3,
+    kEffectiveGasPricePercentageFieldNumber = 5,
   };
-  // bytes encoded = 3;
+  // bytes encoded = 4;
   void clear_encoded();
   const std::string& encoded() const;
   void set_encoded(const std::string& value);
@@ -966,7 +1108,7 @@ class Transaction PROTOBUF_FINAL :
   std::string* _internal_mutable_encoded();
   public:
 
-  // bytes im_state_root = 5;
+  // bytes im_state_root = 6;
   void clear_im_state_root();
   const std::string& im_state_root() const;
   void set_im_state_root(const std::string& value);
@@ -991,6 +1133,24 @@ class Transaction PROTOBUF_FINAL :
   std::string* _internal_mutable_im_state_root();
   public:
 
+  // .datastream.v1.Debug debug = 7;
+  bool has_debug() const;
+  private:
+  bool _internal_has_debug() const;
+  public:
+  void clear_debug();
+  const ::datastream::v1::Debug& debug() const;
+  ::datastream::v1::Debug* release_debug();
+  ::datastream::v1::Debug* mutable_debug();
+  void set_allocated_debug(::datastream::v1::Debug* debug);
+  private:
+  const ::datastream::v1::Debug& _internal_debug() const;
+  ::datastream::v1::Debug* _internal_mutable_debug();
+  public:
+  void unsafe_arena_set_allocated_debug(
+      ::datastream::v1::Debug* debug);
+  ::datastream::v1::Debug* unsafe_arena_release_debug();
+
   // uint64 l2block_number = 1;
   void clear_l2block_number();
   ::PROTOBUF_NAMESPACE_ID::uint64 l2block_number() const;
@@ -1000,7 +1160,16 @@ class Transaction PROTOBUF_FINAL :
   void _internal_set_l2block_number(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // bool is_valid = 2;
+  // uint64 index = 2;
+  void clear_index();
+  ::PROTOBUF_NAMESPACE_ID::uint64 index() const;
+  void set_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_index() const;
+  void _internal_set_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // bool is_valid = 3;
   void clear_is_valid();
   bool is_valid() const;
   void set_is_valid(bool value);
@@ -1009,7 +1178,7 @@ class Transaction PROTOBUF_FINAL :
   void _internal_set_is_valid(bool value);
   public:
 
-  // uint32 effective_gas_price_percentage = 4;
+  // uint32 effective_gas_price_percentage = 5;
   void clear_effective_gas_price_percentage();
   ::PROTOBUF_NAMESPACE_ID::uint32 effective_gas_price_percentage() const;
   void set_effective_gas_price_percentage(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -1027,7 +1196,9 @@ class Transaction PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr encoded_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr im_state_root_;
+  ::datastream::v1::Debug* debug_;
   ::PROTOBUF_NAMESPACE_ID::uint64 l2block_number_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 index_;
   bool is_valid_;
   ::PROTOBUF_NAMESPACE_ID::uint32 effective_gas_price_percentage_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -1151,6 +1322,7 @@ class UpdateGER PROTOBUF_FINAL :
     kGlobalExitRootFieldNumber = 3,
     kCoinbaseFieldNumber = 4,
     kStateRootFieldNumber = 7,
+    kDebugFieldNumber = 8,
     kBatchNumberFieldNumber = 1,
     kTimestampFieldNumber = 2,
     kForkIdFieldNumber = 5,
@@ -1231,6 +1403,24 @@ class UpdateGER PROTOBUF_FINAL :
   std::string* _internal_mutable_state_root();
   public:
 
+  // .datastream.v1.Debug debug = 8;
+  bool has_debug() const;
+  private:
+  bool _internal_has_debug() const;
+  public:
+  void clear_debug();
+  const ::datastream::v1::Debug& debug() const;
+  ::datastream::v1::Debug* release_debug();
+  ::datastream::v1::Debug* mutable_debug();
+  void set_allocated_debug(::datastream::v1::Debug* debug);
+  private:
+  const ::datastream::v1::Debug& _internal_debug() const;
+  ::datastream::v1::Debug* _internal_mutable_debug();
+  public:
+  void unsafe_arena_set_allocated_debug(
+      ::datastream::v1::Debug* debug);
+  ::datastream::v1::Debug* unsafe_arena_release_debug();
+
   // uint64 batch_number = 1;
   void clear_batch_number();
   ::PROTOBUF_NAMESPACE_ID::uint64 batch_number() const;
@@ -1277,6 +1467,7 @@ class UpdateGER PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
+  ::datastream::v1::Debug* debug_;
   ::PROTOBUF_NAMESPACE_ID::uint64 batch_number_;
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
@@ -1432,6 +1623,159 @@ class BookMark PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_datastream_2eproto;
 };
+// -------------------------------------------------------------------
+
+class Debug PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:datastream.v1.Debug) */ {
+ public:
+  inline Debug() : Debug(nullptr) {};
+  virtual ~Debug();
+
+  Debug(const Debug& from);
+  Debug(Debug&& from) noexcept
+    : Debug() {
+    *this = ::std::move(from);
+  }
+
+  inline Debug& operator=(const Debug& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Debug& operator=(Debug&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const Debug& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const Debug* internal_default_instance() {
+    return reinterpret_cast<const Debug*>(
+               &_Debug_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(Debug& a, Debug& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Debug* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Debug* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline Debug* New() const final {
+    return CreateMaybeMessage<Debug>(nullptr);
+  }
+
+  Debug* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Debug>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const Debug& from);
+  void MergeFrom(const Debug& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Debug* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "datastream.v1.Debug";
+  }
+  protected:
+  explicit Debug(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_datastream_2eproto);
+    return ::descriptor_table_datastream_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kMessageFieldNumber = 1,
+  };
+  // string message = 1;
+  void clear_message();
+  const std::string& message() const;
+  void set_message(const std::string& value);
+  void set_message(std::string&& value);
+  void set_message(const char* value);
+  void set_message(const char* value, size_t size);
+  std::string* mutable_message();
+  std::string* release_message();
+  void set_allocated_message(std::string* message);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_message();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_message(
+      std::string* message);
+  private:
+  const std::string& _internal_message() const;
+  void _internal_set_message(const std::string& value);
+  std::string* _internal_mutable_message();
+  public:
+
+  // @@protoc_insertion_point(class_scope:datastream.v1.Debug)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr message_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_datastream_2eproto;
+};
 // ===================================================================
 
 
@@ -1463,7 +1807,27 @@ inline void BatchStart::set_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:datastream.v1.BatchStart.number)
 }
 
-// uint64 fork_id = 4;
+// .datastream.v1.BatchType type = 2;
+inline void BatchStart::clear_type() {
+  type_ = 0;
+}
+inline ::datastream::v1::BatchType BatchStart::_internal_type() const {
+  return static_cast< ::datastream::v1::BatchType >(type_);
+}
+inline ::datastream::v1::BatchType BatchStart::type() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.BatchStart.type)
+  return _internal_type();
+}
+inline void BatchStart::_internal_set_type(::datastream::v1::BatchType value) {
+  
+  type_ = value;
+}
+inline void BatchStart::set_type(::datastream::v1::BatchType value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:datastream.v1.BatchStart.type)
+}
+
+// uint64 fork_id = 3;
 inline void BatchStart::clear_fork_id() {
   fork_id_ = PROTOBUF_ULONGLONG(0);
 }
@@ -1483,7 +1847,7 @@ inline void BatchStart::set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:datastream.v1.BatchStart.fork_id)
 }
 
-// uint64 chain_id = 5;
+// uint64 chain_id = 4;
 inline void BatchStart::clear_chain_id() {
   chain_id_ = PROTOBUF_ULONGLONG(0);
 }
@@ -1501,6 +1865,87 @@ inline void BatchStart::_internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 v
 inline void BatchStart::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_chain_id(value);
   // @@protoc_insertion_point(field_set:datastream.v1.BatchStart.chain_id)
+}
+
+// .datastream.v1.Debug debug = 5;
+inline bool BatchStart::_internal_has_debug() const {
+  return this != internal_default_instance() && debug_ != nullptr;
+}
+inline bool BatchStart::has_debug() const {
+  return _internal_has_debug();
+}
+inline void BatchStart::clear_debug() {
+  if (GetArena() == nullptr && debug_ != nullptr) {
+    delete debug_;
+  }
+  debug_ = nullptr;
+}
+inline const ::datastream::v1::Debug& BatchStart::_internal_debug() const {
+  const ::datastream::v1::Debug* p = debug_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::datastream::v1::Debug*>(
+      &::datastream::v1::_Debug_default_instance_);
+}
+inline const ::datastream::v1::Debug& BatchStart::debug() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.BatchStart.debug)
+  return _internal_debug();
+}
+inline void BatchStart::unsafe_arena_set_allocated_debug(
+    ::datastream::v1::Debug* debug) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(debug_);
+  }
+  debug_ = debug;
+  if (debug) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.BatchStart.debug)
+}
+inline ::datastream::v1::Debug* BatchStart::release_debug() {
+  auto temp = unsafe_arena_release_debug();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::datastream::v1::Debug* BatchStart::unsafe_arena_release_debug() {
+  // @@protoc_insertion_point(field_release:datastream.v1.BatchStart.debug)
+  
+  ::datastream::v1::Debug* temp = debug_;
+  debug_ = nullptr;
+  return temp;
+}
+inline ::datastream::v1::Debug* BatchStart::_internal_mutable_debug() {
+  
+  if (debug_ == nullptr) {
+    auto* p = CreateMaybeMessage<::datastream::v1::Debug>(GetArena());
+    debug_ = p;
+  }
+  return debug_;
+}
+inline ::datastream::v1::Debug* BatchStart::mutable_debug() {
+  // @@protoc_insertion_point(field_mutable:datastream.v1.BatchStart.debug)
+  return _internal_mutable_debug();
+}
+inline void BatchStart::set_allocated_debug(::datastream::v1::Debug* debug) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete debug_;
+  }
+  if (debug) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(debug);
+    if (message_arena != submessage_arena) {
+      debug = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, debug, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  debug_ = debug;
+  // @@protoc_insertion_point(field_set_allocated:datastream.v1.BatchStart.debug)
 }
 
 // -------------------------------------------------------------------
@@ -1687,6 +2132,87 @@ inline void BatchEnd::unsafe_arena_set_allocated_state_root(
   state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       state_root, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.BatchEnd.state_root)
+}
+
+// .datastream.v1.Debug debug = 4;
+inline bool BatchEnd::_internal_has_debug() const {
+  return this != internal_default_instance() && debug_ != nullptr;
+}
+inline bool BatchEnd::has_debug() const {
+  return _internal_has_debug();
+}
+inline void BatchEnd::clear_debug() {
+  if (GetArena() == nullptr && debug_ != nullptr) {
+    delete debug_;
+  }
+  debug_ = nullptr;
+}
+inline const ::datastream::v1::Debug& BatchEnd::_internal_debug() const {
+  const ::datastream::v1::Debug* p = debug_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::datastream::v1::Debug*>(
+      &::datastream::v1::_Debug_default_instance_);
+}
+inline const ::datastream::v1::Debug& BatchEnd::debug() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.BatchEnd.debug)
+  return _internal_debug();
+}
+inline void BatchEnd::unsafe_arena_set_allocated_debug(
+    ::datastream::v1::Debug* debug) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(debug_);
+  }
+  debug_ = debug;
+  if (debug) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.BatchEnd.debug)
+}
+inline ::datastream::v1::Debug* BatchEnd::release_debug() {
+  auto temp = unsafe_arena_release_debug();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::datastream::v1::Debug* BatchEnd::unsafe_arena_release_debug() {
+  // @@protoc_insertion_point(field_release:datastream.v1.BatchEnd.debug)
+  
+  ::datastream::v1::Debug* temp = debug_;
+  debug_ = nullptr;
+  return temp;
+}
+inline ::datastream::v1::Debug* BatchEnd::_internal_mutable_debug() {
+  
+  if (debug_ == nullptr) {
+    auto* p = CreateMaybeMessage<::datastream::v1::Debug>(GetArena());
+    debug_ = p;
+  }
+  return debug_;
+}
+inline ::datastream::v1::Debug* BatchEnd::mutable_debug() {
+  // @@protoc_insertion_point(field_mutable:datastream.v1.BatchEnd.debug)
+  return _internal_mutable_debug();
+}
+inline void BatchEnd::set_allocated_debug(::datastream::v1::Debug* debug) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete debug_;
+  }
+  if (debug) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(debug);
+    if (message_arena != submessage_arena) {
+      debug = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, debug, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  debug_ = debug;
+  // @@protoc_insertion_point(field_set_allocated:datastream.v1.BatchEnd.debug)
 }
 
 // -------------------------------------------------------------------
@@ -2218,6 +2744,188 @@ inline void L2Block::unsafe_arena_set_allocated_coinbase(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.L2Block.coinbase)
 }
 
+// uint64 block_gas_limit = 12;
+inline void L2Block::clear_block_gas_limit() {
+  block_gas_limit_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 L2Block::_internal_block_gas_limit() const {
+  return block_gas_limit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 L2Block::block_gas_limit() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.L2Block.block_gas_limit)
+  return _internal_block_gas_limit();
+}
+inline void L2Block::_internal_set_block_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  block_gas_limit_ = value;
+}
+inline void L2Block::set_block_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_block_gas_limit(value);
+  // @@protoc_insertion_point(field_set:datastream.v1.L2Block.block_gas_limit)
+}
+
+// bytes block_info_root = 13;
+inline void L2Block::clear_block_info_root() {
+  block_info_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& L2Block::block_info_root() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.L2Block.block_info_root)
+  return _internal_block_info_root();
+}
+inline void L2Block::set_block_info_root(const std::string& value) {
+  _internal_set_block_info_root(value);
+  // @@protoc_insertion_point(field_set:datastream.v1.L2Block.block_info_root)
+}
+inline std::string* L2Block::mutable_block_info_root() {
+  // @@protoc_insertion_point(field_mutable:datastream.v1.L2Block.block_info_root)
+  return _internal_mutable_block_info_root();
+}
+inline const std::string& L2Block::_internal_block_info_root() const {
+  return block_info_root_.Get();
+}
+inline void L2Block::_internal_set_block_info_root(const std::string& value) {
+  
+  block_info_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void L2Block::set_block_info_root(std::string&& value) {
+  
+  block_info_root_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:datastream.v1.L2Block.block_info_root)
+}
+inline void L2Block::set_block_info_root(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  block_info_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:datastream.v1.L2Block.block_info_root)
+}
+inline void L2Block::set_block_info_root(const void* value,
+    size_t size) {
+  
+  block_info_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:datastream.v1.L2Block.block_info_root)
+}
+inline std::string* L2Block::_internal_mutable_block_info_root() {
+  
+  return block_info_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* L2Block::release_block_info_root() {
+  // @@protoc_insertion_point(field_release:datastream.v1.L2Block.block_info_root)
+  return block_info_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void L2Block::set_allocated_block_info_root(std::string* block_info_root) {
+  if (block_info_root != nullptr) {
+    
+  } else {
+    
+  }
+  block_info_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), block_info_root,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:datastream.v1.L2Block.block_info_root)
+}
+inline std::string* L2Block::unsafe_arena_release_block_info_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:datastream.v1.L2Block.block_info_root)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return block_info_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void L2Block::unsafe_arena_set_allocated_block_info_root(
+    std::string* block_info_root) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (block_info_root != nullptr) {
+    
+  } else {
+    
+  }
+  block_info_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      block_info_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.L2Block.block_info_root)
+}
+
+// .datastream.v1.Debug debug = 14;
+inline bool L2Block::_internal_has_debug() const {
+  return this != internal_default_instance() && debug_ != nullptr;
+}
+inline bool L2Block::has_debug() const {
+  return _internal_has_debug();
+}
+inline void L2Block::clear_debug() {
+  if (GetArena() == nullptr && debug_ != nullptr) {
+    delete debug_;
+  }
+  debug_ = nullptr;
+}
+inline const ::datastream::v1::Debug& L2Block::_internal_debug() const {
+  const ::datastream::v1::Debug* p = debug_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::datastream::v1::Debug*>(
+      &::datastream::v1::_Debug_default_instance_);
+}
+inline const ::datastream::v1::Debug& L2Block::debug() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.L2Block.debug)
+  return _internal_debug();
+}
+inline void L2Block::unsafe_arena_set_allocated_debug(
+    ::datastream::v1::Debug* debug) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(debug_);
+  }
+  debug_ = debug;
+  if (debug) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.L2Block.debug)
+}
+inline ::datastream::v1::Debug* L2Block::release_debug() {
+  auto temp = unsafe_arena_release_debug();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::datastream::v1::Debug* L2Block::unsafe_arena_release_debug() {
+  // @@protoc_insertion_point(field_release:datastream.v1.L2Block.debug)
+  
+  ::datastream::v1::Debug* temp = debug_;
+  debug_ = nullptr;
+  return temp;
+}
+inline ::datastream::v1::Debug* L2Block::_internal_mutable_debug() {
+  
+  if (debug_ == nullptr) {
+    auto* p = CreateMaybeMessage<::datastream::v1::Debug>(GetArena());
+    debug_ = p;
+  }
+  return debug_;
+}
+inline ::datastream::v1::Debug* L2Block::mutable_debug() {
+  // @@protoc_insertion_point(field_mutable:datastream.v1.L2Block.debug)
+  return _internal_mutable_debug();
+}
+inline void L2Block::set_allocated_debug(::datastream::v1::Debug* debug) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete debug_;
+  }
+  if (debug) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(debug);
+    if (message_arena != submessage_arena) {
+      debug = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, debug, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  debug_ = debug;
+  // @@protoc_insertion_point(field_set_allocated:datastream.v1.L2Block.debug)
+}
+
 // -------------------------------------------------------------------
 
 // Transaction
@@ -2242,7 +2950,27 @@ inline void Transaction::set_l2block_number(::PROTOBUF_NAMESPACE_ID::uint64 valu
   // @@protoc_insertion_point(field_set:datastream.v1.Transaction.l2block_number)
 }
 
-// bool is_valid = 2;
+// uint64 index = 2;
+inline void Transaction::clear_index() {
+  index_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 Transaction::_internal_index() const {
+  return index_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 Transaction::index() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.Transaction.index)
+  return _internal_index();
+}
+inline void Transaction::_internal_set_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  index_ = value;
+}
+inline void Transaction::set_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_index(value);
+  // @@protoc_insertion_point(field_set:datastream.v1.Transaction.index)
+}
+
+// bool is_valid = 3;
 inline void Transaction::clear_is_valid() {
   is_valid_ = false;
 }
@@ -2262,7 +2990,7 @@ inline void Transaction::set_is_valid(bool value) {
   // @@protoc_insertion_point(field_set:datastream.v1.Transaction.is_valid)
 }
 
-// bytes encoded = 3;
+// bytes encoded = 4;
 inline void Transaction::clear_encoded() {
   encoded_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -2343,7 +3071,7 @@ inline void Transaction::unsafe_arena_set_allocated_encoded(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.Transaction.encoded)
 }
 
-// uint32 effective_gas_price_percentage = 4;
+// uint32 effective_gas_price_percentage = 5;
 inline void Transaction::clear_effective_gas_price_percentage() {
   effective_gas_price_percentage_ = 0u;
 }
@@ -2363,7 +3091,7 @@ inline void Transaction::set_effective_gas_price_percentage(::PROTOBUF_NAMESPACE
   // @@protoc_insertion_point(field_set:datastream.v1.Transaction.effective_gas_price_percentage)
 }
 
-// bytes im_state_root = 5;
+// bytes im_state_root = 6;
 inline void Transaction::clear_im_state_root() {
   im_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -2442,6 +3170,87 @@ inline void Transaction::unsafe_arena_set_allocated_im_state_root(
   im_state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       im_state_root, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.Transaction.im_state_root)
+}
+
+// .datastream.v1.Debug debug = 7;
+inline bool Transaction::_internal_has_debug() const {
+  return this != internal_default_instance() && debug_ != nullptr;
+}
+inline bool Transaction::has_debug() const {
+  return _internal_has_debug();
+}
+inline void Transaction::clear_debug() {
+  if (GetArena() == nullptr && debug_ != nullptr) {
+    delete debug_;
+  }
+  debug_ = nullptr;
+}
+inline const ::datastream::v1::Debug& Transaction::_internal_debug() const {
+  const ::datastream::v1::Debug* p = debug_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::datastream::v1::Debug*>(
+      &::datastream::v1::_Debug_default_instance_);
+}
+inline const ::datastream::v1::Debug& Transaction::debug() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.Transaction.debug)
+  return _internal_debug();
+}
+inline void Transaction::unsafe_arena_set_allocated_debug(
+    ::datastream::v1::Debug* debug) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(debug_);
+  }
+  debug_ = debug;
+  if (debug) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.Transaction.debug)
+}
+inline ::datastream::v1::Debug* Transaction::release_debug() {
+  auto temp = unsafe_arena_release_debug();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::datastream::v1::Debug* Transaction::unsafe_arena_release_debug() {
+  // @@protoc_insertion_point(field_release:datastream.v1.Transaction.debug)
+  
+  ::datastream::v1::Debug* temp = debug_;
+  debug_ = nullptr;
+  return temp;
+}
+inline ::datastream::v1::Debug* Transaction::_internal_mutable_debug() {
+  
+  if (debug_ == nullptr) {
+    auto* p = CreateMaybeMessage<::datastream::v1::Debug>(GetArena());
+    debug_ = p;
+  }
+  return debug_;
+}
+inline ::datastream::v1::Debug* Transaction::mutable_debug() {
+  // @@protoc_insertion_point(field_mutable:datastream.v1.Transaction.debug)
+  return _internal_mutable_debug();
+}
+inline void Transaction::set_allocated_debug(::datastream::v1::Debug* debug) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete debug_;
+  }
+  if (debug) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(debug);
+    if (message_arena != submessage_arena) {
+      debug = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, debug, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  debug_ = debug;
+  // @@protoc_insertion_point(field_set_allocated:datastream.v1.Transaction.debug)
 }
 
 // -------------------------------------------------------------------
@@ -2771,6 +3580,87 @@ inline void UpdateGER::unsafe_arena_set_allocated_state_root(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.UpdateGER.state_root)
 }
 
+// .datastream.v1.Debug debug = 8;
+inline bool UpdateGER::_internal_has_debug() const {
+  return this != internal_default_instance() && debug_ != nullptr;
+}
+inline bool UpdateGER::has_debug() const {
+  return _internal_has_debug();
+}
+inline void UpdateGER::clear_debug() {
+  if (GetArena() == nullptr && debug_ != nullptr) {
+    delete debug_;
+  }
+  debug_ = nullptr;
+}
+inline const ::datastream::v1::Debug& UpdateGER::_internal_debug() const {
+  const ::datastream::v1::Debug* p = debug_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::datastream::v1::Debug*>(
+      &::datastream::v1::_Debug_default_instance_);
+}
+inline const ::datastream::v1::Debug& UpdateGER::debug() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.UpdateGER.debug)
+  return _internal_debug();
+}
+inline void UpdateGER::unsafe_arena_set_allocated_debug(
+    ::datastream::v1::Debug* debug) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(debug_);
+  }
+  debug_ = debug;
+  if (debug) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.UpdateGER.debug)
+}
+inline ::datastream::v1::Debug* UpdateGER::release_debug() {
+  auto temp = unsafe_arena_release_debug();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::datastream::v1::Debug* UpdateGER::unsafe_arena_release_debug() {
+  // @@protoc_insertion_point(field_release:datastream.v1.UpdateGER.debug)
+  
+  ::datastream::v1::Debug* temp = debug_;
+  debug_ = nullptr;
+  return temp;
+}
+inline ::datastream::v1::Debug* UpdateGER::_internal_mutable_debug() {
+  
+  if (debug_ == nullptr) {
+    auto* p = CreateMaybeMessage<::datastream::v1::Debug>(GetArena());
+    debug_ = p;
+  }
+  return debug_;
+}
+inline ::datastream::v1::Debug* UpdateGER::mutable_debug() {
+  // @@protoc_insertion_point(field_mutable:datastream.v1.UpdateGER.debug)
+  return _internal_mutable_debug();
+}
+inline void UpdateGER::set_allocated_debug(::datastream::v1::Debug* debug) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete debug_;
+  }
+  if (debug) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(debug);
+    if (message_arena != submessage_arena) {
+      debug = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, debug, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  debug_ = debug;
+  // @@protoc_insertion_point(field_set_allocated:datastream.v1.UpdateGER.debug)
+}
+
 // -------------------------------------------------------------------
 
 // BookMark
@@ -2815,9 +3705,96 @@ inline void BookMark::set_value(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:datastream.v1.BookMark.value)
 }
 
+// -------------------------------------------------------------------
+
+// Debug
+
+// string message = 1;
+inline void Debug::clear_message() {
+  message_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& Debug::message() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.Debug.message)
+  return _internal_message();
+}
+inline void Debug::set_message(const std::string& value) {
+  _internal_set_message(value);
+  // @@protoc_insertion_point(field_set:datastream.v1.Debug.message)
+}
+inline std::string* Debug::mutable_message() {
+  // @@protoc_insertion_point(field_mutable:datastream.v1.Debug.message)
+  return _internal_mutable_message();
+}
+inline const std::string& Debug::_internal_message() const {
+  return message_.Get();
+}
+inline void Debug::_internal_set_message(const std::string& value) {
+  
+  message_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void Debug::set_message(std::string&& value) {
+  
+  message_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:datastream.v1.Debug.message)
+}
+inline void Debug::set_message(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  message_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:datastream.v1.Debug.message)
+}
+inline void Debug::set_message(const char* value,
+    size_t size) {
+  
+  message_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:datastream.v1.Debug.message)
+}
+inline std::string* Debug::_internal_mutable_message() {
+  
+  return message_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* Debug::release_message() {
+  // @@protoc_insertion_point(field_release:datastream.v1.Debug.message)
+  return message_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Debug::set_allocated_message(std::string* message) {
+  if (message != nullptr) {
+    
+  } else {
+    
+  }
+  message_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), message,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:datastream.v1.Debug.message)
+}
+inline std::string* Debug::unsafe_arena_release_message() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:datastream.v1.Debug.message)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return message_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void Debug::unsafe_arena_set_allocated_message(
+    std::string* message) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (message != nullptr) {
+    
+  } else {
+    
+  }
+  message_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      message, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:datastream.v1.Debug.message)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
@@ -2845,6 +3822,11 @@ template <> struct is_proto_enum< ::datastream::v1::EntryType> : ::std::true_typ
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::datastream::v1::EntryType>() {
   return ::datastream::v1::EntryType_descriptor();
+}
+template <> struct is_proto_enum< ::datastream::v1::BatchType> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::datastream::v1::BatchType>() {
+  return ::datastream::v1::BatchType_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE
