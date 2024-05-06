@@ -61,6 +61,7 @@
 #define LOG_FULL_TRACER_ON_ERROR
 //#define LOG_TX_HASH
 //#define LOG_INPUT
+//#define LOG_ASSOCIATIVE_CACHE
 //LOG_SMT_KEY_DETAILS
 
 /* Prover defines */
