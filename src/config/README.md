@@ -165,6 +165,8 @@ The configuration parameters can be of different uses:
 |`cleanerPollingPeriod`|production|u64|Polling period of the cleaner thread that deletes completed Prover batches, in seconds|600|CLEANER_POLLING_PERIOD|
 |`requestsPersistence`|production|u64|Time that completed batches stay before being cleaned up|3600|REQUESTS_PERSISTENCE|
 |`maxExecutorThreads`|production|u64|Maximum number of GRPC Executor service threads|20|MAX_EXECUTOR_THREADS|
+|`maxExecutorReceiveMessageSize`|production|u64|Maximum size of GRPC Executor service receive message, in bytes|1024*1024*1024|MAX_EXECUTOR_RECEIVE_MESSAGE_SIZE|
+|`maxExecutorSendMessageSize`|production|u64|Maximum size of GRPC Executor service send message, in bytes; 0 means no limit|0|MAX_EXECUTOR_SEND_MESSAGE_SIZE|
 |`maxHashDBThreads`|production|u64|Maximum number of GRPC HashDB service threads|8|MAX_HASHDB_THREADS|
 |`fullTracerTraceReserveSize`|production|u64|Full tracer number of reserved traces|256*1024|FULL_TRACER_TRACE_RESERVE_SIZE|
 |`proverName`|production|string|Prover name, used to identy the prover when connecting to the Aggregator service|"UNSPECIFIED"|PROVER_NAME|

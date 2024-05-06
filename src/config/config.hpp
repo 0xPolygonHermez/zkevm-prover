@@ -189,6 +189,8 @@ public:
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
+    uint64_t maxExecutorReceiveMessageSize;
+    uint64_t maxExecutorSendMessageSize;
     uint64_t maxHashDBThreads;
     string proverName;
     uint64_t fullTracerTraceReserveSize;
