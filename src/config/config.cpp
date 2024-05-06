@@ -355,6 +355,8 @@ void Config::load(json &config)
     ParseU64(config, "cleanerPollingPeriod", "CLEANER_POLLING_PERIOD", cleanerPollingPeriod, 600);
     ParseU64(config, "requestsPersistence", "REQUESTS_PERSISTENCE", requestsPersistence, 3600);
     ParseU64(config, "maxExecutorThreads", "MAX_EXECUTOR_THREADS", maxExecutorThreads, 20);
+    ParseU64(config, "maxExecutorReceiveMessageSize", "MAX_EXECUTOR_RECEIVE_MESSAGE_SIZE", maxExecutorReceiveMessageSize, 1*1024*1024*1024);
+    ParseU64(config, "maxExecutorSendMessageSize", "MAX_EXECUTOR_SEND_MESSAGE_SIZE", maxExecutorSendMessageSize, 0);
     ParseU64(config, "maxHashDBThreads", "MAX_HASHDB_THREADS", maxHashDBThreads, 8);
 
     // Prover name, name of this instance as per configuration
@@ -621,6 +623,8 @@ void Config::print(void)
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));
+    zklog.info("    maxExecutorReceiveMessageSize=" + to_string(maxExecutorReceiveMessageSize));
+    zklog.info("    maxExecutorSendMessageSize=" + to_string(maxExecutorSendMessageSize));
     zklog.info("    maxHashDBThreads=" + to_string(maxHashDBThreads));
     zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
     zklog.info("    useAssociativeCache=" + to_string(useAssociativeCache));
