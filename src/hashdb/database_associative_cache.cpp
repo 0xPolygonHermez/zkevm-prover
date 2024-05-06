@@ -17,8 +17,8 @@ DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
     cacheSize = 0;
     indexes = NULL;
     keys = NULL;
-    values = NULL;
     isValidKey = NULL;
+    values = NULL;
     currentCacheIndex = 0;
 #ifdef LOG_ASSOCIATIVE_CACHE
     attempts = 0;
@@ -33,28 +33,11 @@ DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(uint32_t log2IndexesSize_
 {
     postConstruct(log2IndexesSize_, log2CacheSize_, name_);
 };
+
 DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(uint64_t cacheBytes_,string name_) :
 indexes(NULL), keys(NULL), isValidKey(NULL), values(NULL), currentCacheIndex(0), name(name_)
 {
-
-    // Each cache entrie requires 16 Goldiclosk::Elements, 4 for the key and 12 for the value
-    // This is 16*8 = 128 bytes
-    uint32_t log2IndexesSize_ = 0;
-    uint32_t log2CacheSize_ = 0;
-    for(uint64_t i=28; i>=1; --i){
-        uint64_t bytes = uint64_t(1<<i)*uint64_t(128)+uint64_t(1<<(i+3))*uint64_t(4);
-        if(bytes <= cacheBytes_){
-
-            int cacheMB = cacheBytes_/1024/1024;
-            int usedMB = bytes/1024/1024;
-            zklog.info( to_string(usedMB) + " MB of " + to_string(cacheMB) + " MB used for " + name_ + " associative cache. " + to_string(2*usedMB) + " MB should be exposed to efectively increase the cache size.");
-            log2IndexesSize_ = i+3;
-            log2CacheSize_ = i;
-            break;
-        }
-    }
-
-    postConstruct(log2IndexesSize_, log2CacheSize_, name_);
+    postConstruct(cacheBytes_, name_);
 }
 
 DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
@@ -139,6 +122,28 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
     auxBufferKeysValues.clear();
 
 };
+
+void DatabaseMTAssociativeCache::postConstruct(uint64_t cacheBytes_, string name_){
+    // Each cache entrie requires 16 Goldiclosk::Elements, 4 for the key and 12 for the value
+    // This is 16*8 = 128 bytes
+    uint32_t log2IndexesSize_ = 0;
+    uint32_t log2CacheSize_ = 0;
+    for(uint64_t i=28; i>=1; --i){
+        uint64_t bytes = uint64_t(1<<i)*uint64_t(128)+uint64_t(1<<(i+3))*uint64_t(4);
+        if(bytes <= cacheBytes_){
+
+            int cacheMB = cacheBytes_/1024/1024;
+            int usedMB = bytes/1024/1024;
+            zklog.info( to_string(usedMB) + " MB of " + to_string(cacheMB) + " MB used for " + name_ + " associative cache. " + to_string(2*usedMB) + " MB should be exposed to efectively increase the cache size.");
+            log2IndexesSize_ = i+3;
+            log2CacheSize_ = i;
+            break;
+        }
+    }
+    postConstruct(log2IndexesSize_, log2CacheSize_, name_);
+
+}
+
 
 void DatabaseMTAssociativeCache::clear(){
     unique_lock<shared_mutex> guard(mlock);
