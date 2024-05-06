@@ -24,23 +24,29 @@ class DatabaseMTAssociativeCache
         Goldilocks::Element *keys;
         bool *isValidKey;
         Goldilocks::Element *values;
-        uint32_t currentCacheIndex; 
+        uint32_t currentCacheIndex; //next index to be used acts as a clock for the cache
 
+#ifdef LOG_ASSOCIATIVE_CACHE
         uint64_t attempts;
         uint64_t hits;
+#endif
         string name;
 
         uint32_t indexesMask;
         uint32_t cacheMask;
 
         vector<Goldilocks::Element> auxBufferKeysValues;
+        // The buffer uses 17 slots for each key-value pair:
+        // 1 for the raw cache index, 4 for the key, 12 for the value
 
     public:
 
         DatabaseMTAssociativeCache();
-        DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_);
+        DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_ = "associative_cache");
+        DatabaseMTAssociativeCache(uint64_t cacheBytes_, string name_ = "associative_cache");
         ~DatabaseMTAssociativeCache();
         void postConstruct(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_);
+        void clear();
         
         inline void addKeyValue(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
         inline bool findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
@@ -49,27 +55,29 @@ class DatabaseMTAssociativeCache
         inline uint32_t getCacheSize()  const { return cacheSize; };
         inline uint32_t getIndexesSize() const { return indexesSize; };
         inline uint32_t getAuxBufferKeysValuesSize() const { return auxBufferKeysValues.size(); };
-        inline void clear();
 
     private:
-        bool findKey_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value, bool &reinsert);
         void addKeyValue_(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
+        bool findKey_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value, bool &reinsert);
         bool extractKeyValue_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
+        bool extractKeyValueFromAuxBuffer_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
         
-        inline bool isEmptySlot(uint32_t cacheIndexRaw) const { 
-            return  !isValidKey[cacheIndexRaw & cacheMask] || distanceToCurrentCacheIndex(cacheIndexRaw) > cacheSize ;
+         inline bool hasExpired_(uint32_t cacheIndexRaw) const { 
+            return  !isValidKey[cacheIndexRaw & cacheMask] || distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSize ;
          };
-        inline uint32_t distanceToCurrentCacheIndex(uint32_t cacheIndexRaw) const {
+        inline uint32_t distanceFromCurrentCacheIndex_(uint32_t cacheIndexRaw) const {
+            //note: currentCacheIndex is the next index to be used (not used yet)
             if(currentCacheIndex == cacheIndexRaw) return UINT32_MAX; //it should be UINT32_MAX + 1 but is out of range
             return (currentCacheIndex > cacheIndexRaw) ? currentCacheIndex - cacheIndexRaw : UINT32_MAX - cacheIndexRaw + currentCacheIndex + 1;
          };
-        void forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], uint32_t &iters, bool update);
-        inline void cleanAuxBufferKeysValues();
+        void forcedInsertion_(uint32_t (&usedRawCacheIndexes)[20], uint32_t &iters, bool update);
+        inline void cleanExpiredAuxBufferKeysValues_();
+
 };
 
 void DatabaseMTAssociativeCache::addKeyValue(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update){
-    //This wrapper is used to aviod using the lock_guard inside the addKeyValue_ function
-    shared_lock<shared_mutex> lock(mlock);
+    // This wrapper is used to avoid the necessity of using lock_guard within the addKeyValue_ function
+    unique_lock<shared_mutex> lock(mlock);
     addKeyValue_(key, value, update);
 }
 bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value){
@@ -82,12 +90,14 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
     if(reinsert){
         unique_lock<shared_mutex> lock(mlock);
         vector<Goldilocks::Element> values_;
-        bool found = extractKeyValue_(key, values_);
-        //I retrive the values againg (values_) to prevent situations in which the values could have been modified by another thread betxeen the findKey_ and the addKeyValue_
-        if(found) addKeyValue_(key, values_, false);
+
+        bool foundAgain = extractKeyValue_(key, values_);
+        // Retrieved the values again (values_) to prevent potential modifications 
+        // by another thread between the findKey_ and the addKeyValue_ operations
+        if(foundAgain) addKeyValue_(key, values_, false);
     }
 
-#ifdef LOG_CACHE
+#ifdef LOG_ASSOCIATIVE_CACHE
     mlock.lock();
     attempts++; 
     if(found){
@@ -108,24 +118,20 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
 
     return found;
 }
-void DatabaseMTAssociativeCache::clear(){
-    memset(isValidKey, 0, cacheSize * sizeof(bool));
-    auxBufferKeysValues.clear();
-    currentCacheIndex = 0;
+void DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() {
+    if(auxBufferKeysValues.size() == 0) return;
+    if(auxBufferKeysValues.size() % 17!= 0) {
+        zklog.error("DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() auxBufferKeysValues.size() % 17!= 0");
+        return;
+    }
+    auto it = auxBufferKeysValues.begin();
+    while (it != auxBufferKeysValues.end()) {
+        uint32_t cacheIndexRaw = static_cast<uint32_t>(it->fe);
+        if (hasExpired_(cacheIndexRaw)) {
+            it = auxBufferKeysValues.erase(it, it + 17);
+        } else {
+            std::advance(it, 17);
+        }
+    }
 }
-void DatabaseMTAssociativeCache::cleanAuxBufferKeysValues(){
-            auto it = auxBufferKeysValues.begin();
-            while (it < auxBufferKeysValues.end()) {
-                if (isEmptySlot(static_cast<uint32_t>(it->fe))) {
-                    auto next_it = (std::distance(it, auxBufferKeysValues.end()) >= 17) ? it + 17 : auxBufferKeysValues.end();
-                    it = auxBufferKeysValues.erase(it, next_it);
-                } else {
-                    if (std::distance(it, auxBufferKeysValues.end()) >= 17) {
-                        it += 17;
-                    } else {
-                        it = auxBufferKeysValues.end();
-                    }
-                }
-            }
-        };
 #endif

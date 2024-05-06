@@ -20,17 +20,42 @@ DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
     values = NULL;
     isValidKey = NULL;
     currentCacheIndex = 0;
+#ifdef LOG_ASSOCIATIVE_CACHE
     attempts = 0;
     hits = 0;
+#endif
     name = "";
     auxBufferKeysValues.clear();
 };
 
 DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(uint32_t log2IndexesSize_, uint32_t log2CacheSize_, string name_) :
-    indexes(NULL), keys(NULL), isValidKey(NULL), values(NULL), currentCacheIndex(0), attempts(0), hits(0), name(name_)
+    indexes(NULL), keys(NULL), isValidKey(NULL), values(NULL), currentCacheIndex(0), name(name_)
 {
     postConstruct(log2IndexesSize_, log2CacheSize_, name_);
 };
+DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(uint64_t cacheBytes_,string name_) :
+indexes(NULL), keys(NULL), isValidKey(NULL), values(NULL), currentCacheIndex(0), name(name_)
+{
+
+    // Each cache entrie requires 16 Goldiclosk::Elements, 4 for the key and 12 for the value
+    // This is 16*8 = 128 bytes
+    uint32_t log2IndexesSize_ = 0;
+    uint32_t log2CacheSize_ = 0;
+    for(uint64_t i=28; i>=1; --i){
+        uint64_t bytes = uint64_t(1<<i)*uint64_t(128)+uint64_t(1<<(i+3))*uint64_t(4);
+        if(bytes <= cacheBytes_){
+
+            int cacheMB = cacheBytes_/1024/1024;
+            int usedMB = bytes/1024/1024;
+            zklog.info( to_string(usedMB) + " MB of " + to_string(cacheMB) + " MB used for " + name_ + " associative cache. " + to_string(2*usedMB) + " MB should be exposed to efectively increase the cache size.");
+            log2IndexesSize_ = i+3;
+            log2CacheSize_ = i;
+            break;
+        }
+    }
+
+    postConstruct(log2IndexesSize_, log2CacheSize_, name_);
+}
 
 DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
 {
@@ -79,8 +104,8 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
     if(indexes == NULL){
         indexes = new uint32_t[indexesSize];
     }
-    //initialization of indexes array with UINT32_MAX-cacheSize: the value that is at distance
-    //cacheSize+1 from the initial currentCacheIndex, i.e. 0
+    // initialization of indexes array with UINT32_MAX-cacheSize: the value
+    // that is at distance cacheSize+1 from the initial currentCacheIndex, i.e. 0
     uint32_t initValue = UINT32_MAX-cacheSize;
     #pragma omp parallel for schedule(static) num_threads(4)
     for (size_t i = 0; i < indexesSize; i++)
@@ -101,8 +126,10 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
     }
 
     currentCacheIndex = 0;
+#ifdef LOG_ASSOCIATIVE_CACHE
     attempts = 0;
     hits = 0;
+#endif
     name = name_;
     
     //masks for fast module, note cache size and indexes size must be power of 2
@@ -113,6 +140,18 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
 
 };
 
+void DatabaseMTAssociativeCache::clear(){
+    unique_lock<shared_mutex> guard(mlock);
+    memset(isValidKey, 0, cacheSize * sizeof(bool));
+    uint32_t initValue = UINT32_MAX-cacheSize;
+    #pragma omp parallel for schedule(static) num_threads(4)
+    for (size_t i = 0; i < indexesSize; i++)
+    {
+        indexes[i] = initValue;
+    }
+    auxBufferKeysValues.clear();
+    currentCacheIndex = 0;
+}
 
 bool DatabaseMTAssociativeCache::extractKeyValue_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
 {
@@ -122,31 +161,7 @@ bool DatabaseMTAssociativeCache::extractKeyValue_(const Goldilocks::Element (&ke
     // for this reason this search is not optimized at all
     //
     if(auxBufferKeysValues.size() > 0){ 
-        for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
-
-            if( !isEmptySlot(((uint32_t)(auxBufferKeysValues[i].fe))) &&
-                auxBufferKeysValues[i+1].fe == key[0].fe &&
-                auxBufferKeysValues[i+2].fe == key[1].fe &&
-                auxBufferKeysValues[i+3].fe == key[2].fe &&
-                auxBufferKeysValues[i+4].fe == key[3].fe){
-                value.resize(12);
-                value[0] = auxBufferKeysValues[i+5];
-                value[1] = auxBufferKeysValues[i+6];
-                value[2] = auxBufferKeysValues[i+7];
-                value[3] = auxBufferKeysValues[i+8];
-                value[4] = auxBufferKeysValues[i+9];
-                value[5] = auxBufferKeysValues[i+10];
-                value[6] = auxBufferKeysValues[i+11];
-                value[7] = auxBufferKeysValues[i+12];
-                value[8] = auxBufferKeysValues[i+13];
-                value[9] = auxBufferKeysValues[i+14];
-                value[10] = auxBufferKeysValues[i+15];
-                value[11] = auxBufferKeysValues[i+16];
-                //erase the value
-                auxBufferKeysValues.erase(auxBufferKeysValues.begin() + i, auxBufferKeysValues.begin() + i + 17);   
-                found=true;
-            }
-        } 
+        found = extractKeyValueFromAuxBuffer_(key,value);
     }
     //
     // Look at the circulant buffer
@@ -155,7 +170,7 @@ bool DatabaseMTAssociativeCache::extractKeyValue_(const Goldilocks::Element (&ke
         for (int i = 0; i < 4; i++)
         {
             uint32_t cacheIndexRaw = indexes[key[i].fe & indexesMask];
-            if (isEmptySlot(cacheIndexRaw)) continue;
+            if (hasExpired_(cacheIndexRaw)) continue;
             
             uint32_t cacheIndex = cacheIndexRaw  & cacheMask;
             uint32_t cacheIndexKey = cacheIndex * 4;
@@ -186,8 +201,48 @@ bool DatabaseMTAssociativeCache::extractKeyValue_(const Goldilocks::Element (&ke
     return found;
 }
 
+bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value){
+    bool found = false;    
+    //
+    // look at the auxBufferKeysValues (chances that this buffer has any entry are almost negligible),
+    // for this reason this search is not optimized at all
+    //
+    if(auxBufferKeysValues.size() > 0){ 
+        for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
+
+            if( !hasExpired_(((uint32_t)(auxBufferKeysValues[i].fe))) &&
+                auxBufferKeysValues[i+1].fe == key[0].fe &&
+                auxBufferKeysValues[i+2].fe == key[1].fe &&
+                auxBufferKeysValues[i+3].fe == key[2].fe &&
+                auxBufferKeysValues[i+4].fe == key[3].fe){
+                value.resize(12);
+                value[0] = auxBufferKeysValues[i+5];
+                value[1] = auxBufferKeysValues[i+6];
+                value[2] = auxBufferKeysValues[i+7];
+                value[3] = auxBufferKeysValues[i+8];
+                value[4] = auxBufferKeysValues[i+9];
+                value[5] = auxBufferKeysValues[i+10];
+                value[6] = auxBufferKeysValues[i+11];
+                value[7] = auxBufferKeysValues[i+12];
+                value[8] = auxBufferKeysValues[i+13];
+                value[9] = auxBufferKeysValues[i+14];
+                value[10] = auxBufferKeysValues[i+15];
+                value[11] = auxBufferKeysValues[i+16];
+                //erase the value
+                auxBufferKeysValues.erase(auxBufferKeysValues.begin() + i, auxBufferKeysValues.begin() + i + 17);   
+                found=true;
+            }
+        } 
+    }
+    return found;
+}
+
 void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
 {
+    if(auxBufferKeysValues.size() > 0){
+        vector<Goldilocks::Element> value_;
+        extractKeyValueFromAuxBuffer_(key,value_);
+    }
     bool emptySlot = false;
     bool present = false;
     uint32_t cacheIndex;
@@ -201,14 +256,14 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
         uint32_t tableIndex = key[i].fe & indexesMask;
         uint32_t cacheIndexRaw = indexes[tableIndex];
 
-        if (!isEmptySlot(cacheIndexRaw)){
+        if (!hasExpired_(cacheIndexRaw)){
             cacheIndex = cacheIndexRaw & cacheMask;
             uint32_t cacheIndexKey = cacheIndex * 4;
             if( keys[cacheIndexKey + 0].fe == key[0].fe &&
                 keys[cacheIndexKey + 1].fe == key[1].fe &&
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
                 keys[cacheIndexKey + 3].fe == key[3].fe){
-                    if(distanceToCurrentCacheIndex(cacheIndexRaw) > cacheSizeDiv2){
+                    if(distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSizeDiv2){
                         //
                         // It is present but it is far from the currentCacheIndex, so we need to reinsert it
                         //
@@ -278,14 +333,13 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
         uint32_t iter = 0;
         uint32_t usedRawCacheIndexes[20]; // we will do at maximum 20 iterations
         usedRawCacheIndexes[0] = (currentCacheIndex == 0) ? UINT32_MAX : currentCacheIndex-1;
-        forcedInsertion(usedRawCacheIndexes, iter, update);
+        forcedInsertion_(usedRawCacheIndexes, iter, update);
     }
     //
     // Clear empty auxBufferKeysValues slots (the probability of auxBufferKeysValues.size() > 0 is almost negligible)
     //
     if(auxBufferKeysValues.size() > 0){
-        cleanAuxBufferKeysValues();
-
+        cleanExpiredAuxBufferKeysValues_();
     }
 }
 
@@ -293,7 +347,7 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
 // each call is multiplied by roughly 1/2**9 (three new keys are checks and I assume the ratio cacheSize/indexesSize 
 // is 1/8). With this rough estimation the probablilty of requiring 20 iterations would be 1/2**180. If, after 20 
 // iterations is not possible to find a free slot, the entry is added to the auxBufferKeysValues vector.
-void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[20], uint32_t &iters, bool update)
+void DatabaseMTAssociativeCache::forcedInsertion_(uint32_t (&usedRawCacheIndexes)[20], uint32_t &iters, bool update)
 {
     uint32_t inputRawCacheIndex = usedRawCacheIndexes[iters];
     iters++;
@@ -310,7 +364,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     {
         uint32_t tableIndex_ = inputKey[i].fe & indexesMask;
         uint32_t rawCacheIndex_ = indexes[tableIndex_];
-        if (isEmptySlot(rawCacheIndex_))
+        if (hasExpired_(rawCacheIndex_))
         {
             indexes[tableIndex_] = inputRawCacheIndex;
             return;
@@ -339,14 +393,14 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     //
     if (iters >=20 || pos == -1)
     {
-        zklog.warning("forcedInsertion() maxForcedInsertionIterations reached");
+        zklog.warning("forcedInsertion_() maxforcedInsertion_Iterations reached");
         Goldilocks::Element *buffKey = &keys[(inputRawCacheIndex & cacheMask) * 4];
         Goldilocks::Element *buffValue = &values[(inputRawCacheIndex & cacheMask) * 12];
         
         // check first if there is an slot in the vector where the key is already present
         int pos = -1;
         for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
-            if( isEmptySlot(((uint32_t)(auxBufferKeysValues[i].fe)))){
+            if( hasExpired_(((uint32_t)(auxBufferKeysValues[i].fe)))){
                 if(pos < 0) pos = i;
             }else{
                 if( auxBufferKeysValues[i+1].fe == buffKey[0].fe &&
@@ -400,7 +454,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     }else{
         indexes[(uint32_t)(inputKey[pos].fe & indexesMask)] = inputRawCacheIndex;
         usedRawCacheIndexes[iters] = minRawCacheIndex; //new cache element to add in the indexes table
-        forcedInsertion(usedRawCacheIndexes, iters, update);
+        forcedInsertion_(usedRawCacheIndexes, iters, update);
     }
 }
 
@@ -413,9 +467,12 @@ bool DatabaseMTAssociativeCache::findKey_(const Goldilocks::Element (&key)[4], v
     // for this reason this search is not optimized at all
     //
     if(auxBufferKeysValues.size() > 0){ 
+        if(auxBufferKeysValues.size() % 17!= 0) {
+            zklog.error("DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() auxBufferKeysValues.size() % 17!= 0");
+        }
         for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
-
-            if( !isEmptySlot(((uint32_t)(auxBufferKeysValues[i].fe))) &&
+            
+            if( !hasExpired_(((uint32_t)(auxBufferKeysValues[i].fe))) &&
                 auxBufferKeysValues[i+1].fe == key[0].fe &&
                 auxBufferKeysValues[i+2].fe == key[1].fe &&
                 auxBufferKeysValues[i+3].fe == key[2].fe &&
@@ -434,7 +491,7 @@ bool DatabaseMTAssociativeCache::findKey_(const Goldilocks::Element (&key)[4], v
                 value[10] = auxBufferKeysValues[i+15];
                 value[11] = auxBufferKeysValues[i+16];
                 found=true;
-                if(distanceToCurrentCacheIndex((uint32_t)(auxBufferKeysValues[i].fe)) > cacheSizeDiv2){
+                if(distanceFromCurrentCacheIndex_((uint32_t)(auxBufferKeysValues[i].fe)) > cacheSizeDiv2){
                     reinsert = true;
                 }
                 break;
@@ -448,7 +505,7 @@ bool DatabaseMTAssociativeCache::findKey_(const Goldilocks::Element (&key)[4], v
         for (int i = 0; i < 4; i++)
         {
             uint32_t cacheIndexRaw = indexes[key[i].fe & indexesMask];
-            if (isEmptySlot(cacheIndexRaw)) continue;
+            if (hasExpired_(cacheIndexRaw)) continue;
             
             uint32_t cacheIndex = cacheIndexRaw  & cacheMask;
             uint32_t cacheIndexKey = cacheIndex * 4;
@@ -473,7 +530,7 @@ bool DatabaseMTAssociativeCache::findKey_(const Goldilocks::Element (&key)[4], v
                 value[10] = values[cacheIndexValue + 10];
                 value[11] = values[cacheIndexValue + 11];
                 found=true;
-                if(distanceToCurrentCacheIndex(cacheIndexRaw) > cacheSizeDiv2){
+                if(distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSizeDiv2){
                     reinsert = true;
                 }
             }
