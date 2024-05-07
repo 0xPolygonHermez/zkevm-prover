@@ -24,7 +24,7 @@ class DatabaseMTAssociativeCache
         Goldilocks::Element *keys;
         bool *isValidKey;
         Goldilocks::Element *values;
-        uint32_t currentCacheIndex; //next index to be used acts as a clock for the cache
+        uint32_t currentCacheIndex; //next index to be used (acts as a clock for the cache)
 
 #ifdef LOG_ASSOCIATIVE_CACHE
         uint64_t attempts;

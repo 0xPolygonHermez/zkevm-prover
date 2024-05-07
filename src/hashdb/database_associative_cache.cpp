@@ -207,7 +207,6 @@ bool DatabaseMTAssociativeCache::extractKeyValue_(const Goldilocks::Element (&ke
 }
 
 bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value){
-    bool found = false;    
     //
     // look at the auxBufferKeysValues (chances that this buffer has any entry are almost negligible),
     // for this reason this search is not optimized at all
@@ -235,11 +234,11 @@ bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks:
                 value[11] = auxBufferKeysValues[i+16];
                 //erase the value
                 auxBufferKeysValues.erase(auxBufferKeysValues.begin() + i, auxBufferKeysValues.begin() + i + 17);   
-                found=true;
+                return true;
             }
         } 
     }
-    return found;
+    return false;
 }
 
 void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
