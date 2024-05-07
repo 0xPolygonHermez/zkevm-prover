@@ -304,7 +304,7 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
     //
     // Add value
     //
-    isValidKey[cacheIndex] = true;
+    if(!isValidKey[cacheIndex]) isValidKey[cacheIndex] = true; //avoid modify if uneccessary (cache effects)
     keys[cacheIndexKey + 0].fe = key[0].fe;
     keys[cacheIndexKey + 1].fe = key[1].fe;
     keys[cacheIndexKey + 2].fe = key[2].fe;
