@@ -410,46 +410,6 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
         return false;
     }
 
-    // Get data stream
-    pProverRequest->input.publicInputsExtended.publicInputs.dataStream = genStatelessBatchProofRequest.input().public_inputs().data_stream();
-    if (pProverRequest->input.publicInputsExtended.publicInputs.dataStream.empty())
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() got an empty data stream", &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-
-    // Parse data stream and get a binary structure
-    DataStreamBatch batch;
-    zkr = dataStream2batch(pProverRequest->input.publicInputsExtended.publicInputs.dataStream, batch);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() failed calling dataStream2batch() result=" + zkresult2string(zkr), &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-    if (batch.blocks.empty())
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() called dataStream2batch() but got zero blocks=", &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-
-    // Get batchL2Data
-    zkr = dataStreamBatch2batchL2Data(batch, pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() failed calling dataStreamBatch2batchL2Data() result=" + zkresult2string(zkr), &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-    if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() found batchL2Data.size()=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE), &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-
     // Get oldAccInputHash
     if (genStatelessBatchProofRequest.input().public_inputs().old_acc_input_hash().size() > 32)
     {
@@ -460,16 +420,10 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash, genStatelessBatchProofRequest.input().public_inputs().old_acc_input_hash());
 
     // Get oldBatchNum
-    if (batch.batchNumber == 0)
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() called dataStream2batch() but got batch.batchNumber=0", &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-    pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber - 1;
+    pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = genStatelessBatchProofRequest.input().public_inputs().old_batch_num();
 
     // Get chain ID
-    pProverRequest->input.publicInputsExtended.publicInputs.chainID = batch.chainId;
+    pProverRequest->input.publicInputsExtended.publicInputs.chainID = genStatelessBatchProofRequest.input().public_inputs().chain_id();
     if (pProverRequest->input.publicInputsExtended.publicInputs.chainID == 0)
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() got chainID = 0");
@@ -478,7 +432,7 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     }
 
     // Get fork ID
-    pProverRequest->input.publicInputsExtended.publicInputs.forkID = batch.forkId;
+    pProverRequest->input.publicInputsExtended.publicInputs.forkID = genStatelessBatchProofRequest.input().public_inputs().fork_id();
     if (pProverRequest->input.publicInputsExtended.publicInputs.forkID != PROVER_FORK_ID)
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() got an invalid prover ID=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.forkID) + " different from expected=" + to_string(PROVER_FORK_ID));
@@ -494,6 +448,15 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
+
+    // Get batch L2 data
+    if (genStatelessBatchProofRequest.input().public_inputs().batch_l2_data().size() > MAX_BATCH_L2_DATA_SIZE)
+    {
+        zklog.error("AggregatorClient::GenStatelessBatchProof() found batchL2Data.size()=" + to_string(genStatelessBatchProofRequest.input().public_inputs().batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genStatelessBatchProofRequest.input().public_inputs().batch_l2_data();
 
     // Get L1 info root
     if (genStatelessBatchProofRequest.input().public_inputs().l1_info_root().size() > 32)
