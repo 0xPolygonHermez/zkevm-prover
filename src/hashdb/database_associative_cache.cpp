@@ -71,7 +71,7 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
     {
         // if log2CacheSize_ > 28, we would need to use uint64_t values to refere to positions in the keys and values arrays
         // note thar for each cacheIndex we have 4 keys and 12 values
-        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2CacheSize_ > 31");
+        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2CacheSize_ > 28");
         exitProcess();
     }
     cacheSize = 1 << log2CacheSize;
@@ -234,7 +234,7 @@ bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks:
         }
         for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
 
-            if( distanceFromCurrentCacheIndex_((uint32_t)(auxBufferKeysValues[i].fe)) <= cacheSize &&
+            if( !hasExpiredInBuffer_((uint32_t)(auxBufferKeysValues[i].fe)) &&
                 auxBufferKeysValues[i+1].fe == key[0].fe &&
                 auxBufferKeysValues[i+2].fe == key[1].fe &&
                 auxBufferKeysValues[i+3].fe == key[2].fe &&
@@ -265,11 +265,9 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
 {
     if(auxBufferKeysValues.size() > 0){
         vector<Goldilocks::Element> value_;
-        bool found = extractKeyValueFromAuxBuffer_(key,value_);
-        if(found && update == false){
-            addKeyValue_(key, value_, false);
-            return;
-        }
+        extractKeyValueFromAuxBuffer_(key,value_);
+        // We assume that if update was false is beacause value and value_ are equal
+        // so we reincert value
     }
     bool emptySlot = false;
     bool present = false;
@@ -293,7 +291,8 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
                 keys[cacheIndexKey + 3].fe == key[3].fe){
                     if(distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSizeDiv2){
                         // It is present but it is far from the currentCacheIndex, so we need to reinsert it
-                        // we reinsert it assuming update==true
+                        // We assume that if update was false is beacause value and value_ are equal
+                        // so we reincert value
                         isValidKey[cacheIndex]=false;
                         if(emptySlot == false){
                             emptySlot = true;
@@ -424,6 +423,8 @@ void DatabaseMTAssociativeCache::forcedInsertion_(uint32_t (&usedRawCacheIndexes
     //
     if (iters >=20 || pos == -1)
     {
+
+        //We can do a push_bach, we know the key is not in the buffer because it was found in the keys table
         zklog.warning("forcedInsertion_() maxforcedInsertion_Iterations reached");
         Goldilocks::Element *buffKey = &keys[(inputRawCacheIndex & cacheMask) * 4];
         Goldilocks::Element *buffValue = &values[(inputRawCacheIndex & cacheMask) * 12];
@@ -465,7 +466,7 @@ bool DatabaseMTAssociativeCache::findKey_(const Goldilocks::Element (&key)[4], v
         }
         for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
             
-            if( distanceFromCurrentCacheIndex_((uint32_t)(auxBufferKeysValues[i].fe)) <= cacheSize &&
+            if( !hasExpiredInBuffer_((uint32_t)(auxBufferKeysValues[i].fe)) &&
                 auxBufferKeysValues[i+1].fe == key[0].fe &&
                 auxBufferKeysValues[i+2].fe == key[1].fe &&
                 auxBufferKeysValues[i+3].fe == key[2].fe &&
