@@ -91,13 +91,15 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
     mlock.unlock_shared();
 
 if(reinsert){
-        unique_lock<shared_mutex> lock(mlock);
+        mlock.lock();
         vector<Goldilocks::Element> values_;
 
         bool foundAgain = extractKeyValue_(key, values_);
         // Retrieved the values again (values_) to prevent potential modifications 
         // by another thread between the findKey_ and the addKeyValue_ operations
         if(foundAgain) addKeyValue_(key, values_, false);
+        mlock.unlock();
+
     }
 
 #ifdef LOG_ASSOCIATIVE_CACHE
