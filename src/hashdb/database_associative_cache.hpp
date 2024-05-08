@@ -93,7 +93,6 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
 if(reinsert){
         mlock.lock();
         vector<Goldilocks::Element> values_;
-
         bool foundAgain = extractKeyValue_(key, values_);
         // Retrieved the values again (values_) to prevent potential modifications 
         // by another thread between the findKey_ and the addKeyValue_ operations
@@ -132,7 +131,7 @@ void DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() {
     auto it = auxBufferKeysValues.begin();
     while (it != auxBufferKeysValues.end()) {
         uint32_t cacheIndexRaw = static_cast<uint32_t>(it->fe);
-        if (hasExpired_(cacheIndexRaw)) {
+        if (distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSize) {
             it = auxBufferKeysValues.erase(it, it + 17);
         } else {
             std::advance(it, 17);
