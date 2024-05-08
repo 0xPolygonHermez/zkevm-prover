@@ -198,6 +198,7 @@ public:
     // Fork 10 (Feijoa) attributes
     map<uint64_t, Saved> saved;
     BLS12_381Root BLS512_381root;
+    bool forceMode384;
 
     Context( Goldilocks &fr,
              const Config &config,
@@ -222,7 +223,8 @@ public:
         pZKPC(NULL),
         pStep(NULL),
         pEvaluation(NULL),
-        N(0){}; // Constructor, setting references
+        N(0),
+        forceMode384(false){}; // Constructor, setting references
 
     // HashK database, used in Keccak-f hash instructions hashK, hashK1, hashKLen and hashKDigest
     unordered_map< uint64_t, HashValue > hashK;
@@ -260,7 +262,37 @@ public:
     void printU32(string name, uint32_t v);
     void printU16(string name, uint16_t v);
     string printFea(Fea &fea);
+    
+    uint8_t mode384(void)
+    {
+        if (forceMode384) return 1;
+        zkassert(pZKPC != NULL);
+        return rom.line[*pZKPC].mode384;
+    }
 
+    bool multiBaseFea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3, const Goldilocks::Element &fe4, const Goldilocks::Element &fe5, const Goldilocks::Element &fe6, const Goldilocks::Element &fe7)
+    {
+        if (mode384())
+        {
+            return fea384ToScalar(fr, scalar, fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7);
+        }
+        else
+        {
+            return fea2scalar(fr, scalar, fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7);
+        }
+    }
+
+    void scalarToMultiBaseFea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
+    {
+        if (mode384())
+        {
+            return scalar2fea384(fr, scalar, fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7);
+        }
+        else
+        {
+            return scalar2fea(fr, scalar, fe0, fe1, fe2, fe3, fe4, fe5, fe6, fe7);
+        }
+    }
 };
 
 } // namespace

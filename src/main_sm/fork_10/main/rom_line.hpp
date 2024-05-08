@@ -117,6 +117,7 @@ public:
     uint8_t memAlignWR;
     uint8_t repeat;
     uint8_t free0IsByte;
+    uint8_t mode384;
 
     string toString(Goldilocks &fr);
 };

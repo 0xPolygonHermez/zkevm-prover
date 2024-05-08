@@ -95,6 +95,12 @@ tFunction string2Function(string s)
     else if (s == "ARITH_BN254_SUBFP2")             return f_ARITH_BN254_SUBFP2;
     else if (s == "ARITH_BN254_MULFP2_X")           return f_ARITH_BN254_MULFP2_X;
     else if (s == "ARITH_BN254_MULFP2_Y")           return f_ARITH_BN254_MULFP2_Y;
+    else if (s == "ARITH_BLS12381_MULFP2_X")        return f_ARITH_BLS12381_MULFP2_X;
+    else if (s == "ARITH_BLS12381_MULFP2_Y")        return f_ARITH_BLS12381_MULFP2_Y;
+    else if (s == "ARITH_BLS12381_ADDFP2")          return f_ARITH_BLS12381_ADDFP2;
+    else if (s == "ARITH_BLS12381_SUBFP2")          return f_ARITH_BLS12381_SUBFP2;
+    else if (s == "FROM_384_TO_256_H")              return f_FROM_384_TO_256_H;
+    else if (s == "FROM_384_TO_256_L")              return f_FROM_384_TO_256_L;
     else if (s == "fp2InvBN254_x")                  return f_fp2InvBN254_x;
     else if (s == "fp2InvBN254_y")                  return f_fp2InvBN254_y;
     else if (s == "fpBN254inv")                     return f_fpBN254inv;
@@ -197,6 +203,12 @@ string function2String(tFunction f)
         case f_ARITH_BN254_SUBFP2:              return "ARITH_BN254_SUBFP2";
         case f_ARITH_BN254_MULFP2_X:            return "ARITH_BN254_MULFP2_X";
         case f_ARITH_BN254_MULFP2_Y:            return "ARITH_BN254_MULFP2_Y";
+        case f_ARITH_BLS12381_MULFP2_X:         return "ARITH_BLS12381_MULFP2_X";
+        case f_ARITH_BLS12381_MULFP2_Y:         return "ARITH_BLS12381_MULFP2_Y";
+        case f_ARITH_BLS12381_ADDFP2:           return "ARITH_BLS12381_ADDFP2";
+        case f_ARITH_BLS12381_SUBFP2:           return "ARITH_BLS12381_SUBFP2";
+        case f_FROM_384_TO_256_H:               return "FROM_384_TO_256_H";
+        case f_FROM_384_TO_256_L:               return "FROM_384_TO_256_L";
         case f_fp2InvBN254_x:                   return "fp2InvBN254_x";
         case f_fp2InvBN254_y:                   return "fp2InvBN254_y";
         case f_fpBN254inv:                      return "fpBN254inv";

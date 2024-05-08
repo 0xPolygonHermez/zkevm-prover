@@ -389,12 +389,14 @@ int main(int argc, char **argv)
     PoseidonGoldilocks poseidon;
 
 #ifdef DEBUG
-    zklog.info("Goldilocks p-1 =" + fr.toString(fr.negone(),16) + " = " + fr.toString(fr.negone(),10));
-    zklog.info("BN128      p-1 =" + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
-    zklog.info("FQ         p-1 =" + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));
-    zklog.info("FEC        p-1 =" + fec.toString(fec.negOne(),16) + " = " + fec.toString(fec.negOne(),10));
-    zklog.info("FNEC       p-1 =" + fnec.toString(fnec.negOne(),16) + " = " + fnec.toString(fnec.negOne(),10));
-    zklog.info("BLS12-381  p-1 =" + bls12_381.toString(bls12_381.negOne(),16) + " = " + bls12_381.toString(bls12_381.negOne(),10));
+    zklog.info("Goldilocks    p-1 = " + fr.toString(fr.negone(),16) + " = " + fr.toString(fr.negone(),10));
+    zklog.info("BN128         p-1 = " + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
+    zklog.info("BN245         p-1 = " + bn254.toString(bn254.negOne(),16) + " = " + bn254.toString(bn254.negOne(),10));
+    zklog.info("FQ            p-1 = " + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));
+    zklog.info("FEC           p-1 = " + fec.toString(fec.negOne(),16) + " = " + fec.toString(fec.negOne(),10));
+    zklog.info("FNEC          p-1 = " + fnec.toString(fnec.negOne(),16) + " = " + fnec.toString(fnec.negOne(),10));
+    zklog.info("BLS12-381     p-1 = " + bls12_381.toString(bls12_381.negOne(),16) + " = " + bls12_381.toString(bls12_381.negOne(),10));
+    zklog.info("BLS12_381_384 p-1 = " + bls12_381_384.toString(bls12_381_384.negOne(),16) + " = " + bls12_381_384.toString(bls12_381_384.negOne(),10));
 #endif
 
     // Init BLS12-381 4096th roots of unity

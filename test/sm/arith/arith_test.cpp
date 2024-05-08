@@ -13,7 +13,7 @@ void ArithSMTest (Goldilocks &fr, Config &config)
 
     ArithAction action;
 
-    
+    /*
     action.x1.set_str("3", 10);
     action.y1.set_str("2", 10);
     action.x2.set_str("5", 10);
@@ -25,7 +25,7 @@ void ArithSMTest (Goldilocks &fr, Config &config)
     action.selEq2 = 0;
     action.selEq3 = 0;
     list.push_back(action);
-/*
+
     const input = [
     {
         x1: 3n,

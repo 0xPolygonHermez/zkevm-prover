@@ -4,6 +4,7 @@
 #include <gmpxx.h>
 #include "main_sm/fork_10/main/context.hpp"
 #include "main_sm/fork_10/main/rom_command.hpp"
+#include "main_sm/fork_10/main/main_exec_required.hpp"
 #include "goldilocks_base_field.hpp"
 #include "zkresult.hpp"
 #include "ecrecover.hpp"
@@ -146,6 +147,12 @@ void eval_ARITH_BN254_ADDFP2          (Context &ctx, const RomCommand &cmd, Comm
 void eval_ARITH_BN254_SUBFP2          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_ARITH_BN254_MULFP2_X        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_ARITH_BN254_MULFP2_Y        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BLS12381_MULFP2_X     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BLS12381_MULFP2_Y     (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BLS12381_ADDFP2       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BLS12381_SUBFP2       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_FROM_384_TO_256_H           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_FROM_384_TO_256_L           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_fp2InvBN254_x               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_fp2InvBN254_y               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_fpBN254inv                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -186,6 +193,10 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value, const Goldilocks::Element (&key)[4]);
 
 mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p );
+
+bool Arith_isFreeInEquation (uint64_t arithEquation);
+zkresult Arith_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilocks::Element &fi1, Goldilocks::Element &fi2, Goldilocks::Element &fi3, Goldilocks::Element &fi4, Goldilocks::Element &fi5, Goldilocks::Element &fi6, Goldilocks::Element &fi7);
+zkresult Arith_verify (Context &ctx, Goldilocks::Element &op0, Goldilocks::Element &op1, Goldilocks::Element &op2, Goldilocks::Element &op3, Goldilocks::Element &op4, Goldilocks::Element &op5, Goldilocks::Element &op6, Goldilocks::Element &op7, MainExecRequired &required, uint64_t &same12, uint64_t &useE, uint64_t &useCD);
 
 
 } // namespace

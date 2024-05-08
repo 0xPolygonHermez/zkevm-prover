@@ -38,6 +38,8 @@ extern mpz_class ScalarTwoTo256;
 extern mpz_class ScalarTwoTo257;
 extern mpz_class ScalarTwoTo258;
 extern mpz_class ScalarTwoTo259;
+extern mpz_class ScalarTwoTo384;
+extern mpz_class ScalarTwoTo388;
 extern mpz_class ScalarZero;
 extern mpz_class ScalarOne;
 extern mpz_class ScalarGoldilocksPrime;
@@ -417,7 +419,7 @@ inline bool fea384ToScalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks:
  * Converts a Scalar into an array of 8 elements encoded as Fields elements where each one represents 48 bits
  * result = [Scalar[0:47], scalar[48:95], scalar[96:143], scalar[144:191], scalar[192:239], scalar[240:287], scalar[288:335], scalar[336:383]]
  */
-inline void scalarTofea384 (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
+inline void scalar2fea384 (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
 {
     mpz_class aux;
     aux = scalar & ScalarMask48;

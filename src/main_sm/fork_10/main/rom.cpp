@@ -428,6 +428,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["memAlignWR"].is_number_integer()) line[i].memAlignWR = l["memAlignWR"]; else line[i].memAlignWR = 0;
         if (l["repeat"].is_number_integer()) line[i].repeat = l["repeat"]; else line[i].repeat = 0;
         if (l["free0IsByte"].is_number_integer()) line[i].free0IsByte = l["free0IsByte"]; else line[i].free0IsByte = 0;
+        if (l["mode384"].is_number_integer()) line[i].mode384 = l["mode384"]; else line[i].mode384 = 0;
     }
 }
 

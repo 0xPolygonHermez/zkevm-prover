@@ -2,12 +2,15 @@
 #include "definitions.hpp"
 #include "config.hpp"
 #include "main_sm/fork_10/main/eval_command.hpp"
+#include "main_sm/fork_10/main/main_exec_required.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "zkassert.hpp"
 #include "zklog.hpp"
 #include "zkglobals.hpp"
 #include "BLS12_381_utils.hpp"
+#include "main_definitions.hpp"
+#include "arith_executor.hpp"
 
 namespace fork_10
 {
@@ -75,6 +78,12 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_ARITH_BN254_SUBFP2:              return eval_ARITH_BN254_SUBFP2(ctx, cmd, cr);
             case f_ARITH_BN254_MULFP2_X:            return eval_ARITH_BN254_MULFP2_X(ctx, cmd, cr);
             case f_ARITH_BN254_MULFP2_Y:            return eval_ARITH_BN254_MULFP2_Y(ctx, cmd, cr);
+            case f_ARITH_BLS12381_MULFP2_X:         return eval_ARITH_BLS12381_MULFP2_X(ctx, cmd, cr);
+            case f_ARITH_BLS12381_MULFP2_Y:         return eval_ARITH_BLS12381_MULFP2_Y(ctx, cmd, cr);
+            case f_ARITH_BLS12381_ADDFP2:           return eval_ARITH_BLS12381_ADDFP2(ctx, cmd, cr);
+            case f_ARITH_BLS12381_SUBFP2:           return eval_ARITH_BLS12381_SUBFP2(ctx, cmd, cr);
+            case f_FROM_384_TO_256_H:               return eval_FROM_384_TO_256_H(ctx, cmd, cr);
+            case f_FROM_384_TO_256_L:               return eval_FROM_384_TO_256_L(ctx, cmd, cr);
             case f_fp2InvBN254_x:                   return eval_fp2InvBN254_x(ctx, cmd, cr);
             case f_fp2InvBN254_y:                   return eval_fp2InvBN254_y(ctx, cmd, cr);
             case f_fpBN254inv:                      return eval_fpBN254inv(ctx, cmd, cr);
@@ -316,7 +325,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         case reg_A:
             cr.type = crt_scalar;
-            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep]))
+            if (!ctx.multiBaseFea2scalar(ctx.fr, cr.scalar, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep]))
             {
                 cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
                 return;
@@ -324,7 +333,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             break;
         case reg_B:
             cr.type = crt_scalar;
-            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep]))
+            if (!ctx.multiBaseFea2scalar(ctx.fr, cr.scalar, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep]))
             {
                 cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
                 return;
@@ -332,7 +341,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             break;
         case reg_C:
             cr.type = crt_scalar;
-            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep]))
+            if (!ctx.multiBaseFea2scalar(ctx.fr, cr.scalar, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep]))
             {
                 cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
                 return;
@@ -340,7 +349,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             break;
         case reg_D:
             cr.type = crt_scalar;
-            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep]))
+            if (!ctx.multiBaseFea2scalar(ctx.fr, cr.scalar, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep]))
             {
                 cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
                 return;
@@ -348,7 +357,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             break;
         case reg_E:
             cr.type = crt_scalar;
-            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep]))
+            if (!ctx.multiBaseFea2scalar(ctx.fr, cr.scalar, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep]))
             {
                 cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
                 return;
@@ -356,7 +365,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             break;
         case reg_SR:
             cr.type = crt_scalar;
-            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
+            if (!ctx.multiBaseFea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
             {
                 cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
                 return;
@@ -3377,9 +3386,9 @@ void eval_MPdiv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             zklog.error("eval_MPdiv() cound not find ctx.mem entry for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
         }
-        if (!fea2scalar(fr, auxScalar, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        if (!ctx.multiBaseFea2scalar(fr, auxScalar, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
         {
-            zklog.error("eval_MPdiv() failed calling fea2scalar for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            zklog.error("eval_MPdiv() failed calling ctx.multiBaseFea2scalar for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
         }
         input1.emplace_back(auxScalar);
@@ -3392,9 +3401,9 @@ void eval_MPdiv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             zklog.error("eval_MPdiv() cound not find ctx.mem entry for address=" + to_string(addr2 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
         }
-        if (!fea2scalar(fr, auxScalar, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        if (!ctx.multiBaseFea2scalar(fr, auxScalar, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
         {
-            zklog.error("eval_MPdiv() failed calling fea2scalar for address=" + to_string(addr2 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            zklog.error("eval_MPdiv() failed calling ctx.multiBaseFea2scalar for address=" + to_string(addr2 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
         }
         input2.emplace_back(auxScalar);
@@ -3470,9 +3479,9 @@ void eval_MPdiv_short (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             zklog.error("eval_MPdiv_short() cound not find ctx.mem entry for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
         }
-        if (!fea2scalar(fr, auxScalar, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        if (!ctx.multiBaseFea2scalar(fr, auxScalar, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
         {
-            zklog.error("eval_MPdiv_short() failed calling fea2scalar for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            zklog.error("eval_MPdiv_short() failed calling ctx.multiBaseFea2scalar for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
         }
         input1.emplace_back(auxScalar);
@@ -3930,6 +3939,369 @@ void eval_ARITH_BN254_SUBFP2 (Context &ctx, const RomCommand &cmd, CommandResult
     // Convert result to scalar
     cr.type = crt_scalar;
     fq.toMpz(cr.scalar.get_mpz_t(), result);
+}
+
+// BLS12-381
+
+void eval_ARITH_BLS12381_MULFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 4)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_X() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_X() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element x1;
+    bls12_381_384.fromMpz(x1, cr.scalar.get_mpz_t());
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_X() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element y1;
+    bls12_381_384.fromMpz(y1, cr.scalar.get_mpz_t());
+
+    // Get x2 by executing cmd.params[2]
+    evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_X() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element x2;
+    bls12_381_384.fromMpz(x2, cr.scalar.get_mpz_t());
+
+    // Get y2 by executing cmd.params[3]
+    evalCommand(ctx, *cmd.params[3], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_X() 3 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element y2;
+    bls12_381_384.fromMpz(y2, cr.scalar.get_mpz_t());
+
+    // Calculate the point coordinate: x1*x2 - y1*y2
+    RawBLS12_381_384::Element result;
+    result = bls12_381_384.sub( bls12_381_384.mul(x1, x2), bls12_381_384.mul(y1, y2) );
+
+    // Convert result to scalar
+    mpz_class resultScalar;
+    bls12_381_384.toMpz(resultScalar.get_mpz_t(), result);
+
+    // Return as a field element array
+    cr.type = crt_fea;
+    scalar2fea384(fr, resultScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_ARITH_BLS12381_MULFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 4)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_Y() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_Y() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element x1;
+    bls12_381_384.fromMpz(x1, cr.scalar.get_mpz_t());
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_Y() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element y1;
+    bls12_381_384.fromMpz(y1, cr.scalar.get_mpz_t());
+
+    // Get x2 by executing cmd.params[2]
+    evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_Y() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element x2;
+    bls12_381_384.fromMpz(x2, cr.scalar.get_mpz_t());
+
+    // Get y2 by executing cmd.params[3]
+    evalCommand(ctx, *cmd.params[3], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_MULFP2_Y() 3 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element y2;
+    bls12_381_384.fromMpz(y2, cr.scalar.get_mpz_t());
+
+    // Calculate the point coordinate: x1*y2 + x2*y1
+    RawBLS12_381_384::Element result;
+    result = bls12_381_384.add( bls12_381_384.mul(x1, y2), bls12_381_384.mul(x2, y1) );
+
+    // Convert result to scalar
+    mpz_class resultScalar;
+    bls12_381_384.toMpz(resultScalar.get_mpz_t(), result);
+
+    // Return as a field element array
+    cr.type = crt_fea;
+    scalar2fea384(fr, resultScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_ARITH_BLS12381_ADDFP2 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_ARITH_BLS12381_ADDFP2() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_ADDFP2() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element x1;
+    bls12_381_384.fromMpz(x1, cr.scalar.get_mpz_t());
+
+    // Get x2 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_ADDFP2() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element x2;
+    bls12_381_384.fromMpz(x2, cr.scalar.get_mpz_t());
+
+
+    // Calculate the result: x1 + X2
+    RawBLS12_381_384::Element result;
+    result = bls12_381_384.add( x1, x2 );
+
+    // Convert result to scalar
+    mpz_class resultScalar;
+    bls12_381_384.toMpz(resultScalar.get_mpz_t(), result);
+
+    // Return as a field element array
+    cr.type = crt_fea;
+    scalar2fea384(fr, resultScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_ARITH_BLS12381_SUBFP2 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_ARITH_BLS12381_SUBFP2() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_SUBFP2() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element x1;
+    bls12_381_384.fromMpz(x1, cr.scalar.get_mpz_t());
+
+    // Get x2 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BLS12381_SUBFP2() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element x2;
+    bls12_381_384.fromMpz(x2, cr.scalar.get_mpz_t());
+
+
+    // Calculate the result: x1 - X2
+    RawBLS12_381_384::Element result;
+    result = bls12_381_384.sub( x1, x2 );
+
+    // Convert result to scalar
+    mpz_class resultScalar;
+    bls12_381_384.toMpz(resultScalar.get_mpz_t(), result);
+
+    // Return as a field element array
+    cr.type = crt_fea;
+    scalar2fea384(fr, resultScalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_FROM_384_TO_256_H (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_FROM_384_TO_256_H() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get value by executing cmd.params[0]
+    ctx.forceMode384 = true;
+    evalCommand(ctx, *cmd.params[0], cr);
+    ctx.forceMode384 = false;
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_FROM_384_TO_256_H() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Calculate the result: value & MASK_256
+    cr.scalar = (cr.scalar >> 256) & ScalarMask128;
+
+    // Return as a field element array
+    cr.type = crt_fea;
+    scalar2fea(fr, cr.scalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+}
+
+void eval_FROM_384_TO_256_L (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_FROM_384_TO_256_L() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get value by executing cmd.params[0]
+    ctx.forceMode384 = true;
+    evalCommand(ctx, *cmd.params[0], cr);
+    ctx.forceMode384 = false;
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_FROM_384_TO_256_L() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Calculate the result: value & MASK_256
+    cr.scalar &= ScalarMask256;
+
+    // Return as a field element array
+    cr.type = crt_fea;
+    scalar2fea(fr, cr.scalar, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 // Computes the "real" part of the inverse of the given Fp2 element.
@@ -4701,9 +5073,9 @@ void eval_signedComparison (Context &ctx, const RomCommand &cmd, CommandResult &
             return;
         }
         mpz_class input1i;
-        if (!fea2scalar(fr, input1i, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        if (!ctx.multiBaseFea2scalar(fr, input1i, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
         {
-            zklog.error("eval_signedComparison() failed calling fea2scalar addr1=" + to_string(addr1) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            zklog.error("eval_signedComparison() failed calling ctx.multiBaseFea2scalar addr1=" + to_string(addr1) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
             return;
         }
@@ -4716,9 +5088,9 @@ void eval_signedComparison (Context &ctx, const RomCommand &cmd, CommandResult &
             return;
         }
         mpz_class input2i;
-        if (!fea2scalar(fr, input2i, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        if (!ctx.multiBaseFea2scalar(fr, input2i, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
         {
-            zklog.error("eval_signedComparison() failed calling fea2scalar addr2=" + to_string(addr1) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            zklog.error("eval_signedComparison() failed calling ctx.multiBaseFea2scalar addr2=" + to_string(addr1) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
             return;
         }
@@ -4813,9 +5185,9 @@ void eval_signedComparisonWithConst (Context &ctx, const RomCommand &cmd, Comman
         return;
     }
     mpz_class input;
-    if (!fea2scalar(fr, input, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+    if (!ctx.multiBaseFea2scalar(fr, input, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
     {
-        zklog.error("eval_signedComparison() failed calling fea2scalar addr=" + to_string(addr) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_signedComparison() failed calling ctx.multiBaseFea2scalar addr=" + to_string(addr) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
         return;
     }
@@ -4890,9 +5262,9 @@ void eval_getFirstDiffChunkRem (Context &ctx, const RomCommand &cmd, CommandResu
             return;
         }
         mpz_class inputi;
-        if (!fea2scalar(fr, inputi, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        if (!ctx.multiBaseFea2scalar(fr, inputi, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
         {
-            zklog.error("eval_getFirstDiffChunkRem() failed calling fea2scalar addr=" + to_string(addr) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            zklog.error("eval_getFirstDiffChunkRem() failed calling ctx.multiBaseFea2scalar addr=" + to_string(addr) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
             return;
         }
@@ -5019,6 +5391,749 @@ void eval_break                       (Context &ctx, const RomCommand &cmd, Comm
 {
     cr.type = crt_scalar;
     cr.scalar = 0;
+}
+
+bool Arith_isFreeInEquation (uint64_t arithEquation)
+{
+    return (arithEquation == ARITH_MOD) || (arithEquation == ARITH_384_MOD) || (arithEquation == ARITH_256TO384);
+}
+
+zkresult Arith_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilocks::Element &fi1, Goldilocks::Element &fi2, Goldilocks::Element &fi3, Goldilocks::Element &fi4, Goldilocks::Element &fi5, Goldilocks::Element &fi6, Goldilocks::Element &fi7)
+{
+    mpz_class result;
+
+    zkassert(ctx.pZKPC != NULL);
+    uint64_t arithEquation = ctx.rom.line[*ctx.pZKPC].arithEquation;
+    zkassert(ctx.pStep != NULL);
+    uint64_t step = *ctx.pStep;
+    mpz_class _a, _b, _c, _d;
+    switch(arithEquation)
+    {
+        case ARITH_MOD:
+            if (!fea2scalar(fr, _c, ctx.pols.C0[step], ctx.pols.C1[step], ctx.pols.C2[step], ctx.pols.C3[step], ctx.pols.C4[step], ctx.pols.C5[step], ctx.pols.C6[step], ctx.pols.C7[step]))
+            {
+                zklog.error("Arith_calculate() ARITH_MOD failed calling fea2scalar(C)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea2scalar(fr, _d, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step]))
+            {
+                zklog.error("Arith_calculate() ARITH_MOD failed calling fea2scalar(D)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+        case ARITH_256TO384:
+            if (!fea2scalar(fr, _a, ctx.pols.A0[step], ctx.pols.A1[step], ctx.pols.A2[step], ctx.pols.A3[step], ctx.pols.A4[step], ctx.pols.A5[step], ctx.pols.A6[step], ctx.pols.A7[step]))
+            {
+                zklog.error("Arith_calculate() ARITH_256TO384/ARITH_MOD failed calling fea2scalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea2scalar(fr, _b, ctx.pols.B0[step], ctx.pols.B1[step], ctx.pols.B2[step], ctx.pols.B3[step], ctx.pols.B4[step], ctx.pols.B5[step], ctx.pols.B6[step], ctx.pols.B7[step]))
+            {
+                zklog.error("Arith_calculate() ARITH_256TO384/ARITH_MOD failed calling fea2scalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            break;
+        case ARITH_384_MOD:
+            if (!fea384ToScalar(fr, _a, ctx.pols.A0[step], ctx.pols.A1[step], ctx.pols.A2[step], ctx.pols.A3[step], ctx.pols.A4[step], ctx.pols.A5[step], ctx.pols.A6[step], ctx.pols.A7[step]))
+            {
+                zklog.error("Arith_calculate() ARITH_384_MOD failed calling fea384ToScalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea384ToScalar(fr, _b, ctx.pols.B0[step], ctx.pols.B1[step], ctx.pols.B2[step], ctx.pols.B3[step], ctx.pols.B4[step], ctx.pols.B5[step], ctx.pols.B6[step], ctx.pols.B7[step]))
+            {
+                zklog.error("Arith_calculate() ARITH_384_MOD failed calling fea384ToScalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea384ToScalar(fr, _c, ctx.pols.C0[step], ctx.pols.C1[step], ctx.pols.C2[step], ctx.pols.C3[step], ctx.pols.C4[step], ctx.pols.C5[step], ctx.pols.C6[step], ctx.pols.C7[step]))
+            {
+                zklog.error("Arith_calculate() ARITH_384_MOD failed calling fea384ToScalar(C)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea384ToScalar(fr, _d, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step]))
+            {
+                zklog.error("Arith_calculate() ARITH_384_MOD failed calling fea384ToScalar(D)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            break;
+        default:
+            zklog.error("Arith_calculate() invalid arithEquation=" + to_string(arithEquation));
+            exitProcess();
+    }
+
+    if (arithEquation == ARITH_256TO384)
+    {
+        if (_b > ScalarMask128)
+        {
+            zklog.error("Arith_calculate() ARITH_256TO384 invalid b=" + _b.get_str(16) + " > 128 bits");
+            return ZKR_SM_MAIN_ARITH_MISMATCH;
+        }
+        result = _a + (_b << 256);
+        scalar2fea384(fr, result, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+        return ZKR_SUCCESS;
+    }
+    if (_d == 0)
+    {
+        zklog.error("Arith_calculate() modular arithmetic is undefined when D is zero");
+        return ZKR_SM_MAIN_ARITH_MISMATCH;
+    }
+    result = ((_a * _b) + _c) % _d;
+    if (arithEquation == ARITH_MOD)
+    {
+        scalar2fea(fr, result, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+    }
+    else
+    {
+        scalar2fea384(fr, result, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+    }
+    return ZKR_SUCCESS;
+}
+
+zkresult Arith_verify ( Context &ctx,
+                        Goldilocks::Element &op0, Goldilocks::Element &op1, Goldilocks::Element &op2, Goldilocks::Element &op3, Goldilocks::Element &op4, Goldilocks::Element &op5, Goldilocks::Element &op6, Goldilocks::Element &op7,
+                        MainExecRequired &required,
+                        uint64_t &same12, uint64_t &useE, uint64_t &useCD)
+{
+    zkassert(ctx.pZKPC != NULL);
+    uint64_t arithEquation = ctx.rom.line[*ctx.pZKPC].arithEquation;
+    zkassert(ctx.pStep != NULL);
+    uint64_t step = *ctx.pStep;
+    
+    same12 = 0;
+    useE = 1;
+    useCD = 1;
+    
+    bool is384 = (arithEquation >= ARITH_384_MOD);
+
+    if ((arithEquation == ARITH_BASE) || (arithEquation == ARITH_MOD) || (arithEquation == ARITH_384_MOD))
+    {
+        useE = 0;
+
+        mpz_class A, B, C, D, op;
+
+        if (is384)
+        {
+            if (!fea384ToScalar(fr, A, ctx.pols.A0[step], ctx.pols.A1[step], ctx.pols.A2[step], ctx.pols.A3[step], ctx.pols.A4[step], ctx.pols.A5[step], ctx.pols.A6[step], ctx.pols.A7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea384ToScalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea384ToScalar(fr, B, ctx.pols.B0[step], ctx.pols.B1[step], ctx.pols.B2[step], ctx.pols.B3[step], ctx.pols.B4[step], ctx.pols.B5[step], ctx.pols.B6[step], ctx.pols.B7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea384ToScalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea384ToScalar(fr, C, ctx.pols.C0[step], ctx.pols.C1[step], ctx.pols.C2[step], ctx.pols.C3[step], ctx.pols.C4[step], ctx.pols.C5[step], ctx.pols.C6[step], ctx.pols.C7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea384ToScalar(C)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea384ToScalar(fr, D, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea384ToScalar(D)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea384ToScalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                zklog.error("Arith_verify() failed calling fea384ToScalar(op)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+        }
+        else
+        {
+            if (!fea2scalar(fr, A, ctx.pols.A0[step], ctx.pols.A1[step], ctx.pols.A2[step], ctx.pols.A3[step], ctx.pols.A4[step], ctx.pols.A5[step], ctx.pols.A6[step], ctx.pols.A7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea2scalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea2scalar(fr, B, ctx.pols.B0[step], ctx.pols.B1[step], ctx.pols.B2[step], ctx.pols.B3[step], ctx.pols.B4[step], ctx.pols.B5[step], ctx.pols.B6[step], ctx.pols.B7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea2scalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea2scalar(fr, C, ctx.pols.C0[step], ctx.pols.C1[step], ctx.pols.C2[step], ctx.pols.C3[step], ctx.pols.C4[step], ctx.pols.C5[step], ctx.pols.C6[step], ctx.pols.C7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea2scalar(C)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea2scalar(fr, D, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea2scalar(D)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                zklog.error("Arith_verify() failed calling fea2scalar(op)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+        }
+
+        mpz_class left, right;
+        if (arithEquation == ARITH_BASE)
+        {
+            left = A*B + C;
+            right = (D<<256) + op;
+        }
+        else
+        {
+            if (D == 0)
+            {
+                zklog.error("Arith_verify() Modular arithmetic is undefined when D is zero arithEquation=" + arith2string(arithEquation));
+                return ZKR_SM_MAIN_ARITH_MISMATCH;
+            }
+            left = (A*B + C)%D;
+            right = op;
+        }
+
+        if (left != right)
+        {
+            zklog.error("Arith_verify() equation=" + arith2string(arithEquation) + " does not match, A=" + A.get_str(16) + " B=" + B.get_str(16) + " C=" + C.get_str(16) + " D=" + D.get_str(16) + " op=" + op.get_str(16) + " left=" + left.get_str(16) + " right=" + right.get_str(16));
+            return ZKR_SM_MAIN_ARITH_MISMATCH;
+        }
+
+#ifdef USE_REQUIRED
+        ArithAction arithAction;
+
+        arithAction.x1[0] = ctx.pols.A0[step];
+        arithAction.x1[1] = ctx.pols.A1[step];
+        arithAction.x1[2] = ctx.pols.A2[step];
+        arithAction.x1[3] = ctx.pols.A3[step];
+        arithAction.x1[4] = ctx.pols.A4[step];
+        arithAction.x1[5] = ctx.pols.A5[step];
+        arithAction.x1[6] = ctx.pols.A6[step];
+        arithAction.x1[7] = ctx.pols.A7[step];
+
+        arithAction.y1[0] = ctx.pols.B0[step];
+        arithAction.y1[1] = ctx.pols.B1[step];
+        arithAction.y1[2] = ctx.pols.B2[step];
+        arithAction.y1[3] = ctx.pols.B3[step];
+        arithAction.y1[4] = ctx.pols.B4[step];
+        arithAction.y1[5] = ctx.pols.B5[step];
+        arithAction.y1[6] = ctx.pols.B6[step];
+        arithAction.y1[7] = ctx.pols.B7[step];
+
+        arithAction.x2[0] = ctx.pols.C0[step];
+        arithAction.x2[1] = ctx.pols.C1[step];
+        arithAction.x2[2] = ctx.pols.C2[step];
+        arithAction.x2[3] = ctx.pols.C3[step];
+        arithAction.x2[4] = ctx.pols.C4[step];
+        arithAction.x2[5] = ctx.pols.C5[step];
+        arithAction.x2[6] = ctx.pols.C6[step];
+        arithAction.x2[7] = ctx.pols.C7[step];
+
+        arithAction.y2[0] = ctx.pols.D0[step];
+        arithAction.y2[1] = ctx.pols.D1[step];
+        arithAction.y2[2] = ctx.pols.D2[step];
+        arithAction.y2[3] = ctx.pols.D3[step];
+        arithAction.y2[4] = ctx.pols.D4[step];
+        arithAction.y2[5] = ctx.pols.D5[step];
+        arithAction.y2[6] = ctx.pols.D6[step];
+        arithAction.y2[7] = ctx.pols.D7[step];
+
+        arithAction.x3[0] = fr.zero();
+        arithAction.x3[1] = fr.zero();
+        arithAction.x3[2] = fr.zero();
+        arithAction.x3[3] = fr.zero();
+        arithAction.x3[4] = fr.zero();
+        arithAction.x3[5] = fr.zero();
+        arithAction.x3[6] = fr.zero();
+        arithAction.x3[7] = fr.zero();
+
+        arithAction.y3[0] = op0;
+        arithAction.y3[1] = op1;
+        arithAction.y3[2] = op2;
+        arithAction.y3[3] = op3;
+        arithAction.y3[4] = op4;
+        arithAction.y3[5] = op5;
+        arithAction.y3[6] = op6;
+        arithAction.y3[7] = op7;
+
+        arithAction.equation = arithEquation;
+
+        required.Arith.push_back(arithAction);
+#endif
+
+    }
+    else if (((arithEquation >= ARITH_ECADD_DIFFERENT) && (arithEquation <= ARITH_BN254_SUBFP2)) ||
+             ((arithEquation >= ARITH_BLS12381_MULFP2) && (arithEquation <= ARITH_BLS12381_SUBFP2)))
+    {   
+        const bool dbl = (arithEquation == ARITH_ECADD_SAME);
+        mpz_class x1, y1, x2, y2, x3, y3;
+        if (is384)
+        {
+            if (!fea384ToScalar(fr, x1, ctx.pols.A0[step], ctx.pols.A1[step], ctx.pols.A2[step], ctx.pols.A3[step], ctx.pols.A4[step], ctx.pols.A5[step], ctx.pols.A6[step], ctx.pols.A7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea384ToScalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea384ToScalar(fr, y1, ctx.pols.B0[step], ctx.pols.B1[step], ctx.pols.B2[step], ctx.pols.B3[step], ctx.pols.B4[step], ctx.pols.B5[step], ctx.pols.B6[step], ctx.pols.B7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea384ToScalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (dbl)
+            {
+                x2 = x1;
+                y2 = y1;
+            }
+            else
+            {
+                if (!fea384ToScalar(fr, x2, ctx.pols.C0[step], ctx.pols.C1[step], ctx.pols.C2[step], ctx.pols.C3[step], ctx.pols.C4[step], ctx.pols.C5[step], ctx.pols.C6[step], ctx.pols.C7[step]))
+                {
+                    zklog.error("Arith_verify() failed calling fea384ToScalar(C)");
+                    return ZKR_SM_MAIN_FEA2SCALAR;
+                }
+                if (!fea384ToScalar(fr, y2, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step]))
+                {
+                    zklog.error("Arith_verify() failed calling fea384ToScalar(D)");
+                    return ZKR_SM_MAIN_FEA2SCALAR;
+                }
+            }
+            if (!fea384ToScalar(fr, x3, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea384ToScalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea384ToScalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                zklog.error("Arith_verify() failed calling fea384ToScalar(op)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+        }
+        else
+        {
+            if (!fea2scalar(fr, x1, ctx.pols.A0[step], ctx.pols.A1[step], ctx.pols.A2[step], ctx.pols.A3[step], ctx.pols.A4[step], ctx.pols.A5[step], ctx.pols.A6[step], ctx.pols.A7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea2scalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea2scalar(fr, y1, ctx.pols.B0[step], ctx.pols.B1[step], ctx.pols.B2[step], ctx.pols.B3[step], ctx.pols.B4[step], ctx.pols.B5[step], ctx.pols.B6[step], ctx.pols.B7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea2scalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (dbl)
+            {
+                x2 = x1;
+                y2 = y1;
+            }
+            else
+            {
+                if (!fea2scalar(fr, x2, ctx.pols.C0[step], ctx.pols.C1[step], ctx.pols.C2[step], ctx.pols.C3[step], ctx.pols.C4[step], ctx.pols.C5[step], ctx.pols.C6[step], ctx.pols.C7[step]))
+                {
+                    zklog.error("Arith_verify() failed calling fea2scalar(C)");
+                    return ZKR_SM_MAIN_FEA2SCALAR;
+                }
+                if (!fea2scalar(fr, y2, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step]))
+                {
+                    zklog.error("Arith_verify() failed calling fea2scalar(D)");
+                    return ZKR_SM_MAIN_FEA2SCALAR;
+                }
+            }
+            if (!fea2scalar(fr, x3, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step]))
+            {
+                zklog.error("Arith_verify() failed calling fea2scalar(A)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+            if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                zklog.error("Arith_verify() failed calling fea2scalar(op)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
+        }
+
+        RawFec::Element s;
+        if ((arithEquation == ARITH_ECADD_DIFFERENT) || (arithEquation == ARITH_ECADD_SAME))
+        {
+            if (dbl)
+            {
+                // Convert to RawFec::Element
+                RawFec::Element fecX1, fecY1, fecX2, fecY2;
+                fec.fromMpz(fecX1, x1.get_mpz_t());
+                fec.fromMpz(fecY1, y1.get_mpz_t());
+                fec.fromMpz(fecX2, x2.get_mpz_t());
+                fec.fromMpz(fecY2, y2.get_mpz_t());
+
+                // Division by zero must be managed by ROM before call ARITH
+                RawFec::Element divisor;
+                divisor = fec.add(fecY1, fecY1);
+
+                same12 = 1;
+                useCD = 0;
+
+                if (fec.isZero(divisor))
+                {
+                    zklog.info("Arith_verify() Invalid arithmetic op, DivisionByZero arithEquation=" + arith2string(arithEquation));
+                    return ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO;
+                }
+
+                RawFec::Element fecThree;
+                fec.fromUI(fecThree, 3);
+                fec.div(s, fec.mul(fecThree, fec.mul(fecX1, fecX1)), divisor);
+            }
+            else
+            {
+                // Convert to RawFec::Element
+                RawFec::Element fecX1, fecY1, fecX2, fecY2;
+                fec.fromMpz(fecX1, x1.get_mpz_t());
+                fec.fromMpz(fecY1, y1.get_mpz_t());
+                fec.fromMpz(fecX2, x2.get_mpz_t());
+                fec.fromMpz(fecY2, y2.get_mpz_t());
+
+                // Division by zero must be managed by ROM before call ARITH
+                RawFec::Element deltaX = fec.sub(fecX2, fecX1);
+                if (fec.isZero(deltaX))
+                {
+                    zklog.info("Arith_verify() Invalid arithmetic op, DivisionByZero arithEquation=" + arith2string(arithEquation));
+                    return ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO;
+                }
+                fec.div(s, fec.sub(fecY2, fecY1), deltaX);
+            }
+        }
+
+        mpz_class _x3,_y3;
+
+        switch (arithEquation)
+        {
+            case ARITH_ECADD_DIFFERENT:
+            {
+                // Convert to RawFec::Element
+                RawFec::Element fecX1, fecY1, fecX2, fecY2;
+                fec.fromMpz(fecX1, x1.get_mpz_t());
+                fec.fromMpz(fecY1, y1.get_mpz_t());
+                fec.fromMpz(fecX2, x2.get_mpz_t());
+                fec.fromMpz(fecY2, y2.get_mpz_t());
+
+                RawFec::Element _fecX3;
+                _fecX3 = fec.sub( fec.mul(s, s), fec.add(fecX1, fecX2) );
+                fec.toMpz(_x3.get_mpz_t(), _fecX3);
+
+                RawFec::Element _fecY3;
+                _fecY3 = fec.sub( fec.mul(s, fec.sub(fecX1, _fecX3)), fecY1);
+                fec.toMpz(_y3.get_mpz_t(), _fecY3);
+                
+                break;
+            }
+            case ARITH_ECADD_SAME:
+            {
+                // Convert to RawFec::Element
+                RawFec::Element fecX1, fecY1;
+                fec.fromMpz(fecX1, x1.get_mpz_t());
+                fec.fromMpz(fecY1, y1.get_mpz_t());
+
+                RawFec::Element _fecX3;
+                _fecX3 = fec.sub( fec.mul(s, s), fec.add(fecX1, fecX1) );
+                fec.toMpz(_x3.get_mpz_t(), _fecX3);
+
+                RawFec::Element _fecY3;
+                _fecY3 = fec.sub( fec.mul(s, fec.sub(fecX1, _fecX3)), fecY1);
+                fec.toMpz(_y3.get_mpz_t(), _fecY3);
+
+                break;
+            }
+            case ARITH_BN254_MULFP2:
+            case ARITH_BLS12381_MULFP2:
+            {
+                if (is384) // BLS12_381_384
+                {
+                    // Convert to RawFec::Element
+                    RawBLS12_381_384::Element fpX1, fpY1, fpX2, fpY2;
+                    bls12_381_384.fromMpz(fpX1, x1.get_mpz_t());
+                    bls12_381_384.fromMpz(fpY1, y1.get_mpz_t());
+                    bls12_381_384.fromMpz(fpX2, x2.get_mpz_t());
+                    bls12_381_384.fromMpz(fpY2, y2.get_mpz_t());
+
+                    RawBLS12_381_384::Element _fpX3;
+                    _fpX3 = bls12_381_384.sub( bls12_381_384.mul(fpX1, fpX2), bls12_381_384.mul(fpY1, fpY2));
+                    bls12_381_384.toMpz(_x3.get_mpz_t(), _fpX3);
+
+                    RawBLS12_381_384::Element _fpY3;
+                    _fpY3 = bls12_381_384.add( bls12_381_384.mul(fpY1, fpX2), bls12_381_384.mul(fpX1, fpY2));
+                    bls12_381_384.toMpz(_y3.get_mpz_t(), _fpY3);
+                }
+                else // BN256
+                {
+                    // Convert to RawFec::Element
+                    RawFq::Element fpX1, fpY1, fpX2, fpY2;
+                    bn254.fromMpz(fpX1, x1.get_mpz_t());
+                    bn254.fromMpz(fpY1, y1.get_mpz_t());
+                    bn254.fromMpz(fpX2, x2.get_mpz_t());
+                    bn254.fromMpz(fpY2, y2.get_mpz_t());
+
+                    RawFq::Element _fpX3;
+                    _fpX3 = bn254.sub( bn254.mul(fpX1, fpX2), bn254.mul(fpY1, fpY2)) ;
+                    bn254.toMpz(_x3.get_mpz_t(), _fpX3);
+
+                    RawFq::Element _fpY3;
+                    _fpY3 = bn254.add( bn254.mul(fpY1, fpX2), bn254.mul(fpX1, fpY2) );
+                    bn254.toMpz(_y3.get_mpz_t(), _fpY3);                   
+                }
+                break;
+            }
+            case ARITH_BN254_ADDFP2:
+            case ARITH_BLS12381_ADDFP2:
+            {
+                if (is384) // BLS12_381_384
+                {
+                    // Convert to RawFec::Element
+                    RawBLS12_381_384::Element fpX1, fpY1, fpX2, fpY2;
+                    bls12_381_384.fromMpz(fpX1, x1.get_mpz_t());
+                    bls12_381_384.fromMpz(fpY1, y1.get_mpz_t());
+                    bls12_381_384.fromMpz(fpX2, x2.get_mpz_t());
+                    bls12_381_384.fromMpz(fpY2, y2.get_mpz_t());
+
+                    RawBLS12_381_384::Element _fpX3;
+                    _fpX3 = bls12_381_384.add(fpX1, fpX2);
+                    bls12_381_384.toMpz(_x3.get_mpz_t(), _fpX3);
+
+                    RawBLS12_381_384::Element _fpY3;
+                    _fpY3 = bls12_381_384.add(fpY1, fpY2);
+                    bls12_381_384.toMpz(_y3.get_mpz_t(), _fpY3);
+                }
+                else // BN256
+                {
+                    // Convert to RawFec::Element
+                    RawFq::Element fpX1, fpY1, fpX2, fpY2;
+                    bn254.fromMpz(fpX1, x1.get_mpz_t());
+                    bn254.fromMpz(fpY1, y1.get_mpz_t());
+                    bn254.fromMpz(fpX2, x2.get_mpz_t());
+                    bn254.fromMpz(fpY2, y2.get_mpz_t());
+
+                    RawFq::Element _fpX3;
+                    _fpX3 = bn254.add(fpX1, fpX2);
+                    bn254.toMpz(_x3.get_mpz_t(), _fpX3);
+
+                    RawFq::Element _fpY3;
+                    _fpY3 = bn254.add(fpY1, fpY2);
+                    bn254.toMpz(_y3.get_mpz_t(), _fpY3);
+                }
+                break;
+            }
+            case ARITH_BN254_SUBFP2:
+            case ARITH_BLS12381_SUBFP2:
+            {
+                if (is384) // BLS12_381_384
+                {
+                    // Convert to RawFec::Element
+                    RawBLS12_381_384::Element fpX1, fpY1, fpX2, fpY2;
+                    bls12_381_384.fromMpz(fpX1, x1.get_mpz_t());
+                    bls12_381_384.fromMpz(fpY1, y1.get_mpz_t());
+                    bls12_381_384.fromMpz(fpX2, x2.get_mpz_t());
+                    bls12_381_384.fromMpz(fpY2, y2.get_mpz_t());
+
+                    RawBLS12_381_384::Element _fpX3;
+                    _fpX3 = bls12_381_384.sub(fpX1, fpX2);
+                    bls12_381_384.toMpz(_x3.get_mpz_t(), _fpX3);
+
+                    RawBLS12_381_384::Element _fpY3;
+                    _fpY3 = bls12_381_384.sub(fpY1, fpY2);
+                    bls12_381_384.toMpz(_y3.get_mpz_t(), _fpY3);
+                }
+                else // BN256
+                {
+                    // Convert to RawFec::Element
+                    RawFq::Element fpX1, fpY1, fpX2, fpY2;
+                    bn254.fromMpz(fpX1, x1.get_mpz_t());
+                    bn254.fromMpz(fpY1, y1.get_mpz_t());
+                    bn254.fromMpz(fpX2, x2.get_mpz_t());
+                    bn254.fromMpz(fpY2, y2.get_mpz_t());
+
+                    RawFq::Element _fpX3;
+                    _fpX3 = bn254.sub(fpX1, fpX2);
+                    bn254.toMpz(_x3.get_mpz_t(), _fpX3);
+
+                    RawFq::Element _fpY3;
+                    _fpY3 = bn254.sub(fpY1, fpY2);
+                    bn254.toMpz(_y3.get_mpz_t(), _fpY3);
+                }
+                break;
+            }
+            default:
+            {
+                zklog.error("Arith_verify() invalid arithEquation=" + arith2string(arithEquation));
+                exitProcess();
+            }
+        }
+
+        bool x3eq = (x3 == _x3);
+        bool y3eq = (y3 == _y3);
+
+        if (!x3eq || !y3eq)
+        {
+            zklog.error("Arith_verify() Arithmetic point does not match arithEquation=" + arith2string(arithEquation) +
+                " x3=" + x3.get_str(16) +
+                " _x3=" + _x3.get_str(16) +
+                " y3=" + y3.get_str(16) +
+                " _y3=" + _y3.get_str(16));
+            return ZKR_SM_MAIN_ARITH_MISMATCH;
+        }
+
+#ifdef USE_REQUIRED
+        ArithAction arithAction;
+
+        arithAction.x1[0] = ctx.pols.A0[step];
+        arithAction.x1[1] = ctx.pols.A1[step];
+        arithAction.x1[2] = ctx.pols.A2[step];
+        arithAction.x1[3] = ctx.pols.A3[step];
+        arithAction.x1[4] = ctx.pols.A4[step];
+        arithAction.x1[5] = ctx.pols.A5[step];
+        arithAction.x1[6] = ctx.pols.A6[step];
+        arithAction.x1[7] = ctx.pols.A7[step];
+
+        arithAction.y1[0] = ctx.pols.B0[step];
+        arithAction.y1[1] = ctx.pols.B1[step];
+        arithAction.y1[2] = ctx.pols.B2[step];
+        arithAction.y1[3] = ctx.pols.B3[step];
+        arithAction.y1[4] = ctx.pols.B4[step];
+        arithAction.y1[5] = ctx.pols.B5[step];
+        arithAction.y1[6] = ctx.pols.B6[step];
+        arithAction.y1[7] = ctx.pols.B7[step];
+
+        arithAction.x2[0] = dbl ? ctx.pols.A0[step] : ctx.pols.C0[step];
+        arithAction.x2[1] = dbl ? ctx.pols.A1[step] : ctx.pols.C1[step];
+        arithAction.x2[2] = dbl ? ctx.pols.A2[step] : ctx.pols.C2[step];
+        arithAction.x2[3] = dbl ? ctx.pols.A3[step] : ctx.pols.C3[step];
+        arithAction.x2[4] = dbl ? ctx.pols.A4[step] : ctx.pols.C4[step];
+        arithAction.x2[5] = dbl ? ctx.pols.A5[step] : ctx.pols.C5[step];
+        arithAction.x2[6] = dbl ? ctx.pols.A6[step] : ctx.pols.C6[step];
+        arithAction.x2[7] = dbl ? ctx.pols.A7[step] : ctx.pols.C7[step];
+
+        arithAction.y2[0] = dbl ? ctx.pols.B0[step] : ctx.pols.D0[step];
+        arithAction.y2[1] = dbl ? ctx.pols.B1[step] : ctx.pols.D1[step];
+        arithAction.y2[2] = dbl ? ctx.pols.B2[step] : ctx.pols.D2[step];
+        arithAction.y2[3] = dbl ? ctx.pols.B3[step] : ctx.pols.D3[step];
+        arithAction.y2[4] = dbl ? ctx.pols.B4[step] : ctx.pols.D4[step];
+        arithAction.y2[5] = dbl ? ctx.pols.B5[step] : ctx.pols.D5[step];
+        arithAction.y2[6] = dbl ? ctx.pols.B6[step] : ctx.pols.D6[step];
+        arithAction.y2[7] = dbl ? ctx.pols.B7[step] : ctx.pols.D7[step];
+
+        arithAction.x3[0] = ctx.pols.E0[step];
+        arithAction.x3[1] = ctx.pols.E1[step];
+        arithAction.x3[2] = ctx.pols.E2[step];
+        arithAction.x3[3] = ctx.pols.E3[step];
+        arithAction.x3[4] = ctx.pols.E4[step];
+        arithAction.x3[5] = ctx.pols.E5[step];
+        arithAction.x3[6] = ctx.pols.E6[step];
+        arithAction.x3[7] = ctx.pols.E7[step];
+
+        arithAction.y3[0] = op0;
+        arithAction.y3[1] = op1;
+        arithAction.y3[2] = op2;
+        arithAction.y3[3] = op3;
+        arithAction.y3[4] = op4;
+        arithAction.y3[5] = op5;
+        arithAction.y3[6] = op6;
+        arithAction.y3[7] = op7;
+
+        arithAction.equation = arithEquation;
+
+        required.Arith.push_back(arithAction);
+#endif
+
+    } 
+    else if (arithEquation == ARITH_256TO384)
+    {
+        mpz_class A, B, op;
+        if (!fea2scalar(fr, A, ctx.pols.A0[step], ctx.pols.A1[step], ctx.pols.A2[step], ctx.pols.A3[step], ctx.pols.A4[step], ctx.pols.A5[step], ctx.pols.A6[step], ctx.pols.A7[step]))
+        {
+            zklog.error("Arith_verify() failed calling fea2scalar(A)");
+            return ZKR_SM_MAIN_FEA2SCALAR;
+        }
+        if (!fea2scalar(fr, B, ctx.pols.B0[step], ctx.pols.B1[step], ctx.pols.B2[step], ctx.pols.B3[step], ctx.pols.B4[step], ctx.pols.B5[step], ctx.pols.B6[step], ctx.pols.B7[step]))
+        {
+            zklog.error("Arith_verify() failed calling fea2scalar(A)");
+            return ZKR_SM_MAIN_FEA2SCALAR;
+        }
+        if (!fea384ToScalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
+        {
+            zklog.error("Arith_verify() failed calling fea384ToScalar(op)");
+            return ZKR_SM_MAIN_FEA2SCALAR;
+        }
+
+        if (B > ScalarMask128)
+        {
+            zklog.error("Arith_verify() ARITH_256TO384 B is too big B=" + B.get_str(16) + " > 128 bits ");
+            return ZKR_SM_MAIN_ARITH_MISMATCH;
+        }
+
+        mpz_class expected = A + (B << 256);
+
+        if (op != expected)
+        {
+            zklog.error("Arith_verify() Arithmetic ARITH_256TO384 point does not match op=" + op.get_str(16) + " expected=" + expected.get_str(16) + " A=" + A.get_str(16) + " B=" + B.get_str(16));
+            return ZKR_SM_MAIN_ARITH_MISMATCH;
+        }
+
+        useCD = 0;
+        useE = 0;
+
+#ifdef USE_REQUIRED
+        ArithAction arithAction;
+
+        arithAction.x1[0] = ctx.pols.A0[step];
+        arithAction.x1[1] = ctx.pols.A1[step];
+        arithAction.x1[2] = ctx.pols.A2[step];
+        arithAction.x1[3] = ctx.pols.A3[step];
+        arithAction.x1[4] = ctx.pols.A4[step];
+        arithAction.x1[5] = ctx.pols.A5[step];
+        arithAction.x1[6] = ctx.pols.A6[step];
+        arithAction.x1[7] = ctx.pols.A7[step];
+
+        arithAction.y1[0] = ctx.pols.B0[step];
+        arithAction.y1[1] = ctx.pols.B1[step];
+        arithAction.y1[2] = ctx.pols.B2[step];
+        arithAction.y1[3] = ctx.pols.B3[step];
+        arithAction.y1[4] = ctx.pols.B4[step];
+        arithAction.y1[5] = ctx.pols.B5[step];
+        arithAction.y1[6] = ctx.pols.B6[step];
+        arithAction.y1[7] = ctx.pols.B7[step];
+
+        arithAction.x2[0] = fr.zero();
+        arithAction.x2[1] = fr.zero();
+        arithAction.x2[2] = fr.zero();
+        arithAction.x2[3] = fr.zero();
+        arithAction.x2[4] = fr.zero();
+        arithAction.x2[5] = fr.zero();
+        arithAction.x2[6] = fr.zero();
+        arithAction.x2[7] = fr.zero();
+
+        arithAction.y2[0] = fr.zero();
+        arithAction.y2[1] = fr.zero();
+        arithAction.y2[2] = fr.zero();
+        arithAction.y2[3] = fr.zero();
+        arithAction.y2[4] = fr.zero();
+        arithAction.y2[5] = fr.zero();
+        arithAction.y2[6] = fr.zero();
+        arithAction.y2[7] = fr.zero();
+
+        arithAction.x3[0] = fr.zero();
+        arithAction.x3[1] = fr.zero();
+        arithAction.x3[2] = fr.zero();
+        arithAction.x3[3] = fr.zero();
+        arithAction.x3[4] = fr.zero();
+        arithAction.x3[5] = fr.zero();
+        arithAction.x3[6] = fr.zero();
+        arithAction.x3[7] = fr.zero();
+
+        arithAction.y3[0] = op0;
+        arithAction.y3[1] = op1;
+        arithAction.y3[2] = op2;
+        arithAction.y3[3] = op3;
+        arithAction.y3[4] = op4;
+        arithAction.y3[5] = op5;
+        arithAction.y3[6] = op6;
+        arithAction.y3[7] = op7;
+
+        arithAction.equation = arithEquation;
+        
+        required.Arith.push_back(arithAction);
+#endif
+    }
+    else
+    {
+        zklog.error("Arith_verify() invalid arithEquation=" + arith2string(arithEquation));
+        exitProcess();
+    }
+
+    return ZKR_SUCCESS;
 }
 
 } // namespace
