@@ -24,7 +24,7 @@ class DatabaseMTAssociativeCache
         Goldilocks::Element *keys;
         bool *isValidKey;
         Goldilocks::Element *values;
-        uint32_t currentCacheIndex; //next index to be used acts as a clock for the cache
+        uint32_t currentCacheIndex; //next index to be used (acts as a clock for the cache)
 
 #ifdef LOG_ASSOCIATIVE_CACHE
         uint64_t attempts;
@@ -78,17 +78,19 @@ class DatabaseMTAssociativeCache
 
 void DatabaseMTAssociativeCache::addKeyValue(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update){
     // This wrapper is used to avoid the necessity of using lock_guard within the addKeyValue_ function
-    unique_lock<shared_mutex> lock(mlock);
+    mlock.lock();
     addKeyValue_(key, value, update);
+    mlock.unlock();
 }
 bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value){
     bool reinsert=false;
     bool found=false;
-    {
-        shared_lock<shared_mutex> lock(mlock);
-        found = findKey_(key, value, reinsert);
-    }
-    if(reinsert){
+    
+    mlock.lock_shared();
+    found = findKey_(key, value, reinsert);
+    mlock.unlock_shared();
+
+if(reinsert){
         unique_lock<shared_mutex> lock(mlock);
         vector<Goldilocks::Element> values_;
 

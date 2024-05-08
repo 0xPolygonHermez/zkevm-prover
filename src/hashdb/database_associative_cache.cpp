@@ -207,7 +207,6 @@ bool DatabaseMTAssociativeCache::extractKeyValue_(const Goldilocks::Element (&ke
 }
 
 bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value){
-    bool found = false;    
     //
     // look at the auxBufferKeysValues (chances that this buffer has any entry are almost negligible),
     // for this reason this search is not optimized at all
@@ -235,11 +234,11 @@ bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks:
                 value[11] = auxBufferKeysValues[i+16];
                 //erase the value
                 auxBufferKeysValues.erase(auxBufferKeysValues.begin() + i, auxBufferKeysValues.begin() + i + 17);   
-                found=true;
+                return true;
             }
         } 
     }
-    return found;
+    return false;
 }
 
 void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
@@ -304,7 +303,7 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
     //
     // Add value
     //
-    isValidKey[cacheIndex] = true;
+    if(!isValidKey[cacheIndex]) isValidKey[cacheIndex] = true; //avoid modify if uneccessary (cache effects)
     keys[cacheIndexKey + 0].fe = key[0].fe;
     keys[cacheIndexKey + 1].fe = key[1].fe;
     keys[cacheIndexKey + 2].fe = key[2].fe;
@@ -465,7 +464,6 @@ void DatabaseMTAssociativeCache::forcedInsertion_(uint32_t (&usedRawCacheIndexes
 
 bool DatabaseMTAssociativeCache::findKey_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value, bool &reinsert)
 {
-    bool found = false;
     reinsert = false;
     //
     // look at the auxBufferKeysValues (chances that this buffer has any entry are almost negligible),
@@ -495,51 +493,48 @@ bool DatabaseMTAssociativeCache::findKey_(const Goldilocks::Element (&key)[4], v
                 value[9] = auxBufferKeysValues[i+14];
                 value[10] = auxBufferKeysValues[i+15];
                 value[11] = auxBufferKeysValues[i+16];
-                found=true;
                 if(distanceFromCurrentCacheIndex_((uint32_t)(auxBufferKeysValues[i].fe)) > cacheSizeDiv2){
                     reinsert = true;
                 }
-                break;
+                return true;
             }
         } 
     }
     //
     // Look at the circulant buffer
     //
-    if(!found){
-        for (int i = 0; i < 4; i++)
-        {
-            uint32_t cacheIndexRaw = indexes[key[i].fe & indexesMask];
-            if (hasExpired_(cacheIndexRaw)) continue;
-            
-            uint32_t cacheIndex = cacheIndexRaw  & cacheMask;
-            uint32_t cacheIndexKey = cacheIndex * 4;
+    for (int i = 0; i < 4; i++)
+    {
+        uint32_t cacheIndexRaw = indexes[key[i].fe & indexesMask];
+        if (hasExpired_(cacheIndexRaw)) continue;
+        
+        uint32_t cacheIndex = cacheIndexRaw  & cacheMask;
+        uint32_t cacheIndexKey = cacheIndex * 4;
 
-            if (keys[cacheIndexKey + 0].fe == key[0].fe &&
-                keys[cacheIndexKey + 1].fe == key[1].fe &&
-                keys[cacheIndexKey + 2].fe == key[2].fe &&
-                keys[cacheIndexKey + 3].fe == key[3].fe)
-            {
-                uint32_t cacheIndexValue = cacheIndex * 12;
-                value.resize(12);
-                value[0] = values[cacheIndexValue];
-                value[1] = values[cacheIndexValue + 1];
-                value[2] = values[cacheIndexValue + 2];
-                value[3] = values[cacheIndexValue + 3];
-                value[4] = values[cacheIndexValue + 4];
-                value[5] = values[cacheIndexValue + 5];
-                value[6] = values[cacheIndexValue + 6];
-                value[7] = values[cacheIndexValue + 7];
-                value[8] = values[cacheIndexValue + 8];
-                value[9] = values[cacheIndexValue + 9];
-                value[10] = values[cacheIndexValue + 10];
-                value[11] = values[cacheIndexValue + 11];
-                found=true;
-                if(distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSizeDiv2){
-                    reinsert = true;
-                }
+        if (keys[cacheIndexKey + 0].fe == key[0].fe &&
+            keys[cacheIndexKey + 1].fe == key[1].fe &&
+            keys[cacheIndexKey + 2].fe == key[2].fe &&
+            keys[cacheIndexKey + 3].fe == key[3].fe)
+        {
+            uint32_t cacheIndexValue = cacheIndex * 12;
+            value.resize(12);
+            value[0] = values[cacheIndexValue];
+            value[1] = values[cacheIndexValue + 1];
+            value[2] = values[cacheIndexValue + 2];
+            value[3] = values[cacheIndexValue + 3];
+            value[4] = values[cacheIndexValue + 4];
+            value[5] = values[cacheIndexValue + 5];
+            value[6] = values[cacheIndexValue + 6];
+            value[7] = values[cacheIndexValue + 7];
+            value[8] = values[cacheIndexValue + 8];
+            value[9] = values[cacheIndexValue + 9];
+            value[10] = values[cacheIndexValue + 10];
+            value[11] = values[cacheIndexValue + 11];
+            if(distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSizeDiv2){
+                reinsert = true;
             }
+            return true;
         }
     }
-    return found;
+    return false;
 }
