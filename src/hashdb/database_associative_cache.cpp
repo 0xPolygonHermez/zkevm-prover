@@ -211,11 +211,11 @@ bool DatabaseMTAssociativeCache::extractKeyValue_(const Goldilocks::Element (&ke
                 value[9] = values[cacheIndexValue + 9];
                 value[10] = values[cacheIndexValue + 10];
                 value[11] = values[cacheIndexValue + 11]; 
-                found=true;  
+                return true;  
             }
         }
     }
-    return found;
+    return false;
 }
 
 bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value){
@@ -224,6 +224,9 @@ bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks:
     // for this reason this search is not optimized at all
     //
     if(auxBufferKeysValues.size() > 0){ 
+        if(auxBufferKeysValues.size() % 17!= 0) {
+            zklog.error("DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() auxBufferKeysValues.size() % 17!= 0");
+        }
         for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
 
             if( !hasExpired_(((uint32_t)(auxBufferKeysValues[i].fe))) &&
@@ -257,7 +260,11 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
 {
     if(auxBufferKeysValues.size() > 0){
         vector<Goldilocks::Element> value_;
-        extractKeyValueFromAuxBuffer_(key,value_);
+        bool found = extractKeyValueFromAuxBuffer_(key,value_);
+        if(update == false && found){
+            addKeyValue_(key, value_, false);
+            return;
+        }
     }
     bool emptySlot = false;
     bool present = false;
