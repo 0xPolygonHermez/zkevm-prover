@@ -4,7 +4,7 @@
 #include "scalar.hpp"
 
 #define NUMBER_OF_DB_CACHE_ADDS 1000
-#define NUMBER_OF_DB_CACHE_BENCHS 20000000 
+#define LOG_NUMBER_OF_DB_CACHE_BENCHS 23
 
 uint64_t DatabaseCacheTest (void)
 {
@@ -277,9 +277,12 @@ uint64_t DatabaseCacheBenchmark (void){
 
     // Generate 10M of hashes
     PoseidonGoldilocks poseidon_test;
-    Goldilocks::Element* keys= new Goldilocks::Element[NUMBER_OF_DB_CACHE_BENCHS*4];
-    vector<string> keyStrings(NUMBER_OF_DB_CACHE_BENCHS);
-    for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
+    uint32_t Nbench = 1<<LOG_NUMBER_OF_DB_CACHE_BENCHS;
+    uint32_t mask = Nbench-1;
+    Goldilocks::Element* keys= new Goldilocks::Element[Nbench*4];
+    uint32_t* randoms = new uint32_t[4*Nbench];
+    TimerStart(GENERATE_INPUT_DATA);
+    for (uint64_t i=0; i<Nbench; i++)
     {
         Goldilocks::Element key[4];
         vector<Goldilocks::Element> InputValue;
@@ -291,62 +294,56 @@ uint64_t DatabaseCacheBenchmark (void){
         keys[i*4+1] = key[1];
         keys[i*4+2] = key[2];
         keys[i*4+3] = key[3];
-        keyStrings[i] = fea2string(fr, (Goldilocks::Element(&)[4]) key);
+        randoms[i*4] = random() & mask;
+        randoms[i*4+1] = random() & mask;
+        randoms[i*4+2] = random() & mask;
+        randoms[i*4+3] = random() & mask;
     }
-    vector<Goldilocks::Element> value(12);
+    TimerStopAndLog(GENERATE_INPUT_DATA);
 
+    vector<Goldilocks::Element> value(12);
+    int count_hits = 0;
     DatabaseMTCache cache_map;
     cache_map.setMaxSize(uint64_t(8)*uint64_t(1024)*uint64_t(1024)*uint64_t(1024));
-    DatabaseMTAssociativeCache cache_ass(28, 25, "associativeCache");
+    TimerStart(FILL_CACHE);
+    //cache_map.fillCache();
+    cache_map.fillCacheCahotic();
+    TimerStopAndLog(FILL_CACHE);
     
     TimerStart(DATABASE_CACHE_BENCHMARK);
-    int count_hits = 0;
-    for(int k=0; k<4; k++){
-        for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
-        {
-            string keyString = fea2string(fr, (Goldilocks::Element(&)[4]) keys[4*i]); 
-            cache_map.add(keyString,value, false);
-            //cache_map.add(keyStrings[i],value, false);
+    for (uint64_t i=0; i<Nbench; i++)
+    {
+        string keyString = fea2string(fr, (Goldilocks::Element(&)[4]) keys[4*i]); 
+        cache_map.add(keyString,value, false);
 
-        }
     }
-    for(int k=0; k<4; k++){
-        for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
-        {
-            string keyString = fea2string(fr, (Goldilocks::Element(&)[4]) keys[4*i]); 
-            /*if(cache_map.find(keyStrings[i], value)){
-                ++count_hits;
-            }*/
-            if(cache_map.find(keyString, value)){
-                ++count_hits;
-            }
+    for (uint64_t i=0; i<4*Nbench; i++)
+    {
+        string keyString = fea2string(fr, (Goldilocks::Element(&)[4]) keys[4*randoms[i]]); 
+        if(cache_map.find(keyString, value)){
+            ++count_hits;
+        }
 
-        }
     }
-    //std::cout<<"Hits with cache map:"<<count_hits<<::endl;
-    count_hits = 0;
     TimerStopAndLog(DATABASE_CACHE_BENCHMARK);
-    cache_map.clear();
+
+    DatabaseMTAssociativeCache cache_ass(28, 25, "associativeCache");
     TimerStart(DATABASE_CACHE_ASSOCIATIVE_BENCHMARK);
-    for(int k=0; k<4; k++){
-        for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
-        {
-            cache_ass.addKeyValue((Goldilocks::Element(&)[4]) keys[4*i], value, false);
+    for (uint64_t i=0; i<Nbench; i++)
+    {
+        cache_ass.addKeyValue((Goldilocks::Element(&)[4]) keys[4*i], value, false);
 
-        }
     }
-    for(int k=0; k<4; k++){
-        for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_BENCHS; i++)
-        {
-            if(cache_ass.findKey((Goldilocks::Element(&)[4]) keys[4*i], value)){
+    for (uint64_t i=0; i<4*Nbench; i++)
+    {
+  
+        if(cache_ass.findKey((Goldilocks::Element(&)[4]) keys[4*randoms[i]], value)){
                 ++count_hits;
-            }
-
         }
+
     }
-    //std::cout<<"Hits with cache associative:"<<count_hits<<::endl;
     TimerStopAndLog(DATABASE_CACHE_ASSOCIATIVE_BENCHMARK);
     delete[] keys;
-    return 1;
+    return count_hits;
 
 }
