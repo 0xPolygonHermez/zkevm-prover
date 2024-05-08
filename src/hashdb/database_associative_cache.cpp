@@ -86,6 +86,9 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
 
     if(indexes == NULL){
         indexes = new uint32_t[indexesSize];
+    }else{
+        delete[] indexes;
+        indexes = new uint32_t[indexesSize];
     }
     // initialization of indexes array with UINT32_MAX-cacheSize: the value
     // that is at distance cacheSize+1 from the initial currentCacheIndex, i.e. 0
@@ -97,14 +100,23 @@ void DatabaseMTAssociativeCache::postConstruct(uint32_t log2IndexesSize_, uint32
     }
     if(keys == NULL){
         keys = new Goldilocks::Element[4 * cacheSize];
+    }else{
+        delete[] keys;
+        keys = new Goldilocks::Element[4 * cacheSize];
     }
 
     if(isValidKey == NULL){
+        isValidKey = new bool[cacheSize];
+    }else{
+        delete[] isValidKey;
         isValidKey = new bool[cacheSize];
     }
     memset(isValidKey, 0, cacheSize * sizeof(bool));
 
     if(values == NULL){ 
+        values = new Goldilocks::Element[12 * cacheSize];
+    }else{
+        delete[] values;
         values = new Goldilocks::Element[12 * cacheSize];
     }
 
