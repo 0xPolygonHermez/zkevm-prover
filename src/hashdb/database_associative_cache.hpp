@@ -96,7 +96,8 @@ if(reinsert){
         bool foundAgain = extractKeyValue_(key, values_);
         // Retrieved the values again (values_) to prevent potential modifications 
         // by another thread between the findKey_ and the addKeyValue_ operations
-        if(foundAgain) addKeyValue_(key, values_, false);
+        // update = true of false is the same since it will not be found...
+        if(foundAgain) addKeyValue_(key, values_, true);
         mlock.unlock();
 
     }

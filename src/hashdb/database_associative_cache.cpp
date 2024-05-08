@@ -220,7 +220,7 @@ bool DatabaseMTAssociativeCache::extractKeyValue_(const Goldilocks::Element (&ke
             }
         }
     }
-    return false;
+    return found;
 }
 
 bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value){
@@ -266,7 +266,7 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
     if(auxBufferKeysValues.size() > 0){
         vector<Goldilocks::Element> value_;
         bool found = extractKeyValueFromAuxBuffer_(key,value_);
-        if(update == false && found){
+        if(found && update == false){
             addKeyValue_(key, value_, false);
             return;
         }
@@ -292,11 +292,13 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
                 keys[cacheIndexKey + 3].fe == key[3].fe){
                     if(distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSizeDiv2){
-                        //
                         // It is present but it is far from the currentCacheIndex, so we need to reinsert it
-                        //
-                        vector<Goldilocks::Element> value_;
-                        extractKeyValue_(key,value_);
+                        // we reinsert it assuming update==true
+                        isValidKey[cacheIndex]=false;
+                        if(emptySlot == false){
+                            emptySlot = true;
+                            tableIndexEmpty = tableIndex;
+                        }
                     }else{
                         if(update == false) return;
                         present = true;
@@ -318,6 +320,7 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
             indexes[tableIndexEmpty] = currentCacheIndex;
         }
         cacheIndex = currentCacheIndex & cacheMask;
+        //incerment the currentCacheIndex
         currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
     }
     uint64_t cacheIndexKey, cacheIndexValue;
@@ -359,7 +362,7 @@ void DatabaseMTAssociativeCache::addKeyValue_(const Goldilocks::Element (&key)[4
     //
     if(!present && !emptySlot){
         uint32_t iter = 0;
-        uint32_t usedRawCacheIndexes[20]; // we will do at maximum 20 iterations
+        uint32_t usedRawCacheIndexes[20]; // we will do at maximum 20 force transaction iterations
         usedRawCacheIndexes[0] = (currentCacheIndex == 0) ? UINT32_MAX : currentCacheIndex-1;
         forcedInsertion_(usedRawCacheIndexes, iter, update);
     }
@@ -424,60 +427,23 @@ void DatabaseMTAssociativeCache::forcedInsertion_(uint32_t (&usedRawCacheIndexes
         zklog.warning("forcedInsertion_() maxforcedInsertion_Iterations reached");
         Goldilocks::Element *buffKey = &keys[(inputRawCacheIndex & cacheMask) * 4];
         Goldilocks::Element *buffValue = &values[(inputRawCacheIndex & cacheMask) * 12];
-        
-        // check first if there is an slot in the vector where the key is already present
-        int pos = -1;
-        for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
-            if( distanceFromCurrentCacheIndex_((uint32_t)(auxBufferKeysValues[i].fe)) > cacheSize){
-                if(pos < 0) pos = i;
-            }else{
-                if( auxBufferKeysValues[i+1].fe == buffKey[0].fe &&
-                    auxBufferKeysValues[i+2].fe == buffKey[1].fe &&
-                    auxBufferKeysValues[i+3].fe == buffKey[2].fe &&
-                    auxBufferKeysValues[i+4].fe == buffKey[3].fe){
-                    if(update == false) return;
-                    pos = i;
-                }
-            }
-        }
-        if(pos != -1){
-            auxBufferKeysValues[pos] = Goldilocks::fromU64((uint64_t)(inputRawCacheIndex));
-            auxBufferKeysValues[pos + 1] = buffKey[0];
-            auxBufferKeysValues[pos + 2] = buffKey[1];
-            auxBufferKeysValues[pos + 3] = buffKey[2];
-            auxBufferKeysValues[pos + 4] = buffKey[3];    
-            auxBufferKeysValues[pos + 5] = buffValue[0];
-            auxBufferKeysValues[pos + 6] = buffValue[1];
-            auxBufferKeysValues[pos + 7] = buffValue[2];
-            auxBufferKeysValues[pos + 8] = buffValue[3];
-            auxBufferKeysValues[pos + 9] = buffValue[4];
-            auxBufferKeysValues[pos + 10] = buffValue[5];
-            auxBufferKeysValues[pos + 11] = buffValue[6];
-            auxBufferKeysValues[pos + 12] = buffValue[7];
-            auxBufferKeysValues[pos + 13] = buffValue[8];
-            auxBufferKeysValues[pos + 14] = buffValue[9];
-            auxBufferKeysValues[pos + 15] = buffValue[10];
-            auxBufferKeysValues[pos + 16] = buffValue[11];
-
-        }else{
-            auxBufferKeysValues.push_back(Goldilocks::fromU64((uint64_t)(inputRawCacheIndex)));
-            auxBufferKeysValues.push_back(buffKey[0]);
-            auxBufferKeysValues.push_back(buffKey[1]);
-            auxBufferKeysValues.push_back(buffKey[2]);
-            auxBufferKeysValues.push_back(buffKey[3]);
-            auxBufferKeysValues.push_back(buffValue[0]);
-            auxBufferKeysValues.push_back(buffValue[1]);
-            auxBufferKeysValues.push_back(buffValue[2]);
-            auxBufferKeysValues.push_back(buffValue[3]);
-            auxBufferKeysValues.push_back(buffValue[4]);
-            auxBufferKeysValues.push_back(buffValue[5]);
-            auxBufferKeysValues.push_back(buffValue[6]);
-            auxBufferKeysValues.push_back(buffValue[7]);
-            auxBufferKeysValues.push_back(buffValue[8]);
-            auxBufferKeysValues.push_back(buffValue[9]);
-            auxBufferKeysValues.push_back(buffValue[10]);
-            auxBufferKeysValues.push_back(buffValue[11]);
-        }
+        auxBufferKeysValues.push_back(Goldilocks::fromU64((uint64_t)(inputRawCacheIndex)));
+        auxBufferKeysValues.push_back(buffKey[0]);
+        auxBufferKeysValues.push_back(buffKey[1]);
+        auxBufferKeysValues.push_back(buffKey[2]);
+        auxBufferKeysValues.push_back(buffKey[3]);
+        auxBufferKeysValues.push_back(buffValue[0]);
+        auxBufferKeysValues.push_back(buffValue[1]);
+        auxBufferKeysValues.push_back(buffValue[2]);
+        auxBufferKeysValues.push_back(buffValue[3]);
+        auxBufferKeysValues.push_back(buffValue[4]);
+        auxBufferKeysValues.push_back(buffValue[5]);
+        auxBufferKeysValues.push_back(buffValue[6]);
+        auxBufferKeysValues.push_back(buffValue[7]);
+        auxBufferKeysValues.push_back(buffValue[8]);
+        auxBufferKeysValues.push_back(buffValue[9]);
+        auxBufferKeysValues.push_back(buffValue[10]);
+        auxBufferKeysValues.push_back(buffValue[11]);
         return;
     }else{
         indexes[(uint32_t)(inputKey[pos].fe & indexesMask)] = inputRawCacheIndex;
