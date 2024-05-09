@@ -442,15 +442,16 @@ int main(int argc, char **argv)
     /* INIT DB CACHE */
     if(config.useAssociativeCache){
         Database::useAssociativeCache = true;
-        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
+        //Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
+        Database::dbMTACache.postConstruct(uint64_t(config.dbProgramCacheSize)*uint64_t(1024)*uint64_t(1024), "MTCache");
     }
     else{
         Database::useAssociativeCache = false;
         Database::dbMTCache.setName("MTCache");
-        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*uint64_t(1024)*uint64_t(1024));
     }
     Database::dbProgramCache.setName("ProgramCache");
-    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
+    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*uint64_t(1024)*uint64_t(1024));
 
     if (config.databaseURL != "local") // remote DB
     {
@@ -531,6 +532,7 @@ int main(int argc, char **argv)
     if (config.runDatabaseCacheTest)
     {
         DatabaseCacheTest();
+        //DatabaseCacheBenchmark();
     }
 
     // Test check tree
