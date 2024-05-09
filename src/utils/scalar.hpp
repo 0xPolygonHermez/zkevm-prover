@@ -24,6 +24,7 @@ extern mpz_class ScalarMask64;
 extern mpz_class ScalarMask128;
 extern mpz_class ScalarMask160;
 extern mpz_class ScalarMask256;
+extern mpz_class ScalarMask384;
 extern mpz_class ScalarMask512;
 extern mpz_class ScalarTwoTo8;
 extern mpz_class ScalarTwoTo16;
@@ -42,6 +43,8 @@ extern mpz_class ScalarTwoTo384;
 extern mpz_class ScalarTwoTo388;
 extern mpz_class ScalarZero;
 extern mpz_class ScalarOne;
+extern mpz_class ScalarTwo;
+extern mpz_class ScalarFour;
 extern mpz_class ScalarGoldilocksPrime;
 extern mpz_class Scalar4xGoldilocksPrime;
 

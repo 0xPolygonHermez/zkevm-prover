@@ -120,6 +120,13 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_getVersionedHash:                return eval_getVersionedHash(ctx, cmd, cr);
             case f_getKzgCommitmentHash:            return eval_getKzgCommitmentHash(ctx, cmd, cr);
             case f_getKzgProof:                     return eval_getKzgProof(ctx, cmd, cr);
+
+            case f_fpBLS12_381_sqrt:                return eval_fpBLS12_381_sqrt(ctx, cmd, cr);
+            case f_lenBinDecomp:                    return eval_lenBinDecomp(ctx, cmd, cr);
+            case f_frBLS12_381_inv:                 return eval_frBLS12_381_inv(ctx, cmd, cr);
+            case f_fpBLS12_381_inv:                 return eval_fpBLS12_381_inv(ctx, cmd, cr);
+            case f_fp2BLS12_381_inv_x:              return eval_fp2BLS12_381_inv_x(ctx, cmd, cr);
+            case f_fp2BLS12_381_inv_y:              return eval_fp2BLS12_381_inv_y(ctx, cmd, cr);
             
             default:
                 zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + "=" + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
@@ -6134,6 +6141,328 @@ zkresult Arith_verify ( Context &ctx,
     }
 
     return ZKR_SUCCESS;
+}
+
+uint64_t sign_BLS12_381p (mpz_class &a)
+{
+    return (a > ((BLS12_381p_prime - ScalarOne) / ScalarTwo)) ? 1 : 0;
+}
+
+// Returns the square root of the input scalar in the BLS12-381 base field or 2^384-1 if the input scalar is not a square
+void eval_fpBLS12_381_sqrt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_fpBLS12_381_sqrt() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fpBLS12_381_sqrt() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element a;
+    BLS12_381p.fromMpz(a, cr.scalar.get_mpz_t());
+
+    // Get level by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fpBLS12_381_sqrt() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t sign = cr.scalar.get_ui(); // Also knows as "parity"
+
+    cr.type = crt_scalar;
+
+    if (BLS12_381p.isZero(a))
+    {
+        cr.scalar = 0;
+        return;
+    }
+
+    // Get the exponent
+    mpz_class exponent;
+    exponent = (BLS12_381p_prime - ScalarOne) / ScalarTwo;
+    string exponentBa;
+    exponentBa = scalar2ba(exponent);
+
+    // Check if it is a square in this finite field
+    RawBLS12_381_384::Element sqrt;
+    BLS12_381p.exp(sqrt, a, (uint8_t *)exponentBa.c_str(), exponentBa.size());
+
+    if (!BLS12_381p.eq(sqrt, BLS12_381p.one()))
+    {
+        // a is not a square in Fp
+        // return 2^384-1, the maximum allowed value that can be represented
+        cr.scalar = ScalarMask384;
+        return;
+    }
+
+    // You don't need to apply the standard Tonelli-Shanks algorithm because p = 3 mod 4
+    // Get the exponent
+    exponent = (BLS12_381p_prime + ScalarOne) / ScalarFour;
+    BLS12_381p.exp(sqrt, a, (uint8_t *)exponentBa.c_str(), exponentBa.size());
+
+    mpz_class sqrtScalar;
+    BLS12_381p.toMpz(sqrtScalar.get_mpz_t(), sqrt);
+
+    // If sign/parity does not match, negate to get the other sqrt
+    if (sign_BLS12_381p(sqrtScalar) != sign)
+    {
+        BLS12_381p.neg(sqrt);
+        BLS12_381p.toMpz(sqrtScalar.get_mpz_t(), sqrt);
+    }
+
+    cr.scalar = sqrtScalar;
+    return;
+}
+
+// Returns the length of the binary representation of the input scalar. If there are multiple input scalars, it returns the maximum length.
+void eval_lenBinDecomp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_lenBinDecomp() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_lenBinDecomp() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    mpz_class k = cr.scalar;
+
+    // Count the k bits
+    cr.type = crt_scalar;
+    uint64_t len = 0;
+    while (k > 0)
+    {
+        k >>= 1;
+        len++;
+    }
+
+    // Return the length
+    cr.type = crt_scalar;
+    cr.scalar = len;
+}
+
+//Computes the inverse of the given element of the BLS12-381 scalar field
+void eval_frBLS12_381_inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_frBLS12_381_inv() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_frBLS12_381_inv() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381::Element a;
+    BLS12_381r.fromMpz(a, cr.scalar.get_mpz_t());
+
+    // Calculate the inverse
+    RawBLS12_381::Element aInv;
+    BLS12_381r.inv(aInv, a);
+
+    // Return the result
+    cr.type = crt_scalar;
+    BLS12_381r.toMpz(cr.scalar.get_mpz_t(), aInv);
+}
+
+//Computes the inverse of the given element of the BLS12-381 base field
+void eval_fpBLS12_381_inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_fpBLS12_381_inv() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fpBLS12_381_inv() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element a;
+    BLS12_381p.fromMpz(a, cr.scalar.get_mpz_t());
+
+    // Calculate the inverse
+    RawBLS12_381_384::Element aInv;
+    BLS12_381p.inv(aInv, a);
+
+    // Return the result
+    cr.type = crt_scalar;
+    BLS12_381p.toMpz(cr.scalar.get_mpz_t(), aInv);
+}
+
+// Computes the "real" part of the inverse of the given Fp2 element
+void eval_fp2BLS12_381_inv_x (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_fp2BLS12_381_inv_x() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fp2BLS12_381_inv_x() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element a;
+    BLS12_381p.fromMpz(a, cr.scalar.get_mpz_t());
+
+    // Get index by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fp2BLS12_381_inv_x() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element b;
+    BLS12_381p.fromMpz(b, cr.scalar.get_mpz_t());
+
+    // Calculate the denominator
+    RawBLS12_381_384::Element den;
+    den = BLS12_381p.add(BLS12_381p.mul(a, a), BLS12_381p.mul(b, b));
+
+    // Calculate the result
+    RawBLS12_381_384::Element result;
+    BLS12_381p.div(result, a, den);
+
+    cr.type = crt_scalar;
+    BLS12_381p.toMpz(cr.scalar.get_mpz_t(), result);
+}
+
+// Computes the "imaginary" part of the inverse of the given Fp2 element
+void eval_fp2BLS12_381_inv_y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_fp2BLS12_381_inv_y() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fp2BLS12_381_inv_y() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element a;
+    BLS12_381p.fromMpz(a, cr.scalar.get_mpz_t());
+
+    // Get index by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fp2BLS12_381_inv_y() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawBLS12_381_384::Element b;
+    BLS12_381p.fromMpz(b, cr.scalar.get_mpz_t());
+
+    // Calculate the denominator
+    RawBLS12_381_384::Element den;
+    den = BLS12_381p.add(BLS12_381p.mul(a, a), BLS12_381p.mul(b, b));
+
+    // Calculate the result
+    RawBLS12_381_384::Element negB;
+    negB = BLS12_381p.neg(b);
+    RawBLS12_381_384::Element result;
+    BLS12_381p.div(result, negB, den);
+
+    cr.type = crt_scalar;
+    BLS12_381p.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 } // namespace

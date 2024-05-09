@@ -111,6 +111,12 @@ typedef enum : int {
     f_getVersionedHash,
     f_getKzgCommitmentHash,
     f_getKzgProof,
+    f_fpBLS12_381_sqrt,
+    f_lenBinDecomp,
+    f_frBLS12_381_inv,
+    f_fpBLS12_381_inv,
+    f_fp2BLS12_381_inv_x,
+    f_fp2BLS12_381_inv_y,
 } tFunction;
 
 // ROM command (op)

@@ -137,6 +137,12 @@ tFunction string2Function(string s)
     else if (s == "getVersionedHash")               return f_getVersionedHash;
     else if (s == "getKzgCommitmentHash")           return f_getKzgCommitmentHash;
     else if (s == "getKzgProof")                    return f_getKzgProof;
+    else if (s == "fpBLS12_381_sqrt")               return f_fpBLS12_381_sqrt;
+    else if (s == "lenBinDecomp")                   return f_lenBinDecomp;
+    else if (s == "frBLS12_381_inv")                return f_frBLS12_381_inv;
+    else if (s == "fpBLS12_381_inv")                return f_fpBLS12_381_inv;
+    else if (s == "fp2BLS12_381_inv_x")             return f_fp2BLS12_381_inv_x;
+    else if (s == "fp2BLS12_381_inv_y")             return f_fp2BLS12_381_inv_y;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -245,6 +251,12 @@ string function2String(tFunction f)
         case f_getVersionedHash:                return "getVersionedHash";
         case f_getKzgCommitmentHash:            return "getKzgCommitmentHash";
         case f_getKzgProof:                     return "getKzgProof";
+        case f_fpBLS12_381_sqrt:                return "fpBLS12_381_sqrt";
+        case f_lenBinDecomp:                    return "lenBinDecomp";
+        case f_frBLS12_381_inv:                 return "frBLS12_381_inv";
+        case f_fpBLS12_381_inv:                 return "fpBLS12_381_inv";
+        case f_fp2BLS12_381_inv_x:              return "fp2BLS12_381_inv_x";
+        case f_fp2BLS12_381_inv_y:              return "fp2BLS12_381_inv_y";
         case f_empty:                           return "";
         default:                                return "unknown";
     }
