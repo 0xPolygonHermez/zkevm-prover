@@ -421,13 +421,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     TimerStart(EXECUTOR_EXECUTE_INITIALIZATION);
 
     PROVER_FORK_NAMESPACE::CommitPols cmPols(pAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
-    uint64_t num_threads = omp_get_max_threads();
-    uint64_t bytes_per_thread = cmPols.size() / num_threads;
-#pragma omp parallel for num_threads(num_threads)
-    for (uint64_t i = 0; i < cmPols.size(); i += bytes_per_thread) // Each iteration processes 64 bytes at a time
-    {
-        memset((uint8_t *)pAddress + i, 0, bytes_per_thread);
-    }
+    Goldilocks::parSetZero((Goldilocks::Element*)pAddress, cmPols.size()/sizeof(Goldilocks::Element), omp_get_max_threads()/2);
+
 
     TimerStopAndLog(EXECUTOR_EXECUTE_INITIALIZATION);
     // Execute all the State Machines
