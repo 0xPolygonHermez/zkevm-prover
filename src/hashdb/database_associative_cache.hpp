@@ -4,6 +4,8 @@
 #include "goldilocks_base_field.hpp"
 #include <shared_mutex>
 #include "zklog.hpp"
+#include "zkassert.hpp"
+
 
 using namespace std;
 class DatabaseMTAssociativeCache

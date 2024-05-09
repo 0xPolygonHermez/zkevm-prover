@@ -71,7 +71,9 @@ uint64_t DatabaseCacheTest (void)
         poseidon_test.hash(key,(Goldilocks::Element(&)[12])(InputValue.data()[0]));
         cache1.addKeyValue(key, InputValue, false);
     }
-    //test findKey
+    //
+    // test findKey
+    //
     for (uint64_t i=0; i<NUMBER_OF_DB_ASSOCIATIVE_CACHE_ADDS; i++)
     {
         Goldilocks::Element key[4];
@@ -98,7 +100,9 @@ uint64_t DatabaseCacheTest (void)
         }
 
     }
+    //
     // test update
+    //
     for (uint64_t i=0; i<NUMBER_OF_DB_ASSOCIATIVE_CACHE_ADDS; i++)
     {
         Goldilocks::Element key[4];
@@ -113,7 +117,9 @@ uint64_t DatabaseCacheTest (void)
         }
         cache1.addKeyValue(key, value, true);
     }
-    //test findKey with updated values
+    //
+    // test findKey with updated values
+    //
      for (uint64_t i=0; i<NUMBER_OF_DB_ASSOCIATIVE_CACHE_ADDS; i++)
     {
         Goldilocks::Element key[4];
@@ -139,7 +145,9 @@ uint64_t DatabaseCacheTest (void)
         }
 
     }
-    //test clear: clear the cache and check I do not find previous keys
+    //
+    // test clear: clear the cache and check I do not find previous keys
+    //
     cache1.clear();
     for (uint64_t i=0; i<NUMBER_OF_DB_ASSOCIATIVE_CACHE_ADDS; i++)
     {
@@ -157,11 +165,13 @@ uint64_t DatabaseCacheTest (void)
             numberOfFailed++;
         }
     }
-    //collisions and auxBufferKeysValues
+    //
+    // collisions and auxBufferKeysValues
+    //
     Goldilocks::Element key1[4];
     Goldilocks::Element key2[4];
     Goldilocks::Element key3[4];
-    key1[0] = fr.fromU64(0);
+    key1[0] = fr.fromU64(uint64_t(1)<<38);
     key1[1] = fr.fromU64(0);
     key1[2] = fr.fromU64(0);
     key1[3] = fr.fromU64(0);
@@ -176,7 +186,7 @@ uint64_t DatabaseCacheTest (void)
     key3[2] = fr.fromU64(0);
     key3[3] = fr.fromU64(0);
     
-    // Key 0 and Key 1 have only one position availe in the indexes table, if I add both the buffer auxBufferKeysValues should be used
+    // Keys 1, 2 and 3 have only one position availe in the indexes table, if I add both the buffer auxBufferKeysValues should be used
     vector<Goldilocks::Element> value1(12);
     vector<Goldilocks::Element> value2(12);
     vector<Goldilocks::Element> value3(12);
@@ -243,10 +253,15 @@ uint64_t DatabaseCacheTest (void)
             numberOfFailed++;
         }
     }
-
-    //check that after doing a round to the cache the elements are not anymore into de auxBufferKeysValues
-    for (uint64_t i=0; i<2*cache1.getCacheSize(); i++)
+    //
+    // check that after doing a round to the cache the elements are not anymore into de auxBufferKeysValues
+    //
+    for (uint64_t i=0; i<cache1.getCacheSize()-1; i++)
     {
+        if(cache1.getAuxBufferKeysValuesSize()==0 && i<cache1.getCacheSize()){
+            zklog.error("DatabaseCacheTest() auxBufferKeysValues should not be cleaned " + to_string(cache1.getAuxBufferKeysValuesSize()));
+            numberOfFailed++;
+        }
         Goldilocks::Element key[4];
         vector<Goldilocks::Element> value;
         for(int k=0; k<12; ++k){
@@ -258,15 +273,207 @@ uint64_t DatabaseCacheTest (void)
             value[k] = fr.fromU64(i+1);
         }
         cache1.addKeyValue(key, value, true);
-        if(cache1.getAuxBufferKeysValuesSize()==0 && i<cache1.getCacheSize()-2){
-            zklog.error("DatabaseCacheTest() auxBufferKeysValues should not be cleaned" + to_string(cache1.getAuxBufferKeysValuesSize()));
+        
+        
+    }
+    if(cache1.getAuxBufferKeysValuesSize()!=0){
+        zklog.error("DatabaseCacheTest() auxBufferKeysValues should have been be cleaned ");
+        numberOfFailed++;
+    }
+    //
+    // test reincert after read
+    //
+    cache1.clear();
+    //1.fill the cache
+    for (uint64_t i=0; i<cache1.getCacheSize(); i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        cache1.addKeyValue(key, value, true);
+    }
+    //read the second half of elements (should be found and nothing els will happend)
+    for (uint64_t i=cache1.getCacheSize()/2; i<cache1.getCacheSize(); i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        bResult = cache1.findKey(key, value);
+        if (!bResult)
+        {
+            zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
             numberOfFailed++;
         }
+        if(bResult){
+            //check the value is correct
+            for(int k=0; k<12; ++k){
+                if(value[k].fe != fr.fromU64(i).fe){
+                    zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+                    numberOfFailed++;
+                }
+            }
+        }
+
     }
-    
-    if(cache1.getAuxBufferKeysValuesSize()!=0){
-        zklog.error("DatabaseCacheTest() failed the cleaning of auxBufferKeysValues"+ to_string(cache1.getAuxBufferKeysValuesSize()));
-        numberOfFailed++;
+    //read the first half of elements (should be found and the element should be reinserted)
+    for (uint64_t i=0; i<cache1.getCacheSize()/2; i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        bResult = cache1.findKey(key, value);
+        if (!bResult)
+        {
+            zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+            numberOfFailed++;
+        }
+        if(bResult){
+            //check the value is correct
+            for(int k=0; k<12; ++k){
+                if(value[k].fe != fr.fromU64(i).fe){
+                    zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+                    numberOfFailed++;
+                }
+            }
+        }
+
+    }
+    // now we add getCacheSize()/2 more elements
+    for (uint64_t i=cache1.getCacheSize(); i<cache1.getCacheSize()+ cache1.getCacheSize()/2; i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        cache1.addKeyValue(key, value, true);
+    }
+    // We should only find the element form 0 to getCacheSize()/2 and the elements from getCacheSize() to getCacheSize()+ getCacheSize()/2
+    for (uint64_t i=0; i<cache1.getCacheSize()+ cache1.getCacheSize()/2; i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        bResult = cache1.findKey(key, value);
+        if (i<cache1.getCacheSize()/2 || i>=cache1.getCacheSize()){
+            if (!bResult)
+            {
+                zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+                numberOfFailed++;
+            }
+            if(bResult){
+                //check the value is correct
+                for(int k=0; k<12; ++k){
+                    if(value[k].fe != fr.fromU64(i).fe){
+                        zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+                        numberOfFailed++;
+                    }
+                }
+            }
+        }else{
+            if (bResult)
+            {
+                zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+                numberOfFailed++;
+            }
+        }
+
+    }
+    //
+    // test reincert after update
+    //
+    cache1.clear();
+    //1.fill the cache
+    for (uint64_t i=0; i<cache1.getCacheSize(); i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        cache1.addKeyValue(key, value, true);
+    }
+    //update the second half of elements (should be found and nothing els will happend)
+    for (uint64_t i=cache1.getCacheSize()/2; i<cache1.getCacheSize(); i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        cache1.addKeyValue(key, value, true);
+
+    }
+    // update the first half of elements (should be reinserted)
+    for (uint64_t i=0; i<cache1.getCacheSize()/2; i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        cache1.addKeyValue(key, value, true);
+    }
+    // now we add getCacheSize()/2 more elements
+    for (uint64_t i=cache1.getCacheSize(); i<cache1.getCacheSize()+ cache1.getCacheSize()/2; i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        cache1.addKeyValue(key, value, true);
+    }
+    // We should only find the element form 0 to getCacheSize()/2 and the elements from getCacheSize() to getCacheSize()+ getCacheSize()/2
+    for (uint64_t i=0; i<cache1.getCacheSize()+ cache1.getCacheSize()/2; i++)
+    {
+        Goldilocks::Element key[4];
+        vector<Goldilocks::Element> value;
+        for(int k=0; k<12; ++k){
+            value.push_back(fr.fromU64(i));
+        } 
+        poseidon_test.hash(key,(Goldilocks::Element(&)[12])(value.data()[0]));
+        bResult = cache1.findKey(key, value);
+        if (i<cache1.getCacheSize()/2 || i>=cache1.getCacheSize()){
+            if (!bResult)
+            {
+                zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+                numberOfFailed++;
+            }
+            if(bResult){
+                //check the value is correct
+                for(int k=0; k<12; ++k){
+                    if(value[k].fe != fr.fromU64(i).fe){
+                        zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+                        numberOfFailed++;
+                    }
+                }
+            }
+        }else{
+            if (bResult)
+            {
+                zklog.error("DatabaseCacheTest() failed calling cache1.findKey() of key=" + keyString);
+                numberOfFailed++;
+            }
+        }
+
     }
     TimerStopAndLog(DATABASE_ASSOCIATIVE_CACHE_TEST);
     assert(numberOfFailed == 0);
@@ -306,8 +513,8 @@ uint64_t DatabaseCacheBenchmark (void){
     DatabaseMTCache cache_map;
     cache_map.setMaxSize(uint64_t(8)*uint64_t(1024)*uint64_t(1024)*uint64_t(1024));
     TimerStart(FILL_CACHE);
-    //cache_map.fillCache();
-    cache_map.fillCacheCahotic();
+    cache_map.fillCache();
+    //cache_map.fillCacheCahotic();
     TimerStopAndLog(FILL_CACHE);
     
     TimerStart(DATABASE_CACHE_BENCHMARK);
