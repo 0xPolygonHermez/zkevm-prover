@@ -2,11 +2,8 @@
 #define DATABASE_ASSOCIATIVE_CACHE_HPP
 #include <vector>
 #include "goldilocks_base_field.hpp"
-#include <nlohmann/json.hpp>
-#include <mutex>
 #include <shared_mutex>
 #include "zklog.hpp"
-#include "zkmax.hpp"
 
 using namespace std;
 class DatabaseMTAssociativeCache
@@ -37,7 +34,7 @@ class DatabaseMTAssociativeCache
 
         vector<Goldilocks::Element> auxBufferKeysValues;
         // The buffer uses 17 slots for each key-value pair:
-        // 1 for the raw cache index, 4 for the key, 12 for the value
+        // 1 for the rawCacheIndex, 4 for the key, 12 for the value
 
     public:
 
@@ -63,9 +60,12 @@ class DatabaseMTAssociativeCache
         bool extractKeyValue_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
         bool extractKeyValueFromAuxBuffer_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
         
-         inline bool hasExpired_(uint32_t cacheIndexRaw) const { 
+        inline bool hasExpired_(uint32_t cacheIndexRaw) const { 
             return  !isValidKey[cacheIndexRaw & cacheMask] || distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSize ;
          };
+        inline bool hasExpiredInBuffer_(uint32_t cacheIndexRaw) const {
+            return distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSize;
+        };
         inline uint32_t distanceFromCurrentCacheIndex_(uint32_t cacheIndexRaw) const {
             //note: currentCacheIndex is the next index to be used (not used yet)
             if(currentCacheIndex == cacheIndexRaw) return UINT32_MAX; //it should be UINT32_MAX + 1 but is out of range
@@ -77,7 +77,7 @@ class DatabaseMTAssociativeCache
 };
 
 void DatabaseMTAssociativeCache::addKeyValue(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update){
-    // This wrapper is used to avoid the necessity of using lock_guard within the addKeyValue_ function
+    // This wrapper is used to avoid using lock_guard within the addKeyValue_ function
     mlock.lock();
     addKeyValue_(key, value, update);
     mlock.unlock();
@@ -96,7 +96,7 @@ if(reinsert){
         bool foundAgain = extractKeyValue_(key, values_);
         // Retrieved the values again (values_) to prevent potential modifications 
         // by another thread between the findKey_ and the addKeyValue_ operations
-        // update = true of false is the same since it will not be found...
+        // update = true of false is the same since it has been extracted.
         if(foundAgain) addKeyValue_(key, values_, true);
         mlock.unlock();
 
@@ -127,12 +127,12 @@ void DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() {
     if(auxBufferKeysValues.size() == 0) return;
     if(auxBufferKeysValues.size() % 17!= 0) {
         zklog.error("DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() auxBufferKeysValues.size() % 17!= 0");
-        return;
+        exitProcess();
     }
     auto it = auxBufferKeysValues.begin();
     while (it != auxBufferKeysValues.end()) {
         uint32_t cacheIndexRaw = static_cast<uint32_t>(it->fe);
-        if (distanceFromCurrentCacheIndex_(cacheIndexRaw) > cacheSize) {
+        if (hasExpiredInBuffer_(cacheIndexRaw)) {
             it = auxBufferKeysValues.erase(it, it + 17);
         } else {
             std::advance(it, 17);

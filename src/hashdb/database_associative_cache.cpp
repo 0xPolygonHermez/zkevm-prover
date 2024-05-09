@@ -231,6 +231,8 @@ bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks:
     if(auxBufferKeysValues.size() > 0){ 
         if(auxBufferKeysValues.size() % 17!= 0) {
             zklog.error("DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() auxBufferKeysValues.size() % 17!= 0");
+            exitProcess();
+
         }
         for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
 
@@ -463,6 +465,8 @@ bool DatabaseMTAssociativeCache::findKey_(const Goldilocks::Element (&key)[4], v
     if(auxBufferKeysValues.size() > 0){ 
         if(auxBufferKeysValues.size() % 17!= 0) {
             zklog.error("DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() auxBufferKeysValues.size() % 17!= 0");
+            exitProcess();
+
         }
         for(size_t i=0; i<auxBufferKeysValues.size(); i+=17){
             
