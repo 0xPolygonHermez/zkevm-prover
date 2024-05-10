@@ -496,6 +496,10 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
 
     } while ((numberOfOpcodes == 1) && (numberOfCodeOpcodes == 1));
 
+#ifdef LOG_WITNESS
+    zklog.info("calculateWitnessHash() returns hash=" + fea2string(fr, hash));
+#endif
+
     return ZKR_SUCCESS;
 }
 

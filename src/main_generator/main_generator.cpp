@@ -343,6 +343,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    remove(\"c.txt\");\n";
     code += "#endif\n\n";
 
+    code += "   // Clear cache if configured and we are using a local database\n";
+    code += "   if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL == \"local\"))\n";
+    code += "   {\n";
+    code += "       mainExecutor.pHashDB->clearCache();\n";
+    code += "   }\n";
+
     code += "    // Copy input database content into context database\n";
     code += "    if (proverRequest.input.db.size() > 0)\n";
     code += "    {\n";
