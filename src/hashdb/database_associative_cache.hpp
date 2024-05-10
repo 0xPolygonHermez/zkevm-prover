@@ -48,7 +48,8 @@ class DatabaseMTAssociativeCache
         void postConstruct(uint64_t cacheBytes_, string name_ = "associative_cache");
         void clear();
         
-        inline void addKeyValue(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
+        // update = true is only used for testing purposes, update would be fals in real scenarios
+        inline void addKeyValue(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update = false);
         inline bool findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
 
         inline bool enabled() const { return (log2IndexesSize > 0); };
@@ -94,14 +95,9 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
 
 if(reinsert){
         mlock.lock();
-        vector<Goldilocks::Element> values_;
-        bool foundAgain = extractKeyValue_(key, values_);
-        // Retrieved the values again (values_) to prevent potential modifications 
-        // by another thread between the findKey_ and the addKeyValue_ operations
-        // update = true of false is the same since it has been extracted.
-        if(foundAgain) addKeyValue_(key, values_, true);
+        // third argument (update) true or false is the same here, if is still in the cache it will be reinserted
+        addKeyValue_(key, value, true);
         mlock.unlock();
-
     }
 
 #ifdef LOG_ASSOCIATIVE_CACHE
