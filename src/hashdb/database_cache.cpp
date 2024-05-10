@@ -244,6 +244,93 @@ void DatabaseMTCache::updateRecord(DatabaseCacheRecord* record, const void * val
     *(vector<Goldilocks::Element>*)(record->value) = *(vector<Goldilocks::Element>*)(value);
 }
 
+uint32_t DatabaseMTCache::fillCache(){
+
+    vector<Goldilocks::Element> value0(12);
+    value0[0].fe = 0;
+    vector<Goldilocks::Element> value1(12);
+    value1[0].fe = 0;
+
+    Goldilocks::Element key[4];
+    for (uint64_t i=0; i<maxSize/256; i++)
+    {
+        key[0].fe = i;
+        key[1].fe = i+1;
+        key[2].fe = i+2;
+        key[3].fe = i+3;
+        
+        string keyString = fea2string(fr,key); 
+        add(keyString,value0, false);
+        //get a random value from 0 to i
+        uint64_t random = rand() % (i+1);
+        key[0].fe = random;
+        key[1].fe = random+1;
+        key[2].fe = random+2;
+        key[3].fe = random+3;
+        find(fea2string(fr, key), value1);
+        value0[0]= value0[0]+value1[0];
+    }
+    return 1;
+
+}
+
+uint32_t DatabaseMTCache::fillCacheCahotic(){
+
+    vector<Goldilocks::Element> value0(12);
+    value0[0].fe = 0;
+    vector<Goldilocks::Element> value1(12);
+    value1[0].fe = 0;
+
+    uint32_t ndist = 1<<20;
+    uint32_t mask = ndist-1;
+    char ** memory_distorsion = (char**) malloc(ndist*sizeof(char*));
+    for (uint32_t i=0; i<ndist; i++)
+    {
+        memory_distorsion[i] = NULL;
+    }
+    uint32_t count = 0;
+    
+    Goldilocks::Element key[4];
+    for (uint64_t i=0; i<maxSize/256; i++)
+    {
+        key[0].fe = i;
+        key[1].fe = i+1;
+        key[2].fe = i+2;
+        key[3].fe = i+3;
+        
+        string keyString = fea2string(fr,key); 
+        add(keyString,value0, false);
+        //get a random value from 0 to i
+        uint64_t random = rand() % (i+1);
+        key[0].fe = random;
+        key[1].fe = random+1;
+        key[2].fe = random+2;
+        key[3].fe = random+3;
+        find(fea2string(fr, key), value1);
+        value0[0]= value0[0]+value1[0];
+        if(memory_distorsion[i & mask] != NULL)
+        {
+            free(memory_distorsion[i & mask]);
+        }
+        memory_distorsion[i & mask] = (char*) malloc((1<<20)*sizeof(char));
+        if(i%2==0) memory_distorsion[i & mask][3728] = 'a';
+    }
+    for(uint32_t i=0; i<ndist; i++)
+    {
+        if(memory_distorsion[i] != NULL)
+        {
+            if(memory_distorsion[i][3728] == 'a')
+            {
+                count++;
+            }
+            free(memory_distorsion[i]);
+        }
+    }
+    free(memory_distorsion);
+    return count;
+
+}
+
 // DatabaseProgramCache class implementation
 
 DatabaseProgramCache::~DatabaseProgramCache()
