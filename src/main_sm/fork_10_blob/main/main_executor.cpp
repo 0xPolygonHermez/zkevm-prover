@@ -206,6 +206,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     remove("c.txt");
 #endif
 
+    // Clear cache if configured and we are using a local database
+    if (config.dbClearCache && (config.databaseURL == "local"))
+    {
+        pHashDB->clearCache();
+    }
+
     // Copy input database content into context database
     if (proverRequest.input.db.size() > 0)
     {
