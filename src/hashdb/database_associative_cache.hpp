@@ -60,7 +60,6 @@ class DatabaseMTAssociativeCache
     private:
         void addKeyValue_(const Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
         bool findKey_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value, bool &reinsert);
-        bool extractKeyValue_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
         bool extractKeyValueFromAuxBuffer_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
         
         inline bool hasExpired_(uint32_t cacheIndexRaw) const { 
