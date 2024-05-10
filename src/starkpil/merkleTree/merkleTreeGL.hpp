@@ -4,6 +4,7 @@
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
 #include <math.h>
+#include "utils/memory.cuh"
 
 #define MERKLEHASHGL_ARITY 2
 class MerkleTreeGL
@@ -35,21 +36,21 @@ public:
 
         if (source == NULL)
         {
-            source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
+            source = (Goldilocks::Element *)calloc2(height * width, sizeof(Goldilocks::Element));
             isSourceAllocated = true;
         }
-        nodes = (Goldilocks::Element *)calloc(getTreeNumElements(), sizeof(Goldilocks::Element));
+        nodes = (Goldilocks::Element *)calloc2(getTreeNumElements(), sizeof(Goldilocks::Element));
         isNodesAllocated = true;
     };
     ~MerkleTreeGL()
     {
         if (isSourceAllocated)
         {
-            free(source);
+            free2(source);
         }
         if (isNodesAllocated)
         {
-            free(nodes);
+            free2(nodes);
         }
     };
     void copySource(Goldilocks::Element *_source)
@@ -58,6 +59,9 @@ public:
     }
 
     void merkelize();
+    Goldilocks::Element* get_nodes_ptr() {
+        return nodes;
+    }
     uint64_t getTreeNumElements()
     {
         return height * HASH_SIZE + (height - 1) * HASH_SIZE;

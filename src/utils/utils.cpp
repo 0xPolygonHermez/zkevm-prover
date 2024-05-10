@@ -19,6 +19,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 #include "zklog.hpp"
+#include "memory.cuh"
 
 using namespace std;
 using namespace std::filesystem;
@@ -389,7 +390,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
         return pAddress;
 
     // Allocate memory
-    void *pMemAddress = malloc(size);
+    void *pMemAddress = malloc2(size);
     if (pMemAddress == NULL)
     {
         zklog.error("mapFile() failed calling malloc() of size: " + to_string(size));
