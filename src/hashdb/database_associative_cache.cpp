@@ -175,54 +175,6 @@ void DatabaseMTAssociativeCache::clear(){
     currentCacheIndex = 0;
 }
 
-bool DatabaseMTAssociativeCache::extractKeyValue_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
-{
-    bool found = false;    
-    //
-    // look at the auxBufferKeysValues (chances that this buffer has any entry are almost negligible),
-    // for this reason this search is not optimized at all
-    //
-    if(auxBufferKeysValues.size() > 0){ 
-        found = extractKeyValueFromAuxBuffer_(key,value);
-    }
-    //
-    // Look at the circulant buffer
-    //
-    if(found == false){
-        for (int i = 0; i < 4; i++)
-        {
-            uint32_t cacheIndexRaw = indexes[key[i].fe & indexesMask];
-            if (hasExpired_(cacheIndexRaw)) continue;
-            
-            uint32_t cacheIndex = cacheIndexRaw  & cacheMask;
-            uint32_t cacheIndexKey = cacheIndex * 4;
-            if (keys[cacheIndexKey + 0].fe == key[0].fe &&
-                keys[cacheIndexKey + 1].fe == key[1].fe &&
-                keys[cacheIndexKey + 2].fe == key[2].fe &&
-                keys[cacheIndexKey + 3].fe == key[3].fe)
-            {
-                isValidKey[cacheIndex]=false;
-                uint32_t cacheIndexValue = cacheIndex * 12;
-                value.resize(12);
-                value[0] = values[cacheIndexValue];
-                value[1] = values[cacheIndexValue + 1];
-                value[2] = values[cacheIndexValue + 2];
-                value[3] = values[cacheIndexValue + 3];
-                value[4] = values[cacheIndexValue + 4];
-                value[5] = values[cacheIndexValue + 5];
-                value[6] = values[cacheIndexValue + 6];
-                value[7] = values[cacheIndexValue + 7];
-                value[8] = values[cacheIndexValue + 8];
-                value[9] = values[cacheIndexValue + 9];
-                value[10] = values[cacheIndexValue + 10];
-                value[11] = values[cacheIndexValue + 11]; 
-                return true;  
-            }
-        }
-    }
-    return found;
-}
-
 bool DatabaseMTAssociativeCache::extractKeyValueFromAuxBuffer_(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value){
     //
     // look at the auxBufferKeysValues (chances that this buffer has any entry are almost negligible),
