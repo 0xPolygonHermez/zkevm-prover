@@ -12,13 +12,26 @@ HashDBInterface* HashDBClientFactory::createHashDBClient (Goldilocks &fr, const 
 {
     if (config.hashDBURL=="local")
     {
-        HashDBInterface * pLocalClient = hashDBSingleton.get();
-        if (pLocalClient == NULL)
+        if (config.hashDBSingleton)
         {
-            zklog.error("HashDBClientFactory::createHashDBClient() failed calling new hashDBSingleton.get()");
-            exitProcess();
+            HashDBInterface * pLocalClient = hashDBSingleton.get();
+            if (pLocalClient == NULL)
+            {
+                zklog.error("HashDBClientFactory::createHashDBClient() failed calling new hashDBSingleton.get()");
+                exitProcess();
+            }
+            return pLocalClient;
         }
-        return pLocalClient;
+        else
+        {
+            HashDBInterface * pLocalClient = new HashDB(fr, config);
+            if (pLocalClient == NULL)
+            {
+                zklog.error("HashDBClientFactory::createHashDBClient() failed calling new HashDB()");
+                exitProcess();
+            }
+            return pLocalClient;
+        }
     }
 
     HashDBInterface *pRemoteClient = new HashDBRemote (fr, config);
@@ -39,7 +52,14 @@ void HashDBClientFactory::freeHashDBClient (HashDBInterface * pHashDB)
         exitProcess();
     }
 
-    if (pHashDB != hashDBSingleton.get())
+    if (config.hashDBSingleton)
+    {
+        if (pHashDB != hashDBSingleton.get())
+        {
+            delete pHashDB;
+        }
+    }
+    else
     {
         delete pHashDB;
     }

@@ -169,12 +169,6 @@ void Config::load(json &config)
     ParseBool(config, "saveFilesInSubfolders", "SAVE_FILES_IN_SUBFOLDERS", saveFilesInSubfolders, false);
     ParseBool(config, "saveExecutorErrors", "SAVE_EXECUTOR_ERRORS", saveExecutorErrors, false);
 
-    // Load DB to mem cache TODO: Discontinue this functionality
-    //ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
-    loadDBToMemCache = false;
-    ParseBool(config, "loadDBToMemCacheInParallel", "LOAD_DB_TO_MEM_CACHE_IN_PARALLEL", loadDBToMemCacheInParallel, false);
-    ParseU64(config, "loadDBToMemTimeout", "LOAD_DB_TO_MEM_TIMEOUT", loadDBToMemTimeout, 30*1000*1000); // Default = 30 seconds
-
     // MT cache
     ParseS64(config, "dbMTCacheSize", "DB_MT_CACHE_SIZE", dbMTCacheSize, 8*1024); // Default = 8 GB
 
@@ -207,6 +201,7 @@ void Config::load(json &config)
     ParseString(config, "hashDBFileName", "HASHDB_FILE_NAME", hashDBFileName, "");
     ParseU64(config, "hashDBFileSize", "HASHDB_FILE_SIZE", hashDBFileSize, 128);
     ParseString(config, "hashDBFolder", "HASHDB_FOLDER", hashDBFolder, "hashdb");
+    ParseBool(config, "hashDBSingleton", "HASHDB_SINGLETON", hashDBSingleton, true);
     ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
     ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
     ParseString(config, "aggregatorClientHost", "AGGREGATOR_CLIENT_HOST", aggregatorClientHost, "127.0.0.1");
@@ -472,10 +467,7 @@ void Config::print(void)
         zklog.info("    saveExecutorErrors=true");
     if (saveResponseToFile)
         zklog.info("    saveResponseToFile=true");
-    zklog.info("    loadDBToMemCache=" + to_string(loadDBToMemCache));
-    if (loadDBToMemCacheInParallel)
-        zklog.info("    loadDBToMemCacheInParallel=true");
-    if (opcodeTracer)
+   if (opcodeTracer)
         zklog.info("    opcodeTracer=true");
     if (logRemoteDbReads)
         zklog.info("    logRemoteDbReads=true");
@@ -507,6 +499,7 @@ void Config::print(void)
     zklog.info("    hashDBFileName=" + hashDBFileName);
     zklog.info("    hashDBFileSize=" + to_string(hashDBFileSize));
     zklog.info("    hastDBFolder=" + hashDBFolder);
+    zklog.info("    hashDBSingleton=" + to_string(hashDBSingleton));
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
     zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
@@ -635,7 +628,6 @@ void Config::print(void)
     zklog.info("    log2DbVersionsAssociativeCacheSize=" + to_string(log2DbVersionsAssociativeCacheSize));
     zklog.info("    log2DbVersionsAssociativeCacheIndexesSize=" + to_string(log2DbVersionsAssociativeCacheIndexesSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
-    zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
     zklog.info("    ECRecoverPrecalc=" + to_string(ECRecoverPrecalc));
     zklog.info("    ECRecoverPrecalcNThreads=" + to_string(ECRecoverPrecalcNThreads));
@@ -1054,6 +1046,12 @@ bool Config::check (void)
     if (loadDiagnosticRom)
     {
         inputFile = "testvectors/diagnostic/input.json";
+    }
+
+    if (hashDBSingleton && (databaseURL != "local"))
+    {
+        zklog.error("hashDBSingleton=true but databaseURL!=local");
+        bError = true;
     }
 
     return bError;

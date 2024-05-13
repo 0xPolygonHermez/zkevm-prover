@@ -63,9 +63,6 @@ public:
     bool saveFilesInSubfolders; // Saves output files in folders per hour, e.g. output/2023/01/10/18
     bool saveExecutorErrors; // Saves executor service errors in executor_errors.json
 
-    bool loadDBToMemCache;
-    bool loadDBToMemCacheInParallel;
-    uint64_t loadDBToMemTimeout;
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
     bool useAssociativeCache; // Use the associative cache for MT records?
     int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 128 bytes
@@ -94,6 +91,7 @@ public:
     string hashDBFileName;
     uint64_t hashDBFileSize;
     string hashDBFolder;
+    bool hashDBSingleton;
 
     // Aggregator service (client)
     uint16_t aggregatorServerPort;

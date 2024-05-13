@@ -2,6 +2,7 @@
 #include "hashdb/database.hpp"
 #include "timer.hpp"
 #include "scalar.hpp"
+#include "hashdb_factory.hpp"
 
 #define NUMBER_OF_DB_CACHE_ADDS 1000
 #define LOG_NUMBER_OF_DB_CACHE_BENCHS 23
@@ -10,12 +11,13 @@ uint64_t DatabaseCacheTest (void)
 {
     TimerStart(DATABASE_CACHE_TEST);
 
-    
-    Database::dbMTCache.clear();
+    DatabaseMTCache dbMTCache;
+
+    dbMTCache.clear();
     
     uint64_t numberOfFailed = 0;
 
-    Database::dbMTCache.setMaxSize(2000000);
+    dbMTCache.setMaxSize(2000000);
 
     Goldilocks fr;
     mpz_class keyScalar;
@@ -32,7 +34,7 @@ uint64_t DatabaseCacheTest (void)
             value.push_back(fr.fromU64(j));
         }
         bool update = false;
-        Database::dbMTCache.add(keyString, value, update);
+        dbMTCache.add(keyString, value, update);
     }
 
     //Database::dbMTCache.print(true);
@@ -41,7 +43,7 @@ uint64_t DatabaseCacheTest (void)
     {
         keyScalar = i;
         keyString = PrependZeros(keyScalar.get_str(16), 64);
-        bResult = Database::dbMTCache.find(keyString, value);
+        bResult = dbMTCache.find(keyString, value);
         if (!bResult)
         {
             zklog.error("DatabaseCacheTest() failed calling Database::dbMTCache.find() of key=" + keyString);
@@ -49,7 +51,7 @@ uint64_t DatabaseCacheTest (void)
         }
     }
     
-    Database::dbMTCache.clear();
+    dbMTCache.clear();
 
     TimerStopAndLog(DATABASE_CACHE_TEST);
 
