@@ -54,8 +54,8 @@ public:
     uint64_t finalizeExecutionLabel;
     uint64_t checkAndSaveFromLabel;
 
-    // HashDB
-    HashDBInterface *pHashDB;
+    // HashDB singleton
+    HashDBInterface *pHashDBSingleton;
 
     // When we reach this zkPC, state root (SR) will be consolidated (from virtual to real state root)
     const uint64_t consolidateStateRootZKPC = 4922;

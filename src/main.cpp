@@ -457,6 +457,7 @@ int main(int argc, char **argv)
     if (config.runDatabaseCacheTest)
     {
         DatabaseCacheTest();
+        //DatabaseCacheBenchmark();
     }
 
     // Test check tree

@@ -91,11 +91,18 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     opcodeAddressInit(romJson["labels"]);
 
     /* Get a HashDBInterface interface, according to the configuration */
-    pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
-    if (pHashDB == NULL)
+    if (config.hashDBSingleton)
     {
-        zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
-        exitProcess();
+        pHashDBSingleton = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDBSingleton == NULL)
+        {
+            zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
+    }
+    else
+    {
+        pHashDBSingleton = NULL;
     }
     
     TimerStopAndLog(ROM_LOAD);
@@ -105,7 +112,11 @@ MainExecutor::~MainExecutor ()
 {
     TimerStart(MAIN_EXECUTOR_DESTRUCTOR_fork_2);
 
-    HashDBClientFactory::freeHashDBClient(pHashDB);
+    if (config.hashDBSingleton)
+    {
+        zkassertpermanent(pHashDBSingleton != NULL);
+        HashDBClientFactory::freeHashDBClient(pHashDBSingleton);
+    }
 
     TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_2);
 }
@@ -131,6 +142,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         proverRequest.result = ZKR_SM_MAIN_INVALID_UNSIGNED_TX;
         zklog.error("MainExecutor::execute() failed called with bUnsignedTransaction=true but bProcessBatch=false");
         return;
+    }
+
+    // Get a pointer to the HashDB interface
+    HashDBInterface *pHashDB;
+    if (config.hashDBSingleton)
+    {
+        pHashDB = pHashDBSingleton;
+    }
+    else
+    {
+        pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDB == NULL)
+        {
+            zklog.error("MainExecutor::execute() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
     }
 
     // Create context and store a finite field reference in it
