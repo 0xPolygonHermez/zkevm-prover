@@ -67,17 +67,17 @@ private:
 
 public:
 #ifdef DATABASE_USE_CACHE
-    // Cache static instances
-    static bool useAssociativeCache;
-    static DatabaseMTAssociativeCache dbMTACache;
-    static DatabaseMTCache dbMTCache;
-    static DatabaseProgramCache dbProgramCache;
+    // Cache instances
+    bool useAssociativeCache;
+    DatabaseMTAssociativeCache dbMTACache;
+    DatabaseMTCache dbMTCache;
+    DatabaseProgramCache dbProgramCache;
 
     // This is a fixed key to store the latest state root hash, used to load it to the cache
     // This key is "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
     // This key cannot be the result of a hash because it is out of the Goldilocks Element range
-    static string dbStateRootKey;
-    static Goldilocks::Element dbStateRootvKey[4];
+    string dbStateRootKey;
+    Goldilocks::Element dbStateRootvKey[4];
 
 #endif
 
@@ -129,7 +129,5 @@ void *dbSenderThread(void *arg);
 
 // Thread to synchronize cache from master hash DB server
 void *dbCacheSynchThread(void *arg);
-
-void loadDb2MemCache(const Config &config);
 
 #endif

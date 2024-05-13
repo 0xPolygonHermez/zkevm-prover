@@ -53,9 +53,6 @@ The configuration parameters can be of different uses:
 |`saveResponseToFile`|test|boolean|Saves executor GRPC response to file, in text format|false|SAVE_RESPONSE_TO_FILE|
 |`saveProofToFile`|test|boolean|Saves generated proof to file, in JSON format|false|SAVE_PROOF_TO_FILE|
 |`saveFilesInSubfolders`|test|boolean|Saves files in folders named as per hour, e.g. `output/2023/01/10/18`|false|SAVE_FILES_IN_SUBFOLDERS|
-|`loadDBToMemCache`|test|boolean|Fill database cache with content during initialization|false|LOAD_DB_TO_MEM_CACHE|
-|`loadDBToMemCacheInParallel`|test|boolean|Fill database cache in parallel with the normal execution|false|LOAD_DB_TO_MEM_CACHE_IN_PARALLEL|
-|`loadDBToMemTimeout`|test|u64|Fill database cache up to a certain time, in microseconds|30000000 (30 seconds)|LOAD_DB_TO_MEM_TIMEOUT|
 |**`dbMTCacheSize`**|production|s64|Database MT cache size, in MB|8*1024 (8 GB)|DB_MT_CACHE_SIZE|
 |**`useAssociativeCache`**|production|boolean|Use associative cache as Database MT cache, which is faster than regular cache|false|USE_ASSOCIATIVE_CACHE|
 |`log2DbMTAssociativeCacheSize`|production|s64|log2 of the size in entries of the DatabaseMTAssociativeCache; note that 1 cache entry = 128 bytes|25|LOG2_DB_MT_ASSOCIATIVE_CACHE_SIZE|
@@ -79,6 +76,7 @@ The configuration parameters can be of different uses:
 |`hashDBFileName`|test|string|Core name used for the hashDB files (path,numbering and extension not included). If hashDBFileName is empty in-memory version of the hashDB is used (only for DEBUG purposes). |""|HASHDB_FILE_NAME|
 |`hashDBFileSize`|test|u64|HashDB files size in GB|128|HASHDB_FILE_SIZE|failures
 |`hashDBFolder`|test|string|Folder containing the hashDB files|hashdb|HASHDB_FOLDER|
+|`hashDBSingleton`|production|boolean|Use HashDB singleton.  Set to false when databaseURL=local to get one dedicated cache per thread.|true|HASHDB_SINGLETON|
 |`aggregatorServerPort`|test|u16|Aggregator server GRPC port|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientPort`**|production|u16|Aggregator client GRPC port to connect to|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientHost`**|production|string|Aggregator client GRPC host name to connect to, i.e. Aggregator server host name|"127.0.0.1"|AGGREGATOR_CLIENT_HOST|
