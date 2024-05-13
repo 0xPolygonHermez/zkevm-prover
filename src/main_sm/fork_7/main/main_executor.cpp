@@ -110,11 +110,18 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     pthread_mutex_init(&labelsMutex, NULL);
 
     /* Get a HashDBInterface interface, according to the configuration */
-    pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
-    if (pHashDB == NULL)
+    if (config.hashDBSingleton)
     {
-        zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
-        exitProcess();
+        pHashDSingleton = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDSingleton == NULL)
+        {
+            zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
+    }
+    else
+    {
+        pHashDSingleton = NULL;
     }
 
     TimerStopAndLog(ROM_LOAD);
@@ -124,7 +131,11 @@ MainExecutor::~MainExecutor ()
 {
     TimerStart(MAIN_EXECUTOR_DESTRUCTOR_fork_7);
 
-    HashDBClientFactory::freeHashDBClient(pHashDB);
+    if (config.hashDBSingleton)
+    {
+        zkassertpermanent(pHashDSingleton != NULL);
+        HashDBClientFactory::freeHashDBClient(pHashDSingleton);
+    }
 
     TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_7);
 }
@@ -179,6 +190,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         proverRequest.result = ZKR_SM_MAIN_INVALID_UNSIGNED_TX;
         zklog.error("MainExecutor::execute() failed called with bUnsignedTransaction=true but bProcessBatch=false");
         return;
+    }
+
+    // Get a HashDB interface
+    HashDBInterface *pHashDB;
+    if (config.hashDBSingleton)
+    {
+        pHashDB = pHashDSingleton;
+    }
+    else
+    {
+        pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDB == NULL)
+        {
+            zklog.error("MainExecutor::execute() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
     }
 
     // Create context and store a finite field reference in it

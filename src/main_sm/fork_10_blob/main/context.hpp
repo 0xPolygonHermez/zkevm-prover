@@ -19,6 +19,7 @@
 #include "ffiasm/fnec.hpp"
 #include "prover_request.hpp"
 #include "hashdb_interface.hpp"
+#include "hashdb_factory.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -225,6 +226,14 @@ public:
         pEvaluation(NULL),
         N(0),
         forceMode384(false){}; // Constructor, setting references
+
+    ~Context()
+    {
+        if (!config.hashDBSingleton)
+        {
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+        }
+    }
 
     // HashK database, used in Keccak-f hash instructions hashK, hashK1, hashKLen and hashKDigest
     unordered_map< uint64_t, HashValue > hashK;

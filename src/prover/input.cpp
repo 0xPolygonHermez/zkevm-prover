@@ -5,6 +5,7 @@
 #include "database.hpp"
 #include "utils.hpp"
 #include "zklog.hpp"
+#include "zkmax.hpp"
 
 zkresult Input::load (json &input)
 {

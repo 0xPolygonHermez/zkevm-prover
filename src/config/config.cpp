@@ -1048,9 +1048,9 @@ bool Config::check (void)
         inputFile = "testvectors/diagnostic/input.json";
     }
 
-    if (hashDBSingleton && (databaseURL != "local"))
+    if (!hashDBSingleton && (databaseURL != "local"))
     {
-        zklog.error("hashDBSingleton=true but databaseURL!=local");
+        zklog.error("hashDBSingleton=false but databaseURL!=local");
         bError = true;
     }
 
