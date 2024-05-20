@@ -61,7 +61,7 @@ public:
     pthread_mutex_t labelsMutex;    // Mutex to protect the labels vector
 
     // HashDB singleton
-    HashDBInterface *pHashDSingleton;
+    HashDBInterface *pHashDBSingleton;
 
     // When we reach this zkPC, state root (SR) will be consolidated (from virtual to real state root)
     const uint64_t consolidateStateRootZKPC = 4928;

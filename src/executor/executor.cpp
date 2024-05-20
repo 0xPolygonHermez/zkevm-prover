@@ -1,19 +1,13 @@
 #include "executor.hpp"
 #include "utils.hpp"
-#include "main_sm/fork_4/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_4/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_5/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_6/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_6/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_7/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_7/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_8/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_8/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
-#include "main_sm/fork_9/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_9/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_10/main_exec_generated/main_exec_generated.hpp"
+//#include "main_sm/fork_10/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_10/main_exec_generated/main_exec_generated_fast.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
@@ -569,11 +563,11 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
         if (proverRequest.input.publicInputsExtended.publicInputs.forkID == PROVER_FORK_ID)
         {
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            if (config.useMainExecGenerated)
+            /*if (config.useMainExecGenerated)
             {
-                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_9, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
             }
-            else
+            else*/
 #endif
             {
                 mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);
@@ -691,11 +685,11 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-        if (config.useMainExecGenerated)
+        /*if (config.useMainExecGenerated)
         {
-            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_9, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
         }
-        else
+        else*/
 #endif
         {
             mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);

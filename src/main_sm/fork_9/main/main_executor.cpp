@@ -119,8 +119,8 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     /* Get a HashDBInterface interface, according to the configuration */
     if (config.hashDBSingleton)
     {
-        pHashDSingleton = HashDBClientFactory::createHashDBClient(fr, config);
-        if (pHashDSingleton == NULL)
+        pHashDBSingleton = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDBSingleton == NULL)
         {
             zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
             exitProcess();
@@ -128,7 +128,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     }
     else
     {
-        pHashDSingleton = NULL;
+        pHashDBSingleton = NULL;
     }
 
     TimerStopAndLog(ROM_LOAD);
@@ -140,8 +140,8 @@ MainExecutor::~MainExecutor ()
 
     if (config.hashDBSingleton)
     {
-        zkassertpermanent(pHashDSingleton != NULL);
-        HashDBClientFactory::freeHashDBClient(pHashDSingleton);
+        zkassertpermanent(pHashDBSingleton != NULL);
+        HashDBClientFactory::freeHashDBClient(pHashDBSingleton);
     }
 
     TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_9);
@@ -203,7 +203,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     HashDBInterface *pHashDB;
     if (config.hashDBSingleton)
     {
-        pHashDB = pHashDSingleton;
+        pHashDB = pHashDBSingleton;
     }
     else
     {

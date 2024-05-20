@@ -5496,7 +5496,7 @@ zkresult Arith_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilocks::El
 
 zkresult Arith_verify ( Context &ctx,
                         Goldilocks::Element &op0, Goldilocks::Element &op1, Goldilocks::Element &op2, Goldilocks::Element &op3, Goldilocks::Element &op4, Goldilocks::Element &op5, Goldilocks::Element &op6, Goldilocks::Element &op7,
-                        MainExecRequired &required,
+                        MainExecRequired *required,
                         uint64_t &same12, uint64_t &useE, uint64_t &useCD)
 {
     zkassert(ctx.pZKPC != NULL);
@@ -5597,65 +5597,68 @@ zkresult Arith_verify ( Context &ctx,
         }
 
 #ifdef USE_REQUIRED
-        ArithAction arithAction;
+        if (required != NULL)
+        {
+            ArithAction arithAction;
 
-        arithAction.x1[0] = ctx.pols.A0[step];
-        arithAction.x1[1] = ctx.pols.A1[step];
-        arithAction.x1[2] = ctx.pols.A2[step];
-        arithAction.x1[3] = ctx.pols.A3[step];
-        arithAction.x1[4] = ctx.pols.A4[step];
-        arithAction.x1[5] = ctx.pols.A5[step];
-        arithAction.x1[6] = ctx.pols.A6[step];
-        arithAction.x1[7] = ctx.pols.A7[step];
+            arithAction.x1[0] = ctx.pols.A0[step];
+            arithAction.x1[1] = ctx.pols.A1[step];
+            arithAction.x1[2] = ctx.pols.A2[step];
+            arithAction.x1[3] = ctx.pols.A3[step];
+            arithAction.x1[4] = ctx.pols.A4[step];
+            arithAction.x1[5] = ctx.pols.A5[step];
+            arithAction.x1[6] = ctx.pols.A6[step];
+            arithAction.x1[7] = ctx.pols.A7[step];
 
-        arithAction.y1[0] = ctx.pols.B0[step];
-        arithAction.y1[1] = ctx.pols.B1[step];
-        arithAction.y1[2] = ctx.pols.B2[step];
-        arithAction.y1[3] = ctx.pols.B3[step];
-        arithAction.y1[4] = ctx.pols.B4[step];
-        arithAction.y1[5] = ctx.pols.B5[step];
-        arithAction.y1[6] = ctx.pols.B6[step];
-        arithAction.y1[7] = ctx.pols.B7[step];
+            arithAction.y1[0] = ctx.pols.B0[step];
+            arithAction.y1[1] = ctx.pols.B1[step];
+            arithAction.y1[2] = ctx.pols.B2[step];
+            arithAction.y1[3] = ctx.pols.B3[step];
+            arithAction.y1[4] = ctx.pols.B4[step];
+            arithAction.y1[5] = ctx.pols.B5[step];
+            arithAction.y1[6] = ctx.pols.B6[step];
+            arithAction.y1[7] = ctx.pols.B7[step];
 
-        arithAction.x2[0] = ctx.pols.C0[step];
-        arithAction.x2[1] = ctx.pols.C1[step];
-        arithAction.x2[2] = ctx.pols.C2[step];
-        arithAction.x2[3] = ctx.pols.C3[step];
-        arithAction.x2[4] = ctx.pols.C4[step];
-        arithAction.x2[5] = ctx.pols.C5[step];
-        arithAction.x2[6] = ctx.pols.C6[step];
-        arithAction.x2[7] = ctx.pols.C7[step];
+            arithAction.x2[0] = ctx.pols.C0[step];
+            arithAction.x2[1] = ctx.pols.C1[step];
+            arithAction.x2[2] = ctx.pols.C2[step];
+            arithAction.x2[3] = ctx.pols.C3[step];
+            arithAction.x2[4] = ctx.pols.C4[step];
+            arithAction.x2[5] = ctx.pols.C5[step];
+            arithAction.x2[6] = ctx.pols.C6[step];
+            arithAction.x2[7] = ctx.pols.C7[step];
 
-        arithAction.y2[0] = ctx.pols.D0[step];
-        arithAction.y2[1] = ctx.pols.D1[step];
-        arithAction.y2[2] = ctx.pols.D2[step];
-        arithAction.y2[3] = ctx.pols.D3[step];
-        arithAction.y2[4] = ctx.pols.D4[step];
-        arithAction.y2[5] = ctx.pols.D5[step];
-        arithAction.y2[6] = ctx.pols.D6[step];
-        arithAction.y2[7] = ctx.pols.D7[step];
+            arithAction.y2[0] = ctx.pols.D0[step];
+            arithAction.y2[1] = ctx.pols.D1[step];
+            arithAction.y2[2] = ctx.pols.D2[step];
+            arithAction.y2[3] = ctx.pols.D3[step];
+            arithAction.y2[4] = ctx.pols.D4[step];
+            arithAction.y2[5] = ctx.pols.D5[step];
+            arithAction.y2[6] = ctx.pols.D6[step];
+            arithAction.y2[7] = ctx.pols.D7[step];
 
-        arithAction.x3[0] = fr.zero();
-        arithAction.x3[1] = fr.zero();
-        arithAction.x3[2] = fr.zero();
-        arithAction.x3[3] = fr.zero();
-        arithAction.x3[4] = fr.zero();
-        arithAction.x3[5] = fr.zero();
-        arithAction.x3[6] = fr.zero();
-        arithAction.x3[7] = fr.zero();
+            arithAction.x3[0] = fr.zero();
+            arithAction.x3[1] = fr.zero();
+            arithAction.x3[2] = fr.zero();
+            arithAction.x3[3] = fr.zero();
+            arithAction.x3[4] = fr.zero();
+            arithAction.x3[5] = fr.zero();
+            arithAction.x3[6] = fr.zero();
+            arithAction.x3[7] = fr.zero();
 
-        arithAction.y3[0] = op0;
-        arithAction.y3[1] = op1;
-        arithAction.y3[2] = op2;
-        arithAction.y3[3] = op3;
-        arithAction.y3[4] = op4;
-        arithAction.y3[5] = op5;
-        arithAction.y3[6] = op6;
-        arithAction.y3[7] = op7;
+            arithAction.y3[0] = op0;
+            arithAction.y3[1] = op1;
+            arithAction.y3[2] = op2;
+            arithAction.y3[3] = op3;
+            arithAction.y3[4] = op4;
+            arithAction.y3[5] = op5;
+            arithAction.y3[6] = op6;
+            arithAction.y3[7] = op7;
 
-        arithAction.equation = arithEquation;
+            arithAction.equation = arithEquation;
 
-        required.Arith.push_back(arithAction);
+            required->Arith.push_back(arithAction);
+        }
 #endif
 
     }
@@ -5974,65 +5977,68 @@ zkresult Arith_verify ( Context &ctx,
         }
 
 #ifdef USE_REQUIRED
-        ArithAction arithAction;
+        if (required != NULL)
+        {
+            ArithAction arithAction;
 
-        arithAction.x1[0] = ctx.pols.A0[step];
-        arithAction.x1[1] = ctx.pols.A1[step];
-        arithAction.x1[2] = ctx.pols.A2[step];
-        arithAction.x1[3] = ctx.pols.A3[step];
-        arithAction.x1[4] = ctx.pols.A4[step];
-        arithAction.x1[5] = ctx.pols.A5[step];
-        arithAction.x1[6] = ctx.pols.A6[step];
-        arithAction.x1[7] = ctx.pols.A7[step];
+            arithAction.x1[0] = ctx.pols.A0[step];
+            arithAction.x1[1] = ctx.pols.A1[step];
+            arithAction.x1[2] = ctx.pols.A2[step];
+            arithAction.x1[3] = ctx.pols.A3[step];
+            arithAction.x1[4] = ctx.pols.A4[step];
+            arithAction.x1[5] = ctx.pols.A5[step];
+            arithAction.x1[6] = ctx.pols.A6[step];
+            arithAction.x1[7] = ctx.pols.A7[step];
 
-        arithAction.y1[0] = ctx.pols.B0[step];
-        arithAction.y1[1] = ctx.pols.B1[step];
-        arithAction.y1[2] = ctx.pols.B2[step];
-        arithAction.y1[3] = ctx.pols.B3[step];
-        arithAction.y1[4] = ctx.pols.B4[step];
-        arithAction.y1[5] = ctx.pols.B5[step];
-        arithAction.y1[6] = ctx.pols.B6[step];
-        arithAction.y1[7] = ctx.pols.B7[step];
+            arithAction.y1[0] = ctx.pols.B0[step];
+            arithAction.y1[1] = ctx.pols.B1[step];
+            arithAction.y1[2] = ctx.pols.B2[step];
+            arithAction.y1[3] = ctx.pols.B3[step];
+            arithAction.y1[4] = ctx.pols.B4[step];
+            arithAction.y1[5] = ctx.pols.B5[step];
+            arithAction.y1[6] = ctx.pols.B6[step];
+            arithAction.y1[7] = ctx.pols.B7[step];
 
-        arithAction.x2[0] = dbl ? ctx.pols.A0[step] : ctx.pols.C0[step];
-        arithAction.x2[1] = dbl ? ctx.pols.A1[step] : ctx.pols.C1[step];
-        arithAction.x2[2] = dbl ? ctx.pols.A2[step] : ctx.pols.C2[step];
-        arithAction.x2[3] = dbl ? ctx.pols.A3[step] : ctx.pols.C3[step];
-        arithAction.x2[4] = dbl ? ctx.pols.A4[step] : ctx.pols.C4[step];
-        arithAction.x2[5] = dbl ? ctx.pols.A5[step] : ctx.pols.C5[step];
-        arithAction.x2[6] = dbl ? ctx.pols.A6[step] : ctx.pols.C6[step];
-        arithAction.x2[7] = dbl ? ctx.pols.A7[step] : ctx.pols.C7[step];
+            arithAction.x2[0] = dbl ? ctx.pols.A0[step] : ctx.pols.C0[step];
+            arithAction.x2[1] = dbl ? ctx.pols.A1[step] : ctx.pols.C1[step];
+            arithAction.x2[2] = dbl ? ctx.pols.A2[step] : ctx.pols.C2[step];
+            arithAction.x2[3] = dbl ? ctx.pols.A3[step] : ctx.pols.C3[step];
+            arithAction.x2[4] = dbl ? ctx.pols.A4[step] : ctx.pols.C4[step];
+            arithAction.x2[5] = dbl ? ctx.pols.A5[step] : ctx.pols.C5[step];
+            arithAction.x2[6] = dbl ? ctx.pols.A6[step] : ctx.pols.C6[step];
+            arithAction.x2[7] = dbl ? ctx.pols.A7[step] : ctx.pols.C7[step];
 
-        arithAction.y2[0] = dbl ? ctx.pols.B0[step] : ctx.pols.D0[step];
-        arithAction.y2[1] = dbl ? ctx.pols.B1[step] : ctx.pols.D1[step];
-        arithAction.y2[2] = dbl ? ctx.pols.B2[step] : ctx.pols.D2[step];
-        arithAction.y2[3] = dbl ? ctx.pols.B3[step] : ctx.pols.D3[step];
-        arithAction.y2[4] = dbl ? ctx.pols.B4[step] : ctx.pols.D4[step];
-        arithAction.y2[5] = dbl ? ctx.pols.B5[step] : ctx.pols.D5[step];
-        arithAction.y2[6] = dbl ? ctx.pols.B6[step] : ctx.pols.D6[step];
-        arithAction.y2[7] = dbl ? ctx.pols.B7[step] : ctx.pols.D7[step];
+            arithAction.y2[0] = dbl ? ctx.pols.B0[step] : ctx.pols.D0[step];
+            arithAction.y2[1] = dbl ? ctx.pols.B1[step] : ctx.pols.D1[step];
+            arithAction.y2[2] = dbl ? ctx.pols.B2[step] : ctx.pols.D2[step];
+            arithAction.y2[3] = dbl ? ctx.pols.B3[step] : ctx.pols.D3[step];
+            arithAction.y2[4] = dbl ? ctx.pols.B4[step] : ctx.pols.D4[step];
+            arithAction.y2[5] = dbl ? ctx.pols.B5[step] : ctx.pols.D5[step];
+            arithAction.y2[6] = dbl ? ctx.pols.B6[step] : ctx.pols.D6[step];
+            arithAction.y2[7] = dbl ? ctx.pols.B7[step] : ctx.pols.D7[step];
 
-        arithAction.x3[0] = ctx.pols.E0[step];
-        arithAction.x3[1] = ctx.pols.E1[step];
-        arithAction.x3[2] = ctx.pols.E2[step];
-        arithAction.x3[3] = ctx.pols.E3[step];
-        arithAction.x3[4] = ctx.pols.E4[step];
-        arithAction.x3[5] = ctx.pols.E5[step];
-        arithAction.x3[6] = ctx.pols.E6[step];
-        arithAction.x3[7] = ctx.pols.E7[step];
+            arithAction.x3[0] = ctx.pols.E0[step];
+            arithAction.x3[1] = ctx.pols.E1[step];
+            arithAction.x3[2] = ctx.pols.E2[step];
+            arithAction.x3[3] = ctx.pols.E3[step];
+            arithAction.x3[4] = ctx.pols.E4[step];
+            arithAction.x3[5] = ctx.pols.E5[step];
+            arithAction.x3[6] = ctx.pols.E6[step];
+            arithAction.x3[7] = ctx.pols.E7[step];
 
-        arithAction.y3[0] = op0;
-        arithAction.y3[1] = op1;
-        arithAction.y3[2] = op2;
-        arithAction.y3[3] = op3;
-        arithAction.y3[4] = op4;
-        arithAction.y3[5] = op5;
-        arithAction.y3[6] = op6;
-        arithAction.y3[7] = op7;
+            arithAction.y3[0] = op0;
+            arithAction.y3[1] = op1;
+            arithAction.y3[2] = op2;
+            arithAction.y3[3] = op3;
+            arithAction.y3[4] = op4;
+            arithAction.y3[5] = op5;
+            arithAction.y3[6] = op6;
+            arithAction.y3[7] = op7;
 
-        arithAction.equation = arithEquation;
+            arithAction.equation = arithEquation;
 
-        required.Arith.push_back(arithAction);
+            required->Arith.push_back(arithAction);
+        }
 #endif
 
     } 
@@ -6073,65 +6079,68 @@ zkresult Arith_verify ( Context &ctx,
         useE = 0;
 
 #ifdef USE_REQUIRED
-        ArithAction arithAction;
+        if (required != NULL)
+        {
+            ArithAction arithAction;
 
-        arithAction.x1[0] = ctx.pols.A0[step];
-        arithAction.x1[1] = ctx.pols.A1[step];
-        arithAction.x1[2] = ctx.pols.A2[step];
-        arithAction.x1[3] = ctx.pols.A3[step];
-        arithAction.x1[4] = ctx.pols.A4[step];
-        arithAction.x1[5] = ctx.pols.A5[step];
-        arithAction.x1[6] = ctx.pols.A6[step];
-        arithAction.x1[7] = ctx.pols.A7[step];
+            arithAction.x1[0] = ctx.pols.A0[step];
+            arithAction.x1[1] = ctx.pols.A1[step];
+            arithAction.x1[2] = ctx.pols.A2[step];
+            arithAction.x1[3] = ctx.pols.A3[step];
+            arithAction.x1[4] = ctx.pols.A4[step];
+            arithAction.x1[5] = ctx.pols.A5[step];
+            arithAction.x1[6] = ctx.pols.A6[step];
+            arithAction.x1[7] = ctx.pols.A7[step];
 
-        arithAction.y1[0] = ctx.pols.B0[step];
-        arithAction.y1[1] = ctx.pols.B1[step];
-        arithAction.y1[2] = ctx.pols.B2[step];
-        arithAction.y1[3] = ctx.pols.B3[step];
-        arithAction.y1[4] = ctx.pols.B4[step];
-        arithAction.y1[5] = ctx.pols.B5[step];
-        arithAction.y1[6] = ctx.pols.B6[step];
-        arithAction.y1[7] = ctx.pols.B7[step];
+            arithAction.y1[0] = ctx.pols.B0[step];
+            arithAction.y1[1] = ctx.pols.B1[step];
+            arithAction.y1[2] = ctx.pols.B2[step];
+            arithAction.y1[3] = ctx.pols.B3[step];
+            arithAction.y1[4] = ctx.pols.B4[step];
+            arithAction.y1[5] = ctx.pols.B5[step];
+            arithAction.y1[6] = ctx.pols.B6[step];
+            arithAction.y1[7] = ctx.pols.B7[step];
 
-        arithAction.x2[0] = fr.zero();
-        arithAction.x2[1] = fr.zero();
-        arithAction.x2[2] = fr.zero();
-        arithAction.x2[3] = fr.zero();
-        arithAction.x2[4] = fr.zero();
-        arithAction.x2[5] = fr.zero();
-        arithAction.x2[6] = fr.zero();
-        arithAction.x2[7] = fr.zero();
+            arithAction.x2[0] = fr.zero();
+            arithAction.x2[1] = fr.zero();
+            arithAction.x2[2] = fr.zero();
+            arithAction.x2[3] = fr.zero();
+            arithAction.x2[4] = fr.zero();
+            arithAction.x2[5] = fr.zero();
+            arithAction.x2[6] = fr.zero();
+            arithAction.x2[7] = fr.zero();
 
-        arithAction.y2[0] = fr.zero();
-        arithAction.y2[1] = fr.zero();
-        arithAction.y2[2] = fr.zero();
-        arithAction.y2[3] = fr.zero();
-        arithAction.y2[4] = fr.zero();
-        arithAction.y2[5] = fr.zero();
-        arithAction.y2[6] = fr.zero();
-        arithAction.y2[7] = fr.zero();
+            arithAction.y2[0] = fr.zero();
+            arithAction.y2[1] = fr.zero();
+            arithAction.y2[2] = fr.zero();
+            arithAction.y2[3] = fr.zero();
+            arithAction.y2[4] = fr.zero();
+            arithAction.y2[5] = fr.zero();
+            arithAction.y2[6] = fr.zero();
+            arithAction.y2[7] = fr.zero();
 
-        arithAction.x3[0] = fr.zero();
-        arithAction.x3[1] = fr.zero();
-        arithAction.x3[2] = fr.zero();
-        arithAction.x3[3] = fr.zero();
-        arithAction.x3[4] = fr.zero();
-        arithAction.x3[5] = fr.zero();
-        arithAction.x3[6] = fr.zero();
-        arithAction.x3[7] = fr.zero();
+            arithAction.x3[0] = fr.zero();
+            arithAction.x3[1] = fr.zero();
+            arithAction.x3[2] = fr.zero();
+            arithAction.x3[3] = fr.zero();
+            arithAction.x3[4] = fr.zero();
+            arithAction.x3[5] = fr.zero();
+            arithAction.x3[6] = fr.zero();
+            arithAction.x3[7] = fr.zero();
 
-        arithAction.y3[0] = op0;
-        arithAction.y3[1] = op1;
-        arithAction.y3[2] = op2;
-        arithAction.y3[3] = op3;
-        arithAction.y3[4] = op4;
-        arithAction.y3[5] = op5;
-        arithAction.y3[6] = op6;
-        arithAction.y3[7] = op7;
+            arithAction.y3[0] = op0;
+            arithAction.y3[1] = op1;
+            arithAction.y3[2] = op2;
+            arithAction.y3[3] = op3;
+            arithAction.y3[4] = op4;
+            arithAction.y3[5] = op5;
+            arithAction.y3[6] = op6;
+            arithAction.y3[7] = op7;
 
-        arithAction.equation = arithEquation;
-        
-        required.Arith.push_back(arithAction);
+            arithAction.equation = arithEquation;
+            
+            required->Arith.push_back(arithAction);
+        }
 #endif
     }
     else

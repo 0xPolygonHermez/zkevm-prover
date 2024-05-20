@@ -120,8 +120,8 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     /* Get a HashDBInterface interface, according to the configuration */
     if (config.hashDBSingleton)
     {
-        pHashDSingleton = HashDBClientFactory::createHashDBClient(fr, config);
-        if (pHashDSingleton == NULL)
+        pHashDBSingleton = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDBSingleton == NULL)
         {
             zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
             exitProcess();
@@ -129,7 +129,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     }
     else
     {
-        pHashDSingleton = NULL;
+        pHashDBSingleton = NULL;
     }
 
     TimerStopAndLog(ROM_LOAD);
@@ -141,8 +141,8 @@ MainExecutor::~MainExecutor ()
 
     if (config.hashDBSingleton)
     {
-        zkassertpermanent(pHashDSingleton != NULL);
-        HashDBClientFactory::freeHashDBClient(pHashDSingleton);
+        zkassertpermanent(pHashDBSingleton != NULL);
+        HashDBClientFactory::freeHashDBClient(pHashDBSingleton);
     }
 
     TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_10);
@@ -211,7 +211,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     HashDBInterface *pHashDB;
     if (config.hashDBSingleton)
     {
-        pHashDB = pHashDSingleton;
+        pHashDB = pHashDBSingleton;
     }
     else
     {
@@ -970,7 +970,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 addr += sp;
             }
-            // Check addrRel is not too big
+            // Check memAddr is not too big
             int32_t memAddr = addr + (rom.line[zkPC].memUseAddrRel ? addrRel : 0);
             if ( memAddr >= ((rom.line[zkPC].isMem == 1) ? 0x20000 : 0x10000) )
             {
@@ -979,7 +979,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            // If addrRel is negative, fail
+            // If memAddr is negative, fail
             if (memAddr < 0)
             {
                 proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;
@@ -1789,7 +1789,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     unordered_map<uint64_t, HashValue>::const_iterator it;
                     it = ctx.hashK.find(hashAddr);
-                    mpz_class auxScalar;
                     if (it == ctx.hashK.end())
                     {
                         fi0 = fr.zero();
@@ -4032,7 +4031,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t useE;
             uint64_t useCD;
             zkresult zkr;
-            zkr = Arith_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, required, same12, useE, useCD);
+            zkr = Arith_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, same12, useE, useCD);
             if (zkr != ZKR_SUCCESS)
             {
                 proverRequest.result = zkr;
@@ -5489,6 +5488,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.zkPC[nexti] = fr.fromU64(nextNoJmpZkPC);
         }
 
+        /****************************/
+        /* Set GAS, HASHPOS and RID */
+        /****************************/
+
         // If setGAS, GAS'=op
         if (rom.line[zkPC].setGAS == 1) {
             pols.GAS[nexti] = op0;
@@ -5508,6 +5511,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.HASHPOS[nexti] = fr.add( pols.HASHPOS[i], fr.fromU64(incHashPos) );
         }
 
+        // If setRID
         if (rom.line[zkPC].setRID == 1)
         {
             pols.setRID[i] = fr.one();
@@ -5528,6 +5532,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.RID[nexti] = pols.RID[i];
             }
         }
+
+        /************/
+        /* COUNTERS */
+        /************/
 
         if (
 #ifdef SUPPORT_SHA256
