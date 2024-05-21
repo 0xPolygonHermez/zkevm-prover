@@ -23,7 +23,6 @@ public:
         uint64_t nStages = 3;
         uint64_t nextStride = domainExtended ? 1 << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 1;
         uint64_t nextStrides[2] = { 0, nextStride };
-        uint64_t nrowsBuff = nrowsBatch + nextStride;
 
         uint64_t nCols = starkInfo.nConstants;
         uint64_t buffTOffsetsSteps_[nStages + 2];
