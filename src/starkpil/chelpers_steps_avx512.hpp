@@ -1,14 +1,14 @@
-#ifndef CHELPERS_STEPS_HPP
-#define CHELPERS_STEPS_HPP
+#ifndef CHELPERS_STEPS_AVX512_HPP
+#define CHELPERS_STEPS_AVX512_HPP
 #include "chelpers.hpp"
-
+#include "chelpers_steps.hpp"
 #include "steps.hpp"
 
-class CHelpersSteps {
+class CHelpersStepsAvx512 : public CHelpersSteps {
 public:
-    virtual void storePolinomial(Goldilocks::Element *pols, __m256i *bufferT, uint64_t* nColsSteps, uint64_t *offsetsSteps, uint64_t *buffTOffsetsSteps, uint64_t *nextStrides, uint64_t nOpenings, uint64_t domainSize, bool domainExtended, uint64_t nStages, bool needModule, uint64_t row, uint64_t stage, uint64_t stagePos, uint64_t openingPointIndex, uint64_t dim) {
+    virtual void storePolinomial(Goldilocks::Element *pols, __m512i *bufferT, uint64_t* nColsSteps, uint64_t *offsetsSteps, uint64_t *buffTOffsetsSteps, uint64_t *nextStrides, uint64_t nOpenings, uint64_t domainSize, bool domainExtended, uint64_t nStages, bool needModule, uint64_t row, uint64_t stage, uint64_t stagePos, uint64_t openingPointIndex, uint64_t dim) {
         if(needModule) {
-            uint64_t offsetsDest[4];
+            uint64_t offsetsDest[8];
             uint64_t nextStrideOffset = row + nextStrides[openingPointIndex];
             uint64_t stepOffset = offsetsSteps[stage] + stagePos;
             offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[stage];
@@ -16,15 +16,15 @@ public:
             offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[stage];
             offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[stage];
             if(dim == 1) {
-                Goldilocks::store_avx(&pols[0], offsetsDest, bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+                Goldilocks::store_avx512(&pols[0], offsetsDest, bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
             } else {
-                Goldilocks3::store_avx(&pols[0], offsetsDest, &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
+                Goldilocks3::store_avx512(&pols[0], offsetsDest, &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
             }
         } else {
             if(dim == 1) {
-               Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+               Goldilocks::store_avx512(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
             } else {
-               Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
+               Goldilocks3::store_avx512(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
             }
         }
     }
@@ -86,44 +86,44 @@ public:
         Goldilocks3::Element_avx challenges[params.challenges.degree()];
         Goldilocks3::Element_avx challenges_ops[params.challenges.degree()];
         for(uint64_t i = 0; i < params.challenges.degree(); ++i) {
-            challenges[i][0] = _mm256_set1_epi64x(params.challenges[i][0].fe);
-            challenges[i][1] = _mm256_set1_epi64x(params.challenges[i][1].fe);
-            challenges[i][2] = _mm256_set1_epi64x(params.challenges[i][2].fe);
+            challenges[i][0] = __mm512_set1_epi64(params.challenges[i][0].fe);
+            challenges[i][1] = __mm512_set1_epi64(params.challenges[i][1].fe);
+            challenges[i][2] = __mm512_set1_epi64(params.challenges[i][2].fe);
 
             Goldilocks::Element challenges_aux[3];
             challenges_aux[0] = params.challenges[i][0] + params.challenges[i][1];
             challenges_aux[1] = params.challenges[i][0] + params.challenges[i][2];
             challenges_aux[2] = params.challenges[i][1] + params.challenges[i][2];
-            challenges_ops[i][0] = _mm256_set1_epi64x(challenges_aux[0].fe);
-            challenges_ops[i][1] =  _mm256_set1_epi64x(challenges_aux[1].fe);
-            challenges_ops[i][2] =  _mm256_set1_epi64x(challenges_aux[2].fe);
+            challenges_ops[i][0] = __mm512_set1_epi64(challenges_aux[0].fe);
+            challenges_ops[i][1] =  __mm512_set1_epi64(challenges_aux[1].fe);
+            challenges_ops[i][2] =  __mm512_set1_epi64(challenges_aux[2].fe);
         }
         __m256i numbers_[parserParams.nNumbers];
         for(uint64_t i = 0; i < parserParams.nNumbers; ++i) {
-            numbers_[i] = _mm256_set1_epi64x(numbers[i]);
+            numbers_[i] = __mm512_set1_epi64(numbers[i]);
         }
         __m256i publics[starkInfo.nPublics];
         for(uint64_t i = 0; i < starkInfo.nPublics; ++i) {
-            publics[i] = _mm256_set1_epi64x(params.publicInputs[i].fe);
+            publics[i] = __mm512_set1_epi64(params.publicInputs[i].fe);
         }
         Goldilocks3::Element_avx evals[params.evals.degree()];
         for(uint64_t i = 0; i < params.evals.degree(); ++i) {
-            evals[i][0] = _mm256_set1_epi64x(params.evals[i][0].fe);
-            evals[i][1] = _mm256_set1_epi64x(params.evals[i][1].fe);
-            evals[i][2] = _mm256_set1_epi64x(params.evals[i][2].fe);
+            evals[i][0] = __mm512_set1_epi64(params.evals[i][0].fe);
+            evals[i][1] = __mm512_set1_epi64(params.evals[i][1].fe);
+            evals[i][2] = __mm512_set1_epi64(params.evals[i][2].fe);
         }
     #pragma omp parallel for
         for (uint64_t i = 0; i < domainSize; i+= nrowsBatch) {
             uint64_t i_args = 0;
 
             bool const needModule = i + nrowsBatch + nextStride >= domainSize;
-            __m256i bufferT_[2*nCols];
-            __m256i tmp1[parserParams.nTemp1];
-            __m256i tmp1_1;
-            Goldilocks3::Element_avx tmp3[parserParams.nTemp3];
-            Goldilocks3::Element_avx tmp3_;
-            Goldilocks3::Element_avx tmp3_1;
-            __m256i tmp1_0;
+            __m512i bufferT_[2*nCols];
+            __m512i tmp1[parserParams.nTemp1];
+            __m512i tmp1_1;
+            Goldilocks3::Element_avx512 tmp3[parserParams.nTemp3];
+            Goldilocks3::Element_avx512 tmp3_;
+            Goldilocks3::Element_avx512 tmp3_1;
+            __m512i tmp1_0;
             Goldilocks::Element bufferT[2*nrowsBatch];
 
             for(uint64_t k = 0; k < nColsSteps[0]; ++k) {
@@ -132,7 +132,7 @@ public:
                         uint64_t l = (i + j + nextStrides[o]) % domainSize;
                         bufferT[nrowsBatch*o + j] = ((Goldilocks::Element *)constPols->address())[l * nColsSteps[0] + k];
                     }
-                    Goldilocks::load_avx(bufferT_[2 * k + o], &bufferT[nrowsBatch*o]);
+                    Goldilocks::load_avx512(bufferT_[2 * k + o], &bufferT[nrowsBatch*o]);
                 }
             }
             for(uint64_t s = 1; s <= nStages; ++s) {
@@ -143,7 +143,7 @@ public:
                             uint64_t l = (i + j + nextStrides[o]) % domainSize;
                             bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[s] + l * nColsSteps[s] + k];
                         }
-                        Goldilocks::load_avx(bufferT_[2 * (nColsStepsAccumulated[s] + k) + o], &bufferT[nrowsBatch*o]);
+                        Goldilocks::load_avx512(bufferT_[2 * (nColsStepsAccumulated[s] + k) + o], &bufferT[nrowsBatch*o]);
                     }
                 }
             }
@@ -153,7 +153,7 @@ public:
                         uint64_t l = (i + j + nextStrides[o]) % domainSize;
                         bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[nStages + 1] + l * nColsSteps[nStages + 1] + k];
                     }
-                    Goldilocks::load_avx(bufferT_[2 * (nColsStepsAccumulated[nStages + 1] + k) + o], &bufferT[nrowsBatch*o]);
+                    Goldilocks::load_avx512(bufferT_[2 * (nColsStepsAccumulated[nStages + 1] + k) + o], &bufferT[nrowsBatch*o]);
                 }
             }
     
@@ -162,204 +162,204 @@ public:
                 switch (ops[kk]) {
                 case 0: {
                     // COPY commit1 to commit1
-                Goldilocks::copy_avx(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
+                Goldilocks::copy_avx512(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 6;
                     break;
             }
                 case 1: {
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: commit1
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], bufferT_[buffTOffsetsSteps_[args[i_args + 7]] + 2 * args[i_args + 8] + args[i_args + 9]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], bufferT_[buffTOffsetsSteps_[args[i_args + 7]] + 2 * args[i_args + 8] + args[i_args + 9]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 10;
                     break;
             }
                 case 2: {
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: tmp1
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], tmp1[args[i_args + 7]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], tmp1[args[i_args + 7]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 8;
                     break;
             }
                 case 3: {
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: public
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], publics[args[i_args + 7]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], publics[args[i_args + 7]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 8;
                     break;
             }
                 case 4: {
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: number
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], numbers_[args[i_args + 7]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], numbers_[args[i_args + 7]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 8;
                     break;
             }
                 case 5: {
                     // COPY tmp1 to commit1
-                Goldilocks::copy_avx(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], tmp1[args[i_args + 3]]);
+                Goldilocks::copy_avx512(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], tmp1[args[i_args + 3]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 4;
                     break;
             }
                 case 6: {
                     // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: tmp1
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], tmp1[args[i_args + 4]], tmp1[args[i_args + 5]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], tmp1[args[i_args + 4]], tmp1[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 7: {
                     // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: public
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], tmp1[args[i_args + 4]], publics[args[i_args + 5]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], tmp1[args[i_args + 4]], publics[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 8: {
                     // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: number
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], tmp1[args[i_args + 4]], numbers_[args[i_args + 5]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], tmp1[args[i_args + 4]], numbers_[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 9: {
                     // COPY public to commit1
-                Goldilocks::copy_avx(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], publics[args[i_args + 3]]);
+                Goldilocks::copy_avx512(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], publics[args[i_args + 3]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 4;
                     break;
             }
                 case 10: {
                     // OPERATION WITH DEST: commit1 - SRC0: public - SRC1: public
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], publics[args[i_args + 4]], publics[args[i_args + 5]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], publics[args[i_args + 4]], publics[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 11: {
                     // OPERATION WITH DEST: commit1 - SRC0: public - SRC1: number
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], publics[args[i_args + 4]], numbers_[args[i_args + 5]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], publics[args[i_args + 4]], numbers_[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 12: {
                     // COPY x to commit1
-                    Goldilocks::load_avx(tmp1_0, x[i], x.offset());
-                Goldilocks::copy_avx(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], tmp1_0);
+                    Goldilocks::load_avx512(tmp1_0, x[i], x.offset());
+                Goldilocks::copy_avx512(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], tmp1_0);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 3;
                     break;
             }
                 case 13: {
                     // COPY number to commit1
-                Goldilocks::copy_avx(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], numbers_[args[i_args + 3]]);
+                Goldilocks::copy_avx512(bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], numbers_[args[i_args + 3]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 4;
                     break;
             }
                 case 14: {
                     // OPERATION WITH DEST: commit1 - SRC0: number - SRC1: number
-                Goldilocks::op_avx(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], numbers_[args[i_args + 4]], numbers_[args[i_args + 5]]);
+                Goldilocks::op_avx512(args[i_args], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], numbers_[args[i_args + 4]], numbers_[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 15: {
                     // COPY commit1 to tmp1
-                Goldilocks::copy_avx(tmp1[args[i_args]], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]]);
+                Goldilocks::copy_avx512(tmp1[args[i_args]], bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 16: {
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: commit1
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
                     i_args += 8;
                     break;
             }
                 case 17: {
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: tmp1
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], tmp1[args[i_args + 5]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], tmp1[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 18: {
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: public
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], publics[args[i_args + 5]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], publics[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 19: {
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: number
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], numbers_[args[i_args + 5]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], numbers_[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 20: {
                     // COPY tmp1 to tmp1
-                Goldilocks::copy_avx(tmp1[args[i_args]], tmp1[args[i_args + 1]]);
+                Goldilocks::copy_avx512(tmp1[args[i_args]], tmp1[args[i_args + 1]]);
                     i_args += 2;
                     break;
             }
                 case 21: {
                     // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: tmp1
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], tmp1[args[i_args + 3]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], tmp1[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 22: {
                     // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: public
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], publics[args[i_args + 3]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], publics[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 23: {
                     // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: number
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], numbers_[args[i_args + 3]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 24: {
                     // COPY public to tmp1
-                Goldilocks::copy_avx(tmp1[args[i_args]], publics[args[i_args + 1]]);
+                Goldilocks::copy_avx512(tmp1[args[i_args]], publics[args[i_args + 1]]);
                     i_args += 2;
                     break;
             }
                 case 25: {
                     // OPERATION WITH DEST: tmp1 - SRC0: public - SRC1: public
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], publics[args[i_args + 2]], publics[args[i_args + 3]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], publics[args[i_args + 2]], publics[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 26: {
                     // OPERATION WITH DEST: tmp1 - SRC0: public - SRC1: number
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], publics[args[i_args + 2]], numbers_[args[i_args + 3]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], publics[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 27: {
                     // COPY x to tmp1
-                    Goldilocks::load_avx(tmp1_0, x[i], x.offset());
-                Goldilocks::copy_avx(tmp1[args[i_args]], tmp1_0);
+                    Goldilocks::load_avx512(tmp1_0, x[i], x.offset());
+                Goldilocks::copy_avx512(tmp1[args[i_args]], tmp1_0);
                     i_args += 1;
                     break;
             }
                 case 28: {
                     // COPY number to tmp1
-                Goldilocks::copy_avx(tmp1[args[i_args]], numbers_[args[i_args + 1]]);
+                Goldilocks::copy_avx512(tmp1[args[i_args]], numbers_[args[i_args + 1]]);
                     i_args += 2;
                     break;
             }
                 case 29: {
                     // OPERATION WITH DEST: tmp1 - SRC0: number - SRC1: number
-                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], numbers_[args[i_args + 2]], numbers_[args[i_args + 3]]);
+                Goldilocks::op_avx512(args[i_args], tmp1[args[i_args + 1]], numbers_[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 30: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: commit1
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         bufferT_[buffTOffsetsSteps_[args[i_args + 7]] + 2 * args[i_args + 8] + args[i_args + 9]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -368,7 +368,7 @@ public:
             }
                 case 31: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: tmp1
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         tmp1[args[i_args + 7]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -377,7 +377,7 @@ public:
             }
                 case 32: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: public
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         publics[args[i_args + 7]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -386,8 +386,8 @@ public:
             }
                 case 33: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: x
-                Goldilocks::load_avx(tmp1_1, x[i], x.offset());
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks::load_avx512(tmp1_1, x[i], x.offset());
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         tmp1_1);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -396,7 +396,7 @@ public:
             }
                 case 34: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: number
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         numbers_[args[i_args + 7]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -405,7 +405,7 @@ public:
             }
                 case 35: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: commit1
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -414,7 +414,7 @@ public:
             }
                 case 36: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: tmp1
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         tmp1[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -423,7 +423,7 @@ public:
             }
                 case 37: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: public
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         publics[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -432,8 +432,8 @@ public:
             }
                 case 38: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: x
-                Goldilocks::load_avx(tmp1_1, x[i], x.offset());
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks::load_avx512(tmp1_1, x[i], x.offset());
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         tmp1_1);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -442,7 +442,7 @@ public:
             }
                 case 39: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: number
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         numbers_[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -451,7 +451,7 @@ public:
             }
                 case 40: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: commit1
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(challenges[args[i_args + 4]][0]), 1, 
                         bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -460,7 +460,7 @@ public:
             }
                 case 41: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: tmp1
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(challenges[args[i_args + 4]][0]), 1, 
                         tmp1[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -469,7 +469,7 @@ public:
             }
                 case 42: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: public
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(challenges[args[i_args + 4]][0]), 1, 
                         publics[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -478,8 +478,8 @@ public:
             }
                 case 43: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: x
-                Goldilocks::load_avx(tmp1_1, x[i], x.offset());
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks::load_avx512(tmp1_1, x[i], x.offset());
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(challenges[args[i_args + 4]][0]), 1, 
                         tmp1_1);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -488,7 +488,7 @@ public:
             }
                 case 44: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: number
-                Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_31_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(challenges[args[i_args + 4]][0]), 1, 
                         numbers_[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -497,7 +497,7 @@ public:
             }
                 case 45: {
                     // COPY commit3 to commit3
-                Goldilocks3::copy_avx(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], 2, 
+                Goldilocks3::copy_avx512(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]], 2);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], FIELD_EXTENSION);
                     i_args += 6;
@@ -505,7 +505,7 @@ public:
             }
                 case 46: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: commit3
-                Goldilocks3::op_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 7]] + 2 * args[i_args + 8] + args[i_args + 9]], 2);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -514,7 +514,7 @@ public:
             }
                 case 47: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: tmp3
-                Goldilocks3::op_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         &(tmp3[args[i_args + 7]][0]), 1);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -523,7 +523,7 @@ public:
             }
                 case 48: {
                     // MULTIPLICATION WITH DEST: commit3 - SRC0: commit3 - SRC1: challenge
-                Goldilocks3::mul_avx(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::mul_avx512(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         challenges[args[i_args + 7]], challenges_ops[args[i_args + 7]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -532,7 +532,7 @@ public:
             }
                 case 49: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: challenge
-                Goldilocks3::op_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], 2, 
                         &(challenges[args[i_args + 7]][0]), 1);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -541,7 +541,7 @@ public:
             }
                 case 50: {
                     // COPY tmp3 to commit3
-                Goldilocks3::copy_avx(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], 2, 
+                Goldilocks3::copy_avx512(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], 2, 
                         &(tmp3[args[i_args + 3]][0]), 1);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], FIELD_EXTENSION);
                     i_args += 4;
@@ -549,7 +549,7 @@ public:
             }
                 case 51: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: tmp3
-                Goldilocks3::op_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         &(tmp3[args[i_args + 5]][0]), 1);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -558,7 +558,7 @@ public:
             }
                 case 52: {
                     // MULTIPLICATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: challenge
-                Goldilocks3::mul_avx(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::mul_avx512(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         challenges[args[i_args + 5]], challenges_ops[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -567,7 +567,7 @@ public:
             }
                 case 53: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: challenge
-                Goldilocks3::op_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(tmp3[args[i_args + 4]][0]), 1, 
                         &(challenges[args[i_args + 5]][0]), 1);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -576,7 +576,7 @@ public:
             }
                 case 54: {
                     // MULTIPLICATION WITH DEST: commit3 - SRC0: challenge - SRC1: challenge
-                Goldilocks3::mul_avx(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::mul_avx512(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(challenges[args[i_args + 4]][0]), 1, 
                         challenges[args[i_args + 5]], challenges_ops[args[i_args + 5]]);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -585,7 +585,7 @@ public:
             }
                 case 55: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: challenge
-                Goldilocks3::op_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
+                Goldilocks3::op_avx512(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2, 
                         &(challenges[args[i_args + 4]][0]), 1, 
                         &(challenges[args[i_args + 5]][0]), 1);
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
@@ -594,7 +594,7 @@ public:
             }
                 case 56: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: commit1
-                Goldilocks3::op_31_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks3::op_31_avx512(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
                     i_args += 8;
@@ -602,7 +602,7 @@ public:
             }
                 case 57: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: tmp1
-                Goldilocks3::op_31_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks3::op_31_avx512(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         tmp1[args[i_args + 5]]);
                     i_args += 6;
@@ -610,7 +610,7 @@ public:
             }
                 case 58: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: public
-                Goldilocks3::op_31_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks3::op_31_avx512(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         publics[args[i_args + 5]]);
                     i_args += 6;
@@ -618,8 +618,8 @@ public:
             }
                 case 59: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: x
-                Goldilocks::load_avx(tmp1_1, x[i], x.offset());
-                Goldilocks3::op_31_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks::load_avx512(tmp1_1, x[i], x.offset());
+                Goldilocks3::op_31_avx512(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         tmp1_1);
                     i_args += 5;
@@ -627,7 +627,7 @@ public:
             }
                 case 60: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: number
-                Goldilocks3::op_31_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks3::op_31_avx512(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         numbers_[args[i_args + 5]]);
                     i_args += 6;
@@ -635,76 +635,76 @@ public:
             }
                 case 61: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: commit1
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 62: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: tmp1
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp1[args[i_args + 3]]);
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp1[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 63: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: public
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], publics[args[i_args + 3]]);
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], publics[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 64: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: x
-                Goldilocks::load_avx(tmp1_1, x[i], x.offset());
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp1_1);
+                Goldilocks::load_avx512(tmp1_1, x[i], x.offset());
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp1_1);
                     i_args += 3;
                     break;
             }
                 case 65: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: number
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], numbers_[args[i_args + 3]]);
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 66: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: commit1
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 67: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: tmp1
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], tmp1[args[i_args + 3]]);
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], tmp1[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 68: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: public
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], publics[args[i_args + 3]]);
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], publics[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 69: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: x
-                Goldilocks::load_avx(tmp1_1, x[i], x.offset());
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], tmp1_1);
+                Goldilocks::load_avx512(tmp1_1, x[i], x.offset());
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], tmp1_1);
                     i_args += 3;
                     break;
             }
                 case 70: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: number
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], numbers_[args[i_args + 3]]);
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 71: {
                     // COPY commit3 to tmp3
-                Goldilocks3::copy_avx(&(tmp3[args[i_args]][0]), 1, 
+                Goldilocks3::copy_avx512(&(tmp3[args[i_args]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], 2);
                     i_args += 4;
                     break;
             }
                 case 72: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: commit3
-                Goldilocks3::op_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks3::op_avx512(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]], 2);
                     i_args += 8;
@@ -712,7 +712,7 @@ public:
             }
                 case 73: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: tmp3
-                Goldilocks3::op_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks3::op_avx512(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         &(tmp3[args[i_args + 5]][0]), 1);
                     i_args += 6;
@@ -720,7 +720,7 @@ public:
             }
                 case 74: {
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: challenge
-                Goldilocks3::mul_avx(&(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks3::mul_avx512(&(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         challenges[args[i_args + 5]], challenges_ops[args[i_args + 5]]);
                     i_args += 6;
@@ -728,7 +728,7 @@ public:
             }
                 case 75: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: challenge
-                Goldilocks3::op_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks3::op_avx512(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         &(challenges[args[i_args + 5]][0]), 1);
                     i_args += 6;
@@ -736,73 +736,73 @@ public:
             }
                 case 76: {
                     // COPY tmp3 to tmp3
-                Goldilocks3::copy_avx(tmp3[args[i_args]], tmp3[args[i_args + 1]]);
+                Goldilocks3::copy_avx512(tmp3[args[i_args]], tmp3[args[i_args + 1]]);
                     i_args += 2;
                     break;
             }
                 case 77: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: tmp3
-                Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3[args[i_args + 3]]);
+                Goldilocks3::op_avx512(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 78: {
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: challenge
-                Goldilocks3::mul_avx(tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
+                Goldilocks3::mul_avx512(tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 79: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: challenge
-                Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], challenges[args[i_args + 3]]);
+                Goldilocks3::op_avx512(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], challenges[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 80: {
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: challenge - SRC1: challenge
-                Goldilocks3::mul_avx(tmp3[args[i_args + 1]], challenges[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
+                Goldilocks3::mul_avx512(tmp3[args[i_args + 1]], challenges[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 81: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: challenge
-                Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], challenges[args[i_args + 3]]);
+                Goldilocks3::op_avx512(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], challenges[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 82: {
                     // COPY eval to tmp3
-                Goldilocks3::copy_avx(tmp3[args[i_args]], evals[args[i_args + 1]]);
+                Goldilocks3::copy_avx512(tmp3[args[i_args]], evals[args[i_args + 1]]);
                     i_args += 2;
                     break;
             }
                 case 83: {
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: eval - SRC1: challenge
-                Goldilocks3::mul_avx(tmp3[args[i_args + 1]], evals[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
+                Goldilocks3::mul_avx512(tmp3[args[i_args + 1]], evals[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 84: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: eval
-                Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], evals[args[i_args + 3]]);
+                Goldilocks3::op_avx512(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], evals[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 85: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: eval
-                Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], evals[args[i_args + 3]]);
+                Goldilocks3::op_avx512(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], evals[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 86: {
                     // OPERATION WITH DEST: tmp3 - SRC0: eval - SRC1: commit1
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], evals[args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
+                Goldilocks3::op_31_avx512(args[i_args], tmp3[args[i_args + 1]], evals[args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 87: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: eval
-                Goldilocks3::op_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                Goldilocks3::op_avx512(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], 2, 
                         &(evals[args[i_args + 5]][0]), 1);
                     i_args += 6;
@@ -810,8 +810,8 @@ public:
             }
                 case 88: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: xDivXSubXi
-                Goldilocks3::load_avx(tmp3_1, params.xDivXSubXi[i + args[i_args + 3]*domainSize], uint64_t(FIELD_EXTENSION));
-                Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3_1);
+                Goldilocks3::load_avx512(tmp3_1, params.xDivXSubXi[i + args[i_args + 3]*domainSize], uint64_t(FIELD_EXTENSION));
+                Goldilocks3::op_avx512(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3_1);
                     i_args += 4;
                     break;
             }
@@ -821,9 +821,9 @@ public:
                 Goldilocks::Element ti0[nrowsBatch];
                 Goldilocks::Element ti1[nrowsBatch];
                 Goldilocks::Element ti2[nrowsBatch];
-                Goldilocks::store_avx(ti0, tmp3[args[i_args]][0]);
-                Goldilocks::store_avx(ti1, tmp3[args[i_args]][1]);
-                Goldilocks::store_avx(ti2, tmp3[args[i_args]][2]);
+                Goldilocks::store_avx512(ti0, tmp3[args[i_args]][0]);
+                Goldilocks::store_avx512(ti1, tmp3[args[i_args]][1]);
+                Goldilocks::store_avx512(ti2, tmp3[args[i_args]][2]);
                 for (uint64_t j = 0; j < nrowsBatch; ++j) {
                     tmp_inv[0] = ti0[j];
                     tmp_inv[1] = ti1[j];
@@ -835,15 +835,15 @@ public:
             }
                 case 90: {
                     // OPERATION WITH DEST: f - SRC0: tmp3 - SRC1: tmp3
-                Goldilocks3::op_avx(args[i_args], tmp3_, tmp3[args[i_args + 1]], tmp3[args[i_args + 2]]);
-                Goldilocks3::store_avx(&params.f_2ns[i*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3_);
+                Goldilocks3::op_avx512(args[i_args], tmp3_, tmp3[args[i_args + 1]], tmp3[args[i_args + 2]]);
+                Goldilocks3::store_avx512(&params.f_2ns[i*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3_);
                     i_args += 3;
                     break;
             }
                 case 91: {
                     // COPY tmp3 to f
-                    Goldilocks3::copy_avx(tmp3_, tmp3[args[i_args]]);
-                    Goldilocks3::store_avx(&params.f_2ns[i*3], uint64_t(3), tmp3_);
+                    Goldilocks3::copy_avx512(tmp3_, tmp3[args[i_args]]);
+                    Goldilocks3::store_avx512(&params.f_2ns[i*3], uint64_t(3), tmp3_);
                     i_args += 1;
                     break;
             }
