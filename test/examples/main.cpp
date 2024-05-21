@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
+#include "chelpers_steps.hpp"
 #include "AllSteps.hpp"
 
 int main()
