@@ -132,16 +132,19 @@ public:
         constPolsDegree = (1 << starkInfo.starkStruct.nBits);
         constPolsSize = starkInfo.nConstants * sizeof(Goldilocks::Element) * constPolsDegree;
 
-        if (starkFiles.mapConstPolsFile)
-        {
-            pConstPolsAddress = mapFile(starkFiles.zkevmConstPols, constPolsSize, false);
-            zklog.info("Starks::Starks() successfully mapped " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
+        if (starkInfo.nConstants > 0) {
+            if (starkFiles.mapConstPolsFile)
+            {
+                pConstPolsAddress = mapFile(starkFiles.zkevmConstPols, constPolsSize, false);
+                zklog.info("Starks::Starks() successfully mapped " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
+            }
+            else
+            {
+            pConstPolsAddress = copyFile(starkFiles.zkevmConstPols, constPolsSize);
+                zklog.info("Starks::Starks() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
+            }
         }
-        else
-        {
-        pConstPolsAddress = copyFile(starkFiles.zkevmConstPols, constPolsSize);
-            zklog.info("Starks::Starks() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
-        }
+
         pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
@@ -194,7 +197,11 @@ public:
         }
         TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
 
-        buildZHInv();
+        zi = new Goldilocks::Element[NExtended * starkInfo.boundaries.size()];
+
+        for(uint64_t i = 0; i < starkInfo.boundaries.size(); ++i) {
+            buildZHInv(starkInfo.boundaries[i], i);
+        }
 
         mem = (Goldilocks::Element *)pAddress;
         
@@ -335,29 +342,72 @@ public:
         
     };
 
-    void buildZHInv()
+    void buildZHInv(Boundary boundary, uint64_t offset)
     {
         TimerStart(COMPUTE_ZHINV);
-        zi = new Goldilocks::Element[NExtended];
 
-        uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
-        uint64_t extend = (1 << extendBits);
-        
-        Goldilocks::Element w = Goldilocks::one();
-        Goldilocks::Element sn = Goldilocks::shift();
+        if(boundary.name == "everyRow") {
+            uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
+            uint64_t extend = (1 << extendBits);
+            
+            Goldilocks::Element w = Goldilocks::one();
+            Goldilocks::Element sn = Goldilocks::shift();
 
-        for (uint64_t i = 0; i < starkInfo.starkStruct.nBits; i++) Goldilocks::square(sn, sn);
+            for (uint64_t i = 0; i < starkInfo.starkStruct.nBits; i++) Goldilocks::square(sn, sn);
 
-        for (uint64_t i=0; i<extend; i++) {
-            Goldilocks::inv(zi[i], (sn * w) - Goldilocks::one());
-            Goldilocks::mul(w, w, Goldilocks::w(extendBits));
+            for (uint64_t i=0; i<extend; i++) {
+                Goldilocks::inv(zi[i + offset*NExtended], (sn * w) - Goldilocks::one());
+                Goldilocks::mul(w, w, Goldilocks::w(extendBits));
+            }
+
+            #pragma omp parallel for
+            for (uint64_t i=extend; i<NExtended; i++) {
+                zi[i + offset*NExtended] = zi[(i + offset*NExtended) % extend];
+            }
+        } else if (boundary.name == "firstRow" || boundary.name == "lastRow") {
+            uint64_t row = boundary.name == "firstRow" ? 0 : N - 1;
+            Goldilocks::Element root = Goldilocks::one();
+            for(uint64_t i = 0; i < row; ++i) {
+                Goldilocks::mul(root, root, Goldilocks::w(starkInfo.starkStruct.nBits));
+            }
+            Goldilocks::Element w = Goldilocks::one();
+            Goldilocks::Element sn = Goldilocks::shift();
+            for(uint64_t i = 0; i < NExtended; i++) {
+                Goldilocks::inv(zi[i + offset*NExtended], zi[i] * ((sn * w) - root));
+                Goldilocks::mul(w, w, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
+            }
+        } else if(boundary.name == "everyFrame") {
+            uint64_t nRoots = boundary.offsetMin + boundary.offsetMax;
+            Goldilocks::Element roots[nRoots];
+            
+            uint64_t nBits = starkInfo.starkStruct.nBits;
+            for(uint64_t i = 0; i < boundary.offsetMin; ++i) {
+                Goldilocks::Element root = Goldilocks::one();
+                for(uint64_t j = 0; j < i; ++j) {
+                    Goldilocks::mul(root, root, Goldilocks::w(nBits));
+                }
+                roots[i] = root;
+            }
+
+            for(uint64_t i = 0; i < boundary.offsetMax; ++i) {
+                Goldilocks::Element root = Goldilocks::one();
+                for(uint64_t j = 0; j < (N - i - 1); ++j) {
+                    Goldilocks::mul(root, root, Goldilocks::w(nBits));
+                }
+                roots[boundary.offsetMin + i] = root;
+            }
+
+            Goldilocks::Element w = Goldilocks::one();
+            Goldilocks::Element sn = Goldilocks::shift();
+
+            for(uint64_t i = 0; i < NExtended; i++) {
+                zi[i + offset*NExtended] = Goldilocks::one();
+                for(uint64_t j = 0; j < nRoots; ++j) {
+                    zi[i + offset*NExtended] = zi[i + offset*NExtended] * ((sn * w) - roots[j]);
+                }
+                Goldilocks::mul(w, w, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
+            }
         }
-
-        #pragma omp parallel for
-        for (uint64_t i=extend; i<NExtended; i++) {
-            zi[i] = zi[i % extend];
-        }
-
         TimerStopAndLog(COMPUTE_ZHINV);
     };
 

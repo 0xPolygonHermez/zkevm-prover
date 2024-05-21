@@ -4,6 +4,7 @@
 #include "AllSteps.hpp"
 #include "AllC18Steps.hpp"
 #include "FibonacciPil2Steps.hpp"
+#include "FibonacciSteps.hpp"
 #include "hint_handler.hpp"
 #include "hint_handler_builder.hpp"
 
@@ -32,7 +33,7 @@ int main(int argc, char **argv)
 
     string testName = argv[1];
 
-    if(testName != "all" && testName != "compressor" && testName != "fibonacci_pil2") {
+    if(testName != "all" && testName != "compressor" && testName != "fibonacci_pil2" && testName != "fibonacci_boundaries") {
         cout << "Error: unknown test name " << testName << endl;
         return -1;
     }
@@ -86,6 +87,21 @@ int main(int argc, char **argv)
             cHelpersFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin";
         } else {
             cHelpersFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers.bin";
+        }
+    } else if(testName == "fibonacci_boundaries") {
+        constPols = "test/examples/fibonacci.boundaries/fibonacci.const";
+        constTree = "test/examples/fibonacci.boundaries/fibonacci.consttree";
+        starkInfoFile = "test/examples/fibonacci.boundaries/fibonacci.starkinfo.json";
+        commitPols = "test/examples/fibonacci.boundaries/fibonacci.commit";
+        verkey = "test/examples/fibonacci.boundaries/fibonacci.verkey.json";
+        publicsFile = "test/examples/fibonacci.boundaries/fibonacci.publics.json";
+        proofFile = "runtime/output/fibonacci_proof.json";
+        zkinProofFile = "runtime/output/fibonacci_proof.zkin.json";
+
+        if(USE_GENERIC_PARSER) {
+            cHelpersFile = "test/examples/fibonacci.boundaries/fibonacci.chelpers/fibonacci.chelpers_generic.bin";
+        } else {
+            cHelpersFile = "test/examples/fibonacci.boundaries/fibonacci.chelpers/fibonacci.chelpers.bin";
         }
     }
    
@@ -154,6 +170,17 @@ int main(int argc, char **argv)
         } else {
             FibonacciPil2Steps fibonacciPil2Steps;
             starks.genProof(fproof, &publicInputs[0], &fibonacciPil2Steps);
+        }
+        jProof = fproof.proofs.proof2json();
+    } else if(testName == "fibonacci_boundaries") {
+        FRIProof<Goldilocks::Element> fproof(starkInfo);
+        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
+        if(USE_GENERIC_PARSER) {
+            CHelpersSteps cHelpersSteps;
+            starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
+        } else {
+            FibonacciSteps fibonacciSteps;
+            starks.genProof(fproof, &publicInputs[0], &fibonacciSteps);
         }
         jProof = fproof.proofs.proof2json();
     }

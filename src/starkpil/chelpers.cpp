@@ -238,6 +238,9 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
         parserParamsConstraint.destDim = cHelpersBin->readU32LE();
         parserParamsConstraint.destId = cHelpersBin->readU32LE();
 
+        parserParamsConstraint.firstRow = cHelpersBin->readU32LE();
+        parserParamsConstraint.lastRow = cHelpersBin->readU32LE();
+
         parserParamsConstraint.nTemp1 = cHelpersBin->readU32LE();
         parserParamsConstraint.nTemp3 = cHelpersBin->readU32LE();
 

@@ -1,0 +1,163 @@
+{
+ "cmPolsMap": [
+  {
+   "stage": "cm1",
+   "stageNum": 1,
+   "name": "Fibonacci.l1",
+   "dim": 1,
+   "imPol": false,
+   "id": 0,
+   "stagePos": 0,
+   "stageId": 0
+  },
+  {
+   "stage": "cm1",
+   "stageNum": 1,
+   "name": "Fibonacci.l2",
+   "dim": 1,
+   "imPol": false,
+   "id": 1,
+   "stagePos": 1,
+   "stageId": 1
+  },
+  {
+   "stage": "cm3",
+   "stageNum": 3,
+   "name": "ImPol.2",
+   "dim": 1,
+   "imPol": true,
+   "id": 2,
+   "stagePos": 0,
+   "stageId": 0
+  },
+  {
+   "stage": "cm4",
+   "stageNum": 4,
+   "name": "Q0",
+   "dim": 3,
+   "imPol": false,
+   "id": 3,
+   "stagePos": 0,
+   "stageId": 0
+  }
+ ],
+ "constPolsMap": [],
+ "challengesMap": [
+  {
+   "name": "std_vc",
+   "stageNum": 4,
+   "dim": 3,
+   "stageId": 0
+  },
+  {
+   "name": "std_xi",
+   "stageNum": 5,
+   "dim": 3,
+   "stageId": 0
+  },
+  {
+   "name": "std_vf1",
+   "stageNum": 6,
+   "dim": 3,
+   "stageId": 0
+  },
+  {
+   "name": "std_vf2",
+   "stageNum": 6,
+   "dim": 3,
+   "stageId": 1
+  }
+ ],
+ "pil2": false,
+ "mapSectionsN": {
+  "const": 0,
+  "tmpExp": 0,
+  "cm1": 2,
+  "cm2": 0,
+  "cm3": 1,
+  "cm4": 3
+ },
+ "subproofId": 0,
+ "airId": 0,
+ "nPublics": 3,
+ "nConstants": 0,
+ "nStages": 3,
+ "starkStruct": {
+  "nBits": 6,
+  "nBitsExt": 9,
+  "nQueries": 8,
+  "verificationHashType": "GL",
+  "steps": [
+   {
+    "nBits": 9
+   },
+   {
+    "nBits": 6
+   },
+   {
+    "nBits": 3
+   }
+  ]
+ },
+ "boundaries": [
+  {
+   "name": "everyRow"
+  },
+  {
+   "name": "everyFrame",
+   "offsetMin": 0,
+   "offsetMax": 1
+  },
+  {
+   "name": "firstRow"
+  },
+  {
+   "name": "lastRow"
+  }
+ ],
+ "openingPoints": [
+  0,
+  1
+ ],
+ "qDim": 3,
+ "qDeg": 1,
+ "nCommitmentsStage1": 2,
+ "evMap": [
+  {
+   "type": "cm",
+   "id": 0,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 0,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 1,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 1,
+   "prime": 1,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 2,
+   "prime": 0,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 3,
+   "prime": 0,
+   "openingPos": 0
+  }
+ ]
+}

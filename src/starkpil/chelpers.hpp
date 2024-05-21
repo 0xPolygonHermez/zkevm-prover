@@ -45,6 +45,8 @@ struct ParserParams
     uint32_t cmPolsCalculatedOffset;
     uint32_t destDim;
     uint32_t destId;
+    uint32_t firstRow;
+    uint32_t lastRow;
 };
 
 struct ParserArgs 
