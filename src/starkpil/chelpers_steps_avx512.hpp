@@ -83,8 +83,8 @@ public:
         buffTOffsetsSteps_[4] = buffTOffsetsSteps_[3] + 2*nColsSteps[3];
         nCols += nColsSteps[4];
 
-        Goldilocks3::Element_avx challenges[params.challenges.degree()];
-        Goldilocks3::Element_avx challenges_ops[params.challenges.degree()];
+        Goldilocks3::Element_avx512 challenges[params.challenges.degree()];
+        Goldilocks3::Element_avx512 challenges_ops[params.challenges.degree()];
         for(uint64_t i = 0; i < params.challenges.degree(); ++i) {
             challenges[i][0] = __mm512_set1_epi64(params.challenges[i][0].fe);
             challenges[i][1] = __mm512_set1_epi64(params.challenges[i][1].fe);
@@ -106,7 +106,7 @@ public:
         for(uint64_t i = 0; i < starkInfo.nPublics; ++i) {
             publics[i] = __mm512_set1_epi64(params.publicInputs[i].fe);
         }
-        Goldilocks3::Element_avx evals[params.evals.degree()];
+        Goldilocks3::Element_avx512 evals[params.evals.degree()];
         for(uint64_t i = 0; i < params.evals.degree(); ++i) {
             evals[i][0] = __mm512_set1_epi64(params.evals[i][0].fe);
             evals[i][1] = __mm512_set1_epi64(params.evals[i][1].fe);

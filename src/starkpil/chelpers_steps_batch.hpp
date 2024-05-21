@@ -16,13 +16,13 @@ public:
             offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[stage];
             offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[stage];
             if(dim == 1) {
-                Goldilocks::copy_batch(&pols[0], offsetsDest, bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+                Goldilocks::copy_batch(&pols[0], offsetsDest, &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
             } else {
                 Goldilocks3::copy_batch(&pols[0], offsetsDest, &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
             }
         } else {
             if(dim == 1) {
-               Goldilocks::copy_batch(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+               Goldilocks::copy_batch(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
             } else {
                Goldilocks3::copy_batch(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
             }
@@ -83,6 +83,10 @@ public:
         buffTOffsetsSteps_[4] = buffTOffsetsSteps_[3] + 2*nColsSteps[3];
         nCols += nColsSteps[4];
 
+        Goldilocks::Element numbers_[parserParams.nNumbers];
+        for(uint64_t i = 0; i < parserParams.nNumbers; ++i) {
+            numbers_[i] = Goldilocks::fromU64(numbers[i]);
+        }
     #pragma omp parallel for
         for (uint64_t i = 0; i < domainSize; i+= nrowsBatch) {
             uint64_t i_args = 0;
@@ -90,16 +94,13 @@ public:
             bool const needModule = i + nrowsBatch + nextStride >= domainSize;
             Goldilocks::Element bufferT_[2*nCols*nrowsBatch];
             Goldilocks::Element tmp1[parserParams.nTemp1];
-            Goldilocks::Element tmp1_1;
             Goldilocks::Element tmp3[parserParams.nTemp3 * FIELD_EXTENSION];
-            Goldilocks::Element tmp3_;
-            Goldilocks::Element tmp3_1;
-            Goldilocks::Element tmp1_0;
+            Goldilocks::Element tmp3_
             for(uint64_t k = 0; k < nColsSteps[0]; ++k) {
                 for(uint64_t o = 0; o < 2; ++o) {
                     for(uint64_t j = 0; j < nrowsBatch; ++j) {
                         uint64_t l = (i + j + nextStrides[o]) % domainSize;
-                        bufferT_[(2 * id + o) * nrowsBatch + j] = ((Goldilocks::Element *)constPols->address())[l * nColsSteps[0] + k];
+                        bufferT_[(2 * k + o) * nrowsBatch + j] = ((Goldilocks::Element *)constPols->address())[l * nColsSteps[0] + k];
                     }
                 }
             }
@@ -118,7 +119,7 @@ public:
                 for(uint64_t o = 0; o < 2; ++o) {
                     for(uint64_t j = 0; j < nrowsBatch; ++j) {
                         uint64_t l = (i + j + nextStrides[o]) % domainSize;
-                        bufferT_[(2 * (nColsStepsAccumulated[s] + k) + o) * nrowsBatch + j] = params.pols[offsetsSteps[nStages + 1] + l * nColsSteps[nStages + 1] + k];
+                        bufferT_[(2 * (nColsStepsAccumulated[nStages + 1] + k) + o) * nrowsBatch + j] = params.pols[offsetsSteps[nStages + 1] + l * nColsSteps[nStages + 1] + k];
                     }
                 }
             }
@@ -129,90 +130,105 @@ public:
                 case 0: {
                     // COPY commit1 to commit1
                 Goldilocks::copy_batch(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], &bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 6;
                     break;
             }
                 case 1: {
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: commit1
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], &bufferT_[buffTOffsetsSteps_[args[i_args + 7]] + 2 * args[i_args + 8] + args[i_args + 9]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 10;
                     break;
             }
                 case 2: {
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: tmp1
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], &tmp1[args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 8;
                     break;
             }
                 case 3: {
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: public
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], params.publicInputs[args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 8;
                     break;
             }
                 case 4: {
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: number
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], numbers_[args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 8;
                     break;
             }
                 case 5: {
                     // COPY tmp1 to commit1
                 Goldilocks::copy_batch(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], &tmp1[args[i_args + 3]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 4;
                     break;
             }
                 case 6: {
                     // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: tmp1
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp1[args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp1[args[i_args + 4]], &tmp1[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 7: {
                     // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: public
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp1[args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp1[args[i_args + 4]], params.publicInputs[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 8: {
                     // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: number
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp1[args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp1[args[i_args + 4]], numbers_[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 9: {
                     // COPY public to commit1
                 Goldilocks::copy_batch(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], params.publicInputs[args[i_args + 3]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 4;
                     break;
             }
                 case 10: {
                     // OPERATION WITH DEST: commit1 - SRC0: public - SRC1: public
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], params.publicInputs[args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], params.publicInputs[args[i_args + 4]], params.publicInputs[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 11: {
                     // OPERATION WITH DEST: commit1 - SRC0: public - SRC1: number
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], params.publicInputs[args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], params.publicInputs[args[i_args + 4]], numbers_[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
                 case 12: {
                     // COPY x to commit1
                 Goldilocks::copy_batch(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], x[i]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 3;
                     break;
             }
                 case 13: {
                     // COPY number to commit1
                 Goldilocks::copy_batch(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], numbers_[args[i_args + 3]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], 1);
                     i_args += 4;
                     break;
             }
                 case 14: {
                     // OPERATION WITH DEST: commit1 - SRC0: number - SRC1: number
-                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], numbers_[args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], numbers_[args[i_args + 4]], numbers_[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], 1);
                     i_args += 6;
                     break;
             }
@@ -224,25 +240,25 @@ public:
             }
                 case 16: {
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: commit1
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], &bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
                     i_args += 8;
                     break;
             }
                 case 17: {
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: tmp1
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], &tmp1[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 18: {
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: public
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], params.publicInputs[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 19: {
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: number
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], numbers_[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
@@ -254,19 +270,19 @@ public:
             }
                 case 21: {
                     // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: tmp1
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &tmp1[args[i_args + 2]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &tmp1[args[i_args + 2]], &tmp1[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 22: {
                     // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: public
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &tmp1[args[i_args + 2]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &tmp1[args[i_args + 2]], params.publicInputs[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 23: {
                     // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: number
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &tmp1[args[i_args + 2]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], &tmp1[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
@@ -278,13 +294,13 @@ public:
             }
                 case 25: {
                     // OPERATION WITH DEST: tmp1 - SRC0: public - SRC1: public
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], params.publicInputs[args[i_args + 2]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], params.publicInputs[args[i_args + 2]], params.publicInputs[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 26: {
                     // OPERATION WITH DEST: tmp1 - SRC0: public - SRC1: number
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], params.publicInputs[args[i_args + 2]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], params.publicInputs[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
@@ -302,253 +318,279 @@ public:
             }
                 case 29: {
                     // OPERATION WITH DEST: tmp1 - SRC0: number - SRC1: number
-                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], numbers_[args[i_args + 2]], undefined);
+                Goldilocks::op_batch(args[i_args], &tmp1[args[i_args + 1]], numbers_[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 30: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: commit1
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], &bufferT_[buffTOffsetsSteps_[args[i_args + 7]] + 2 * args[i_args + 8] + args[i_args + 9]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 10;
                     break;
             }
                 case 31: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: tmp1
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], &tmp1[args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 8;
                     break;
             }
                 case 32: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: public
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], params.publicInputs[args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 8;
                     break;
             }
                 case 33: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: x
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], x[i]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 7;
                     break;
             }
                 case 34: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: number
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], numbers_[args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 8;
                     break;
             }
                 case 35: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: commit1
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 8;
                     break;
             }
                 case 36: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: tmp1
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], &tmp1[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 37: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: public
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], params.publicInputs[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 38: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: x
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], x[i]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 5;
                     break;
             }
                 case 39: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: number
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], numbers_[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 40: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: commit1
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], &bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 8;
                     break;
             }
                 case 41: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: tmp1
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], &tmp1[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 42: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: public
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], params.publicInputs[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 43: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: x
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], x[i]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 5;
                     break;
             }
                 case 44: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: number
-                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], numbers_[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 45: {
                     // COPY commit3 to commit3
                 Goldilocks3::copy_batch(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], &bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 46: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: commit3
-                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], &bufferT_[buffTOffsetsSteps_[args[i_args + 7]] + 2 * args[i_args + 8] + args[i_args + 9]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 10;
                     break;
             }
                 case 47: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: tmp3
-                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], &tmp3[args[i_args + 7] * FIELD_EXTENSION]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 8;
                     break;
             }
                 case 48: {
                     // MULTIPLICATION WITH DEST: commit3 - SRC0: commit3 - SRC1: challenge
-                Goldilocks3::mul_batch(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks3::mul_batch(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], &params.challenges[args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 8;
                     break;
             }
                 case 49: {
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: challenge
-                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], undefined);
+                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &bufferT_[buffTOffsetsSteps_[args[i_args + 4]] + 2 * args[i_args + 5] + args[i_args + 6]], &params.challenges[args[i_args + 7]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 8;
                     break;
             }
                 case 50: {
                     // COPY tmp3 to commit3
                 Goldilocks3::copy_batch(&bufferT_[buffTOffsetsSteps_[args[i_args]] + 2 * args[i_args + 1] + args[i_args + 2]], &tmp3[args[i_args + 3] * FIELD_EXTENSION]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args], args[i_args + 1], args[i_args + 2], FIELD_EXTENSION);
                     i_args += 4;
                     break;
             }
                 case 51: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: tmp3
-                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], &tmp3[args[i_args + 5] * FIELD_EXTENSION]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 52: {
                     // MULTIPLICATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: challenge
-                Goldilocks3::mul_batch(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], undefined);
+                Goldilocks3::mul_batch(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], &params.challenges[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 53: {
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: challenge
-                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &tmp3[args[i_args + 4] * FIELD_EXTENSION], &params.challenges[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 54: {
                     // MULTIPLICATION WITH DEST: commit3 - SRC0: challenge - SRC1: challenge
-                Goldilocks3::mul_batch(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], undefined);
+                Goldilocks3::mul_batch(&bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], &params.challenges[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 55: {
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: challenge
-                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], undefined);
+                Goldilocks3::op_batch(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + 2 * args[i_args + 2] + args[i_args + 3]], &params.challenges[args[i_args + 4]], &params.challenges[args[i_args + 5]]);
+                storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, 2, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
                     i_args += 6;
                     break;
             }
                 case 56: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: commit1
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], &bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
                     i_args += 8;
                     break;
             }
                 case 57: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: tmp1
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], &tmp1[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 58: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: public
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], params.publicInputs[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 59: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: x
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], x[i]);
                     i_args += 5;
                     break;
             }
                 case 60: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: number
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], numbers_[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 61: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: commit1
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 62: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: tmp1
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], &tmp1[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 63: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: public
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], params.publicInputs[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 64: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: x
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], x[i]);
                     i_args += 3;
                     break;
             }
                 case 65: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: number
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 66: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: commit1
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], &bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 67: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: tmp1
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], &tmp1[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 68: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: public
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], params.publicInputs[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 69: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: x
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], x[i]);
                     i_args += 3;
                     break;
             }
                 case 70: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: number
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], numbers_[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
@@ -560,25 +602,25 @@ public:
             }
                 case 72: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: commit3
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], &bufferT_[buffTOffsetsSteps_[args[i_args + 5]] + 2 * args[i_args + 6] + args[i_args + 7]]);
                     i_args += 8;
                     break;
             }
                 case 73: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: tmp3
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], &tmp3[args[i_args + 5] * FIELD_EXTENSION]);
                     i_args += 6;
                     break;
             }
                 case 74: {
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: challenge
-                Goldilocks3::mul_batch(&tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::mul_batch(&tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], &params.challenges[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 75: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: challenge
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], &params.challenges[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
@@ -590,31 +632,31 @@ public:
             }
                 case 77: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: tmp3
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], &tmp3[args[i_args + 3] * FIELD_EXTENSION]);
                     i_args += 4;
                     break;
             }
                 case 78: {
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: challenge
-                Goldilocks3::mul_batch(&tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::mul_batch(&tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], &params.challenges[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 79: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: challenge
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], &params.challenges[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 80: {
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: challenge - SRC1: challenge
-                Goldilocks3::mul_batch(&tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], undefined);
+                Goldilocks3::mul_batch(&tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], &params.challenges[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 81: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: challenge
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], &params.challenges[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
@@ -626,37 +668,37 @@ public:
             }
                 case 83: {
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: eval - SRC1: challenge
-                Goldilocks3::mul_batch(&tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.evals[args[i_args + 2]], undefined);
+                Goldilocks3::mul_batch(&tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.evals[args[i_args + 2]], &params.challenges[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 84: {
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: eval
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.challenges[args[i_args + 2]], &params.evals[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 85: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: eval
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], &params.evals[args[i_args + 3]]);
                     i_args += 4;
                     break;
             }
                 case 86: {
                     // OPERATION WITH DEST: tmp3 - SRC0: eval - SRC1: commit1
-                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.evals[args[i_args + 2]], undefined);
+                Goldilocks3::op_31_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &params.evals[args[i_args + 2]], &bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + 2 * args[i_args + 4] + args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 87: {
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: eval
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + 2 * args[i_args + 3] + args[i_args + 4]], &params.evals[args[i_args + 5]]);
                     i_args += 6;
                     break;
             }
                 case 88: {
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: xDivXSubXi
-                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_batch(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], params.xDivXSubXi[i + args[i_args + 3]*domainSize]);
                     i_args += 4;
                     break;
             }
@@ -672,7 +714,8 @@ public:
             }
                 case 90: {
                     // OPERATION WITH DEST: f - SRC0: tmp3 - SRC1: tmp3
-                Goldilocks3::op_batch(args[i_args], &params.f_2ns[i*3], &tmp3[args[i_args + 1] * FIELD_EXTENSION], undefined);
+                Goldilocks3::op_batch(args[i_args], &params.f_2ns[i*3], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION]);
+                Goldilocks3::copy_batch(&params.f_2ns[i*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3_);
                     i_args += 3;
                     break;
             }
