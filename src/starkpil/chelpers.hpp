@@ -7,6 +7,8 @@
 #include "polinomial.hpp"
 #include "goldilocks_base_field.hpp"
 #include "goldilocks_base_field_avx.hpp"
+#include "goldilocks_base_field_avx512.hpp"
+#include "goldilocks_base_field_batch.hpp"
 #include "goldilocks_cubic_extension.hpp"
 #include "constant_pols_starks.hpp"
 #include "stark_info.hpp"
