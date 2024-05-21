@@ -18,6 +18,12 @@
 ./build/constraintChecker -c test/examples/fibonacci.pil2/fibonacci.pil2.const -s test/examples/fibonacci.pil2/fibonacci.pil2.starkinfo.json -h test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin -t test/examples/fibonacci.pil2/fibonacci.pil2.commit -p test/examples/fibonacci.pil2/fibonacci.pil2.publics.json
 ```
 
+# Constraint checker Fibonacci Boundaries test
+
+```bash
+./build/constraintChecker -c test/examples/fibonacci.boundaries/fibonacci.const -s test/examples/fibonacci.boundaries/fibonacci.starkinfo.json -h test/examples/fibonacci.boundaries/fibonacci.chelpers/fibonacci.chelpers_generic.bin -t test/examples/fibonacci.boundaries/fibonacci.commit -p test/examples/fibonacci.boundaries/fibonacci.publics.json
+```
+
 ## Verify
 
 # Verify ALL test
@@ -31,6 +37,13 @@ node ../pil2-stark-js/src/main_verifier.js -v test/examples/all/all.verkey.json 
 ```bash
 node ../pil2-stark-js/src/main_verifier.js -v test/examples/compressor/all.c18.verkey.json -s test/examples/compressor/all.c18.starkinfo.json -i test/examples/compressor/all.c18.verifierinfo.json -o runtime/output/compressor_proof.json -b test/examples/compressor/all.c18.publics.json
 ```
+
+# Verify Fibonaci Boundaries test
+
+```bash
+node ../pil2-stark-js/src/main_verifier.js -v test/examples/fibonacci.boundaries/fibonacci.verkey.json -s test/examples/fibonacci.boundaries/fibonacci.starkinfo.json -i test/examples/fibonacci.boundaries/fibonacci.verifierinfo.json -o runtime/output/fibonacci_proof.json -b test/examples/fibonacci.boundaries/fibonacci.publics.json
+```
+
 
 # Verify Fibonaci Pil2 test
 
