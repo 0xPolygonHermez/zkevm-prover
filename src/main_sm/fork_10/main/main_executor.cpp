@@ -2234,7 +2234,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         c = (a ^ b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
-                    } else if ( rom.line[zkPC].binOpcode == 8 ) // LT4
+                    }
+                    else if ( rom.line[zkPC].binOpcode == 8 ) // LT4
                     {
                         mpz_class a, b, c;
                         if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
@@ -2380,70 +2381,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Copy fi=command result, depending on its type
-                if (cr.type == crt_fea)
-                {
-                    fi0 = cr.fea0;
-                    fi1 = cr.fea1;
-                    fi2 = cr.fea2;
-                    fi3 = cr.fea3;
-                    fi4 = cr.fea4;
-                    fi5 = cr.fea5;
-                    fi6 = cr.fea6;
-                    fi7 = cr.fea7;
-                }
-                else if (cr.type == crt_fe)
-                {
-                    fi0 = cr.fe;
-                    fi1 = fr.zero();
-                    fi2 = fr.zero();
-                    fi3 = fr.zero();
-                    fi4 = fr.zero();
-                    fi5 = fr.zero();
-                    fi6 = fr.zero();
-                    fi7 = fr.zero();
-                }
-                else if (cr.type == crt_scalar)
-                {
-                    ctx.scalarToMultiBaseFea(fr, cr.scalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                }
-                else if (cr.type == crt_u16)
-                {
-                    fi0 = fr.fromU64(cr.u16);
-                    fi1 = fr.zero();
-                    fi2 = fr.zero();
-                    fi3 = fr.zero();
-                    fi4 = fr.zero();
-                    fi5 = fr.zero();
-                    fi6 = fr.zero();
-                    fi7 = fr.zero();
-                }
-                else if (cr.type == crt_u32)
-                {
-                    fi0 = fr.fromU64(cr.u32);
-                    fi1 = fr.zero();
-                    fi2 = fr.zero();
-                    fi3 = fr.zero();
-                    fi4 = fr.zero();
-                    fi5 = fr.zero();
-                    fi6 = fr.zero();
-                    fi7 = fr.zero();
-                }
-                else if (cr.type == crt_u64)
-                {
-                    fi0 = fr.fromU64(cr.u64);
-                    fi1 = fr.zero();
-                    fi2 = fr.zero();
-                    fi3 = fr.zero();
-                    fi4 = fr.zero();
-                    fi5 = fr.zero();
-                    fi6 = fr.zero();
-                    fi7 = fr.zero();
-                }
-                else
-                {
-                    logError(ctx, "Unexpected command result type: " + to_string(cr.type));
-                    exitProcess();
-                }
+                cr.toFea(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
             }
 
             // Store polynomial FREE=fi
@@ -5694,6 +5632,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                    " RR=" << fr.toString(pols.RR[nexti],16) <<
                    " RCX=" << fr.toString(pols.RCX[nexti],16) <<
                    " HASHPOS=" << fr.toString(pols.HASHPOS[nexti],16) <<
+                   " RID=" << fr.toString(pols.RID[nexti],16) <<
                    endl;
         outfile.close();
         //if (i==1000) break;

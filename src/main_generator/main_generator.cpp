@@ -10,7 +10,7 @@
 //#define LOG_START_STEPS
 //#define LOG_START_STEPS_TO_FILE
 //#define LOG_COMPLETED_STEPS
-#define LOG_COMPLETED_STEPS_TO_FILE
+//#define LOG_COMPLETED_STEPS_TO_FILE
 
 //#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
 
@@ -19,6 +19,7 @@
 //#define LOG_HASHS
 //#define LOG_SMT_KEY_DETAILS
 //#define LOG_STORAGE
+//#define LOG_SAVE_RESTORE
 
 #ifdef DEBUG
 //#define CHECK_MAX_CNT_ASAP
@@ -26,6 +27,9 @@
 
 using namespace std;
 using json = nlohmann::json;
+
+#define zkmin(a,b) (a < b ? a : b)
+#define zkmax(a,b) (a > b ? a : b)
 
 // Forward declaration
 void file2json (json &rom, string &romFileName);
@@ -359,9 +363,17 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "    uint64_t addr = 0;\n";
     }
     code += "    uint64_t context = 0;\n";
-    if (forkID >= 10)
+    if ((forkID >= 10) && !bFastMode)
     {
-        code += "    Goldilocks::Element op0CondConst;\n";
+        // Declare op0CondConst only if condConst instruction is used
+        for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
+        {
+            if (rom["program"][zkPC].contains("condConst"))
+            {
+                code += "    Goldilocks::Element op0CondConst;\n";
+                break;
+            }
+        }
     }
     code += "    Goldilocks::Element value8[8];\n";
 
@@ -612,13 +624,16 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "    uint64_t elseAddr;\n";
         code += "    Goldilocks::Element op0cond;\n";
 
-        // Declare valueU64 only if free0IsByte instruction is used
-        for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
+        if (!bFastMode)
         {
-            if (rom["program"][zkPC].contains("free0IsByte") && (rom["program"][zkPC]["free0IsByte"]==1))
+            // Declare valueU64 only if free0IsByte instruction is used
+            for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
             {
-                code += "    uint64_t valueU64;\n";
-                break;
+                if (rom["program"][zkPC].contains("free0IsByte") && (rom["program"][zkPC]["free0IsByte"]==1))
+                {
+                    code += "    uint64_t valueU64;\n";
+                    break;
+                }
             }
         }
     }
@@ -735,7 +750,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     // MAIN LOOP //
     ///////////////
 
-    for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
+    for (uint64_t zkPC=0; zkPC < rom["program"].size(); zkPC++)
     {
 
         // When bConditionalJump=true, the code will go to the proper label after all the work has been done based on the content of bJump
@@ -752,9 +767,23 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         //    code += "// ";
         code += functionName + "_rom_line_" + to_string(zkPC) + ": //" + string(rom["program"][zkPC]["fileName"]) + ":" + to_string(rom["program"][zkPC]["line"]) + "=[" + removeDuplicateSpaces(string(rom["program"][zkPC]["lineStr"])) + "]\n\n";
 
+        /*if ((zkPC > 1000) && (zkPC < 10200))
+        {
+            code += "    zkassert(" + to_string(zkPC) + " == 0);\n";
+            continue;
+        }*/
+
         // START LOGS
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         code += "    fi0=fi1=fi2=fi3=fi4=fi5=fi6=fi7=fr.zero();\n";
+        code += "    pols.FREE0[" + string(bFastMode?"0":"i") + "] = fi0;\n";
+        code += "    pols.FREE1[" + string(bFastMode?"0":"i") + "] = fi1;\n";
+        code += "    pols.FREE2[" + string(bFastMode?"0":"i") + "] = fi2;\n";
+        code += "    pols.FREE3[" + string(bFastMode?"0":"i") + "] = fi3;\n";
+        code += "    pols.FREE4[" + string(bFastMode?"0":"i") + "] = fi4;\n";
+        code += "    pols.FREE5[" + string(bFastMode?"0":"i") + "] = fi5;\n";
+        code += "    pols.FREE6[" + string(bFastMode?"0":"i") + "] = fi6;\n";
+        code += "    pols.FREE7[" + string(bFastMode?"0":"i") + "] = fi7;\n\n";
 #endif
 #ifdef LOG_START_STEPS
         code += "    zklog.info(\"--> Starting step=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " zkasm=\" + rom.line[" + to_string(zkPC) + "].lineStr);\n";
@@ -860,12 +889,10 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        cr.reset();\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        evalCommand(ctx, *rom.line[" + to_string(zkPC) + "].cmdBefore[j], cr);\n";
-            code += "\n";
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
             code += "        evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdBefore[j]->opAndFunction, TimeDiff(t));\n";
 #endif
-            code += "        // In case of an external error, return it\n";
             code += "        if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = cr.zkResult;\n";
@@ -873,7 +900,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
-            code += "    }\n";
+            code += "    }\n\n";
             code += "\n";
         }
 
@@ -1070,7 +1097,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
         if ((forkID >= 10) && rom["program"][zkPC].contains("inRID") && (rom["program"][zkPC]["inRID"]!=0))
         {
-            code += selector1("RCX", rom["program"][zkPC]["inRID"], opInitialized, bFastMode);
+            code += selector1("RID", rom["program"][zkPC]["inRID"], opInitialized, bFastMode);
             opInitialized = true;
         }
 
@@ -1093,6 +1120,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += selectorConstL(rom["program"][zkPC]["CONSTL"], opInitialized, bFastMode, bMode384);
             opInitialized = true;
         }
+
+        bool anyMem = rom["program"][zkPC].contains("mOp") && (rom["program"][zkPC]["mOp"]==1);
 
         bool bOnlyOffset = false;
 
@@ -1148,14 +1177,15 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             if (rom["program"][zkPC].contains("indRR") && (rom["program"][zkPC]["indRR"]!=0))
             {
-                if ((rom["program"][zkPC]["indRR"]==1))
+                int32_t indRR = rom["program"][zkPC]["indRR"];
+                if ((indRR==1))
                     code += "    if ( !fr.toS32(addrRel, pols.RR[" + string(bFastMode?"0":"i") + "]))\n";
                 else
-                    code += "    if (!fr.toS32(addrRel, fr.mul(rom.line[" + to_string(zkPC) + "].indRR, pols.E0[" + string(bFastMode?"0":"i") + "])))\n";
+                    code += "    if (!fr.toS32(addrRel, fr.mul(fr.fromS64(" + to_string(indRR) + "), pols.RR[" + string(bFastMode?"0":"i") + "])))\n";
                 code += "    {\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_TOS32;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fr.toS32() with pols.RR[i]=\" + fr.toString(pols.RR[" + string(bFastMode?"0":"i") + "], 16));\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fr.toS32() with pols.RR[i]=\" + fr.toString(pols.RR[" + string(bFastMode?"0":"i") + "], 16) + \" indRR=" + to_string(indRR) + "\");\n";
                 code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -1408,10 +1438,13 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             
         if (forkID >= 10)
         {
-            if (rom["program"][zkPC].contains("memUseAddrRel") && (rom["program"][zkPC]["memUseAddrRel"] > 0))
-                code += "    memAddr = addr + addrRel;\n";
-            else
-                code += "    memAddr = addr;\n";
+            if (anyMem)
+            {
+                if (rom["program"][zkPC].contains("memUseAddrRel") && (rom["program"][zkPC]["memUseAddrRel"] > 0))
+                    code += "    memAddr = addr + addrRel;\n";
+                else
+                    code += "    memAddr = addr;\n";
+            }
             if (anyHash)
             {
                 int64_t hashOffset = 0;
@@ -1436,11 +1469,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
         if (forkID >= 10)
         {
-            code += "    rid = 0;\n";
-
             if (rom["program"][zkPC].contains("restore") && (rom["program"][zkPC]["restore"] == 1))
             {
                 code += "    rid = fr.toU64(pols.RID[" + string(bFastMode?"0":"i") + "]);\n";
+#ifdef LOG_SAVE_RESTORE
+                code += "    zklog.info(\"Restoring rid=\" + to_string(rid) + \" zkPC=" + to_string(zkPC) + "\");\n";
+#endif
                 if (!bFastMode)
                 {
                     code += "    pols.restore[i] = fr.one();\n";
@@ -2809,11 +2843,11 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                       (rom["program"][zkPC]["arithEquation"]==12) // ARITH_256TO384
                     ) )
                 {
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
                     code += "    zkResult = Arith_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = zkr;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        logError(ctx, \"Arith failed calling ArithCalculate result=\" + zkresult2string(zkr)+\" arithEquation=" + to_string(rom["program"][zkPC]["arithEquation"]) + ";\n";
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
@@ -2903,9 +2937,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "    // Call evalCommand()\n";
                     code += "    cr.reset();\n";
                     code += "    zkPC=" + to_string(zkPC) +";\n";
-                    code += "    evalCommand(ctx, rom.line[" + to_string(zkPC) + "].freeInTag, cr);\n\n";
-
-                    code += "    // In case of an external error, return it\n";
+                    code += "    evalCommand(ctx, rom.line[" + to_string(zkPC) + "].freeInTag, cr);\n";
                     code += "    if (cr.zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = cr.zkResult;\n";
@@ -2913,9 +2945,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        mainExecutor.logError(ctx, string(\"Main exec failed calling evalCommand() result=\") + zkresult2string(proverRequest.result));\n";
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
-                    code += "    }\n\n";
+                    code += "    }\n";
 
-                    code += "    // Copy fi=command result, depending on its type \n";
+                    if (forkID >= 10)
+                        code += "    cr.toFea(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n\n";
+                    else
+                    {
                     code += "    switch (cr.type)\n";
                     code += "    {\n";
                     code += "    case crt_fea:\n";
@@ -2978,6 +3013,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        mainExecutor.logError(ctx, \"Unexpected command result type: \" + to_string(cr.type));\n";
                     code += "        exitProcess();\n";
                     code += "    }\n";
+                    }
                 }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
@@ -3000,7 +3036,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
             }
 
-            if ((forkID >= 10) || !bFastMode)
+            //if (((forkID >= 10) && rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1)) ||
+            //    !bFastMode)
             {
                 code += "    // Store polynomial FREE=fi\n";
                 code += "    pols.FREE0[" + string(bFastMode?"0":"i") + "] = fi0;\n";
@@ -4777,6 +4814,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         if ( rom["program"][zkPC].contains("arith") && (rom["program"][zkPC]["arith"]==1) &&
              (forkID >= 10) )
         {
+            code += "    zkPC=" + to_string(zkPC) +";\n";
             code += "    zkResult = Arith_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ", same12, useE, useCD);\n";
             code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
@@ -6166,6 +6204,9 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         if ((forkID >= 10) && rom["program"][zkPC].contains("save") && (rom["program"][zkPC]["save"] == 1))
         {
             code += "    rid = i;\n";
+#ifdef LOG_SAVE_RESTORE
+            code += "    zklog.info(\"Saving rid=\" + to_string(rid) + \" zkPC=" + to_string(zkPC) + "\");\n";
+#endif
             code += "    itSaved = ctx.saved.find(rid);\n";
             code += "    if (itSaved != ctx.saved.end())\n";
             code += "    {\n";
@@ -6228,6 +6269,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    dataToRestore.savedZKPC = " + to_string(zkPC) +";\n";
             code += "    dataToRestore.savedStep = i;\n";
 
+            code += "    dataToRestore.restored = false;\n";
+
             code += "    ctx.saved[rid] = dataToRestore;\n";
 
             if (!bFastMode)
@@ -6244,7 +6287,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         /* SETTERS */
         /***********/
 
-        if (forkID >= 10)
+        if ((forkID >= 10) && !bFastMode)
         {
             code += "    pols.op0[" + string(bFastMode?"0":"i") + "] = op0;\n";
             code += "    pols.op1[" + string(bFastMode?"0":"i") + "] = op1;\n";
@@ -6446,7 +6489,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         {
             code += "    pols.RCX[" + string(bFastMode?"0":"nexti") + "] = dataToRestore.RCX;\n";
         }
-        else
+        else if (!bFastMode)
         {
             code += "    pols.RCX[" + string(bFastMode?"0":"nexti") + "] = pols.RCX[" + string(bFastMode?"0":"i") + "];\n";
         }
@@ -6463,6 +6506,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         /*********/
         /* JUMPS */
         /*********/
+
+        bool anyJump =
+            (rom["program"][zkPC].contains("JMPN") && (rom["program"][zkPC]["JMPN"]==1)) ||
+            (rom["program"][zkPC].contains("JMPC") && (rom["program"][zkPC]["JMPC"]==1)) ||
+            (rom["program"][zkPC].contains("JMPZ") && (rom["program"][zkPC]["JMPZ"]==1)) ||
+            (rom["program"][zkPC].contains("JMP") && (rom["program"][zkPC]["JMP"]==1));
 
         // Record jump address data
         if ( rom["program"][zkPC].contains("jmpAddr") && rom["program"][zkPC]["jmpAddr"].is_number_unsigned() )
@@ -6506,36 +6555,39 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
         if (forkID >= 10)
         {
-            int64_t jmpAddr = 0;
-            if (rom["program"][zkPC].contains("jmpAddr") && (rom["program"][zkPC]["jmpAddr"] > 0))
+            if (anyJump)
             {
-                jmpAddr = rom["program"][zkPC]["jmpAddr"];
-            }
-            code += "    finalJmpAddr = " + to_string(jmpAddr) + string(jmpUseAddrRel ? " + addrRel" : "") +";\n";
-            if (repeat)
-                code += "    nextNoJmpZkPC = fr.toU64(pols.zkPC[" + string(bFastMode?"0":"i") + "]) + (!fr.isZero(currentRCX) ? 0 : 1);\n";
-            else
-                code += "    nextNoJmpZkPC = fr.toU64(pols.zkPC[" + string(bFastMode?"0":"i") + "]) + 1;\n";
-            int64_t elseAddr = 0;
-            if (rom["program"][zkPC].contains("elseAddr") && (rom["program"][zkPC]["elseAddr"] != 0))
-            {
-                elseAddr = rom["program"][zkPC]["elseAddr"];
-                if (!bFastMode)
-                    code += "    pols.elseAddr[i] = fr.fromS64(" + to_string(elseAddr) + ");\n";
-            }
-            bool elseUseAddrRel = false;
-            if (rom["program"][zkPC].contains("elseUseAddrRel") && (rom["program"][zkPC]["elseUseAddrRel"] == 1))
-            {
-                elseUseAddrRel = true;
-                if (!bFastMode)
-                    code += "    pols.elseUseAddrRel[i] = fr.one();\n";
-            }
-            code += "    elseAddr = " + to_string(elseAddr) + " + " + string(elseUseAddrRel ? "addrRel" : "0") + ";\n";
+                int64_t jmpAddr = 0;
+                if (rom["program"][zkPC].contains("jmpAddr") && (rom["program"][zkPC]["jmpAddr"] > 0))
+                {
+                    jmpAddr = rom["program"][zkPC]["jmpAddr"];
+                }
+                code += "    finalJmpAddr = " + to_string(jmpAddr) + string(jmpUseAddrRel ? " + addrRel" : "") +";\n";
+                if (repeat)
+                    code += "    nextNoJmpZkPC = fr.toU64(pols.zkPC[" + string(bFastMode?"0":"i") + "]) + (!fr.isZero(currentRCX) ? 0 : 1);\n";
+                else
+                    code += "    nextNoJmpZkPC = fr.toU64(pols.zkPC[" + string(bFastMode?"0":"i") + "]) + 1;\n";
+                int64_t elseAddr = 0;
+                if (rom["program"][zkPC].contains("elseAddr") && (rom["program"][zkPC]["elseAddr"] != 0))
+                {
+                    elseAddr = rom["program"][zkPC]["elseAddr"];
+                    if (!bFastMode)
+                        code += "    pols.elseAddr[i] = fr.fromS64(" + to_string(elseAddr) + ");\n";
+                }
+                bool elseUseAddrRel = false;
+                if (rom["program"][zkPC].contains("elseUseAddrRel") && (rom["program"][zkPC]["elseUseAddrRel"] == 1))
+                {
+                    elseUseAddrRel = true;
+                    if (!bFastMode)
+                        code += "    pols.elseUseAddrRel[i] = fr.one();\n";
+                }
+                code += "    elseAddr = " + to_string(elseAddr) + " + " + string(elseUseAddrRel ? "addrRel" : "0") + ";\n";
 
-            // Modify JMP 'elseAddr' to continue execution in case of an unsigned transaction
-            if (rom["program"][zkPC].contains("elseAddrLabel") && (rom["program"][zkPC]["elseAddrLabel"] == "invalidIntrinsicTxSenderCode"))
-            {
-                code += "    if (bUnsignedTransaction) elseAddr = finalJmpAddr;\n";
+                // Modify JMP 'elseAddr' to continue execution in case of an unsigned transaction
+                if (rom["program"][zkPC].contains("elseAddrLabel") && (rom["program"][zkPC]["elseAddrLabel"] == "invalidIntrinsicTxSenderCode"))
+                {
+                    code += "    if (bUnsignedTransaction) elseAddr = finalJmpAddr;\n";
+                }
             }
 
             // Log free0IsByte in pols
@@ -6675,14 +6727,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             // If op<0, jump to addr: zkPC'=addr
             code += "    if (jmpnCondValue >= FrFirst32Negative)\n";
             code += "    {\n";
+            if (anyJump && (forkID >= 10))
+                code += "        pols.zkPC[" + string(bFastMode ? "0":"nexti") + "] = fr.fromU64(finalJmpAddr);\n";
             
             if (!bFastMode)
             {
                 code += "        pols.isNeg[i] = fr.one();\n";
                 code += "        jmpnCondValue = fr.toU64(fr.add(" + string(forkID >= 10 ? "o" : "op0") + ", fr.fromU64(0x100000000)));\n";
-                if (forkID >= 10)
-                    code += "    pols.zkPC[" + string(bFastMode ? "0":"nexti") + "] = fr.fromU64(finalJmpAddr);\n";
-                else
+                if (forkID <= 9)
                 {
                     if (useJmpAddr)
                         code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["jmpAddr"]) + "); // If op<0, jump to jmpAddr: zkPC'=jmpAddr\n";
@@ -6700,17 +6752,17 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             // If op>=0, simply increase zkPC'=zkPC+1
             code += "    else if (jmpnCondValue <= FrLast32Positive)\n";
             code += "    {\n";
-            if (!bFastMode)
+            if (forkID >= 10)
             {
-                if (forkID >= 10)
-                    code += "    pols.zkPC[nexti] = fr.fromU64(elseAddr);\n";
+                code += "        pols.zkPC[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(elseAddr);\n";
+                code += "        bJump = true;\n";
+            }
+            else if (!bFastMode)
+            {
+                if (useElseAddr)
+                    code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + "); // If op>=0, simply increase zkPC'=zkPC+1\n";
                 else
-                {
-                    if (useElseAddr)
-                        code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + "); // If op>=0, simply increase zkPC'=zkPC+1\n";
-                    else
-                        code += "        pols.zkPC[nexti] = fr.inc(pols.zkPC[i]); // If op>=0, simply increase zkPC'=zkPC+1\n";
-                }
+                    code += "        pols.zkPC[nexti] = fr.inc(pols.zkPC[i]); // If op>=0, simply increase zkPC'=zkPC+1\n";
             }
             code += "    }\n";
 
@@ -6757,12 +6809,16 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             if (bFastMode) // We reset the global variable to prevent jumping in next zkPC
                 code += "        pols.carry[0] = fr.zero();\n";
             code += "    }\n";
-            if (!bFastMode)
+            if ((forkID >= 10) || !bFastMode)
             {
                 code += "    else\n";
                 code += "    {\n";
                 if (forkID >= 10)
-                    code += "        pols.zkPC[nexti] = fr.fromU64(elseAddr);\n";
+                {
+                    code += "        pols.zkPC[" + string(bFastMode ? "0":"nexti") + "] = fr.fromU64(elseAddr);\n";
+                    bConditionalJump = true;
+                    code += "        bJump = true;\n";
+                }
                 else
                 {
                     if (useElseAddr)
@@ -6834,6 +6890,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             {
                 code += "    bJump = true;\n";
                 code += "    pols.zkPC[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(finalJmpAddr);\n";
+                bConditionalJump = true;
             }
             else if (!bFastMode)
             {
@@ -6893,7 +6950,10 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         else
         {
             if (forkID >= 10)
-                code += "    pols.zkPC[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(nextNoJmpZkPC);\n";
+            {
+                if (anyJump)
+                    code += "    pols.zkPC[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(nextNoJmpZkPC);\n";
+            }
             else if (!bFastMode)
                 code += "    pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);\n";
         }
@@ -6961,7 +7021,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.RID[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(i);\n";
                 }
-                else
+                else if (!bFastMode)
                 {
                     code += "    pols.RID[" + string(bFastMode?"0":"nexti") + "] = pols.RID[" + string(bFastMode?"0":"i") + "];\n";
                 }
@@ -7124,12 +7184,10 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "            cr.reset();\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            evalCommand(ctx, *rom.line[" + to_string(zkPC) + "].cmdAfter[j], cr);\n";
-            code += "    \n";
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "            mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
             code += "            evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdAfter[j]->opAndFunction, TimeDiff(t));\n";
 #endif
-            code += "            // In case of an external error, return it\n";
             code += "            if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "            {\n";
             code += "                proverRequest.result = cr.zkResult;\n";
@@ -7138,7 +7196,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "                pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "                return;\n";
             code += "            }\n";
-            code += "        }\n";
+            code += "        }\n\n";
             if (!bFastMode)
             code += "        i--;\n";
             code += "    }\n\n";
@@ -7176,7 +7234,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 " addr=\" << addr << \"" +
                 " RR=\" << fr.toString(pols.RR[" + string(bFastMode?"0":"nexti") + "],16) << \"" +
                 " RCX=\" << fr.toString(pols.RCX[" + string(bFastMode?"0":"nexti") + "],16) << \"" +
-                " HASHPOS=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "],16) << " +
+                " HASHPOS=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "],16) << \"" +
+                " RID=\" << fr.toString(pols.RID[" + string(bFastMode?"0":"nexti") + "],16) << " +
                 " endl;\n";
         code += "    outfile.close();\n";
 #endif
@@ -7191,6 +7250,17 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        exitProcess();\n";
             code += "    }\n";
             code += "    ctx.lastStep = i;\n";
+
+            if (forkID >= 10)
+            {
+                // Set last save as restored because it is not restored at end.zkasm in case of fastDebugExit
+                code += "    if (!ctx.saved.empty())\n";
+                code += "    {\n";
+                code += "        itSaved = prev(ctx.saved.end());\n";
+                code += "        itSaved->second.restored = true;\n";
+                code += "    }\n";
+            }
+
             if (bFastMode)
             code += "    goto " + functionName + "_end;\n\n";
         }
@@ -7209,7 +7279,18 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             if (bConditionalJump)
             {
                 code += "    if (bJump)\n";
+                code += "    {\n";
+                code += "        bJump = false;\n";
                 code += "        goto *" + functionName + "_labels[fr.toU64(pols.zkPC[" + string(bFastMode?"0":"i") + "])];\n";
+                code += "    }\n\n";
+            }
+            if (rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"]==1))
+            {
+                code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["jmpAddr"]) + ";\n";
+            }
+            if (rom["program"][zkPC].contains("return") && (rom["program"][zkPC]["return"]==1))
+            {
+                code += "    goto *" + functionName + "_labels[fr.toU64(pols.RR[" + string(bFastMode?"0":"i") + "])];\n";
             }
         }
         else
@@ -7720,7 +7801,7 @@ string setter8 (const string &reg, bool setReg, bool restore, bool bFastMode, ui
 
     if (setReg)
     {
-        code += "    // " + reg + "' = op\n";
+        //code += "    // " + reg + "' = op\n";
         for (uint64_t j=0; j<8; j++)
             code += "    pols." + reg + to_string(j) + "[" + (bFastMode?"0":"nexti") + "] = op" + to_string(j) + ";\n";
         if (!bFastMode)
@@ -7738,7 +7819,7 @@ string setter8 (const string &reg, bool setReg, bool restore, bool bFastMode, ui
         {
             code += "    else\n";
             code += "    {\n";
-            code += "        // " + reg + "' = " + reg + "\n";
+            //code += "        // " + reg + "' = " + reg + "\n";
             for (uint64_t j=0; j<8; j++)
                 code += "        pols." + reg + to_string(j) + "[nexti] = pols." + reg + to_string(j) + "[i];\n";
             code += "\n";
@@ -7756,7 +7837,7 @@ string setter8 (const string &reg, bool setReg, bool restore, bool bFastMode, ui
         {
             code += "    else\n";
             code += "    {\n";
-            code += "        // " + reg + "' = " + reg + "\n";
+            //code += "        // " + reg + "' = " + reg + "\n";
             for (uint64_t j=0; j<8; j++)
                 code += "        pols." + reg + to_string(j) + "[nexti] = pols." + reg + to_string(j) + "[i];\n";
             code += "\n";
@@ -7771,7 +7852,7 @@ string setter8 (const string &reg, bool setReg, bool restore, bool bFastMode, ui
     }
     else if (!bFastMode)
     {
-        code += "    // " + reg + "' = " + reg + "\n";
+        //code += "    // " + reg + "' = " + reg + "\n";
         for (uint64_t j=0; j<8; j++)
             code += "    pols." + reg + to_string(j) + "[nexti] = pols." + reg + to_string(j) + "[i];\n";
         code += "\n";

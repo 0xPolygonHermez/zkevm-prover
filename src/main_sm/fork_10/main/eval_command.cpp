@@ -6474,4 +6474,68 @@ void eval_fp2BLS12_381_inv_y (Context &ctx, const RomCommand &cmd, CommandResult
     BLS12_381p.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
+void CommandResult::toFea (Context &ctx, Goldilocks::Element &fi0, Goldilocks::Element &fi1, Goldilocks::Element &fi2, Goldilocks::Element &fi3, Goldilocks::Element &fi4, Goldilocks::Element &fi5, Goldilocks::Element &fi6, Goldilocks::Element &fi7)
+{
+    // Copy fi=command result, depending on its type 
+    switch (type)
+    {
+    case crt_fea:
+        fi0 = fea0;
+        fi1 = fea1;
+        fi2 = fea2;
+        fi3 = fea3;
+        fi4 = fea4;
+        fi5 = fea5;
+        fi6 = fea6;
+        fi7 = fea7;
+        break;
+    case crt_fe:
+        fi0 = fe;
+        fi1 = fr.zero();
+        fi2 = fr.zero();
+        fi3 = fr.zero();
+        fi4 = fr.zero();
+        fi5 = fr.zero();
+        fi6 = fr.zero();
+        fi7 = fr.zero();
+        break;
+    case crt_scalar:
+        ctx.scalarToMultiBaseFea(fr, scalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+        break;
+    case crt_u16:
+        fi0 = fr.fromU64(u16);
+        fi1 = fr.zero();
+        fi2 = fr.zero();
+        fi3 = fr.zero();
+        fi4 = fr.zero();
+        fi5 = fr.zero();
+        fi6 = fr.zero();
+        fi7 = fr.zero();
+        break;
+    case crt_u32:
+        fi0 = fr.fromU64(u32);
+        fi1 = fr.zero();
+        fi2 = fr.zero();
+        fi3 = fr.zero();
+        fi4 = fr.zero();
+        fi5 = fr.zero();
+        fi6 = fr.zero();
+        fi7 = fr.zero();
+        break;
+    case crt_u64:
+        fi0 = fr.fromU64(u64);
+        fi1 = fr.zero();
+        fi2 = fr.zero();
+        fi3 = fr.zero();
+        fi4 = fr.zero();
+        fi5 = fr.zero();
+        fi6 = fr.zero();
+        fi7 = fr.zero();
+        break;
+    default:
+        zklog.error("CommandResult::toFea() Unexpected command result type: " + to_string(type));
+        exitProcess();
+    }
+}
+
 } // namespace
