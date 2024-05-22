@@ -389,18 +389,29 @@ Polinomial *Starks::transposeH1H2Columns(void *pAddress, uint64_t &numCommited, 
     // #pragma omp parallel for
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
-        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fExpId)]);
-        Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tExpId)]);
+        uint64_t fPolId = starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fExpId)];
+        uint64_t tPolId = starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tExpId)];
+
+        Polinomial fPol = starkInfo.getPolinomial(mem, fPolId);
+        Polinomial tPol = starkInfo.getPolinomial(mem, tPolId);
         Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
         Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
 
         uint64_t indx = i * 4;
-        transPols[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsH1H2[starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fExpId)]]]), fPol.degree(), fPol.dim(), fPol.dim());
-        Polinomial::copy(transPols[indx], fPol);
+        if(starkInfo.varPolMap[fPolId].section == eSection::tmpExp_n) {
+            transPols[indx] = fPol;
+        } else {
+            transPols[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsH1H2[fPolId]]), fPol.degree(), fPol.dim(), fPol.dim());
+            Polinomial::copy(transPols[indx], fPol);
+        }
         indx++;
         
-        transPols[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsH1H2[starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tExpId)]]]), tPol.degree(), tPol.dim(), tPol.dim());
-        Polinomial::copy(transPols[indx], tPol);
+        if(starkInfo.varPolMap[tPolId].section == eSection::tmpExp_n) {
+            transPols[indx] = tPol;
+        } else {
+            transPols[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsH1H2[tPolId]]), tPol.degree(), tPol.dim(), tPol.dim());
+            Polinomial::copy(transPols[indx], tPol);
+        }
         indx++;
 
         transPols[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsH1H2[starkInfo.cm_n[numCommited + 2*i]]]), h1.degree(), h1.dim(), h1.dim());
@@ -439,17 +450,27 @@ Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited, Ste
     // #pragma omp parallel for (better without)
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].numId)]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].denId)]);
+        uint64_t numId = starkInfo.exp2pol[to_string(starkInfo.puCtx[i].numId)];
+        uint64_t denId = starkInfo.exp2pol[to_string(starkInfo.puCtx[i].denId)];
+        Polinomial pNum = starkInfo.getPolinomial(mem, numId);
+        Polinomial pDen = starkInfo.getPolinomial(mem, denId);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i]);
         u_int64_t indx = i * 3;
-        newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[starkInfo.exp2pol[to_string(starkInfo.puCtx[i].numId)]]]), pNum.degree(), pNum.dim(), pNum.dim());
-        Polinomial::copy(newpols_[indx], pNum);
+        if(starkInfo.varPolMap[numId].section == eSection::tmpExp_n) {
+            newpols_[indx] = pNum;
+        } else {
+            newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[numId]]), pNum.degree(), pNum.dim(), pNum.dim());
+            Polinomial::copy(newpols_[indx], pNum);
+        }
         indx++;
         assert(pNum.degree() <= N);
 
-        newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[starkInfo.exp2pol[to_string(starkInfo.puCtx[i].denId)]]]), pDen.degree(), pDen.dim(), pDen.dim());
-        Polinomial::copy(newpols_[indx], pDen);
+        if(starkInfo.varPolMap[denId].section == eSection::tmpExp_n) {
+            newpols_[indx] = pDen;
+        } else {
+            newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[denId]]), pDen.degree(), pDen.dim(), pDen.dim());
+            Polinomial::copy(newpols_[indx], pDen);
+        }
         indx++;
         assert(pDen.degree() <= N);
 
@@ -460,17 +481,27 @@ Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited, Ste
     u_int64_t offset = 3 * starkInfo.puCtx.size();
     for (uint64_t i = 0; i < starkInfo.peCtx.size(); i++)
     {
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.peCtx[i].numId)]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.peCtx[i].denId)]);
+        uint64_t numId = starkInfo.exp2pol[to_string(starkInfo.peCtx[i].numId)];
+        uint64_t denId = starkInfo.exp2pol[to_string(starkInfo.peCtx[i].denId)];
+        Polinomial pNum = starkInfo.getPolinomial(mem, numId);
+        Polinomial pDen = starkInfo.getPolinomial(mem, denId);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i]);
         u_int64_t indx = 3 * i + offset;
-        newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[starkInfo.exp2pol[to_string(starkInfo.peCtx[i].numId)]]]), pNum.degree(), pNum.dim(), pNum.dim());
-        Polinomial::copy(newpols_[indx], pNum);
+        if(starkInfo.varPolMap[numId].section == eSection::tmpExp_n) {
+            newpols_[indx] = pNum;
+        } else {
+            newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[numId]]), pNum.degree(), pNum.dim(), pNum.dim());
+            Polinomial::copy(newpols_[indx], pNum);
+        }
         indx++;
         assert(pNum.degree() <= N);
 
-        newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[starkInfo.exp2pol[to_string(starkInfo.peCtx[i].denId)]]]), pDen.degree(), pDen.dim(), pDen.dim());
-        Polinomial::copy(newpols_[indx], pDen);
+        if(starkInfo.varPolMap[denId].section == eSection::tmpExp_n) {
+            newpols_[indx] = pDen;
+        } else {
+            newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[denId]]), pDen.degree(), pDen.dim(), pDen.dim());
+            Polinomial::copy(newpols_[indx], pDen);
+        }
         indx++;
         assert(pDen.degree() <= N);
 
@@ -482,18 +513,28 @@ Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited, Ste
     for (uint64_t i = 0; i < starkInfo.ciCtx.size(); i++)
     {
 
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.ciCtx[i].numId)]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.ciCtx[i].denId)]);
+        uint64_t numId = starkInfo.exp2pol[to_string(starkInfo.ciCtx[i].numId)];
+        uint64_t denId = starkInfo.exp2pol[to_string(starkInfo.ciCtx[i].denId)];
+        Polinomial pNum = starkInfo.getPolinomial(mem, numId);
+        Polinomial pDen = starkInfo.getPolinomial(mem, denId);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i]);
         u_int64_t indx = 3 * i + offset;
 
-        newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[starkInfo.exp2pol[to_string(starkInfo.ciCtx[i].numId)]]]), pNum.degree(), pNum.dim(), pNum.dim());
-        Polinomial::copy(newpols_[indx], pNum);
+        if(starkInfo.varPolMap[numId].section == eSection::tmpExp_n) {
+            newpols_[indx] = pNum;
+        } else {
+            newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[numId]]), pNum.degree(), pNum.dim(), pNum.dim());
+            Polinomial::copy(newpols_[indx], pNum);
+        }
         indx++;
         assert(pNum.degree() <= N);
 
-        newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[starkInfo.exp2pol[to_string(starkInfo.ciCtx[i].denId)]]]), pDen.degree(), pDen.dim(), pDen.dim());
-        Polinomial::copy(newpols_[indx], pDen);
+        if(starkInfo.varPolMap[denId].section == eSection::tmpExp_n) {
+            newpols_[indx] = pDen;
+        } else {
+            newpols_[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsGrandProduct[denId]]), pDen.degree(), pDen.dim(), pDen.dim());
+            Polinomial::copy(newpols_[indx], pDen);
+        }
         indx++;
         assert(pDen.degree() <= N);
 
