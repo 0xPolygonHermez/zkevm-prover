@@ -33,8 +33,6 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
-    bool optimizeMemoryNTT = false;
-    bool optimizeMemoryNTTCommitPols = false;
 
 private:
     void *pConstPolsAddress;
@@ -66,7 +64,6 @@ private:
     Goldilocks::Element *p_q_2ns;
     Goldilocks::Element *p_f_2ns;
     Goldilocks::Element *p_tmpExp_n;
-    Goldilocks::Element *pBuffer;
 
     void *pAddress;
 
@@ -170,7 +167,6 @@ public:
         TimerStopAndLog(COMPUTE_ZHINV);
 
         mem = (Goldilocks::Element *)pAddress;
-        pBuffer = &mem[starkInfo.mapTotalN];
 
         p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
         p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
@@ -247,9 +243,9 @@ public:
 
     void genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], CHelpersSteps *chelpersSteps);
 
-    Polinomial *transposeH1H2Columns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
+    Polinomial *transposeH1H2Columns(void *pAddress, uint64_t &numCommited, StepsParams& params);
     void transposeH1H2Rows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
-    Polinomial *transposeZColumns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
+    Polinomial *transposeZColumns(void *pAddress, uint64_t &numCommited, StepsParams& params);
     void transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
     void evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomial &LpEv);
 };

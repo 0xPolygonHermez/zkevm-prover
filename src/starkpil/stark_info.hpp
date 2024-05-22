@@ -46,7 +46,10 @@ typedef enum
     tmpExp_n = 8,
     q_2ns = 9,
     f_2ns = 10,
-    eSectionMax = 11
+    xDivXSubXi_2ns = 11,
+    LEv = 12,
+    evals = 13,
+    eSectionMax = 14
 } eSection;
 
 eSection string2section (const string s);
@@ -163,7 +166,6 @@ class StarkInfo
 public:
     StarkStruct starkStruct;
 
-    uint64_t mapTotalN;
     uint64_t nConstants;
     uint64_t nPublics;
     uint64_t nCm1;
@@ -178,8 +180,8 @@ public:
     uint64_t merkleTreeArity;
 
     PolsSections mapDeg;
-    PolsSections mapOffsets;
     PolsSections mapSectionsN;
+    PolsSections mapOffsets;
     vector<VarPolMap> varPolMap;
     vector<uint64_t> qs;
     vector<uint64_t> cm_n;
@@ -189,7 +191,19 @@ public:
     vector<CiCtx> ciCtx;
     vector<EvMap> evMap;
     map<string,uint64_t> exp2pol;
+
+    // Precomputed
+    std::map<std::string, std::pair<uint64_t, uint64_t>> mapNTTOffsetsHelpers; // <stage, <offset, size>>
     
+    std::map<uint64_t, uint64_t> mapOffsetsPolsH1H2;
+    std::map<uint64_t, uint64_t> mapOffsetsPolsGrandProduct;
+
+    std::vector<uint64_t> offsetsExtraMemoryH1H2;
+
+    uint64_t mapTotalN;
+    
+    void setMapOffsets();
+
     /* Constructor */
     StarkInfo(string file);
 
@@ -205,6 +219,8 @@ public:
     /* Returns a polynomial specified by its ID */
     Polinomial getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol);
 
+    void setMemoryPol(uint64_t stage, uint64_t polId, uint64_t &memoryOffset, uint64_t limitMemoryOffset, uint64_t additionalMemoryOffset);
+    
     /* Returns the size of the constant tree data/file */
     uint64_t getConstTreeSizeInBytes (void) const
     {

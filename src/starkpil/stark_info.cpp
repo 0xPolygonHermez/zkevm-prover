@@ -60,18 +60,6 @@ void StarkInfo::load(json j)
     mapDeg.section[cm4_2ns] = j["mapDeg"]["cm4_2ns"];
     mapDeg.section[q_2ns] = j["mapDeg"]["q_2ns"];
 
-    mapOffsets.section[cm1_n] = j["mapOffsets"]["cm1_n"];
-    mapOffsets.section[cm2_n] = j["mapOffsets"]["cm2_n"];
-    mapOffsets.section[cm3_n] = j["mapOffsets"]["cm3_n"];
-    mapOffsets.section[cm4_n] = j["mapOffsets"]["cm4_n"];
-    mapOffsets.section[tmpExp_n] = j["mapOffsets"]["tmpExp_n"];
-    mapOffsets.section[f_2ns] = j["mapOffsets"]["f_2ns"];
-    mapOffsets.section[cm1_2ns] = j["mapOffsets"]["cm1_2ns"];
-    mapOffsets.section[cm2_2ns] = j["mapOffsets"]["cm2_2ns"];
-    mapOffsets.section[cm3_2ns] = j["mapOffsets"]["cm3_2ns"];
-    mapOffsets.section[cm4_2ns] = j["mapOffsets"]["cm4_2ns"];
-    mapOffsets.section[q_2ns] = j["mapOffsets"]["q_2ns"];
-
     mapSectionsN.section[cm1_n] = j["mapSectionsN"]["cm1_n"];
     mapSectionsN.section[cm2_n] = j["mapSectionsN"]["cm2_n"];
     mapSectionsN.section[cm3_n] = j["mapSectionsN"]["cm3_n"];
@@ -157,6 +145,7 @@ void StarkInfo::load(json j)
          exp2pol.insert(pair(key,value));
     }
 
+    setMapOffsets();
 }
 
 void StarkInfo::getPol(void *pAddress, uint64_t idPol, PolInfo &polInfo)
@@ -214,4 +203,214 @@ eSection string2section(const string s)
     zklog.error("string2section() found invalid string=" + s);
     exitProcess();
     exit(-1);
+}
+
+void StarkInfo::setMapOffsets() {
+    uint64_t N = (1 << starkStruct.nBits);
+    uint64_t NExtended = (1 << starkStruct.nBitsExt);
+
+    mapTotalN = 0;
+
+    // Set offsets for all stages in the extended field (cm1, cm2, cm3, cm4)
+    mapOffsets.section[cm1_2ns] = mapTotalN;
+    mapTotalN += NExtended * mapSectionsN.section[cm1_2ns];
+
+    mapOffsets.section[cm2_2ns] = mapTotalN;
+    mapTotalN += NExtended * mapSectionsN.section[cm2_2ns];
+
+    mapOffsets.section[cm3_2ns] = mapTotalN;
+    mapTotalN += NExtended * mapSectionsN.section[cm3_2ns];
+
+    mapOffsets.section[cm4_2ns] = mapTotalN;
+    mapTotalN += NExtended * mapSectionsN.section[cm4_2ns];
+
+    mapOffsets.section[q_2ns] = mapTotalN;
+    mapTotalN += NExtended * qDim;
+    
+    cout << "cm1 _ 2ns " << mapOffsets.section[cm1_2ns] << endl;
+    cout << "cm2 _ 2ns " << mapOffsets.section[cm2_2ns] << endl;
+    cout << "cm3 _ 2ns " << mapOffsets.section[cm3_2ns] << endl;
+    cout << "cm4 _ 2ns " << mapOffsets.section[cm4_2ns] << endl;
+
+    uint64_t offsetPolsBasefield = mapOffsets.section[cm3_2ns];
+
+    // Set offsets for all stages in the basefield field (cm1, cm2, cm3, tmpExp)
+    mapOffsets.section[cm3_n] = offsetPolsBasefield;
+    offsetPolsBasefield += N * mapSectionsN.section[cm3_n];
+
+    mapOffsets.section[cm1_n] = offsetPolsBasefield;
+    offsetPolsBasefield += N * mapSectionsN.section[cm1_n];
+
+    mapOffsets.section[cm2_n] = offsetPolsBasefield;
+    offsetPolsBasefield += N * mapSectionsN.section[cm2_n];
+
+    mapOffsets.section[tmpExp_n] = offsetPolsBasefield;
+    offsetPolsBasefield += N * mapSectionsN.section[tmpExp_n];
+
+    cout << "cm1 _ n " << mapOffsets.section[cm1_n] << endl;
+    cout << "cm2 _ n " << mapOffsets.section[cm2_n] << endl;
+    cout << "cm3 _ n " << mapOffsets.section[cm3_n] << endl;
+    cout << "tmpExp _ n " << mapOffsets.section[tmpExp_n] << endl;
+
+    if(offsetPolsBasefield > mapTotalN) mapTotalN = offsetPolsBasefield;
+
+    // Stage FRIPolynomial
+    uint64_t offsetPolsFRI = mapOffsets.section[q_2ns];
+    mapOffsets.section[xDivXSubXi_2ns] = offsetPolsFRI;
+    offsetPolsFRI += 2 * NExtended * FIELD_EXTENSION;
+    
+    mapOffsets.section[f_2ns] = offsetPolsFRI;
+    offsetPolsFRI += NExtended * FIELD_EXTENSION;
+
+    if(offsetPolsFRI > mapTotalN) mapTotalN = offsetPolsFRI;
+
+    uint64_t offsetPolsEvals = mapOffsets.section[q_2ns];
+    mapOffsets.section[LEv] = offsetPolsEvals;
+    offsetPolsEvals += 2 * N * FIELD_EXTENSION;
+    
+    mapOffsets.section[evals] = offsetPolsEvals;
+    offsetPolsEvals += evMap.size() * omp_get_max_threads() * FIELD_EXTENSION;
+
+    mapNTTOffsetsHelpers["LEv"] = std::make_pair(offsetPolsEvals, N * FIELD_EXTENSION * 2);
+    offsetPolsEvals += N * FIELD_EXTENSION * 2;
+   
+    if(offsetPolsEvals > mapTotalN) mapTotalN = offsetPolsEvals;
+
+    offsetsExtraMemoryH1H2.resize(puCtx.size());
+
+    uint64_t additionalMemoryOffsetAvailable = offsetPolsBasefield;
+    uint64_t limitMemoryOffset = mapOffsets.section[cm3_2ns];
+
+    // Memory H1H2
+    uint64_t memoryOffsetH1H2 = mapOffsets.section[cm2_2ns];
+
+    uint64_t numCommited = nCm1;
+
+    for(uint64_t i = 0; i < puCtx.size(); ++i) {
+        setMemoryPol(2, exp2pol[to_string(puCtx[i].fExpId)], memoryOffsetH1H2, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        setMemoryPol(2, exp2pol[to_string(puCtx[i].tExpId)], memoryOffsetH1H2, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        setMemoryPol(2, cm_n[numCommited + i * 2], memoryOffsetH1H2, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        setMemoryPol(2, cm_n[numCommited + i * 2 + 1], memoryOffsetH1H2, limitMemoryOffset, additionalMemoryOffsetAvailable);
+    }
+
+    if(memoryOffsetH1H2 > mapTotalN) {
+        mapTotalN = memoryOffsetH1H2;
+    }
+
+    // Set extra memory for H1H2
+    for(uint64_t i = 0; i < puCtx.size(); ++i) {
+        uint64_t extraMemoryNeeded = 8 * N;
+        if(memoryOffsetH1H2 < limitMemoryOffset && memoryOffsetH1H2 + extraMemoryNeeded > limitMemoryOffset) {
+            memoryOffsetH1H2 = additionalMemoryOffsetAvailable;
+        }
+        offsetsExtraMemoryH1H2[i] = memoryOffsetH1H2;
+        memoryOffsetH1H2 += extraMemoryNeeded;
+    }
+
+    if(memoryOffsetH1H2 > mapTotalN) {
+        mapTotalN = memoryOffsetH1H2;
+    }
+
+    numCommited = numCommited + puCtx.size() * 2;
+    
+    // Memory grand product
+    uint64_t memoryOffsetGrandProduct = additionalMemoryOffsetAvailable;
+    for(uint64_t i = 0; i < puCtx.size(); ++i) {
+        setMemoryPol(3, exp2pol[to_string(puCtx[i].numId)], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        setMemoryPol(3, exp2pol[to_string(puCtx[i].denId)], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        setMemoryPol(3, cm_n[numCommited + i], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
+    }
+    numCommited += puCtx.size();
+
+    for(uint64_t i = 0; i < peCtx.size(); ++i) {
+        setMemoryPol(3, exp2pol[to_string(peCtx[i].numId)], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        setMemoryPol(3, exp2pol[to_string(peCtx[i].denId)], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        setMemoryPol(3, cm_n[numCommited + i], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
+    }
+    numCommited += peCtx.size();
+
+    for(uint64_t i = 0; i < ciCtx.size(); ++i) {
+        setMemoryPol(3, exp2pol[to_string(ciCtx[i].numId)], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        setMemoryPol(3, exp2pol[to_string(ciCtx[i].denId)], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
+        setMemoryPol(3, cm_n[numCommited + i], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
+    }
+    numCommited += ciCtx.size();
+    
+    uint64_t startBuffer;
+    uint64_t memoryAvailable;
+    uint64_t minBlocks = 4;
+
+    // Stage 1 NTT Memory Helper
+    uint64_t startBufferExtended = mapOffsets.section[cm2_2ns];
+    uint64_t memoryAvailableEnd = mapTotalN - offsetPolsBasefield;
+    uint64_t memoryAvailableExtended =  mapOffsets.section[cm3_n] - startBufferExtended;
+    uint64_t nttMemoryHelper = NExtended * mapSectionsN.section[cm1_n];
+    if(memoryAvailableExtended > memoryAvailableEnd && memoryAvailableExtended * 8 > nttMemoryHelper) {
+        memoryAvailable = memoryAvailableExtended;
+        startBuffer = startBufferExtended;
+    } else {
+        memoryAvailable = memoryAvailableEnd;
+        startBuffer = offsetPolsBasefield;
+    }
+
+    uint64_t memoryNTTHelperStage1 = NExtended * mapSectionsN.section[cm1_2ns];
+    if(startBuffer >= offsetPolsBasefield && memoryAvailable * minBlocks < memoryNTTHelperStage1) {
+        memoryAvailable = memoryNTTHelperStage1 / minBlocks;
+        if(startBuffer + memoryAvailable > mapTotalN) {
+            mapTotalN = startBuffer + memoryAvailable;
+        }   
+    }
+    mapNTTOffsetsHelpers["cm1"] = std::make_pair(startBuffer, memoryAvailable);
+
+    // Stage 2 NTT Memory Helper
+    memoryAvailable = mapTotalN - offsetPolsBasefield;
+    startBuffer = offsetPolsBasefield;
+    uint64_t memoryNTTHelperStage2 = NExtended * mapSectionsN.section[cm2_2ns];
+    if(startBuffer >= offsetPolsBasefield && memoryAvailable * minBlocks < memoryNTTHelperStage2) {
+        memoryAvailable = memoryNTTHelperStage2 / minBlocks;
+        if(startBuffer + memoryAvailable > mapTotalN) {
+            mapTotalN = startBuffer + memoryAvailable;
+        }   
+    }
+    mapNTTOffsetsHelpers["cm2"] = std::make_pair(startBuffer, memoryAvailable);
+
+    // Stage 3 NTT Memory Helper
+    startBuffer = mapOffsets.section[cm4_2ns];
+    memoryAvailable = mapTotalN - startBuffer;
+    uint64_t memoryNTTHelperStage3 = NExtended * mapSectionsN.section[cm3_2ns];
+    if(startBuffer >= offsetPolsBasefield && memoryAvailable * minBlocks < memoryNTTHelperStage3) {
+        memoryAvailable = memoryNTTHelperStage3 / minBlocks;
+        if(startBuffer + memoryAvailable > mapTotalN) {
+            mapTotalN = startBuffer + memoryAvailable;
+        }   
+    }
+    mapNTTOffsetsHelpers["cm3"] = std::make_pair(startBuffer, memoryAvailable);
+
+    // Stage 4 NTT Memory Helper
+    startBuffer = mapOffsets.section[q_2ns] + NExtended * qDim;
+    memoryAvailable = mapTotalN - startBuffer;
+     uint64_t memoryNTTHelperStage4 = NExtended * mapSectionsN.section[cm4_2ns];
+    if(startBuffer >= offsetPolsBasefield && memoryAvailable * minBlocks < memoryNTTHelperStage4) {
+        memoryAvailable = memoryNTTHelperStage4 / minBlocks;
+        if(startBuffer + memoryAvailable > mapTotalN) {
+            mapTotalN = startBuffer + memoryAvailable;
+        }   
+    }
+    mapNTTOffsetsHelpers["cm4"] = std::make_pair(startBuffer, memoryAvailable);
+}
+
+void StarkInfo::setMemoryPol(uint64_t stage, uint64_t polId, uint64_t &memoryOffset, uint64_t limitMemoryOffset, uint64_t additionalMemoryOffset) {
+    VarPolMap pol = varPolMap[polId];
+    uint64_t memoryUsed = (1 << starkStruct.nBits) * pol.dim + 8;
+    if(memoryOffset < limitMemoryOffset && memoryOffset + memoryUsed > limitMemoryOffset) {
+        memoryOffset = additionalMemoryOffset;
+    }
+    if(stage == 2) {
+        mapOffsetsPolsH1H2[polId] = memoryOffset;
+    } else {
+        mapOffsetsPolsGrandProduct[polId] = memoryOffset;
+    }
+    
+    memoryOffset += memoryUsed;
+
 }
