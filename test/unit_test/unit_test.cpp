@@ -12,7 +12,7 @@
 #include "database_cache_test.hpp"
 #include "hashdb_test.hpp"
 #include "key_utils_unit_tests.hpp"
-
+#include "zklog.hpp"
 
 uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config)
 {
