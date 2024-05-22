@@ -9,7 +9,7 @@
 
 using namespace std;
 
-//#define USE_DATA_STREAM_PROTOBUF
+#define USE_DATA_STREAM_PROTOBUF
 
 class DataStreamTx
 {
