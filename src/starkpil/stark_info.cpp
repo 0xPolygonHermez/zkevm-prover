@@ -170,10 +170,15 @@ Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPo
     VarPolMap polInfo = varPolMap[idPol];
     uint64_t dim = polInfo.dim;
     uint64_t N = mapDeg.section[polInfo.section];
+    uint64_t nCols = mapSectionsN.section[polInfo.section];
     uint64_t offset = mapOffsets.section[polInfo.section];
-    offset += polInfo.sectionPos;
-    uint64_t next = mapSectionsN.section[polInfo.section];
-    return Polinomial(&pAddress[offset], N, dim, next, std::to_string(idPol));
+    if(polInfo.section == eSection::tmpExp_n) {
+        offset += polInfo.sectionPos*N;
+        return Polinomial(&pAddress[offset], N, dim, dim, std::to_string(idPol));
+    } else {
+        offset += polInfo.sectionPos;
+        return Polinomial(&pAddress[offset], N, dim, nCols, std::to_string(idPol));
+    }    
 }
 
 eSection string2section(const string s)
@@ -401,6 +406,7 @@ void StarkInfo::setMapOffsets() {
 
 void StarkInfo::setMemoryPol(uint64_t stage, uint64_t polId, uint64_t &memoryOffset, uint64_t limitMemoryOffset, uint64_t additionalMemoryOffset) {
     VarPolMap pol = varPolMap[polId];
+    if(pol.section == eSection::tmpExp_n) return;
     uint64_t memoryUsed = (1 << starkStruct.nBits) * pol.dim + 8;
     if(memoryOffset < limitMemoryOffset && memoryOffset + memoryUsed > limitMemoryOffset) {
         memoryOffset = additionalMemoryOffset;

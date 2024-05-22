@@ -7,14 +7,23 @@
 class CHelpersSteps {
 public:
     virtual void storePolinomial(Goldilocks::Element *pols, __m256i *bufferT, uint64_t* nColsSteps, uint64_t *offsetsSteps, uint64_t *buffTOffsetsSteps, uint64_t *nextStrides, uint64_t nOpenings, uint64_t domainSize, bool domainExtended, uint64_t nStages, bool needModule, uint64_t row, uint64_t stage, uint64_t stagePos, uint64_t openingPointIndex, uint64_t dim) {
+        bool isTmpPol = !domainExtended && stage == 4;
         if(needModule) {
             uint64_t offsetsDest[4];
             uint64_t nextStrideOffset = row + nextStrides[openingPointIndex];
-            uint64_t stepOffset = offsetsSteps[stage] + stagePos;
-            offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[stage];
-            offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[stage];
-            offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[stage];
-            offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[stage];
+            if(isTmpPol) {
+                uint64_t stepOffset = offsetsSteps[stage] + stagePos * domainSize;
+                offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * dim;
+                offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * dim;
+                offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * dim;
+                offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * dim;
+            } else {
+                uint64_t stepOffset = offsetsSteps[stage] + stagePos;
+                offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[stage];
+                offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[stage];
+                offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[stage];
+                offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[stage];
+            }
             if(dim == 1) {
                 Goldilocks::store_avx(&pols[0], offsetsDest, bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
             } else {
@@ -22,9 +31,17 @@ public:
             }
         } else {
             if(dim == 1) {
-               Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+                if(isTmpPol) {
+                    Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex])], uint64_t(1), bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+                } else {
+                    Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+                }
             } else {
-               Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
+                if(isTmpPol) {
+                    Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex]) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
+                } else {
+                    Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
+                }
             }
         }
     }
@@ -151,7 +168,11 @@ public:
                 for(uint64_t o = 0; o < 2; ++o) {
                     for(uint64_t j = 0; j < nrowsBatch; ++j) {
                         uint64_t l = (i + j + nextStrides[o]) % domainSize;
-                        bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[nStages + 1] + l * nColsSteps[nStages + 1] + k];
+                        if(!domainExtended) {
+                            bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[nStages + 1] + k * domainSize + l];
+                        } else {
+                            bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[nStages + 1] + l * nColsSteps[nStages + 1] + k];
+                        }
                     }
                     Goldilocks::load_avx(bufferT_[2 * (nColsStepsAccumulated[nStages + 1] + k) + o], &bufferT[nrowsBatch*o]);
                 }
