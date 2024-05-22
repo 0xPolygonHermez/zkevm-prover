@@ -31,17 +31,19 @@ int main()
     uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
 
-    void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
-    void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
-
-    Starks starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
+    void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN.section[cm1_n] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+    void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
 
     uint64_t N = (1 << starkInfo.starkStruct.nBits);
     #pragma omp parallel for
     for (uint64_t i = 0; i < N; i += 1)
     {
-        std::memcpy((uint8_t*)pAddress + i*starkInfo.nCm1*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.nCm1*sizeof(Goldilocks::Element), starkInfo.nCm1*sizeof(Goldilocks::Element));
+        std::memcpy((uint8_t*)pAddress + starkInfo.mapOffsets.section[cm1_n]*sizeof(Goldilocks::Element) + i*starkInfo.mapSectionsN.section[cm1_n]*sizeof(Goldilocks::Element), 
+            (uint8_t*)pCommit + i*starkInfo.mapSectionsN.section[cm1_n]*sizeof(Goldilocks::Element), 
+            starkInfo.mapSectionsN.section[cm1_n]*sizeof(Goldilocks::Element));
     }
+
+    Starks starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
 
     Goldilocks::Element publicInputs[3] = {
         Goldilocks::fromU64(1),
