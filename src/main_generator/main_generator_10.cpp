@@ -603,10 +603,9 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         }
     }
 
-    code += "    uint64_t incHashPos = 0;\n";
-    code += "    uint64_t incCounter = 0;\n\n";
-    code += "    bool bJump = false;\n";
-    code += "    uint64_t jmpnCondValue = 0;\n";
+    code += "    uint64_t incHashPos;\n";
+    code += "    uint64_t incCounter;\n\n";
+    code += "    uint64_t jmpnCondValue;\n";
     code += "\n";
 
     code += "    uint64_t N_Max;\n";
@@ -675,14 +674,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     for (uint64_t zkPC=0; zkPC < rom["program"].size(); zkPC++)
     {
 
-        //json line = rom["program"][zkPC];
-        //if (zkPC == 259)
-        //if (zkPC == 14100)
-        //    cout << "zkPC=" << zkPC << " line=" << line.dump() << endl;
-
-        // If bJump=true, the code will jump based on the content of bJump
-        bool bJump = false;
-
         // If bJumpToFinalJmpAddress=true, the code always jumps to finalJmpAddress
         bool bJumpToFinalJmpAddress = false;
 
@@ -692,16 +683,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // When bIncHashPos=true, incHashPos will be added to HASHPOS
         bool bIncHashPos = false;
 
-        // ROM instruction line, commented if not used to save compilation workload
-        //if (!usedLabels.includes(zkPC))
-        //    code += "// ";
+        // ROM instruction line label
         code += functionName + "_rom_line_" + to_string(zkPC) + ": //" + string(rom["program"][zkPC]["fileName"]) + ":" + to_string(rom["program"][zkPC]["line"]) + "=[" + removeDuplicateSpaces(string(rom["program"][zkPC]["lineStr"])) + "]\n\n";
-
-        /*if ((zkPC > 1000) && (zkPC < 10200))
-        {
-            code += "    zkassert(" + to_string(zkPC) + " == 0);\n";
-            continue;
-        }*/
 
         // START LOGS
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
@@ -3468,7 +3451,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n\n";
 
             code += "    // Store the size\n";
-            code += "    incHashPos = size;\n\n";
+            code += "    incHashPos = size;\n";
             bIncHashPos = true;
 
 #ifdef LOG_HASHK
@@ -4058,7 +4041,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n\n";
 
             code += "    // Store the size\n";
-            code += "    incHashPos = size;\n\n";
+            code += "    incHashPos = size;\n";
             bIncHashPos = true;
 
 #ifdef LOG_HASHS
@@ -5429,8 +5412,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
             code += "    jmpnCondValue = fr.toU64(o);\n";
             // If op<0, jump to addr: zkPC'=addr
-            code += "    bJump = true;\n";
-            bJump = true;
+            bJumpToZkPC = true;
             code += "    if (jmpnCondValue >= FrFirst32Negative)\n";
             code += "    {\n";
             if (anyJump)
@@ -5479,17 +5461,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    if (!fr.isZero(pols.carry[" + string(bFastMode?"0":"i") + "]))\n";
             code += "    {\n";
             code += "        pols.zkPC[" + string(bFastMode ? "0":"nexti") + "] = fr.fromU64(finalJmpAddr);\n";
-            bJump = true;
             if (bFastMode) // We reset the global variable to prevent jumping in next zkPC
                 code += "        pols.carry[0] = fr.zero();\n";
             code += "    }\n";
             code += "    else\n";
             code += "    {\n";
             code += "        pols.zkPC[" + string(bFastMode ? "0":"nexti") + "] = fr.fromU64(elseAddr);\n";
-            bJump = true;
             code += "    }\n";
-            code += "    bJump = true;\n";
-            bJump = true;
+            bJumpToZkPC = true;
         }
         // If JMPZ, jump
         else if (rom["program"][zkPC].contains("JMPZ") && (rom["program"][zkPC]["JMPZ"]==1))
@@ -5512,17 +5491,13 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    {\n";
             code += "        pols.zkPC[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(elseAddr);\n";
             code += "    }\n";
-            code += "    bJump = true;\n";
-            bJump = true;
+            bJumpToZkPC = true;
             if (!bFastMode)
-            code += "    pols.JMPZ[i] = fr.one();\n";
+                code += "    pols.JMPZ[i] = fr.one();\n";
         }
         // If JMP, directly jump zkPC'=addr
         else if (rom["program"][zkPC].contains("JMP") && (rom["program"][zkPC]["JMP"] == 1))
         {
-            //code += "    bJump = true;\n";
-            //bJump = true;
-            //code += "    pols.zkPC[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(finalJmpAddr);\n";
             if (!bFastMode)
             {
                 code += "    pols.zkPC[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(finalJmpAddr);\n";
@@ -5837,30 +5812,19 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "\n";
 
         // In case we had a pending jump, do it now, after the work has been done
-        if (bJump)
-        {
-            code += "    if (bJump)\n";
-            code += "    {\n";
-            code += "        bJump = false;\n";
-            code += "        goto *" + functionName + "_labels[fr.toU64(pols.zkPC[" + string(bFastMode?"0":"i") + "])];\n";
-            code += "    }\n\n";
-        }
-        else if (bJumpToFinalJmpAddress)
+        if (bJumpToFinalJmpAddress)
         {
             code += "    goto *" + functionName + "_labels[finalJmpAddr];\n\n";
         }
         else if (bJumpToZkPC)
         {
-            code += "        goto *" + functionName + "_labels[fr.toU64(pols.zkPC[" + string(bFastMode?"0":"i") + "])];\n";
+            code += "    goto *" + functionName + "_labels[fr.toU64(pols.zkPC[" + string(bFastMode?"0":"i") + "])];\n\n";
         }
-        //if (rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"]==1))
-        //{
-        //    code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["jmpAddr"]) + ";\n\n";
-        //}
         if (rom["program"][zkPC].contains("return") && (rom["program"][zkPC]["return"]==1))
         {
             code += "    goto *" + functionName + "_labels[fr.toU64(pols.RR[" + string(bFastMode?"0":"i") + "])];\n\n";
         }
+
     } // End of main executor loop, for all rom instructions
 
     code += functionName + "_end:\n\n";
