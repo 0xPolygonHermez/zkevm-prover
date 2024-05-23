@@ -1,6 +1,7 @@
 TARGET_ZKP := zkProver
 TARGET_BCT := bctree
 TARGET_MNG += mainGenerator
+TARGET_MNG_10 += mainGenerator10
 TARGET_PLG += polsGenerator
 TARGET_PLD += polsDiff
 TARGET_TEST := zkProverTest
@@ -101,8 +102,15 @@ $(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp ./src/config
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/main_generator/main_generator.cpp -o $@ -lgmp
 
-generate: main_generator
+main_generator_10: $(BUILD_DIR)/$(TARGET_MNG_10)
+
+$(BUILD_DIR)/$(TARGET_MNG_10): ./src/main_generator/main_generator_10.cpp ./src/config/definitions.hpp
+	$(MKDIR_P) $(BUILD_DIR)
+	g++ -g ./src/main_generator/main_generator_10.cpp -o $@ -lgmp
+
+generate: main_generator main_generator_10
 	$(BUILD_DIR)/$(TARGET_MNG) all
+	$(BUILD_DIR)/$(TARGET_MNG_10) all
 
 pols_generator: $(BUILD_DIR)/$(TARGET_PLG)
 
