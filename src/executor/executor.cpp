@@ -275,8 +275,10 @@ void Executor::processBatch (ProverRequest &proverRequest)
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
+                //TimerStart(MAIN_EXEC_GENERATED_FAST);
                 //zklog.info("Executor::processBatch() fork 9 generated");
                 fork_9::main_exec_generated_fast(mainExecutor_fork_9, proverRequest);
+                //TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
             }
             else
 #endif
@@ -307,10 +309,10 @@ void Executor::processBatch (ProverRequest &proverRequest)
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
-                TimerStart(MAIN_EXEC_GENERATED_FAST);
+                //TimerStart(MAIN_EXEC_GENERATED_FAST);
                 //zklog.info("Executor::processBatch() fork 10 generated");
                 fork_10::main_exec_generated_fast(mainExecutor_fork_10, proverRequest);
-                TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
+                //TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
             }
             else
 #endif
