@@ -328,11 +328,11 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "    uint8_t polsBuffer[CommitPols::numPols()*sizeof(Goldilocks::Element)] = { 0 };\n";
         code += "    MainCommitPols pols((void *)polsBuffer, 1);\n";
     }
-    code += "    int32_t addrRel = 0; // Relative and absolute address auxiliary variables\n";
+    code += "    int32_t addrRel;\n";
     code += "    int32_t addr;\n";
     code += "    int32_t memAddr;\n";
     code += "    int32_t hashAddr;\n";
-    code += "    uint64_t context = 0;\n";
+    code += "    uint64_t context;\n";
     if (!bFastMode)
     {
         // Declare op0CondConst only if condConst instruction is used
@@ -368,7 +368,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    }\n";
     code += "    mainExecutor.labelsUnlock();\n\n";
 
-    code += "    // Init execution flags\n";
     code += "    bool bProcessBatch = (proverRequest.type == prt_processBatch);\n";
     code += "    bool bUnsignedTransaction = (proverRequest.input.from != \"\") && (proverRequest.input.from != \"0x\");\n\n";
     
@@ -425,8 +424,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "   // Convert batch data to vector\n";
     code += "   vector<uint8_t> batchDataVector;\n";
     code += "   ba2ba(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data, batchDataVector);\n";
-
-    code += "   // Load poseidon batch data into DB\n";
+    //code += "   // Load poseidon batch data into DB\n";
     code += "   Goldilocks::Element batchKey[4];\n";
     code += "   poseidonLinearHash(batchDataVector, batchKey);\n";
     code += "   mpz_class batchHashDataComputed;\n";
@@ -455,7 +453,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "        }\n";
     code += "    }\n\n";
 
-    code += "    // opN are local, uncommitted polynomials\n";
+    //code += "    // opN are local, uncommitted polynomials\n";
     code += "    Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;\n";
     code += "    Goldilocks::Element o;\n";
     
@@ -525,7 +523,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    mpz_class w0, w1, _W0, _W1;\n";
     code += "    mpz_class _W;\n";
     code += "    MemAlignAction memAlignAction;\n";
-    code += "    mpz_class byteMaskOn256(\"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\", 16);\n";
 
     // Binary free in
     code += "    mpz_class a, b, c, _a, _b;\n";
@@ -712,7 +709,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
         // ECRECOVER PRE-CALCULATION 
         if(rom["labels"].contains("ecrecover_store_args") && zkPC == rom["labels"]["ecrecover_store_args"]){
-            code += "    //ECRecover pre-calculation \n";
+            //code += "    //ECRecover pre-calculation \n";
             code += "    if(mainExecutor.config.ECRecoverPrecalc){\n";
             code += "        zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);\n";
             code += "        mpz_class signature_, r_, s_, v_;\n";
@@ -737,7 +734,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         }       
         if(rom["labels"].contains("ecrecover_end") && zkPC == rom["labels"]["ecrecover_end"]){
 
-            code += "    //ECRecover destroy pre-calculaiton buffer\n";
+            //code += "    //ECRecover destroy pre-calculaiton buffer\n";
             code += "    if( ctx.ecRecoverPrecalcBuffer.filled){\n";  
             code += "       zkassert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);\n";
             code += "       ctx.ecRecoverPrecalcBuffer.filled = false;\n";
@@ -752,7 +749,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         if (rom["program"][zkPC].contains("cmdBefore") &&
             (rom["program"][zkPC]["cmdBefore"].size()>0))
         {
-            code += "    // Evaluate the list cmdBefore commands, and any children command, recursively\n";
+            //code += "    // Evaluate the list cmdBefore commands, and any children command, recursively\n";
             code += "    for (uint64_t j=0; j<rom.line[" + to_string(zkPC) + "].cmdBefore.size(); j++)\n";
             code += "    {\n";
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
@@ -845,7 +842,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             string inSTEPString = rom["program"][zkPC]["inSTEP"];
             int64_t inSTEP = atoi(inSTEPString.c_str());
 
-            code += "    // op0 = op0 + inSTEP*step , where inSTEP=" + inSTEPString + "\n";
+            //code += "    // op0 = op0 + inSTEP*step , where inSTEP=" + inSTEPString + "\n";
 
             string value = "";
             if (inSTEP == 1)
@@ -929,7 +926,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             int64_t inROTL_C = atoi(inROTL_CString.c_str());
             if (inROTL_C != 0)
             {
-                code += "    // If inROTL_C, op = C rotated left\n";
+                //code += "    // If inROTL_C, op = C rotated left\n";
                 if (opInitialized)
                 {
                     code += "    op0 = fr.add(op0, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C7[" + string(bFastMode?"0":"i") + "]));\n";
@@ -1007,7 +1004,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             bool bAddrRel = false;
             bool bAddr = false;
             bool bOffset = false;
-            code += "    // If address is involved, load offset into addr\n";
+            //code += "    // If address is involved, load offset into addr\n";
             if ( (rom["program"][zkPC].contains("ind") && (rom["program"][zkPC]["ind"]==1))  &&
                  (rom["program"][zkPC].contains("indRR") && (rom["program"][zkPC]["indRR"]==1)) )
             {
@@ -1090,7 +1087,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 code += "        return;\n";
                 code += "    }\n";
             
-                code += "    // If memAddr is negative, fail\n";
+                //code += "    // If memAddr is negative, fail\n";
                 code += "    if (memAddr < 0)\n";
                 code += "    {\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;\n";
@@ -1133,7 +1130,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
         if (rom["program"][zkPC].contains("useCTX") && (rom["program"][zkPC]["useCTX"] == 1))
         {
-            code += "    // If useCTX, addr = addr + CTX*CTX_OFFSET\n";            // Check context range
+            //code += "    // If useCTX, addr = addr + CTX*CTX_OFFSET\n";            // Check context range
             code += "    context = fr.toU64(pols.CTX[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (context > CTX_MAX)\n";
             code += "    {\n";
@@ -1303,7 +1300,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 if ( (rom["program"][zkPC].contains("mOp") && (rom["program"][zkPC]["mOp"]==1)) &&
                      (!rom["program"][zkPC].contains("mWR") || (rom["program"][zkPC]["mWR"]==0)) )
                 {
-                    code += "    // Memory read free in: get fi=mem[addr], if it exists\n";
+                    //code += "    // Memory read free in: get fi=mem[addr], if it exists\n";
                     code += "    memIterator = ctx.mem.find(memAddr);\n";
                     code += "    if (memIterator != ctx.mem.end()) {\n";
                     code += "        fi0 = memIterator->second.fe0;\n";
@@ -1461,7 +1458,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     } // bFastMode
 
                     code += "    {\n";
-                        code += "    // Storage read free in: get a poseidon hash, and read fi=sto[hash]\n";
+                        //code += "    // Storage read free in: get a poseidon hash, and read fi=sto[hash]\n";
                         code += "    Kin0[0] = pols.C0[" + string(bFastMode?"0":"i") + "];\n";
                         code += "    Kin0[1] = pols.C1[" + string(bFastMode?"0":"i") + "];\n";
                         code += "    Kin0[2] = pols.C2[" + string(bFastMode?"0":"i") + "];\n";
@@ -1491,16 +1488,16 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                         code += "    gettimeofday(&t, NULL);\n";
 #endif
 
-                        code += "    // Call poseidon and get the hash key\n";
+                        //code += "    // Call poseidon and get the hash key\n";
                         code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
 
-                        code += "    // Reinject the first resulting hash as the capacity for the next poseidon hash\n";
+                        //code += "    // Reinject the first resulting hash as the capacity for the next poseidon hash\n";
                         code += "    Kin1[8] = Kin0Hash[0];\n";
                         code += "    Kin1[9] = Kin0Hash[1];\n";
                         code += "    Kin1[10] = Kin0Hash[2];\n";
                         code += "    Kin1[11] = Kin0Hash[3];\n";
 
-                        code += "    // Call poseidon hash\n";
+                        //code += "    // Call poseidon hash\n";
                         code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
 
                         code += "    key[0] = Kin1Hash[0];\n";
@@ -1515,7 +1512,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                         code += "    zklog.info(\"Storage read sRD got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
 #endif
 
-                        code += "    // Collect the keys used to read or write store data\n";
+                        //code += "    // Collect the keys used to read or write store data\n";
                         code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
                         code += "    {\n";
                         code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
@@ -1576,7 +1573,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
                     code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
-                    code += "    // Call SMT to get the new Merkel Tree root hash\n";
+                    //code += "    // Call SMT to get the new Merkel Tree root hash\n";
                     code += "    if (!fea2scalar(fr, value, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -1675,8 +1672,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
                     code += "    {\n";
 
-                    code += "    // Storage write free in: calculate the poseidon hash key, check its entry exists in storage, and update new root hash\n";
-                    code += "    // reset lastSWrite\n";
+                    //code += "    // Storage write free in: calculate the poseidon hash key, check its entry exists in storage, and update new root hash\n";
+                    //code += "    // reset lastSWrite\n";
                     code += "    ctx.lastSWrite.reset();\n";
                     code += "    Kin0[0] = pols.C0[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin0[1] = pols.C1[" + string(bFastMode?"0":"i") + "];\n";
@@ -1708,7 +1705,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "    gettimeofday(&t, NULL);\n";
 #endif
 
-                    code += "    // Call poseidon and get the hash key\n";
+                    //code += "    // Call poseidon and get the hash key\n";
                     code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
 
                     code += "    Kin1[8] = Kin0Hash[0];\n";
@@ -1721,10 +1718,10 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "    ctx.lastSWrite.keyI[2] = Kin0Hash[2];\n";
                     code += "    ctx.lastSWrite.keyI[3] = Kin0Hash[3];\n";
 
-                    code += "    // Call poseidon hash\n";
+                    //code += "    // Call poseidon hash\n";
                     code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
 
-                    code += "    // Store a copy of the data in ctx.lastSWrite\n";
+                    //code += "    // Store a copy of the data in ctx.lastSWrite\n";
                     if (!bFastMode)
                     {
                         code += "    for (uint64_t j=0; j<12; j++)\n";
@@ -1753,7 +1750,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "    gettimeofday(&t, NULL);\n";
 #endif
 
-                    code += "    // Collect the keys used to read or write store data\n";
+                    //code += "    // Collect the keys used to read or write store data\n";
                     code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
                     code += "    {\n";
                     code += "        proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
@@ -1786,7 +1783,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                         code += "    }\n";
                     }
                         
-                    code += "    // If we just modified a balance\n";
+                    //code += "    // If we just modified a balance\n";
                     code += "    if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "        ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
 
@@ -1807,8 +1804,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 // HashK free in
                 if (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"] == 1))
                 {
-                    code += "    // HashK free in\n";
-                    code += "    // If there is no entry in the hash database for this address, then create a new one\n";
+                    //code += "    // HashK free in\n";
+                    //code += "    // If there is no entry in the hash database for this address, then create a new one\n";
                     code += "    hashIterator = ctx.hashK.find(hashAddr);\n";
                     code += "    if (hashIterator == ctx.hashK.end())\n";
                     code += "    {\n";
@@ -1819,7 +1816,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
                     if (rom["program"][zkPC].contains("hashBytesInD") && (rom["program"][zkPC]["hashBytesInD"] == 1))
                     {
-                        code += "    // Get the size of the hash from D0\n";
+                        //code += "    // Get the size of the hash from D0\n";
                         code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                     }
                     else
@@ -1836,7 +1833,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n\n";
 
-                    code += "    // Get the positon of the hash from HASHPOS\n";
+                    //code += "    // Get the positon of the hash from HASHPOS\n";
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (iPos < 0)\n";
                     code += "    {\n";
@@ -1848,7 +1845,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "    }\n";
                     code += "    pos = iPos;\n\n";
 
-                    code += "    // Check that pos+size do not exceed data size\n";
+                    //code += "    // Check that pos+size do not exceed data size\n";
                     code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
@@ -1858,7 +1855,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n";
 
-                    code += "    // Copy data into fi\n";
+                    //code += "    // Copy data into fi\n";
                     code += "    s = 0;\n";
                     code += "    for (uint64_t j=0; j<size; j++)\n";
                     code += "    {\n";
@@ -1877,8 +1874,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 // HashKDigest free in
                 if (rom["program"][zkPC].contains("hashKDigest") && (rom["program"][zkPC]["hashKDigest"] == 1))
                 {
-                    code += "    // HashKDigest free in\n";
-                    code += "    // If there is no entry in the hash database for this address, this is an error\n";
+                    //code += "    // HashKDigest free in\n";
+                    //code += "    // If there is no entry in the hash database for this address, this is an error\n";
                     code += "    hashIterator = ctx.hashK.find(hashAddr);\n";
                     code += "    if (hashIterator == ctx.hashK.end())\n";
                     code += "    {\n";
@@ -1889,7 +1886,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n";
 
-                    code += "    // If digest was not calculated, this is an error\n";
+                    //code += "    // If digest was not calculated, this is an error\n";
                     code += "    if (!hashIterator->second.lenCalled)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED;\n";
@@ -1899,7 +1896,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n";
 
-                    code += "    // Copy digest into fi\n";
+                    //code += "    // Copy digest into fi\n";
                     code += "    scalar2fea(fr, hashIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
 
 #ifdef LOG_HASHK
@@ -1935,8 +1932,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 // HashP free in
                 if ( rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1))
                 {
-                    code += "    // HashP free in\n";
-                    code += "    // If there is no entry in the hash database for this address, then create a new one\n";
+                    //code += "    // HashP free in\n";
+                    //code += "    // If there is no entry in the hash database for this address, then create a new one\n";
                     code += "    hashIterator = ctx.hashP.find(hashAddr);\n";
                     code += "    if (hashIterator == ctx.hashP.end())\n";
                     code += "    {\n";
@@ -1947,7 +1944,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
                     if (rom["program"][zkPC].contains("hashBytesInD") && (rom["program"][zkPC]["hashBytesInD"] == 1))
                     {
-                        code += "    // Get the size of the hash from D0\n";
+                        //code += "    // Get the size of the hash from D0\n";
                         code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                     }
                     else
@@ -1964,7 +1961,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n\n";
 
-                    code += "    // Get the positon of the hash from HASHPOS\n";
+                    //code += "    // Get the positon of the hash from HASHPOS\n";
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (iPos < 0)\n";
                     code += "    {\n";
@@ -1976,7 +1973,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "    }\n";
                     code += "    pos = iPos;\n\n";
 
-                    code += "    // Check that pos+size do not exceed data size\n";
+                    //code += "    // Check that pos+size do not exceed data size\n";
                     code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
@@ -1986,7 +1983,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n";
 
-                    code += "    // Copy data into fi\n";
+                    //code += "    // Copy data into fi\n";
                     code += "    s = 0;\n";
                     code += "    for (uint64_t j=0; j<size; j++)\n";
                     code += "    {\n";
@@ -2001,8 +1998,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 // HashPDigest free in
                 if (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"] == 1))
                 {
-                    code += "    // HashPDigest free in\n";
-                    code += "    // If there is no entry in the hash database for this address, this is an error\n";
+                    //code += "    // HashPDigest free in\n";
+                    //code += "    // If there is no entry in the hash database for this address, this is an error\n";
                     code += "    hashIterator = ctx.hashP.find(hashAddr);\n";
                     code += "    if (hashIterator == ctx.hashP.end())\n";
                     code += "    {\n";
@@ -2012,7 +2009,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
-                    code += "    // If digest was not calculated, this is an error\n";
+                    //code += "    // If digest was not calculated, this is an error\n";
                     code += "    if (!hashIterator->second.lenCalled)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_NOT_COMPLETED;\n";
@@ -2021,7 +2018,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
-                    code += "    // Copy digest into fi\n";
+                    //code += "    // Copy digest into fi\n";
                     code += "    scalar2fea(fr, hashIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
                     nHits++;
                 }
@@ -2052,8 +2049,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 // HashS free in
                 if (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"] == 1))
                 {
-                    code += "    // HashS free in\n";
-                    code += "    // If there is no entry in the hash database for this address, then create a new one\n";
+                    //code += "    // HashS free in\n";
+                    //code += "    // If there is no entry in the hash database for this address, then create a new one\n";
                     code += "    hashIterator = ctx.hashS.find(hashAddr);\n";
                     code += "    if (hashIterator == ctx.hashS.end())\n";
                     code += "    {\n";
@@ -2064,7 +2061,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
                     if (rom["program"][zkPC].contains("hashBytesInD") && (rom["program"][zkPC]["hashBytesInD"] == 1))
                     {
-                        code += "    // Get the size of the hash from D0\n";
+                        //code += "    // Get the size of the hash from D0\n";
                         code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                     }
                     else
@@ -2081,7 +2078,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n\n";
 
-                    code += "    // Get the positon of the hash from HASHPOS\n";
+                    //code += "    // Get the positon of the hash from HASHPOS\n";
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (iPos < 0)\n";
                     code += "    {\n";
@@ -2093,7 +2090,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "    }\n";
                     code += "    pos = iPos;\n\n";
 
-                    code += "    // Check that pos+size do not exceed data size\n";
+                    //code += "    // Check that pos+size do not exceed data size\n";
                     code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHS_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
@@ -2103,7 +2100,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n";
 
-                    code += "    // Copy data into fi\n";
+                    //code += "    // Copy data into fi\n";
                     code += "    s = 0;\n";
                     code += "    for (uint64_t j=0; j<size; j++)\n";
                     code += "    {\n";
@@ -2121,8 +2118,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 // HashSDigest free in
                 if (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"] == 1))
                 {
-                    code += "    // HashSDigest free in\n";
-                    code += "    // If there is no entry in the hash database for this address, this is an error\n";
+                    //code += "    // HashSDigest free in\n";
+                    //code += "    // If there is no entry in the hash database for this address, this is an error\n";
                     code += "    hashIterator = ctx.hashS.find(hashAddr);\n";
                     code += "    if (hashIterator == ctx.hashS.end())\n";
                     code += "    {\n";
@@ -2133,7 +2130,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n";
 
-                    code += "    // If digest was not calculated, this is an error\n";
+                    //code += "    // If digest was not calculated, this is an error\n";
                     code += "    if (!hashIterator->second.lenCalled)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_NOT_COMPLETED;\n";
@@ -2143,7 +2140,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        return;\n";
                     code += "    }\n";
 
-                    code += "    // Copy digest into fi\n";
+                    //code += "    // Copy digest into fi\n";
                     code += "    scalar2fea(fr, hashIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
 
 #ifdef LOG_HASHS
@@ -2180,7 +2177,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     if (rom["program"][zkPC]["binOpcode"] == 0) // ADD
                     {
-                        code += "    //Binary free in ADD\n";
+                        //code += "    //Binary free in ADD\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2203,7 +2200,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 1) // SUB
                     {
-                        code += "    //Binary free in SUB\n";
+                        //code += "    //Binary free in SUB\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2226,7 +2223,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 2) // LT
                     {
-                        code += "    //Binary free in LT\n";
+                        //code += "    //Binary free in LT\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2249,7 +2246,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 3) // SLT
                     {
-                        code += "    //Binary free in SLT\n";
+                        //code += "    //Binary free in SLT\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2274,7 +2271,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 4) // EQ
                     {
-                        code += "    //Binary free in EQ\n";
+                        //code += "    //Binary free in EQ\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2297,7 +2294,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 5) // AND
                     {
-                        code += "    //Binary free in AND\n";
+                        //code += "    //Binary free in AND\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2320,7 +2317,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 6) // OR
                     {
-                        code += "    //Binary free in OR\n";
+                        //code += "    //Binary free in OR\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2343,7 +2340,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 7) // XOR
                     {
-                        code += "    //Binary free in XOR\n";
+                        //code += "    //Binary free in XOR\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2366,7 +2363,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 8) // LT4
                     {
-                        code += "    //Binary free in XOR\n";
+                        //code += "    //Binary free in XOR\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2398,7 +2395,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 // Mem allign read free in
                 if (rom["program"][zkPC].contains("memAlignRD") && (rom["program"][zkPC]["memAlignRD"]==1))
                 {
-                    code += "    // Mem allign read free in\n";
+                    //code += "    // Mem allign read free in\n";
                     code += "    if (!fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -2570,7 +2567,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 }
                 else
                 {
-                    code += "    // Call evalCommand()\n";
+                    //code += "    // Call evalCommand()\n";
                     code += "    cr.reset();\n";
                     code += "    zkPC=" + to_string(zkPC) +";\n";
                     code += "    evalCommand(ctx, rom.line[" + to_string(zkPC) + "].freeInTag, cr);\n";
@@ -2609,7 +2606,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             //if ((rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1)) ||
             //    !bFastMode)
             {
-                code += "    // Store polynomial FREE=fi\n";
+                //code += "    // Store polynomial FREE=fi\n";
                 code += "    pols.FREE0[" + string(bFastMode?"0":"i") + "] = fi0;\n";
                 code += "    pols.FREE1[" + string(bFastMode?"0":"i") + "] = fi1;\n";
                 code += "    pols.FREE2[" + string(bFastMode?"0":"i") + "] = fi2;\n";
@@ -2620,7 +2617,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 code += "    pols.FREE7[" + string(bFastMode?"0":"i") + "] = fi7;\n\n";
             }
 
-            code += "    // op = op + inFREE*fi\n";
+            //code += "    // op = op + inFREE*fi\n";
             string inFREEString = rom["program"][zkPC]["inFREE"];
             int64_t inFREE;
             string inFREE0String = rom["program"][zkPC]["inFREE0"];
@@ -2681,7 +2678,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
             if (!bFastMode)
             {
-                code += "    // Copy ROM flags into the polynomials\n";
+                //code += "    // Copy ROM flags into the polynomials\n";
                 code += "    pols.inFREE[i] = rom.line[" + to_string(zkPC) + "].inFREE;\n\n";
                 code += "    pols.inFREE0[i] = rom.line[" + to_string(zkPC) + "].inFREE0;\n\n";
             }
@@ -2730,7 +2727,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // If assert, check that A=op
         if (rom["program"][zkPC].contains("assert") && (rom["program"][zkPC]["assert"] == 1))
         {
-            code += "    // If assert, check that A=op\n";
+            //code += "    // If assert, check that A=op\n";
             code += "    if ( (!fr.equal(pols.A0[" + string(bFastMode?"0":"i") + "], op0)) ||\n";
             code += "         (!fr.equal(pols.A1[" + string(bFastMode?"0":"i") + "], op1)) ||\n";
             code += "         (!fr.equal(pols.A2[" + string(bFastMode?"0":"i") + "], op2)) ||\n";
@@ -2762,7 +2759,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // Memory operation instruction
         if (rom["program"][zkPC].contains("mOp") && (rom["program"][zkPC]["mOp"] == 1))
         {
-            code += "    // Memory operation instruction\n";
+            //code += "    // Memory operation instruction\n";
             if (!bFastMode)
                 code += "    pols.mOp[i] = fr.one();\n";
 
@@ -2924,7 +2921,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // Storage read instruction
         if (rom["program"][zkPC].contains("sRD") && (rom["program"][zkPC]["sRD"] == 1) )
         {
-            code += "    // Storage read instruction\n";
+            //code += "    // Storage read instruction\n";
 
             if (!bFastMode)
                 code += "    pols.sRD[i] = fr.one();\n";
@@ -2967,7 +2964,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    gettimeofday(&t, NULL);\n";
 #endif
 
-            code += "    // Call poseidon and get the hash key\n";
+            //code += "    // Call poseidon and get the hash key\n";
             code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
 
             code += "    keyI[0] = Kin0Hash[0];\n";
@@ -2985,7 +2982,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             // Store PoseidonG required data
             if (!bFastMode)
             {                
-                code += "    // Store PoseidonG required data\n";
+                //code += "    // Store PoseidonG required data\n";
                 code += "    for (uint64_t j=0; j<12; j++)\n";
                 code += "        pg[j] = Kin0[j];\n";
                 code += "    for (uint64_t j=0; j<4; j++)\n";
@@ -2993,7 +2990,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
                 code += "    required.PoseidonG.push_back(pg);\n";
 
-                code += "    // Store PoseidonG required data\n";
+                //code += "    // Store PoseidonG required data\n";
                 code += "    for (uint64_t j=0; j<12; j++)\n";
                 code += "        pg[j] = Kin1[j];\n";
                 code += "    for (uint64_t j=0; j<4; j++)\n";
@@ -3017,7 +3014,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
             code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
-            code += "    // Collect the keys used to read or write store data\n";
+            //code += "    // Collect the keys used to read or write store data\n";
             code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
             code += "    {\n";
             code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
@@ -3094,11 +3091,11 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // Storage write instruction
         if (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"] == 1))
         {
-            code += "    // Storage write instruction\n";
+            //code += "    // Storage write instruction\n";
 
             if (!bFastMode)
             {
-                code += "    // Copy ROM flags into the polynomials\n";
+                //code += "    // Copy ROM flags into the polynomials\n";
                 code += "    pols.sWR[i] = fr.one();\n";
             }
 
@@ -3241,14 +3238,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             // Store PoseidonG required data
             if (!bFastMode)
             {
-                code += "    // Store PoseidonG required data\n";
+                //code += "    // Store PoseidonG required data\n";
                 code += "    for (uint64_t j=0; j<12; j++)\n";
                 code += "        pg[j] = ctx.lastSWrite.Kin0[j];\n";
                 code += "    for (uint64_t j=0; j<4; j++)\n";
                 code += "        pg[12+j] = ctx.lastSWrite.keyI[j];\n";
                 code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
                 code += "    required.PoseidonG.push_back(pg);\n";
-                code += "    // Store PoseidonG required data\n";
+                //code += "    // Store PoseidonG required data\n";
                 code += "    for (uint64_t j=0; j<12; j++)\n";
                 code += "        pg[j] = ctx.lastSWrite.Kin1[j];\n";
                 code += "    for (uint64_t j=0; j<4; j++)\n";
@@ -3264,7 +3261,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 code += "    required.Storage.push_back(smtAction);\n";
             }
 
-            code += "    // Check that the new root hash equals op0\n";
+            //code += "    // Check that the new root hash equals op0\n";
             code += "    sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
             code += "    if ( !fr.equal(ctx.lastSWrite.newRoot[0], oldRoot[0]) ||\n";
@@ -3329,14 +3326,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashK instruction
         if (rom["program"][zkPC].contains("hashK") && (rom["program"][zkPC]["hashK"] == 1))
         {
-            code += "    // HashK instruction\n";
+            //code += "    // HashK instruction\n";
 
             if (!bFastMode)
             {
                 code += "    pols.hashK[i] = fr.one();\n\n";
             }
 
-            code += "    // If there is no entry in the hash database for this address, then create a new one\n";
+            //code += "    // If there is no entry in the hash database for this address, then create a new one\n";
             code += "    hashIterator = ctx.hashK.find(hashAddr);\n";
             code += "    if (hashIterator == ctx.hashK.end())\n";
             code += "    {\n";
@@ -3347,7 +3344,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
             if (rom["program"][zkPC].contains("hashBytesInD") && (rom["program"][zkPC]["hashBytesInD"] == 1))
             {
-                code += "    // Get the size of the hash from D0\n";
+                //code += "    // Get the size of the hash from D0\n";
                 code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
             }
             else
@@ -3364,7 +3361,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "    // Get the position of the hash from HASHPOS\n";
+            //code += "    // Get the position of the hash from HASHPOS\n";
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (iPos < 0)\n";
             code += "    {\n";
@@ -3376,7 +3373,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n";
             code += "    pos = iPos;\n\n";
 
-            code += "    // Get contents of opN into a\n";
+            //code += "    // Get contents of opN into a\n";
             if (rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1))
                 code += "    if (!fea2scalar(fr, a,  pols.FREE0[" + string(bFastMode?"0":"i") + "], pols.FREE1[" + string(bFastMode?"0":"i") + "], pols.FREE2[" + string(bFastMode?"0":"i") + "], pols.FREE3[" + string(bFastMode?"0":"i") + "], pols.FREE4[" + string(bFastMode?"0":"i") + "], pols.FREE5[" + string(bFastMode?"0":"i") + "], pols.FREE6[" + string(bFastMode?"0":"i") + "], pols.FREE7[" + string(bFastMode?"0":"i") + "]))\n";
             else
@@ -3389,7 +3386,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "    // Fill the hash data vector with chunks of the scalar value\n";
+            //code += "    // Fill the hash data vector with chunks of the scalar value\n";
             code += "    for (uint64_t j=0; j<size; j++)\n";
             code += "    {\n";
             code += "        result = (a >> ((size-j-1)*8)) & ScalarMask8;\n";
@@ -3421,7 +3418,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        }\n";
             code += "    }\n\n";
 
-            code += "    // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size\n";
+            //code += "    // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size\n";
             code += "    paddingA = a >> (size*8);\n";
             code += "    if (paddingA != 0)\n";
             code += "    {\n";
@@ -3432,7 +3429,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "    // Record the read operation\n";
+            //code += "    // Record the read operation\n";
             code += "    readsIterator = hashIterator->second.reads.find(pos);\n";
             code += "    if ( readsIterator != hashIterator->second.reads.end() )\n";
             code += "    {\n";
@@ -3450,7 +3447,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        ctx.hashK[hashAddr].reads[pos] = size;\n";
             code += "    }\n\n";
 
-            code += "    // Store the size\n";
+            //code += "    // Store the size\n";
             code += "    incHashPos = size;\n";
             bIncHashPos = true;
 
@@ -3462,18 +3459,18 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashKLen instruction
         if (rom["program"][zkPC].contains("hashKLen") && (rom["program"][zkPC]["hashKLen"] == 1))
         {
-            code += "    // HashKLen instruction\n";
+            //code += "    // HashKLen instruction\n";
 
             if (!bFastMode)
                 code += "    pols.hashKLen[i] = fr.one();\n";
 
-            code += "    // Get the length\n";
+            //code += "    // Get the length\n";
             code += "    lm = fr.toU64(op0);\n\n";
 
-            code += "    // Find the entry in the hash database for this address\n";
+            //code += "    // Find the entry in the hash database for this address\n";
             code += "    hashIterator = ctx.hashK.find(hashAddr);\n\n";
 
-            code += "    // If it's undefined, compute a hash of 0 bytes\n";
+            //code += "    // If it's undefined, compute a hash of 0 bytes\n";
             code += "    if (hashIterator == ctx.hashK.end())\n";
             code += "    {\n";
             code += "        // Check that length = 0\n";
@@ -3538,12 +3535,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashKDigest instruction
         if (rom["program"][zkPC].contains("hashKDigest") && (rom["program"][zkPC]["hashKDigest"] == 1))
         {
-            code += "    // HashKDigest instruction\n";
+            //code += "    // HashKDigest instruction\n";
 
             if (!bFastMode)
                 code += "    pols.hashKDigest[i] = fr.one();\n";
 
-            code += "    // Get contents of op into dg\n";
+            //code += "    // Get contents of op into dg\n";
             code += "    if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -3553,7 +3550,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n";
 
-            code += "    // Find the entry in the hash database for this address\n";
+            //code += "    // Find the entry in the hash database for this address\n";
             code += "    hashIterator = ctx.hashK.find(hashAddr);\n";
             code += "    if (hashIterator == ctx.hashK.end())\n";
             code += "    {\n";
@@ -3593,14 +3590,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashP instruction
         if (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1))
         {
-            code += "    // HashP instruction\n";
+            //code += "    // HashP instruction\n";
 
             if (!bFastMode)
             {
                 code += "    pols.hashP[i] = fr.one();\n";
             }
 
-            code += "    // If there is no entry in the hash database for this address, then create a new one\n";
+            //code += "    // If there is no entry in the hash database for this address, then create a new one\n";
             code += "    hashIterator = ctx.hashP.find(hashAddr);\n";
             code += "    if (hashIterator == ctx.hashP.end())\n";
             code += "    {\n";
@@ -3611,7 +3608,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
             if (rom["program"][zkPC].contains("hashBytesInD") && (rom["program"][zkPC]["hashBytesInD"] == 1))
             {
-                code += "    // Get the size of the hash from D0\n";
+                //code += "    // Get the size of the hash from D0\n";
                 code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
             }
             else
@@ -3628,7 +3625,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "    // Get the positon of the hash from HASHPOS\n";
+            //code += "    // Get the positon of the hash from HASHPOS\n";
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (iPos < 0)\n";
             code += "    {\n";
@@ -3640,7 +3637,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n";
             code += "    pos = iPos;\n\n";
 
-            code += "    // Get contents of opN into a\n";
+            //code += "    // Get contents of opN into a\n";
             if (rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1))
                 code += "    if (!fea2scalar(fr, a,  pols.FREE0[" + string(bFastMode?"0":"i") + "], pols.FREE1[" + string(bFastMode?"0":"i") + "], pols.FREE2[" + string(bFastMode?"0":"i") + "], pols.FREE3[" + string(bFastMode?"0":"i") + "], pols.FREE4[" + string(bFastMode?"0":"i") + "], pols.FREE5[" + string(bFastMode?"0":"i") + "], pols.FREE6[" + string(bFastMode?"0":"i") + "], pols.FREE7[" + string(bFastMode?"0":"i") + "]))\n";
             else
@@ -3653,7 +3650,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n";
 
-            code += "    // Fill the hash data vector with chunks of the scalar value\n";
+            //code += "    // Fill the hash data vector with chunks of the scalar value\n";
             code += "    for (uint64_t j=0; j<size; j++) {\n";
             code += "        result = (a >> (size-j-1)*8) & ScalarMask8;\n";
             code += "        uint8_t bm = result.get_ui();\n";
@@ -3711,7 +3708,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        }\n";
             code += "    }\n";
 
-            code += "    // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size\n";
+            //code += "    // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size\n";
             code += "    paddingA = a >> (size*8);\n";
             code += "    if (paddingA != 0)\n";
             code += "    {\n";
@@ -3722,7 +3719,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "    // Record the read operation\n";
+            //code += "    // Record the read operation\n";
             code += "    readsIterator = hashIterator->second.reads.find(pos);\n";
             code += "    if ( readsIterator != hashIterator->second.reads.end() )\n";
             code += "    {\n";
@@ -3740,7 +3737,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        hashIterator->second.reads[pos] = size;\n";
             code += "    }\n\n";
 
-            code += "    // Store the size\n";
+            //code += "    // Store the size\n";
             code += "    incHashPos = size;\n";
             bIncHashPos = true;
         }
@@ -3748,18 +3745,18 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashPLen instruction
         if (rom["program"][zkPC].contains("hashPLen") && (rom["program"][zkPC]["hashPLen"] == 1))
         {
-            code += "    // HashPLen instruction\n";
+            //code += "    // HashPLen instruction\n";
 
             if (!bFastMode)
                 code += "    pols.hashPLen[i] = fr.one();\n";
 
-            code += "    // Get the length\n";
+            //code += "    // Get the length\n";
             code += "    lm = fr.toU64(op0);\n\n";
 
-            code += "    // Find the entry in the hash database for this address\n";
+            //code += "    // Find the entry in the hash database for this address\n";
             code += "    hashIterator = ctx.hashP.find(hashAddr);\n\n";
 
-            code += "    // If it's undefined, compute a hash of 0 bytes\n";
+            //code += "    // If it's undefined, compute a hash of 0 bytes\n";
             code += "    if (hashIterator == ctx.hashP.end())\n";
             code += "    {\n";
             code += "        // Check that length = 0\n";
@@ -3844,12 +3841,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashPDigest instruction
         if (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"] == 1))
         {
-            code += "    // HashPDigest instruction\n";
+            //code += "    // HashPDigest instruction\n";
 
             if (!bFastMode)
                 code += "    pols.hashPDigest[i] = fr.one();\n";
 
-            code += "    // Get contents of op into dg\n";
+            //code += "    // Get contents of op into dg\n";
             code += "    if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -3905,7 +3902,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
             code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(56));\n";
 
-            code += "    // Check that digest equals op\n";
+            //code += "    // Check that digest equals op\n";
             code += "    if (dg != hashIterator->second.digest)\n";
             code += "    {\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;\n";
@@ -3919,14 +3916,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashS instruction
         if (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"] == 1))
         {
-            code += "    // HashS instruction\n";
+            //code += "    // HashS instruction\n";
 
             if (!bFastMode)
             {
                 code += "    pols.hashS[i] = fr.one();\n\n";
             }
 
-            code += "    // If there is no entry in the hash database for this address, then create a new one\n";
+            //code += "    // If there is no entry in the hash database for this address, then create a new one\n";
             code += "    hashIterator = ctx.hashS.find(hashAddr);\n";
             code += "    if (hashIterator == ctx.hashS.end())\n";
             code += "    {\n";
@@ -3937,7 +3934,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
             if (rom["program"][zkPC].contains("hashBytesInD") && (rom["program"][zkPC]["hashBytesInD"] == 1))
             {
-                code += "    // Get the size of the hash from D0\n";
+                //code += "    // Get the size of the hash from D0\n";
                 code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
             }
             else
@@ -3954,7 +3951,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "    // Get the position of the hash from HASHPOS\n";
+            //code += "    // Get the position of the hash from HASHPOS\n";
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (iPos < 0)\n";
             code += "    {\n";
@@ -3966,7 +3963,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n";
             code += "    pos = iPos;\n\n";
 
-            code += "    // Get contents of opN into a\n";
+            //code += "    // Get contents of opN into a\n";
             if (rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1))
                 code += "    if (!fea2scalar(fr, a,  pols.FREE0[" + string(bFastMode?"0":"i") + "], pols.FREE1[" + string(bFastMode?"0":"i") + "], pols.FREE2[" + string(bFastMode?"0":"i") + "], pols.FREE3[" + string(bFastMode?"0":"i") + "], pols.FREE4[" + string(bFastMode?"0":"i") + "], pols.FREE5[" + string(bFastMode?"0":"i") + "], pols.FREE6[" + string(bFastMode?"0":"i") + "], pols.FREE7[" + string(bFastMode?"0":"i") + "]))\n";
             else
@@ -3979,7 +3976,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "    // Fill the hash data vector with chunks of the scalar value\n";
+            //code += "    // Fill the hash data vector with chunks of the scalar value\n";
             code += "    for (uint64_t j=0; j<size; j++)\n";
             code += "    {\n";
             code += "        result = (a >> ((size-j-1)*8)) & ScalarMask8;\n";
@@ -4011,7 +4008,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        }\n";
             code += "    }\n\n";
 
-            code += "    // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size\n";
+            //code += "    // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size\n";
             code += "    paddingA = a >> (size*8);\n";
             code += "    if (paddingA != 0)\n";
             code += "    {\n";
@@ -4022,7 +4019,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "    // Record the read operation\n";
+            //code += "    // Record the read operation\n";
             code += "    readsIterator = hashIterator->second.reads.find(pos);\n";
             code += "    if ( readsIterator != hashIterator->second.reads.end() )\n";
             code += "    {\n";
@@ -4040,7 +4037,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        hashIterator->second.reads[pos] = size;\n";
             code += "    }\n\n";
 
-            code += "    // Store the size\n";
+            //code += "    // Store the size\n";
             code += "    incHashPos = size;\n";
             bIncHashPos = true;
 
@@ -4052,18 +4049,18 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashSLen instruction
         if (rom["program"][zkPC].contains("hashSLen") && (rom["program"][zkPC]["hashSLen"] == 1))
         {
-            code += "    // HashSLen instruction\n";
+            //code += "    // HashSLen instruction\n";
 
             if (!bFastMode)
                 code += "    pols.hashSLen[i] = fr.one();\n";
 
-            code += "    // Get the length\n";
+            //code += "    // Get the length\n";
             code += "    lm = fr.toU64(op0);\n\n";
 
-            code += "    // Find the entry in the hash database for this address\n";
+            //code += "    // Find the entry in the hash database for this address\n";
             code += "    hashIterator = ctx.hashS.find(hashAddr);\n\n";
 
-            code += "    // If it's undefined, compute a hash of 0 bytes\n";
+            //code += "    // If it's undefined, compute a hash of 0 bytes\n";
             code += "    if (hashIterator == ctx.hashS.end())\n";
             code += "    {\n";
             code += "        // Check that length = 0\n";
@@ -4128,12 +4125,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashSDigest instruction
         if (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"] == 1))
         {
-            code += "    // HashKDigest instruction\n";
+            //code += "    // HashKDigest instruction\n";
 
             if (!bFastMode)
                 code += "    pols.hashSDigest[i] = fr.one();\n";
 
-            code += "    // Get contents of op into dg\n";
+            //code += "    // Get contents of op into dg\n";
             code += "    if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -4143,7 +4140,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        return;\n";
             code += "    }\n";
 
-            code += "    // Find the entry in the hash database for this address\n";
+            //code += "    // Find the entry in the hash database for this address\n";
             code += "    hashIterator = ctx.hashS.find(hashAddr);\n";
             code += "    if (hashIterator == ctx.hashS.end())\n";
             code += "    {\n";
@@ -4200,7 +4197,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         if (!bFastMode && ( (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ||
                             (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"] ==1))) )
         {
-            code += "    // HashP or Storage write instructions, required data\n";
+            //code += "    // HashP or Storage write instructions, required data\n";
             code += "    if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -4209,7 +4206,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
-            code += "    // Store the binary action to execute it later with the binary SM\n";
+            //code += "    // Store the binary action to execute it later with the binary SM\n";
             code += "    binaryAction.a = op;\n";
             code += "    binaryAction.b = Scalar4xGoldilocksPrime;\n";
             code += "    binaryAction.c = 1;\n";
@@ -4245,7 +4242,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         {
             if (rom["program"][zkPC]["binOpcode"] == 0) // ADD
             {
-                code += "    // Binary instruction: ADD\n";
+                //code += "    // Binary instruction: ADD\n";
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
@@ -4288,7 +4285,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.binOpcode[i] = fr.zero();\n";
 
-                    code += "    // Store the binary action to execute it later with the binary SM\n";
+                    //code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
                     code += "    binaryAction.b = b;\n";
                     code += "    binaryAction.c = c;\n";
@@ -4299,7 +4296,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             else if (rom["program"][zkPC]["binOpcode"] == 1) // SUB
             {
-                code += "    // Binary instruction: SUB\n";
+                //code += "    // Binary instruction: SUB\n";
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
@@ -4342,7 +4339,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.binOpcode[i] = fr.one();\n";
 
-                    code += "    // Store the binary action to execute it later with the binary SM\n";
+                    //code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
                     code += "    binaryAction.b = b;\n";
                     code += "    binaryAction.c = c;\n";
@@ -4353,7 +4350,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             else if (rom["program"][zkPC]["binOpcode"] == 2) // LT
             {
-                code += "    // Binary instruction: LT\n";
+                //code += "    // Binary instruction: LT\n";
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
@@ -4396,7 +4393,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(2);\n";
 
-                    code += "    // Store the binary action to execute it later with the binary SM\n";
+                    //code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
                     code += "    binaryAction.b = b;\n";
                     code += "    binaryAction.c = c;\n";
@@ -4407,7 +4404,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             else if (rom["program"][zkPC]["binOpcode"] == 3) // SLT
             {
-                code += "    // Binary instruction: SLT\n";
+                //code += "    // Binary instruction: SLT\n";
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
@@ -4454,7 +4451,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(3);\n";
 
-                    code += "    // Store the binary action to execute it later with the binary SM\n";
+                    //code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
                     code += "    binaryAction.b = b;\n";
                     code += "    binaryAction.c = c;\n";
@@ -4465,7 +4462,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             else if (rom["program"][zkPC]["binOpcode"] == 4) // EQ
             {
-                code += "    // Binary instruction: EQ\n";
+                //code += "    // Binary instruction: EQ\n";
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
@@ -4508,7 +4505,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(4);\n";
 
-                    code += "    // Store the binary action to execute it later with the binary SM\n";
+                    //code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
                     code += "    binaryAction.b = b;\n";
                     code += "    binaryAction.c = c;\n";
@@ -4519,7 +4516,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             else if (rom["program"][zkPC]["binOpcode"] == 5) // AND
             {
-                code += "    // Binary instruction: AND\n";
+                //code += "    // Binary instruction: AND\n";
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
@@ -4563,7 +4560,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(5);\n";
 
-                    code += "    // Store the binary action to execute it later with the binary SM\n";
+                    //code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
                     code += "    binaryAction.b = b;\n";
                     code += "    binaryAction.c = c;\n";
@@ -4574,7 +4571,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             else if (rom["program"][zkPC]["binOpcode"] == 6) // OR
             {
-                code += "    // Binary instruction: OR\n";
+                //code += "    // Binary instruction: OR\n";
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
@@ -4615,7 +4612,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(6);\n";
 
-                    code += "    // Store the binary action to execute it later with the binary SM\n";
+                    //code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
                     code += "    binaryAction.b = b;\n";
                     code += "    binaryAction.c = c;\n";
@@ -4626,7 +4623,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             else if (rom["program"][zkPC]["binOpcode"] == 7) // XOR
             {
-                code += "    // Binary instruction: XOR\n";
+                //code += "    // Binary instruction: XOR\n";
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
@@ -4667,7 +4664,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(7);\n";
 
-                    code += "    // Store the binary action to execute it later with the binary SM\n";
+                    //code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
                     code += "    binaryAction.b = b;\n";
                     code += "    binaryAction.c = c;\n";
@@ -4678,7 +4675,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
             else if (rom["program"][zkPC]["binOpcode"] == 8) // LT4
             {
-                code += "    // Binary instruction: LT4\n";
+                //code += "    // Binary instruction: LT4\n";
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
@@ -4721,7 +4718,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(8);\n";
 
-                    code += "    // Store the binary action to execute it later with the binary SM\n";
+                    //code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
                     code += "    binaryAction.b = b;\n";
                     code += "    binaryAction.c = c;\n";
@@ -4746,7 +4743,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         if ( (rom["program"][zkPC].contains("memAlignRD") && (rom["program"][zkPC]["memAlignRD"]==1)) ||
              (rom["program"][zkPC].contains("memAlignWR") && (rom["program"][zkPC]["memAlignWR"]==1)) )
         {
-            code += "    // MemAlign instruction\n";
+            //code += "    // MemAlign instruction\n";
             code += "    if (!fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
             code += "    {\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
@@ -5711,8 +5708,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // COMAND AFTER (of previous instruction)
         if ( rom["program"][zkPC].contains("cmdAfter") && (rom["program"][zkPC]["cmdAfter"].size()>0) )
         {
-            code += "    // Evaluate the list cmdAfter commands of the previous ROM line,\n";
-            code += "    // and any children command, recursively\n";
+            //code += "    // Evaluate the list cmdAfter commands of the previous ROM line,\n";
+            //code += "    // and any children command, recursively\n";
             code += "    if (i < N_Max_minus_one)\n";
             code += "    {\n";
             if (!bFastMode)
@@ -5808,7 +5805,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "    if (i==N_Max_minus_one) goto " + functionName + "_end;\n";
         code += "    i++;\n";
         if (!bFastMode)
-            code += "    nexti=(i+1)%N_Max;\n";
+            code += "    nexti = (i==N_Max_minus_one) ? 0 : i+1;\n";
         code += "\n";
 
         // In case we had a pending jump, do it now, after the work has been done
@@ -5852,7 +5849,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "        return;\n";
     code += "    }\n";
 
-    code += "    // Copy the counters\n";
+    //code += "    // Copy the counters\n";
     code += "    proverRequest.counters.arith = fr.toU64(pols.cntArith[0]);\n";
     code += "    proverRequest.counters.binary = fr.toU64(pols.cntBinary[0]);\n";
     code += "    proverRequest.counters.keccakF = fr.toU64(pols.cntKeccakF[0]);\n";
@@ -5871,10 +5868,10 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    proverRequest.countersReserve.sha256F = zkmax(proverRequest.countersReserve.sha256F, proverRequest.counters.sha256F);\n";
     code += "    proverRequest.countersReserve.steps = zkmax(proverRequest.countersReserve.steps, proverRequest.counters.steps);\n";
 
-    code += "    // Set the error (all previous errors generated a return)\n";
+    //code += "    // Set the error (all previous errors generated a return)\n";
     code += "    proverRequest.result = ZKR_SUCCESS;\n";
 
-    code += "    // Check that we did not run out of steps during the execution\n";
+    //code += "    // Check that we did not run out of steps during the execution\n";
     code += "    if (ctx.lastStep == 0)\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
@@ -5946,11 +5943,11 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
     if (!bFastMode) // In fast mode, last nexti was not 0 but 1, and pols have only 2 evaluations
     {
-        code += "    // Check that all registers are set to 0\n";
+        //code += "    // Check that all registers are set to 0\n";
         code += "    mainExecutor.checkFinalState(ctx);\n";
         code += "    mainExecutor.assertOutputs(ctx);\n\n";
 
-        code += "    // Generate Padding KK required data\n";
+        //code += "    // Generate Padding KK required data\n";
         code += "    for (uint64_t i=0; i<ctx.hashK.size(); i++)\n";
         code += "    {\n";
         code += "        PaddingKKExecutorInput h;\n";
@@ -5981,7 +5978,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "        required.PaddingKK.push_back(h);\n";
         code += "    }\n";
 
-        code += "    // Generate Padding PG required data\n";
+        //code += "    // Generate Padding PG required data\n";
         code += "    for (uint64_t i=0; i<ctx.hashP.size(); i++)\n";
         code += "    {\n";
         code += "        PaddingPGExecutorInput h;\n";
@@ -6012,7 +6009,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "        required.PaddingPG.push_back(h);\n";
         code += "    }\n";
 
-        code += "    // Generate Padding SHA required data\n";
+        //code += "    // Generate Padding SHA required data\n";
         code += "    for (uint64_t i=0; i<ctx.hashS.size(); i++)\n";
         code += "    {\n";
         code += "        PaddingSha256ExecutorInput h;\n";
@@ -6118,7 +6115,7 @@ string selector8 (const string &regName, const string &regValue, bool opInitiali
     int64_t inRegValue = atoi(regValue.c_str());
     string inRegName = "in" + string2upper(regName.substr(0, 1)) + regName.substr(1);
     string code = "";
-    code += "    // op = op + " + inRegName + "*" + regName + ", where " + inRegName + "=" + to_string(inRegValue) + "\n";
+    //code += "    // op = op + " + inRegName + "*" + regName + ", where " + inRegName + "=" + to_string(inRegValue) + "\n";
     for (uint64_t j=0; j<8; j++)
     {
         string value = "";
@@ -6143,7 +6140,7 @@ string selector1 (const string &regName, const string &regValue, bool opInitiali
     int64_t inRegValue = atoi(regValue.c_str());
     string inRegName = "in" + string2upper(regName.substr(0, 1)) + regName.substr(1);
     string code = "";
-    code += "    // op0 = op0 + " + inRegName + "*" + regName + ", where " + inRegName + "=" + to_string(inRegValue) + "\n";
+    //code += "    // op0 = op0 + " + inRegName + "*" + regName + ", where " + inRegName + "=" + to_string(inRegValue) + "\n";
 
     // Calculate value
     string value = "";
@@ -6177,7 +6174,7 @@ string selector1 (const string &regName, const string &regValue, bool opInitiali
 string selectorConst (int64_t CONST, bool opInitialized, bool bFastMode)
 {
     string code = "";
-    code += "    // op0 = op0 + CONST\n";
+    //code += "    // op0 = op0 + CONST\n";
 
     string value = "";
     string valueCopy;
@@ -6205,7 +6202,7 @@ string selectorConst (int64_t CONST, bool opInitialized, bool bFastMode)
 string selectorConstL (const string &CONSTL, bool opInitialized, bool bFastMode, bool bMode384)
 {
     string code = "";
-    code += "    // op = op + CONSTL\n";
+    //code += "    // op = op + CONSTL\n";
     uint64_t op[8];
     if (bMode384)
     {
