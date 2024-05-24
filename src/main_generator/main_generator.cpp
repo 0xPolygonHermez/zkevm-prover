@@ -9,6 +9,19 @@
 using namespace std;
 using json = nlohmann::json;
 
+//#define LOG_PRINT_ROM_LINES
+//#define LOG_START_STEPS
+//#define LOG_START_STEPS_TO_FILE
+//#define LOG_COMPLETED_STEPS
+//#define LOG_COMPLETED_STEPS_TO_FILE
+//#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
+//#define LOG_STORAGE
+//#define LOG_HASHK
+//#define LOG_HASHS
+//#define LOG_HASHP
+//#define CHECK_MAX_CNT_ASAP
+//#define CHECK_MAX_CNT_AT_THE_END
+
 /* This code generates forks 4 to 9 */
 
 // Forward declaration
@@ -268,10 +281,10 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "#define FrFirst32Negative ( 0xFFFFFFFF00000001 - 0xFFFFFFFF )\n";
         code += "#define FrLast32Positive 0xFFFFFFFF\n\n";
 
-        code += "#ifdef DEBUG\n";
-        code += "#define CHECK_MAX_CNT_ASAP\n";
-        code += "#endif\n";
-        code += "#define CHECK_MAX_CNT_AT_THE_END\n\n";
+        //code += "#ifdef DEBUG\n";
+        //code += "#define CHECK_MAX_CNT_ASAP\n";
+        //code += "#endif\n";
+        //code += "#define CHECK_MAX_CNT_AT_THE_END\n\n";
 
         code += "vector<void *> " + functionName + "_labels;\n\n";
 
@@ -356,9 +369,9 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
     code += "    mainExecutor.initState(ctx);\n\n";
 
-    code += "#ifdef LOG_COMPLETED_STEPS_TO_FILE\n";
+#ifdef LOG_COMPLETED_STEPS_TO_FILE
     code += "    remove(\"c.txt\");\n";
-    code += "#endif\n\n";
+#endif
 
     code += "   // Clear cache if configured and we are using a local database\n";
     code += "   if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL == \"local\"))\n";
@@ -461,11 +474,11 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     {
     code += "    bool bIsBlockL2Hash;\n";
     }
-    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     code += "    struct timeval t;\n";
     code += "    TimeMetricStorage mainMetrics;\n";
     code += "    TimeMetricStorage evalCommandMetrics;\n";
-    code += "#endif\n";
+#endif
 
     // Arith
     code += "    mpz_class A, B, C, D, op;\n";
@@ -607,20 +620,20 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += functionName + "_rom_line_" + to_string(zkPC) + ": //" + string(rom["program"][zkPC]["fileName"]) + ":" + to_string(rom["program"][zkPC]["line"]) + "=[" + removeDuplicateSpaces(string(rom["program"][zkPC]["lineStr"])) + "]\n\n";
 
         // START LOGS
-        code += "#ifdef LOG_COMPLETED_STEPS_TO_FILE\n";
+#ifdef LOG_COMPLETED_STEPS_TO_FILE
         code += "    fi0=fi1=fi2=fi3=fi4=fi5=fi6=fi7=fr.zero();\n";
-        code += "#endif\n";
-        code += "#ifdef LOG_START_STEPS\n";
+#endif
+#ifdef LOG_START_STEPS
         code += "    zklog.info(\"--> Starting step=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " zkasm=\" + rom.line[" + to_string(zkPC) + "].lineStr);\n";
-        code += "#endif\n";
-        code += "#ifdef LOG_PRINT_ROM_LINES\n";
+#endif
+#ifdef LOG_PRINT_ROM_LINES
         code += "    zklog.info(\"step=\" + to_string(i) + \" rom.line[" + to_string(zkPC) + "] =[\" + rom.line[" + to_string(zkPC) + "].toString(fr) + \"]\");\n";
-        code += "#endif\n";
-        code += "#ifdef LOG_START_STEPS_TO_FILE\n";
+#endif
+#ifdef LOG_START_STEPS_TO_FILE
         code += "    outfile.open(\"c.txt\", std::ios_base::app); // append instead of overwrite\n";
         code += "    outfile << \"--> Starting step=\" << i << \" zkPC=" + to_string(zkPC) + " instruction= \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
         code += "    outfile.close();\n";
-        code += "#endif\n\n";
+#endif
 
         // ECRECOVER PRE-CALCULATION 
         if(rom["labels"].contains("ecrecover_store_args") && zkPC == rom["labels"]["ecrecover_store_args"]){
@@ -708,17 +721,17 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    // Evaluate the list cmdBefore commands, and any children command, recursively\n";
             code += "    for (uint64_t j=0; j<rom.line[" + to_string(zkPC) + "].cmdBefore.size(); j++)\n";
             code += "    {\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
             code += "        cr.reset();\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        evalCommand(ctx, *rom.line[" + to_string(zkPC) + "].cmdBefore[j], cr);\n";
             code += "\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
             code += "        evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdBefore[j]->opAndFunction, TimeDiff(t));\n";
-            code += "#endif\n";
+#endif
             code += "        // In case of an external error, return it\n";
             code += "        if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
@@ -1105,9 +1118,9 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         }
         else
         {
-            code += "#if (defined LOG_COMPLETED_STEPS) || (defined LOG_COMPLETED_STEPS_TO_FILE)\n";
+#if (defined LOG_COMPLETED_STEPS) || (defined LOG_COMPLETED_STEPS_TO_FILE)
             code += "    addr = 0;\n";
-            code += "#endif\n\n";
+#endif
         }
 
         if (rom["program"][zkPC].contains("useCTX") && (rom["program"][zkPC]["useCTX"] == 1))
@@ -1282,14 +1295,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_CODE) && (itStateOverride->second.code.size() > 0))\n";
                     code += "            {\n";
                                 // Calculate the linear poseidon hash
-code += "    #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     code += "                gettimeofday(&t, NULL);\n";
-code += "    #endif\n";
+#endif
                     code += "                Goldilocks::Element result[4];\n";
                     code += "                mainExecutor.linearPoseidon(ctx, itStateOverride->second.code, result);\n";
-code += "    #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     code += "                mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
-code += "    #endif\n";
+#endif
                                 // Convert to scalar
                     code += "                fea2scalar(fr, value, result);\n";
 
@@ -1371,9 +1384,9 @@ code += "    #endif\n";
                         code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
 
-                        code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                         code += "    gettimeofday(&t, NULL);\n";
-                        code += "#endif\n";
+#endif
 
                         code += "    // Call poseidon and get the hash key\n";
                         code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
@@ -1391,13 +1404,13 @@ code += "    #endif\n";
                         code += "    key[1] = Kin1Hash[1];\n";
                         code += "    key[2] = Kin1Hash[2];\n";
                         code += "    key[3] = Kin1Hash[3];\n";
-                        code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                         code += "    mainMetrics.add(\"Poseidon\", TimeDiff(t), 3);\n";
-                        code += "#endif\n";
+#endif
 
-                        code += "#ifdef LOG_STORAGE\n";
+#ifdef LOG_STORAGE
                         code += "    zklog.info(\"Storage read sRD got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
-                        code += "#endif\n";
+#endif
 
                         code += "    // Collect the keys used to read or write store data\n";
                         code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
@@ -1405,9 +1418,9 @@ code += "    #endif\n";
                         code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
                         code += "    }\n";
 
-                        code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                         code += "    gettimeofday(&t, NULL);\n";
-                        code += "#endif\n";
+#endif
                         code += "    zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
                         code += "    if (zkResult != ZKR_SUCCESS)\n";
                         code += "    {\n";
@@ -1419,9 +1432,9 @@ code += "    #endif\n";
                         code += "    }\n";
                         code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
 
-                        code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                         code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
-                        code += "#endif\n";
+#endif
                     code += "    }\n";
 
                     if (bFastMode)
@@ -1439,9 +1452,9 @@ code += "    #endif\n";
 
                     code += "    scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
 
-                    code += "#ifdef LOG_STORAGE\n";
+#ifdef LOG_STORAGE
                     code += "    zklog.info(\"Storage read sRD read from key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16) + \" value:\" + fr.toString(fi3, 16) + \":\" + fr.toString(fi2, 16) + \":\" + fr.toString(fi1, 16) + \":\" + fr.toString(fi0, 16));\n";
-                    code += "#endif\n";
+#endif
 
                     nHits++;
                 }
@@ -1591,9 +1604,9 @@ code += "    #endif\n";
                     code += "    bIsBlockL2Hash = (b0 > 6);\n";
                     }
 
-                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     code += "    gettimeofday(&t, NULL);\n";
-                    code += "#endif\n";
+#endif
 
                     code += "    // Call poseidon and get the hash key\n";
                     code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
@@ -1628,17 +1641,17 @@ code += "    #endif\n";
                     code += "    ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
                     code += "    ctx.lastSWrite.key[2] = Kin1Hash[2];\n";
                     code += "    ctx.lastSWrite.key[3] = Kin1Hash[3];\n";
-                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     code += "    mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
-                    code += "#endif\n";
+#endif
 
-                    code += "#ifdef LOG_STORAGE\n";
+#ifdef LOG_STORAGE
                     code += "    zklog.info(\"Storage write sWR got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
-                    code += "#endif\n";
+#endif
 
-                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     code += "    gettimeofday(&t, NULL);\n";
-                    code += "#endif\n";
+#endif
 
                     code += "    // Collect the keys used to read or write store data\n";
                     code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
@@ -1684,16 +1697,16 @@ code += "    #endif\n";
                     code += "    if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "        ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
 
-                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     code += "    mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
-                    code += "#endif\n";
+#endif
                     code += "    ctx.lastSWrite.step = i;\n";
 
                     code += "    sr4to8(fr, ctx.lastSWrite.newRoot[0], ctx.lastSWrite.newRoot[1], ctx.lastSWrite.newRoot[2], ctx.lastSWrite.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
 
-                    code += "#ifdef LOG_STORAGE\n";
+#ifdef LOG_STORAGE
                     code += "    zklog.info(\"Storage write sWR stored at key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16) + \" newRoot: \" + fr.toString(ctx.lastSWrite.res.newRoot, 16));\n";
-                    code += "#endif\n";
+#endif
 
                     nHits++;
                 }
@@ -1761,9 +1774,9 @@ code += "    #endif\n";
                     code += "    }\n";
                     code += "    scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
 
-                    code += "#ifdef LOG_HASHK\n";
+#ifdef LOG_HASHK
                     code += "    zklog.info(\"hashK 1 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data=\" + s.get_str(16));\n";
-                    code += "#endif\n";
+#endif
 
                     nHits++;
                 }
@@ -1796,9 +1809,9 @@ code += "    #endif\n";
                     code += "    // Copy digest into fi\n";
                     code += "    scalar2fea(fr, hashIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
 
-                    code += "#ifdef LOG_HASHK\n";
+#ifdef LOG_HASHK
                     code += "    zklog.info(\"hashKDigest 1 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashK[addr].digest.get_str(16));\n";
-                    code += "#endif\n";
+#endif
 
                     nHits++;
                 }
@@ -1963,9 +1976,9 @@ code += "    #endif\n";
                     code += "    }\n";
                     code += "    scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
 
-                    code += "#ifdef LOG_HASHS\n";
+#ifdef LOG_HASHS
                     code += "    zklog.info(\"hashS 1 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data=\" + s.get_str(16));\n";
-                    code += "#endif\n";
+#endif
 
                     nHits++;
                 }
@@ -1998,9 +2011,9 @@ code += "    #endif\n";
                     code += "    // Copy digest into fi\n";
                     code += "    scalar2fea(fr, hashIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
 
-                    code += "#ifdef LOG_HASHS\n";
+#ifdef LOG_HASHS
                     code += "    zklog.info(\"hashSDigest 1 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashS[addr].digest.get_str(16));\n";
-                    code += "#endif\n";
+#endif
 
                     nHits++;
                 }
@@ -2281,9 +2294,9 @@ code += "    #endif\n";
             // If freeInTag.op!="", then evaluate the requested command (recursively)
             else
             {
-                code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 code += "    gettimeofday(&t, NULL);\n";
-                code += "#endif\n";
+#endif
 
                 if ( (rom["program"][zkPC]["freeInTag"]["op"]=="functionCall") && (rom["program"][zkPC]["freeInTag"]["funcName"]=="getBytecode") )
                 {
@@ -2425,10 +2438,10 @@ code += "    #endif\n";
                     code += "    }\n";
                 }
 
-                code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 code += "    mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
                 code += "    evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].freeInTag.opAndFunction, TimeDiff(t));\n";
-                code += "#endif\n";
+#endif
 
                 /*
                 code += "    // If we are in fast mode and we are consuming the last evaluations, exit the loop\n";
@@ -2774,9 +2787,9 @@ code += "    #endif\n";
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "    gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
 
             code += "    // Call poseidon and get the hash key\n";
             code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
@@ -2818,13 +2831,13 @@ code += "    #endif\n";
             code += "    key[2] = Kin1Hash[2];\n";
             code += "    key[3] = Kin1Hash[3];\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "    mainMetrics.add(\"Poseidon\", TimeDiff(t), 3);\n";
-            code += "#endif\n";
+#endif
 
-            code += "#ifdef LOG_STORAGE\n";
+#ifdef LOG_STORAGE
             code += "    zklog.info(\"Storage read sRD got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
-            code += "#endif\n";
+#endif
 
             code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
@@ -2834,9 +2847,9 @@ code += "    #endif\n";
             code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
             code += "    }\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "    gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
             code += "    zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
             code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
@@ -2861,9 +2874,9 @@ code += "    #endif\n";
                 code += "    }\n";
             }
 
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
-            code += "#endif\n";
+#endif
             if (!bFastMode)
             {
                 code += "    smtAction.bIsSet = false;\n";
@@ -2871,9 +2884,9 @@ code += "    #endif\n";
                 code += "    required.Storage.push_back(smtAction);\n";
             }
 
-            code += "#ifdef LOG_STORAGE\n";
+#ifdef LOG_STORAGE
             code += "    zklog.info(\"Storage read sRD read from key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16) + \" value:\" + fr.toString(fi3, 16) + \":\" + fr.toString(fi2, 16) + \":\" + fr.toString(fi1, 16) + \":\" + fr.toString(fi0, 16));\n";
-            code += "#endif\n";
+#endif
 
             code += "    if (!fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
@@ -2956,9 +2969,9 @@ code += "    #endif\n";
             code += "            return;\n";
             code += "        }\n\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
 
             code += "        // Call poseidon and get the hash key\n";
             code += "        mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
@@ -2993,9 +3006,9 @@ code += "    #endif\n";
             code += "        ctx.lastSWrite.key[2] = Kin1Hash[2];\n";
             code += "        ctx.lastSWrite.key[3] = Kin1Hash[3];\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
-            code += "#endif\n";
+#endif
 
             code += "        // Call SMT to get the new Merkel Tree root hash\n";
             code += "        if (!fea2scalar(fr, scalarD, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3006,9 +3019,9 @@ code += "    #endif\n";
             code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
 
             code += "        sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
@@ -3053,9 +3066,9 @@ code += "    #endif\n";
             code += "        if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "            ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
-            code += "#endif\n";
+#endif
 
             code += "        ctx.lastSWrite.step = i;\n";
             code += "    }\n";
@@ -3255,9 +3268,9 @@ code += "    #endif\n";
             code += "    incHashPos = size;\n\n";
             bIncHashPos = true;
 
-            code += "#ifdef LOG_HASHK\n";
-            code += "    zklog.info(\"hashK 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data=\" + a.get_str(16));\n";
-            code += "#endif\n\n";
+#ifdef LOG_HASHK
+            code += "    zklog.info(\"hashK 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data=\" + a.get_str(16));\n\n";
+#endif
         }
 
         // HashKLen instruction
@@ -3314,26 +3327,26 @@ code += "    #endif\n";
             code += "    }\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
             code += "    {\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
             code += "        keccak256(hashIterator->second.data.data(), hashIterator->second.data.size(), hashIterator->second.digest);\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        mainMetrics.add(\"Keccak\", TimeDiff(t));\n";
-            code += "#endif\n";
+#endif
 
-            code += "#ifdef LOG_HASHK\n";
+#ifdef LOG_HASHK
             code += "        {\n";
             code += "           string s = \"hashKLen 2 calculate hashKLen: addr:\" + to_string(addr) + \" hash:\" + ctx.hashK[addr].digest.get_str(16) + \" size:\" + to_string(ctx.hashK[addr].data.size()) + \" data:\";\n";
             code += "           for (uint64_t k=0; k<ctx.hashK[addr].data.size(); k++) s += byte2string(ctx.hashK[addr].data[k]) + \":\";\n";
             code += "           zklog.info(s);\n";
             code += "        }\n";
-            code += "#endif\n";
+#endif
             code += "    }\n";
 
-            code += "#ifdef LOG_HASHK\n";
+#ifdef LOG_HASHK
             code += "    zklog.info(\"hashKLen 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr));\n";
-            code += "#endif\n";
+#endif
         }
 
         // HashKDigest instruction
@@ -3386,9 +3399,9 @@ code += "    #endif\n";
 
             code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(136));\n";
 
-            code += "#ifdef LOG_HASHK\n";
+#ifdef LOG_HASHK
             code += "    zklog.info(\"hashKDigest 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashK[addr].digest.get_str(16));\n";
-            code += "#endif\n";
+#endif
         }
 
         // HashP instruction
@@ -3611,15 +3624,15 @@ code += "    #endif\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
             code += "    {\n";
             
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
             code += "        Goldilocks::Element result[4];\n";
             code += "        mainExecutor.linearPoseidon(ctx, hashIterator->second.data, result);\n";
             code += "        fea2scalar(fr, hashIterator->second.digest, result);\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
-            code += "#endif\n";
+#endif
 
             code += "        // Collect the keys used to read or write store data\n";
             code += "        if (proverRequest.input.bGetKeys)\n";
@@ -3627,9 +3640,9 @@ code += "    #endif\n";
             code += "            proverRequest.programKeys.insert(fea2string(fr, result));\n";
             code += "        }\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
             code += "        zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
@@ -3639,16 +3652,16 @@ code += "    #endif\n";
             code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        mainMetrics.add(\"Set program\", TimeDiff(t));\n";
-            code += "#endif\n";
-            code += "#ifdef LOG_HASH\n";
+#endif
+#ifdef LOG_HASHP
             code += "        {\n";
             code += "           string s = \"Hash calculate hashPLen 2: addr:\" + to_string(addr) + \" hash:\" + ctx.hashP[addr].digest.get_str(16) + \" size:\" + to_string(ctx.hashP[addr].data.size()) + \" data:\";\n";
             code += "           for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) s += byte2string(ctx.hashP[addr].data[k]) + \":\";\n";
             code += "           zklog.info(s);\n";
             code += "        }\n";
-            code += "#endif\n";
+#endif
             code += "    }\n";
         }
 
@@ -3684,9 +3697,9 @@ code += "    #endif\n";
             code += "            proverRequest.programKeys.insert(fea2string(fr, aux));\n";
             code += "        }\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
             code += "        zkResult = pHashDB->getProgram(proverRequest.uuid, aux, hashValue.data, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
@@ -3696,9 +3709,9 @@ code += "    #endif\n";
             code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        mainMetrics.add(\"Get program\", TimeDiff(t));\n";
-            code += "#endif\n";
+#endif
             code += "        ctx.hashP[addr] = hashValue;\n";
             code += "        hashIterator = ctx.hashP.find(addr);\n";
             code += "        zkassert(hashIterator != ctx.hashP.end());\n";
@@ -3861,9 +3874,9 @@ code += "    #endif\n";
             code += "    incHashPos = size;\n\n";
             bIncHashPos = true;
 
-            code += "#ifdef LOG_HASHS\n";
+#ifdef LOG_HASHS
             code += "    zklog.info(\"hashS 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data=\" + a.get_str(16));\n";
-            code += "#endif\n\n";
+#endif
         }
 
         // HashSLen instruction
@@ -3920,26 +3933,26 @@ code += "    #endif\n";
             code += "    }\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
             code += "    {\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
             code += "        SHA256(hashIterator->second.data.data(), hashIterator->second.data.size(), hashIterator->second.digest);\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "        mainMetrics.add(\"SHA256\", TimeDiff(t));\n";
-            code += "#endif\n";
+#endif
 
-            code += "#ifdef LOG_HASHS\n";
+#ifdef LOG_HASHS
             code += "        {\n";
             code += "           string s = \"hashSLen 2 calculate hashSLen: addr:\" + to_string(addr) + \" hash:\" + ctx.hashS[addr].digest.get_str(16) + \" size:\" + to_string(ctx.hashS[addr].data.size()) + \" data:\";\n";
             code += "           for (uint64_t k=0; k<ctx.hashS[addr].data.size(); k++) s += byte2string(ctx.hashS[addr].data[k]) + \":\";\n";
             code += "           zklog.info(s);\n";
             code += "        }\n";
-            code += "#endif\n";
+#endif
             code += "    }\n";
 
-            code += "#ifdef LOG_HASHS\n";
+#ifdef LOG_HASHS
             code += "    zklog.info(\"hashSLen 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr));\n";
-            code += "#endif\n";
+#endif
         }
 
         // HashSDigest instruction
@@ -3992,9 +4005,9 @@ code += "    #endif\n";
 
             code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1+8)) / double(64));\n";
 
-            code += "#ifdef LOG_HASHS\n";
+#ifdef LOG_HASHS
             code += "    zklog.info(\"hashSDigest 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashS[addr].digest.get_str(16));\n";
-            code += "#endif\n";
+#endif
         }
 
         }
@@ -5379,7 +5392,7 @@ code += "    #endif\n";
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
             code += "        pols.cntArith[" + string(bFastMode?"0":"nexti") + "] = fr.inc(pols.cntArith[" + string(bFastMode?"0":"i") + "]);\n";
-            code += "#ifdef CHECK_MAX_CNT_ASAP\n";
+#ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntArith[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + ")\n";
             code += "        {\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
@@ -5395,7 +5408,7 @@ code += "    #endif\n";
             code += "            exitProcess();\n";
             }
             code += "        }\n";
-            code += "#endif\n";
+#endif
             code += "    }\n\n";
         }
         else if (!bFastMode)
@@ -5411,7 +5424,7 @@ code += "    #endif\n";
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
             code += "        pols.cntBinary[" + string(bFastMode?"0":"nexti") + "] = fr.inc(pols.cntBinary[" + string(bFastMode?"0":"i") + "]);\n";
-            code += "#ifdef CHECK_MAX_CNT_ASAP\n";
+#ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntBinary[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + ")\n";
             code += "        {\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
@@ -5427,7 +5440,7 @@ code += "    #endif\n";
             code += "            exitProcess();\n";
             }
             code += "        }\n";
-            code += "#endif\n";
+#endif
             code += "    }\n\n";
         }
         else if (!bFastMode)
@@ -5443,7 +5456,7 @@ code += "    #endif\n";
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
             code += "        pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "] = fr.inc(pols.cntMemAlign[" + string(bFastMode?"0":"i") + "]);\n";
-            code += "#ifdef CHECK_MAX_CNT_ASAP\n";
+#ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + ")\n";
             code += "        {\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
@@ -5459,7 +5472,7 @@ code += "    #endif\n";
             code += "            exitProcess();\n";
             }
             code += "        }\n";
-            code += "#endif\n";
+#endif
             code += "    }\n\n";
         }
         else if (!bFastMode)
@@ -5843,7 +5856,7 @@ code += "    #endif\n";
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
             code += "        pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntKeccakF[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
-            code += "#ifdef CHECK_MAX_CNT_ASAP\n";
+#ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + ")\n";
             code += "        {\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
@@ -5859,7 +5872,8 @@ code += "    #endif\n";
             code += "            exitProcess();\n";
             }
             code += "        }\n";
-            code += "#endif\n";
+
+#endif
             code += "    }\n\n";
         }
         else if (!bFastMode)
@@ -5872,7 +5886,7 @@ code += "    #endif\n";
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
             code += "        pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntPaddingPG[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
-            code += "#ifdef CHECK_MAX_CNT_ASAP\n";
+#ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + ")\n";
             code += "        {\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
@@ -5888,7 +5902,7 @@ code += "    #endif\n";
             code += "            exitProcess();\n";
             }
             code += "        }\n";
-            code += "#endif\n";
+#endif
             code += "    }\n\n";
         }
         else if (!bFastMode)
@@ -5903,7 +5917,7 @@ code += "    #endif\n";
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
             code += "        pols.cntSha256F[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntSha256F[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
-            code += "#ifdef CHECK_MAX_CNT_ASAP\n";
+#ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntSha256F[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_SHA256_F_LIMIT"]["value"] + ")\n";
             code += "        {\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
@@ -5919,7 +5933,7 @@ code += "    #endif\n";
             code += "            exitProcess();\n";
             }
             code += "        }\n";
-            code += "#endif\n";
+#endif
             code += "    }\n\n";
         }
         else if (!bFastMode)
@@ -5935,7 +5949,7 @@ code += "    #endif\n";
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
             code += "        pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntPoseidonG[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
-            code += "#ifdef CHECK_MAX_CNT_ASAP\n";
+#ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + ")\n";
             code += "        {\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
@@ -5951,7 +5965,7 @@ code += "    #endif\n";
             code += "            exitProcess();\n";
             }
             code += "        }\n";
-            code += "#endif\n";
+#endif
             code += "    }\n\n";
         }
         else if (!bFastMode)
@@ -5970,17 +5984,17 @@ code += "    #endif\n";
             code += "        i++;\n";
             code += "        for (uint64_t j=0; j<rom.line[" + to_string(zkPC) + "].cmdAfter.size(); j++)\n";
             code += "        {\n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "            gettimeofday(&t, NULL);\n";
-            code += "#endif\n";
+#endif
             code += "            cr.reset();\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            evalCommand(ctx, *rom.line[" + to_string(zkPC) + "].cmdAfter[j], cr);\n";
             code += "    \n";
-            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             code += "            mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
             code += "            evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdAfter[j]->opAndFunction, TimeDiff(t));\n";
-            code += "#endif\n";
+#endif
             code += "            // In case of an external error, return it\n";
             code += "            if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "            {\n";
@@ -5996,7 +6010,7 @@ code += "    #endif\n";
             code += "    }\n\n";
         }
 
-        code += "#ifdef LOG_COMPLETED_STEPS\n";
+#ifdef LOG_COMPLETED_STEPS
         code += "    zklog.info( \"<-- Completed step=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " op=\" + fr.toString(op7,16) + \":\" + fr.toString(op6,16) + \":\" + fr.toString(op5,16) + \":\" + fr.toString(op4,16) + \":\" + fr.toString(op3,16) + \":\" + fr.toString(op2,16) + \":\" + fr.toString(op1,16) + \":\" + fr.toString(op0,16) + \" ABCDE0=\" + fr.toString(pols.A0[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.B0[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.C0[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.D0[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.E0[" + string(bFastMode?"0":"nexti") + "],16) + \" FREE0:7=\" + fr.toString(fi0,16) + \":\" + fr.toString(fi7,16) + \" addr=\" + to_string(addr));\n";
         /*code += "    zklog.info(\"<-- Completed step=\" + to_string(i) + \" zkPC=" + to_string(zkPC) +
                 " op=\" + fr.toString(op7,16) + \":\" + fr.toString(op6,16) + \":\" + fr.toString(op5,16) + \":\" + fr.toString(op4,16) + \":\" + fr.toString(op3,16) + \":\" + fr.toString(op2,16) + \":\" + fr.toString(op1,16) + \":\" + fr.toString(op0,16) + \"" +
@@ -6006,8 +6020,8 @@ code += "    #endif\n";
                 " D=\" + fr.toString(pols.D7[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.D6[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.D5[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.D4[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.D3[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.D2[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.D1[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.D0[" + string(bFastMode?"0":"nexti") + "],16) + \"" +
                 " E=\" + fr.toString(pols.E7[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.E6[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.E5[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.E4[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.E3[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.E2[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.E1[" + string(bFastMode?"0":"nexti") + "],16) + \":\" + fr.toString(pols.E0[" + string(bFastMode?"0":"nexti") + "],16) + \"" +
                 " FREE0:7=\" + fr.toString(fi0,16) + \":\" + fr.toString(fi7],16) + \" addr=\" + to_string(addr));\n";*/
-        code += "#endif\n";
-        code += "#ifdef LOG_COMPLETED_STEPS_TO_FILE\n";
+#endif
+#ifdef LOG_COMPLETED_STEPS_TO_FILE
         code += "    outfile.open(\"c.txt\", std::ios_base::app); // append instead of overwrite\n";
         code += "    outfile << \"<-- Completed step=\" << i << \" zkPC=" + to_string(zkPC) + " op=\" << fr.toString(op7,16) << \":\" << fr.toString(op6,16) << \":\" << fr.toString(op5,16) << \":\" << fr.toString(op4,16) << \":\" << fr.toString(op3,16) << \":\" << fr.toString(op2,16) << \":\" << fr.toString(op1,16) << \":\" << fr.toString(op0,16) << \" ABCDE0=\" << fr.toString(pols.A0[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.B0[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.C0[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.D0[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.E0[" + string(bFastMode?"0":"nexti") + "],16) << \" FREE0:7=\" << fr.toString(fi0,16) << \":\" << fr.toString(fi7,16) << \" addr=\" << addr << endl;\n";
         /*code += "    outfile << \"<-- Completed step=\" << i << \" zkPC=" + to_string(zkPC) +
@@ -6019,7 +6033,7 @@ code += "    #endif\n";
                 " E=\" << fr.toString(pols.E7[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.E6[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.E5[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.E4[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.E3[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.E2[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.E1[" + string(bFastMode?"0":"nexti") + "],16) << \":\" << fr.toString(pols.E0[" + string(bFastMode?"0":"nexti") + "],16) << \"" +
                 " FREE0:7=\" << fr.toString(fi0,16) << \":\" << fr.toString(fi7,16) << \" addr=\" << addr << endl;\n";*/
         code += "    outfile.close();\n";
-        code += "#endif\n\n";
+#endif
 
         // Jump to the end label if we are done and we are in fast mode
         if (zkPC == rom["labels"]["finalizeExecution"])
@@ -6162,7 +6176,7 @@ code += "    #endif\n";
     }
     code += "    }\n\n";
 
-    code += "#ifdef CHECK_MAX_CNT_AT_THE_END\n";
+#ifdef CHECK_MAX_CNT_AT_THE_END
     code += "    if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntArith[0]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + "))\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
@@ -6215,7 +6229,7 @@ code += "    #endif\n";
         code += "        exitProcess();\n";
     code += "    }\n";
     }
-    code += "#endif\n\n";
+#endif
 
     if (!bFastMode) // In fast mode, last nexti was not 0 but 1, and pols have only 2 evaluations
     {
@@ -6320,9 +6334,9 @@ code += "    #endif\n";
         }
     }
 
-    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     code += "    gettimeofday(&t, NULL);\n";
-    code += "#endif\n";
+#endif
 
     code += "    if (ctx.config.hashDB64)\n";
     code += "    {\n";
@@ -6357,17 +6371,17 @@ code += "    #endif\n";
     code += "        }\n";
     code += "    }\n\n";
 
-    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     code += "    mainMetrics.add(\"Flush\", TimeDiff(t));\n";
-    code += "#endif\n";
+#endif
 
-    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     code += "    if (mainExecutor.config.executorTimeStatistics)\n";
     code += "    {\n";
     code += "        mainMetrics.print(\"Main Executor calls\");\n";
     code += "        evalCommandMetrics.print(\"Main Executor eval command calls\");\n";
-    code += "    }\n";
-    code += "#endif\n\n";
+    code += "    }\n\n";
+#endif
     
     code += "    if (mainExecutor.config.dbMetrics) proverRequest.dbReadLog->print();\n\n";
 
