@@ -195,10 +195,6 @@ zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value, const Go
 
 mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p );
 
-bool Arith_isFreeInEquation (uint64_t arithEquation);
-zkresult Arith_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilocks::Element &fi1, Goldilocks::Element &fi2, Goldilocks::Element &fi3, Goldilocks::Element &fi4, Goldilocks::Element &fi5, Goldilocks::Element &fi6, Goldilocks::Element &fi7);
-zkresult Arith_verify (Context &ctx, Goldilocks::Element &op0, Goldilocks::Element &op1, Goldilocks::Element &op2, Goldilocks::Element &op3, Goldilocks::Element &op4, Goldilocks::Element &op5, Goldilocks::Element &op6, Goldilocks::Element &op7, MainExecRequired *required, uint64_t &same12, uint64_t &useE, uint64_t &useCD);
-
 void eval_fpBLS12_381_sqrt            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_lenBinDecomp                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_frBLS12_381_inv             (Context &ctx, const RomCommand &cmd, CommandResult &cr);

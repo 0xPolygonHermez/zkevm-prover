@@ -259,6 +259,9 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "#include \"main_sm/" + forkNamespace + "/main_exec_generated/" + fileName + ".hpp\"\n";
         code += "#include \"scalar.hpp\"\n";
         code += "#include \"main_sm/"+ forkNamespace + "/main/eval_command.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/helpers/arith_helper.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/helpers/binary_helper.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/helpers/memory_helper.hpp\"\n";
         code += "#include <fstream>\n";
         code += "#include \"utils.hpp\"\n";
         code += "#include \"timer.hpp\"\n";
@@ -345,7 +348,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
         }
     }
-    code += "    Goldilocks::Element value8[8];\n";
 
     code += "    int32_t sp;\n";
 
@@ -562,9 +564,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
         }
     }
-    code += "    uint64_t same12;\n";
-    code += "    uint64_t useE;\n";
-    code += "    uint64_t useCD;\n";
 
     if (!bFastMode)
         code += "    MemoryAccess memoryAccess;\n";
@@ -1354,26 +1353,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                      (!rom["program"][zkPC].contains("mWR") || (rom["program"][zkPC]["mWR"]==0)) )
                 {
                     //code += "    // Memory read free in: get fi=mem[addr], if it exists\n";
-                    code += "    memIterator = ctx.mem.find(memAddr);\n";
-                    code += "    if (memIterator != ctx.mem.end()) {\n";
-                    code += "        fi0 = memIterator->second.fe0;\n";
-                    code += "        fi1 = memIterator->second.fe1;\n";
-                    code += "        fi2 = memIterator->second.fe2;\n";
-                    code += "        fi3 = memIterator->second.fe3;\n";
-                    code += "        fi4 = memIterator->second.fe4;\n";
-                    code += "        fi5 = memIterator->second.fe5;\n";
-                    code += "        fi6 = memIterator->second.fe6;\n";
-                    code += "        fi7 = memIterator->second.fe7;\n";
-                    code += "    } else {\n";
-                    code += "        fi0 = fr.zero();\n";
-                    code += "        fi1 = fr.zero();\n";
-                    code += "        fi2 = fr.zero();\n";
-                    code += "        fi3 = fr.zero();\n";
-                    code += "        fi4 = fr.zero();\n";
-                    code += "        fi5 = fr.zero();\n";
-                    code += "        fi6 = fr.zero();\n";
-                    code += "        fi7 = fr.zero();\n";
-                    code += "    }\n";
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
+                    code += "    Memory_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, memAddr);\n";
                     nHits++;
                 }
 
@@ -2228,220 +2209,16 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 // Binary free in
                 if (rom["program"][zkPC].contains("bin") && (rom["program"][zkPC]["bin"] == 1))
                 {
-                    if (rom["program"][zkPC]["binOpcode"] == 0) // ADD
-                    {
-                        //code += "    //Binary free in ADD\n";
-                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    c = (a + b) & ScalarMask256;\n";
-                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        nHits++;
-                    }
-                    else if (rom["program"][zkPC]["binOpcode"] == 1) // SUB
-                    {
-                        //code += "    //Binary free in SUB\n";
-                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    c = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
-                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        nHits++;
-                    }
-                    else if (rom["program"][zkPC]["binOpcode"] == 2) // LT
-                    {
-                        //code += "    //Binary free in LT\n";
-                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    c = (a < b);\n";
-                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        nHits++;
-                    }
-                    else if (rom["program"][zkPC]["binOpcode"] == 3) // SLT
-                    {
-                        //code += "    //Binary free in SLT\n";
-                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (a >= ScalarTwoTo255) a = a - ScalarTwoTo256;\n";
-                        code += "    if (b >= ScalarTwoTo255) b = b - ScalarTwoTo256;\n";
-                        code += "    c = (a < b);\n";
-                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        nHits++;
-                    }
-                    else if (rom["program"][zkPC]["binOpcode"] == 4) // EQ
-                    {
-                        //code += "    //Binary free in EQ\n";
-                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    c = (a == b);\n";
-                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        nHits++;
-                    }
-                    else if (rom["program"][zkPC]["binOpcode"] == 5) // AND
-                    {
-                        //code += "    //Binary free in AND\n";
-                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    c = (a & b);\n";
-                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        nHits++;
-                    }
-                    else if (rom["program"][zkPC]["binOpcode"] == 6) // OR
-                    {
-                        //code += "    //Binary free in OR\n";
-                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    c = (a | b);\n";
-                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        nHits++;
-                    }
-                    else if (rom["program"][zkPC]["binOpcode"] == 7) // XOR
-                    {
-                        //code += "    //Binary free in XOR\n";
-                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    c = (a ^ b);\n";
-                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        nHits++;
-                    }
-                    else if (rom["program"][zkPC]["binOpcode"] == 8) // LT4
-                    {
-                        //code += "    //Binary free in XOR\n";
-                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    c = lt4(a, b);\n";
-                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        nHits++;
-                    }
-                    else
-                    {
-                        cerr << "Error: Invalid binary operation: opcode=" << rom["program"][zkPC]["binOpcode"] << endl;
-                        exit(-1);
-                    }
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
+                    code += "    zkResult = Binary_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
+                    code += "    if (zkResult != ZKR_SUCCESS)\n";
+                    code += "    {\n";
+                    code += "        proverRequest.result = zkResult;\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling Binary_calculate() result=\" + zkresult2string(zkResult));\n";
+                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
+                    code += "        return;\n";
+                    code += "    }\n";
+                    nHits++;
                     code += "\n";
                 }
 
@@ -2813,130 +2590,15 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         if (rom["program"][zkPC].contains("mOp") && (rom["program"][zkPC]["mOp"] == 1))
         {
             //code += "    // Memory operation instruction\n";
-            if (!bFastMode)
-                code += "    pols.mOp[i] = fr.one();\n";
-
-            if (!bFastMode && rom["program"][zkPC].contains("memUseAddrRel") && (rom["program"][zkPC]["memUseAddrRel"] == 1))
-                code += "    pols.memUseAddrRel[i] = fr.one();\n";
-
-            // If mWR, mem[addr]=op
-            if (rom["program"][zkPC].contains("mWR") && (rom["program"][zkPC]["mWR"] == 1))
-            {
-                if (!bFastMode)
-                    code += "    pols.mWR[i] = fr.one();\n\n";
-
-                code += "    memIterator = ctx.mem.find(memAddr);\n";
-                code += "    if (memIterator == ctx.mem.end())\n";
-                code += "    {\n";
-                code += "        ctx.mem[memAddr].fe0 = op0;\n";
-                code += "        memIterator = ctx.mem.find(memAddr);\n";
-                code += "    }\n";
-                code += "    else\n";
-                code += "    {\n";
-                code += "        memIterator->second.fe0 = op0;\n";
-                code += "    }\n";
-                code += "    memIterator->second.fe1 = op1;\n";
-                code += "    memIterator->second.fe2 = op2;\n";
-                code += "    memIterator->second.fe3 = op3;\n";
-                code += "    memIterator->second.fe4 = op4;\n";
-                code += "    memIterator->second.fe5 = op5;\n";
-                code += "    memIterator->second.fe6 = op6;\n";
-                code += "    memIterator->second.fe7 = op7;\n\n";
-
-                if (!bFastMode)
-                {
-                    code += "    memoryAccess.bIsWrite = true;\n";
-                    code += "    memoryAccess.address = memAddr;\n";
-                    code += "    memoryAccess.pc = i;\n";
-                    code += "    memoryAccess.fe0 = op0;\n";
-                    code += "    memoryAccess.fe1 = op1;\n";
-                    code += "    memoryAccess.fe2 = op2;\n";
-                    code += "    memoryAccess.fe3 = op3;\n";
-                    code += "    memoryAccess.fe4 = op4;\n";
-                    code += "    memoryAccess.fe5 = op5;\n";
-                    code += "    memoryAccess.fe6 = op6;\n";
-                    code += "    memoryAccess.fe7 = op7;\n";
-                    code += "    required.Memory.push_back(memoryAccess);\n\n";
-                }
-            }
-            else
-            {
-                if (rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1))
-                {
-                    code += "    value8[0] = pols.FREE0[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    value8[1] = pols.FREE1[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    value8[2] = pols.FREE2[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    value8[3] = pols.FREE3[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    value8[4] = pols.FREE4[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    value8[5] = pols.FREE5[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    value8[6] = pols.FREE6[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    value8[7] = pols.FREE7[" + string(bFastMode?"0":"i") + "];\n";
-                }
-                else
-                {
-                    code += "    value8[0] = op0;\n";
-                    code += "    value8[1] = op1;\n";
-                    code += "    value8[2] = op2;\n";
-                    code += "    value8[3] = op3;\n";
-                    code += "    value8[4] = op4;\n";
-                    code += "    value8[5] = op5;\n";
-                    code += "    value8[6] = op6;\n";
-                    code += "    value8[7] = op7;\n";
-                }
-                if (!bFastMode)
-                {
-                    code += "    memoryAccess.bIsWrite = false;\n";
-                    code += "    memoryAccess.address = memAddr;\n";
-                    code += "    memoryAccess.pc = i;\n";
-                    code += "    memoryAccess.fe0 = value8[0];\n";
-                    code += "    memoryAccess.fe1 = value8[1];\n";
-                    code += "    memoryAccess.fe2 = value8[2];\n";
-                    code += "    memoryAccess.fe3 = value8[3];\n";
-                    code += "    memoryAccess.fe4 = value8[4];\n";
-                    code += "    memoryAccess.fe5 = value8[5];\n";
-                    code += "    memoryAccess.fe6 = value8[6];\n";
-                    code += "    memoryAccess.fe7 = value8[7];\n";
-                    code += "    required.Memory.push_back(memoryAccess);\n\n";
-                }
-
-                code += "    memIterator = ctx.mem.find(memAddr);\n";
-                code += "    if (memIterator != ctx.mem.end()) \n";
-                code += "    {\n";
-                code += "        if ( (!fr.equal(memIterator->second.fe0, value8[0])) ||\n";
-                code += "             (!fr.equal(memIterator->second.fe1, value8[1])) ||\n";
-                code += "             (!fr.equal(memIterator->second.fe2, value8[2])) ||\n";
-                code += "             (!fr.equal(memIterator->second.fe3, value8[3])) ||\n";
-                code += "             (!fr.equal(memIterator->second.fe4, value8[4])) ||\n";
-                code += "             (!fr.equal(memIterator->second.fe5, value8[5])) ||\n";
-                code += "             (!fr.equal(memIterator->second.fe6, value8[6])) ||\n";
-                code += "             (!fr.equal(memIterator->second.fe7, value8[7])) )\n";
-                code += "        {\n";
-                code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
-                code += "            zkPC=" + to_string(zkPC) +";\n";
-                code += "            mainExecutor.logError(ctx, \"Memory Read does not match value=\" + fea2stringchain(fr, value8[0], value8[1], value8[2], value8[3], value8[4], value8[5], value8[6], value8[7]) + \" mem=\" + fea2stringchain(fr, memIterator->second.fe0, memIterator->second.fe1, memIterator->second.fe2, memIterator->second.fe3, memIterator->second.fe4, memIterator->second.fe5, memIterator->second.fe6, memIterator->second.fe7));\n";
-                code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "            return;\n";
-                code += "        }\n";
-                code += "    }\n";
-                code += "    else\n";
-                code += "    {\n";
-                code += "        if ( (!fr.isZero(value8[0])) ||\n";
-                code += "             (!fr.isZero(value8[1])) ||\n";
-                code += "             (!fr.isZero(value8[2])) ||\n";
-                code += "             (!fr.isZero(value8[3])) ||\n";
-                code += "             (!fr.isZero(value8[4])) ||\n";
-                code += "             (!fr.isZero(value8[5])) ||\n";
-                code += "             (!fr.isZero(value8[6])) ||\n";
-                code += "             (!fr.isZero(value8[7])) )\n";
-                code += "        {\n";
-                code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
-                code += "            zkPC=" + to_string(zkPC) +";\n";
-                code += "            mainExecutor.logError(ctx, \"Memory Read does not match (value!=0) value=\" + fea2stringchain(fr, value8[0], value8[1], value8[2], value8[3], value8[4], value8[5], value8[6], value8[7]));\n";
-                code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "            return;\n";
-                code += "        }\n";
-                code += "    }\n\n";
-            }
+            code += "    zkPC=" + to_string(zkPC) +";\n";
+            code += "    zkResult = Memory_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ", memAddr);\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
+            code += "    {\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling Memory_verify() result=\" + zkresult2string(zkResult));\n";
+            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
+            code += "        return;\n";
+            code += "    }\n\n";
         }
 
         // overwrite 'op' when hiting 'checkFirstTxType' label
@@ -4272,7 +3934,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         if (rom["program"][zkPC].contains("arith") && (rom["program"][zkPC]["arith"]==1))
         {
             code += "    zkPC=" + to_string(zkPC) +";\n";
-            code += "    zkResult = Arith_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ", same12, useE, useCD);\n";
+            code += "    zkResult = Arith_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ");\n";
             code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
             code += "        proverRequest.result = zkResult;\n";
@@ -4280,515 +3942,22 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
-            if (!bFastMode)
-            {
-                code += "    pols.arith[i] = fr.one();\n";
-                code += "    pols.arithEquation[i] = fr.fromU64(rom.line[zkPC].arithEquation);\n";
-                code += "    pols.arithSame12[i] = fr.fromU64(same12);\n";
-                code += "    pols.arithUseE[i] = fr.fromU64(useE);\n";
-                code += "    pols.arithUseCD[i] = fr.fromU64(useCD);\n";
-            }
         }
 
         // Binary instruction
         if (rom["program"][zkPC].contains("bin") && (rom["program"][zkPC]["bin"] == 1))
         {
-            if (rom["program"][zkPC]["binOpcode"] == 0) // ADD
-            {
-                //code += "    // Binary instruction: ADD\n";
-
-                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    expectedC = (a + b) & ScalarMask256;\n";
-                code += "    if (c != expectedC)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_ADD_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Binary ADD operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a + b) & ScalarMask256=\" + expectedC.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    pols.carry[" + string(bFastMode?"0":"i") + "] = fr.fromU64(((a + b) >> 256) > 0);\n";
-
-                if (!bFastMode)
-                {
-                    code += "    pols.binOpcode[i] = fr.zero();\n";
-
-                    //code += "    // Store the binary action to execute it later with the binary SM\n";
-                    code += "    binaryAction.a = a;\n";
-                    code += "    binaryAction.b = b;\n";
-                    code += "    binaryAction.c = c;\n";
-                    code += "    binaryAction.opcode = 0;\n";
-                    code += "    binaryAction.type = 1;\n";
-                    code += "    required.Binary.push_back(binaryAction);\n";
-                }
-            }
-            else if (rom["program"][zkPC]["binOpcode"] == 1) // SUB
-            {
-                //code += "    // Binary instruction: SUB\n";
-
-                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
-                code += "    if (c != expectedC)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_SUB_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Binary SUB operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a - b + ScalarTwoTo256) & ScalarMask256=\" + expectedC.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    pols.carry[" + string(bFastMode?"0":"i") + "] = fr.fromU64((a - b) < 0);\n";
-
-                if (!bFastMode)
-                {
-                    code += "    pols.binOpcode[i] = fr.one();\n";
-
-                    //code += "    // Store the binary action to execute it later with the binary SM\n";
-                    code += "    binaryAction.a = a;\n";
-                    code += "    binaryAction.b = b;\n";
-                    code += "    binaryAction.c = c;\n";
-                    code += "    binaryAction.opcode = 1;\n";
-                    code += "    binaryAction.type = 1;\n";
-                    code += "    required.Binary.push_back(binaryAction);\n";
-                }
-            }
-            else if (rom["program"][zkPC]["binOpcode"] == 2) // LT
-            {
-                //code += "    // Binary instruction: LT\n";
-
-                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    expectedC = (a < b);\n";
-                code += "    if (c != expectedC)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_LT_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Binary LT operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a < b)=\" + expectedC.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    pols.carry[" + string(bFastMode?"0":"i") + "] = fr.fromU64(a < b);\n";
-
-                if (!bFastMode)
-                {
-                    code += "    pols.binOpcode[i] = fr.fromU64(2);\n";
-
-                    //code += "    // Store the binary action to execute it later with the binary SM\n";
-                    code += "    binaryAction.a = a;\n";
-                    code += "    binaryAction.b = b;\n";
-                    code += "    binaryAction.c = c;\n";
-                    code += "    binaryAction.opcode = 2;\n";
-                    code += "    binaryAction.type = 1;\n";
-                    code += "    required.Binary.push_back(binaryAction);\n";
-                }
-            }
-            else if (rom["program"][zkPC]["binOpcode"] == 3) // SLT
-            {
-                //code += "    // Binary instruction: SLT\n";
-
-                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    _a = a;\n";
-                code += "    _b = b;\n";
-                code += "    if (a >= ScalarTwoTo255) _a = a - ScalarTwoTo256;\n";
-                code += "    if (b >= ScalarTwoTo255) _b = b - ScalarTwoTo256;\n";
-
-                code += "    expectedC = (_a < _b);\n";
-                code += "    if (c != expectedC)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_SLT_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Binary SLT operation does not match a=\" + a.get_str(16) + \" b=\" + b.get_str(16) + \" c=\" + c.get_str(16) + \" _a=\" + _a.get_str(16) + \" _b=\" + _b.get_str(16) + \" expectedC=\" + expectedC.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    pols.carry[" + string(bFastMode?"0":"i") + "] = fr.fromU64(_a < _b);\n";
-
-                if (!bFastMode)
-                {
-                    code += "    pols.binOpcode[i] = fr.fromU64(3);\n";
-
-                    //code += "    // Store the binary action to execute it later with the binary SM\n";
-                    code += "    binaryAction.a = a;\n";
-                    code += "    binaryAction.b = b;\n";
-                    code += "    binaryAction.c = c;\n";
-                    code += "    binaryAction.opcode = 3;\n";
-                    code += "    binaryAction.type = 1;\n";
-                    code += "    required.Binary.push_back(binaryAction);\n";
-                }
-            }
-            else if (rom["program"][zkPC]["binOpcode"] == 4) // EQ
-            {
-                //code += "    // Binary instruction: EQ\n";
-
-                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    expectedC = (a == b);\n";
-                code += "    if (c != expectedC)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_EQ_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError( ctx, \"Binary EQ operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a==b)=\" + expectedC.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    pols.carry[" + string(bFastMode?"0":"i") + "] = fr.fromU64((a == b));\n";
-
-                if (!bFastMode)
-                {
-                    code += "    pols.binOpcode[i] = fr.fromU64(4);\n";
-
-                    //code += "    // Store the binary action to execute it later with the binary SM\n";
-                    code += "    binaryAction.a = a;\n";
-                    code += "    binaryAction.b = b;\n";
-                    code += "    binaryAction.c = c;\n";
-                    code += "    binaryAction.opcode = 4;\n";
-                    code += "    binaryAction.type = 1;\n";
-                    code += "    required.Binary.push_back(binaryAction);\n";
-                }
-            }
-            else if (rom["program"][zkPC]["binOpcode"] == 5) // AND
-            {
-                //code += "    // Binary instruction: AND\n";
-
-                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    expectedC = (a & b);\n";
-                code += "    if (c != expectedC)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_AND_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Binary AND operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a&b)=\" + expectedC.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    if (c != 0)\n";
-                code += "        pols.carry[" + string(bFastMode?"0":"i") + "] = fr.one();\n";
-
-                if (!bFastMode)
-                {
-                    code += "    pols.binOpcode[i] = fr.fromU64(5);\n";
-
-                    //code += "    // Store the binary action to execute it later with the binary SM\n";
-                    code += "    binaryAction.a = a;\n";
-                    code += "    binaryAction.b = b;\n";
-                    code += "    binaryAction.c = c;\n";
-                    code += "    binaryAction.opcode = 5;\n";
-                    code += "    binaryAction.type = 1;\n";
-                    code += "    required.Binary.push_back(binaryAction);\n";
-                }
-            }
-            else if (rom["program"][zkPC]["binOpcode"] == 6) // OR
-            {
-                //code += "    // Binary instruction: OR\n";
-
-                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    expectedC = (a | b);\n";
-                code += "    if (c != expectedC)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_OR_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Binary OR operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a|b)=\" + expectedC.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                if (!bFastMode)
-                {
-                    code += "    pols.binOpcode[i] = fr.fromU64(6);\n";
-
-                    //code += "    // Store the binary action to execute it later with the binary SM\n";
-                    code += "    binaryAction.a = a;\n";
-                    code += "    binaryAction.b = b;\n";
-                    code += "    binaryAction.c = c;\n";
-                    code += "    binaryAction.opcode = 6;\n";
-                    code += "    binaryAction.type = 1;\n";
-                    code += "    required.Binary.push_back(binaryAction);\n";
-                }
-            }
-            else if (rom["program"][zkPC]["binOpcode"] == 7) // XOR
-            {
-                //code += "    // Binary instruction: XOR\n";
-
-                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    expectedC = (a ^ b);\n";
-                code += "    if (c != expectedC)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_XOR_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Binary XOR operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a^b)=\" + expectedC.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                if (!bFastMode)
-                {
-                    code += "    pols.binOpcode[i] = fr.fromU64(7);\n";
-
-                    //code += "    // Store the binary action to execute it later with the binary SM\n";
-                    code += "    binaryAction.a = a;\n";
-                    code += "    binaryAction.b = b;\n";
-                    code += "    binaryAction.c = c;\n";
-                    code += "    binaryAction.opcode = 7;\n";
-                    code += "    binaryAction.type = 1;\n";
-                    code += "    required.Binary.push_back(binaryAction);\n";
-                }
-            }
-            else if (rom["program"][zkPC]["binOpcode"] == 8) // LT4
-            {
-                //code += "    // Binary instruction: LT4\n";
-
-                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    expectedC = lt4(a, b);\n";
-                code += "    if (c != expectedC)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_LT4_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Binary LT4 operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a^b)=\" + expectedC.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                code += "    pols.carry[" + string(bFastMode?"0":"i") + "] = fr.fromScalar(c);\n";
-
-                if (!bFastMode)
-                {
-                    code += "    pols.binOpcode[i] = fr.fromU64(8);\n";
-
-                    //code += "    // Store the binary action to execute it later with the binary SM\n";
-                    code += "    binaryAction.a = a;\n";
-                    code += "    binaryAction.b = b;\n";
-                    code += "    binaryAction.c = c;\n";
-                    code += "    binaryAction.opcode = 8;\n";
-                    code += "    binaryAction.type = 1;\n";
-                    code += "    required.Binary.push_back(binaryAction);\n";
-                }
-            }
-            else
-            {
-                cerr << "Error: Invalid binary operation opcode=" << rom["program"][zkPC]["binOpcode"] << " zkPC=" << zkPC << endl;
-                exit(-1);
-            }
-
+            code += "    zkPC=" + to_string(zkPC) +";\n";
+            code += "    zkResult = Binary_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ");\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
+            code += "    {\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling Binary_verify() result=\" + zkresult2string(zkResult));\n";
+            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
+            code += "        return;\n";
+            code += "    }\n";
             if (!bFastMode)
                 code += "    pols.bin[i] = fr.one();\n";
-
             code += "\n";
         }
 
