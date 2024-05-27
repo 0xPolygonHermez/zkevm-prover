@@ -994,6 +994,11 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
         bool bOnlyOffset = false;
 
+        bool addrRelSet = false;
+        bool addrSet = false;
+        bool offsetSet = false;
+        int32_t addressOffset = 0;
+
         if ( (rom["program"][zkPC].contains("mOp") && (rom["program"][zkPC]["mOp"]==1)) ||
              (rom["program"][zkPC].contains("JMP") && (rom["program"][zkPC]["JMP"]==1)) ||
              (rom["program"][zkPC].contains("JMPN") && (rom["program"][zkPC]["JMPN"]==1)) ||
@@ -1001,9 +1006,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
              (rom["program"][zkPC].contains("JMPZ") && (rom["program"][zkPC]["JMPZ"]==1)) ||
              (rom["program"][zkPC].contains("call") && (rom["program"][zkPC]["call"]==1)) )
         {
-            bool bAddrRel = false;
-            bool bAddr = false;
-            bool bOffset = false;
+            uint64_t memAddrMax = (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000;
+
             //code += "    // If address is involved, load offset into addr\n";
             if ( (rom["program"][zkPC].contains("ind") && (rom["program"][zkPC]["ind"]==1))  &&
                  (rom["program"][zkPC].contains("indRR") && (rom["program"][zkPC]["indRR"]==1)) )
@@ -1024,7 +1028,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
-                bAddrRel = true;
+                addrRelSet = true;
             }
             if (rom["program"][zkPC].contains("indRR") && (rom["program"][zkPC]["indRR"]!=0))
             {
@@ -1040,17 +1044,17 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
-                bAddrRel = true;
+                addrRelSet = true;
             }
             if (rom["program"][zkPC].contains("offset") && (rom["program"][zkPC]["offset"] != 0))
             {
-                int64_t offset = rom["program"][zkPC]["offset"];
-                if (bAddr)
-                    code += "    addr += " + to_string(offset) + ";\n";
+                addressOffset = rom["program"][zkPC]["offset"];
+                if (addrSet)
+                    code += "    addr += " + to_string(addressOffset) + ";\n";
                 else
-                    code += "    addr = " + to_string(offset) + ";\n";
-                bAddr = true;
-                bOffset = true;
+                    code += "    addr = " + to_string(addressOffset) + ";\n";
+                addrSet = true;
+                offsetSet = true;
             }
             if (rom["program"][zkPC].contains("isStack") && (rom["program"][zkPC]["isStack"]==1))
             {
@@ -1062,42 +1066,87 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
-                if (bAddr)
+                if (addrSet)
                     code += "    addr += sp;\n";
                 else
                     code += "    addr = sp;\n";
-                bAddr = true;
+                addrSet = true;
             }
-            if (!bAddr)
-                    code += "    addr = 0;\n";
+            /*if (!addrSet)
+            {
+                code += "    addr = 0;\n";
+            }*/
             if (anyMem)
             {
                 //code += "    // If addrRel is possitive, and the sum is too big, fail\n";                
                 //code += "        addr = addrRel;\n\n";
+                bool memAddrMustBeChecked = false;
                 if (rom["program"][zkPC].contains("memUseAddrRel") && (rom["program"][zkPC]["memUseAddrRel"] > 0))
-                    code += "    memAddr = addr + addrRel;\n";
+                {
+                    if (!addrRelSet)
+                    {
+                        cerr << "memUseAddrRel set but addrRelSet=false" << endl;
+                        exit(-1);
+                    }
+                    if (addrSet)
+                        code += "    memAddr = addr + addrRel;\n";
+                    else
+                        code += "    memAddr = addrRel;\n";
+                }
                 else
-                    code += "    memAddr = addr;\n";
-                code += "    if ( memAddr >= " + to_string( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) + ")\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"memAddr too big memAddr=\" + to_string(memAddr));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-            
-                //code += "    // If memAddr is negative, fail\n";
-                code += "    if (memAddr < 0)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"memAddr<0 memAddr=\" + to_string(memAddr));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
+                {
+                    if (addrRelSet)
+                    {
+                        cerr << "memUseAddrRel not set but addrRelSet=true" << endl;
+                        exit(-1);
+                    }
+                    if (addrSet)
+                    {
+                        code += "    memAddr = addr;\n";
+                        memAddrMustBeChecked = offsetSet;
+                    }
+                    else
+                    {
+                        code += "    memAddr = 0;\n";
+                        memAddrMustBeChecked = false;
+                    }
+                }
+                if (memAddrMustBeChecked)
+                {
+                    code += "    if ( memAddr >= " + to_string(memAddrMax) + ")\n";
+                    code += "    {\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"memAddr too big memAddr=\" + to_string(memAddr));\n";
+                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
+                    code += "        return;\n";
+                    code += "    }\n";
+                
+                    //code += "    // If memAddr is negative, fail\n";
+                    code += "    if (memAddr < 0)\n";
+                    code += "    {\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"memAddr<0 memAddr=\" + to_string(memAddr));\n";
+                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
+                    code += "        return;\n";
+                    code += "    }\n";
+                }
+                else if (offsetSet)
+                {
+                    if (addressOffset > memAddrMax)
+                    {
+                        cerr << "addressOffset > memAddrMax, addressOffset=" << addressOffset << " memAddrMax=" << memAddrMax << endl;
+                        exit(-1);
+                    }
+                    if (addressOffset < 0)
+                    {
+                        cerr << "addressOffset < 0, addressOffset=" << addressOffset << endl;
+                        exit(-1);
+                    }
+                }
             }
-            //else if (!bAddrRel && bOffset)
+            //else if (!addrRelSet && offsetSet)
             //{
             //    if (/*(rom["program"][zkPC]["offset"] < 0) ||*/ (rom["program"][zkPC]["offset"] >= 0x10000))
             //    {
@@ -1108,7 +1157,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             //        code += "    addrRel = " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
             //    bOnlyOffset = true;
             //}
-            //else if (!bAddrRel && !bOffset)
+            //else if (!addrRelSet && !offsetSet)
             //{
             //    if (!bFastMode)
             //        code += "    addrRel = 0;\n";
@@ -1120,13 +1169,17 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                   (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1)) )
         {
             code += "    addr = 0;\n\n";  // TDDO: can we delete  it?
+            addrSet = true;
         }
         else
         {
 #if (defined LOG_COMPLETED_STEPS) || (defined LOG_COMPLETED_STEPS_TO_FILE)
             code += "    addr = 0;\n";
+            addrSet = true;
 #endif
         }
+        if (!addrSet)
+            code += "    addr = 0;\n";
 
         if (rom["program"][zkPC].contains("useCTX") && (rom["program"][zkPC]["useCTX"] == 1))
         {
