@@ -262,6 +262,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "#include \"main_sm/"+ forkNamespace + "/helpers/arith_helper.hpp\"\n";
         code += "#include \"main_sm/"+ forkNamespace + "/helpers/binary_helper.hpp\"\n";
         code += "#include \"main_sm/"+ forkNamespace + "/helpers/memory_helper.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/helpers/memalign_helper.hpp\"\n";
         code += "#include <fstream>\n";
         code += "#include \"utils.hpp\"\n";
         code += "#include \"timer.hpp\"\n";
@@ -505,26 +506,9 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    HashValue emptyHashValue;\n";
 
     // Mem allign free in
-    code += "    mpz_class m0;\n";
-    code += "    mpz_class m1;\n";
-    code += "    mpz_class modeScalar;\n";
-    code += "    uint64_t mode;\n";
-    code += "    uint64_t len;\n";
-    code += "    bool leftAlignment;\n";
-    code += "    bool littleEndian;\n";
-    code += "    uint64_t _len;\n";
     code += "    mpz_class m;\n";
-    code += "    mpz_class maskV;\n";
-    code += "    uint64_t shiftBits;\n";
-    code += "    mpz_class _v;\n";
-    code += "    mpz_class _tmpv;\n";
     code += "    uint64_t offset;\n";
-    code += "    mpz_class leftV;\n";
-    code += "    mpz_class rightV;\n";
-    code += "    mpz_class v, _V;\n";
-    code += "    mpz_class w0, w1, _W0, _W1;\n";
-    code += "    mpz_class _W;\n";
-    code += "    MemAlignAction memAlignAction;\n";
+    code += "    mpz_class v;\n";
 
     // Binary free in
     code += "    mpz_class a, b, c, _a, _b;\n";
@@ -2217,84 +2201,22 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                     code += "        mainExecutor.logError(ctx, \"Failed calling Binary_calculate() result=\" + zkresult2string(zkResult));\n";
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
-                    code += "    }\n";
+                    code += "    }\n\n";
                     nHits++;
-                    code += "\n";
                 }
 
-                // Mem allign read free in
+                // Mem align read free in
                 if (rom["program"][zkPC].contains("memAlignRD") && (rom["program"][zkPC]["memAlignRD"]==1))
                 {
-                    //code += "    // Mem allign read free in\n";
-                    code += "    if (!fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
+                    code += "    zkResult = Memalign_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
+                    code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
+                    code += "        proverRequest.result = zkResult;\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling Memalign_calculate() result=\" + zkresult2string(zkResult));\n";
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
-                    code += "    }\n";
-                    code += "    if (!fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
-
-                    code += "    if (!fea2scalar(fr, modeScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
-                    code += "    mode = modeScalar.get_ui();\n";
-                    code += "    offset = mode & 0x7F;\n";
-                    code += "    len = (mode >> 7) & 0x3F;\n";
-                    code += "    leftAlignment = mode & 0x2000;\n";
-                    code += "    littleEndian = mode & 0x4000;\n";
-                    code += "    if (offset>64 || len > 32 || mode > 0x7FFFF)\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"MemAlign out of range mode=\"+to_string(mode)+\" offset=\" + to_string(offset)+\" len=\"+to_string(len));\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
-                    
-                    code += "    _len = (len == 0) ? 32 : len;\n";
-                    code += "    if ((_len + offset) > 64) \n";
-                    code += "    {\n";
-                    code += "        _len = 64 - offset;\n";
-                    code += "    }\n";
-                    code += "    m = (m0 << 256) | m1;\n";
-                    code += "    maskV = ScalarMask256 >> (8 *(32 - _len));\n";
-                    code += "    shiftBits = (64 - offset - _len) * 8;\n";
-                    code += "    if (shiftBits > 0) \n";
-                    code += "    {\n";
-                    code += "        m = m >> shiftBits;\n";
-                    code += "    }\n";
-                    code += "    _v = m & maskV;\n";
-                    code += "    if (littleEndian) \n";
-                    code += "    {\n";
-                    code += "        // reverse bytes\n";
-                    code += "        _tmpv = 0;\n";
-                    code += "        for (uint64_t ilen = 0; ilen < _len; ++ilen) \n";
-                    code += "        {\n";
-                    code += "            _tmpv = (_tmpv << 8) | (_v & 0xFF);\n";
-                    code += "            _v = _v >> 8;\n";
-                    code += "        }\n";
-                    code += "        _v = _tmpv;\n";
-                    code += "    }\n";
-                    code += "    if (leftAlignment && _len < 32) \n";
-                    code += "    {\n";
-                    code += "        _v = _v << ((32 - _len) * 8);\n";
-                    code += "    }\n";
-                    code += "    scalar2fea(fr, _v, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-
+                    code += "    }\n\n";
                     nHits++;
                 }
 
@@ -3955,190 +3877,22 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        mainExecutor.logError(ctx, \"Failed calling Binary_verify() result=\" + zkresult2string(zkResult));\n";
             code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
-            code += "    }\n";
-            if (!bFastMode)
-                code += "    pols.bin[i] = fr.one();\n";
-            code += "\n";
+            code += "    }\n\n";
         }
 
         // MemAlign instruction
         if ( (rom["program"][zkPC].contains("memAlignRD") && (rom["program"][zkPC]["memAlignRD"]==1)) ||
              (rom["program"][zkPC].contains("memAlignWR") && (rom["program"][zkPC]["memAlignWR"]==1)) )
         {
-            //code += "    // MemAlign instruction\n";
-            code += "    if (!fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+            code += "    zkPC=" + to_string(zkPC) +";\n";
+            code += "    zkResult = Memalign_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ");\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling Memalign_verify() result=\" + zkresult2string(zkResult));\n";
             code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
-            code += "    }\n";
-            code += "    if (!fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-            code += "    if (!fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-            code += "    if (!fea2scalar(fr, modeScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-            
-            code += "    mode = modeScalar.get_ui();\n";
-            code += "    offset = mode & 0x7F;\n";
-            code += "    len = (mode >> 7) & 0x3F;\n";
-            code += "    leftAlignment = mode & 0x2000;\n";
-            code += "    littleEndian = mode & 0x4000;\n";
-
-            code += "    if (offset>64 || len > 32 || mode > 0x7FFFF)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"MemAlign out of range mode=\" + to_string(mode));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-            code += "    _len = (len == 0) ? 32 : len;\n";
-            code += "    if ((_len + offset) > 64) \n";
-            code += "    {\n";
-            code += "        _len = 64 - offset;\n";
-            code += "    }\n";
-            code += "    m = (m0 << 256) | m1;\n";
-            code += "    maskV = ScalarMask256 >> (8 * (32 - _len));\n";
-            code += "    shiftBits = (64 - offset - _len) * 8;\n";
-
-            if ( (!rom["program"][zkPC].contains("memAlignRD") || (rom["program"][zkPC]["memAlignRD"]==0)) &&
-                 (rom["program"][zkPC].contains("memAlignWR") && (rom["program"][zkPC]["memAlignWR"]==1)) )
-            {
-                if (!bFastMode)
-                    code += "    pols.memAlignWR[i] = fr.one();\n";
-
-                code += "    if (!fea2scalar(fr, w0, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    if (!fea2scalar(fr, w1, pols.E0[" + string(bFastMode?"0":"i") + "], pols.E1[" + string(bFastMode?"0":"i") + "], pols.E2[" + string(bFastMode?"0":"i") + "], pols.E3[" + string(bFastMode?"0":"i") + "], pols.E4[" + string(bFastMode?"0":"i") + "], pols.E5[" + string(bFastMode?"0":"i") + "], pols.E6[" + string(bFastMode?"0":"i") + "], pols.E7[" + string(bFastMode?"0":"i") + "]))\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.E)\");\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-                code += "    _v = v;\n";
-                code += "    if (leftAlignment && _len < 32) \n";
-                code += "    {\n";
-                code += "        _v = _v >> (8* (32 - _len));\n";
-                code += "    }\n";
-                code += "    _v = _v & maskV;\n";
-                code += "    if (littleEndian) \n";
-                code += "    {\n";
-                    // reverse bytes
-                code += "        _tmpv = 0;\n";
-                code += "        for (uint64_t ilen = 0; ilen < _len; ++ilen) \n";
-                code += "        {\n";
-                code += "            _tmpv = (_tmpv << 8) | (_v & 0xFF);\n";
-                code += "            _v = _v >> 8;\n";
-                code += "        }\n";
-                code += "        _v = _tmpv;\n";
-                code += "    }\n";
-                code += "    _W = (m & (ScalarMask512 ^ (maskV << shiftBits))) | (_v << shiftBits);\n";
-                code += "    _W0 = _W >> 256;\n";
-                code += "    _W1 = _W & ScalarMask256;\n";
-                code += "    if ( (w0 != _W0) || (w1 != _W1) )\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"MemAlign w0, w1 invalid: w0=\" + w0.get_str(16) + \" w1=\" + w1.get_str(16) + \" _W0=\" + _W0.get_str(16) + \" _W1=\" + _W1.get_str(16) + \" m0=\" + m0.get_str(16) + \" m1=\" + m1.get_str(16) + \"mode=\" + to_string(mode) + \" v=\" + v.get_str(16));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                if (!bFastMode)
-                {
-                    code += "    memAlignAction.m0 = m0;\n";
-                    code += "    memAlignAction.m1 = m1;\n";
-                    code += "    memAlignAction.w0 = w0;\n";
-                    code += "    memAlignAction.w1 = w1;\n";
-                    code += "    memAlignAction.v = v;\n";
-                    code += "    memAlignAction.mode = mode;\n";
-                    code += "    memAlignAction.wr = 1;\n";
-                    code += "    required.MemAlign.push_back(memAlignAction);\n";
-                }
-            }
-            else if ( (rom["program"][zkPC].contains("memAlignRD") && (rom["program"][zkPC]["memAlignRD"]==1)) &&
-                      (!rom["program"][zkPC].contains("memAlignWR") || (rom["program"][zkPC]["memAlignWR"]==0)) )
-            {
-                if (!bFastMode)
-                    code += "    pols.memAlignRD[i] = fr.one();\n";
-
-                code += "    if (shiftBits > 0) \n";
-                code += "    {\n";
-                code += "        m = m >> shiftBits;\n";
-                code += "    }\n";
-                code += "    _v = m & maskV;\n";
-                code += "    if (littleEndian)\n";
-                code += "    {\n";
-                    // reverse bytes
-                code += "     _tmpv = 0;\n";
-                code += "        for (uint64_t ilen = 0; ilen < _len; ++ilen) \n";
-                code += "        {\n";
-                code += "            _tmpv = (_tmpv << 8) | (_v & 0xFF);\n";
-                code += "            _v = _v >> 8;\n";
-                code += "        }\n";
-                code += "        _v = _tmpv;\n";
-                code += "    }\n";
-                code += "    if (leftAlignment && _len < 32) \n";
-                code += "    {\n";
-                code += "        _v = _v << ((32 - _len) * 8);\n";
-                code += "    }\n";
-                code += "    if (v != _v)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"MemAlign v invalid: v=\" + v.get_str(16) + \" _V=\" + _v.get_str(16) + \" m0=\" + m0.get_str(16) + \" m1=\" + m1.get_str(16) + \" mode=\" + to_string(mode));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-
-                if (!bFastMode)
-                {
-                    code += "    memAlignAction.m0 = m0;\n";
-                    code += "    memAlignAction.m1 = m1;\n";
-                    code += "    memAlignAction.w0 = 0;\n";
-                    code += "    memAlignAction.w1 = 0;\n";
-                    code += "    memAlignAction.v = v;\n";
-                    code += "    memAlignAction.mode = mode;\n";
-                    code += "    memAlignAction.wr = 0;\n";
-                    code += "    required.MemAlign.push_back(memAlignAction);\n";
-                }
-            }
-            else
-            {
-                cerr << "Error: Invalid memAlign instruction zkPC=" << zkPC << endl;
-                exit(-1);
-            }
-
-            code += "\n";
+            code += "    }\n\n";
         }
 
         // Repeat instruction

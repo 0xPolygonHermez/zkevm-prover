@@ -21,6 +21,7 @@
 #include "main_sm/fork_10/helpers/arith_helper.hpp"
 #include "main_sm/fork_10/helpers/binary_helper.hpp"
 #include "main_sm/fork_10/helpers/memory_helper.hpp"
+#include "main_sm/fork_10/helpers/memalign_helper.hpp"
 #include "utils/time_metric.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
@@ -2053,75 +2054,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
                 }
 
-                // Mem allign read free in
+                // Mem align read free in
                 if (rom.line[zkPC].memAlignRD==1)
                 {
-                    mpz_class m0;
-                    if (!fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                    zkresult zkr = Memalign_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                    if (zkr != ZKR_SUCCESS)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                        logError(ctx, "Failed calling fea2scalar(pols.A)");
+                        proverRequest.result = zkr;
+                        logError(ctx, "Failed calling Memalign_calculate() result=" + zkresult2string(zkr));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-                    mpz_class m1;
-                    if (!fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                        logError(ctx, "Failed calling fea2scalar(pols.B)");
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
-                    }
-                    mpz_class modeScalar;
-                    if (!fea2scalar(fr, modeScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                        logError(ctx, "Failed calling fea2scalar(pols.C)");
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
-                    }
-                    uint64_t mode = modeScalar.get_ui();
-                    uint64_t offset = mode & 0x7F;
-                    uint64_t len = (mode >> 7) & 0x3F;
-                    bool leftAlignment = mode & 0x2000;
-                    bool littleEndian = mode & 0x4000;
-        
-                    if (offset>64 || len > 32 || mode > 0x7FFFF)
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
-                        logError(ctx, "MemAlign out of range mode="+to_string(mode)+" offset=" + to_string(offset)+" len="+to_string(len));
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
-                    }
-                    uint64_t _len = (len == 0) ? 32 : len;
-                    if ((_len + offset) > 64) 
-                    {
-                        _len = 64 - offset;
-                    }
-                    mpz_class m = (m0 << 256) | m1;
-                    mpz_class maskV = ScalarMask256 >> (8 *(32 - _len));
-                    uint64_t shiftBits = (64 - offset - _len) * 8;
-                    if (shiftBits > 0) 
-                    {
-                        m = m >> shiftBits;
-                    }
-                    mpz_class _v = m & maskV;
-                    if (littleEndian) 
-                    {
-                        // reverse bytes
-                        mpz_class _tmpv = 0;
-                        for (uint64_t ilen = 0; ilen < _len; ++ilen) 
-                        {
-                            _tmpv = (_tmpv << 8) | (_v & 0xFF);
-                            _v = _v >> 8;
-                        }
-                        _v = _tmpv;
-                    }
-                    if (leftAlignment && _len < 32) 
-                    {
-                        _v = _v << ((32 - _len) * 8);
-                    }
-                    scalar2fea(fr, _v, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
                 }
 
@@ -3667,183 +3610,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            if (!bProcessBatch)
-            {            
-                pols.bin[i] = fr.one();
-            }
         }
 
         // MemAlign instruction
         if ( (rom.line[zkPC].memAlignRD==1) || (rom.line[zkPC].memAlignWR==1) )
         {
-            mpz_class m0;
-            if (!fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+            zkresult zkr = Memalign_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required);
+            if (zkr != ZKR_SUCCESS)
             {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(pols.A)");
+                proverRequest.result = zkr;
+                logError(ctx, "Failed calling Memalign_verify() result=" + zkresult2string(zkr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
-            }
-            mpz_class m1;
-            if (!fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(pols.B)");
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-            mpz_class v;
-            if (!fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(op)");
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-            mpz_class modeScalar;
-            if (!fea2scalar(fr, modeScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(pols.C)");
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-            uint64_t mode = modeScalar.get_ui();
-            uint64_t offset = mode & 0x7F;
-            uint64_t len = (mode >> 7) & 0x3F;
-            bool leftAlignment = mode & 0x2000;
-            bool littleEndian = mode & 0x4000;
-
-            if (offset>64 || len > 32 || mode > 0x7FFFF)
-            {
-                proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
-                logError(ctx, "MemAlign out of range mode="+to_string(mode)+" offset=" + to_string(offset)+" len="+to_string(len));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-            uint64_t _len = (len == 0) ? 32 : len;
-            if ((_len + offset) > 64) 
-            {
-                _len = 64 - offset;
-            }
-            mpz_class m = (m0 << 256) | m1;
-            mpz_class maskV = ScalarMask256 >> (8 * (32 - _len));
-            uint64_t shiftBits = (64 - offset - _len) * 8;
-
-            if (rom.line[zkPC].memAlignRD==0 && rom.line[zkPC].memAlignWR==1)
-            {
-                pols.memAlignWR[i] = fr.one();
-
-                mpz_class w0;
-                if (!fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.D)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-                mpz_class w1;
-                if (!fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.E)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-                mpz_class _v = v;
-                if (leftAlignment && _len < 32) 
-                {
-                    _v = _v >> (8* (32 - _len));
-                }
-                _v = _v & maskV;
-                if (littleEndian) 
-                {
-                    // reverse bytes
-                    mpz_class _tmpv = 0;
-                    for (uint64_t ilen = 0; ilen < _len; ++ilen) 
-                    {
-                        _tmpv = (_tmpv << 8) | (_v & 0xFF);
-                        _v = _v >> 8;
-                    }
-                    _v = _tmpv;
-                }
-                mpz_class _W = (m & (ScalarMask512 ^ (maskV << shiftBits))) | (_v << shiftBits);
-
-                mpz_class _W0 = _W >> 256;
-                mpz_class _W1 = _W & ScalarMask256;
-                if ( (w0 != _W0) || (w1 != _W1) )
-                {
-                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE_MISMATCH;
-                    logError(ctx, "MemAlign w0, w1 invalid: w0=" + w0.get_str(16) + " w1=" + w1.get_str(16) + " _W0=" + _W0.get_str(16) + " _W1=" + _W1.get_str(16) + " m0=" + m0.get_str(16) + " m1=" + m1.get_str(16) + " mode=" + to_string(mode) + " v=" + v.get_str(16));
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-
-#ifdef USE_REQUIRED
-                if (!bProcessBatch)
-                {
-                    MemAlignAction memAlignAction;
-                    memAlignAction.m0 = m0;
-                    memAlignAction.m1 = m1;
-                    memAlignAction.w0 = w0;
-                    memAlignAction.w1 = w1;
-                    memAlignAction.v = v;
-                    memAlignAction.mode = mode;
-                    memAlignAction.wr = 1;
-                    required.MemAlign.push_back(memAlignAction);
-                }
-#endif
-            }
-            else if (rom.line[zkPC].memAlignRD==1 && rom.line[zkPC].memAlignWR==0)
-            {
-                pols.memAlignRD[i] = fr.one();
-
-                if (shiftBits > 0) 
-                {
-                    m = m >> shiftBits;
-                }
-                mpz_class _v = m & maskV;
-                if (littleEndian)
-                {
-                    // reverse bytes
-                    mpz_class _tmpv = 0;
-                    for (uint64_t ilen = 0; ilen < _len; ++ilen) 
-                    {
-                        _tmpv = (_tmpv << 8) | (_v & 0xFF);
-                        _v = _v >> 8;
-                    }
-                    _v = _tmpv;
-                }
-                if (leftAlignment && _len < 32) 
-                {
-                    _v = _v << ((32 - _len) * 8);
-                }
-                if (v != _v)
-                {
-                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH;
-                    logError(ctx, "MemAlign v invalid: v=" + v.get_str(16) + " _V=" + _v.get_str(16) + " m0=" + m0.get_str(16) + " m1=" + m1.get_str(16) + " mode=" + to_string(mode));
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-#ifdef USE_REQUIRED
-                if (!bProcessBatch)
-                {
-                    MemAlignAction memAlignAction;
-                    memAlignAction.m0 = m0;
-                    memAlignAction.m1 = m1;
-                    memAlignAction.w0 = 0;
-                    memAlignAction.w1 = 0;
-                    memAlignAction.v = v;
-                    memAlignAction.mode = mode;
-                    memAlignAction.wr = 0;
-                    required.MemAlign.push_back(memAlignAction);
-                }
-#endif
-            }
-            else
-            {
-                logError(ctx, "Invalid memAlign operation");
-                exitProcess();
             }
         }
 
