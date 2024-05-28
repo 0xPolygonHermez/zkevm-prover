@@ -63,12 +63,14 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
         }
 
         // ConstTree
-        ofstream fw(constTreeFile.c_str(), std::fstream::out | std::fstream::binary);
-        fw.write((const char *)&(nPols), sizeof(uint64_t));
-        fw.write((const char *)&(NExtended), sizeof(uint64_t));
-        fw.write((const char *)pConstPolsExt, nPols * NExtended * sizeof(Goldilocks::Element));
-        fw.write((const char *)mt.nodes, mt.getTreeNumElements() * sizeof(Goldilocks::Element));
-        fw.close();
+        if(constTreeFile != "") {
+            ofstream fw(constTreeFile.c_str(), std::fstream::out | std::fstream::binary);
+            fw.write((const char *)&(nPols), sizeof(uint64_t));
+            fw.write((const char *)&(NExtended), sizeof(uint64_t));
+            fw.write((const char *)pConstPolsExt, nPols * NExtended * sizeof(Goldilocks::Element));
+            fw.write((const char *)mt.nodes, mt.getTreeNumElements() * sizeof(Goldilocks::Element));
+            fw.close();
+        }
 
         TimerStopAndLog(GENERATING_FILES);
 
@@ -90,12 +92,14 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
         TimerStart(GENERATING_FILES);
 
         // ConstTree
-        std::ofstream fw(constTreeFile.c_str(), std::fstream::out | std::fstream::binary);
-        fw.write((const char *)&(mt.source_width), sizeof(mt.source_width));
-        fw.write((const char *)&(mt.height), sizeof(mt.height));
-        fw.write((const char *)mt.source, nPols * NExtended * sizeof(Goldilocks::Element));
-        fw.write((const char *)mt.nodes, mt.numNodes * sizeof(RawFr::Element));
-        fw.close();
+        if (consTreeFile != "") {
+            std::ofstream fw(constTreeFile.c_str(), std::fstream::out | std::fstream::binary);
+            fw.write((const char *)&(mt.source_width), sizeof(mt.source_width));
+            fw.write((const char *)&(mt.height), sizeof(mt.height));
+            fw.write((const char *)mt.source, nPols * NExtended * sizeof(Goldilocks::Element));
+            fw.write((const char *)mt.nodes, mt.numNodes * sizeof(RawFr::Element));
+            fw.close();
+        }
 
         TimerStopAndLog(GENERATING_FILES);
     } else {

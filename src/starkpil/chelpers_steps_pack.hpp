@@ -136,7 +136,6 @@ public:
 
         Goldilocks::Element challenges[params.challenges.degree()*FIELD_EXTENSION*nrowsPack];
         Goldilocks::Element challenges_ops[params.challenges.degree()*FIELD_EXTENSION*nrowsPack];
-
         for(uint64_t i = 0; i < params.challenges.degree(); ++i) {
             for(uint64_t j = 0; j < nrowsPack; ++j) {
                 challenges[(i*FIELD_EXTENSION)*nrowsPack + j] = params.challenges[i][0];
