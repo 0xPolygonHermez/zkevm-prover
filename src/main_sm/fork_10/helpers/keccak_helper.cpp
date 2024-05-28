@@ -213,7 +213,7 @@ zkresult HashK_verify ( Context &ctx,
     return ZKR_SUCCESS;
 }
 
-zkresult HashKLen_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilocks::Element &fi1, Goldilocks::Element &fi2, Goldilocks::Element &fi3, Goldilocks::Element &fi4, Goldilocks::Element &fi5, Goldilocks::Element &fi6, Goldilocks::Element &fi7, int32_t hashAddr)
+void HashKLen_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilocks::Element &fi1, Goldilocks::Element &fi2, Goldilocks::Element &fi3, Goldilocks::Element &fi4, Goldilocks::Element &fi5, Goldilocks::Element &fi6, Goldilocks::Element &fi7, int32_t hashAddr)
 {
     mpz_class result;
 
@@ -238,8 +238,6 @@ zkresult HashKLen_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilocks:
     fi5 = fr.zero();
     fi6 = fr.zero();
     fi7 = fr.zero();
-
-    return ZKR_SUCCESS;
 }
 
 zkresult HashKLen_verify ( Context &ctx,

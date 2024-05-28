@@ -265,6 +265,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "#include \"main_sm/"+ forkNamespace + "/helpers/memalign_helper.hpp\"\n";
         code += "#include \"main_sm/"+ forkNamespace + "/helpers/storage_helper.hpp\"\n";
         code += "#include \"main_sm/"+ forkNamespace + "/helpers/keccak_helper.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/helpers/poseidon_helper.hpp\"\n";
         code += "#include <fstream>\n";
         code += "#include \"utils.hpp\"\n";
         code += "#include \"timer.hpp\"\n";
@@ -1378,131 +1379,45 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 if (rom["program"][zkPC].contains("hashKLen") && (rom["program"][zkPC]["hashKLen"] == 1)) 
                 {
                     code += "    zkPC=" + to_string(zkPC) +";\n";
-                    code += "    zkResult = HashKLen_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, hashAddr);\n";
-                    code += "    if (zkResult != ZKR_SUCCESS)\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = zkResult;\n";
-                    code += "        mainExecutor.logError(ctx, \"Failed calling HashKLen_calculate() result=\" + zkresult2string(zkResult));\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
+                    code += "    HashKLen_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, hashAddr);\n";
                     nHits++;
                 }
 
                 // HashP free in
                 if ( rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1))
                 {
-                    //code += "    // HashP free in\n";
-                    //code += "    // If there is no entry in the hash database for this address, then create a new one\n";
-                    code += "    hashIterator = ctx.hashP.find(hashAddr);\n";
-                    code += "    if (hashIterator == ctx.hashP.end())\n";
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
+                    code += "    zkResult = HashP_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, hashAddr);\n";
+                    code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
-                    code += "        ctx.hashP[hashAddr] = emptyHashValue;\n";
-                    code += "        hashIterator = ctx.hashP.find(hashAddr);\n";
-                    code += "        zkassert(hashIterator != ctx.hashP.end());\n";
-                    code += "    }\n";
-
-                    if (rom["program"][zkPC].contains("hashBytesInD") && (rom["program"][zkPC]["hashBytesInD"] == 1))
-                    {
-                        //code += "    // Get the size of the hash from D0\n";
-                        code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
-                    }
-                    else
-                    {
-                        uint64_t hashBytes = rom["program"][zkPC]["hashBytes"];
-                        code += "    size = " + to_string(hashBytes) + ";\n";
-                    }
-                    code += "    if (size>32)\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashP 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n\n";
-
-                    //code += "    // Get the positon of the hash from HASHPOS\n";
-                    code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    if (iPos < 0)\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashP 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
+                    code += "        proverRequest.result = zkResult;\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling HashP_calculate() result=\" + zkresult2string(zkResult));\n";
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
-                    code += "    pos = iPos;\n\n";
-
-                    //code += "    // Check that pos+size do not exceed data size\n";
-                    code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"HashP 1 invalid size of hash: pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data.size=\" + to_string(ctx.hashP[addr].data.size()));\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
-
-                    //code += "    // Copy data into fi\n";
-                    code += "    s = 0;\n";
-                    code += "    for (uint64_t j=0; j<size; j++)\n";
-                    code += "    {\n";
-                    code += "        uint8_t data = hashIterator->second.data[pos+j];\n";
-                    code += "        s = (s<<uint64_t(8)) + data;\n";
-                    code += "    }\n";
-                    code += "    scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
-
                     nHits++;
                 }
 
                 // HashPDigest free in
                 if (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"] == 1))
                 {
-                    //code += "    // HashPDigest free in\n";
-                    //code += "    // If there is no entry in the hash database for this address, this is an error\n";
-                    code += "    hashIterator = ctx.hashP.find(hashAddr);\n";
-                    code += "    if (hashIterator == ctx.hashP.end())\n";
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
+                    code += "    zkResult = HashPDigest_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, hashAddr);\n";
+                    code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"HashPDigest 1: digest not defined addr=\" + to_string(hashAddr));\n";
+                    code += "        proverRequest.result = zkResult;\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling HashPDigest_calculate() result=\" + zkresult2string(zkResult));\n";
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
-                    //code += "    // If digest was not calculated, this is an error\n";
-                    code += "    if (!hashIterator->second.lenCalled)\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_NOT_COMPLETED;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"HashPDigest 1: digest not calculated.  Call hashPLen to finish digest.\");\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
-                    //code += "    // Copy digest into fi\n";
-                    code += "    scalar2fea(fr, hashIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
                     nHits++;
                 }
 
                 // HashPLen free in
                 if (rom["program"][zkPC].contains("hashPLen") && (rom["program"][zkPC]["hashPLen"] == 1)) 
                 {
-                    code += "    hashIterator = ctx.hashP.find(hashAddr);\n";
-                    code += "    if (hashIterator == ctx.hashP.end())\n";
-                    code += "    {\n";
-                    code += "        fi0 = fr.zero();\n";
-                    code += "    }\n";
-                    code += "    else\n";
-                    code += "    {\n";
-                    code += "        fi0 = fr.fromU64(hashIterator->second.data.size());\n";
-                    code += "    }\n";
-                    code += "    fi1 = fr.zero();\n";
-                    code += "    fi2 = fr.zero();\n";
-                    code += "    fi3 = fr.zero();\n";
-                    code += "    fi4 = fr.zero();\n";
-                    code += "    fi5 = fr.zero();\n";
-                    code += "    fi6 = fr.zero();\n";
-                    code += "    fi7 = fr.zero();\n";
-
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
+                    code += "    HashPLen_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, hashAddr);\n";
                     nHits++;
                 }
 
@@ -2095,327 +2010,44 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // HashP instruction
         if (rom["program"][zkPC].contains("hashP") && (rom["program"][zkPC]["hashP"] == 1))
         {
-            //code += "    // HashP instruction\n";
-
-            if (!bFastMode)
-            {
-                code += "    pols.hashP[i] = fr.one();\n";
-            }
-
-            //code += "    // If there is no entry in the hash database for this address, then create a new one\n";
-            code += "    hashIterator = ctx.hashP.find(hashAddr);\n";
-            code += "    if (hashIterator == ctx.hashP.end())\n";
+            code += "    zkPC=" + to_string(zkPC) +";\n";
+            code += "    zkResult = HashP_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ", hashAddr);\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
-            code += "        ctx.hashP[hashAddr] = emptyHashValue;\n";
-            code += "        hashIterator = ctx.hashP.find(hashAddr);\n";
-            code += "        zkassert(hashIterator != ctx.hashP.end());\n";
-            code += "    }\n";
-
-            if (rom["program"][zkPC].contains("hashBytesInD") && (rom["program"][zkPC]["hashBytesInD"] == 1))
-            {
-                //code += "    // Get the size of the hash from D0\n";
-                code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
-            }
-            else
-            {
-                uint64_t hashBytes = rom["program"][zkPC]["hashBytes"];
-                code += "    size = " + to_string(hashBytes) + ";\n";
-            }
-            code += "    if (size>32)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashP 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling HashP_verify() result=\" + zkresult2string(zkResult));\n";
             code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n\n";
-
-            //code += "    // Get the positon of the hash from HASHPOS\n";
-            code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
-            code += "    if (iPos < 0)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashP 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-            code += "    pos = iPos;\n\n";
-
-            //code += "    // Get contents of opN into a\n";
-            if (rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1))
-                code += "    if (!fea2scalar(fr, a,  pols.FREE0[" + string(bFastMode?"0":"i") + "], pols.FREE1[" + string(bFastMode?"0":"i") + "], pols.FREE2[" + string(bFastMode?"0":"i") + "], pols.FREE3[" + string(bFastMode?"0":"i") + "], pols.FREE4[" + string(bFastMode?"0":"i") + "], pols.FREE5[" + string(bFastMode?"0":"i") + "], pols.FREE6[" + string(bFastMode?"0":"i") + "], pols.FREE7[" + string(bFastMode?"0":"i") + "]))\n";
-            else
-                code += "    if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(" + string((rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1)) ? "pols.FREE" : "op") + ")\");\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-
-            //code += "    // Fill the hash data vector with chunks of the scalar value\n";
-            code += "    for (uint64_t j=0; j<size; j++) {\n";
-            code += "        result = (a >> (size-j-1)*8) & ScalarMask8;\n";
-            code += "        uint8_t bm = result.get_ui();\n";
-
-                             // Allow to fill the first byte with a zero
-            code += "        if (((pos+j) == 1) && hashIterator->second.data.empty() && !hashIterator->second.firstByteWritten)\n";
-            code += "        {\n";
-                                 // Fill a zero
-            code += "            hashIterator->second.data.push_back(0);\n";
-                    
-                                 // Record the read operation
-            code += "            readsIterator = hashIterator->second.reads.find(0);\n";
-            code += "            if ( readsIterator != hashIterator->second.reads.end() )\n";
-            code += "            {\n";
-            code += "                proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;\n";
-            code += "                mainExecutor.logError(ctx, \"HashP 2 zero position already existed addr=\" + to_string(hashAddr) + \" pos=\" + to_string(pos));\n";
-            code += "                pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "                return;\n";
-            code += "            }\n";
-            code += "            else\n";
-            code += "            {\n";
-            code += "                hashIterator->second.reads[0] = 1;\n";
-            code += "            }\n";
-            code += "        }\n";
-                             // Allow to overwrite the first byte
-            code += "        if (((pos+j) == 0) && (size==1) && !hashIterator->second.data.empty() && !hashIterator->second.firstByteWritten)\n";
-            code += "        {\n";
-            code += "            hashIterator->second.data[0] = bm;\n";
-            code += "            hashIterator->second.firstByteWritten = true;\n";
-            code += "        }\n";
-            code += "        else if (hashIterator->second.data.size() == (pos+j))\n";
-            code += "        {\n";
-            code += "            hashIterator->second.data.push_back(bm);\n";
-            code += "        }\n";
-            code += "        else if (hashIterator->second.data.size() < (pos+j))\n";
-            code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, \"HashP 2: trying to insert data in a position:\" + to_string(pos+j) + \" higher than current data size:\" + to_string(ctx.hashP[hashAddr].data.size()));\n";
-            code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "            return;\n";
-            code += "        }\n";
-            code += "        else\n";
-            code += "        {\n";
-            code += "            uint8_t bh;\n";
-            code += "            bh = hashIterator->second.data[pos+j];\n";
-            code += "            if (bm != bh)\n";
-            code += "            {\n";
-            code += "                proverRequest.result = ZKR_SM_MAIN_HASHP_VALUE_MISMATCH;\n";
-            code += "                zkPC=" + to_string(zkPC) +";\n";
-            code += "                mainExecutor.logError(ctx, \"HashP 2 bytes do not match: addr=\" + to_string(hashAddr) + \" pos+j=\" + to_string(pos+j) + \" is bm=\" + to_string(bm) + \" and it should be bh=\" + to_string(bh));\n";
-            code += "                pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "                return;\n";
-            code += "            }\n";
-            code += "        }\n";
-            code += "    }\n";
-
-            //code += "    // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size\n";
-            code += "    paddingA = a >> (size*8);\n";
-            code += "    if (paddingA != 0)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_PADDING_MISMATCH;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"HashP2 incoherent size=\" + to_string(size) + \" a=\" + a.get_str(16) + \" paddingA=\" + paddingA.get_str(16));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n\n";
-
-            //code += "    // Record the read operation\n";
-            code += "    readsIterator = hashIterator->second.reads.find(pos);\n";
-            code += "    if ( readsIterator != hashIterator->second.reads.end() )\n";
-            code += "    {\n";
-            code += "        if ( readsIterator->second != size )\n";
-            code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, \"HashP 2 diferent read sizes in the same position addr=\" + to_string(hashAddr) + \" pos=\" + to_string(pos));\n";
-            code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "            return;\n";
-            code += "        }\n";
-            code += "    }\n";
-            code += "    else\n";
-            code += "    {\n";
-            code += "        hashIterator->second.reads[pos] = size;\n";
-            code += "    }\n\n";
-
-            //code += "    // Store the size\n";
-            code += "    ctx.incHashPos = size;\n";
             bIncHashPos = true;
         }
 
         // HashPLen instruction
         if (rom["program"][zkPC].contains("hashPLen") && (rom["program"][zkPC]["hashPLen"] == 1))
         {
-            //code += "    // HashPLen instruction\n";
-
-            if (!bFastMode)
-                code += "    pols.hashPLen[i] = fr.one();\n";
-
-            //code += "    // Get the length\n";
-            code += "    lm = fr.toU64(op0);\n\n";
-
-            //code += "    // Find the entry in the hash database for this address\n";
-            code += "    hashIterator = ctx.hashP.find(hashAddr);\n\n";
-
-            //code += "    // If it's undefined, compute a hash of 0 bytes\n";
-            code += "    if (hashIterator == ctx.hashP.end())\n";
+            code += "    zkPC=" + to_string(zkPC) +";\n";
+            code += "    zkResult = HashPLen_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ", hashAddr);\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
-            code += "        // Check that length = 0\n";
-            code += "        if (lm != 0)\n";
-            code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, \"HashPLen 2 hashP[addr] is empty but lm is not 0 addr=\" + to_string(hashAddr) + \" lm=\" + to_string(lm));\n";
-            code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "            return;\n";
-            code += "        }\n\n";
-
-            code += "        // Create an empty entry in this address slot\n";
-            code += "        ctx.hashP[hashAddr] = emptyHashValue;\n";
-            code += "        hashIterator = ctx.hashP.find(hashAddr);\n";
-            code += "        zkassert(hashIterator != ctx.hashP.end());\n";
-            code += "    }\n";
-
-            code += "    if (hashIterator->second.lenCalled)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHPLEN_CALLED_TWICE;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"HashPLen 2 called more than once addr=\" + to_string(addr));\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling HashPLen_verify() result=\" + zkresult2string(zkResult));\n";
             code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
-            code += "    }\n";
-            code += "    hashIterator->second.lenCalled = true;\n";
-
-            code += "    lh = hashIterator->second.data.size();\n";
-            code += "    if (lm != lh)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"HashPLen 2 does not match match addr=\" + to_string(hashAddr) + \" is lm=\" + to_string(lm) + \" and it should be lh=\" + to_string(lh));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-            code += "    if (!hashIterator->second.digestCalled)\n";
-            code += "    {\n";
-            
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        gettimeofday(&t, NULL);\n";
-#endif
-            code += "        Goldilocks::Element result[4];\n";
-            code += "        mainExecutor.linearPoseidon(ctx, hashIterator->second.data, result);\n";
-            code += "        fea2scalar(fr, hashIterator->second.digest, result);\n";
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
-#endif
-
-            code += "        // Collect the keys used to read or write store data\n";
-            code += "        if (proverRequest.input.bGetKeys)\n";
-            code += "        {\n";
-            code += "            proverRequest.programKeys.insert(fea2string(fr, result));\n";
-            code += "        }\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        gettimeofday(&t, NULL);\n";
-#endif
-            code += "        zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
-            code += "        if (zkResult != ZKR_SUCCESS)\n";
-            code += "        {\n";
-            code += "            proverRequest.result = zkResult;\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->setProgram() result=\") + zkresult2string(zkResult));\n";
-            code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "            return;\n";
-            code += "        }\n";
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        mainMetrics.add(\"Set program\", TimeDiff(t));\n";
-#endif
-#ifdef LOG_HASHP
-            code += "        {\n";
-            code += "           string s = \"Hash calculate hashPLen 2: addr:\" + to_string(hashAddr) + \" hash:\" + ctx.hashP[hashAddr].digest.get_str(16) + \" size:\" + to_string(ctx.hashP[hashAddr].data.size()) + \" data:\";\n";
-            code += "           for (uint64_t k=0; k<ctx.hashP[hashAddr].data.size(); k++) s += byte2string(ctx.hashP[hashAddr].data[k]) + \":\";\n";
-            code += "           zklog.info(s);\n";
-            code += "        }\n";
-#endif
-            code += "    }\n";
+            code += "    }\n\n";
         }
 
         // HashPDigest instruction
         if (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"] == 1))
         {
-            //code += "    // HashPDigest instruction\n";
-
-            if (!bFastMode)
-                code += "    pols.hashPDigest[i] = fr.one();\n";
-
-            //code += "    // Get contents of op into dg\n";
-            code += "    if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+            code += "    zkPC=" + to_string(zkPC) +";\n";
+            code += "    zkResult = HashPDigest_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ", hashAddr);\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling HashPDigest_verify() result=\" + zkresult2string(zkResult));\n";
             code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
-            code += "    }\n";
-
-            code += "    hashIterator = ctx.hashP.find(hashAddr);\n";
-            code += "    if (hashIterator == ctx.hashP.end())\n";
-            code += "    {\n";
-            code += "        HashValue hashValue;\n";
-            code += "        hashValue.digest = dg;\n";
-            code += "        Goldilocks::Element aux[4];\n";
-            code += "        scalar2fea(fr, dg, aux);\n";
-
-            code += "        // Collect the keys used to read or write store data\n";
-            code += "        if (proverRequest.input.bGetKeys)\n";
-            code += "        {\n";
-            code += "            proverRequest.programKeys.insert(fea2string(fr, aux));\n";
-            code += "        }\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        gettimeofday(&t, NULL);\n";
-#endif
-            code += "        zkResult = pHashDB->getProgram(proverRequest.uuid, aux, hashValue.data, proverRequest.dbReadLog);\n";
-            code += "        if (zkResult != ZKR_SUCCESS)\n";
-            code += "        {\n";
-            code += "            proverRequest.result = zkResult;\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->getProgram() result=\") + zkresult2string(zkResult));\n";
-            code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "            return;\n";
-            code += "        }\n";
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        mainMetrics.add(\"Get program\", TimeDiff(t));\n";
-#endif
-            code += "        ctx.hashP[hashAddr] = hashValue;\n";
-            code += "        hashIterator = ctx.hashP.find(hashAddr);\n";
-            code += "        zkassert(hashIterator != ctx.hashP.end());\n";
-            code += "    }\n";
-
-            code += "    if (hashIterator->second.digestCalled)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_CALLED_TWICE;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"HashPDigest 2 called more than once addr=\" + to_string(hashAddr));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-            code += "    hashIterator->second.digestCalled = true;\n";
-
-            code += "    ctx.incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(56));\n";
-
-            //code += "    // Check that digest equals op\n";
-            code += "    if (dg != hashIterator->second.digest)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"HashPDigest 2: ctx.hashP[addr].digest=\" + ctx.hashP[addr].digest.get_str(16) + \" does not match op=\" + dg.get_str(16));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
+            code += "    }\n\n";
         }
 
         // HashS instruction
