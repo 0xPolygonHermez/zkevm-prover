@@ -446,11 +446,12 @@ void* loadFileParallel(const string &fileName, uint64_t size) {
     }
 
     // Determine the number of threads and the size of each chunk
-    size_t numThreads = 16;
+    size_t numThreads = 8;
     size_t chunkSize = size / numThreads;
     if(size % numThreads != 0){
         zklog.error("loadFileParallel() failed to divide the file into equal chunks");
     }
+    omp_set_num_threads(numThreads);
     #pragma omp parallel for
     for(size_t i=0; i<numThreads; i++){
         // Open the file
@@ -465,6 +466,7 @@ void* loadFileParallel(const string &fileName, uint64_t size) {
         }
         fclose(fd);
     }
+    omp_set_num_threads(omp_get_max_threads());
     return buffer;
 }
 
