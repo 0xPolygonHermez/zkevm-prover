@@ -577,27 +577,27 @@ bool Config::check (void)
             bError = true;
         }
 
-        if (!fileExists(zkevmConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(zkevmConstantsTree))
         {
             zklog.error("required file config.zkevmConstantsTree=" + zkevmConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(c12aConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(c12aConstantsTree))
         {
             zklog.error("required file config.c12aConstantsTree=" + c12aConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive1ConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(recursive1ConstantsTree))
         {
             zklog.error("required file config.recursive1ConstantsTree=" + recursive1ConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive2ConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(recursive2ConstantsTree))
         {
             zklog.error("required file config.recursive2ConstantsTree=" + recursive2ConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursivefConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(recursivefConstantsTree))
         {
             zklog.error("required file config.recursivefConstantsTree=" + recursivefConstantsTree + " does not exist");
             bError = true;
