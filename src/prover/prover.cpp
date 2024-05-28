@@ -56,6 +56,7 @@ Prover::Prover(Goldilocks &fr,
     {
         if (config.generateProof())
         {
+            TimerStart(PROVER_INIT);
             zkey = BinFileUtils::openExisting(config.finalStarkZkey, "zkey", 1);
             protocolId = Zkey::getProtocolIdFromZkey(zkey.get());
             if (Zkey::GROTH16_PROTOCOL_ID == protocolId)
@@ -120,10 +121,12 @@ Prover::Prover(Goldilocks &fr,
                 }
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
-
+            TimerStopAndLog(PROVER_INIT);
+            TimerStart(PROVER_INIT_FFLONK);
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
             prover->setZkey(zkey.get());
-
+            TimerStopAndLog(PROVER_INIT_FFLONK);
+            TimerStart(PROVER_INIT_STARKINFO);
             StarkInfo _starkInfoRecursiveF(config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
 
@@ -131,12 +134,22 @@ Prover::Prover(Goldilocks &fr,
             string c12aChelpers = USE_GENERIC_PARSER ? config.c12aGenericCHelpers : config.c12aCHelpers;
             string recursive1Chelpers = USE_GENERIC_PARSER ? config.recursive1GenericCHelpers : config.recursive1CHelpers;
             string recursive2Chelpers = USE_GENERIC_PARSER ? config.recursive2GenericCHelpers : config.recursive2CHelpers;
-
+            TimerStopAndLog(PROVER_INIT_STARKINFO);
+            TimerStart(PROVER_INIT_STARK_ZKEVM);    
             starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, zkevmChelpers}, pAddress);
+            TimerStopAndLog(PROVER_INIT_STARK_ZKEVM);
+            TimerStart(PROVER_INIT_STARK_C12A);
             starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, c12aChelpers}, pAddress);
+            TimerStopAndLog(PROVER_INIT_STARK_C12A);
+            TimerStart(PROVER_INIT_STARK_RECURSIVE1);
             starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, recursive1Chelpers}, pAddress);
+            TimerStopAndLog(PROVER_INIT_STARK_RECURSIVE1);
+            TimerStart(PROVER_INIT_STARK_RECURSIVE2);
             starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, recursive2Chelpers}, pAddress);
+            TimerStopAndLog(PROVER_INIT_STARK_RECURSIVE2);
+            TimerStart(PROVER_INIT_STARK_RECURSIVEF);
             starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
+            TimerStopAndLog(PROVER_INIT_STARK_RECURSIVEF);
         }
     }
     catch (std::exception &e)

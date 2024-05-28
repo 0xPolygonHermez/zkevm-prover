@@ -425,6 +425,49 @@ void unmapFile(void *pAddress, uint64_t size)
     }
 }
 
+void* loadFileParallel(const string &fileName, uint64_t size) {
+
+    // Check file size
+    struct stat sb;
+    if (lstat(fileName.c_str(), &sb) == -1) {
+        zklog.error("loadFileParallel() failed calling lstat() of file " + fileName);
+        exitProcess();
+    }
+    if ((uint64_t)sb.st_size != size) {
+        zklog.error("loadFileParallel() found size of file " + fileName + " to be " + to_string(sb.st_size) + " B instead of " + to_string(size) + " B");
+        exitProcess();
+    }
+
+    // Allocate memory
+    void* buffer = malloc(size);
+    if (buffer == NULL) {
+        zklog.error("loadFileParallel() failed calling malloc() of size: " + to_string(size));
+        exitProcess();
+    }
+
+    // Determine the number of threads and the size of each chunk
+    size_t numThreads = 16;
+    size_t chunkSize = size / numThreads;
+    if(size % numThreads != 0){
+        zklog.error("loadFileParallel() failed to divide the file into equal chunks");
+    }
+    #pragma omp parallel for
+    for(size_t i=0; i<numThreads; i++){
+        // Open the file
+        FILE * fd = fopen(fileName.c_str(), "rb");
+        if(fd == NULL){
+            zklog.error("loadFileParallel() failed to open the file");
+        }
+        size_t offset = i * chunkSize;
+        size_t readed = fread((uint8_t*)buffer + offset, 1, chunkSize, fd);
+        if(readed != chunkSize){
+            zklog.error("loadFileParallel() failed to read the file");
+        }
+        fclose(fd);
+    }
+    return buffer;
+}
+
 string sha256(string str)
 {
     long len = 0;
