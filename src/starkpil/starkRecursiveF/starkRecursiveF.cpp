@@ -50,35 +50,49 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree, starkInfo.nConstants);
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
 
-    // Map constants tree file to memory
 
-    TimerStart(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
-    pConstTreeAddress = NULL;
-    if (config.recursivefConstantsTree.size() == 0)
-    {
-        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree");
-        exitProcess();
-    }
+    if(!LOAD_CONST_FILES) {
+        TimerStart(CALCULATE_CONST_TREE_TO_MEMORY);
+        pConstPolsAddress2ns = (void *)malloc(NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element));
+        TimerStart(EXTEND_CONST_POLS);
+        ntt.extendPol((Goldilocks::Element *)pConstPolsAddress2ns, (Goldilocks::Element *)pConstPolsAddress, NExtended, N, starkInfo.nConstants);
+        TimerStopAndLog(EXTEND_CONST_POLS);
+        TimerStart(MERKELIZE_CONST_TREE);
+        treesBN128[4] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.nConstants, (Goldilocks::Element *)pConstPolsAddress2ns);
+        treesBN128[4]->merkelize();
+        TimerStopAndLog(MERKELIZE_CONST_TREE);
+        RawFr::Element rootC;
+        treesBN128[4]->getRoot(&rootC);
+        zklog.info("MerkleTree root C: [ " + RawFr::field.toString(rootC, 10) + " ]");
+        TimerStopAndLog(CALCULATE_CONST_TREE_TO_MEMORY);
+    } else {
+        TimerStart(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
+        // Map constants tree file to memory
+        pConstTreeAddress = NULL;
+        if (config.recursivefConstantsTree.size() == 0)
+        {
+            zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree");
+            exitProcess();
+        }
 
-    if (config.mapConstantsTreeFile)
-    {
-        pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity), false);
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant tree file " + config.recursivefConstantsTree);
+        if (config.mapConstantsTreeFile)
+        {
+            pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity), false);
+            zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant tree file " + config.recursivefConstantsTree);
+        }
+        else
+        {
+            pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
+            zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant file " + config.recursivefConstantsTree);
+        }
+        pConstPolsAddress2ns = (uint8_t *)pConstTreeAddress + 2 * sizeof(uint64_t);
+        treesBN128[4] = new MerkleTreeBN128(starkInfo.merkleTreeArity, pConstTreeAddress);
+        TimerStopAndLog(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
     }
-    else
-    {
-        pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant file " + config.recursivefConstantsTree);
-    }
-    TimerStopAndLog(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
+    
 
-    // Initialize and allocate ConstantPols2ns
-    TimerStart(LOAD_RECURSIVE_F_CONST_POLS_2NS_TO_MEMORY);
-    pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
+    // Allocate ConstantPols2ns
     pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
-    std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
-
-    TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_2NS_TO_MEMORY);
 
     // TODO x_n and x_2ns could be precomputed
     TimerStart(COMPUTE_X_N_AND_X_2_NS);
@@ -122,6 +136,13 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
 
+    TimerStart(MERKLE_TREE_ALLOCATION);
+    treesBN128[0] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
+    treesBN128[1] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
+    treesBN128[2] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
+    treesBN128[3] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
+    TimerStopAndLog(MERKLE_TREE_ALLOCATION);
+
     TimerStart(CHELPERS_ALLOCATION);
     string recursivefChelpers = (USE_GENERIC_PARSER) ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
     cHelpersBinFile = BinFileUtils::openExisting(recursivefChelpers, "chps", 1);
@@ -136,27 +157,29 @@ StarkRecursiveF::~StarkRecursiveF()
 
     delete pConstPols;
     delete pConstPols2ns;
-    free(pConstPolsAddress2ns);
 
-    if (config.mapConstPolsFile)
-    {
+    if (config.mapConstPolsFile){
         unmapFile(pConstPolsAddress, constPolsSize);
-    }
-    else
-    {
+    } else {
         free(pConstPolsAddress);
     }
 
-    if (config.mapConstantsTreeFile)
-    {
-        unmapFile(pConstTreeAddress, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
-    }
-    else
-    {
-        free(pConstTreeAddress);
+    if(LOAD_CONST_FILES) {
+        if (config.mapConstantsTreeFile) {
+            unmapFile(pConstTreeAddress, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
+        } else {
+            free(pConstTreeAddress);
+        }
+    } else {
+        free(pConstPolsAddress2ns);
     }
 
     free(pBuffer);
+
+    for (uint i = 0; i < 5; i++)
+    {
+        delete treesBN128[i];
+    }
 
     BinFileUtils::BinFile *pCHelpers = cHelpersBinFile.release();
     assert(cHelpersBinFile.get() == nullptr);
@@ -181,13 +204,6 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     RawFr::Element root1;
     RawFr::Element root2;
     RawFr::Element root3;
-
-    MerkleTreeBN128 *treesBN128[STARK_RECURSIVE_F_NUM_TREES];
-    treesBN128[0] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-    treesBN128[1] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
-    treesBN128[2] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
-    treesBN128[3] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
-    treesBN128[4] = new MerkleTreeBN128(starkInfo.merkleTreeArity, pConstTreeAddress);
 
     treesBN128[4]->getRoot(&rootC);
 
@@ -639,9 +655,5 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     std::memcpy(&proof.proofs.root2[0], &root1, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root3[0], &root2, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root4[0], &root3, sizeof(RawFr::Element));
-    for (uint i = 0; i < 5; i++)
-    {
-        delete treesBN128[i];
-    }
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_FRI);
 }

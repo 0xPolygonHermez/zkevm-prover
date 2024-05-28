@@ -75,6 +75,8 @@
 
 // #define MAIN_SM_EXECUTOR_GENERATED_CODE
 
+#define LOAD_CONST_FILES false
+
 #define USE_GENERIC_PARSER true
 
 //#define MULTI_ROM_TEST

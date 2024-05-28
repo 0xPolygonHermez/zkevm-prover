@@ -26,8 +26,10 @@ public:
                 for(uint64_t i = 0; i < nrowsPack; ++i) {
                     offsetsDest[i] = stepOffset + ((nextStrideOffset + i) % domainSize) * dim;
                 }
-                for(uint64_t i = 0; i < dim; ++i) {
-                    Goldilocks::store_avx(&pols[i], offsetsDest, buffT[i*nOpenings]);
+                if(dim == 1) {
+                    Goldilocks::store_avx(&pols[0], offsetsDest, buffT[0]);
+                } else {
+                    Goldilocks3::store_avx(&pols[0], offsetsDest, buffT, nOpenings);
                 }
             } else {
                 uint64_t stepOffset = offsetsStages[stage] + stagePos;
@@ -38,8 +40,10 @@ public:
             }
         } else {
             if(isTmpPol) {
-                for(uint64_t i = 0; i < dim; ++i) {
-                    Goldilocks::store_avx(&pols[offsetsStages[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex]) * FIELD_EXTENSION + i], uint64_t(dim), buffT[i*nOpenings]);
+                if(dim == 1) {
+                        Goldilocks::store_avx(&pols[offsetsStages[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex])], uint64_t(1), buffT[0]);
+                } else {
+                        Goldilocks3::store_avx(&pols[offsetsStages[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex]) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), buffT, nOpenings);
                 }
             } else {
                 Goldilocks::store_avx(&pols[offsetsStages[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsStages[stage]], nColsStages[stage], buffT[0]);
@@ -63,17 +67,17 @@ public:
     }
 
     inline virtual void setStorePol(std::vector<uint64_t> &storePol, std::vector<uint64_t> buffTOffsetsStages, uint64_t stage, uint64_t stagePos, uint64_t openingPointIndex, uint64_t dim) {
-    if(stage == 4) {
-        storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex] = dim;
-    } else {
-        if(dim == 1) {
-            storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex] = 1;
+        if(stage == 4) {
+            storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex] = dim;
         } else {
-            storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex] = 1;
-            storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex + 2] = 1;
-            storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex + 4] = 1;
+            if(dim == 1) {
+                storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex] = 1;
+            } else {
+                storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex] = 1;
+                storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex + 2] = 1;
+                storePol[buffTOffsetsStages[stage] + 2 * stagePos + openingPointIndex + 4] = 1;
+            }
         }
-    }
     }
 
     inline virtual void loadPolinomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint64_t row, uint64_t stage, uint64_t nrowsPack, uint64_t domainExtended) {
