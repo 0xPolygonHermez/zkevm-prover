@@ -118,33 +118,47 @@ public:
         pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
-        // Map constants tree file to memory
-        TimerStart(LOAD_CONST_TREE_TO_MEMORY);
-        pConstTreeAddress = NULL;
-        if (starkFiles.zkevmConstantsTree.size() == 0)
+        if (!LOAD_CONST_FILES)
         {
-            zklog.error("Starks::Starks() received an empty config.zkevmConstantsTree");
-            exitProcess();
+            TimerStart(CALCULATE_CONST_TREE_TO_MEMORY);
+            pConstPolsAddress2ns = (void *)malloc(NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element));
+            TimerStart(EXTEND_CONST_POLS);
+            ntt.extendPol((Goldilocks::Element *)pConstPolsAddress2ns, (Goldilocks::Element *)pConstPolsAddress, NExtended, N, starkInfo.nConstants);
+            TimerStopAndLog(EXTEND_CONST_POLS);
+            TimerStart(MERKELIZE_CONST_TREE);
+            treesGL[4] = new MerkleTreeGL(NExtended, starkInfo.nConstants, (Goldilocks::Element *)pConstPolsAddress2ns);
+            treesGL[4]->merkelize();
+            TimerStopAndLog(MERKELIZE_CONST_TREE);
+            Polinomial rootC(HASH_SIZE, 1);
+            treesGL[4]->getRoot(rootC.address());
+            zklog.info("MerkleTree rootGL C: [ " + rootC.toString(4) + " ]");
+            TimerStopAndLog(CALCULATE_CONST_TREE_TO_MEMORY);
+        } else {
+            // Map constants tree file to memory
+            pConstTreeAddress = NULL;
+            if (starkFiles.zkevmConstantsTree.size() == 0)
+            {
+                zklog.error("Starks::Starks() received an empty config.zkevmConstantsTree");
+                exitProcess();
+            }
+            TimerStart(LOAD_CONST_TREE_TO_MEMORY);
+            if (config.mapConstantsTreeFile)
+            {
+                pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes(), false);
+                zklog.info("Starks::Starks() successfully mapped " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
+            }
+            else
+            {
+                pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes());
+                zklog.info("Starks::Starks() successfully copied " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
+            }
+            treesGL[4] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
+            pConstPolsAddress2ns = (uint8_t *)pConstTreeAddress + 2 * sizeof(uint64_t);
+            TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
         }
 
-        if (config.mapConstantsTreeFile)
-        {
-            pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes(), false);
-            zklog.info("Starks::Starks() successfully mapped " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
-        }
-        else
-        {
-            pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes());
-            zklog.info("Starks::Starks() successfully copied " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
-        }
-        TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
-
-        // Initialize and allocate ConstantPols2ns
-        TimerStart(LOAD_CONST_POLS_2NS_TO_MEMORY);
-        pConstPolsAddress2ns = (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element);
-        pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
-
-        TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);
+        // Allocate ConstantPols2ns
+        pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, NExtended, starkInfo.nConstants);
 
         // TODO x_n and x_2ns could be precomputed
         TimerStart(COMPUTE_X_N_AND_X_2_NS);
@@ -193,7 +207,6 @@ public:
         treesGL[1] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
         treesGL[2] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
         treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
-        treesGL[4] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
 
         TimerStart(CHELPERS_ALLOCATION);
@@ -210,22 +223,22 @@ public:
 
         delete pConstPols;
         delete pConstPols2ns;
-
+        
         if (config.mapConstPolsFile)
         {
             unmapFile(pConstPolsAddress, constPolsSize);
-        }
-        else
-        {
+        } else {
             free(pConstPolsAddress);
         }
-        if (config.mapConstantsTreeFile)
-        {
-            unmapFile(pConstTreeAddress, constPolsSize);
-        }
-        else
-        {
-            free(pConstTreeAddress);
+
+        if(LOAD_CONST_FILES) {
+            if (config.mapConstantsTreeFile) {
+                unmapFile(pConstTreeAddress, constPolsSize);
+            } else {
+                free(pConstTreeAddress);
+            }
+        } else {
+            free(pConstPolsAddress2ns);
         }
 
         for (uint i = 0; i < 5; i++)

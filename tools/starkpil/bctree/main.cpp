@@ -66,14 +66,15 @@ int main(int argc, char **argv)
         } else throw runtime_error("bctree: starkinfo input file argument not specified <-s/--stark> <starkinfo_file>");
 
         //Output arguments
-        if (aParser.argumentExists("-t","--tree")) {
-            constTreeFile = aParser.getArgumentValue("-t","--tree");
-            if (constTreeFile=="") throw runtime_error("bctree: constants tree output file not specified");
-        } else throw runtime_error("bctree: constants tree ouput file argument not specified <-t/--tree> <consttree_file>");
         if (aParser.argumentExists("-v","--verkey")) {
             verKeyFile = aParser.getArgumentValue("-v","--verkey");
             if (verKeyFile=="") throw runtime_error("bctree: key ouput file not specified");
+        } else throw runtime_error("bctree: constants tree verkey file argument not specified <-v/--verkey> <verkey_file>");
+        if (aParser.argumentExists("-t","--tree")) {
+            constTreeFile = aParser.getArgumentValue("-t","--tree");
+            if (constTreeFile=="") throw runtime_error("bctree: constants tree output file not specified");
         }
+        
 
         showVersion();
 

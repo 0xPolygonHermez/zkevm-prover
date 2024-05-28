@@ -61,6 +61,8 @@ private:
     Goldilocks::Element *p_f_2ns;
 
     Goldilocks::Element *pBuffer;
+    
+    MerkleTreeBN128 *treesBN128[STARK_RECURSIVE_F_NUM_TREES];
 
     std::unique_ptr<BinFileUtils::BinFile> cHelpersBinFile;
     CHelpers chelpers;
