@@ -92,7 +92,7 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
         TimerStart(GENERATING_FILES);
 
         // ConstTree
-        if (consTreeFile != "") {
+        if (constTreeFile != "") {
             std::ofstream fw(constTreeFile.c_str(), std::fstream::out | std::fstream::binary);
             fw.write((const char *)&(mt.source_width), sizeof(mt.source_width));
             fw.write((const char *)&(mt.height), sizeof(mt.height));
