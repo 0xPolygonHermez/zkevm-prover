@@ -23,6 +23,7 @@
 #include "main_sm/fork_10/helpers/memory_helper.hpp"
 #include "main_sm/fork_10/helpers/memalign_helper.hpp"
 #include "main_sm/fork_10/helpers/storage_helper.hpp"
+#include "main_sm/fork_10/helpers/keccak_helper.hpp"
 #include "utils/time_metric.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
@@ -1190,128 +1191,42 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // HashK free in
                 if (rom.line[zkPC].hashK == 1)
                 {
-                    unordered_map< uint64_t, HashValue >::iterator hashKIterator;
-
-                    // If there is no entry in the hash database for this address, then create a new one
-                    hashKIterator = ctx.hashK.find(hashAddr);
-                    if (hashKIterator == ctx.hashK.end())
+                    zkresult zkr = HashK_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, hashAddr);
+                    if (zkr != ZKR_SUCCESS)
                     {
-                        HashValue hashValue;
-                        ctx.hashK[hashAddr] = hashValue;
-                        hashKIterator = ctx.hashK.find(hashAddr);
-                        zkassert(hashKIterator != ctx.hashK.end());
-                    }
-
-                    // Get the size of the hash from D0
-                    uint64_t size;
-                    if (rom.line[zkPC].hashBytesInD == 1)
-                    {
-                        size = fr.toU64(pols.D0[i]);
-                    }
-                    else
-                    {
-                        size = rom.line[zkPC].hashBytes;
-                    }
-                    if (size > 32)
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
-                        logError(ctx, "Invalid size>32 for hashK 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                        proverRequest.result = zkr;
+                        logError(ctx, "Failed calling HashK_calculate() result=" + zkresult2string(zkr));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-
-                    // Get the positon of the hash from HASHPOS
-                    int64_t iPos;
-                    fr.toS64(iPos, pols.HASHPOS[i]);
-                    if (iPos < 0)
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;
-                        logError(ctx, "Invalid pos<0 for HashK 1: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
-                    }
-                    uint64_t pos = iPos;
-
-                    // Check that pos+size do not exceed data size
-                    if ( (pos+size) > hashKIterator->second.data.size())
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
-                        logError(ctx, "HashK 1 invalid size of hash: pos=" + to_string(pos) + " + size=" + to_string(size) + " > data.size=" + to_string(hashKIterator->second.data.size()));
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
-                    }
-
-                    // Copy data into fi
-                    mpz_class s;
-                    for (uint64_t j=0; j<size; j++)
-                    {
-                        uint8_t data = hashKIterator->second.data[pos+j];
-                        s = (s<<uint64_t(8)) + mpz_class(data);
-                    }
-                    scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
-
                     nHits++;
-
-#ifdef LOG_HASHK
-                    zklog.info("hashK 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
-#endif
                 }
 
                 // HashKDigest free in
                 if (rom.line[zkPC].hashKDigest == 1)
                 {
-                    unordered_map< uint64_t, HashValue >::iterator hashKIterator;
-
-                    // If there is no entry in the hash database for this address, this is an error
-                    hashKIterator = ctx.hashK.find(hashAddr);
-                    if (hashKIterator == ctx.hashK.end())
+                    zkresult zkr = HashKDigest_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, hashAddr);
+                    if (zkr != ZKR_SUCCESS)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND;
-                        logError(ctx, "HashKDigest 1: digest not defined for hashAddr=" + to_string(hashAddr));
+                        proverRequest.result = zkr;
+                        logError(ctx, "Failed calling HashKDigest_calculate() result=" + zkresult2string(zkr));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-
-                    // If digest was not calculated, this is an error
-                    if (!hashKIterator->second.lenCalled)
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED;
-                        logError(ctx, "HashKDigest 1: digest not calculated for hashAddr=" + to_string(hashAddr) + ".  Call hashKLen to finish digest.");
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
-                    }
-
-                    // Copy digest into fi
-                    scalar2fea(fr, hashKIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
-
                     nHits++;
-
-#ifdef LOG_HASHK
-                    zklog.info("hashKDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " digest=" + ctx.hashK[hashAddr].digest.get_str(16));
-#endif
                 }
 
                 // HashKlen free in
                 if (rom.line[zkPC].hashKLen)
                 {
-                    unordered_map<uint64_t, HashValue>::const_iterator it;
-                    it = ctx.hashK.find(hashAddr);
-                    if (it == ctx.hashK.end())
+                    zkresult zkr = HashKLen_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, hashAddr);
+                    if (zkr != ZKR_SUCCESS)
                     {
-                        fi0 = fr.zero();
+                        proverRequest.result = zkr;
+                        logError(ctx, "Failed calling HashKLen_calculate() result=" + zkresult2string(zkr));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
                     }
-                    else
-                    {
-                        fi0 = fr.fromU64(it->second.data.size());
-                    }
-                    fi1 = fr.zero();
-                    fi2 = fr.zero();
-                    fi3 = fr.zero();
-                    fi4 = fr.zero();
-                    fi5 = fr.zero();
-                    fi6 = fr.zero();
-                    fi7 = fr.zero();
-
                     nHits++;
                 }
 
@@ -1814,284 +1729,40 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // HashK instruction
         if ( rom.line[zkPC].hashK == 1 )
         {
-            if (!bProcessBatch)
+            zkresult zkr = HashK_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, hashAddr);
+            if (zkr != ZKR_SUCCESS)
             {
-                pols.hashK[i] = fr.one();
-            }
-
-            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
-
-            // If there is no entry in the hash database for this address, then create a new one
-            hashKIterator = ctx.hashK.find(hashAddr);
-            if (hashKIterator == ctx.hashK.end())
-            {
-                HashValue hashValue;
-                ctx.hashK[hashAddr] = hashValue;
-                hashKIterator = ctx.hashK.find(hashAddr);
-                zkassert(hashKIterator != ctx.hashK.end());
-            }
-
-            // Get the size of the hash from D0
-            uint64_t size;
-            if (rom.line[zkPC].hashBytesInD == 1)
-            {
-                size = fr.toU64(pols.D0[i]);
-            }
-            else
-            {
-                size = rom.line[zkPC].hashBytes;
-            }
-            if (size > 32)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
-                logError(ctx, "Invalid size>32 for hashK 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
+                proverRequest.result = zkr;
+                logError(ctx, "Failed calling HashK_verify() result=" + zkresult2string(zkr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-
-            // Get the position of the hash from HASHPOS
-            int64_t iPos;
-            fr.toS64(iPos, pols.HASHPOS[i]);
-            if (iPos < 0)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;
-                logError(ctx, string("Invalid pos<0 for HashK 2: pols.HASHPOS[i]=") + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-            uint64_t pos = iPos;
-
-            // Get contents of opN into a
-            mpz_class a;
-            if (rom.line[zkPC].assumeFree == 1)
-            {
-                if (!fea2scalar(fr, a, pols.FREE0[i], pols.FREE1[i], pols.FREE2[i], pols.FREE3[i], pols.FREE4[i], pols.FREE5[i], pols.FREE6[i], pols.FREE7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.FREE)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-            }
-            else
-            {
-                if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-            }
-
-            // Fill the hash data vector with chunks of the scalar value
-            mpz_class result;
-            for (uint64_t j=0; j<size; j++)
-            {
-                result = (a >> ((size-j-1)*8)) & ScalarMask8;
-                uint8_t bm = result.get_ui();
-                if (hashKIterator->second.data.size() == (pos+j))
-                {
-                    hashKIterator->second.data.push_back(bm);
-                }
-                else if (hashKIterator->second.data.size() < (pos+j))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
-                    logError(ctx, "HashK 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashK[hashAddr].data.size()));
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-                else
-                {
-                    uint8_t bh;
-                    bh = hashKIterator->second.data[pos+j];
-                    if (bm != bh)
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK_VALUE_MISMATCH;
-                        logError(ctx, "HashK 2 bytes do not match: hashAddr=" + to_string(hashAddr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
-                    }
-                }
-            }
-
-            // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size
-            mpz_class paddingA = a >> (size*8);
-            if (paddingA != 0)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHK_PADDING_MISMATCH;
-                logError(ctx, "HashK 2 incoherent size=" + to_string(size) + " a=" + a.get_str(16) + " paddingA=" + paddingA.get_str(16));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-            // Record the read operation
-            unordered_map<uint64_t, uint64_t>::iterator readsIterator;
-            readsIterator = hashKIterator->second.reads.find(pos);
-            if ( readsIterator != hashKIterator->second.reads.end() )
-            {
-                if (readsIterator->second != size)
-                {
-                    proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_MISMATCH;
-                    logError(ctx, "HashK 2 different read sizes in the same position hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos) + " ctx.hashK[addr].reads[pos]=" + to_string(ctx.hashK[hashAddr].reads[pos]) + " size=" + to_string(size));
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-            }
-            else
-            {
-                hashKIterator->second.reads[pos] = size;
-            }
-
-            // Store the size
-            ctx.incHashPos = size;
-
-#ifdef LOG_HASHK
-            zklog.info("hashK 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + a.get_str(16));
-#endif
         }
 
         // HashKLen instruction
         if (rom.line[zkPC].hashKLen == 1)
         {
-            if (!bProcessBatch) pols.hashKLen[i] = fr.one();
-
-            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
-
-            // Get the length
-            uint64_t lm = fr.toU64(op0);
-
-            // Find the entry in the hash database for this address
-            hashKIterator = ctx.hashK.find(hashAddr);
-
-            // If it's undefined, compute a hash of 0 bytes
-            if (hashKIterator == ctx.hashK.end())
+            zkresult zkr = HashKLen_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, hashAddr);
+            if (zkr != ZKR_SUCCESS)
             {
-                // Check that length = 0
-                if (lm != 0)
-                {
-                    proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
-                    logError(ctx, "HashKLen 2 hashK[hashAddr] is empty but lm is not 0 hashAddr=" + to_string(hashAddr) + " lm=" + to_string(lm));
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-
-                // Create an empty entry in this address slot
-                HashValue hashValue;
-                ctx.hashK[hashAddr] = hashValue;
-                hashKIterator = ctx.hashK.find(hashAddr);
-                zkassert(hashKIterator != ctx.hashK.end());
-            }
-
-            if (hashKIterator->second.lenCalled)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHKLEN_CALLED_TWICE;
-                logError(ctx, "HashKLen 2 called more than once hashAddr=" + to_string(hashAddr));
+                proverRequest.result = zkr;
+                logError(ctx, "Failed calling HashKLen_verify() result=" + zkresult2string(zkr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            hashKIterator->second.lenCalled = true;
-
-            uint64_t lh = hashKIterator->second.data.size();
-            if (lm != lh)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
-                logError(ctx, "HashKLen 2 length does not match hashAddr=" + to_string(hashAddr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-            if (!hashKIterator->second.digestCalled)
-            {
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                gettimeofday(&t, NULL);
-#endif
-                keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                mainMetrics.add("Keccak", TimeDiff(t));
-#endif
-
-#ifdef LOG_HASHK
-                {
-                    string s = "hashKLen 2 calculate hashKLen: hashAddr:" + to_string(hashAddr) + " hash:" + ctx.hashK[hashAddr].digest.get_str(16) + " size:" + to_string(ctx.hashK[hashAddr].data.size()) + " data:";
-                    for (uint64_t k=0; k<ctx.hashK[hashAddr].data.size(); k++) s += byte2string(ctx.hashK[hashAddr].data[k]) + ":";
-                    zklog.info(s);
-                }
-#endif
-            }
-
-#ifdef LOG_HASHK
-            zklog.info("hashKLen 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr));
-#endif
         }
 
         // HashKDigest instruction
         if (rom.line[zkPC].hashKDigest == 1)
         {
-            if (!bProcessBatch) pols.hashKDigest[i] = fr.one();
-
-            // Get contents of op into dg
-            mpz_class dg;
-            if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
+            zkresult zkr = HashKDigest_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, hashAddr);
+            if (zkr != ZKR_SUCCESS)
             {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(op)");
+                proverRequest.result = zkr;
+                logError(ctx, "Failed calling HashKDigest_verify() result=" + zkresult2string(zkr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-
-            // Find the entry in the hash database for this address
-            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
-            hashKIterator = ctx.hashK.find(hashAddr);
-            if (hashKIterator == ctx.hashK.end())
-            {
-#ifdef BLOB_INNER
-                HashValue hashValue;
-                Goldilocks::Element keyFea[4];
-                scalar2fea(fr, dg, keyFea);
-                zkresult zkr = pHashDB->getProgram(emptyString, keyFea, hashValue.data, proverRequest.dbReadLog);
-                if (zkr != ZKR_SUCCESS)
-                {
-                    proverRequest.result = zkr;
-                    logError(ctx, "HashKDigest 2: blob inner data not found in DB dg=" + dg.get_str(16));
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-
-                hashValue.digest = dg;
-                hashValue.lenCalled = false;
-                ctx.hashK[hashAddr] = hashValue;
-                hashKIterator = ctx.hashK.find(hashAddr);
-                zkassertpermanent(hashKIterator != ctx.hashK.end());
-#else
-                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND;
-                logError(ctx, "HashKDigest 2 could not find entry for hashAddr=" + to_string(hashAddr));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-#endif
-            }
-
-            if (dg != hashKIterator->second.digest)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH;
-                logError(ctx, "HashKDigest 2: Digest does not match op");
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-            if (hashKIterator->second.digestCalled)
-            {
-                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_CALLED_TWICE;
-                logError(ctx, "HashKDigest 2 called more than once hashAddr=" + to_string(hashAddr));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-            hashKIterator->second.digestCalled = true;
-
-            ctx.incCounter = ceil((double(hashKIterator->second.data.size()) + double(1)) / double(136));
-
-#ifdef LOG_HASHK
-            zklog.info("hashKDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " hashAddr=" + to_string(hashAddr) + " digest=" + ctx.hashK[hashAddr].digest.get_str(16));
-#endif
         }
 
         // HashP instruction
