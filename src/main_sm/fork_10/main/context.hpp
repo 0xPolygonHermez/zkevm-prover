@@ -200,6 +200,10 @@ public:
     BLS12_381Root BLS512_381root;
     bool forceMode384;
 
+    uint64_t incHashPos;
+    uint64_t incCounter;
+    bool bProcessBatch;
+
     Context( Goldilocks &fr,
              const Config &config,
              RawFec &fec,
@@ -224,7 +228,11 @@ public:
         pStep(NULL),
         pEvaluation(NULL),
         N(0),
-        forceMode384(false){}; // Constructor, setting references
+        forceMode384(false),
+        incHashPos(0),
+        incCounter(0),
+        bProcessBatch((proverRequest.type == prt_processBatch) || (proverRequest.type == prt_processBlobInner))
+        {}; // Constructor, setting references
 
     ~Context()
     {

@@ -263,6 +263,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "#include \"main_sm/"+ forkNamespace + "/helpers/binary_helper.hpp\"\n";
         code += "#include \"main_sm/"+ forkNamespace + "/helpers/memory_helper.hpp\"\n";
         code += "#include \"main_sm/"+ forkNamespace + "/helpers/memalign_helper.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/helpers/storage_helper.hpp\"\n";
         code += "#include <fstream>\n";
         code += "#include \"utils.hpp\"\n";
         code += "#include \"timer.hpp\"\n";
@@ -351,8 +352,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     }
 
     code += "    int32_t sp;\n";
-
-    //code += "    int64_t incHashPos = 0;\n"; // TODO: Remove initialization to check it is initialized before being used
     
     code += "    Rom &rom = config.loadDiagnosticRom ? mainExecutor.romDiagnostic : mainExecutor.romBatch;\n";
 
@@ -465,31 +464,9 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    CommandResult cr;\n";
 
     // Storage free in
-    code += "    Goldilocks::Element Kin0[12];\n";
-    code += "    Goldilocks::Element Kin1[12];\n";
-    code += "    mpz_class scalarD;\n";
     code += "    zkresult zkResult;\n";
-    code += "    Goldilocks::Element Kin0Hash[4];\n";
-    code += "    Goldilocks::Element Kin1Hash[4];\n";  // TODO: Reuse global variables
-    code += "    Goldilocks::Element keyI[4];\n";
-    code += "    Goldilocks::Element oldRoot[4];\n";
-    code += "    Goldilocks::Element key[4];\n";
-    code += "    SmtGetResult smtGetResult;\n";
     code += "    mpz_class opScalar;\n";
     code += "    mpz_class value;\n";
-    if (bFastMode)
-    {
-        code += "    bool bStateOverride;\n";
-        code += "    string keyAddress;\n";
-        code += "    uint64_t keyType;\n";
-        code += "    string keyStorage;\n";
-        code += "    unordered_map<string, OverrideEntry>::iterator itStateOverride;\n";
-        code += "    unordered_map<string, mpz_class>::iterator itState;\n";
-    }
-    if (!bFastMode)
-        code += "    array<Goldilocks::Element,17> pg;\n";
-    code += "    Goldilocks::Element fea[4];\n";
-    code += "    SmtAction smtAction;\n";
 
     // Hash free in
     code += "    mpz_class s;\n";
@@ -507,7 +484,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
     // Mem allign free in
     code += "    mpz_class m;\n";
-    code += "    uint64_t offset;\n";
     code += "    mpz_class v;\n";
 
     // Binary free in
@@ -515,9 +491,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    mpz_class expectedC;\n";
     code += "    BinaryAction binaryAction;\n";
 
-    code += "    uint64_t b0;\n";
-    code += "    bool bIsTouchedAddressTree;\n";
-    code += "    bool bIsBlockL2Hash;\n";
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     code += "    struct timeval t;\n";
     code += "    TimeMetricStorage mainMetrics;\n";
@@ -583,8 +556,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         }
     }
 
-    code += "    uint64_t incHashPos;\n";
-    code += "    uint64_t incCounter;\n\n";
     code += "    uint64_t jmpnCondValue;\n";
     code += "\n";
 
@@ -1344,478 +1315,31 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
                 // Storage read free in: get a poseidon hash, and read fi=sto[hash]
                 if (rom["program"][zkPC].contains("sRD") && (rom["program"][zkPC]["sRD"] == 1))
-                {                    
-                    code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
+                {
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
+                    code += "    zkResult = Storage_read_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
+                    code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Storage read free in found non-zero A-B storage registers\");\n";
+                    code += "        proverRequest.result = zkResult;\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling Storage_read_calculate() result=\" + zkresult2string(zkResult));\n";
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
-                    code += "    }\n\n";
-
-                    code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
-
-                    if (bFastMode)
-                    {
-                    code += "    bStateOverride = false;\n";
-
-                    // If the input contains a state override section, then use it
-                    code += "    if (!proverRequest.input.stateOverride.empty())\n";
-                    code += "    {\n";
-                        // Get the key address
-                    code += "        if (!fea2scalar(fr, s, pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0]))\n";
-                    code += "        {\n";
-                    code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "            zkPC=" + to_string(zkPC) +";\n";
-                    code += "            mainExecutor.logError(ctx, \"Failed calling fea2scalar()\");\n";
-                    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "            return;\n";
-                    code += "        }\n";
-
-                    code += "        keyAddress = NormalizeTo0xNFormat(s.get_str(16), 40);\n";
-
-                        // Get the key type
-                    code += "        if (!fea2scalar(fr, s, pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0]))\n";
-                    code += "        {\n";
-                    code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "            zkPC=" + to_string(zkPC) +";\n";
-                    code += "            mainExecutor.logError(ctx, \"Failed calling fea2scalar()\");\n";
-                    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "            return;\n";
-                    code += "        }\n";
-                    code += "       keyType = s.get_ui();\n";
-
-                        // Get the key storage
-                    code += "        if (!fea2scalar(fr, s, pols.C0[0], pols.C1[0], pols.C2[0], pols.C3[0], pols.C4[0], pols.C5[0], pols.C6[0], pols.C7[0]))\n";
-                    code += "        {\n";
-                    code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "            zkPC=" + to_string(zkPC) +";\n";
-                    code += "            mainExecutor.logError(ctx, \"Failed calling fea2scalar()\");\n";
-                    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "            return;\n";
-                    code += "        }\n";
-                    code += "        keyStorage = NormalizeTo0xNFormat(s.get_str(16), 64);\n";
-
-                    code += "        itStateOverride = proverRequest.input.stateOverride.find(keyAddress);\n";
-                    code += "        if (itStateOverride != proverRequest.input.stateOverride.end())\n";
-                    code += "        {\n";
-                    code += "            if ((keyType == rom.constants.SMT_KEY_BALANCE) && itStateOverride->second.bBalance)\n";
-                    code += "            {\n";
-                    code += "                value = itStateOverride->second.balance;\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "            else if ((keyType == rom.constants.SMT_KEY_NONCE) && (itStateOverride->second.nonce > 0))\n";
-                    code += "            {\n";
-                    code += "                value = itStateOverride->second.nonce;\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "            else if ((keyType == rom.constants.SMT_KEY_SC_CODE) && (itStateOverride->second.code.size() > 0))\n";
-                    code += "            {\n";
-                                // Calculate the linear poseidon hash
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    code += "                gettimeofday(&t, NULL);\n";
-#endif
-                    code += "                Goldilocks::Element result[4];\n";
-                    code += "                mainExecutor.linearPoseidon(ctx, itStateOverride->second.code, result);\n";
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    code += "                mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
-#endif
-                                // Convert to scalar
-                    code += "                fea2scalar(fr, value, result);\n";
-
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "            else if ((keyType == rom.constants.SMT_KEY_SC_LENGTH) && (itStateOverride->second.code.size() > 0))\n";
-                    code += "            {\n";
-                    code += "                value = itStateOverride->second.code.size();\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "            else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (itStateOverride->second.state.size() > 0))\n";
-                    code += "            {\n";
-                    code += "                itState = itStateOverride->second.state.find(keyStorage);\n";
-                    code += "                if (itState != itStateOverride->second.state.end())\n";
-                    code += "                {\n";
-                    code += "                    value = itState->second;\n";
-                    code += "                }\n";
-                    code += "                else\n";
-                    code += "                {\n";
-                    code += "                    value = 0;\n";
-                    code += "                }\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "            else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (itStateOverride->second.stateDiff.size() > 0))\n";
-                    code += "            {\n";
-                    code += "                itState = itStateOverride->second.stateDiff.find(keyStorage);\n";
-                    code += "                if (itState != itStateOverride->second.stateDiff.end())\n";
-                    code += "                {\n";
-                    code += "                    value = itState->second;\n";
-                    code += "                }\n";
-                    code += "                else\n";
-                    code += "                {\n";
-                    code += "                    value = 0;\n";
-                    code += "                }\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "        }\n";
                     code += "    }\n";
-
-                    code += "    if (bStateOverride)\n";
-                    code += "    {\n";
-                    code += "        smtGetResult.value = value;\n";
-
-#ifdef LOG_SMT_KEY_DETAILS
-                    code += "        zklog.info(\"SMT get state override C=\" + fea2stringchain(fr, pols.C0[0], pols.C1[0], pols.C2[0], pols.C3[0], pols.C4[0], pols.C5[0], pols.C6[0], pols.C7[0]) +\n";
-                    code += "            \" A=\" + fea2stringchain(fr, pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0]) +\n";
-                    code += "            \" B=\" + fea2stringchain(fr, pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0]) +\n";
-                    code += "            \" oldRoot=\" + fea2string(fr, oldRoot) +\n";
-                    code += "            \" value=\" + value.get_str(10));\n";
-#endif
-                    code += "    }\n";
-                    code += "    else\n";
-                    } // bFastMode
-
-                    code += "    {\n";
-                        //code += "    // Storage read free in: get a poseidon hash, and read fi=sto[hash]\n";
-                        code += "    Kin0[0] = pols.C0[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin0[1] = pols.C1[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin0[2] = pols.C2[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin0[3] = pols.C3[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin0[4] = pols.C4[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin0[5] = pols.C5[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin0[6] = pols.C6[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin0[7] = pols.C7[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin0[8] = fr.zero();\n";
-                        code += "    Kin0[9] = fr.zero();\n";
-                        code += "    Kin0[10] = fr.zero();\n";
-                        code += "    Kin0[11] = fr.zero();\n";
-
-                        code += "    Kin1[0] = pols.A0[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin1[1] = pols.A1[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin1[2] = pols.A2[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin1[3] = pols.A3[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin1[4] = pols.A4[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin1[5] = pols.A5[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
-                        code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
-
-                        code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
-                        code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                        code += "    gettimeofday(&t, NULL);\n";
-#endif
-
-                        //code += "    // Call poseidon and get the hash key\n";
-                        code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-                        //code += "    // Reinject the first resulting hash as the capacity for the next poseidon hash\n";
-                        code += "    Kin1[8] = Kin0Hash[0];\n";
-                        code += "    Kin1[9] = Kin0Hash[1];\n";
-                        code += "    Kin1[10] = Kin0Hash[2];\n";
-                        code += "    Kin1[11] = Kin0Hash[3];\n";
-
-                        //code += "    // Call poseidon hash\n";
-                        code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
-
-                        code += "    key[0] = Kin1Hash[0];\n";
-                        code += "    key[1] = Kin1Hash[1];\n";
-                        code += "    key[2] = Kin1Hash[2];\n";
-                        code += "    key[3] = Kin1Hash[3];\n";
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                        code += "    mainMetrics.add(\"Poseidon\", TimeDiff(t), 3);\n";
-#endif
-
-#ifdef LOG_STORAGE
-                        code += "    zklog.info(\"Storage read sRD got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
-#endif
-
-                        //code += "    // Collect the keys used to read or write store data\n";
-                        code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
-                        code += "    {\n";
-                        code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
-                        code += "    }\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                        code += "    gettimeofday(&t, NULL);\n";
-#endif
-                        code += "    zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
-                        code += "    if (zkResult != ZKR_SUCCESS)\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = zkResult;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->get() result=\") + zkresult2string(zkResult));\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                        code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                        code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
-#endif
-                    code += "    }\n";
-
-                    if (bFastMode)
-                    {
-                        code += "    zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value, key);\n";
-                        code += "    if (zkResult != ZKR_SUCCESS)\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = zkResult;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 1 result=\") + zkresult2string(zkResult));\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                    }
-
-                    code += "    scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-
-#ifdef LOG_STORAGE
-                    code += "    zklog.info(\"Storage read sRD read from key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16) + \" value:\" + fr.toString(fi3, 16) + \":\" + fr.toString(fi2, 16) + \":\" + fr.toString(fi1, 16) + \":\" + fr.toString(fi0, 16));\n";
-#endif
-
                     nHits++;
                 }
 
                 // Storage write free in: calculate the poseidon hash key, check its entry exists in storage, and update new root hash
                 if (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"] == 1))
                 {
-                    code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Storage write free in found non-zero A-B registers\");\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n\n";
-
-                    code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
-
-                    //code += "    // Call SMT to get the new Merkel Tree root hash\n";
-                    code += "    if (!fea2scalar(fr, value, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar()\");\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
-
-                    if (bFastMode)
-                    {
-                    code += "    bStateOverride = false;\n";
-
-                    // If the input contains a state override section, then use it
-                    code += "    if (!proverRequest.input.stateOverride.empty())\n";
-                    code += "    {\n";
-                        // Get the key address
-                    code += "        if (!fea2scalar(fr, s, pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0]))\n";
-                    code += "        {\n";
-                    code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "            zkPC=" + to_string(zkPC) +";\n";
-                    code += "            mainExecutor.logError(ctx, \"Failed calling fea2scalar()\");\n";
-                    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "            return;\n";
-                    code += "        }\n";
-
-                    code += "        keyAddress = NormalizeTo0xNFormat(s.get_str(16), 40);\n";
-
-                        // Get the key type
-                    code += "        if (!fea2scalar(fr, s, pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0]))\n";
-                    code += "        {\n";
-                    code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "            zkPC=" + to_string(zkPC) +";\n";
-                    code += "            mainExecutor.logError(ctx, \"Failed calling fea2scalar()\");\n";
-                    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "            return;\n";
-                    code += "        }\n";
-                    code += "       keyType = s.get_ui();\n";
-
-                        // Get the key storage
-                    code += "        if (!fea2scalar(fr, s, pols.C0[0], pols.C1[0], pols.C2[0], pols.C3[0], pols.C4[0], pols.C5[0], pols.C6[0], pols.C7[0]))\n";
-                    code += "        {\n";
-                    code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-                    code += "            zkPC=" + to_string(zkPC) +";\n";
-                    code += "            mainExecutor.logError(ctx, \"Failed calling fea2scalar()\");\n";
-                    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "            return;\n";
-                    code += "        }\n";
-                    code += "        keyStorage = NormalizeTo0xNFormat(s.get_str(16), 64);\n";
-
-                    code += "        itStateOverride = proverRequest.input.stateOverride.find(keyAddress);\n";
-                    code += "        if (itStateOverride != proverRequest.input.stateOverride.end())\n";
-                    code += "        {\n";
-                    code += "            if ((keyType == rom.constants.SMT_KEY_BALANCE) && itStateOverride->second.bBalance)\n";
-                    code += "            {\n";
-                    code += "                itStateOverride->second.balance = value;\n";
-                    code += "                itStateOverride->second.bBalance = true;\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "            else if ((keyType == rom.constants.SMT_KEY_NONCE) && (itStateOverride->second.nonce > 0))\n";
-                    code += "            {\n";
-                    code += "                itStateOverride->second.nonce = value.get_ui();\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "            else if ((keyType == rom.constants.SMT_KEY_SC_CODE) && (itStateOverride->second.code.size() > 0))\n";
-                    code += "            {\n";
-                    code += "                itStateOverride->second.code = proverRequest.input.contractsBytecode[NormalizeTo0xNFormat(value.get_str(16), 64)];\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "            else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (itStateOverride->second.state.size() > 0))\n";
-                    code += "            {\n";
-                    code += "                itStateOverride->second.state[keyStorage] = value;\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "            else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (itStateOverride->second.stateDiff.size() > 0))\n";
-                    code += "            {\n";
-                    code += "                itStateOverride->second.stateDiff[keyStorage] = value;\n";
-                    code += "                bStateOverride = true;\n";
-                    code += "            }\n";
-                    code += "        }\n";
-                    code += "    }\n";
-
-                    code += "    if (bStateOverride)\n";
-                    code += "    {\n";
-
-#ifdef LOG_SMT_KEY_DETAILS
-                    code += "        zklog.info(\"SMT set state override C=\" + fea2stringchain(fr, pols.C0[0], pols.C1[0], pols.C2[0], pols.C3[0], pols.C4[0], pols.C5[0], pols.C6[0], pols.C7[0]) +\n";
-                    code += "            \" A=\" + fea2stringchain(fr, pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0]) +\n";
-                    code += "            \" B=\" + fea2stringchain(fr, pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0]) +\n";
-                    code += "            \" oldRoot=\" + fea2string(fr, oldRoot) +\n";
-                    code += "            \" value=\" + value.get_str(10));\n";
-#endif
-                    code += "    }\n";
-                    code += "    else\n";
-                    } // bFastMode
-
-                    code += "    {\n";
-
-                    //code += "    // Storage write free in: calculate the poseidon hash key, check its entry exists in storage, and update new root hash\n";
-                    //code += "    // reset lastSWrite\n";
-                    code += "    ctx.lastSWrite.reset();\n";
-                    code += "    Kin0[0] = pols.C0[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin0[1] = pols.C1[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin0[2] = pols.C2[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin0[3] = pols.C3[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin0[4] = pols.C4[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin0[5] = pols.C5[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin0[6] = pols.C6[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin0[7] = pols.C7[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin0[8] = fr.zero();\n";
-                    code += "    Kin0[9] = fr.zero();\n";
-                    code += "    Kin0[10] = fr.zero();\n";
-                    code += "    Kin0[11] = fr.zero();\n";
-
-                    code += "    Kin1[0] = pols.A0[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin1[1] = pols.A1[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin1[2] = pols.A2[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin1[3] = pols.A3[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin1[4] = pols.A4[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin1[5] = pols.A5[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
-
-                    code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
-                    code += "    bIsBlockL2Hash = (b0 > 6);\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    code += "    gettimeofday(&t, NULL);\n";
-#endif
-
-                    //code += "    // Call poseidon and get the hash key\n";
-                    code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-                    code += "    Kin1[8] = Kin0Hash[0];\n";
-                    code += "    Kin1[9] = Kin0Hash[1];\n";
-                    code += "    Kin1[10] = Kin0Hash[2];\n";
-                    code += "    Kin1[11] = Kin0Hash[3];\n";
-
-                    code += "    ctx.lastSWrite.keyI[0] = Kin0Hash[0];\n";
-                    code += "    ctx.lastSWrite.keyI[1] = Kin0Hash[1];\n";
-                    code += "    ctx.lastSWrite.keyI[2] = Kin0Hash[2];\n";
-                    code += "    ctx.lastSWrite.keyI[3] = Kin0Hash[3];\n";
-
-                    //code += "    // Call poseidon hash\n";
-                    code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
-
-                    //code += "    // Store a copy of the data in ctx.lastSWrite\n";
-                    if (!bFastMode)
-                    {
-                        code += "    for (uint64_t j=0; j<12; j++)\n";
-                        code += "        ctx.lastSWrite.Kin0[j] = Kin0[j];\n";
-                        code += "    for (uint64_t j=0; j<12; j++)\n";
-                        code += "        ctx.lastSWrite.Kin1[j] = Kin1[j];\n";
-                    }
-                    code += "    for (uint64_t j=0; j<4; j++)\n";
-                    code += "        ctx.lastSWrite.keyI[j] = Kin0Hash[j];\n";
-                    code += "    for (uint64_t j=0; j<4; j++)\n";
-                    code += "        ctx.lastSWrite.key[j] = Kin1Hash[j];\n";
-
-                    code += "    ctx.lastSWrite.key[0] = Kin1Hash[0];\n";
-                    code += "    ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
-                    code += "    ctx.lastSWrite.key[2] = Kin1Hash[2];\n";
-                    code += "    ctx.lastSWrite.key[3] = Kin1Hash[3];\n";
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    code += "    mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
-#endif
-
-#ifdef LOG_STORAGE
-                    code += "    zklog.info(\"Storage write sWR got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
-#endif
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    code += "    gettimeofday(&t, NULL);\n";
-#endif
-
-                    //code += "    // Collect the keys used to read or write store data\n";
-                    code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
-                    code += "    {\n";
-                    code += "        proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
-                    code += "    }\n";
-
-                    code += "    zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
-
+                    code += "    zkPC=" + to_string(zkPC) +";\n";
+                    code += "    zkResult = Storage_write_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = zkResult;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->set() result=\") + zkresult2string(zkResult));\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling Storage_write_calculate() result=\" + zkresult2string(zkResult));\n";
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
-                    code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
-
-                    code += "    }\n";
-
-                    if (bFastMode)
-                    {
-                        code += "    zkResult = eval_addReadWriteAddress(ctx, value, ctx.lastSWrite.key);\n";
-                        code += "    if (zkResult != ZKR_SUCCESS)\n";
-                        code += "    {\n";
-                        code += "        proverRequest.result = zkResult;\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 2 result=\") + zkresult2string(zkResult));\n";
-                        code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                        code += "        return;\n";
-                        code += "    }\n";
-                    }
-                        
-                    //code += "    // If we just modified a balance\n";
-                    code += "    if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
-                    code += "        ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    code += "    mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
-#endif
-                    code += "    ctx.lastSWrite.step = i;\n";
-
-                    code += "    sr4to8(fr, ctx.lastSWrite.newRoot[0], ctx.lastSWrite.newRoot[1], ctx.lastSWrite.newRoot[2], ctx.lastSWrite.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-
-#ifdef LOG_STORAGE
-                    code += "    zklog.info(\"Storage write sWR stored at key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16) + \" newRoot: \" + fr.toString(ctx.lastSWrite.res.newRoot, 16));\n";
-#endif
-
                     nHits++;
                 }
 
@@ -2558,382 +2082,29 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // Storage read instruction
         if (rom["program"][zkPC].contains("sRD") && (rom["program"][zkPC]["sRD"] == 1) )
         {
-            //code += "    // Storage read instruction\n";
-
-            if (!bFastMode)
-                code += "    pols.sRD[i] = fr.one();\n";
-
-            code += "    Kin0[0] = pols.C0[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin0[1] = pols.C1[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin0[2] = pols.C2[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin0[3] = pols.C3[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin0[4] = pols.C4[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin0[5] = pols.C5[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin0[6] = pols.C6[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin0[7] = pols.C7[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin0[8] = fr.zero();\n";
-            code += "    Kin0[9] = fr.zero();\n";
-            code += "    Kin0[10] = fr.zero();\n";
-            code += "    Kin0[11] = fr.zero();\n";
-
-            code += "    Kin1[0] = pols.A0[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin1[1] = pols.A1[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin1[2] = pols.A2[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin1[3] = pols.A3[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin1[4] = pols.A4[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin1[5] = pols.A5[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
-            code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
-
-            code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
-            code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
-
-            code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Storage read instruction found non-zero A-B registers\");\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "    gettimeofday(&t, NULL);\n";
-#endif
-
-            //code += "    // Call poseidon and get the hash key\n";
-            code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-            code += "    keyI[0] = Kin0Hash[0];\n";
-            code += "    keyI[1] = Kin0Hash[1];\n";
-            code += "    keyI[2] = Kin0Hash[2];\n";
-            code += "    keyI[3] = Kin0Hash[3];\n";
-
-            code += "    Kin1[8] = Kin0Hash[0];\n";
-            code += "    Kin1[9] = Kin0Hash[1];\n";
-            code += "    Kin1[10] = Kin0Hash[2];\n";
-            code += "    Kin1[11] = Kin0Hash[3];\n";
-
-            code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
-
-            // Store PoseidonG required data
-            if (!bFastMode)
-            {                
-                //code += "    // Store PoseidonG required data\n";
-                code += "    for (uint64_t j=0; j<12; j++)\n";
-                code += "        pg[j] = Kin0[j];\n";
-                code += "    for (uint64_t j=0; j<4; j++)\n";
-                code += "        pg[12+j] = Kin0Hash[j];\n";
-                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
-                code += "    required.PoseidonG.push_back(pg);\n";
-
-                //code += "    // Store PoseidonG required data\n";
-                code += "    for (uint64_t j=0; j<12; j++)\n";
-                code += "        pg[j] = Kin1[j];\n";
-                code += "    for (uint64_t j=0; j<4; j++)\n";
-                code += "        pg[12+j] = Kin1Hash[j];\n";
-                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
-                code += "    required.PoseidonG.push_back(pg);\n";
-            }
-
-            code += "    key[0] = Kin1Hash[0];\n";
-            code += "    key[1] = Kin1Hash[1];\n";
-            code += "    key[2] = Kin1Hash[2];\n";
-            code += "    key[3] = Kin1Hash[3];\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "    mainMetrics.add(\"Poseidon\", TimeDiff(t), 3);\n";
-#endif
-
-#ifdef LOG_STORAGE
-            code += "    zklog.info(\"Storage read sRD got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
-#endif
-
-            code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
-
-            //code += "    // Collect the keys used to read or write store data\n";
-            code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
-            code += "    {\n";
-            code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
-            code += "    }\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "    gettimeofday(&t, NULL);\n";
-#endif
-            code += "    zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
+            code += "    zkPC=" + to_string(zkPC) +";\n";
+            code += "    zkResult = Storage_read_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ");\n";
             code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
             code += "        proverRequest.result = zkResult;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->get() result=\") + zkresult2string(zkResult));\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling Storage_read_verify() result=\" + zkresult2string(zkResult));\n";
             code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
-            code += "    }\n";
-            code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
-                    
-            if (bFastMode)
-            {
-                code += "    zkResult = eval_addReadWriteAddress(ctx, value, key);\n";
-                code += "    if (zkResult != ZKR_SUCCESS)\n";
-                code += "    {\n";
-                code += "        proverRequest.result = zkResult;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 3 result=\") + zkresult2string(zkResult));\n";
-                code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "        return;\n";
-                code += "    }\n";
-            }
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
-#endif
-            if (!bFastMode)
-            {
-                code += "    smtAction.bIsSet = false;\n";
-                code += "    smtAction.getResult = smtGetResult;\n";
-                code += "    required.Storage.push_back(smtAction);\n";
-            }
-
-#ifdef LOG_STORAGE
-            code += "    zklog.info(\"Storage read sRD read from key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16) + \" value:\" + fr.toString(fi3, 16) + \":\" + fr.toString(fi2, 16) + \":\" + fr.toString(fi1, 16) + \":\" + fr.toString(fi0, 16));\n";
-#endif
-
-            code += "    if (!fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7))\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-            code += "    if (smtGetResult.value != opScalar)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_READ_MISMATCH;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Storage read does not match: smtGetResult.value=\" + smtGetResult.value.get_str() + \" opScalar=\" + opScalar.get_str());\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-
-            if (!bFastMode)
-            {
-                code += "    for (uint64_t k=0; k<4; k++)\n";
-                code += "    {\n";
-                code += "        pols.sKeyI[k][i] = keyI[k];\n";
-                code += "        pols.sKey[k][i] = key[k];\n";
-                code += "    }\n";
-            }
+            code += "    }\n\n";
         }
 
         // Storage write instruction
         if (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"] == 1))
         {
-            //code += "    // Storage write instruction\n";
-
-            if (!bFastMode)
-            {
-                //code += "    // Copy ROM flags into the polynomials\n";
-                code += "    pols.sWR[i] = fr.one();\n";
-            }
-
-            code += "    if ( (ctx.lastSWrite.step == 0) || (ctx.lastSWrite.step != i) )\n";
+            code += "    zkPC=" + to_string(zkPC) +";\n";
+            code += "    zkResult = Storage_write_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ");\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
-            code += "        // Reset lastSWrite\n";
-            code += "        ctx.lastSWrite.reset();\n";
-
-            code += "        Kin0[0] = pols.C0[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin0[1] = pols.C1[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin0[2] = pols.C2[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin0[3] = pols.C3[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin0[4] = pols.C4[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin0[5] = pols.C5[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin0[6] = pols.C6[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin0[7] = pols.C7[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin0[8] = fr.zero();\n";
-            code += "        Kin0[9] = fr.zero();\n";
-            code += "        Kin0[10] = fr.zero();\n";
-            code += "        Kin0[11] = fr.zero();\n";
-
-            code += "        Kin1[0] = pols.A0[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin1[1] = pols.A1[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin1[2] = pols.A2[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin1[3] = pols.A3[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin1[4] = pols.A4[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin1[5] = pols.A5[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
-            code += "        Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
-
-            code += "        b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);;\n";
-            code += "        bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
-            code += "        bIsBlockL2Hash = (b0 > 6);\n";
-
-            code += "        if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
-            code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, \"Storage write instruction found non-zero A-B registers\");\n";
-            code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "            return;\n";
-            code += "        }\n\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        gettimeofday(&t, NULL);\n";
-#endif
-
-            code += "        // Call poseidon and get the hash key\n";
-            code += "        mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-            code += "        ctx.lastSWrite.keyI[0] = Kin0Hash[0];\n";
-            code += "        ctx.lastSWrite.keyI[1] = Kin0Hash[1];\n";
-            code += "        ctx.lastSWrite.keyI[2] = Kin0Hash[2];\n";
-            code += "        ctx.lastSWrite.keyI[3] = Kin0Hash[3];\n";
-
-            code += "        Kin1[8] = Kin0Hash[0];\n";
-            code += "        Kin1[9] = Kin0Hash[1];\n";
-            code += "        Kin1[10] = Kin0Hash[2];\n";
-            code += "        Kin1[11] = Kin0Hash[3];\n";
-
-            code += "        mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
-
-            code += "        // Store a copy of the data in ctx.lastSWrite\n";
-            if (!bFastMode)
-            {
-                code += "        for (uint64_t j=0; j<12; j++)\n";
-                code += "            ctx.lastSWrite.Kin0[j] = Kin0[j];\n";
-                code += "        for (uint64_t j=0; j<12; j++)\n";
-                code += "            ctx.lastSWrite.Kin1[j] = Kin1[j];\n";
-            }
-            code += "        for (uint64_t j=0; j<4; j++)\n";
-            code += "            ctx.lastSWrite.keyI[j] = Kin0Hash[j];\n";
-            code += "        for (uint64_t j=0; j<4; j++)\n";
-            code += "            ctx.lastSWrite.key[j] = Kin1Hash[j];\n";
-
-            code += "        ctx.lastSWrite.key[0] = Kin1Hash[0];\n";
-            code += "        ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
-            code += "        ctx.lastSWrite.key[2] = Kin1Hash[2];\n";
-            code += "        ctx.lastSWrite.key[3] = Kin1Hash[3];\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
-#endif
-
-            code += "        // Call SMT to get the new Merkel Tree root hash\n";
-            code += "        if (!fea2scalar(fr, scalarD, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
-            code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
-            code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "            return;\n";
-            code += "        }\n";
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        gettimeofday(&t, NULL);\n";
-#endif
-
-            code += "        sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
-
-            code += "        // Collect the keys used to read or write store data\n";
-            code += "        if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
-            code += "        {\n";
-            code += "            proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
-            code += "        }\n";
-            code += "        zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
-            code += "        if (zkResult != ZKR_SUCCESS)\n";
-            code += "        {\n";
-            code += "            proverRequest.result = zkResult;\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->set() result=\") + zkresult2string(zkResult));\n";
-            code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "            return;\n";
-            code += "        }\n";
-            code += "        incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
-                    
-            if (bFastMode)
-            {
-                code += "        zkResult = eval_addReadWriteAddress(ctx, scalarD, ctx.lastSWrite.key);\n";
-                code += "        if (zkResult != ZKR_SUCCESS)\n";
-                code += "        {\n";
-                code += "            proverRequest.result = zkResult;\n";
-                code += "            zkPC=" + to_string(zkPC) +";\n";
-                code += "            mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 4 result=\") + zkresult2string(zkResult));\n";
-                code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "            return;\n";
-                code += "        }\n";
-            }
-                        
-            code += "        // If we just modified a balance\n";
-            code += "        if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
-            code += "            ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
-#endif
-
-            code += "        ctx.lastSWrite.step = i;\n";
-            code += "    }\n";
-
-            // Store PoseidonG required data
-            if (!bFastMode)
-            {
-                //code += "    // Store PoseidonG required data\n";
-                code += "    for (uint64_t j=0; j<12; j++)\n";
-                code += "        pg[j] = ctx.lastSWrite.Kin0[j];\n";
-                code += "    for (uint64_t j=0; j<4; j++)\n";
-                code += "        pg[12+j] = ctx.lastSWrite.keyI[j];\n";
-                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
-                code += "    required.PoseidonG.push_back(pg);\n";
-                //code += "    // Store PoseidonG required data\n";
-                code += "    for (uint64_t j=0; j<12; j++)\n";
-                code += "        pg[j] = ctx.lastSWrite.Kin1[j];\n";
-                code += "    for (uint64_t j=0; j<4; j++)\n";
-                code += "       pg[12+j] = ctx.lastSWrite.key[j];\n";
-                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
-                code += "    required.PoseidonG.push_back(pg);\n";
-            }
-
-            if (!bFastMode)
-            {
-                code += "    smtAction.bIsSet = true;\n";
-                code += "    smtAction.setResult = ctx.lastSWrite.res;\n";
-                code += "    required.Storage.push_back(smtAction);\n";
-            }
-
-            //code += "    // Check that the new root hash equals op0\n";
-            code += "    sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
-
-            code += "    if ( !fr.equal(ctx.lastSWrite.newRoot[0], oldRoot[0]) ||\n";
-            code += "         !fr.equal(ctx.lastSWrite.newRoot[1], oldRoot[1]) ||\n";
-            code += "         !fr.equal(ctx.lastSWrite.newRoot[2], oldRoot[2]) ||\n";
-            code += "         !fr.equal(ctx.lastSWrite.newRoot[3], oldRoot[3]) )\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Storage write does not match: ctx.lastSWrite.newRoot: \" + fr.toString(ctx.lastSWrite.newRoot[3], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[2], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[1], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[0], 16) + \" oldRoot: \" + fr.toString(oldRoot[3], 16) + \":\" + fr.toString(oldRoot[2], 16) + \":\" + fr.toString(oldRoot[1], 16) + \":\" + fr.toString(oldRoot[0], 16));\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling Storage_write_verify() result=\" + zkresult2string(zkResult));\n";
             code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
-            code += "    }\n";
-
-            code += "    sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, fea[0], fea[1], fea[2], fea[3]);\n";
-            code += "    if ( !fr.equal(ctx.lastSWrite.newRoot[0], fea[0]) ||\n";
-            code += "         !fr.equal(ctx.lastSWrite.newRoot[1], fea[1]) ||\n";
-            code += "         !fr.equal(ctx.lastSWrite.newRoot[2], fea[2]) ||\n";
-            code += "         !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, \"Storage write does not match: ctx.lastSWrite.newRoot=\" + fea2string(fr, ctx.lastSWrite.newRoot) + \" op=\" + fea2string(fr, fea));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-
-            if (!bFastMode)
-            {
-                code += "    for (uint64_t k=0; k<4; k++)\n";
-                code += "    {\n";
-                code += "        pols.sKeyI[k][i] =  ctx.lastSWrite.keyI[k];\n";
-                code += "        pols.sKey[k][i] = ctx.lastSWrite.key[k];\n";
-                code += "    }\n";
-            }
+            code += "    }\n\n";
         }
 
         if (!bFastMode)
@@ -3085,7 +2256,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n\n";
 
             //code += "    // Store the size\n";
-            code += "    incHashPos = size;\n";
+            code += "    ctx.incHashPos = size;\n";
             bIncHashPos = true;
 
 #ifdef LOG_HASHK
@@ -3217,7 +2388,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n";
             code += "    hashIterator->second.digestCalled = true;\n";
 
-            code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(136));\n";
+            code += "    ctx.incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(136));\n";
 
 #ifdef LOG_HASHK
             code += "    zklog.info(\"hashKDigest 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashK[addr].digest.get_str(16));\n";
@@ -3375,7 +2546,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n\n";
 
             //code += "    // Store the size\n";
-            code += "    incHashPos = size;\n";
+            code += "    ctx.incHashPos = size;\n";
             bIncHashPos = true;
         }
 
@@ -3537,7 +2708,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n";
             code += "    hashIterator->second.digestCalled = true;\n";
 
-            code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(56));\n";
+            code += "    ctx.incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(56));\n";
 
             //code += "    // Check that digest equals op\n";
             code += "    if (dg != hashIterator->second.digest)\n";
@@ -3675,7 +2846,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n\n";
 
             //code += "    // Store the size\n";
-            code += "    incHashPos = size;\n";
+            code += "    ctx.incHashPos = size;\n";
             bIncHashPos = true;
 
 #ifdef LOG_HASHS
@@ -3823,7 +2994,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n";
             code += "    hashIterator->second.digestCalled = true;\n";
 
-            code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(64));\n";
+            code += "    ctx.incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(64));\n";
 
 #ifdef LOG_HASHS
             code += "    zklog.info(\"hashSDigest 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(hashAddr) + \" digest=\" + ctx.hashS[hashAddr].digest.get_str(16));\n";
@@ -4514,7 +3685,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         if ( rom["program"][zkPC].contains("setHASHPOS") && (rom["program"][zkPC]["setHASHPOS"] == 1) )
         {
             if (bIncHashPos)
-                code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.add(op0, fr.fromU64(incHashPos));\n";
+                code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.add(op0, fr.fromU64(ctx.incHashPos));\n";
             else
                 code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = op0;\n";
             if (!bFastMode)
@@ -4523,7 +3694,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         else //if (!bFastMode)
         {
             if (bIncHashPos)
-                code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], fr.fromU64(incHashPos));\n";
+                code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], fr.fromU64(ctx.incHashPos));\n";
             else if (!bFastMode)
                 code += "    pols.HASHPOS[nexti] = pols.HASHPOS[i];\n";
         }
@@ -4560,14 +3731,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                             (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ||
                             (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"]==1)) ) )
         {
-            code += "    pols.incCounter[i] = fr.fromU64(incCounter);\n";
+            code += "    pols.incCounter[i] = fr.fromU64(ctx.incCounter);\n";
         }
 
         if ( rom["program"][zkPC].contains("hashKDigest") && (rom["program"][zkPC]["hashKDigest"] == 1) )
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
-            code += "        pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntKeccakF[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
+            code += "        pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntKeccakF[" + string(bFastMode?"0":"i") + "], fr.fromU64(ctx.incCounter));\n";
 #ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + ")\n";
             code += "        {\n";
@@ -4596,7 +3767,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
-            code += "        pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntPaddingPG[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
+            code += "        pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntPaddingPG[" + string(bFastMode?"0":"i") + "], fr.fromU64(ctx.incCounter));\n";
 #ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + ")\n";
             code += "        {\n";
@@ -4626,7 +3797,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
 #ifdef CHECK_MAX_CNT_ASAP
-            code += "        pols.cntSha256F[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntSha256F[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
+            code += "        pols.cntSha256F[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntSha256F[" + string(bFastMode?"0":"i") + "], fr.fromU64(ctx.incCounter));\n";
             code += "        if (fr.toU64(pols.cntSha256F[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_SHA256_F_LIMIT"]["value"] + ")\n";
             code += "        {\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
@@ -4656,7 +3827,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
-            code += "        pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntPoseidonG[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
+            code += "        pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntPoseidonG[" + string(bFastMode?"0":"i") + "], fr.fromU64(ctx.incCounter));\n";
 #ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + ")\n";
             code += "        {\n";

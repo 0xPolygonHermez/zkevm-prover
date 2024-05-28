@@ -202,7 +202,6 @@ zkresult Arith_verify ( Context &ctx,
             return ZKR_SM_MAIN_ARITH_MISMATCH;
         }
 
-#ifdef USE_REQUIRED
         if (required != NULL)
         {
             ArithAction arithAction;
@@ -265,8 +264,6 @@ zkresult Arith_verify ( Context &ctx,
 
             required->Arith.push_back(arithAction);
         }
-#endif
-
     }
     else if (((arithEquation >= ARITH_ECADD_DIFFERENT) && (arithEquation <= ARITH_BN254_SUBFP2)) ||
              ((arithEquation >= ARITH_BLS12381_MULFP2) && (arithEquation <= ARITH_BLS12381_SUBFP2)))
@@ -582,7 +579,6 @@ zkresult Arith_verify ( Context &ctx,
             return ZKR_SM_MAIN_ARITH_MISMATCH;
         }
 
-#ifdef USE_REQUIRED
         if (required != NULL)
         {
             ArithAction arithAction;
@@ -645,8 +641,6 @@ zkresult Arith_verify ( Context &ctx,
 
             required->Arith.push_back(arithAction);
         }
-#endif
-
     } 
     else if (arithEquation == ARITH_256TO384)
     {
@@ -684,7 +678,6 @@ zkresult Arith_verify ( Context &ctx,
         useCD = 0;
         useE = 0;
 
-#ifdef USE_REQUIRED
         if (required != NULL)
         {
             ArithAction arithAction;
@@ -747,7 +740,6 @@ zkresult Arith_verify ( Context &ctx,
             
             required->Arith.push_back(arithAction);
         }
-#endif
     }
     else
     {
@@ -755,7 +747,7 @@ zkresult Arith_verify ( Context &ctx,
         exitProcess();
     }
 
-    if (required != NULL)
+    if (!ctx.bProcessBatch)
     {
         ctx.pols.arith[i] = fr.one();
         ctx.pols.arithEquation[i] = fr.fromU64(arithEquation);

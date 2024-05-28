@@ -49,9 +49,10 @@ zkresult Memory_verify ( Context &ctx,
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 
-    if (required != NULL) ctx.pols.mOp[i] = fr.one();
-
-    if ((required != NULL) && (ctx.rom.line[zkPC].memUseAddrRel == 1)) ctx.pols.memUseAddrRel[i] = fr.one();
+    if ((!ctx.bProcessBatch) && (ctx.rom.line[zkPC].memUseAddrRel == 1))
+    {
+        ctx.pols.memUseAddrRel[i] = fr.one();
+    }
 
     // If MEMORY WRITE, store op in memory
     if (ctx.rom.line[zkPC].mWR == 1)
@@ -65,7 +66,6 @@ zkresult Memory_verify ( Context &ctx,
         ctx.mem[memAddr].fe6 = op6;
         ctx.mem[memAddr].fe7 = op7;
 
-#ifdef USE_REQUIRED 
         if (required != NULL)
         {
             MemoryAccess memoryAccess;
@@ -80,11 +80,13 @@ zkresult Memory_verify ( Context &ctx,
             memoryAccess.fe5 = op5;
             memoryAccess.fe6 = op6;
             memoryAccess.fe7 = op7;
-            required.Memory.push_back(memoryAccess);
+            required->Memory.push_back(memoryAccess);
+        }
+        if (!ctx.bProcessBatch)
+        {
             ctx.pols.mOp[i] = fr.one();
             ctx.pols.mWR[i] = fr.one();
         }
-#endif
 #ifdef LOG_MEMORY
         zklog.info("Memory write mWR: memAddr:" + to_string(memAddr) + " " + fea2stringchain(fr, ctx.mem[memAddr].fe0, ctx.mem[memAddr].fe1, ctx.mem[memAddr].fe2, ctx.mem[memAddr].fe3, ctx.mem[memAddr].fe4, ctx.mem[memAddr].fe5, ctx.mem[memAddr].fe6, ctx.mem[memAddr].fe7));
 #endif
@@ -115,8 +117,7 @@ zkresult Memory_verify ( Context &ctx,
             value[6] = op6;
             value[7] = op7;
         }
-#ifdef USE_REQUIRED
-        if (requested != NULL)
+        if (required != NULL)
         {
             MemoryAccess memoryAccess;
             memoryAccess.bIsWrite = false;
@@ -130,10 +131,12 @@ zkresult Memory_verify ( Context &ctx,
             memoryAccess.fe5 = value[5];
             memoryAccess.fe6 = value[6];
             memoryAccess.fe7 = value[7];
-            required.Memory.push_back(memoryAccess);
+            required->Memory.push_back(memoryAccess);
+        }
+        if (!ctx.bProcessBatch)
+        {
             ctx.pols.mOp[i] = fr.one();
         }
-#endif
         if (ctx.mem.find(memAddr) != ctx.mem.end())
         {
             if ( (!fr.equal(ctx.mem[memAddr].fe0, value[0])) ||

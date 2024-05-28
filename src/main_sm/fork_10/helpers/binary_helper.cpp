@@ -250,12 +250,14 @@ zkresult Binary_verify ( Context &ctx,
         }
     }
 
-    if (required != NULL)
+    if (!ctx.bProcessBatch)
     {
         ctx.pols.bin[i] = fr.one();
         ctx.pols.binOpcode[i] = fr.fromU64(binOpcode);
+    }
 
-#ifdef USE_REQUIRED
+    if(required != NULL)
+    {
         // Store the binary action to execute it later with the binary SM
         BinaryAction binaryAction;
         binaryAction.a = a;
@@ -263,8 +265,7 @@ zkresult Binary_verify ( Context &ctx,
         binaryAction.c = c;
         binaryAction.opcode = binOpcode;
         binaryAction.type = 1;
-        required.Binary.push_back(binaryAction);
-#endif
+        required->Binary.push_back(binaryAction);
     }
 
     return ZKR_SUCCESS;

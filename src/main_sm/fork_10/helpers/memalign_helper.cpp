@@ -170,11 +170,13 @@ zkresult Memalign_verify ( Context &ctx,
             return ZKR_SM_MAIN_MEMALIGN_WRITE_MISMATCH;
         }
 
-        if (required != NULL)
+        if (!ctx.bProcessBatch)
         {
             ctx.pols.memAlignWR[i] = fr.one();
+        }
 
-#ifdef USE_REQUIRED
+        if (required != NULL)
+        {
             MemAlignAction memAlignAction;
             memAlignAction.m0 = m0;
             memAlignAction.m1 = m1;
@@ -183,8 +185,7 @@ zkresult Memalign_verify ( Context &ctx,
             memAlignAction.v = v;
             memAlignAction.mode = mode;
             memAlignAction.wr = 1;
-            required.MemAlign.push_back(memAlignAction);
-#endif
+            required->MemAlign.push_back(memAlignAction);
         }
     }
     else if ((ctx.rom.line[zkPC].memAlignRD == 1) && (ctx.rom.line[zkPC].memAlignWR == 0))
@@ -214,20 +215,21 @@ zkresult Memalign_verify ( Context &ctx,
             zklog.error("Memalign_verify() MemAlign v invalid: v=" + v.get_str(16) + " _V=" + _v.get_str(16) + " m0=" + m0.get_str(16) + " m1=" + m1.get_str(16) + " mode=" + to_string(mode));
             return ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH;
         }
-        if (required != NULL)
+        if (ctx.bProcessBatch)
         {
             ctx.pols.memAlignRD[i] = fr.one();
-#ifdef USE_REQUIRED
-                MemAlignAction memAlignAction;
-                memAlignAction.m0 = m0;
-                memAlignAction.m1 = m1;
-                memAlignAction.w0 = 0;
-                memAlignAction.w1 = 0;
-                memAlignAction.v = v;
-                memAlignAction.mode = mode;
-                memAlignAction.wr = 0;
-                required.MemAlign.push_back(memAlignAction);
-#endif
+        }
+        if (required != NULL)
+        {
+            MemAlignAction memAlignAction;
+            memAlignAction.m0 = m0;
+            memAlignAction.m1 = m1;
+            memAlignAction.w0 = 0;
+            memAlignAction.w1 = 0;
+            memAlignAction.v = v;
+            memAlignAction.mode = mode;
+            memAlignAction.wr = 0;
+            required->MemAlign.push_back(memAlignAction);
         }
     }
     else
