@@ -67,6 +67,9 @@ uint64_t getNumberOfFileDescriptors (void);
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);
 void unmapFile (void * pAddress, uint64_t size);
 
+// Load file in parallel
+void * loadFileParallel(const string &fileName, uint64_t size);
+
 // Copies file content into memory; use free after use
 void * copyFile (const string &fileName, uint64_t size);
 
