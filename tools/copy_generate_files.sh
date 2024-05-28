@@ -3,6 +3,7 @@
 VERSION=v6.0.0-rc.1-fork.9
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
+EXCLUDE_CONSTTREE="true"
 
 WORKING_DIR=/releases/${VERSION}
 CONFIG_DIR=${WORKING_DIR}/config/
@@ -15,9 +16,16 @@ RECURSIVE2_CPP=./src/starkpil/starkRecursive2/witness/recursive2.verifier.cpp
 RECURSIVEF_CPP=./src/starkpil/starkRecursiveF/witness/recursivef.verifier.cpp
 RECURSIVEFINAL_CPP=./src/starkpil/recursivefinal/final.verifier.cpp
 
+EXCLUDE_OPTION=""
+
+# Check if we need to exclude .consttree files
+if [ "$EXCLUDE_CONSTTREE" = true ]; then
+    EXCLUDE_OPTION="--exclude '*.consttree'"
+fi
+
 #Sync the config directory
 rsync -avz --progress ${CONFIG_DIR}/scripts/ config/scripts/
-rsync -avz --progress ${CONFIG_DIR}/ config/
+rsync -avz --progress ${EXCLUDE_OPTION} ${CONFIG_DIR}/ config/
 rm config/scripts/rom.json
 rm config/scripts/metadata-rom.txt
 
