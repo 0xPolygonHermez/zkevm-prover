@@ -201,6 +201,32 @@ public:
     std::vector<uint64_t> offsetsExtraMemoryH1H2;
 
     uint64_t mapTotalN;
+
+    // Chelpers info
+    uint64_t nStages;
+    
+    uint64_t nextStride;
+    uint64_t nextStrideExt;
+
+    vector<uint64_t> nextStrides;
+    vector<uint64_t> nextStridesExt;
+
+    uint64_t nCols;
+    uint64_t nColsExt;
+
+    vector<uint64_t> buffTOffsetsStages;
+    vector<uint64_t> buffTOffsetsStagesExt;
+
+    vector<uint64_t> nColsStages;
+    vector<uint64_t> nColsStagesExt;
+
+    vector<uint64_t> nColsStagesAcc;
+    vector<uint64_t> nColsStagesAccExt;
+
+    vector<uint64_t> offsetsStages;
+    vector<uint64_t> offsetsStagesExt;
+
+    void setCHelpersInfo();
     
     void setMapOffsets();
 

@@ -146,6 +146,8 @@ void StarkInfo::load(json j)
     }
 
     setMapOffsets();
+
+    setCHelpersInfo();
 }
 
 void StarkInfo::getPol(void *pAddress, uint64_t idPol, PolInfo &polInfo)
@@ -232,11 +234,6 @@ void StarkInfo::setMapOffsets() {
     mapOffsets.section[q_2ns] = mapTotalN;
     mapTotalN += NExtended * qDim;
     
-    cout << "cm1 _ 2ns " << mapOffsets.section[cm1_2ns] << endl;
-    cout << "cm2 _ 2ns " << mapOffsets.section[cm2_2ns] << endl;
-    cout << "cm3 _ 2ns " << mapOffsets.section[cm3_2ns] << endl;
-    cout << "cm4 _ 2ns " << mapOffsets.section[cm4_2ns] << endl;
-
     uint64_t offsetPolsBasefield = mapOffsets.section[cm3_2ns];
 
     // Set offsets for all stages in the basefield field (cm1, cm2, cm3, tmpExp)
@@ -251,11 +248,6 @@ void StarkInfo::setMapOffsets() {
 
     mapOffsets.section[tmpExp_n] = offsetPolsBasefield;
     offsetPolsBasefield += N * mapSectionsN.section[tmpExp_n];
-
-    cout << "cm1 _ n " << mapOffsets.section[cm1_n] << endl;
-    cout << "cm2 _ n " << mapOffsets.section[cm2_n] << endl;
-    cout << "cm3 _ n " << mapOffsets.section[cm3_n] << endl;
-    cout << "tmpExp _ n " << mapOffsets.section[tmpExp_n] << endl;
 
     if(offsetPolsBasefield > mapTotalN) mapTotalN = offsetPolsBasefield;
 
@@ -341,6 +333,10 @@ void StarkInfo::setMapOffsets() {
     }
     numCommited += ciCtx.size();
     
+    if(memoryOffsetGrandProduct > mapTotalN) {
+        mapTotalN = memoryOffsetGrandProduct;
+    }
+
     uint64_t startBuffer;
     uint64_t memoryAvailable;
     uint64_t minBlocks = 4;
@@ -419,4 +415,95 @@ void StarkInfo::setMemoryPol(uint64_t stage, uint64_t polId, uint64_t &memoryOff
     
     memoryOffset += memoryUsed;
 
+}
+
+void StarkInfo::setCHelpersInfo() {
+    nStages = 3;
+    
+    nextStride = 1;
+    nextStrideExt = 1 << (starkStruct.nBitsExt - starkStruct.nBits);
+
+    nextStrides.resize(2);
+    nextStrides[0] = 0;
+    nextStrides[1] = nextStride;
+
+    nextStridesExt.resize(2);
+    nextStridesExt[0] = 0;
+    nextStridesExt[1] = nextStrideExt;
+
+    nCols = nConstants;
+    nColsExt = nConstants;
+
+    buffTOffsetsStages.resize(nStages + 2);
+    buffTOffsetsStagesExt.resize(nStages + 2);
+
+    nColsStages.resize(nStages + 2);
+    nColsStagesExt.resize(nStages + 2);
+
+    nColsStagesAcc.resize(nStages + 2);
+    nColsStagesAccExt.resize(nStages + 2);
+
+    offsetsStages.resize(nStages + 2);
+    offsetsStagesExt.resize(nStages + 2);
+
+
+    // Stage 0: Constants
+    nColsStages[0] = nConstants;
+    nColsStagesExt[0] = nConstants;
+    nColsStagesAcc[0] = 0;
+    nColsStagesAccExt[0] = 0;
+    buffTOffsetsStages[0] = 0;
+    buffTOffsetsStagesExt[0] = 0;
+    offsetsStages[0] = 0;
+    offsetsStagesExt[0] = 0;
+
+    // Stage 1
+    nColsStages[1] = mapSectionsN.section[eSection::cm1_n];
+    nColsStagesExt[1] = mapSectionsN.section[eSection::cm1_2ns];
+    nColsStagesAcc[1] = nColsStagesAcc[0] + nColsStages[0];
+    nColsStagesAccExt[1] = nColsStagesAccExt[0] + nColsStagesExt[0];
+    buffTOffsetsStages[1] = 2*nColsStages[0];
+    buffTOffsetsStagesExt[1] = 2*nColsStagesExt[0];
+    offsetsStages[1] = mapOffsets.section[eSection::cm1_n];
+    offsetsStagesExt[1] = mapOffsets.section[eSection::cm1_2ns];
+    nCols += nColsStages[1];
+    nColsExt += nColsStagesExt[1];
+
+    // Stage 2
+    nColsStages[2] = mapSectionsN.section[eSection::cm2_n];
+    nColsStagesExt[2] = mapSectionsN.section[eSection::cm2_2ns];
+    nColsStagesAcc[2] = nColsStagesAcc[1] + nColsStages[1];
+    nColsStagesAccExt[2] = nColsStagesAccExt[1] + nColsStagesExt[1];
+    buffTOffsetsStages[2] = buffTOffsetsStages[1] + 2*nColsStages[1];
+    buffTOffsetsStagesExt[2] = buffTOffsetsStagesExt[1] + 2*nColsStagesExt[1];
+    offsetsStages[2] = mapOffsets.section[eSection::cm2_n];
+    offsetsStagesExt[2] = mapOffsets.section[eSection::cm2_2ns];
+    nCols += nColsStages[2];
+    nColsExt += nColsStagesExt[2];
+
+    // Stage 3
+    nColsStages[3] = mapSectionsN.section[eSection::cm3_n];
+    nColsStagesExt[3] = mapSectionsN.section[eSection::cm3_2ns];
+    nColsStagesAcc[3] = nColsStagesAcc[2] + nColsStages[2];
+    nColsStagesAccExt[3] = nColsStagesAccExt[2] + nColsStagesExt[2];
+    buffTOffsetsStages[3] = buffTOffsetsStages[2] + 2*nColsStages[2];
+    buffTOffsetsStagesExt[3] = buffTOffsetsStagesExt[2] + 2*nColsStagesExt[2];
+    offsetsStages[3] = mapOffsets.section[eSection::cm3_n];
+    offsetsStagesExt[3] = mapOffsets.section[eSection::cm3_2ns];
+    nCols += nColsStages[3];
+    nColsExt += nColsStagesExt[3];
+
+    // Stage 4: Basefield (tmpExp)
+    nColsStages[4] = mapSectionsN.section[eSection::tmpExp_n];
+    nColsStagesAcc[4] = nColsStagesAcc[3] + nColsStages[3];
+    buffTOffsetsStages[4] = buffTOffsetsStages[3] + 2*nColsStages[3];
+    offsetsStages[4] = mapOffsets.section[eSection::tmpExp_n];
+    nCols += nColsStages[4];
+    
+    // Stage 4: Extended
+    nColsStagesExt[4] = mapSectionsN.section[eSection::cm4_2ns];
+    nColsStagesAccExt[4] = nColsStagesAccExt[3] + nColsStagesExt[3];
+    buffTOffsetsStagesExt[4] = buffTOffsetsStagesExt[3] + 2*nColsStagesExt[3];
+    offsetsStagesExt[4] = mapOffsets.section[eSection::cm4_2ns];
+    nColsExt += nColsStagesExt[4];
 }

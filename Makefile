@@ -51,6 +51,8 @@ endif
 #	CXXFLAGS += -mavx512f -D__AVX512__
 #endif
 
+# CXXFLAGS += -D __PACK__
+
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 

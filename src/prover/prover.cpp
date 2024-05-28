@@ -26,6 +26,11 @@
 
 #include "commit_pols_starks.hpp"
 #include "chelpers_steps.hpp"
+#include "chelpers_steps_pack.hpp"
+#ifdef __AVX512__
+#include "chelpers_steps_avx512.hpp"
+#endif
+
 #include "ZkevmSteps.hpp"
 #include "C12aSteps.hpp"
 #include "Recursive1Steps.hpp"
@@ -611,7 +616,13 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*  Generate stark proof            */
         /*************************************/
 
+#ifdef __AVX512__
+        CHelpersStepsAvx512 cHelpersSteps;
+#elif defined(__PACK__) 
+        CHelpersStepsPack cHelpersSteps;
+#else
         CHelpersSteps cHelpersSteps;
+#endif
 
         TimerStart(STARK_PROOF_BATCH_PROOF);
 
@@ -839,7 +850,13 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starksRecursive2->starkInfo.starkStruct.steps.size(), starksRecursive2->starkInfo.evMap.size(), starksRecursive2->starkInfo.nPublics);
     
     if(USE_GENERIC_PARSER) {
+#ifdef __AVX512__
+        CHelpersStepsAvx512 cHelpersSteps;
+#elif defined(__PACK__) 
+        CHelpersStepsPack cHelpersSteps;
+#else
         CHelpersSteps cHelpersSteps;
+#endif        
         starksRecursive2->genProof(fproofRecursive2, publics, recursive2VerkeyValues, &cHelpersSteps);
     } else {
         starksRecursive2->genProof(fproofRecursive2, publics, recursive2VerkeyValues, &recursive2ChelpersSteps);
@@ -934,7 +951,13 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     uint64_t polBitsRecursiveF = starksRecursiveF->starkInfo.starkStruct.steps[starksRecursiveF->starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
     if(USE_GENERIC_PARSER) {
-        CHelpersSteps cHelpersSteps;
+        #ifdef __AVX512__
+                CHelpersStepsAvx512 cHelpersSteps;
+        #elif defined(__PACK__) 
+                CHelpersStepsPack cHelpersSteps;
+        #else
+                CHelpersSteps cHelpersSteps;
+        #endif
         starksRecursiveF->genProof(fproofRecursiveF, publics, &cHelpersSteps);
     } else {
         RecursiveFSteps recursiveFChelpersSteps;

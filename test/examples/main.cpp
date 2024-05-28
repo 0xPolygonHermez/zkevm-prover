@@ -2,6 +2,7 @@
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
 #include "chelpers_steps.hpp"
+#include "chelpers_steps_pack.hpp"
 #include "AllSteps.hpp"
 
 int main()
@@ -66,7 +67,13 @@ int main()
     allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
 
     if(USE_GENERIC_PARSER) {
+#ifdef __AVX512__
+        CHelpersStepsAvx512 cHelpersSteps;
+#elif defined(__PACK__) 
+        CHelpersStepsPack cHelpersSteps;
+#else
         CHelpersSteps cHelpersSteps;
+#endif
         starks.genProof(fproof, &publicInputs[0], allVerkey, &cHelpersSteps); 
     } else {
         AllSteps allSteps;
