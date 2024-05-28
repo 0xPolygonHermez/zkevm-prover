@@ -89,6 +89,7 @@ public:
                                                                            pAddress(_pAddress),
                                                                            x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
     {
+        TimerStart(STARK_CONSTRUCTOR);
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
@@ -215,6 +216,7 @@ public:
             chelpers.loadCHelpers(cHelpersBinFile.get());
         }
         TimerStopAndLog(CHELPERS_ALLOCATION);
+        TimerStopAndLog(STARK_CONSTRUCTOR);
     };
     ~Starks()
     {

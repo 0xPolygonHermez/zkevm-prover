@@ -80,7 +80,7 @@ public:
         }
     }
 
-    inline virtual void loadPolinomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint64_t row, uint64_t stage, uint64_t nrowsPack, uint64_t domainExtended) {
+    inline virtual void loadPolinomials(StarkInfo &starkInfo, StepsParams &params, __m512i *bufferT_, uint64_t row, uint64_t stage, uint64_t nrowsPack, uint64_t domainExtended) {
         Goldilocks::Element bufferT[2*nrowsPack];
         ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
@@ -157,12 +157,10 @@ public:
             challenges_ops[i][1] =  _mm512_set1_epi64(challenges_aux[1].fe);
             challenges_ops[i][2] =  _mm512_set1_epi64(challenges_aux[2].fe);
         }
-
         __m512i numbers_[parserParams.nNumbers];
         for(uint64_t i = 0; i < parserParams.nNumbers; ++i) {
             numbers_[i] = _mm512_set1_epi64(numbers[i]);
         }
-
         __m512i publics[starkInfo.nPublics];
         for(uint64_t i = 0; i < starkInfo.nPublics; ++i) {
             publics[i] = _mm512_set1_epi64(params.publicInputs[i].fe);
