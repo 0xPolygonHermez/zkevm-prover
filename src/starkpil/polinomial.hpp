@@ -588,20 +588,30 @@ public:
     {
         uint64_t size = num.degree();
 
-        Polinomial denI(size, 3);
         Polinomial checkVal(1, 3);
         Goldilocks::Element *pZ = z[0];
         Goldilocks3::copy((Goldilocks3::Element *)&pZ[0], &Goldilocks3::one());
 
-        batchInverse(denI, den);
-        for (uint64_t i = 1; i < size; i++)
+
+        uint64_t stride = 2048;
+        for (uint64_t ii = 1; ii < size; ii += stride)
         {
-            Polinomial tmp(1, 3);
-            Polinomial::mulElement(tmp, 0, num, i - 1, denI, i - 1);
-            Polinomial::mulElement(z, i, z, i - 1, tmp, 0);
+            Polinomial denI(stride, 3);
+            Polinomial den_(den[ii - 1], stride, 3, 3);
+            Polinomial::batchInverse(denI, den_);
+
+            uint64_t c = 0;
+            for (uint64_t k = ii; k < min(size, ii + stride); ++k) {
+                Polinomial tmp(1, 3);                
+                Polinomial::mulElement(tmp, 0, num, k - 1, denI, c);
+                Polinomial::mulElement(z, k, z, k - 1, tmp, 0);
+                c++;
+            }
         }
         Polinomial tmp(1, 3);
-        Polinomial::mulElement(tmp, 0, num, size - 1, denI, size - 1);
+        Polinomial denI(1, 3);
+        Goldilocks3::inv((Goldilocks3::Element *)denI[0], (Goldilocks3::Element *)den[size - 1]);
+        Polinomial::mulElement(tmp, 0, num, size - 1, denI, 0);
         Polinomial::mulElement(checkVal, 0, z, size - 1, tmp, 0);
 
         zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));

@@ -7,14 +7,21 @@
 class CHelpersStepsAvx512 : public CHelpersSteps {
 public:
     virtual void storePolinomial(Goldilocks::Element *pols, __m512i *bufferT, uint64_t* nColsSteps, uint64_t *offsetsSteps, uint64_t *buffTOffsetsSteps, uint64_t *nextStrides, uint64_t nOpenings, uint64_t domainSize, bool domainExtended, uint64_t nStages, bool needModule, uint64_t row, uint64_t stage, uint64_t stagePos, uint64_t openingPointIndex, uint64_t dim) {
+        bool isTmpPol = !domainExtended && stage == 4;
         if(needModule) {
             uint64_t offsetsDest[8];
             uint64_t nextStrideOffset = row + nextStrides[openingPointIndex];
-            uint64_t stepOffset = offsetsSteps[stage] + stagePos;
-            offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[stage];
-            offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[stage];
-            offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[stage];
-            offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[stage];
+            if(isTmpPol) {
+                uint64_t stepOffset = offsetsSteps[stage] + stagePos * domainSize;
+                for(uint64_t i = 0; i < 8; ++i) {
+                    offsetsDest[i] = stepOffset + ((nextStrideOffset + i) % domainSize) * dim;
+                }
+            } else {
+                uint64_t stepOffset = offsetsSteps[stage] + stagePos;
+                for(uint64_t i = 0; i < 8; ++i) {
+                    offsetsDest[i] = stepOffset + ((nextStrideOffset + i) % domainSize) * nColsSteps[stage];
+                }
+            }
             if(dim == 1) {
                 Goldilocks::store_avx512(&pols[0], offsetsDest, bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
             } else {
@@ -22,15 +29,23 @@ public:
             }
         } else {
             if(dim == 1) {
-               Goldilocks::store_avx512(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+                if(isTmpPol) {
+                    Goldilocks::store_avx512(&pols[offsetsSteps[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex])], uint64_t(1), bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+                } else {
+                    Goldilocks::store_avx512(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
+                }
             } else {
-               Goldilocks3::store_avx512(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
+                if(isTmpPol) {
+                    Goldilocks3::store_avx512(&pols[offsetsSteps[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex]) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
+                } else {
+                    Goldilocks3::store_avx512(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
+                }
             }
         }
     }
 
     virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
-        uint32_t nrowsBatch = 4;
+        uint32_t nrowsBatch =  8;
         bool domainExtended = parserParams.stage > 3 ? true : false;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         Polinomial &x = domainExtended ? params.x_2ns : params.x_n;
@@ -86,31 +101,31 @@ public:
         Goldilocks3::Element_avx512 challenges[params.challenges.degree()];
         Goldilocks3::Element_avx512 challenges_ops[params.challenges.degree()];
         for(uint64_t i = 0; i < params.challenges.degree(); ++i) {
-            challenges[i][0] = __mm512_set1_epi64(params.challenges[i][0].fe);
-            challenges[i][1] = __mm512_set1_epi64(params.challenges[i][1].fe);
-            challenges[i][2] = __mm512_set1_epi64(params.challenges[i][2].fe);
+            challenges[i][0] = _mm512_set1_epi64(params.challenges[i][0].fe);
+            challenges[i][1] = _mm512_set1_epi64(params.challenges[i][1].fe);
+            challenges[i][2] = _mm512_set1_epi64(params.challenges[i][2].fe);
 
             Goldilocks::Element challenges_aux[3];
             challenges_aux[0] = params.challenges[i][0] + params.challenges[i][1];
             challenges_aux[1] = params.challenges[i][0] + params.challenges[i][2];
             challenges_aux[2] = params.challenges[i][1] + params.challenges[i][2];
-            challenges_ops[i][0] = __mm512_set1_epi64(challenges_aux[0].fe);
-            challenges_ops[i][1] =  __mm512_set1_epi64(challenges_aux[1].fe);
-            challenges_ops[i][2] =  __mm512_set1_epi64(challenges_aux[2].fe);
+            challenges_ops[i][0] = _mm512_set1_epi64(challenges_aux[0].fe);
+            challenges_ops[i][1] =  _mm512_set1_epi64(challenges_aux[1].fe);
+            challenges_ops[i][2] =  _mm512_set1_epi64(challenges_aux[2].fe);
         }
-        __m256i numbers_[parserParams.nNumbers];
+        __m512i numbers_[parserParams.nNumbers];
         for(uint64_t i = 0; i < parserParams.nNumbers; ++i) {
-            numbers_[i] = __mm512_set1_epi64(numbers[i]);
+            numbers_[i] = _mm512_set1_epi64(numbers[i]);
         }
-        __m256i publics[starkInfo.nPublics];
+        __m512i publics[starkInfo.nPublics];
         for(uint64_t i = 0; i < starkInfo.nPublics; ++i) {
-            publics[i] = __mm512_set1_epi64(params.publicInputs[i].fe);
+            publics[i] = _mm512_set1_epi64(params.publicInputs[i].fe);
         }
         Goldilocks3::Element_avx512 evals[params.evals.degree()];
         for(uint64_t i = 0; i < params.evals.degree(); ++i) {
-            evals[i][0] = __mm512_set1_epi64(params.evals[i][0].fe);
-            evals[i][1] = __mm512_set1_epi64(params.evals[i][1].fe);
-            evals[i][2] = __mm512_set1_epi64(params.evals[i][2].fe);
+            evals[i][0] = _mm512_set1_epi64(params.evals[i][0].fe);
+            evals[i][1] = _mm512_set1_epi64(params.evals[i][1].fe);
+            evals[i][2] = _mm512_set1_epi64(params.evals[i][2].fe);
         }
     #pragma omp parallel for
         for (uint64_t i = 0; i < domainSize; i+= nrowsBatch) {
@@ -151,7 +166,11 @@ public:
                 for(uint64_t o = 0; o < 2; ++o) {
                     for(uint64_t j = 0; j < nrowsBatch; ++j) {
                         uint64_t l = (i + j + nextStrides[o]) % domainSize;
-                        bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[nStages + 1] + l * nColsSteps[nStages + 1] + k];
+                        if(!domainExtended) {
+                            bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[nStages + 1] + k * domainSize + l];
+                        } else {
+                            bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[nStages + 1] + l * nColsSteps[nStages + 1] + k];
+                        }
                     }
                     Goldilocks::load_avx512(bufferT_[2 * (nColsStepsAccumulated[nStages + 1] + k) + o], &bufferT[nrowsBatch*o]);
                 }

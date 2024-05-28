@@ -705,3 +705,27 @@ void Starks::merkelizeMemory()
     std::cout << "rootDBG[3]: [ " << Goldilocks::toU64(rootDBG[3]) << " ]" << std::endl;
     delete[] treeDBG;
 }
+
+void Starks::printPolRoot(uint64_t polId, StepsParams &params)
+{
+    Polinomial p = starkInfo.getPolinomial(params.pols, polId);
+
+    Polinomial pCol;
+    Goldilocks::Element *pBuffCol = new Goldilocks::Element[p.dim() * N];
+    pCol.potConstruct(pBuffCol, p.degree(), p.dim(), p.dim());
+    Polinomial::copy(pCol, p);
+
+    MerkleTreeGL *mt_ = new MerkleTreeGL(N, p.dim(), pBuffCol);
+    mt_->merkelize();
+    
+    Goldilocks::Element root[4];
+    cout << "--------------------" << endl;
+    cout << "ID: " << polId << endl;
+    mt_->getRoot(&root[0]);
+    cout <<  "MerkleTree rootGL : [ " << Goldilocks::toString(root[0]) << " " << Goldilocks::toString(root[1]) << " " << Goldilocks::toString(root[2]) << " " << Goldilocks::toString(root[3]) << " ]" << endl;
+
+    cout << "--------------------" << endl;
+
+    delete mt_;
+    delete pBuffCol;
+}

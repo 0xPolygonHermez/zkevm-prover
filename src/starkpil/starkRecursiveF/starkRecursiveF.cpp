@@ -123,7 +123,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
 
     TimerStart(CHELPERS_ALLOCATION);
-    string recursivefChelpers = USE_GENERIC_PARSER ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
+    string recursivefChelpers = (USE_GENERIC_PARSER) ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
     cHelpersBinFile = BinFileUtils::openExisting(recursivefChelpers, "chps", 1);
     chelpers.loadCHelpers(cHelpersBinFile.get());
     TimerStopAndLog(CHELPERS_ALLOCATION);
