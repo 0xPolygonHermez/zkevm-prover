@@ -267,8 +267,7 @@ zkresult HashPLen_verify ( Context &ctx,
                            int32_t hashAddr)
 {
     zkassert(ctx.pZKPC != NULL);
-    uint64_t zkPC = *ctx.pZKPC;
-    zkassert(ctx.rom.line[zkPC].hashPLen == 1);
+    zkassert(ctx.rom.line[*ctx.pZKPC].hashPLen == 1);
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 
@@ -319,17 +318,17 @@ zkresult HashPLen_verify ( Context &ctx,
     {
         // Calculate the linear poseidon hash
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         Goldilocks::Element result[4];
         poseidonLinearHash(hashPIterator->second.data, result);
         fea2scalar(fr, hashPIterator->second.digest, result);
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("Poseidon", TimeDiff(t));
+        ctx.mainMetrics.add("Poseidon", TimeDiff(ctx.t));
 #endif
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         // Collect the keys used to read or write program data
         if (ctx.proverRequest.input.bGetKeys)
@@ -345,7 +344,7 @@ zkresult HashPLen_verify ( Context &ctx,
         }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("Set program", TimeDiff(t));
+        ctx.mainMetrics.add("Set program", TimeDiff(ctx.t));
 #endif
 
 #ifdef LOG_HASH
@@ -403,8 +402,7 @@ zkresult HashPDigest_verify ( Context &ctx,
                               int32_t hashAddr)
 {
     zkassert(ctx.pZKPC != NULL);
-    uint64_t zkPC = *ctx.pZKPC;
-    zkassert(ctx.rom.line[zkPC].hashPDigest == 1);
+    zkassert(ctx.rom.line[*ctx.pZKPC].hashPDigest == 1);
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 
@@ -430,7 +428,7 @@ zkresult HashPDigest_verify ( Context &ctx,
         Goldilocks::Element aux[4];
         scalar2fea(fr, dg, aux);
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         // Collect the keys used to read or write store data
         if (ctx.proverRequest.input.bGetKeys)
@@ -446,7 +444,7 @@ zkresult HashPDigest_verify ( Context &ctx,
         }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("Get program", TimeDiff(t));
+        ctx.mainMetrics.add("Get program", TimeDiff(ctx.t));
 #endif
         ctx.hashP[hashAddr] = hashValue;
         hashPIterator = ctx.hashP.find(hashAddr);

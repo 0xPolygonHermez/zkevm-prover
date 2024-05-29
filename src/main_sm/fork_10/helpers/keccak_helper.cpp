@@ -246,8 +246,7 @@ zkresult HashKLen_verify ( Context &ctx,
                            int32_t hashAddr)
 {
     zkassert(ctx.pZKPC != NULL);
-    uint64_t zkPC = *ctx.pZKPC;
-    zkassert(ctx.rom.line[zkPC].hashKLen == 1);
+    zkassert(ctx.rom.line[*ctx.pZKPC].hashKLen == 1);
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 
@@ -297,11 +296,11 @@ zkresult HashKLen_verify ( Context &ctx,
     if (!hashKIterator->second.digestCalled)
     {
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("Keccak", TimeDiff(t));
+        ctx.mainMetrics.add("Keccak", TimeDiff(ctx.t));
 #endif
 
 #ifdef LOG_HASHK
@@ -367,8 +366,7 @@ zkresult HashKDigest_verify ( Context &ctx,
                            int32_t hashAddr)
 {
     zkassert(ctx.pZKPC != NULL);
-    uint64_t zkPC = *ctx.pZKPC;
-    zkassert(ctx.rom.line[zkPC].hashKDigest == 1);
+    zkassert(ctx.rom.line[*ctx.pZKPC].hashKDigest == 1);
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 

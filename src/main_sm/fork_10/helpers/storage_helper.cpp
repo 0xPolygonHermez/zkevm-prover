@@ -81,12 +81,12 @@ zkresult Storage_read_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilo
             {
                 // Calculate the linear poseidon hash
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                gettimeofday(&t, NULL);
+                gettimeofday(&ctx.t, NULL);
 #endif
                 Goldilocks::Element result[4];
                 poseidonLinearHash(it->second.code, result);
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                mainMetrics.add("Poseidon", TimeDiff(t));
+                ctx.mainMetrics.add("Poseidon", TimeDiff(ctx.t));
 #endif
                 // Convert to scalar
                 fea2scalar(fr, value, result);
@@ -171,7 +171,7 @@ zkresult Storage_read_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilo
         bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         // Call poseidon and get the hash key
         Goldilocks::Element Kin0Hash[4];
@@ -193,7 +193,7 @@ zkresult Storage_read_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilo
         key[2] = Kin1Hash[2];
         key[3] = Kin1Hash[3];
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("Poseidon", TimeDiff(t), 3);
+        ctx.mainMetrics.add("Poseidon", TimeDiff(ctx.t), 3);
 #endif
 
 #ifdef LOG_STORAGE
@@ -201,7 +201,7 @@ zkresult Storage_read_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilo
 #endif
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         // Collect the keys used to read or write store data
         if (ctx.proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
@@ -228,7 +228,7 @@ zkresult Storage_read_calculate (Context &ctx, Goldilocks::Element &fi0, Goldilo
 #endif
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("SMT Get", TimeDiff(t));
+        ctx.mainMetrics.add("SMT Get", TimeDiff(ctx.t));
 #endif
 
         if (ctx.bProcessBatch)
@@ -256,9 +256,8 @@ zkresult Storage_read_verify ( Context &ctx,
                                MainExecRequired *required)
 {
     zkassert(ctx.pZKPC != NULL);
-    uint64_t zkPC = *ctx.pZKPC;
-    zkassert(ctx.rom.line[zkPC].sRD == 1);
-    zkassert(ctx.rom.line[zkPC].sWR == 0);
+    zkassert(ctx.rom.line[*ctx.pZKPC].sRD == 1);
+    zkassert(ctx.rom.line[*ctx.pZKPC].sWR == 0);
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 
@@ -301,7 +300,7 @@ zkresult Storage_read_verify ( Context &ctx,
     }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    gettimeofday(&t, NULL);
+    gettimeofday(&ctx.t, NULL);
 #endif
     // Call poseidon and get the hash key
     Goldilocks::Element Kin0Hash[4];
@@ -359,7 +358,7 @@ zkresult Storage_read_verify ( Context &ctx,
     key[3] = Kin1Hash[3];
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    mainMetrics.add("Poseidon", TimeDiff(t), 3);
+    ctx.mainMetrics.add("Poseidon", TimeDiff(ctx.t), 3);
 #endif
 
 #ifdef LOG_STORAGE
@@ -369,7 +368,7 @@ zkresult Storage_read_verify ( Context &ctx,
     sr8to4(fr, ctx.pols.SR0[i], ctx.pols.SR1[i], ctx.pols.SR2[i], ctx.pols.SR3[i], ctx.pols.SR4[i], ctx.pols.SR5[i], ctx.pols.SR6[i], ctx.pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    gettimeofday(&t, NULL);
+    gettimeofday(&ctx.t, NULL);
 #endif
 
     // Collect the keys used to read or write store data
@@ -400,7 +399,7 @@ zkresult Storage_read_verify ( Context &ctx,
     }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    mainMetrics.add("SMT Get", TimeDiff(t));
+    ctx.mainMetrics.add("SMT Get", TimeDiff(ctx.t));
 #endif 
     if (required != NULL)
     {
@@ -569,7 +568,7 @@ zkresult Storage_write_calculate (Context &ctx, Goldilocks::Element &fi0, Goldil
         bool bIsBlockL2Hash = (b0 > 6);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         // Call poseidon and get the hash key
         Goldilocks::Element Kin0Hash[4];
@@ -606,14 +605,14 @@ zkresult Storage_write_calculate (Context &ctx, Goldilocks::Element &fi0, Goldil
         }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("Poseidon", TimeDiff(t));
+        ctx.mainMetrics.add("Poseidon", TimeDiff(ctx.t));
 #endif
 
 #ifdef LOG_STORAGE
         zklog.info("Storage write sWR got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
 #endif
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         // Collect the keys used to read or write store data
         if (ctx.proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
@@ -664,7 +663,7 @@ zkresult Storage_write_calculate (Context &ctx, Goldilocks::Element &fi0, Goldil
     }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    mainMetrics.add("SMT Set", TimeDiff(t));
+    ctx.mainMetrics.add("SMT Set", TimeDiff(ctx.t));
 #endif
     ctx.lastSWrite.step = i;
 
@@ -682,9 +681,8 @@ zkresult Storage_write_verify ( Context &ctx,
                                 MainExecRequired *required)
 {
     zkassert(ctx.pZKPC != NULL);
-    uint64_t zkPC = *ctx.pZKPC;
-    zkassert(ctx.rom.line[zkPC].sRD == 0);
-    zkassert(ctx.rom.line[zkPC].sWR == 1);
+    zkassert(ctx.rom.line[*ctx.pZKPC].sRD == 0);
+    zkassert(ctx.rom.line[*ctx.pZKPC].sWR == 1);
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 
@@ -734,7 +732,7 @@ zkresult Storage_write_verify ( Context &ctx,
         }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         // Call poseidon and get the hash key
         Goldilocks::Element Kin0Hash[4];
@@ -770,7 +768,7 @@ zkresult Storage_write_verify ( Context &ctx,
         }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("Poseidon", TimeDiff(t));
+        ctx.mainMetrics.add("Poseidon", TimeDiff(ctx.t));
 #endif
         // Call SMT to get the new Merkel Tree root hash
         mpz_class scalarD;
@@ -780,7 +778,7 @@ zkresult Storage_write_verify ( Context &ctx,
             return ZKR_SM_MAIN_FEA2SCALAR;
         }
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         Goldilocks::Element oldRoot[4];
         sr8to4(fr, ctx.pols.SR0[i], ctx.pols.SR1[i], ctx.pols.SR2[i], ctx.pols.SR3[i], ctx.pols.SR4[i], ctx.pols.SR5[i], ctx.pols.SR6[i], ctx.pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
@@ -818,7 +816,7 @@ zkresult Storage_write_verify ( Context &ctx,
         }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("SMT Set", TimeDiff(t));
+        ctx.mainMetrics.add("SMT Set", TimeDiff(ctx.t));
 #endif
         ctx.lastSWrite.step = i;
     }

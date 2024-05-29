@@ -248,8 +248,7 @@ zkresult HashSLen_verify ( Context &ctx,
                            int32_t hashAddr)
 {
     zkassert(ctx.pZKPC != NULL);
-    uint64_t zkPC = *ctx.pZKPC;
-    zkassert(ctx.rom.line[zkPC].hashSLen == 1);
+    zkassert(ctx.rom.line[*ctx.pZKPC].hashSLen == 1);
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 
@@ -299,11 +298,11 @@ zkresult HashSLen_verify ( Context &ctx,
     if (!hashSIterator->second.digestCalled)
     {
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         SHA256(hashSIterator->second.data.data(), hashSIterator->second.data.size(), hashSIterator->second.digest);
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("SHA256", TimeDiff(t));
+        ctx.mainMetrics.add("SHA256", TimeDiff(ctx.t));
 #endif
 
 #ifdef LOG_HASHS
@@ -369,8 +368,7 @@ zkresult HashSDigest_verify ( Context &ctx,
                               int32_t hashAddr)
 {
     zkassert(ctx.pZKPC != NULL);
-    uint64_t zkPC = *ctx.pZKPC;
-    zkassert(ctx.rom.line[zkPC].hashSDigest == 1);
+    zkassert(ctx.rom.line[*ctx.pZKPC].hashSDigest == 1);
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 
@@ -398,7 +396,7 @@ zkresult HashSDigest_verify ( Context &ctx,
         Goldilocks::Element aux[4];
         scalar2fea(fr, dg, aux);
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        gettimeofday(&ctx.t, NULL);
 #endif
         // Collect the keys used to read or write store data
         if (ctx.proverRequest.input.bGetKeys)
@@ -414,7 +412,7 @@ zkresult HashSDigest_verify ( Context &ctx,
         }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("Get program", TimeDiff(t));
+        ctx.mainMetrics.add("Get program", TimeDiff(ctx.t));
 #endif
         ctx.hashS[hashAddr] = hashValue;
         hashSIterator = ctx.hashS.find(hashAddr);

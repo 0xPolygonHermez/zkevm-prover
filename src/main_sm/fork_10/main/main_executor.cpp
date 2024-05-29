@@ -160,12 +160,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 {
     TimerStart(MAIN_EXECUTOR_EXECUTE);
 
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    struct timeval t;
-    TimeMetricStorage mainMetrics;
-    TimeMetricStorage evalCommandMetrics;
-#endif
-
 #ifdef MULTI_ROM_TEST
 
     // Get the right rom based on gas limit
@@ -575,14 +569,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         for (uint64_t j=0; j<rom.line[zkPC].cmdBefore.size(); j++)
         {
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            gettimeofday(&t, NULL);
+            gettimeofday(&ctx.t, NULL);
 #endif
             CommandResult cr;
             evalCommand(ctx, *rom.line[zkPC].cmdBefore[j], cr);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            mainMetrics.add("Eval command", TimeDiff(t));
-            evalCommandMetrics.add(rom.line[zkPC].cmdBefore[j]->opAndFunction, TimeDiff(t));
+            ctx.mainMetrics.add("Eval command", TimeDiff(ctx.t));
+            ctx.evalCommandMetrics.add(rom.line[zkPC].cmdBefore[j]->opAndFunction, TimeDiff(ctx.t));
 #endif
             // In case of an external error, return it
             if (cr.zkResult != ZKR_SUCCESS)
@@ -1353,15 +1347,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else
             {
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                gettimeofday(&t, NULL);
+                gettimeofday(&ctx.t, NULL);
 #endif
                 // Call evalCommand()
                 CommandResult cr;
                 evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                mainMetrics.add("Eval command", TimeDiff(t));
-                evalCommandMetrics.add(rom.line[zkPC].freeInTag.opAndFunction, TimeDiff(t));
+                ctx.mainMetrics.add("Eval command", TimeDiff(ctx.t));
+                ctx.evalCommandMetrics.add(rom.line[zkPC].freeInTag.opAndFunction, TimeDiff(ctx.t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -2661,14 +2655,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
             {
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                gettimeofday(&t, NULL);
+                gettimeofday(&ctx.t, NULL);
 #endif
                 CommandResult cr;
                 evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                mainMetrics.add("Eval command", TimeDiff(t));
-                evalCommandMetrics.add(rom.line[zkPC].cmdAfter[j]->opAndFunction, TimeDiff(t));
+                ctx.mainMetrics.add("Eval command", TimeDiff(ctx.t));
+                ctx.evalCommandMetrics.add(rom.line[zkPC].cmdAfter[j]->opAndFunction, TimeDiff(ctx.t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -2985,7 +2979,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    gettimeofday(&t, NULL);
+    gettimeofday(&ctx.t, NULL);
 #endif
 
     if (config.hashDB64)
@@ -3034,14 +3028,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    mainMetrics.add("Flush", TimeDiff(t));
+    ctx.mainMetrics.add("Flush", TimeDiff(ctx.t));
 #endif
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     if (config.executorTimeStatistics)
     {
-        mainMetrics.print("Main Executor calls");
-        evalCommandMetrics.print("Main Executor eval command calls");
+        ctx.mainMetrics.print("Main Executor calls");
+        ctx.evalCommandMetrics.print("Main Executor eval command calls");
     }
 #endif
 

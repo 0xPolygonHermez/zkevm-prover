@@ -485,12 +485,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    mpz_class expectedC;\n";
     code += "    BinaryAction binaryAction;\n";
 
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    code += "    struct timeval t;\n";
-    code += "    TimeMetricStorage mainMetrics;\n";
-    code += "    TimeMetricStorage evalCommandMetrics;\n";
-#endif
-
     // Arith
     code += "    mpz_class op;\n";
     code += "    int64_t reserve;\n";
@@ -701,14 +695,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    for (uint64_t j=0; j<rom.line[" + to_string(zkPC) + "].cmdBefore.size(); j++)\n";
             code += "    {\n";
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        gettimeofday(&t, NULL);\n";
+            code += "        gettimeofday(&ctx.t, NULL);\n";
 #endif
             code += "        cr.reset();\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        evalCommand(ctx, *rom.line[" + to_string(zkPC) + "].cmdBefore[j], cr);\n";
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "        mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
-            code += "        evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdBefore[j]->opAndFunction, TimeDiff(t));\n";
+            code += "        ctx.mainMetrics.add(\"Eval command\", TimeDiff(ctx.t));\n";
+            code += "        ctx.evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdBefore[j]->opAndFunction, TimeDiff(ctx.t));\n";
 #endif
             code += "        if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
@@ -1514,7 +1508,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             else
             {
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                code += "    gettimeofday(&t, NULL);\n";
+                code += "    gettimeofday(&ctx.t, NULL);\n";
 #endif
 
                 if ( (rom["program"][zkPC]["freeInTag"]["op"]=="functionCall") && (rom["program"][zkPC]["freeInTag"]["funcName"]=="getBytecode") )
@@ -1597,8 +1591,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                code += "    mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
-                code += "    evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].freeInTag.opAndFunction, TimeDiff(t));\n";
+                code += "    ctx.mainMetrics.add(\"Eval command\", TimeDiff(ctx.t));\n";
+                code += "    ctx.evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].freeInTag.opAndFunction, TimeDiff(ctx.t));\n";
 #endif
 
                 /*
@@ -2860,14 +2854,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "        for (uint64_t j=0; j<rom.line[" + to_string(zkPC) + "].cmdAfter.size(); j++)\n";
             code += "        {\n";
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "            gettimeofday(&t, NULL);\n";
+            code += "            gettimeofday(&ctx.t, NULL);\n";
 #endif
             code += "            cr.reset();\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            evalCommand(ctx, *rom.line[" + to_string(zkPC) + "].cmdAfter[j], cr);\n";
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            code += "            mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
-            code += "            evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdAfter[j]->opAndFunction, TimeDiff(t));\n";
+            code += "            ctx.mainMetrics.add(\"Eval command\", TimeDiff(ctx.t));\n";
+            code += "            ctx.evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdAfter[j]->opAndFunction, TimeDiff(ctx.t));\n";
 #endif
             code += "            if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "            {\n";
@@ -3185,7 +3179,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    code += "    gettimeofday(&t, NULL);\n";
+    code += "    gettimeofday(&ctx.t, NULL);\n";
 #endif
 
     code += "    if (ctx.config.hashDB64)\n";
@@ -3222,12 +3216,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    }\n\n";
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    code += "    mainMetrics.add(\"Flush\", TimeDiff(t));\n";
+    code += "    ctx.mainMetrics.add(\"Flush\", TimeDiff(ctx.t));\n";
 
     code += "    if (mainExecutor.config.executorTimeStatistics)\n";
     code += "    {\n";
-    code += "        mainMetrics.print(\"Main Executor calls\");\n";
-    code += "        evalCommandMetrics.print(\"Main Executor eval command calls\");\n";
+    code += "        ctx.mainMetrics.print(\"Main Executor calls\");\n";
+    code += "        ctx.evalCommandMetrics.print(\"Main Executor eval command calls\");\n";
     code += "    }\n";
 #endif
     
