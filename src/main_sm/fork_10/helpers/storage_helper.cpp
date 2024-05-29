@@ -623,7 +623,7 @@ zkresult Storage_write_calculate (Context &ctx, Goldilocks::Element &fi0, Goldil
         zkResult = ctx.pHashDB->set(ctx.proverRequest.uuid, ctx.proverRequest.pFullTracer->get_block_number(), ctx.proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, ctx.proverRequest.dbReadLog);
         if (zkResult != ZKR_SUCCESS)
         {
-            zklog.error("Storage_write_calculate() Failed calling pHashDB->set() result=" + zkresult2string(zkResult) + " key=" + fea2string(fr, ctx.lastSWrite.key));
+            zklog.error("Storage_write_calculate() Failed calling pHashDB->set() result=" + zkresult2string(zkResult) + " key=" + fea2string(fr, ctx.lastSWrite.key) + " value=" + value.get_str(16));
             return zkResult;
         }
         ctx.incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
@@ -792,7 +792,7 @@ zkresult Storage_write_verify ( Context &ctx,
         zkresult zkResult = ctx.pHashDB->set(ctx.proverRequest.uuid, ctx.proverRequest.pFullTracer->get_block_number(), ctx.proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, ctx.proverRequest.dbReadLog);
         if (zkResult != ZKR_SUCCESS)
         {
-            zklog.error("Storage_write_verify() Failed calling pHashDB->set() result=" + zkresult2string(zkResult) + " key=" + fea2string(fr, ctx.lastSWrite.key));
+            zklog.error("Storage_write_verify() Failed calling pHashDB->set() result=" + zkresult2string(zkResult) + " key=" + fea2string(fr, ctx.lastSWrite.key) + " value=" + scalarD.get_str(16));
             return zkResult;
         }
 
