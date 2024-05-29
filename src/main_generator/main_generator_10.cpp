@@ -1055,21 +1055,11 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 }
                 if (memAddrMustBeChecked)
                 {
-                    code += "    if ( memAddr >= " + to_string(memAddrMax) + ")\n";
+                    code += "    if ( (memAddr < 0) || (memAddr >= " + to_string(memAddrMax) + "))\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"memAddr too big memAddr=\" + to_string(memAddr));\n";
-                    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
-                
-                    //code += "    // If memAddr is negative, fail\n";
-                    code += "    if (memAddr < 0)\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"memAddr<0 memAddr=\" + to_string(memAddr));\n";
+                    code += "        mainExecutor.logError(ctx, \"memAddr out of range memAddr=\" + to_string(memAddr));\n";
                     code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
