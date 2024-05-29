@@ -146,8 +146,6 @@ void StarkInfo::load(json j)
     }
 
     setMapOffsets();
-
-    setCHelpersInfo();
 }
 
 void StarkInfo::getPol(void *pAddress, uint64_t idPol, PolInfo &polInfo)
@@ -417,93 +415,80 @@ void StarkInfo::setMemoryPol(uint64_t stage, uint64_t polId, uint64_t &memoryOff
 
 }
 
-void StarkInfo::setCHelpersInfo() {
-    nStages = 3;
-    
-    nextStride = 1;
-    nextStrideExt = 1 << (starkStruct.nBitsExt - starkStruct.nBits);
+void StarkInfo::setCHelpersInfo(uint64_t stage) {
+    uint64_t buffTSize = 5;
 
-    nextStrides.resize(2);
-    nextStrides[0] = 0;
-    nextStrides[1] = nextStride;
+    if(stage == 4 || stage == 5) {
+        buffTSize++;
+    }
 
-    nextStridesExt.resize(2);
-    nextStridesExt[0] = 0;
-    nextStridesExt[1] = nextStrideExt;
+    bool domainExtended = stage <= 3 ? false : true;
 
-    nCols = nConstants;
-    nColsExt = nConstants;
-
-    buffTOffsetsStages.resize(nStages + 2);
-    buffTOffsetsStagesExt.resize(nStages + 2);
-
-    nColsStages.resize(nStages + 2);
-    nColsStagesExt.resize(nStages + 2);
-
-    nColsStagesAcc.resize(nStages + 2);
-    nColsStagesAccExt.resize(nStages + 2);
-
-    offsetsStages.resize(nStages + 2);
-    offsetsStagesExt.resize(nStages + 2);
-
+    buffTOffsetsStages.resize(buffTSize);
+    nColsStages.resize(buffTSize);
+    nColsStagesAcc.resize(buffTSize);
+    offsetsStages.resize(buffTSize);
 
     // Stage 0: Constants
     nColsStages[0] = nConstants;
-    nColsStagesExt[0] = nConstants;
     nColsStagesAcc[0] = 0;
-    nColsStagesAccExt[0] = 0;
     buffTOffsetsStages[0] = 0;
-    buffTOffsetsStagesExt[0] = 0;
     offsetsStages[0] = 0;
-    offsetsStagesExt[0] = 0;
 
     // Stage 1
     nColsStages[1] = mapSectionsN.section[eSection::cm1_n];
-    nColsStagesExt[1] = mapSectionsN.section[eSection::cm1_2ns];
     nColsStagesAcc[1] = nColsStagesAcc[0] + nColsStages[0];
-    nColsStagesAccExt[1] = nColsStagesAccExt[0] + nColsStagesExt[0];
     buffTOffsetsStages[1] = 2*nColsStages[0];
-    buffTOffsetsStagesExt[1] = 2*nColsStagesExt[0];
-    offsetsStages[1] = mapOffsets.section[eSection::cm1_n];
-    offsetsStagesExt[1] = mapOffsets.section[eSection::cm1_2ns];
-    nCols += nColsStages[1];
-    nColsExt += nColsStagesExt[1];
+    if(domainExtended) {
+        offsetsStages[1] = mapOffsets.section[eSection::cm1_2ns];
+    } else {
+        offsetsStages[1] = mapOffsets.section[eSection::cm1_n];
+    }
 
     // Stage 2
     nColsStages[2] = mapSectionsN.section[eSection::cm2_n];
-    nColsStagesExt[2] = mapSectionsN.section[eSection::cm2_2ns];
     nColsStagesAcc[2] = nColsStagesAcc[1] + nColsStages[1];
-    nColsStagesAccExt[2] = nColsStagesAccExt[1] + nColsStagesExt[1];
     buffTOffsetsStages[2] = buffTOffsetsStages[1] + 2*nColsStages[1];
-    buffTOffsetsStagesExt[2] = buffTOffsetsStagesExt[1] + 2*nColsStagesExt[1];
-    offsetsStages[2] = mapOffsets.section[eSection::cm2_n];
-    offsetsStagesExt[2] = mapOffsets.section[eSection::cm2_2ns];
-    nCols += nColsStages[2];
-    nColsExt += nColsStagesExt[2];
+    if(domainExtended) {
+        offsetsStages[2] = mapOffsets.section[eSection::cm2_2ns];
+    } else {
+        offsetsStages[2] = mapOffsets.section[eSection::cm2_n];
+    }
 
     // Stage 3
     nColsStages[3] = mapSectionsN.section[eSection::cm3_n];
-    nColsStagesExt[3] = mapSectionsN.section[eSection::cm3_2ns];
     nColsStagesAcc[3] = nColsStagesAcc[2] + nColsStages[2];
-    nColsStagesAccExt[3] = nColsStagesAccExt[2] + nColsStagesExt[2];
     buffTOffsetsStages[3] = buffTOffsetsStages[2] + 2*nColsStages[2];
-    buffTOffsetsStagesExt[3] = buffTOffsetsStagesExt[2] + 2*nColsStagesExt[2];
-    offsetsStages[3] = mapOffsets.section[eSection::cm3_n];
-    offsetsStagesExt[3] = mapOffsets.section[eSection::cm3_2ns];
-    nCols += nColsStages[3];
-    nColsExt += nColsStagesExt[3];
-
-    // Stage 4: Basefield (tmpExp)
-    nColsStages[4] = mapSectionsN.section[eSection::tmpExp_n];
+    if(domainExtended) {
+        offsetsStages[3] = mapOffsets.section[eSection::cm3_2ns];
+    } else {
+        offsetsStages[3] = mapOffsets.section[eSection::cm3_n];
+    }
+    
+    // Stage 4: Basefield (tmpExp) // Extended (Stage 4)
+    if(domainExtended) {
+        nColsStages[4] = mapSectionsN.section[eSection::cm4_2ns];
+    } else {
+        nColsStages[4] = mapSectionsN.section[eSection::tmpExp_n];
+    }
     nColsStagesAcc[4] = nColsStagesAcc[3] + nColsStages[3];
     buffTOffsetsStages[4] = buffTOffsetsStages[3] + 2*nColsStages[3];
-    offsetsStages[4] = mapOffsets.section[eSection::tmpExp_n];
-    nCols += nColsStages[4];
-    
-    // Stage 4: Extended
-    nColsStagesExt[4] = mapSectionsN.section[eSection::cm4_2ns];
-    nColsStagesAccExt[4] = nColsStagesAccExt[3] + nColsStagesExt[3];
-    buffTOffsetsStagesExt[4] = buffTOffsetsStagesExt[3] + 2*nColsStagesExt[3];
-    offsetsStagesExt[4] = mapOffsets.section[eSection::cm4_2ns];
-    nColsExt += nColsStagesExt[4];
+    if(domainExtended) {
+        offsetsStages[4] = mapOffsets.section[eSection::cm4_2ns];
+    } else {
+        offsetsStages[4] = mapOffsets.section[eSection::tmpExp_n];
+    }
+
+    if(stage == 4 || stage == 5) {
+        if(stage == 4) {
+            nColsStages[buffTSize - 1] = mapSectionsN.section[eSection::q_2ns];
+            offsetsStages[buffTSize - 1] = mapOffsets.section[eSection::q_2ns];
+        } else if(stage == 5) {
+            nColsStages[buffTSize - 1] = mapSectionsN.section[eSection::f_2ns];
+            offsetsStages[buffTSize - 1] = mapOffsets.section[eSection::f_2ns];
+        }
+
+        nColsStagesAcc[buffTSize - 1] = nColsStagesAcc[buffTSize - 2] + nColsStages[buffTSize - 2];
+        buffTOffsetsStages[buffTSize - 1] = buffTOffsetsStages[buffTSize - 2] + 2*nColsStages[buffTSize - 2];
+    }
 }

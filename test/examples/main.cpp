@@ -2,7 +2,9 @@
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
 #include "chelpers_steps.hpp"
-#include "chelpers_steps_avx512.hpp"
+#ifdef __AVX512__
+    #include "chelpers_steps_avx512.hpp"
+#endif
 #include "chelpers_steps_pack.hpp"
 #include "AllSteps.hpp"
 
