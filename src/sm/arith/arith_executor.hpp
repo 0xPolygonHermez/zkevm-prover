@@ -9,6 +9,7 @@
 #include "ffiasm/fec.hpp"
 #include "scalar.hpp"
 #include "exit_process.hpp"
+#include "arith_equation.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -19,7 +20,6 @@ private:
     RawFec fec;
     const Config &config;
     const uint64_t N;
-    mpz_class pFec;
 
 public:
     ArithExecutor (Goldilocks &fr, const Config &config) :
@@ -27,9 +27,6 @@ public:
         config(config),
         N(PROVER_FORK_NAMESPACE::ArithCommitPols::pilDegree())
     {
-        // Calculate the prime number
-        fec2scalar(fec, fec.negOne(), pFec);
-        pFec++;
     }
     ~ArithExecutor ()
     {

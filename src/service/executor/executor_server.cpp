@@ -22,6 +22,13 @@ void ExecutorServer::run (void)
     rq.SetMaxThreads(config.maxExecutorThreads);
     builder.SetResourceQuota(rq);
 
+    // Limit the maximum receive and send message size
+    builder.SetMaxReceiveMessageSize(config.maxExecutorReceiveMessageSize);
+    if (config.maxExecutorSendMessageSize > 0)
+    {
+        builder.SetMaxSendMessageSize(config.maxExecutorSendMessageSize);
+    }
+
     ExecutorServiceImpl service(fr, config, prover);
 
     std::string server_address("0.0.0.0:" + to_string(config.executorServerPort));

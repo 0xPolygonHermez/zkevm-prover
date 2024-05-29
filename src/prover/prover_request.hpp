@@ -46,10 +46,23 @@ public:
     /* genBatchProof output */
     nlohmann::ordered_json batchProofOutput;
 
-    /* genAggregatedProof input and output */
-    nlohmann::ordered_json aggregatedProofInput1;
-    nlohmann::ordered_json aggregatedProofInput2;
-    nlohmann::ordered_json aggregatedProofOutput;
+    /* genAggregatedBatchProof input and output */
+    nlohmann::ordered_json aggregatedBatchProofInput1;
+    nlohmann::ordered_json aggregatedBatchProofInput2;
+    nlohmann::ordered_json aggregatedBatchProofOutput;
+
+    /* genBlobInnerProof output */
+    nlohmann::ordered_json blobInnerProofOutput;
+
+    /* genBlobOuterProof input and output */
+    nlohmann::ordered_json blobOuterProofInputBatch;
+    nlohmann::ordered_json blobOuterProofInputBlobInner;
+    nlohmann::ordered_json blobOuterProofOutput;
+
+    /* genAggregatedBlobOuterProof input and output */
+    nlohmann::ordered_json aggregatedBlobOuterProofInput1;
+    nlohmann::ordered_json aggregatedBlobOuterProofInput2;
+    nlohmann::ordered_json aggregatedBlobOuterProofOutput;
 
     /* genFinalProof input */
     nlohmann::ordered_json finalProofInput;
@@ -59,7 +72,8 @@ public:
 
     /* Execution generated data */
     Counters counters; // Counters of the batch execution
-    Counters counters_reserve; // Counters reserve of the batch execution
+    Counters countersReserve; // Counters reserve of the batch execution
+    Counters countersReserveZkpc; // Counters reserver zkPC
     DatabaseMap *dbReadLog; // Database reads logs done during the execution (if enabled)
     FullTracerInterface * pFullTracer; // Execution traces interface
 
@@ -77,6 +91,9 @@ public:
     /* Keys */
     unordered_set<string> nodesKeys;
     unordered_set<string> programKeys;
+
+    /* Debug info */
+    string errorLog;
 
     /* Constructor */
     ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);
@@ -114,6 +131,8 @@ public:
     }
 
     void onDBReadLogChange(DatabaseMap *dbMap);
+
+    bool isBlobInner (void) { return (type == prt_processBlobInner) || (type == prt_executeBlobInner) || (type == prt_genBlobInnerProof);};
 };
 
 #endif

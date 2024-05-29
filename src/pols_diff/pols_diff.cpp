@@ -5,10 +5,10 @@
 #include <cstdio>
 #include <sys/stat.h>
 #include "../config/definitions.hpp"
-#include "../main_sm/fork_8/pols_generated/commit_pols.hpp"
+#include "../main_sm/fork_10/pols_generated/commit_pols.hpp"
 
 using namespace std;
-using namespace fork_8;
+using namespace fork_10;
 
 // Fork namespace
 const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;

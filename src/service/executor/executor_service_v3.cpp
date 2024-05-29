@@ -1,0 +1,1508 @@
+#include "config.hpp"
+#include "executor_service.hpp"
+#include "input.hpp"
+#include "proof.hpp"
+#include "zklog.hpp"
+#include <grpcpp/grpcpp.h>
+#include "exit_process.hpp"
+#include "utils.hpp"
+#include "witness.hpp"
+#include "data_stream.hpp"
+#include "version.hpp"
+
+using grpc::Server;
+using grpc::ServerBuilder;
+using grpc::ServerContext;
+using grpc::Status;
+
+::grpc::Status ExecutorServiceImpl::ProcessBatchV3 (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequestV3* request, ::executor::v1::ProcessBatchResponseV3* response)
+{
+    // If the process is exiting, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
+    //TimerStart(EXECUTOR_PROCESS_BATCH);
+    struct timeval EXECUTOR_PROCESS_BATCH_start;
+    gettimeofday(&EXECUTOR_PROCESS_BATCH_start,NULL);
+
+#ifdef LOG_SERVICE
+    zklog.info("ExecutorServiceImpl::ProcessBatchV3() got request:\n" + request->DebugString());
+#endif
+
+#ifdef LOG_TIME
+    lock();
+    if ( (firstTotalTime.tv_sec == 0) && (firstTotalTime.tv_usec == 0) )
+    {
+        gettimeofday(&firstTotalTime, NULL);
+        lastTotalTime = firstTotalTime;
+    }
+    unlock();
+#endif
+
+    // Create and init an instance of ProverRequest
+    ProverRequest proverRequest(fr, config, prt_processBatch);
+
+    // Save request to file
+    if (config.saveRequestToFile)
+    {
+        string2file(request->DebugString(), proverRequest.filePrefix + "executor_request.txt");
+    }
+
+    // Get external request ID
+    proverRequest.contextId = request->context_id();
+
+    // Build log tags
+    LogTag logTag("context_id", proverRequest.contextId);
+    proverRequest.tags.emplace_back(logTag);
+
+    // PUBLIC INPUTS
+
+    // Get oldStateRoot
+    if (request->old_state_root().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got oldStateRoot too long, size=" + to_string(request->old_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_STATE_ROOT);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, request->old_state_root());
+
+    // Get oldAccInputHash
+    if (request->old_acc_input_hash().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got oldAccInputHash too long, size=" + to_string(request->old_acc_input_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_ACC_INPUT_HASH);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, request->old_acc_input_hash());
+
+    // Get previousL1InfoTreeRoot
+    if (request->previous_l1_info_tree_root().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got previousL1InfoTreeRoot too long, size=" + to_string(request->previous_l1_info_tree_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_PREVIOUS_L1_INFO_TREE_ROOT);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.previousL1InfoTreeRoot, request->previous_l1_info_tree_root());
+
+    // Get previousL1InfoTreeIndex
+    proverRequest.input.publicInputsExtended.publicInputs.previousL1InfoTreeIndex = request->previous_l1_info_tree_index();
+
+    // Get chain ID
+    proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
+    if (!config.loadDiagnosticRom && proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got chainID = 0";
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CHAIN_ID);
+        return Status::OK;
+    }
+
+    // Get fork ID
+    proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
+    if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 10)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
+        return Status::OK;
+    }
+
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() failed calling proverRequest.CreateFullTracer() result=" + zkresult2string(proverRequest.result);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(zkresult2error(proverRequest.result));
+        return Status::OK;
+    }
+
+    // Get batchL2Data
+    if (request->batch_l2_data().size() > MAX_BATCH_L2_DATA_SIZE)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() found batchL2Data.size()=" + to_string(request->batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BATCH_L2_DATA);
+        return Status::OK;
+    }
+    proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = request->batch_l2_data();
+
+    // Get forcedHashData
+    if (request->forced_hash_data().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got forcedHashData too long, size=" + to_string(request->forced_hash_data().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FORCED_HASH_DATA);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.forcedHashData, request->forced_hash_data());
+
+    // Get forced data global exit root
+    if (request->forced_data().global_exit_root().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got forced data global exit root too long, size=" + to_string(request->forced_data().global_exit_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FORCED_DATA_GLOBAL_EXIT_ROOT);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.forcedData.globalExitRoot, request->forced_data().global_exit_root());
+
+    // Get forced data block hash L1
+    if (request->forced_data().block_hash_l1().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got forced data block hash L1 too long, size=" + to_string(request->forced_data().block_hash_l1().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FORCED_DATA_BLOCK_HASH_L1);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.forcedData.blockHashL1, request->forced_data().block_hash_l1());
+
+    // Get forced data minimum timestamp
+    proverRequest.input.publicInputsExtended.publicInputs.forcedData.minTimestamp = request->forced_data().min_timestamp();
+
+    // Get sequencer address
+    string auxString = Remove0xIfPresent(request->coinbase());
+    if (auxString.size() > 40)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got sequencer address too long, size=" + to_string(auxString.size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
+        return Status::OK;
+    }
+    if (!stringIsHex(auxString))
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got sequencer address not hex, coinbase=" + auxString;
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
+        return Status::OK;
+    }
+    proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
+
+    // ROOT
+
+    // Get from
+    proverRequest.input.from = Add0xIfMissing(request->from());
+    if (proverRequest.input.from.size() > (2 + 40))
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got from too long, size=" + to_string(proverRequest.input.from.size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FROM);
+        return Status::OK;
+    }
+    if (!stringIs0xHex(proverRequest.input.from))
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got from not hex, size=" + proverRequest.input.from;
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FROM);
+        return Status::OK;
+    }
+
+    // Flags
+    proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
+    if (proverRequest.input.bUpdateMerkleTree && config.dbReadOnly)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got bUpdateMerkleTree=true while dbReadOnly=true";
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_UPDATE_MERKLE_TREE);
+        return Status::OK;
+    }
+    proverRequest.input.bNoCounters = request->no_counters();
+    proverRequest.input.bGetKeys = request->get_keys();
+    proverRequest.input.bSkipFirstChangeL2Block = request->skip_first_change_l2_block();
+    proverRequest.input.bSkipWriteBlockInfoRoot = request->skip_write_block_info_root();
+
+    // Trace config
+    if (request->has_trace_config())
+    {
+        proverRequest.input.traceConfig.bEnabled = true;
+        const executor::v1::TraceConfigV2 & traceConfig = request->trace_config();
+        if (traceConfig.disable_storage())
+        {
+            proverRequest.input.traceConfig.bDisableStorage = true;
+        }
+        if (traceConfig.disable_stack())
+        {
+            proverRequest.input.traceConfig.bDisableStack = true;
+        }
+        if (traceConfig.enable_memory())
+        {
+            proverRequest.input.traceConfig.bEnableMemory = true;
+        }
+        if (traceConfig.enable_return_data())
+        {
+            proverRequest.input.traceConfig.bEnableReturnData = true;
+        }
+        if (traceConfig.tx_hash_to_generate_full_trace().size() > 0)
+        {
+            proverRequest.input.traceConfig.txHashToGenerateFullTrace = Add0xIfMissing(ba2string(traceConfig.tx_hash_to_generate_full_trace()));
+        }
+        proverRequest.input.traceConfig.calculateFlags();
+    }
+
+    // Default values
+    proverRequest.input.publicInputsExtended.newStateRoot = "0x0";
+    proverRequest.input.publicInputsExtended.newAccInputHash = "0x0";
+    proverRequest.input.publicInputsExtended.newLocalExitRoot = "0x0";
+    proverRequest.input.publicInputsExtended.newBatchNum = 0;
+
+    // Parse db map
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &db = request->db();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator it;
+    string key;
+    for (it=db.begin(); it!=db.end(); it++)
+    {
+        // Get key
+        key = it->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > 64)
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got db key too long, size=" + to_string(key.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+            return Status::OK;
+        }
+        if (!stringIsHex(key))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got db key not hex, key=" + key;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+            return Status::OK;
+        }
+        PrependZerosNoCopy(key, 64);
+
+        // Get value
+        vector<Goldilocks::Element> dbValue;
+        string concatenatedValues = it->second;
+        if (!stringIsHex(concatenatedValues))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() found db value not hex: " + concatenatedValues;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+            return Status::OK;
+        }
+        if (concatenatedValues.size()%16!=0)
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() found invalid db value size: " + to_string(concatenatedValues.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+            return Status::OK;
+        }
+        for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
+        {
+            Goldilocks::Element fe;
+            string2fe(fr, concatenatedValues.substr(i, 16), fe);
+            dbValue.push_back(fe);
+        }
+        
+        // Save key-value
+        proverRequest.input.db[key] = dbValue;
+
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
+        //zklog.info("input.db[" + key + "]: " + proverRequest.input.db[key], &proverRequest.tags);
+#endif
+    }
+
+    // Parse contracts data
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &contractsBytecode = request->contracts_bytecode();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator itp;
+    for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
+    {
+        // Get key
+        key = itp->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > (64))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got contracts key too long, size=" + to_string(key.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
+            return Status::OK;
+        }
+        if (!stringIsHex(key))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got contracts key not hex, key=" + key;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
+            return Status::OK;
+        }
+        PrependZerosNoCopy(key, 64);
+
+        // Get value
+        if (!stringIsHex(Remove0xIfPresent(itp->second)))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got contracts value not hex, value=" + itp->second;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE);
+            return Status::OK;
+        }
+        vector<uint8_t> dbValue;
+        string contractValue = string2ba(itp->second);
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            dbValue.push_back(contractValue.at(i));
+        }
+
+        // Save key-value
+        proverRequest.input.contractsBytecode[key] = dbValue;
+
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
+        //zklog.info("proverRequest.input.contractsBytecode[" + itp->first + "]: " + itp->second, &proverRequest.tags);
+#endif
+    }
+
+    // Parse L1 info tree data
+    const google::protobuf::Map<google::protobuf::uint32, executor::v1::L1DataV3> &l1InfoTreeData = request->l1_info_tree_data();
+    google::protobuf::Map<google::protobuf::uint32, executor::v1::L1DataV3>::const_iterator itl;
+    for (itl=l1InfoTreeData.begin(); itl!=l1InfoTreeData.end(); itl++)
+    {
+        // Get index
+        uint64_t index = itl->first;
+
+        // Get L1 data
+        L1Data l1Data;
+        const executor::v1::L1DataV3 &l1DataV3 = itl->second;
+        if (l1DataV3.global_exit_root().size() > 32)
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.global_exit_root() too long, size=" + to_string(l1DataV3.global_exit_root().size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_L1_DATA_V2_GLOBAL_EXIT_ROOT);
+            return Status::OK;
+        }
+        ba2scalar(l1Data.globalExitRoot, l1DataV3.global_exit_root());
+        if (l1DataV3.block_hash_l1().size() > 32)
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.block_hash_l1() too long, size=" + to_string(l1DataV3.block_hash_l1().size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_L1_DATA_V2_BLOCK_HASH_L1);
+            return Status::OK;
+        }
+        ba2scalar(l1Data.blockHashL1, l1DataV3.block_hash_l1());
+        l1Data.minTimestamp = l1DataV3.min_timestamp();
+        for (int64_t i=0; i<l1DataV3.smt_proof_previous_index_size(); i++)
+        {
+            mpz_class auxScalar;
+            if (l1DataV3.smt_proof_previous_index(i).size() > 32)
+            {
+                proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.smt_proof_previous_index(i) too long, size=" + to_string(l1DataV3.smt_proof_previous_index(i).size());
+                zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_L1_SMT_PROOF);
+                return Status::OK;
+            }
+            ba2scalar(auxScalar, l1DataV3.smt_proof_previous_index(i));
+            l1Data.smtProofPreviousIndex.emplace_back(auxScalar);
+        }
+        if (l1DataV3.initial_historic_root().size() > 32)
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got l1DataV3.initial_historic_root() too long, size=" + to_string(l1DataV3.initial_historic_root().size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_L1_DATA_V3_INITIAL_HISTORIC_ROOT);
+            return Status::OK;
+        }
+        ba2scalar(l1Data.initialHistoricRoot, l1DataV3.initial_historic_root());
+
+        // Store it
+        proverRequest.input.l1InfoTreeData[index] = l1Data;
+    }
+
+    if (request->state_override_size() > 0)
+    {
+        google::protobuf::Map<std::string, executor::v1::OverrideAccountV2>::const_iterator it;
+        for (it = request->state_override().begin(); it != request->state_override().end(); it++)
+        {
+            OverrideEntry overrideEntry;
+
+            // Get balance
+            if (it->second.balance().size() > 32)
+            {
+                proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got state override balance too long, size=" + to_string(it->second.balance().size());
+                zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BALANCE);
+                return Status::OK;
+            }
+
+            if (it->second.balance().size() > 0)
+            {
+                overrideEntry.balance.set_str(ba2string(it->second.balance()), 16);
+                overrideEntry.bBalance = true;
+            }
+
+            // Get nonce
+            overrideEntry.nonce = it->second.nonce();
+
+            // Get code
+            ba2ba(it->second.code(), overrideEntry.code);
+
+            // Get state
+            if (it->second.state_size() > 0)
+            {
+                google::protobuf::Map<std::string, std::string>::const_iterator itState;
+                for (itState = it->second.state().begin(); itState != it->second.state().end(); itState++)
+                {
+                    // Get a valid key
+                    string keyString = Remove0xIfPresent(itState->first);
+                    if (keyString.size() > 64)
+                    {
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size());
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    if (!stringIsHex(keyString))
+                    {
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString;
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    keyString = NormalizeToNFormat(keyString, 64);
+
+                    // Get a valid value
+                    string valueString = Remove0xIfPresent(itState->second);
+                    if (valueString.size() > 64)
+                    {
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size());
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
+                    if (!stringIsHex(valueString))
+                    {
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString;
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
+                    mpz_class valueScalar;
+                    valueScalar.set_str(valueString, 16);
+
+                    // Store the value
+                    overrideEntry.state[keyString] = valueScalar;
+                }
+            }
+
+            // Get state diff
+            if (it->second.state_diff_size() > 0)
+            {
+                google::protobuf::Map<std::string, std::string>::const_iterator itState;
+                for (itState = it->second.state_diff().begin(); itState != it->second.state_diff().end(); itState++)
+                {
+                    // Get a valid key
+                    string keyString = Remove0xIfPresent(itState->first);
+                    if (keyString.size() > 64)
+                    {
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size());
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    if (!stringIsHex(keyString))
+                    {
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString;
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    keyString = NormalizeToNFormat(keyString, 64);
+
+                    // Get a valid value
+                    string valueString = Remove0xIfPresent(itState->second);
+                    if (valueString.size() > 64)
+                    {
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size());
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
+                    if (!stringIsHex(valueString))
+                    {
+                        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString;
+                        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+                        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
+                    mpz_class valueScalar;
+                    valueScalar.set_str(valueString, 16);
+
+                    // Store the value
+                    overrideEntry.stateDiff[keyString] = valueScalar;
+                }
+            }
+
+            // Store the override entry
+            proverRequest.input.stateOverride[it->first] = overrideEntry;
+        }
+    }
+
+    proverRequest.input.debug.gasLimit = request->debug().gas_limit();
+    
+    if (request->debug().new_state_root().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got new_state_root too long, size=" + to_string(request->debug().new_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_STATE_ROOT);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.newStateRoot, request->debug().new_state_root());
+    if (request->debug().new_acc_input_hash().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got new_acc_input_hash too long, size=" + to_string(request->debug().new_acc_input_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_ACC_INPUT_HASH);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.newAccInputHash, request->debug().new_acc_input_hash());
+    if (request->debug().new_local_exit_root().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBatchV3() got new_local_exit_root too long, size=" + to_string(request->debug().new_local_exit_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_LOCAL_EXIT_ROOT);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.newLocalExitRoot, request->debug().new_local_exit_root());
+    proverRequest.input.publicInputsExtended.newBatchNum = request->debug().new_batch_num();
+
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
+    string l1InfoTreeDataString = " l1InfoTreeData.size=" + to_string(proverRequest.input.l1InfoTreeData.size()) + "=";
+    unordered_map<uint64_t, L1Data>::const_iterator itl1;
+    for (itl1 = proverRequest.input.l1InfoTreeData.begin(); itl1 != proverRequest.input.l1InfoTreeData.end(); itl1++)
+    {
+        l1InfoTreeDataString += to_string(itl1->first) + ",";
+    }
+    zklog.info(string("ExecutorServiceImpl::ProcessBatchV3() got") +
+        " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
+        " batchL2DataLength=" + to_string(request->batch_l2_data().size()) +
+        " batchL2Data=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())) +
+        " oldStateRoot=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+        " oldAccInputHash=" + proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+        " oldBatchNum=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
+        " chainId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.chainID) +
+        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
+            (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 7) && config.useMainExecC) ? " C" :
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+             ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" :
+#endif
+             " native") +
+        " globalExitRoot=" + proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16) +
+        " timestampLimit=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestampLimit) +
+        " from=" + proverRequest.input.from +
+        " bUpdateMerkleTree=" + to_string(proverRequest.input.bUpdateMerkleTree) +
+        " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
+        " bGetKeys=" + to_string(proverRequest.input.bGetKeys) +
+        " bSkipVerifyL1InfoRoot=" + to_string(proverRequest.input.bSkipVerifyL1InfoRoot) +
+        " bSkipFirstChangeL2Block=" + to_string(proverRequest.input.bSkipFirstChangeL2Block) +
+        " bSkipWriteBlockInfoRoot=" + to_string(proverRequest.input.bSkipWriteBlockInfoRoot) +
+        " traceConfig=" + proverRequest.input.traceConfig.toString() +
+        " UUID=" + proverRequest.uuid +
+        " gasLimit=" + to_string(proverRequest.input.debug.gasLimit) +
+        l1InfoTreeDataString +
+        " stateOverride.size=" + to_string(proverRequest.input.stateOverride.size())
+        , &proverRequest.tags);
+#endif
+
+    if (config.logExecutorServerInputJson)
+    {
+        // Log the input file content
+        json inputJson;
+        proverRequest.input.save(inputJson);
+        string inputJsonString = inputJson.dump();
+        replace(inputJsonString.begin(), inputJsonString.end(), '"', '\'');
+        zklog.info("ExecutorServiceImpl::ProcessBatchV3() Input=" + inputJsonString, &proverRequest.tags);
+    }
+
+    prover.processBatch(&proverRequest);
+
+    //TimerStart(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
+
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatchV3() detected proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result), &proverRequest.tags);
+    }
+    
+    response->set_error(zkresult2error(proverRequest.result));
+    response->set_gas_used(proverRequest.pFullTracer->get_gas_used());
+
+    response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
+    response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
+    response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
+    response->set_cnt_mem_aligns(proverRequest.counters.memAlign);
+    response->set_cnt_arithmetics(proverRequest.counters.arith);
+    response->set_cnt_binaries(proverRequest.counters.binary);
+    response->set_cnt_sha256_hashes(proverRequest.counters.sha256F);
+    response->set_cnt_steps(proverRequest.counters.steps);
+    
+    response->set_cnt_reserve_keccak_hashes(proverRequest.countersReserve.keccakF);
+    response->set_cnt_reserve_poseidon_hashes(proverRequest.countersReserve.poseidonG);
+    response->set_cnt_reserve_poseidon_paddings(proverRequest.countersReserve.paddingPG);
+    response->set_cnt_reserve_mem_aligns(proverRequest.countersReserve.memAlign);
+    response->set_cnt_reserve_arithmetics(proverRequest.countersReserve.arith);
+    response->set_cnt_reserve_binaries(proverRequest.countersReserve.binary);
+    response->set_cnt_reserve_sha256_hashes(proverRequest.countersReserve.sha256F);
+    response->set_cnt_reserve_steps(proverRequest.countersReserve.steps);
+
+    response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
+    response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
+    response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
+    response->set_new_last_timestamp(proverRequest.pFullTracer->get_new_last_timestamp());
+    response->set_current_l1_info_tree_index(proverRequest.pFullTracer->get_current_l1_info_tree_index());
+    response->set_current_l1_info_tree_root(string2ba(proverRequest.pFullTracer->get_current_l1_info_tree_root()));
+    response->set_flush_id(proverRequest.flushId);
+    response->set_stored_flush_id(proverRequest.lastSentFlushId);
+    response->set_prover_id(config.proverID);
+    response->set_fork_id(proverRequest.input.publicInputsExtended.publicInputs.forkID);
+    response->set_error_rom(string2error(proverRequest.pFullTracer->get_error()));
+    response->set_invalid_batch(proverRequest.pFullTracer->get_invalid_batch());
+    response->set_old_state_root(string2ba(NormalizeToNFormat(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64)));
+    
+    unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
+    if (p_read_write_addresses != NULL)
+    {
+        unordered_map<string, InfoReadWrite>::const_iterator itRWA;
+        for (itRWA=p_read_write_addresses->begin(); itRWA != p_read_write_addresses->end(); itRWA++)
+        {
+            executor::v1::InfoReadWriteV2 infoReadWrite;
+            google::protobuf::Map<std::string, executor::v1::InfoReadWriteV2> * pReadWriteAddresses = response->mutable_read_write_addresses();
+            infoReadWrite.set_balance(itRWA->second.balance);
+            infoReadWrite.set_nonce(itRWA->second.nonce);
+            infoReadWrite.set_sc_code(itRWA->second.sc_code);
+            infoReadWrite.set_sc_length(itRWA->second.sc_length);
+            google::protobuf::Map<std::string, std::string> * pStorage = infoReadWrite.mutable_sc_storage();
+            zkassertpermanent(pStorage != NULL);
+            unordered_map<string, string>::const_iterator itStorage;
+            for (itStorage = itRWA->second.sc_storage.begin(); itStorage != itRWA->second.sc_storage.end(); itStorage++)
+            {
+                (*pStorage)[itStorage->first] = itStorage->second;
+            }
+            (*pReadWriteAddresses)[itRWA->first] = infoReadWrite;
+        }
+    }
+
+    vector<Block> &block_responses = proverRequest.pFullTracer->get_block_responses();
+    uint64_t nTxs = 0;
+
+    for (uint64_t block=0; block<block_responses.size(); block++)
+    {
+        executor::v1::ProcessBlockResponseV2 * pProcessBlockResponse = response->add_block_responses();
+
+        pProcessBlockResponse->set_block_hash(string2ba(block_responses[block].block_hash));
+        pProcessBlockResponse->set_block_hash_l1(string2ba(block_responses[block].block_hash_l1));
+        pProcessBlockResponse->set_block_info_root(string2ba(block_responses[block].block_info_root));
+        pProcessBlockResponse->set_block_number(block_responses[block].block_number);
+        pProcessBlockResponse->set_coinbase(block_responses[block].coinbase);
+        pProcessBlockResponse->set_gas_limit(block_responses[block].gas_limit);
+        pProcessBlockResponse->set_gas_used(block_responses[block].gas_used);
+        pProcessBlockResponse->set_ger(string2ba(block_responses[block].ger));
+        pProcessBlockResponse->set_parent_hash(string2ba(block_responses[block].parent_hash));
+        pProcessBlockResponse->set_timestamp(block_responses[block].timestamp);
+        pProcessBlockResponse->set_error(string2error(block_responses[block].error));
+
+        for (uint64_t log=0; log<block_responses[block].logs.size(); log++)
+        {
+            executor::v1::LogV2 * pLog = pProcessBlockResponse->add_logs();
+            pLog->set_address(block_responses[block].logs[log].address); // Address of the contract that generated the event
+            for (uint64_t topic=0; topic<block_responses[block].logs[log].topics.size(); topic++)
+            {
+                std::string * pTopic = pLog->add_topics();
+                *pTopic = string2ba(block_responses[block].logs[log].topics[topic]); // List of topics provided by the contract
+            }
+            string dataConcatenated;
+            for (uint64_t data=0; data<block_responses[block].logs[log].data.size(); data++)
+                dataConcatenated += block_responses[block].logs[log].data[data];
+            pLog->set_data(string2ba(dataConcatenated)); // Supplied by the contract, usually ABI-encoded
+            //pLog->set_batch_number(block_responses[tblockx].logs[log].batch_number); // Batch in which the transaction was included
+            pLog->set_tx_hash(string2ba(block_responses[block].logs[log].tx_hash)); // Hash of the transaction
+            pLog->set_tx_hash_l2(string2ba(block_responses[block].logs[log].tx_hash_l2)); // Hash of the transaction in layer 2
+            pLog->set_tx_index(block_responses[block].logs[log].tx_index); // Index of the transaction in the block
+            //pLog->set_batch_hash(string2ba(block_responses[block].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
+            pLog->set_index(block_responses[block].logs[log].index); // Index of the log in the block
+            pLog->set_block_hash(string2ba(block_responses[block].logs[log].block_hash));
+            pLog->set_block_number(block_responses[block].logs[log].block_number);
+        }
+
+        vector<ResponseV2> &responses = block_responses[block].responses;
+        nTxs += responses.size();
+
+        for (uint64_t tx=0; tx<block_responses[block].responses.size(); tx++)
+        {
+            // Remember the previous memory sent for each TX, and send only increments
+            string previousMemory;
+
+            executor::v1::ProcessTransactionResponseV2 * pProcessTransactionResponse = pProcessBlockResponse->add_responses();
+
+            //executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
+            pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
+            pProcessTransactionResponse->set_tx_hash_l2(string2ba(responses[tx].tx_hash_l2));
+            pProcessTransactionResponse->set_rlp_tx(responses[tx].rlp_tx);
+            pProcessTransactionResponse->set_type(responses[tx].type); // Type indicates legacy transaction; it will be always 0 (legacy) in the executor
+            pProcessTransactionResponse->set_return_value(string2ba(responses[tx].return_value)); // Returned data from the runtime (function result or data supplied with revert opcode)
+            pProcessTransactionResponse->set_gas_left(responses[tx].gas_left); // Total gas left as result of execution
+            pProcessTransactionResponse->set_gas_used(responses[tx].gas_used); // Total gas used as result of execution or gas estimation
+            pProcessTransactionResponse->set_gas_refunded(responses[tx].gas_refunded); // Total gas refunded as result of execution
+            pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
+            pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
+            pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+            pProcessTransactionResponse->set_status(responses[tx].status);
+            pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
+            pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
+            pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);
+            pProcessTransactionResponse->set_has_gasprice_opcode(responses[tx].has_gasprice_opcode);
+            pProcessTransactionResponse->set_cumulative_gas_used(responses[tx].cumulative_gas_used);
+            
+            for (uint64_t log=0; log<responses[tx].logs.size(); log++)
+            {
+                executor::v1::LogV2 * pLog = pProcessTransactionResponse->add_logs();
+                pLog->set_address(responses[tx].logs[log].address); // Address of the contract that generated the event
+                for (uint64_t topic=0; topic<responses[tx].logs[log].topics.size(); topic++)
+                {
+                    std::string * pTopic = pLog->add_topics();
+                    *pTopic = string2ba(responses[tx].logs[log].topics[topic]); // List of topics provided by the contract
+                }
+                string dataConcatenated;
+                for (uint64_t data=0; data<responses[tx].logs[log].data.size(); data++)
+                    dataConcatenated += responses[tx].logs[log].data[data];
+                pLog->set_data(string2ba(dataConcatenated)); // Supplied by the contract, usually ABI-encoded
+                //pLog->set_batch_number(responses[tx].logs[log].batch_number); // Batch in which the transaction was included
+                pLog->set_tx_hash(string2ba(responses[tx].logs[log].tx_hash)); // Hash of the transaction
+                pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
+                //pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
+                pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
+                pLog->set_block_hash(string2ba(responses[tx].logs[log].block_hash));
+                pLog->set_block_number(responses[tx].logs[log].block_number);
+            }
+            if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateFullTrace == responses[tx].tx_hash))
+            {
+                executor::v1::FullTraceV2 * pFullTrace = new executor::v1::FullTraceV2();
+                executor::v1::TransactionContextV2 * pTransactionContext = pFullTrace->mutable_context();
+                pTransactionContext->set_type(responses[tx].full_trace.context.type); // "CALL" or "CREATE"
+                pTransactionContext->set_from(responses[tx].full_trace.context.from); // Sender of the transaction
+                pTransactionContext->set_to(responses[tx].full_trace.context.to); // Target of the transaction
+                pTransactionContext->set_data(string2ba(responses[tx].full_trace.context.data)); // Input data of the transaction
+                pTransactionContext->set_gas(responses[tx].full_trace.context.gas);
+                pTransactionContext->set_gas_price(Add0xIfMissing(responses[tx].full_trace.context.gas_price.get_str(16)));
+                pTransactionContext->set_value(Add0xIfMissing(responses[tx].full_trace.context.value.get_str(16)));
+                //pTransactionContext->set_batch(string2ba(responses[tx].full_trace.context.batch)); // Hash of the batch in which the transaction was included
+                pTransactionContext->set_output(string2ba(responses[tx].full_trace.context.output)); // Returned data from the runtime (function result or data supplied with revert opcode)
+                pTransactionContext->set_gas_used(responses[tx].full_trace.context.gas_used); // Total gas used as result of execution
+                pTransactionContext->set_execution_time(responses[tx].full_trace.context.execution_time);
+                pTransactionContext->set_old_state_root(string2ba(responses[tx].full_trace.context.old_state_root)); // Starting state root
+                pTransactionContext->set_chain_id(responses[tx].full_trace.context.chainId);
+                pTransactionContext->set_tx_index(responses[tx].full_trace.context.txIndex);
+                for (uint64_t step=0; step<responses[tx].full_trace.steps.size(); step++)
+                {
+                    executor::v1::TransactionStepV2 * pTransactionStep = pFullTrace->add_steps();
+                    pTransactionStep->set_state_root(string2ba(responses[tx].full_trace.steps[step].state_root));
+                    pTransactionStep->set_depth(responses[tx].full_trace.steps[step].depth); // Call depth
+                    pTransactionStep->set_pc(responses[tx].full_trace.steps[step].pc); // Program counter
+                    pTransactionStep->set_gas(responses[tx].full_trace.steps[step].gas); // Remaining gas
+                    pTransactionStep->set_gas_cost(responses[tx].full_trace.steps[step].gas_cost); // Gas cost of the operation
+                    pTransactionStep->set_gas_refund(responses[tx].full_trace.steps[step].gas_refund); // Gas refunded during the operation
+                    pTransactionStep->set_op(responses[tx].full_trace.steps[step].op); // Opcode
+                    for (uint64_t stack=0; stack<responses[tx].full_trace.steps[step].stack.size() ; stack++)
+                        pTransactionStep->add_stack(responses[tx].full_trace.steps[step].stack[stack].get_str(16)); // Content of the stack
+                    pTransactionStep->set_memory_size(responses[tx].full_trace.steps[step].memory_size);
+                    pTransactionStep->set_memory_offset(responses[tx].full_trace.steps[step].memory_offset);
+                    pTransactionStep->set_memory(responses[tx].full_trace.steps[step].memory);
+                    string dataConcatenated;
+                    for (uint64_t data=0; data<responses[tx].full_trace.steps[step].return_data.size(); data++)
+                        dataConcatenated += responses[tx].full_trace.steps[step].return_data[data];
+                    pTransactionStep->set_return_data(string2ba(dataConcatenated));
+                    executor::v1::ContractV2 * pContract = pTransactionStep->mutable_contract(); // Contract information
+                    pContract->set_address(responses[tx].full_trace.steps[step].contract.address);
+                    pContract->set_caller(responses[tx].full_trace.steps[step].contract.caller);
+                    pContract->set_value(Add0xIfMissing(responses[tx].full_trace.steps[step].contract.value.get_str(16)));
+                    pContract->set_data(string2ba(responses[tx].full_trace.steps[step].contract.data));
+                    pContract->set_gas(responses[tx].full_trace.steps[step].contract.gas);
+                    pContract->set_type(responses[tx].full_trace.steps[step].contract.type);
+                    pTransactionStep->set_error(string2error(responses[tx].full_trace.steps[step].error));
+
+                    google::protobuf::Map<std::string, std::string> * pStorage = pTransactionStep->mutable_storage();
+                    unordered_map<string,string>::iterator it;
+                    for (it=responses[tx].full_trace.steps[step].storage.begin(); it!=responses[tx].full_trace.steps[step].storage.end(); it++)
+                        (*pStorage)[it->first] = it->second; // Content of the storage
+                }
+                pProcessTransactionResponse->set_allocated_full_trace(pFullTrace);
+            }
+        }
+    }
+
+    // Return accessed keys, if requested
+    if (proverRequest.input.bGetKeys)
+    {
+        unordered_set<string>::const_iterator it;
+        for (it = proverRequest.nodesKeys.begin(); it != proverRequest.nodesKeys.end(); it++)
+        {
+            response->add_smt_keys(string2ba(it->c_str()));
+        }
+        for (it = proverRequest.programKeys.begin(); it != proverRequest.programKeys.end(); it++)
+        {
+            response->add_program_keys(string2ba(it->c_str()));
+        }
+    }
+
+    // Debug
+    response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+
+#ifdef LOG_SERVICE_EXECUTOR_OUTPUT
+    {
+        string s = "ExecutorServiceImpl::ProcessBatchV3() returns result=" + to_string(response->error()) +
+            " error_rom=" + to_string(response->error_rom()) + "=" + proverRequest.pFullTracer->get_error() +
+            " invalid_batch=" + to_string(response->invalid_batch()) +
+            " old_state_root=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+            " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
+            " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
+            " new_local_exit_root=" + proverRequest.pFullTracer->get_new_local_exit_root() +
+            " new_last_timestamp=" + to_string(proverRequest.pFullTracer->get_new_last_timestamp()) +
+            " current_l1_info_tree_index=" + to_string(proverRequest.pFullTracer->get_current_l1_info_tree_index()) +
+            " current_l1_info_tree_root=" + proverRequest.pFullTracer->get_current_l1_info_tree_root() +
+            " old_batch_num=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
+            " gasUsed=" + to_string(proverRequest.pFullTracer->get_gas_used()) +
+            " counters=["
+                " steps=" + to_string(proverRequest.counters.steps) + "/" + to_string(proverRequest.countersReserve.steps) + "/" + to_string(proverRequest.countersReserveZkpc.steps) +
+                " keccakF=" + to_string(proverRequest.counters.keccakF) + "/" + to_string(proverRequest.countersReserve.keccakF) + "/" + to_string(proverRequest.countersReserveZkpc.keccakF) +
+                " poseidonG=" + to_string(proverRequest.counters.poseidonG) + "/" + to_string(proverRequest.countersReserve.poseidonG) + "/" + to_string(proverRequest.countersReserveZkpc.poseidonG) +
+                " paddingPG=" + to_string(proverRequest.counters.paddingPG) + "/" + to_string(proverRequest.countersReserve.paddingPG) + "/" + to_string(proverRequest.countersReserveZkpc.paddingPG) +
+                " memAlign=" + to_string(proverRequest.counters.memAlign) + "/" + to_string(proverRequest.countersReserve.memAlign) + "/" + to_string(proverRequest.countersReserveZkpc.memAlign) +
+                " arith=" + to_string(proverRequest.counters.arith) + "/" + to_string(proverRequest.countersReserve.arith) + "/" + to_string(proverRequest.countersReserveZkpc.arith) +
+                " binary=" + to_string(proverRequest.counters.binary) + "/" + to_string(proverRequest.countersReserve.binary) + "/" + to_string(proverRequest.countersReserveZkpc.binary) +
+                " sha256F=" + to_string(proverRequest.counters.sha256F) + "/" + to_string(proverRequest.countersReserve.sha256F) + "/" + to_string(proverRequest.countersReserveZkpc.sha256F) +
+                " ]" +
+            " flush_id=" + to_string(proverRequest.flushId) +
+            " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
+            " nBlocks=" + to_string(block_responses.size()) +
+            " nTxs=" + to_string(nTxs);
+         if (config.logExecutorServerTxs)
+         {
+            for (uint64_t block=0; block<block_responses.size(); block++)
+            {
+                s += " block[" + to_string(block) + "].hash=" + block_responses[block].block_hash + " blockNumber=" + to_string(block_responses[block].block_number);
+                vector<ResponseV2> &responses = block_responses[block].responses;
+                for (uint64_t tx=0; tx<responses.size(); tx++)
+                {
+                    s += " tx[" + to_string(tx) + "].hash=" + responses[tx].tx_hash +
+                        " stateRoot=" + responses[tx].state_root +
+                        " gasUsed=" + to_string(responses[tx].gas_used) +
+                        " gasLeft=" + to_string(responses[tx].gas_left) +
+                        " gasUsed+gasLeft=" + to_string(responses[tx].gas_used + responses[tx].gas_left) +
+                        " gasRefunded=" + to_string(responses[tx].gas_refunded) +
+                        " result=" + responses[tx].error;
+                }
+            }
+         }
+        zklog.info(s, &proverRequest.tags);
+    }
+#endif
+
+    if (config.logExecutorServerResponses)
+    {
+        zklog.info("ExecutorServiceImpl::ProcessBatchV3() returns:\n" + response->DebugString(), &proverRequest.tags);
+    }
+
+    //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
+    
+    //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+    struct timeval EXECUTOR_PROCESS_BATCH_stop;
+    gettimeofday(&EXECUTOR_PROCESS_BATCH_stop,NULL);
+
+    if (config.saveResponseToFile)
+    {
+        //TimerStart(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
+        //zklog.info("ExecutorServiceImpl::ProcessBatch() returns response of size=" + to_string(response->ByteSizeLong()), &proverRequest.tags);
+        string2file(response->DebugString(), proverRequest.filePrefix + "executor_response.txt");
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
+    }
+
+    if (config.opcodeTracer)
+    {
+        map<uint8_t, vector<Opcode>> opcodeMap;
+        vector<Opcode> &info(proverRequest.pFullTracer->get_info());
+        zklog.info("Received " + to_string(info.size()) + " opcodes:", &proverRequest.tags);
+        for (uint64_t i=0; i<info.size(); i++)
+        {
+            if (opcodeMap.find(info[i].op) == opcodeMap.end())
+            {
+                vector<Opcode> aux;
+                opcodeMap[info[i].op] = aux;
+            }
+            opcodeMap[info[i].op].push_back(info[i]);
+        }
+        string s;
+        map<uint8_t, vector<Opcode>>::iterator opcodeMapIt;
+        for (opcodeMapIt = opcodeMap.begin(); opcodeMapIt != opcodeMap.end(); opcodeMapIt++)
+        {
+            s += "    0x" + byte2string(opcodeMapIt->first) + "=" + opcodeMapIt->second[0].opcode + " called " + to_string(opcodeMapIt->second.size()) + " times";
+
+            uint64_t opcodeTotalGas = 0;
+            s += " gas=";
+            for (uint64_t i=0; i<opcodeMapIt->second.size(); i++)
+            {
+                s += to_string(opcodeMapIt->second[i].gas_cost) + ",";
+                opcodeTotalGas += opcodeMapIt->second[i].gas_cost;
+            }
+
+            uint64_t opcodeTotalDuration = 0;
+            s += " duration=";
+            for (uint64_t i=0; i<opcodeMapIt->second.size(); i++)
+            {
+                s += to_string(opcodeMapIt->second[i].duration) + ",";
+                opcodeTotalDuration += opcodeMapIt->second[i].duration;
+            }
+
+            s += " TP=" + to_string((double(opcodeTotalGas)*1000000)/double(opcodeTotalDuration)) + "gas/s";
+        }
+        zklog.info(s, &proverRequest.tags);
+    }
+
+    // Calculate the throughput, for this ProcessBatch call, and for all calls
+#ifdef LOG_TIME
+    lock();
+    counter++;
+    uint64_t execGas = response->gas_used();
+    totalGas += execGas;
+    uint64_t execBytes = request->batch_l2_data().size();
+    totalBytes += execBytes;
+    uint64_t execTX = nTxs;
+    totalTX += execTX;
+    double execTime = double(TimeDiff(EXECUTOR_PROCESS_BATCH_start, EXECUTOR_PROCESS_BATCH_stop))/1000000;
+    totalTime += execTime;
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    double timeSinceLastTotal = zkmax(1, double(TimeDiff(lastTotalTime, now))/1000000);
+    if (timeSinceLastTotal >= 10.0)
+    {
+        totalTPG = double(totalGas - lastTotalGas)/timeSinceLastTotal;
+        totalTPB = double(totalBytes - lastTotalBytes)/timeSinceLastTotal;
+        totalTPTX = double(totalTX - lastTotalTX)/timeSinceLastTotal;
+        lastTotalGas = totalGas;
+        lastTotalBytes = totalBytes;
+        lastTotalTX = totalTX;
+        lastTotalTime = now;
+    }
+    double timeSinceFirstTotal = zkmax(1, double(TimeDiff(firstTotalTime, now))/1000000);
+    double TPG = double(totalGas)/timeSinceFirstTotal;
+    double TPB = double(totalBytes)/timeSinceFirstTotal;
+    double TPTX = double(totalTX)/timeSinceFirstTotal;
+    
+    uint64_t nfd = getNumberOfFileDescriptors();
+
+    zklog.info("ExecutorServiceImpl::ProcessBatchV3() done counter=" + to_string(counter) + " B=" + to_string(execBytes) + " TX=" + to_string(execTX) + " gas=" + to_string(execGas) + " time=" + to_string(execTime) +
+        " TP=" + to_string(double(execBytes)/execTime) + "B/s=" + to_string(double(execTX)/execTime) + "TX/s=" + to_string(double(execGas)/execTime) + "gas/s=" + to_string(double(execGas)/double(execBytes)) + "gas/B" +
+        " totalTP(10s)=" + to_string(totalTPB) + "B/s=" + to_string(totalTPTX) + "TX/s=" + to_string(totalTPG) + "gas/s=" + to_string(totalTPG/zkmax(1,totalTPB)) + "gas/B" +
+        " totalTP(ever)=" + to_string(TPB) + "B/s=" + to_string(TPTX) + "TX/s=" + to_string(TPG) + "gas/s=" + to_string(TPG/zkmax(1,TPB)) + "gas/B" +
+        " totalTime=" + to_string(totalTime) +
+        " filedesc=" + to_string(nfd),
+        &proverRequest.tags);
+    
+    // If the TP in gas/s is < threshold, log the input, unless it has been done before
+    if (!config.logExecutorServerInput && (config.logExecutorServerInputGasThreshold > 0) && ((double(execGas)/execTime) < config.logExecutorServerInputGasThreshold))
+    {
+        json inputJson;
+        proverRequest.input.save(inputJson);
+        string inputJsonString = inputJson.dump();
+        replace(inputJsonString.begin(), inputJsonString.end(), '"', '\'');
+        zklog.info("TP=" + to_string(double(execGas)/execTime) + "gas/s Input=" + inputJsonString, &proverRequest.tags);
+    }
+    unlock();
+#endif
+
+    return Status::OK;
+}
+
+::grpc::Status ExecutorServiceImpl::ProcessBlobInnerV3 (::grpc::ServerContext* context, const ::executor::v1::ProcessBlobInnerRequestV3* request, ::executor::v1::ProcessBlobInnerResponseV3* response)
+{
+    // If the process is exiting, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
+    //TimerStart(EXECUTOR_PROCESS_BATCH);
+    struct timeval EXECUTOR_PROCESS_BLOB_INNER_start;
+    gettimeofday(&EXECUTOR_PROCESS_BLOB_INNER_start,NULL);
+
+#ifdef LOG_SERVICE
+    zklog.info("ExecutorServiceImpl::ProcessBlobInnerV3() got request:\n" + request->DebugString());
+#endif
+
+#ifdef LOG_TIME
+    lock();
+    if ( (firstTotalTime.tv_sec == 0) && (firstTotalTime.tv_usec == 0) )
+    {
+        gettimeofday(&firstTotalTime, NULL);
+        lastTotalTime = firstTotalTime;
+    }
+    unlock();
+#endif
+
+    // Create and init an instance of ProverRequest
+    ProverRequest proverRequest(fr, config, prt_processBlobInner);
+
+    // Save request to file
+    if (config.saveRequestToFile)
+    {
+        string2file(request->DebugString(), proverRequest.filePrefix + "executor_request_blob.txt");
+    }
+
+    // Get external request ID
+    proverRequest.contextId = request->context_id();
+
+    // Build log tags
+    LogTag logTag("context_id", proverRequest.contextId);
+    proverRequest.tags.emplace_back(logTag);
+
+    // PUBLIC INPUTS
+
+    // Get oldBlobStateRoot
+    if (request->old_blob_state_root().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got oldBlobStateRoot too long, size=" + to_string(request->old_blob_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_BLOB_STATE_ROOT);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldBlobStateRoot, request->old_blob_state_root());
+
+    // Get oldBlobAccInputHash
+    if (request->old_blob_acc_input_hash().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got oldBlobAccInputHash too long, size=" + to_string(request->old_blob_acc_input_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_BLOB_ACC_INPUT_HASH);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldBlobAccInputHash, request->old_blob_acc_input_hash());
+
+    // Get oldBlobNum
+    proverRequest.input.publicInputsExtended.publicInputs.oldBlobNum = request->old_num_blob();
+
+    // Get fork ID
+    proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
+    if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 10)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
+        return Status::OK;
+    }
+
+    // Get oldStateRoot
+    if (request->old_state_root().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got oldStateRoot too long, size=" + to_string(request->old_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_STATE_ROOT);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, request->old_state_root());
+
+    // Get lastL1InfoTreeIndex
+    proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex = request->last_l1_info_tree_index();
+
+    // Get lastL1InfoTreeRoot
+    if (request->last_l1_info_tree_root().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got lastL1InfoTreeRoot too long, size=" + to_string(request->last_l1_info_tree_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_LAST_L1_INFO_TREE_ROOT);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot, request->last_l1_info_tree_root());
+
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() failed calling proverRequest.CreateFullTracer() result=" + zkresult2string(proverRequest.result);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(zkresult2error(proverRequest.result));
+        return Status::OK;
+    }
+
+    // Get last timestamp
+    proverRequest.input.publicInputsExtended.publicInputs.timestampLimit = request->timestamp_limit();
+
+    // Get sequencer address
+    string auxString = Remove0xIfPresent(request->coinbase());
+    if (auxString.size() > 40)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got sequencer address too long, size=" + to_string(auxString.size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
+        return Status::OK;
+    }
+    if (!stringIsHex(auxString))
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got sequencer address not hex, coinbase=" + auxString;
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
+        return Status::OK;
+    }
+    proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
+
+    // Get zkGasLimit
+    proverRequest.input.publicInputsExtended.publicInputs.zkGasLimit = request->zk_gas_limit();
+
+    // Get type
+    proverRequest.input.publicInputsExtended.publicInputs.blobType = request->blob_type();
+
+    // Get versioned_hash
+    if (request->versioned_hash().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got versioned_hash too long, size=" + to_string(request->versioned_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_VERSIONED_HASH);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.versionedHash, request->versioned_hash());
+
+    // Get kzg_commitment
+    if (request->kzg_commitment().size() > 48)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got kzg_commitment too long, size=" + to_string(request->kzg_commitment().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_KZG_COMMITMENT);
+        return Status::OK;
+    }
+    proverRequest.input.publicInputsExtended.publicInputs.kzgCommitment = request->kzg_commitment();
+
+    // Get kzg_proof
+    if (request->kzg_proof().size() > 48)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got kzg_proof too long, size=" + to_string(request->kzg_proof().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_KZG_PROOF);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.kzgProof, request->kzg_proof());
+
+    // Get pointZ
+    if (request->point_z().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got pointZ too long, size=" + to_string(request->point_z().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_POINT_Z);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.pointZ, request->point_z());
+
+    // Get pointY
+    if (request->point_y().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got pointY too long, size=" + to_string(request->point_y().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_POINT_Y);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.pointY, request->point_y());
+
+    // Get blobData
+    if (request->blob_data().size() > MAX_BLOB_DATA_SIZE)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() found blobData.size()=" + to_string(request->blob_data().size()) + " > MAX_BLOB_DATA_SIZE=" + to_string(MAX_BLOB_DATA_SIZE);
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BLOB_DATA);
+        return Status::OK;
+    }
+    proverRequest.input.publicInputsExtended.publicInputs.blobData = request->blob_data();
+
+    // Get forcedHashData
+    if (request->forced_hash_data().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got forcedHashData too long, size=" + to_string(request->forced_hash_data().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FORCED_HASH_DATA);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.forcedHashData, request->forced_hash_data());
+
+    // ROOT    
+    
+    // Debug data
+    if (request->debug().new_blob_state_root().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got new_blob_state_root too long, size=" + to_string(request->debug().new_blob_state_root().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_BLOB_STATE_ROOT);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.newBlobStateRoot, request->debug().new_blob_state_root());
+    if (request->debug().new_blob_acc_input_hash().size() > 32)
+    {
+        proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got new_blob_acc_input_hash too long, size=" + to_string(request->debug().new_blob_acc_input_hash().size());
+        zklog.error(proverRequest.errorLog, &proverRequest.tags);
+        response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_BLOB_ACC_INPUT_HASH);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.newBlobAccInputHash, request->debug().new_blob_acc_input_hash());
+    proverRequest.input.publicInputsExtended.newBlobNum = request->debug().new_blob_num();
+
+    // Parse db map
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &db = request->db();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator it;
+    string key;
+    for (it=db.begin(); it!=db.end(); it++)
+    {
+        // Get key
+        key = it->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > 64)
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got db key too long, size=" + to_string(key.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+            return Status::OK;
+        }
+        if (!stringIsHex(key))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got db key not hex, key=" + key;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+            return Status::OK;
+        }
+        PrependZerosNoCopy(key, 64);
+
+        // Get value
+        vector<Goldilocks::Element> dbValue;
+        string concatenatedValues = it->second;
+        if (!stringIsHex(concatenatedValues))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() found db value not hex: " + concatenatedValues;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+            return Status::OK;
+        }
+        if (concatenatedValues.size()%16!=0)
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() found invalid db value size: " + to_string(concatenatedValues.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+            return Status::OK;
+        }
+        for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
+        {
+            Goldilocks::Element fe;
+            string2fe(fr, concatenatedValues.substr(i, 16), fe);
+            dbValue.push_back(fe);
+        }
+        
+        // Save key-value
+        proverRequest.input.db[key] = dbValue;
+
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
+        //zklog.info("input.db[" + key + "]: " + proverRequest.input.db[key], &proverRequest.tags);
+#endif
+    }
+
+    // Parse contracts data
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &contractsBytecode = request->contracts_bytecode();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator itp;
+    for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
+    {
+        // Get key
+        key = itp->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > (64))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got contracts key too long, size=" + to_string(key.size());
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
+            return Status::OK;
+        }
+        if (!stringIsHex(key))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got contracts key not hex, key=" + key;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
+            return Status::OK;
+        }
+        PrependZerosNoCopy(key, 64);
+
+        // Get value
+        if (!stringIsHex(Remove0xIfPresent(itp->second)))
+        {
+            proverRequest.errorLog = "ExecutorServiceImpl::ProcessBlobInnerV3() got contracts value not hex, value=" + itp->second;
+            zklog.error(proverRequest.errorLog, &proverRequest.tags);
+            response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE);
+            return Status::OK;
+        }
+        vector<uint8_t> dbValue;
+        string contractValue = string2ba(itp->second);
+        for (uint64_t i=0; i<contractValue.size(); i++)
+        {
+            dbValue.push_back(contractValue.at(i));
+        }
+
+        // Save key-value
+        proverRequest.input.contractsBytecode[key] = dbValue;
+
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
+        //zklog.info("proverRequest.input.contractsBytecode[" + itp->first + "]: " + itp->second, &proverRequest.tags);
+#endif
+    }
+
+#ifdef LOG_SERVICE_EXECUTOR_INPUT
+    string l1InfoTreeDataString = " l1InfoTreeData.size=" + to_string(proverRequest.input.l1InfoTreeData.size()) + "=";
+    unordered_map<uint64_t, L1Data>::const_iterator itl1;
+    for (itl1 = proverRequest.input.l1InfoTreeData.begin(); itl1 != proverRequest.input.l1InfoTreeData.end(); itl1++)
+    {
+        l1InfoTreeDataString += to_string(itl1->first) + ",";
+    }
+    zklog.info(string("ExecutorServiceImpl::ProcessBlobInnerV3() got") +
+        " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
+        " blobDataLength=" + to_string(request->blob_data().size()) +
+        " blobData=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.blobData.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.blobData.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.blobData.size())-10), proverRequest.input.publicInputsExtended.publicInputs.blobData.size())) +
+        " oldBlobStateRoot=" + proverRequest.input.publicInputsExtended.publicInputs.oldBlobStateRoot.get_str(16) +
+        " oldBlobAccInputHash=" + proverRequest.input.publicInputsExtended.publicInputs.oldBlobAccInputHash.get_str(16) +
+        " oldBlobNum=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBlobNum) +
+        " oldStateRoot=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
+        " lastL1InfoTreeIndex=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeIndex) +
+        " lastL1InfoTreeRoot=" + proverRequest.input.publicInputsExtended.publicInputs.lastL1InfoTreeRoot.get_str(16) +
+        " timestampLimit=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestampLimit) +
+        " zkGasLimit=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.zkGasLimit) +
+        " type=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.blobType) +
+        " pointZ=" + proverRequest.input.publicInputsExtended.publicInputs.pointZ.get_str(16) +
+        " pointY=" + proverRequest.input.publicInputsExtended.publicInputs.pointY.get_str(16) +
+        " forcedHashData=" + proverRequest.input.publicInputsExtended.publicInputs.forcedHashData.get_str(16)
+        , &proverRequest.tags);
+#endif
+
+    if (config.logExecutorServerInputJson)
+    {
+        // Log the input file content
+        json inputJson;
+        proverRequest.input.save(inputJson);
+        string inputJsonString = inputJson.dump();
+        replace(inputJsonString.begin(), inputJsonString.end(), '"', '\'');
+        zklog.info("ExecutorServiceImpl::ProcessBlobInnerV3() Input=" + inputJsonString, &proverRequest.tags);
+    }
+
+    prover.processBlobInner(&proverRequest);
+
+    //TimerStart(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
+
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBlobInnerV3() detected proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result), &proverRequest.tags);
+    }
+    
+    response->set_error(zkresult2error(proverRequest.result));
+
+    FinalTraceBlob & finalTraceBlob = proverRequest.pFullTracer->get_final_trace_blob();
+    
+    response->set_error_rom_blob(string2rombloberror(finalTraceBlob.error));
+    response->set_new_blob_state_root(scalar2ba(finalTraceBlob.new_blob_state_root));
+    response->set_new_blob_acc_input_hash(scalar2ba(finalTraceBlob.new_blob_acc_input_hash));
+    response->set_new_num_blob(finalTraceBlob.new_num_blob);
+    response->set_final_acc_batch_hash_data(scalar2ba(finalTraceBlob.final_acc_batch_hash_data));
+    response->set_local_exit_root_from_blob(scalar2ba(finalTraceBlob.local_exit_root_from_blob));
+    response->set_is_invalid(finalTraceBlob.is_invalid);
+    for (uint64_t i=0; i<finalTraceBlob.batch_data.size(); i++)
+    {
+        response->add_batch_data(finalTraceBlob.batch_data[i]);
+    }
+
+    // Debug
+    response->set_allocated_debug(AllocateResponseDebug(proverRequest.errorLog, version));
+
+#ifdef LOG_SERVICE_EXECUTOR_OUTPUT
+    {
+        // TODO: log response data
+        string s = "ExecutorServiceImpl::ProcessBlobInnerV3() returns result=" + to_string(response->error()) +
+            " blob_error=" + to_string(response->error_rom_blob()) +
+            " new_blob_state_root=" + ba2string(response->new_blob_state_root()) +
+            " new_blob_acc_input_hash=" + ba2string(response->new_blob_acc_input_hash()) +
+            " new_num_blob=" + to_string(response->new_num_blob()) +
+            " final_acc_batch_hash_data=" + ba2string(response->final_acc_batch_hash_data()) +
+            " local_exit_root_from_blob=" + ba2string(response->local_exit_root_from_blob()) +
+            " is_invalid=" + to_string(response->is_invalid()) +
+            " batch_data.size=" + to_string(response->batch_data_size());
+        zklog.info(s, &proverRequest.tags);
+    }
+#endif
+
+    if (config.logExecutorServerResponses)
+    {
+        zklog.info("ExecutorServiceImpl::ProcessBlobInnerV3() returns:\n" + response->DebugString(), &proverRequest.tags);
+    }
+
+    //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
+    
+    //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+    struct timeval EXECUTOR_PROCESS_BATCH_stop;
+    gettimeofday(&EXECUTOR_PROCESS_BATCH_stop,NULL);
+
+    if (config.saveResponseToFile)
+    {
+        //TimerStart(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
+        //zklog.info("ExecutorServiceImpl::ProcessBatch() returns response of size=" + to_string(response->ByteSizeLong()), &proverRequest.tags);
+        string2file(response->DebugString(), proverRequest.filePrefix + "executor_response_blob.txt");
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
+    }
+
+    return Status::OK;
+}

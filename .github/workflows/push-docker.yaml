@@ -2,7 +2,7 @@ name: Build docker image and run node tests
 
 on:
   push:
-    branches: [ develop, main, fork_8 ]
+    branches: [ develop, main, fork_9 ]
 
 jobs:
   build-docker:
@@ -25,7 +25,7 @@ jobs:
       - name: Submodule init
         run: |
           git submodule init
-          git submodule update --remote
+          git submodule update
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1

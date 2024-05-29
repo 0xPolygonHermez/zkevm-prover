@@ -2063,13 +2063,14 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
     ctx.fec.sub(y3, aux1, y1);
 }
 
-void eval_addReadWriteAddress (Context &ctx, const mpz_class value)
+void eval_addReadWriteAddress (Context &ctx, const mpz_class value, const Goldilocks::Element (&key)[4])
 {
     zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 1);
     ((fork_1::FullTracer *)ctx.proverRequest.pFullTracer)->addReadWriteAddress(
         ctx.pols.A0[0], ctx.pols.A1[0], ctx.pols.A2[0], ctx.pols.A3[0], ctx.pols.A4[0], ctx.pols.A5[0], ctx.pols.A6[0], ctx.pols.A7[0],
         ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0],
-        value);
+        value,
+        key);
 }
 
 } // namespace

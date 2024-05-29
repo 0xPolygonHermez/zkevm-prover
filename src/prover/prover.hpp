@@ -31,10 +31,16 @@ class Prover
 
     StarkRecursiveF *starksRecursiveF;
 
-    Starks *starkZkevm;
-    Starks *starksC12a;
-    Starks *starksRecursive1;
-    Starks *starksRecursive2;
+    Starks *starkBatch;
+    Starks *starkBatchC12a;
+    Starks *starkBatchRecursive1;
+    Starks *starkBatchRecursive2;
+    Starks *starkBlobInner;
+    Starks *starkBlobInnerCompressor;
+    Starks *starkBlobInnerRecursive1;
+    Starks *starkBlobOuter;
+    Starks *starkBlobOuterRecursive2;
+    
 
     Fflonk::FflonkProver<AltBn128::Engine> *prover;
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
@@ -44,10 +50,9 @@ class Prover
 
 public:
     unordered_map<string, ProverRequest *> requestsMap; // Map uuid -> ProveRequest pointer
-
     vector<ProverRequest *> pendingRequests;   // Queue of pending requests
     ProverRequest *pCurrentRequest;            // Request currently being processed by the prover thread in server mode
-    vector<ProverRequest *> completedRequests; // Map uuid -> ProveRequest pointer
+    vector<ProverRequest *> completedRequests; // Completed requests
 
 private:
     pthread_t proverPthread;  // Prover thread
@@ -56,6 +61,9 @@ private:
     void *pAddress = NULL;
     void *pAddressStarksRecursiveF = NULL;
     int protocolId;
+    uint64_t polsSize;
+    bool optimizeMemoryNTT = false;
+    bool optimizeMemoryNTTCommitPols = false;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
@@ -69,16 +77,26 @@ public:
     ~Prover();
 
     void genBatchProof(ProverRequest *pProverRequest);
-    void genAggregatedProof(ProverRequest *pProverRequest);
+    void genBlobInnerProof(ProverRequest *pProverRequest);
+    void genBlobOuterProof(ProverRequest *pProverRequest);
+    void genAggregatedBatchProof(ProverRequest *pProverRequest) ;
+    void genAggregatedBlobOuterProof(ProverRequest *pProverRequest);
     void genFinalProof(ProverRequest *pProverRequest);
     void processBatch(ProverRequest *pProverRequest);
-    void execute(ProverRequest *pProverRequest);
+    void executeBatch(ProverRequest *pProverRequest);
+    void processBlobInner(ProverRequest *pProverRequest);
+    void executeBlobInner(ProverRequest *pProverRequest);
     
     string submitRequest(ProverRequest *pProverRequest);                                          // returns UUID for this request
     ProverRequest *waitForRequestToComplete(const string &uuid, const uint64_t timeoutInSeconds); // wait for the request with this UUID to complete; returns NULL if UUID is invalid
 
-    void lock(void) { pthread_mutex_lock(&mutex); };
-    void unlock(void) { pthread_mutex_unlock(&mutex); };
+    inline void lock(void) { pthread_mutex_lock(&mutex); };
+    inline void unlock(void) { pthread_mutex_unlock(&mutex); };
+
+private:
+
+    void logBatchExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest);
+    void logBlobInnerExecutionInfo(PROVER_FORK_NAMESPACE::CommitPols& cmPols, ProverRequest *pProverRequest);
 };
 
 void *proverThread(void *arg);

@@ -113,6 +113,14 @@ typedef enum : int
     
     ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR = 99, // Invalid TX status-error combination
 
+    ZKR_SM_MAIN_POINT_Z_MISMATCH = 100, // Point Z was calculated and different from the one provided as an input via JSON
+    ZKR_SM_MAIN_BLOB_L2_HASH_DATA_MISMATCH = 101, // Blob L1 data hash was calculated and different from the one provided as an input via JSON
+    ZKR_SM_MAIN_BATCH_HASH_DATA_MISMATCH = 102, // Batch L2 data hash was calculated and different from the one provided as an input via JSON
+    ZKR_SM_MAIN_INVALID_BLOB_TYPE = 103, // Blob type is invalid
+    ZKR_SM_MAIN_UNRESTORED_SAVED_CONTEXT = 104, // At least one saved context was not restored after execution was completed
+
+    ZKR_BLOB_OUTER_PROOF_INVALID_INPUT = 105, // Invalid Blob outer proof input
+    ZKR_SM_MAIN_INVALID_MEMORY_CTX = 106, // Invalid memory address context
 } zkresult;
 
 string zkresult2string (int code);

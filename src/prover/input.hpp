@@ -17,6 +17,7 @@ using json = nlohmann::json;
 // We keep a security margin for other small keccaks, padding bytes, etc. = 60000
 // This max length is checked in preprocessTxs()
 #define MAX_BATCH_L2_DATA_SIZE (120000)
+#define MAX_BLOB_DATA_SIZE (128*1024)
 
 class L1Data
 {
@@ -26,6 +27,8 @@ public:
     mpz_class blockHashL1;
     uint64_t minTimestamp;
     vector<mpz_class> smtProof;
+    vector<mpz_class> smtProofPreviousIndex;
+    mpz_class initialHistoricRoot;
     L1Data() : bPresent(false), minTimestamp(0) {};
 };
 
@@ -70,6 +73,7 @@ public:
     unordered_map<string, OverrideEntry> stateOverride;
     uint64_t stepsN;
     InputDebug debug;
+    unordered_map<uint64_t, uint64_t> minTimestampMap;
 
     // Constructor
     Input (Goldilocks &fr) :
@@ -87,46 +91,20 @@ public:
     zkresult load (json &input);
 
     // Saves the input object data into a JSON object
-    void save (json &input) const;
-    void save (json &input, DatabaseMap &dbReadLog) const;
+    string save (json &input) const;
+    string save (json &input, DatabaseMap &dbReadLog) const;
 
 private:
     void loadGlobals      (json &input);
-    void saveGlobals      (json &input) const;
+    string saveGlobals      (json &input) const;
 
 public:
     DatabaseMap::MTMap db;
     DatabaseMap::ProgramMap contractsBytecode;
 
     void loadDatabase     (json &input);
-    void saveDatabase     (json &input) const;
-    void saveDatabase     (json &input, DatabaseMap &dbReadLog) const;
-
-    bool operator==(Input &input)
-    {
-        return
-            publicInputsExtended == input.publicInputsExtended &&
-            from == input.from &&
-            bUpdateMerkleTree == input.bUpdateMerkleTree &&
-            bNoCounters == input.bNoCounters &&
-            traceConfig == input.traceConfig &&
-            db == input.db &&
-            contractsBytecode == input.contractsBytecode;
-    };
-
-    bool operator!=(Input &input) { return !(*this == input); };
-    
-    Input & operator=(const Input &other)
-    {
-        publicInputsExtended = other.publicInputsExtended;
-        from = other.from;
-        bUpdateMerkleTree = other.bUpdateMerkleTree;
-        bNoCounters = other.bNoCounters;
-        traceConfig = other.traceConfig;
-        db = other.db;
-        contractsBytecode = other.contractsBytecode;
-        return *this;
-    }
+    string saveDatabase     (json &input) const;
+    string saveDatabase     (json &input, DatabaseMap &dbReadLog) const;
 };
 
 #endif

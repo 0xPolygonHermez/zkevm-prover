@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include "zkglobals.hpp"
 
 using namespace std;
 
@@ -236,11 +237,50 @@ public:
     FinalTraceV2() : bInitialized(false), numBatch(0), cumulative_gas_used(0), gas_used(0), invalid_batch(false) {};
 };
 
+class FinalTraceV3
+{
+public:
+    bool bInitialized;
+    string new_state_root;
+    string new_local_exit_root;
+    string newAccInputHash;
+    string new_acc_input_hash;
+    uint64_t numBatch;
+    uint64_t cumulative_gas_used;
+    uint64_t gas_used;
+    vector<Block> block_responses;
+    bool invalid_batch;
+    string error;
+    uint64_t new_last_timestamp;
+    string current_l1_info_tree_root;
+    uint64_t current_l1_info_tree_index;
+    FinalTraceV3() : bInitialized(false), numBatch(0), cumulative_gas_used(0), gas_used(0), invalid_batch(false), new_last_timestamp(0), current_l1_info_tree_index(0) {};
+};
+
 class InfoReadWrite
 {
 public:
     string nonce;
+    Goldilocks::Element nonceKey[4];
     string balance;
+    Goldilocks::Element balanceKey[4];
+    string sc_code;
+    unordered_map<string, string> sc_storage;
+    string sc_length;
+    InfoReadWrite()
+    {
+        // Reset nonce key
+        nonceKey[0] = fr.zero();
+        nonceKey[1] = fr.zero();
+        nonceKey[2] = fr.zero();
+        nonceKey[3] = fr.zero();
+
+        // Reset balance key
+        balanceKey[0] = fr.zero();
+        balanceKey[1] = fr.zero();
+        balanceKey[2] = fr.zero();
+        balanceKey[3] = fr.zero();
+    }
 };
 
 class TxGAS
@@ -260,6 +300,32 @@ public:
     ReturnFromCreate() : enabled(false), originCTX(0), createCTX(0) {};
 };
 
+class FinalTraceBlob
+{
+public:
+    string error;
+    vector<string> batch_data;
+    mpz_class new_blob_state_root;
+    mpz_class new_blob_acc_input_hash;
+    uint64_t new_num_blob;
+    mpz_class final_acc_batch_hash_data;
+    mpz_class local_exit_root_from_blob;
+    uint64_t is_invalid;
+
+    FinalTraceBlob() { clear(); };
+    void clear (void)
+    {
+        error.clear();
+        batch_data.clear();
+        new_blob_state_root = 0;
+        new_blob_acc_input_hash = 0;
+        new_num_blob = 0;
+        final_acc_batch_hash_data = 0;
+        local_exit_root_from_blob = 0;
+        is_invalid = 0;
+    }
+};
+
 class FullTracerInterface
 {
 public:
@@ -277,6 +343,10 @@ public:
     virtual uint64_t get_tx_number(void) = 0; // tx number = 0, 1, 2...
     virtual string & get_error(void) = 0;
     virtual bool get_invalid_batch(void) = 0;
+    virtual FinalTraceBlob & get_final_trace_blob(void) = 0;
+    virtual uint64_t get_new_last_timestamp(void) = 0;
+    virtual string & get_current_l1_info_tree_root(void) = 0;
+    virtual uint64_t get_current_l1_info_tree_index(void) = 0;
 };
 
 #endif

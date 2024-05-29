@@ -10,10 +10,11 @@
 #include "friProofC12.hpp"
 #include "friProve.hpp"
 #include "transcript.hpp"
-#include "zhInv.hpp"
 #include "steps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "chelpers.hpp"
+#include "chelpers_steps.hpp"
 
 #define STARK_C12_A_NUM_TREES 5
 #define NUM_CHALLENGES 8
@@ -24,6 +25,7 @@ struct StarkFiles
     bool mapConstPolsFile;
     std::string zkevmConstantsTree;
     std::string zkevmStarkInfo;
+    std::string zkevmCHelpers;
 };
 
 class Starks
@@ -31,7 +33,8 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
-    uint64_t nrowsStepBatch;
+    bool optimizeMemoryNTT = false;
+    bool optimizeMemoryNTTCommitPols = false;
 
 private:
     void *pConstPolsAddress;
@@ -40,13 +43,13 @@ private:
     ConstantPolsStarks *pConstPols2ns;
     void *pConstTreeAddress;
     StarkFiles starkFiles;
-    ZhInv zi;
     uint64_t N;
     uint64_t NExtended;
     NTT_Goldilocks ntt;
     NTT_Goldilocks nttExtended;
     Polinomial x_n;
     Polinomial x_2ns;
+    Polinomial zi;
     uint64_t constPolsSize;
     uint64_t constPolsDegree;
     MerkleTreeGL *treesGL[STARK_C12_A_NUM_TREES];
@@ -62,30 +65,32 @@ private:
     Goldilocks::Element *cm4_2ns;
     Goldilocks::Element *p_q_2ns;
     Goldilocks::Element *p_f_2ns;
+    Goldilocks::Element *p_tmpExp_n;
     Goldilocks::Element *pBuffer;
 
     void *pAddress;
 
     Polinomial x;
 
-    void merkelizeMemory(); // function for DBG purposes
+    std::unique_ptr<BinFileUtils::BinFile> cHelpersBinFile;
+    CHelpers chelpers;
+
+void merkelizeMemory(); // function for DBG purposes
 
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
-                                                                           starkInfo(config, starkFiles.zkevmStarkInfo),
+                                                                           starkInfo(starkFiles.zkevmStarkInfo),
                                                                            starkFiles(starkFiles),
-                                                                           zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
-                                                                              config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
                                                                            N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                                            ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                                            x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
                                                                            x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                                                           zi(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
                                                                            pAddress(_pAddress),
                                                                            x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
     {
-        nrowsStepBatch = 1;
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
@@ -139,7 +144,17 @@ public:
         // Initialize and allocate ConstantPols2ns
         TimerStart(LOAD_CONST_POLS_2NS_TO_MEMORY);
         pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
+        if (pConstPolsAddress2ns == NULL)
+        {
+            zklog.error("Starks::Starks() failed to allocate " + to_string(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element)) + " bytes for pConstPolsAddress2ns");
+            exitProcess();
+        }   
         pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
+        if(pConstPols2ns == NULL)
+        {
+            zklog.error("Starks::Starks() failed to allocate pConstPols2ns");
+            exitProcess();
+        }
         std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
 
         TimerStopAndLog(LOAD_CONST_POLS_2NS_TO_MEMORY);
@@ -160,6 +175,10 @@ public:
         }
         TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
 
+        TimerStart(COMPUTE_ZHINV);
+        Polinomial::buildZHInv(zi, starkInfo.starkStruct.nBits, starkInfo.starkStruct.nBitsExt);
+        TimerStopAndLog(COMPUTE_ZHINV);
+
         mem = (Goldilocks::Element *)pAddress;
         pBuffer = &mem[starkInfo.mapTotalN];
 
@@ -169,6 +188,7 @@ public:
         p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
         p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
         p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
+        p_tmpExp_n = &mem[starkInfo.mapOffsets.section[eSection::tmpExp_n]];
         cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
         p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
         p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
@@ -189,6 +209,23 @@ public:
         treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
         treesGL[4] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
+
+        TimerStart(CHELPERS_ALLOCATION);
+        if(!starkFiles.zkevmCHelpers.empty()) {
+            cHelpersBinFile = BinFileUtils::openExisting(starkFiles.zkevmCHelpers, "chps", 1);
+            chelpers.loadCHelpers(cHelpersBinFile.get());
+        }
+        TimerStopAndLog(CHELPERS_ALLOCATION);
+
+        if(starkInfo.mapOffsets.section[eSection::cm1_2ns] < starkInfo.mapOffsets.section[eSection::tmpExp_n]) {
+            optimizeMemoryNTTCommitPols = true;
+        }
+
+        uint64_t currentSectionStart = starkInfo.mapOffsets.section[eSection::cm3_n] * sizeof(Goldilocks::Element);
+        uint64_t nttHelperSize = starkInfo.mapSectionsN.section[eSection::cm3_n] * NExtended * sizeof(Goldilocks::Element);
+        if(currentSectionStart > nttHelperSize) {
+            optimizeMemoryNTT = true;
+        }
     };
     ~Starks()
     {
@@ -220,15 +257,24 @@ public:
         {
             delete treesGL[i];
         }
+
+        BinFileUtils::BinFile *pCHelpers = cHelpersBinFile.release();
+        assert(cHelpersBinFile.get() == nullptr);
+        assert(cHelpersBinFile == nullptr);
+        delete pCHelpers;
+        
     };
 
-    void genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps);
+    void genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], CHelpersSteps *chelpersSteps);
 
     Polinomial *transposeH1H2Columns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
     void transposeH1H2Rows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
     Polinomial *transposeZColumns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
     void transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
     void evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomial &LpEv);
+    inline uint64_t getPolBits() const{
+        return starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
+    }
 };
 
 #endif // STARKS_H

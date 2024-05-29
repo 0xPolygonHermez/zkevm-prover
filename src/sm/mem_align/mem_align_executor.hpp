@@ -17,9 +17,8 @@ public:
     mpz_class v;
     mpz_class w0;
     mpz_class w1;
-    uint8_t offset;
-    uint8_t wr8;
-    uint8_t wr256;
+    uint64_t mode;
+    uint8_t wr;
 };
 
 class MemAlignExecutor

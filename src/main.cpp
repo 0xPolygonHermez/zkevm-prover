@@ -49,6 +49,7 @@
 #include "page_manager_test.hpp"
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
+#include "BLS12_381_utils.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -111,24 +112,24 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
     prover.genBatchProof(&proverRequest);
 }
 
-void runFileGenAggregatedProof(Goldilocks fr, Prover &prover, Config &config)
+void runFileGenAggregatedBatchProof(Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_genAggregatedProof);
+    ProverRequest proverRequest(fr, config, prt_genAggregatedBatchProof);
     if (config.inputFile.size() > 0)
     {
-        file2json(config.inputFile, proverRequest.aggregatedProofInput1);
+        file2json(config.inputFile, proverRequest.aggregatedBatchProofInput1);
     }
     if (config.inputFile2.size() > 0)
     {
-        file2json(config.inputFile2, proverRequest.aggregatedProofInput2);
+        file2json(config.inputFile2, proverRequest.aggregatedBatchProofInput2);
     }
     TimerStopAndLog(INPUT_LOAD);
 
     // Call the prover
-    prover.genAggregatedProof(&proverRequest);
+    prover.genAggregatedBatchProof(&proverRequest);
 }
 
 void runFileGenFinalProof(Goldilocks fr, Prover &prover, Config &config)
@@ -263,18 +264,29 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
+
     // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_execute);
-    if (config.inputFile.size() > 0)
+    ProverRequest proverRequest(fr, config, prt_executeBatch);
+
+    // Load and parse input JSON file
+    if (config.inputFile.empty())
     {
-        json inputJson;
-        file2json(config.inputFile, inputJson);
-        zkresult zkResult = proverRequest.input.load(inputJson);
-        if (zkResult != ZKR_SUCCESS)
-        {
-            zklog.error("runFileExecute() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
-            exitProcess();
-        }
+        zklog.error("runFileExecute() found config.inputFile empty");
+        exitProcess();
+    }
+
+    json inputJson;
+    file2json(config.inputFile, inputJson);
+    zkresult zkResult = proverRequest.input.load(inputJson);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        zklog.error("runFileExecute() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
+        exitProcess();
+    }
+
+    if (!proverRequest.input.publicInputsExtended.publicInputs.blobData.empty())
+    {
+        proverRequest.type = prt_executeBlobInner;
     }
     TimerStopAndLog(INPUT_LOAD);
 
@@ -287,7 +299,24 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     }
 
     // Call the prover
-    prover.execute(&proverRequest);
+    switch (proverRequest.type)
+    {
+        case prt_executeBlobInner:
+        {
+            prover.executeBlobInner(&proverRequest);
+            break;
+        }
+        case prt_executeBatch:
+        {
+            prover.executeBatch(&proverRequest);
+            break;
+        }
+        default:
+        {
+            zklog.error("runFileExecute() found invalid prover request type=" + to_string(proverRequest.type) + "=" + proverRequestType2string(proverRequest.type));
+            break;
+        }
+    }
 }
 
 int main(int argc, char **argv)
@@ -360,11 +389,18 @@ int main(int argc, char **argv)
     PoseidonGoldilocks poseidon;
 
 #ifdef DEBUG
-    zklog.info("BN128 p-1 =" + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
-    zklog.info("FQ    p-1 =" + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));
-    zklog.info("FEC   p-1 =" + fec.toString(fec.negOne(),16) + " = " + fec.toString(fec.negOne(),10));
-    zklog.info("FNEC  p-1 =" + fnec.toString(fnec.negOne(),16) + " = " + fnec.toString(fnec.negOne(),10));
+    zklog.info("Goldilocks    p-1 = " + fr.toString(fr.negone(),16) + " = " + fr.toString(fr.negone(),10));
+    zklog.info("BN128         p-1 = " + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
+    zklog.info("BN245         p-1 = " + bn254.toString(bn254.negOne(),16) + " = " + bn254.toString(bn254.negOne(),10));
+    zklog.info("FQ            p-1 = " + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));
+    zklog.info("FEC           p-1 = " + fec.toString(fec.negOne(),16) + " = " + fec.toString(fec.negOne(),10));
+    zklog.info("FNEC          p-1 = " + fnec.toString(fnec.negOne(),16) + " = " + fnec.toString(fnec.negOne(),10));
+    zklog.info("BLS12-381     p-1 = " + bls12_381.toString(bls12_381.negOne(),16) + " = " + bls12_381.toString(bls12_381.negOne(),10));
+    zklog.info("BLS12_381_384 p-1 = " + bls12_381_384.toString(bls12_381_384.negOne(),16) + " = " + bls12_381_384.toString(bls12_381_384.negOne(),10));
 #endif
+
+    // Init BLS12-381 4096th roots of unity
+    BLS12_381_4096thRootsOfUnity_init();
 
     // Generate account zero keys
     fork_8::Account::GenerateZeroKey(fr, poseidon);
@@ -400,44 +436,6 @@ int main(int argc, char **argv)
     {
         SHA256GenerateScript(config);
     }
-
-#ifdef DATABASE_USE_CACHE
-
-    /* INIT DB CACHE */
-    if(config.useAssociativeCache){
-        Database::useAssociativeCache = true;
-        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
-    }
-    else{
-        Database::useAssociativeCache = false;
-        Database::dbMTCache.setName("MTCache");
-        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
-    }
-    Database::dbProgramCache.setName("ProgramCache");
-    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
-
-    if (config.databaseURL != "local") // remote DB
-    {
-
-        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
-        {
-            TimerStart(DB_CACHE_LOAD);
-            // if we have a db cache enabled
-            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
-            {
-                if (config.loadDBToMemCacheInParallel) {
-                    // Run thread that loads the DB into the dbCache
-                    std::thread loadDBThread (loadDb2MemCache, config);
-                    loadDBThread.detach();
-                } else {
-                    loadDb2MemCache(config);
-                }
-            }
-            TimerStopAndLog(DB_CACHE_LOAD);
-        }
-    }
-
-#endif // DATABASE_USE_CACHE
 
     /* TESTS */
 
@@ -495,6 +493,7 @@ int main(int argc, char **argv)
     if (config.runDatabaseCacheTest)
     {
         DatabaseCacheTest();
+        //DatabaseCacheBenchmark();
     }
 
     // Test check tree
@@ -631,13 +630,13 @@ int main(int argc, char **argv)
                 tmpConfig.inputFile = config.inputFile + files[i];
                 zklog.info("runFileGenAggregatedProof inputFile=" + tmpConfig.inputFile);
                 // Call the prover
-                runFileGenAggregatedProof(fr, prover, tmpConfig);
+                runFileGenAggregatedBatchProof(fr, prover, tmpConfig);
             }
         }
         else
         {
             // Call the prover
-            runFileGenAggregatedProof(fr, prover, config);
+            runFileGenAggregatedBatchProof(fr, prover, config);
         }
     }
 

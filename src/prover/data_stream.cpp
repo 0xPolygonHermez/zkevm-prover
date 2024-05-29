@@ -5,6 +5,10 @@
 
 //#define LOG_DATA_STREAM
 
+#ifdef USE_DATA_STREAM_PROTOBUF
+#include "grpc/gen/datastream.grpc.pb.h"
+#endif
+
 uint8_t ParseU8 (const string &data, uint64_t &p)
 {
     uint8_t result;
@@ -107,6 +111,7 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
     // Initialize variables
     uint64_t p = 0;
     batch.reset();
+    string auxString;
 
     // While there is data to process
     while (p < dataStream.size())
@@ -139,8 +144,8 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
         }
         if (p + length - 1 /*packetType*/ - 4 /*length*/ - 1 > dataStream.size())
         {
-            zklog.error("dataStream2batch() checking length, run out of data stream data p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
-            //return ZKR_DATA_STREAM_INVALID_DATA;
+            zklog.error("dataStream2batch() checking length, run out of data stream data p=" + to_string(p) + " length=" + to_string(length) + " dataStream.size=" + to_string(dataStream.size()));
+            return ZKR_DATA_STREAM_INVALID_DATA;
         }
 
         // Parse type
@@ -194,6 +199,7 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                 continue;
             }
 
+#ifndef USE_DATA_STREAM_PROTOBUF
             /*
             Start L2 Block:
                 Entry type = 1
@@ -459,6 +465,391 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
 #endif
                 continue;
             }
+#endif
+
+#ifdef USE_DATA_STREAM_PROTOBUF
+
+            case datastream::v1::ENTRY_TYPE_BATCH_START: // Batch start
+            {
+                // Check that batch has not been previously parsed
+                if (batch.forkId != 0)
+                {
+                    zklog.error("dataStream2batch() batch start called with batch.forkId=" + to_string(batch.forkId) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Parse the data stream entry as a protobuf
+                datastream::v1::BatchStart dsBatchStart;
+                if (!dsBatchStart.ParseFromString(dataStream.substr(p, dataLength)))
+                {
+                    zklog.error("dataStream2batch() batch start failed calling dsBatchStart.ParseFromString() p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                p += dataLength;
+
+                // Get batch number
+                uint64_t batchNumber = dsBatchStart.number();
+                if (batchNumber == 0)
+                {
+                    zklog.error("dataStream2batch() batch start invalid batch number=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                else
+                {
+                    batch.batchNumber = batchNumber;
+                }
+
+                // Get fork ID
+                batch.forkId = dsBatchStart.fork_id();
+                if (batch.forkId == 0)
+                {
+                    zklog.error("dataStream2batch() batch start invalid fork ID=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Get chain ID
+                batch.chainId = dsBatchStart.chain_id();
+
+#ifdef LOG_DATA_STREAM
+                zklog.info("dataStream2batch() BATCH START " + batch.toString());
+#endif
+
+                continue;
+            }
+
+            case datastream::v1::ENTRY_TYPE_L2_BLOCK: // L2 block
+            {
+                // Check that batch has been previously parsed
+                if (batch.forkId == 0)
+                {
+                    zklog.error("dataStream2batch() L2 block called with batch.forkId=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Create a block and fill it with the entry data
+                DataStreamBlock block;
+
+                // Parse the data stream entry as a protobuf
+                datastream::v1::L2Block dsBlock;
+                if (!dsBlock.ParseFromString(dataStream.substr(p, dataLength)))
+                {
+                    zklog.error("dataStream2batch() L2 block failed calling dsBlock.ParseFromString() p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                p += dataLength;
+
+                // Get block number
+                block.blockNumber = dsBlock.number();
+                if (block.blockNumber == 0)
+                {
+                    zklog.error("dataStream2batch() L2 block, found blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                
+                // Get batch number
+                uint64_t batchNumber;
+                batchNumber = dsBlock.batch_number();
+                if (batchNumber == 0)
+                {
+                    zklog.error("dataStream2batch() L2 block, found batchNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                if (batch.batchNumber == 0)
+                {
+                    batch.batchNumber = batchNumber;
+                }
+                else if (batchNumber != batch.batchNumber)
+                {
+                    zklog.error("dataStream2batch() L2 block, found batchNumber=" + to_string(batchNumber) + " != batch.batchNumber=" + to_string(batch.batchNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Parse block timestamp
+                block.timestamp = dsBlock.timestamp();
+
+                // Parse block delta timestamp
+                block.deltaTimestamp = dsBlock.delta_timestamp();
+
+                // Parse block min timestamp
+                block.minTimestamp = dsBlock.min_timestamp();
+
+                // Parse L1 block hash
+                auxString = dsBlock.l1_blockhash();
+                if (auxString.size() > 32)
+                {
+                    zklog.error("dataStream2batch() L2 block, found dsBlock.l1_blockhash.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(auxString, block.l1BlockHash);
+
+                // Parse block L1 info tree index
+                block.l1InfoTreeIndex = dsBlock.l1_infotree_index();
+
+                // Parse L2 block hash
+                auxString = dsBlock.hash();
+                if (auxString.size() > 32)
+                {
+                    zklog.error("dataStream2batch() L2 block, found dsBlock.hash.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(auxString, block.l2BlockHash);
+
+                // Parse state root
+                auxString = dsBlock.state_root();
+                if (auxString.size() > 32)
+                {
+                    zklog.error("dataStream2batch() L2 block, found dsBlock.state_root.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(auxString, block.stateRoot);
+
+                // Parse block global exit root
+                auxString = dsBlock.global_exit_root();
+                if (auxString.size() > 32)
+                {
+                    zklog.error("dataStream2batch() L2 block, found dsBlock.global_exit_root.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(auxString, block.globalExitRoot);
+
+                // Get coinbase
+                auxString = dsBlock.coinbase();
+                if (auxString.size() > 20)
+                {
+                    zklog.error("dataStream2batch() L2 block, found dsBlock.coinbase.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(auxString, block.coinbase);
+
+                // If batch is empty, initialize it
+                if (batch.blocks.empty())
+                {
+                    // Store block in batch
+                    batch.blocks.emplace_back(block);
+                }
+
+                // If batch number has already been assigned, perform checks
+                else
+                {
+                    // Check that the batch numbers match
+                    if (batch.batchNumber != batchNumber) // If they don't match, we are getting blocks from different batches, so fail
+                    {
+                        zklog.error("dataStream2batch() L2 block, batch number mismatch, batchNumber=" + to_string(batchNumber) + " batch.batchNumber=" + to_string(batch.batchNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                        return ZKR_DATA_STREAM_INVALID_DATA;
+                    }
+
+                    // Check that the block number is incremental with regards the current one
+                    uint64_t latestBlockNumber = batch.blocks[batch.blocks.size() - 1].blockNumber;
+                    if (block.blockNumber != latestBlockNumber + 1)
+                    {
+                        zklog.error("dataStream2batch() L2 block, found block.blockNumber=" + to_string(block.blockNumber) + " different from 1 more than latestBlockNumber=" + to_string(latestBlockNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                        return ZKR_DATA_STREAM_INVALID_DATA;
+                    }
+
+                    // Add the block to the batch list of blocks
+                    batch.blocks.emplace_back(block);
+                }
+
+#ifdef LOG_DATA_STREAM
+                zklog.info("dataStream2batch() L2 BLOCK " + block.toString());
+#endif
+
+                continue;
+            }
+
+            case datastream::v1::ENTRY_TYPE_TRANSACTION: // L2 TX
+            {
+                // Check that batch is in the proper state, i.e. with current block still open
+                if (batch.blocks.empty())
+                {
+                    zklog.error("dataStream2batch() L2 TX found batch.blocks empty p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                DataStreamBlock &latestBlock = batch.blocks[batch.blocks.size() - 1];
+                if (latestBlock.l2BlockHash.empty())
+                {
+                    zklog.error("dataStream2batch() L2 TX, found current block with l2BlockHash empty latestBlock=" + to_string(latestBlock.blockNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                if (latestBlock.stateRoot.empty())
+                {
+                    zklog.error("dataStream2batch() L2 TX, found current block with stateRoot empty latestBlock=" + to_string(latestBlock.blockNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Parse Tx
+                DataStreamTx tx;
+                
+                // Parse the data stream entry as a protobuf
+                datastream::v1::Transaction dsTx;
+                if (!dsTx.ParseFromString(dataStream.substr(p, dataLength)))
+                {
+                    zklog.error("dataStream2batch() L2 TX failed calling dsTx.ParseFromString() p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                p += dataLength;
+
+                // Check block number
+                if (dsTx.l2block_number() != latestBlock.blockNumber)
+                {
+                    zklog.error("dataStream2batch() L2 TX invalid dsTx.l2block_number=" + to_string(dsTx.l2block_number()) + " != latestBlock.blockNumber=" + to_string(latestBlock.blockNumber) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Get is valid
+                tx.isValid = dsTx.is_valid();
+
+                // Get TX encoded data
+                tx.encodedTx = dsTx.encoded();
+
+                // Get gas price percentage
+                tx.gasPricePercentage = dsTx.effective_gas_price_percentage();
+                if (tx.gasPricePercentage > 255)
+                {
+                    zklog.error("dataStream2batch() L2 TX invalid tx.gasPricePercentage=" + to_string(tx.gasPricePercentage) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Get intermediate state root
+                if (dsTx.im_state_root().size() > 32)
+                {
+                    zklog.error("dataStream2batch() L2 TX invalid dsTx.im_state_root=" + to_string(dsTx.im_state_root().size()) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(dsTx.im_state_root(), tx.stateRoot);
+                
+                // Add it to the current block
+                latestBlock.txs.emplace_back(tx);
+
+#ifdef LOG_DATA_STREAM
+                zklog.info("dataStream2batch() L2 TX " + tx.toString());
+#endif
+
+                continue;
+            }
+
+            case datastream::v1::ENTRY_TYPE_UPDATE_GER:
+            {
+                // Parse the update global exit root entry
+                datastream::v1::UpdateGER dsUpdateGER;
+                if (!dsUpdateGER.ParseFromString(dataStream.substr(p, dataLength)))
+                {
+                    zklog.error("dataStream2batch() Update GER failed calling dsUpdateGER.ParseFromString() p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                p += dataLength;
+
+                // Check batch number
+                if (dsUpdateGER.batch_number() != batch.batchNumber)
+                {
+                    zklog.error("dataStream2batch() Update GER found dsUpdateGER.batch_number=" + to_string(dsUpdateGER.batch_number()) + " != batch.batchNumber=" + to_string(batch.batchNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Check timestamp
+                /*if (dsUpdateGER.timestamp() != batch.timestamp)
+                {
+                    zklog.error("dataStream2batch() Update GER found dsUpdateGER.timestamp=" + to_string(dsUpdateGER.timestamp()) + " != batch.timestamp=" + to_string(batch.timestamp) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }*/
+
+                // Check coinbase
+
+                // Check fork ID
+                if (dsUpdateGER.fork_id() != batch.forkId)
+                {
+                    zklog.error("dataStream2batch() Update GER found dsUpdateGER.fork_id=" + to_string(dsUpdateGER.fork_id()) + " != batch.forkId=" + to_string(batch.forkId) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Check chain ID
+                if (dsUpdateGER.chain_id() != batch.chainId)
+                {
+                    zklog.error("dataStream2batch() Update GER found dsUpdateGER.chain_id=" + to_string(dsUpdateGER.chain_id()) + " != batch.chainId=" + to_string(batch.chainId) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Check state root
+                if (dsUpdateGER.state_root().size() > 32)
+                {
+                    zklog.error("dataStream2batch() Update GER invalid dsUpdateGER.state_root=" + to_string(dsUpdateGER.state_root().size()) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                string stateRoot;
+                ba2string(dsUpdateGER.state_root(), stateRoot);
+                if (stateRoot != batch.stateRoot)
+                {
+                    zklog.error("dataStream2batch() Update GER found dsUpdateGER.state_root=" + stateRoot + " != batch.stateRoot=" + batch.stateRoot + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Update GER
+                if (dsUpdateGER.global_exit_root().size() > 32)
+                {
+                    zklog.error("dataStream2batch() Update GER invalid dsUpdateGER.global_exit_root=" + to_string(dsUpdateGER.global_exit_root().size()) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(dsUpdateGER.global_exit_root(), batch.globalExitRoot);
+                
+                continue;
+            }
+
+            case datastream::v1::ENTRY_TYPE_BATCH_END: // Batch end
+            {
+                // Check that batch has not been previously parsed
+                if (batch.forkId == 0)
+                {
+                    zklog.error("dataStream2batch() batch end called with batch.forkId=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Parse the data stream entry as a protobuf
+                datastream::v1::BatchEnd dsBatchEnd;
+                if (!dsBatchEnd.ParseFromString(dataStream.substr(p, dataLength)))
+                {
+                    zklog.error("dataStream2batch() batch end failed calling dsBatchStart.ParseFromString() p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                p += dataLength;
+
+                // Get batch number
+                uint64_t batchNumber = dsBatchEnd.number();
+                if (batchNumber == 0)
+                {
+                    zklog.error("dataStream2batch() batch end invalid batch number=0 p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                else if (batchNumber != batch.batchNumber)
+                {
+                    zklog.error("dataStream2batch() batch end found batchNumber=" + to_string(batchNumber) + " != batch.batchNumber=" + to_string(batch.batchNumber) + " p=" + to_string(p) + " dataLength=" + to_string(dataLength) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+
+                // Get local exit root
+                auxString = dsBatchEnd.local_exit_root();
+                if (auxString.size() > 32)
+                {
+                    zklog.error("dataStream2batch() batch end found dsBatch.local_exit_root.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(auxString, batch.localExitRoot);
+
+                // Get state root
+                auxString = dsBatchEnd.state_root();
+                if (auxString.size() > 32)
+                {
+                    zklog.error("dataStream2batch() batch end found dsBatch.state_root.size=" + to_string(auxString.size()) + " != 32, blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    return ZKR_DATA_STREAM_INVALID_DATA;
+                }
+                ba2string(auxString, batch.stateRoot);
+
+#ifdef LOG_DATA_STREAM
+                zklog.info("dataStream2batch() BATCH END " + batch.toString());
+#endif
+
+                continue;
+            }
+#endif
 
             // Default: fail
             default:
@@ -553,10 +944,14 @@ zkresult dataStreamBatch2batchL2Data (const DataStreamBatch &batch, string &batc
     return ZKR_SUCCESS;
 }
 
+//#define LOG_TX_FIELDS
+
 // Decodes tx from Ethereum RLP format, and encodes it into ROM RLP format
 // From: RLP(fields, v, r, s) --> To: RLP(fields, chainId, 0, 0) | r | s | v
 zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcodedTx)
 {
+    //zklog.info("tx original=" + ba2string(tx));
+    
     // Decode the TX RLP list
     bool bResult;
     vector<string> fields;
@@ -585,6 +980,20 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
         return ZKR_DATA_STREAM_INVALID_DATA;
     }
 
+#ifdef LOG_TX_FIELDS
+    mpz_class auxScalar;
+    ba2scalar(auxScalar, fields[0]);
+    zklog.info("TX nonce=" + auxScalar.get_str(10));
+    ba2scalar(auxScalar, fields[1]);
+    zklog.info("TX gas price=" + auxScalar.get_str(10));
+    ba2scalar(auxScalar, fields[2]);
+    zklog.info("TX gas limit=" + auxScalar.get_str(10));
+    ba2scalar(auxScalar, fields[3]);
+    zklog.info("TX to=" + auxScalar.get_str(16));
+    ba2scalar(auxScalar, fields[4]);
+    zklog.info("TX value=" + auxScalar.get_str(10));
+#endif
+
     // Get TX v
     mpz_class vScalar;
     ba2scalar(vScalar, fields[6]);
@@ -595,16 +1004,43 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
     }
     uint64_t txv = vScalar.get_ui();
 
-    // Get chain ID
-    uint64_t chainId = (txv - 35) / 2;
-    if (chainId != batchChainId)
-    {
-        zklog.error("transcodeTx() called decodeList() and got chainId=" + to_string(chainId) + " != batchChainId=" + to_string(batchChainId));
-        return ZKR_DATA_STREAM_INVALID_DATA;
-    }
-
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX v original=" + to_string(txv));
+#endif
+    
     // Get ROM v
-    uint64_t v = txv - chainId*2 - 35 + 27;
+    uint64_t v;
+    bool isPreEIP155;
+    if ((txv == 27) || (txv == 28)) // This is a pre-EIP-155
+    {
+        isPreEIP155 = true;
+
+        v = txv;
+
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX pre-EIP-155 v rom=" + to_string(v));
+#endif
+
+    }
+    else
+    {
+        isPreEIP155 = false;
+
+        // Get chain ID
+        uint64_t chainId = (txv - 35) / 2;
+        if (chainId != batchChainId)
+        {
+            zklog.error("transcodeTx() called decodeList() and got chainId=" + to_string(chainId) + " != batchChainId=" + to_string(batchChainId));
+            return ZKR_DATA_STREAM_INVALID_DATA;
+        }
+
+        // Get ROM v
+        v = txv - chainId*2 - 35 + 27;
+
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX EIP-155 v rom=" + to_string(v) + " chainID=" + to_string(chainId));
+#endif
+    }
 
     // Get r
     mpz_class r;
@@ -614,6 +1050,10 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
         zklog.error("transcodeTx() called decodeList() and got too big r=" + r.get_str(16));
         return ZKR_DATA_STREAM_INVALID_DATA;
     }
+    
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX r =" + r.get_str(16) + "=" + r.get_str(10));
+#endif
 
     // Get s
     mpz_class s;
@@ -623,25 +1063,44 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
         zklog.error("transcodeTx() called decodeList() and got too big r=" + r.get_str(16));
         return ZKR_DATA_STREAM_INVALID_DATA;
     }
+    
+#ifdef LOG_TX_FIELDS
+    zklog.info("TX s =" + s.get_str(16) + "=" + s.get_str(10));
+#endif
 
-    // Set fields[6] = chain ID
-    fields[6].clear();
-    const uint8_t * pChainId = (const uint8_t *)&batchChainId;
-    bool writing = false;
-    for (int64_t i = 3; i >= 0; i--)
+    // preEIP155 format: [rlp(nonce,gasprice,gaslimit,to,value,data)|r|s|v|effectivePercentage]
+    if (isPreEIP155)
     {
-        if (writing || (pChainId[i] != 0))
-        {
-            fields[6] += pChainId[i];
-            writing = true;
-        }
+        fields.pop_back();
+        fields.pop_back();
+        fields.pop_back();
     }
+    // Legacy format: [rlp(nonce,gasprice,gaslimit,to,value,data,chainId,0,0)|r|s|v|effectivePercentage]
+    else
+    {
+        // Set fields[6] = chain ID
+        fields[6].clear();
+        const uint8_t * pChainId = (const uint8_t *)&batchChainId;
+        bool writing = false;
+        for (int64_t i = 3; i >= 0; i--)
+        {
+            if (writing || (pChainId[i] != 0))
+            {
+                fields[6] += pChainId[i];
+                writing = true;
+            }
+        }
+        
+#ifdef LOG_TX_FIELDS
+        zklog.info("TX chain ID=" + to_string(batchChainId));
+#endif
 
-    // Clear fields[7]
-    fields[7].clear();
+        // Clear fields[7]
+        fields[7].clear();
 
-    // Clear fields[8]
-    fields[8].clear();
+        // Clear fields[8]
+        fields[8].clear();
+    }
 
     // Encode RLP list
     bResult = rlp::encodeList(fields, transcodedTx);
@@ -667,6 +1126,8 @@ zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcode
     uint8_t d = v;
     transcodedTx += d;
     //zklog.info("v=" + to_string(v));
+
+    //zklog.info("transcoded tx=" + ba2string(transcodedTx));
 
     return ZKR_SUCCESS;
 }
