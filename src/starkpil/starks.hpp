@@ -116,7 +116,7 @@ public:
             pConstPolsAddress = loadFileParallel(starkFiles.zkevmConstPols, constPolsSize);
             zklog.info("Starks::Starks() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
         }
-        pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
+        pConstPols = new ConstantPolsStarks(pConstPolsAddress, N, starkInfo.nConstants);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
 
         if (!LOAD_CONST_FILES)
