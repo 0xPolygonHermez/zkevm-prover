@@ -362,6 +362,11 @@ message ProcessBatchResponseV2 {
     uint32 cnt_reserve_steps = 31;
     uint32 cnt_reserve_sha256_hashes = 32;
     bytes old_state_root = 33;
+    ResponseDebug debug = 34;
+}
+
+message ResponseDebug {
+    string error_log = 1;
 }
 
 // Trace configuration request params

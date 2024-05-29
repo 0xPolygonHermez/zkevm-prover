@@ -159,7 +159,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         r = ZKR_SUCCESS;
     }
     // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
-    else if (config.dbGetTree && (keys != NULL))
+    else if (useRemoteDB && config.dbGetTree && (keys != NULL))
     {
         // Get the tree
         uint64_t numberOfFields;

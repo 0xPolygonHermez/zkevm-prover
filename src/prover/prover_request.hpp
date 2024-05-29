@@ -78,6 +78,9 @@ public:
     unordered_set<string> nodesKeys;
     unordered_set<string> programKeys;
 
+    /* Debug info */
+    string errorLog;
+
     /* Constructor */
     ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);
     ~ProverRequest();

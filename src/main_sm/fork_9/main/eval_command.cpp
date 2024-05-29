@@ -2510,14 +2510,15 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
     return ZKR_SUCCESS;
 }
 
-zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value)
+zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value, const Goldilocks::Element (&key)[4])
 {
     zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 9); // fork_9
     return ((fork_9::FullTracer *)ctx.proverRequest.pFullTracer)->addReadWriteAddress(
         ctx.pols.A0[0], ctx.pols.A1[0], ctx.pols.A2[0], ctx.pols.A3[0], ctx.pols.A4[0], ctx.pols.A5[0], ctx.pols.A6[0], ctx.pols.A7[0],
         ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0],
         ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0],
-        value);
+        value,
+        key);
 }
 
 void eval_getL1InfoRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)

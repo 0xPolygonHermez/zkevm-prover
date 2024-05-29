@@ -1026,6 +1026,14 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     // getVarFromCtx(ctx, true, "newNumBatch", auxScalar);
     // finalTrace.new_batch_num = auxScalar.get_ui();
 
+    // Call fillInReadWriteAddresses
+    zkr = fillInReadWriteAddresses(ctx);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBatch() failed calling fillInReadWriteAddresses()");
+        return zkr;
+    }
+
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishBatch() new_state_root=" + finalTrace.new_state_root);
 #endif
@@ -1648,11 +1656,14 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
 zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &address3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
                                            const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
-                                           const mpz_class &value )
+                                           const mpz_class &value,
+                                           const Goldilocks::Element (&key)[4] )
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+
+    zkassert(!fr.isZero(key[0]) || !fr.isZero(key[1]) || !fr.isZero(key[2]) || !fr.isZero(key[3]));
 
     // Get address
     mpz_class address;
@@ -1679,11 +1690,19 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
         {
             InfoReadWrite infoReadWrite;
             infoReadWrite.balance = value.get_str();
+            infoReadWrite.balanceKey[0]= key[0];
+            infoReadWrite.balanceKey[1]= key[1];
+            infoReadWrite.balanceKey[2]= key[2];
+            infoReadWrite.balanceKey[3]= key[3];
             read_write_addresses[addressHex] = infoReadWrite;
         }
         else
         {
             it->second.balance = value.get_str();
+            it->second.balanceKey[0]= key[0];
+            it->second.balanceKey[1]= key[1];
+            it->second.balanceKey[2]= key[2];
+            it->second.balanceKey[3]= key[3];
         }
     }
     else if (keyType == SMT_KEY_NONCE)
@@ -1693,17 +1712,69 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
         {
             InfoReadWrite infoReadWrite;
             infoReadWrite.nonce = value.get_str();
+            infoReadWrite.nonceKey[0]= key[0];
+            infoReadWrite.nonceKey[1]= key[1];
+            infoReadWrite.nonceKey[2]= key[2];
+            infoReadWrite.nonceKey[3]= key[3];
             read_write_addresses[addressHex] = infoReadWrite;
         }
         else
         {
             it->second.nonce = value.get_str();
+            it->second.nonceKey[0]= key[0];
+            it->second.nonceKey[1]= key[1];
+            it->second.nonceKey[2]= key[2];
+            it->second.nonceKey[3]= key[3];
         }
     }
 
 #ifdef LOG_TIME_STATISTICS
     tms.add("addReadWriteAddress", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
+}
+
+zkresult FullTracer::fillInReadWriteAddresses (Context &ctx)
+{
+    zkresult zkr;
+
+    // Get new state root fea
+    Goldilocks::Element newStateRoot[4];
+    string2fea(fr, NormalizeToNFormat(finalTrace.new_state_root, 64), newStateRoot);
+
+    // For all entries in read_write_addresses
+    unordered_map<string, InfoReadWrite>::iterator it;
+    for (it = read_write_addresses.begin(); it != read_write_addresses.end(); it++)
+    {
+        // Re-read balance for this state root
+        if (!it->second.balance.empty())
+        {
+            zkassert(!fr.isZero(it->second.balanceKey[0]) || !fr.isZero(it->second.balanceKey[1]) || !fr.isZero(it->second.balanceKey[2])|| !fr.isZero(it->second.balanceKey[3]));
+            mpz_class balance;
+            zkr = ctx.pHashDB->get(ctx.proverRequest.uuid, newStateRoot, it->second.balanceKey, balance, NULL, NULL);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::fillInReadWriteAddresses() failed calling ctx.pHashDB->get(balance) result=" + zkresult2string(zkr));
+                return zkr;
+            }
+            it->second.balance = balance.get_str();
+        }
+
+        // Re-read nonce for this state root
+        if (!it->second.nonce.empty())
+        {
+            zkassert(!fr.isZero(it->second.nonceKey[0]) || !fr.isZero(it->second.nonceKey[1]) || !fr.isZero(it->second.nonceKey[2]) || !fr.isZero(it->second.nonceKey[3]));
+            mpz_class nonce;
+            zkr = ctx.pHashDB->get(ctx.proverRequest.uuid, newStateRoot, it->second.nonceKey, nonce, NULL, NULL);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::fillInReadWriteAddresses() failed calling ctx.pHashDB->get(nonce) result=" + zkresult2string(zkr));
+                return zkr;
+            }
+            it->second.nonce = nonce.get_str();
+        }
+    }
 
     return ZKR_SUCCESS;
 }

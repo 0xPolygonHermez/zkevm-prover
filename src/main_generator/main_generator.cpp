@@ -1403,7 +1403,7 @@ code += "    #endif\n";
 
                     if (bFastMode)
                     {
-                        code += "    zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
+                        code += "    zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value, key);\n";
                         code += "    if (zkResult != ZKR_SUCCESS)\n";
                         code += "    {\n";
                         code += "        proverRequest.result = zkResult;\n";
@@ -1646,7 +1646,7 @@ code += "    #endif\n";
 
                     if (bFastMode)
                     {
-                        code += "    zkResult = eval_addReadWriteAddress(ctx, value);\n";
+                        code += "    zkResult = eval_addReadWriteAddress(ctx, value, ctx.lastSWrite.key);\n";
                         code += "    if (zkResult != ZKR_SUCCESS)\n";
                         code += "    {\n";
                         code += "        proverRequest.result = zkResult;\n";
@@ -2827,7 +2827,7 @@ code += "    #endif\n";
                     
             if (bFastMode)
             {
-                code += "    zkResult = eval_addReadWriteAddress(ctx, value);\n";
+                code += "    zkResult = eval_addReadWriteAddress(ctx, value, key);\n";
                 code += "    if (zkResult != ZKR_SUCCESS)\n";
                 code += "    {\n";
                 code += "        proverRequest.result = zkResult;\n";
@@ -3015,7 +3015,7 @@ code += "    #endif\n";
                     
             if (bFastMode)
             {
-                code += "        zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
+                code += "        zkResult = eval_addReadWriteAddress(ctx, scalarD, ctx.lastSWrite.key);\n";
                 code += "        if (zkResult != ZKR_SUCCESS)\n";
                 code += "        {\n";
                 code += "            proverRequest.result = zkResult;\n";
