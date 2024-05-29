@@ -9,12 +9,12 @@ public:
     inline virtual void storePolinomial(StarkInfo& starkInfo, Goldilocks::Element *pols, __m256i *bufferT, uint64_t row, uint64_t nrowsPack, bool domainExtended, uint64_t stage, uint64_t stagePos, uint64_t openingPointIndex, uint64_t dim) {
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint64_t nOpenings = 2;
-        uint64_t nextStride = domainExtended ? starkInfo.nextStrideExt : starkInfo.nextStride;
-        std::vector<uint64_t> nextStrides = domainExtended ? starkInfo.nextStridesExt : starkInfo.nextStrides;
-        std::vector<uint64_t> buffTOffsetsStages = domainExtended ? starkInfo.buffTOffsetsStagesExt : starkInfo.buffTOffsetsStages;
-        std::vector<uint64_t> nColsStages = domainExtended ? starkInfo.nColsStagesExt : starkInfo.nColsStages;
-        std::vector<uint64_t> nColsStagesAcc = domainExtended ? starkInfo.nColsStagesAccExt : starkInfo.nColsStagesAcc;
-        std::vector<uint64_t> offsetsStages = domainExtended ? starkInfo.offsetsStagesExt : starkInfo.offsetsStages;
+        uint64_t nextStride = domainExtended ?  1 << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 1;
+        std::vector<uint64_t> nextStrides = {0, nextStride};
+        std::vector<uint64_t> buffTOffsetsStages = starkInfo.buffTOffsetsStages;
+        std::vector<uint64_t> nColsStages = starkInfo.nColsStages;
+        std::vector<uint64_t> nColsStagesAcc = starkInfo.nColsStagesAcc;
+        std::vector<uint64_t> offsetsStages = starkInfo.offsetsStages;
         bool isTmpPol = !domainExtended && stage == 4;
         bool const needModule = row + nrowsPack + nextStride >= domainSize;
         __m256i *buffT = &bufferT[(buffTOffsetsStages[stage] + nOpenings * stagePos + openingPointIndex)];
@@ -52,9 +52,9 @@ public:
     }
 
     inline virtual void storePolinomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, vector<uint64_t> storePol, uint64_t row, uint64_t nrowsPack, uint64_t domainExtended) {
-        uint64_t nStages = starkInfo.nStages;
-        std::vector<uint64_t> nColsStages = domainExtended ? starkInfo.nColsStagesExt : starkInfo.nColsStages;
-        std::vector<uint64_t> nColsStagesAcc = domainExtended ? starkInfo.nColsStagesAccExt : starkInfo.nColsStagesAcc;
+        uint64_t nStages = 3;
+        std::vector<uint64_t> nColsStages = starkInfo.nColsStages;
+        std::vector<uint64_t> nColsStagesAcc = starkInfo.nColsStagesAcc;
         for(uint64_t s = 2; s <= nStages + 1; ++s) {
             for(uint64_t k = 0; k < nColsStages[s]; ++k) {
                 for(uint64_t o = 0; o < 2; ++o) {
@@ -84,12 +84,13 @@ public:
         Goldilocks::Element bufferT[2*nrowsPack];
         ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
-        uint64_t nStages = starkInfo.nStages;
-        std::vector<uint64_t> nextStrides = domainExtended ? starkInfo.nextStridesExt : starkInfo.nextStrides;
-        std::vector<uint64_t> buffTOffsetsStages = domainExtended ? starkInfo.buffTOffsetsStagesExt : starkInfo.buffTOffsetsStages;
-        std::vector<uint64_t> nColsStages = domainExtended ? starkInfo.nColsStagesExt : starkInfo.nColsStages;
-        std::vector<uint64_t> nColsStagesAcc = domainExtended ? starkInfo.nColsStagesAccExt : starkInfo.nColsStagesAcc;
-        std::vector<uint64_t> offsetsStages = domainExtended ? starkInfo.offsetsStagesExt : starkInfo.offsetsStages;
+        uint64_t nStages = 3;
+        uint64_t nextStride = domainExtended ?  1 << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 1;
+        std::vector<uint64_t> nextStrides = {0, nextStride};
+        std::vector<uint64_t> buffTOffsetsStages = starkInfo.buffTOffsetsStages;
+        std::vector<uint64_t> nColsStages = starkInfo.nColsStages;
+        std::vector<uint64_t> nColsStagesAcc = starkInfo.nColsStagesAcc;
+        std::vector<uint64_t> offsetsStages = starkInfo.offsetsStages;
         for(uint64_t k = 0; k < nColsStages[0]; ++k) {
             for(uint64_t o = 0; o < 2; ++o) {
                 for(uint64_t j = 0; j < nrowsPack; ++j) {
@@ -135,12 +136,12 @@ public:
         uint16_t *args = &parserArgs.args[parserParams.argsOffset];
         uint64_t *numbers = &parserArgs.numbers[parserParams.numbersOffset];
 
-        uint64_t nCols = domainExtended ? starkInfo.nColsExt : starkInfo.nCols;
-        std::vector<uint64_t> nextStrides = domainExtended ? starkInfo.nextStridesExt : starkInfo.nextStrides;
-        std::vector<uint64_t> buffTOffsetsStages = domainExtended ? starkInfo.buffTOffsetsStagesExt : starkInfo.buffTOffsetsStages;
-        std::vector<uint64_t> nColsStages = domainExtended ? starkInfo.nColsStagesExt : starkInfo.nColsStages;
-        std::vector<uint64_t> nColsStagesAcc = domainExtended ? starkInfo.nColsStagesAccExt : starkInfo.nColsStagesAcc;
-        std::vector<uint64_t> offsetsStages = domainExtended ? starkInfo.offsetsStagesExt : starkInfo.offsetsStages;
+        starkInfo.setCHelpersInfo(parserParams.stage);
+        std::vector<uint64_t> buffTOffsetsStages = starkInfo.buffTOffsetsStages;
+        std::vector<uint64_t> nColsStages = starkInfo.nColsStages;
+        std::vector<uint64_t> nColsStagesAcc = starkInfo.nColsStagesAcc;
+        std::vector<uint64_t> offsetsStages = starkInfo.offsetsStages;
+        uint64_t nCols = nColsStages[nColsStages.size() - 1] + nColsStagesAcc[nColsStagesAcc.size() - 1];
 
         Goldilocks3::Element_avx challenges[params.challenges.degree()];
         Goldilocks3::Element_avx challenges_ops[params.challenges.degree()];

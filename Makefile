@@ -11,6 +11,8 @@ TARGET_PLG := polsGenerator
 TARGET_PLD := polsDiff
 TARGET_TEST := zkProverTest
 TARGET_W2DB := witness2db
+TARGET_EXPRESSIONS := zkProverExpressions
+TARGET_SETUP := fflonkSetup
 
 BUILD_DIR := ./build
 BUILD_DIR_GPU := ./build-gpu
@@ -91,6 +93,11 @@ DEPS_W2DB := $(OBJS_W2DB:.o=.d)
 
 cpu: $(BUILD_DIR)/$(TARGET_ZKP)
 gpu: $(BUILD_DIR_GPU)/$(TARGET_ZKP_GPU)
+
+SRCS_EXPRESSIONS := $(shell find ./test/expressions/ ./src/XKCP ./src/goldilocks/src ./src/starkpil/stark_info.*  ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.*  ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/ffiasm ./src/utils ! -path "./src/starkpil/fri/friProveC12.*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS_EXPRESSIONS := $(SRCS_EXPRESSIONS:%=$(BUILD_DIR)/%.o)
+DEPS_EXPRESSIONS := $(OBJS_EXPRESSIONS:.o=.d)
+
 SRCS_SETUP := $(shell find $(SETUP_DIRS) ! -path "./src/sm/*" ! -path "./src/main_sm/*" -name *.cpp)
 SRCS_SETUP += $(shell find src/XKCP -name *.cpp)
 SRCS_SETUP += $(shell find src/fflonk_setup -name fflonk_setup.cpp)
@@ -105,6 +112,8 @@ bctree: $(BUILD_DIR)/$(TARGET_BCT)
 
 test: $(BUILD_DIR)/$(TARGET_TEST)
 
+expressions: ${BUILD_DIR}/$(TARGET_EXPRESSIONS)
+
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
 	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
@@ -116,6 +125,9 @@ $(BUILD_DIR)/$(TARGET_BCT): $(OBJS_BCT)
 
 $(BUILD_DIR)/$(TARGET_TEST): $(OBJS_TEST)
 	$(CXX) $(OBJS_TEST) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
+
+$(BUILD_DIR)/$(TARGET_EXPRESSIONS): $(OBJS_EXPRESSIONS)
+	$(CXX) $(OBJS_EXPRESSIONS) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 # assembly
 $(BUILD_DIR)/%.asm.o: %.asm
