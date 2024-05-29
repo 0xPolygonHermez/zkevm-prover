@@ -69,57 +69,33 @@ namespace BinFileUtils
             throw std::system_error(errno, std::generic_category(), "fstat");
 
         size = sb.st_size;
-        /*close(fd);
+        close(fd);
+        addr = malloc(size);
 
-        void * addr3 = malloc(size);
-        std::cout << "debub 0" << std::endl;
-        std::cout << "size " <<size<< std::endl;
-        size_t nThreads = 2;
-        if(nThreads == 0) nThreads = 1;
-        size_t chunkSize = size / nThreads;
-        size_t chunkRemainder = size - nThreads*chunkSize;
-        std::cout << "chunkSize " <<chunkSize<< std::endl;
-        std::cout << "chunkRemainder " <<chunkRemainder<< std::endl;
-        //#pragma omp parallel for num_threads(nThreads)
-        for(size_t i=0; i<nThreads; i++){
+
+        // Determine the number of chunks and the size of each chunk
+        size_t numChunks = 8; //omp_get_max_threads()/2;
+        if(numChunks == 0 ) numChunks = 1;
+        size_t chunkSize = size / numChunks;
+        size_t remainder = size - numChunks*chunkSize;
+        
+        #pragma omp parallel for num_threads(numChunks)
+        for(size_t i=0; i<numChunks; i++){
             // Open the file
-            FILE * fd_ = fopen(fileName.c_str(), "rb");
-            if(fd_ == NULL){
+            FILE* file = fopen(fileName.c_str(), "rb");
+            if(file == NULL){
                 throw std::system_error(errno, std::generic_category(), "open");
             }
+            size_t chunkSize_ = i == numChunks -1 ? chunkSize + remainder : chunkSize;
             size_t offset = i * chunkSize;
-            size_t chunkSize_ = chunkSize;
-            if(i == nThreads - 1){
-                chunkSize_ += chunkRemainder;
-            }
-            std::cout << "offset " <<offset<<" "<<omp_get_thread_num()<<std::endl;
-            std::cout << "chunkSize_ " <<chunkSize_<<" "<<omp_get_thread_num()<<std::endl;
-            //std::cout << "pointer " << &(((u_int8_t*)addr)[offset]) <<" "<<omp_get_thread_num()<<std::endl;
-            size_t readed = fread(addr3 + offset, chunkSize_, 1,fd_);
+            fseek(file, offset, SEEK_SET);
+            size_t readed = fread((uint8_t*)addr + offset, 1, chunkSize_, file);
             if(readed != chunkSize_){
                 throw std::system_error(errno, std::generic_category(), "readed");
             }
-            fclose(fd_);
+            fclose(file);
         }
-        */
 
-        void *addrmm = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
-        addr = malloc(sb.st_size);
-
-        int nThreads = omp_get_max_threads() / 2;
-        ThreadUtils::parcpy(addr, addrmm, sb.st_size, nThreads);
-        //    memcpy(addr, addrmm, sb.st_size);
-
-        munmap(addrmm, sb.st_size);
-        close(fd);
-
-        /*for(size_t k=0; k<size; ++k){
-            if(((u_int8_t*)addr3)[k] != ((u_int8_t*)addr2)[k]){
-                std::cout << "diff " <<k<<std::endl;
-                exit(0);
-            }
-        }
-        std::cout << "debub 1" << std::endl;*/
         type.assign((const char *)addr, 4);
         pos = 4;
         //std::cout << "debub 2" << std::endl;
@@ -127,23 +103,17 @@ namespace BinFileUtils
         {
             throw new std::invalid_argument("Invalid file type. It should be " + _type + " and it us " + type);
         }
-        //std::cout << "debub 3" << std::endl;
         version = readU32LE();
-        //std::cout << "version " <<version<< std::endl;
         if (version > maxVersion)
         {
             throw new std::invalid_argument("Invalid version. It should be <=" + std::to_string(maxVersion) + " and it us " + std::to_string(version));
         }
-        //std::cout << "debub 4" << std::endl;
         u_int32_t nSections = readU32LE();
-        //std::cout << "debub 5" << nSections<<std::endl;
 
         for (u_int32_t i = 0; i < nSections; i++)
         {
             u_int32_t sType = readU32LE();
-            //std::cout << "sType " <<sType<< std::endl;
             u_int64_t sSize = readU64LE();
-            //std::cout << "sSize " <<sSize<< std::endl;
 
             if (sections.find(sType) == sections.end())
             {
@@ -154,7 +124,6 @@ namespace BinFileUtils
 
             pos += sSize;
         }
-        //std::cout << "debub 6" << std::endl;
         pos = 0;
         readingSection = NULL;
     }

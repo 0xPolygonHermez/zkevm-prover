@@ -113,7 +113,7 @@ public:
         }
         else
         {
-            pConstPolsAddress = copyFile(starkFiles.zkevmConstPols, constPolsSize);
+            pConstPolsAddress = loadFileParallel(starkFiles.zkevmConstPols, constPolsSize);
             zklog.info("Starks::Starks() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
         }
         pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
@@ -150,7 +150,7 @@ public:
             }
             else
             {
-                pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes());
+                pConstTreeAddress = loadFileParallel(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes());
                 zklog.info("Starks::Starks() successfully copied " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
             }
             treesGL[4] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
