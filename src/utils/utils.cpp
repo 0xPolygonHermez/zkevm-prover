@@ -445,28 +445,30 @@ void* loadFileParallel(const string &fileName, uint64_t size) {
         exitProcess();
     }
 
-    // Determine the number of threads and the size of each chunk
-    size_t numThreads = 8;
-    size_t chunkSize = size / numThreads;
-    if(size % numThreads != 0){
-        zklog.error("loadFileParallel() failed to divide the file into equal chunks");
-    }
-    omp_set_num_threads(numThreads);
-    #pragma omp parallel for
-    for(size_t i=0; i<numThreads; i++){
+    // Determine the number of chunks and the size of each chunk
+    size_t numChunks = 8; //omp_get_max_threads()/2;
+    if(numChunks == 0 ) numChunks = 1;
+    size_t chunkSize = size / numChunks;
+    size_t remainder = size - numChunks*chunkSize;
+    
+    #pragma omp parallel for num_threads(numChunks)
+    for(size_t i=0; i<numChunks; i++){
         // Open the file
-        FILE * fd = fopen(fileName.c_str(), "rb");
-        if(fd == NULL){
+        FILE* file = fopen(fileName.c_str(), "rb");
+        if(file == NULL){
             zklog.error("loadFileParallel() failed to open the file");
+            exitProcess();
         }
+        size_t chunkSize_ = i == numChunks -1 ? chunkSize + remainder : chunkSize;
         size_t offset = i * chunkSize;
-        size_t readed = fread((uint8_t*)buffer + offset, 1, chunkSize, fd);
-        if(readed != chunkSize){
+        fseek(file, offset, SEEK_SET);
+        size_t readed = fread((uint8_t*)buffer + offset, 1, chunkSize_, file);
+        if(readed != chunkSize_){
             zklog.error("loadFileParallel() failed to read the file");
         }
-        fclose(fd);
+        fclose(file);
     }
-    omp_set_num_threads(omp_get_max_threads());
+
     return buffer;
 }
 
