@@ -171,7 +171,7 @@ int main()
 #ifdef __AVX512__
     for(uint64_t i = 0; i < NUM_ITERATIONS; ++i) {
         TimerStart(CALCULATING_EXPRESSIONS_ZKEVM_AVX512_GENERIC);
-        cHelpersStepsAvx512Generic.calculateExpressions(starkInfo, params, cHelpers.cHelpersArgs, cHelpers.stagesInfo["step4"]);
+        cHelpersStepsAvx512Generic.calculateExpressions(starkInfo, params, cHelpersGeneric.cHelpersArgs, cHelpersGeneric.stagesInfo["step4"]);
         TimerStopAndLog(CALCULATING_EXPRESSIONS_ZKEVM_AVX512_GENERIC);
     }
 #endif
