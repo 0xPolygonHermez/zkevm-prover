@@ -75,7 +75,7 @@ int main()
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
 #else
-        CHelpersSteps cHelpersSteps;
+        CHelpersStepsPack cHelpersSteps;
 #endif
         starks.genProof(fproof, &publicInputs[0], allVerkey, &cHelpersSteps); 
     } else {
