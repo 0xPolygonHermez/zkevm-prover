@@ -18,13 +18,10 @@
 #include "ZkevmSteps.hpp"
 
 
-#define NUM_ITERATIONS 2
+#define NUM_ITERATIONS 3
 
 int main()
 {
-    CHelpers cHelpersTest;
-    CHelpers cHelpersTestGeneric;
-
     CHelpers cHelpers;
     CHelpers cHelpersGeneric;
 
@@ -146,7 +143,6 @@ int main()
         q_2ns : p_q_2ns,
         f_2ns : p_f_2ns
     };
-
 
     CHelpersSteps cHelpersStepsGeneric;
     CHelpersStepsPack cHelpersStepsPackGeneric;
