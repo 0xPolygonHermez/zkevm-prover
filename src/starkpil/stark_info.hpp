@@ -203,7 +203,6 @@ public:
     uint64_t mapTotalN;
 
     // Chelpers info
-    vector<uint64_t> buffTOffsetsStages;
     vector<uint64_t> nColsStages;
     vector<uint64_t> nColsStagesAcc;
     vector<uint64_t> offsetsStages;
