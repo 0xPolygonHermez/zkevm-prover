@@ -10,6 +10,7 @@
 #include "goldilocks_base_field_avx512.hpp"
 #include "goldilocks_base_field_pack.hpp"
 #include "goldilocks_cubic_extension.hpp"
+#include "goldilocks_cubic_extension_pack.hpp"
 #include "constant_pols_starks.hpp"
 #include "stark_info.hpp"
 #include <immintrin.h>
