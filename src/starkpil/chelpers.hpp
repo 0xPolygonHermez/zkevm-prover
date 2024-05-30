@@ -33,6 +33,8 @@ struct ParserParams
     uint32_t argsOffset;
     uint32_t nNumbers;
     uint64_t numbersOffset;
+    uint32_t nStorePols;
+    uint32_t storePolsOffset;
 };
 
 struct ParserArgs 
@@ -40,6 +42,7 @@ struct ParserArgs
     uint8_t* ops;
     uint16_t* args;
     uint64_t* numbers;
+    uint8_t* storePols;
 };
 
 class CHelpers
@@ -52,6 +55,7 @@ public:
     ~CHelpers() {
         delete[] cHelpersArgs.ops;
         delete[] cHelpersArgs.args;
+        delete[] cHelpersArgs.storePols;
         delete[] cHelpersArgs.numbers;
 
         stagesInfo.clear();

@@ -7,10 +7,12 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
     uint32_t nOps = cHelpersBin->readU32LE();
     uint32_t nArgs = cHelpersBin->readU32LE();
     uint32_t nNumbers = cHelpersBin->readU32LE();
+    uint32_t nStorePols = cHelpersBin->readU32LE();
 
     cHelpersArgs.ops = new uint8_t[nOps];
     cHelpersArgs.args = new uint16_t[nArgs];
     cHelpersArgs.numbers = new uint64_t[nNumbers];
+    cHelpersArgs.storePols = new uint8_t[nStorePols];
 
     cHelpersBin->endReadSection();
 
@@ -43,6 +45,9 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
         parserParamsStage.nNumbers = cHelpersBin->readU32LE();
         parserParamsStage.numbersOffset = cHelpersBin->readU32LE();
 
+        parserParamsStage.nStorePols = cHelpersBin->readU32LE();
+        parserParamsStage.storePolsOffset = cHelpersBin->readU32LE();
+
         stagesInfo[stageName] = parserParamsStage;
     }
     
@@ -58,6 +63,10 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
     }
     for(uint64_t j = 0; j < nNumbers; ++j) {
         cHelpersArgs.numbers[j] = cHelpersBin->readU64LE();
+    }
+
+    for(uint64_t j = 0; j < nStorePols; ++j) {
+        cHelpersArgs.storePols[j] = cHelpersBin->readU8LE();
     }
 
     cHelpersBin->endReadSection();
