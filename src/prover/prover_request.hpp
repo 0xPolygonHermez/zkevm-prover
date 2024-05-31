@@ -59,7 +59,8 @@ public:
 
     /* Execution generated data */
     Counters counters; // Counters of the batch execution
-    Counters counters_reserve; // Counters reserve of the batch execution
+    Counters countersReserve; // Counters reserve of the batch execution
+    Counters countersReserveZkpc; // Counters reserver zkPC
     DatabaseMap *dbReadLog; // Database reads logs done during the execution (if enabled)
     FullTracerInterface * pFullTracer; // Execution traces interface
 

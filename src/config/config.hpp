@@ -4,7 +4,6 @@
 #include <string>
 #include <iostream>
 #include <nlohmann/json.hpp>
-#include "definitions.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -79,6 +78,7 @@ public:
     uint64_t executorClientLoops;
     bool executorClientCheckNewStateRoot;
     bool executorClientResetDB;
+    bool executorClientClearCache;
 
     // HashDB service
     uint16_t hashDBServerPort;
@@ -102,6 +102,7 @@ public:
 
     // Executor debugging
     bool executorROMLineTraces;
+    bool executorROMInstructions;
     bool executorTimeStatistics;
     bool opcodeTracer;
     bool logRemoteDbReads;
@@ -110,13 +111,14 @@ public:
     uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
     bool logExecutorServerResponses;
     bool logExecutorServerTxs;
-    bool dontLoadRomOffsets;
+    bool loadDiagnosticRom;
 
     // Files
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
     string configPath;
+    
     string zkevmCmPols; // Maps commit pols memory into file, which slows down a bit the executor
     string zkevmCmPolsAfterExecutor; // Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning
     string c12aCmPols;
@@ -127,6 +129,7 @@ public:
     string recursive2ConstPols;
     string recursivefConstPols;
     bool mapConstPolsFile;
+
     string zkevmConstantsTree;
     string c12aConstantsTree;
     string recursive1ConstantsTree;

@@ -190,6 +190,7 @@ void Config::load(json &config)
     ParseU64(config, "executorClientLoops", "EXECUTOR_CLIENT_LOOPS", executorClientLoops, 1);
     ParseBool(config, "executorClientCheckNewStateRoot", "EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT", executorClientCheckNewStateRoot, false);
     ParseBool(config, "executorClientResetDB", "EXECUTOR_CLIENT_RESET_DB", executorClientResetDB, false);
+    ParseBool(config, "executorClientClearCache", "EXECUTOR_CLIENT_CLEAR_CACHE", executorClientClearCache, true);
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
     //ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
@@ -210,6 +211,7 @@ void Config::load(json &config)
 
     // Logs
     ParseBool(config, "executorROMLineTraces", "EXECUTOR_ROM_LINE_TRACES", executorROMLineTraces, false);
+    ParseBool(config, "executorROMInstructions", "EXECUTOR_ROM_INSTRUCTIONS", executorROMInstructions, false);
     ParseBool(config, "executorTimeStatistics", "EXECUTOR_TIME_STATISTICS", executorTimeStatistics, false);
     ParseBool(config, "opcodeTracer", "OPCODE_TRACER", opcodeTracer, false);
     ParseBool(config, "logRemoteDbReads", "LOG_REMOTE_DB_READS", logRemoteDbReads, false);
@@ -218,7 +220,7 @@ void Config::load(json &config)
     ParseU64(config, "logExecutorServerInputGasThreshold", "LOG_EXECUTOR_SERVER_INPUT_GAS_THRESHOLD", logExecutorServerInputGasThreshold, 0);
     ParseBool(config, "logExecutorServerResponses", "LOG_EXECUTOR_SERVER_RESPONSES", logExecutorServerResponses, false);
     ParseBool(config, "logExecutorServerTxs", "LOG_EXECUTOR_SERVER_TXS", logExecutorServerTxs, true);
-    ParseBool(config, "dontLoadRomOffsets", "DONT_LOAD_ROM_OFFSETS", dontLoadRomOffsets, false);
+    ParseBool(config, "loadDiagnosticRom", "LOAD_DIAGNOSTIC_ROM", loadDiagnosticRom, false);
 
     // Files and paths
     ParseString(config, "inputFile", "INPUT_FILE", inputFile, "testvectors/batchProof/input_executor_0.json");
@@ -391,6 +393,8 @@ void Config::print(void)
 
     if (executorROMLineTraces)
         zklog.info("    executorROMLineTraces=true");
+    if (executorROMInstructions)
+        zklog.info("    executorROMInstructions=true");
 
     zklog.info("    executorTimeStatistics=" + to_string(executorTimeStatistics));
 
@@ -424,8 +428,8 @@ void Config::print(void)
         zklog.info("    logExecutorServerResponses=true");
     if (logExecutorServerTxs)
         zklog.info("    logExecutorServerTxs=true");
-    if (dontLoadRomOffsets)
-        zklog.info("    dontLoadRomOffsets=true");
+    if (loadDiagnosticRom)
+        zklog.info("    loadDiagnosticRom=true");
 
     zklog.info("    executorServerPort=" + to_string(executorServerPort));
     zklog.info("    executorClientPort=" + to_string(executorClientPort));
@@ -433,6 +437,7 @@ void Config::print(void)
     zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
     zklog.info("    executorClientCheckNewStateRoot=" + to_string(executorClientCheckNewStateRoot));
     zklog.info("    executorClientResetDB=" + to_string(executorClientResetDB));
+    zklog.info("    executorClientClearCache=" + to_string(executorClientClearCache));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
     zklog.info("    hashDB64=" + to_string(hashDB64));
@@ -688,6 +693,11 @@ bool Config::check (void)
     {
         zklog.error("hashDB64=true but stateManager=false");
         bError = true;
+    }
+
+    if (loadDiagnosticRom)
+    {
+        inputFile = "testvectors/diagnostic/input.json";
     }
 
     if (!hashDBSingleton && (databaseURL != "local"))

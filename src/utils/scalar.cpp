@@ -16,9 +16,13 @@ mpz_class ScalarMask8   ("FF", 16);
 mpz_class ScalarMask16  ("FFFF", 16);
 mpz_class ScalarMask20  ("FFFFF", 16);
 mpz_class ScalarMask32  ("FFFFFFFF", 16);
+mpz_class ScalarMask48  ("FFFFFFFFFFFF", 16);
 mpz_class ScalarMask64  ("FFFFFFFFFFFFFFFF", 16);
+mpz_class ScalarMask128 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
 mpz_class ScalarMask160 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
 mpz_class ScalarMask256 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+mpz_class ScalarMask384 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+mpz_class ScalarMask512 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
 mpz_class ScalarTwoTo8  ("100", 16);
 mpz_class ScalarTwoTo16 ("10000", 16);
 mpz_class ScalarTwoTo18 ("40000", 16);
@@ -32,9 +36,13 @@ mpz_class ScalarTwoTo256("100000000000000000000000000000000000000000000000000000
 mpz_class ScalarTwoTo257("20000000000000000000000000000000000000000000000000000000000000000", 16);
 mpz_class ScalarTwoTo258("40000000000000000000000000000000000000000000000000000000000000000", 16);
 mpz_class ScalarTwoTo259("80000000000000000000000000000000000000000000000000000000000000000", 16);
+mpz_class ScalarTwoTo384("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", 16);
+mpz_class ScalarTwoTo388("10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", 16);
 
 mpz_class ScalarZero    ("0", 16);
 mpz_class ScalarOne     ("1", 16);
+mpz_class ScalarTwo     ("2", 16);
+mpz_class ScalarFour    ("4", 16);
 mpz_class ScalarGoldilocksPrime = (uint64_t)GOLDILOCKS_PRIME;
 mpz_class Scalar4xGoldilocksPrime ("FFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001", 16);
 
@@ -113,13 +121,9 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
     return fea2string(fr, fea);
 }
 
-string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7)
+string fea2stringchain (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7)
 {
-    mpz_class auxScalar;
-    fea2scalar(fr, auxScalar, fea0, fea1, fea2, fea3, fea4, fea5, fea6, fea7);
-    string s = auxScalar.get_str(16);
-    PrependZerosNoCopy(s, 64);
-    return s;
+    return fr.toString(fea7,16) + ":" + fr.toString(fea6,16) + ":" + fr.toString(fea5,16) + ":" + fr.toString(fea4,16) + ":" + fr.toString(fea3,16) + ":" + fr.toString(fea2,16) + ":" + fr.toString(fea1,16) + ":" + fr.toString(fea0,16);
 }
 
 /* Normalized strings */
@@ -668,6 +672,27 @@ string scalar2ba(const mpz_class &s)
     }
 
     uint8_t buffer[32] = {0};
+    mpz_export(buffer, NULL, 1, 1, 1, 0, s.get_mpz_t());
+
+    string result;
+    for (uint64_t i = 0; i < size; i++)
+    {
+        result.push_back(buffer[i]);
+    }
+    
+    return result;
+}
+
+string scalar2ba48(const mpz_class &s)
+{
+    uint64_t size = mpz_sizeinbase(s.get_mpz_t(), 256);
+    if (size > 48)
+    {
+        zklog.error("scalar2ba48() failed, size=" + to_string(size) + " is > 48");
+        exitProcess();
+    }
+
+    uint8_t buffer[48] = {0};
     mpz_export(buffer, NULL, 1, 1, 1, 0, s.get_mpz_t());
 
     string result;
