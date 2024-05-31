@@ -44,7 +44,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     }
     else
     {
-        pConstPolsAddress = copyFile(config.recursivefConstPols, constPolsSize);
+        pConstPolsAddress = loadFileParallel(config.recursivefConstPols, constPolsSize);
         zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + config.recursivefConstPols);
     }
     pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree, starkInfo.nConstants);
@@ -82,7 +82,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
         }
         else
         {
-            pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
+            pConstTreeAddress = loadFileParallel(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
             zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant file " + config.recursivefConstantsTree);
         }
         pConstPolsAddress2ns = (uint8_t *)pConstTreeAddress + 2 * sizeof(uint64_t);
