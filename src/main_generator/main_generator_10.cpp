@@ -3006,7 +3006,25 @@ string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, c
         {
             code += "    else\n";
             code += "    {\n";
-            //code += "        // " + reg + "' = " + reg + "\n";
+            code += "        // " + reg + "' = " + reg + "\n";
+            for (uint64_t j=0; j<8; j++)
+                code += "        pols." + reg + to_string(j) + "[nexti] = pols." + reg + to_string(j) + "[i];\n";
+            code += "\n";
+            code += "    }\n";
+        }
+        code += "\n";
+    }
+    else if ((forkID >= 7) && rom["labels"].contains("verifyMerkleProofEnd") && (zkPC == rom["labels"]["verifyMerkleProofEnd"]) && (reg=="C"))
+    {
+        code += "    if (proverRequest.input.bSkipVerifyL1InfoRoot)\n";
+        code += "    {\n";
+        code += "        scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot, pols.C0[" + string(bFastMode?"0":"nexti") + "], pols.C1[" + (bFastMode?"0":"nexti") + "], pols.C2[" + (bFastMode?"0":"nexti") + "], pols.C3[" + (bFastMode?"0":"nexti") + "], pols.C4[" + (bFastMode?"0":"nexti") + "], pols.C5[" + (bFastMode?"0":"nexti") + "], pols.C6[" + (bFastMode?"0":"nexti") + "], pols.C7[" + (bFastMode?"0":"nexti") + "] );\n";
+        code += "    }\n";
+        if (!bFastMode)
+        {
+            code += "    else\n";
+            code += "    {\n";
+            code += "        // " + reg + "' = " + reg + "\n";
             for (uint64_t j=0; j<8; j++)
                 code += "        pols." + reg + to_string(j) + "[nexti] = pols." + reg + to_string(j) + "[i];\n";
             code += "\n";

@@ -70,7 +70,7 @@ namespace fork_10
 #define CHECK_MAX_CNT_AT_THE_END
 
 //#define LOG_START_STEPS_TO_FILE
-//#define LOG_COMPLETED_STEPS_TO_FILE
+#define LOG_COMPLETED_STEPS_TO_FILE
 //#define LOG_COMPLETED_STEPS
 
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
@@ -114,6 +114,23 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     file2json("src/main_sm/fork_10/scripts/rom_gas_limit_89128960.json", romJson);
     rom_gas_limit_89128960.load(fr, romJson);
 #endif
+
+    // Get labels
+    finalizeExecutionLabel     = romBatch.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel      = romBatch.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel    = romBatch.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel          = romBatch.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel      = romBatch.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel    = romBatch.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel  = romBatch.getLabel(string("verifyMerkleProofEnd"));
+    outOfCountersStepLabel     = romBatch.getLabel(string("outOfCountersStep"));
+    outOfCountersArithLabel    = romBatch.getLabel(string("outOfCountersArith"));
+    outOfCountersBinaryLabel   = romBatch.getLabel(string("outOfCountersBinary"));
+    outOfCountersKeccakLabel   = romBatch.getLabel(string("outOfCountersKeccak"));
+    outOfCountersSha256Label   = romBatch.getLabel(string("outOfCountersSha256"));
+    outOfCountersMemalignLabel = romBatch.getLabel(string("outOfCountersMemalign"));
+    outOfCountersPoseidonLabel = romBatch.getLabel(string("outOfCountersPoseidon"));
+    outOfCountersPaddingLabel  = romBatch.getLabel(string("outOfCountersPadding"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -1561,6 +1578,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setC C[nexti]=" + fea2stringchain(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
+        }            
+        else if ((zkPC == verifyMerkleProofEndLabel) && proverRequest.input.bSkipVerifyL1InfoRoot)
+        {
+            // Set C register with input.l1InfoRoot to process unsigned transactions
+            scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot,
+                pols.C0[nexti],
+                pols.C1[nexti],
+                pols.C2[nexti],
+                pols.C3[nexti],
+                pols.C4[nexti],
+                pols.C5[nexti],
+                pols.C6[nexti],
+                pols.C7[nexti]);
         }
         else
         {
@@ -2282,7 +2312,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                    " RR=" << fr.toString(pols.RR[nexti],16) <<
                    " RCX=" << fr.toString(pols.RCX[nexti],16) <<
                    " HASHPOS=" << fr.toString(pols.HASHPOS[nexti],16) <<
-                   " RID=" << fr.toString(pols.RID[nexti],16) <<
                    endl;
         outfile.close();
         //if (i==1000) break;

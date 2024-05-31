@@ -5414,16 +5414,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
-        outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[nexti],16) << ":" << fr.toString(pols.B0[nexti],16) << ":" << fr.toString(pols.C0[nexti],16) << ":" << fr.toString(pols.D0[nexti],16) << ":" << fr.toString(pols.E0[nexti],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
-        /*outfile << "<-- Completed step=" << step << " zkPC=" << zkPC <<
+        //outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[nexti],16) << ":" << fr.toString(pols.B0[nexti],16) << ":" << fr.toString(pols.C0[nexti],16) << ":" << fr.toString(pols.D0[nexti],16) << ":" << fr.toString(pols.E0[nexti],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
+        outfile << "<-- Completed step=" << step << " zkPC=" << zkPC <<
                    " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) <<
                    " A=" << fr.toString(pols.A7[nexti],16) << ":" << fr.toString(pols.A6[nexti],16) << ":" << fr.toString(pols.A5[nexti],16) << ":" << fr.toString(pols.A4[nexti],16) << ":" << fr.toString(pols.A3[nexti],16) << ":" << fr.toString(pols.A2[nexti],16) << ":" << fr.toString(pols.A1[nexti],16) << ":" << fr.toString(pols.A0[nexti],16) <<
                    " B=" << fr.toString(pols.B7[nexti],16) << ":" << fr.toString(pols.B6[nexti],16) << ":" << fr.toString(pols.B5[nexti],16) << ":" << fr.toString(pols.B4[nexti],16) << ":" << fr.toString(pols.B3[nexti],16) << ":" << fr.toString(pols.B2[nexti],16) << ":" << fr.toString(pols.B1[nexti],16) << ":" << fr.toString(pols.B0[nexti],16) <<
                    " C=" << fr.toString(pols.C7[nexti],16) << ":" << fr.toString(pols.C6[nexti],16) << ":" << fr.toString(pols.C5[nexti],16) << ":" << fr.toString(pols.C4[nexti],16) << ":" << fr.toString(pols.C3[nexti],16) << ":" << fr.toString(pols.C2[nexti],16) << ":" << fr.toString(pols.C1[nexti],16) << ":" << fr.toString(pols.C0[nexti],16) <<
                    " D=" << fr.toString(pols.D7[nexti],16) << ":" << fr.toString(pols.D6[nexti],16) << ":" << fr.toString(pols.D5[nexti],16) << ":" << fr.toString(pols.D4[nexti],16) << ":" << fr.toString(pols.D3[nexti],16) << ":" << fr.toString(pols.D2[nexti],16) << ":" << fr.toString(pols.D1[nexti],16) << ":" << fr.toString(pols.D0[nexti],16) <<
                    " E=" << fr.toString(pols.E7[nexti],16) << ":" << fr.toString(pols.E6[nexti],16) << ":" << fr.toString(pols.E5[nexti],16) << ":" << fr.toString(pols.E4[nexti],16) << ":" << fr.toString(pols.E3[nexti],16) << ":" << fr.toString(pols.E2[nexti],16) << ":" << fr.toString(pols.E1[nexti],16) << ":" << fr.toString(pols.E0[nexti],16) <<
-                   " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) <<
-                   " addr=" << addr << endl;*/
+                   " FREE=" << fr.toString(pols.FREE7[i],16) << ":" << fr.toString(pols.FREE6[i],16) << ":" << fr.toString(pols.FREE5[i],16) << ":" << fr.toString(pols.FREE4[i],16) << ":" << fr.toString(pols.FREE3[i],16) << ":" << fr.toString(pols.FREE2[i],16) << ":" << fr.toString(pols.FREE1[i],16) << ":" << fr.toString(pols.FREE0[i],16) <<
+                   " addr=" << addr <<
+                   " RR=" << fr.toString(pols.RR[nexti],16) <<
+                   " RCX=" << fr.toString(pols.RCX[nexti],16) <<
+                   " HASHPOS=" << fr.toString(pols.HASHPOS[nexti],16) <<
+                   endl;
         outfile.close();
         //if (i==1000) break;
 #endif
