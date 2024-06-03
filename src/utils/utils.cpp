@@ -390,7 +390,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
         return pAddress;
 
     // Allocate memory
-    void *pMemAddress = malloc2(size);
+    void *pMemAddress = malloc_zkevm(size);
     if (pMemAddress == NULL)
     {
         zklog.error("mapFile() failed calling malloc() of size: " + to_string(size));
