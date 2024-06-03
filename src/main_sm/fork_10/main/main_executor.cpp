@@ -70,7 +70,7 @@ namespace fork_10
 #define CHECK_MAX_CNT_AT_THE_END
 
 //#define LOG_START_STEPS_TO_FILE
-#define LOG_COMPLETED_STEPS_TO_FILE
+//#define LOG_COMPLETED_STEPS_TO_FILE
 //#define LOG_COMPLETED_STEPS
 
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
