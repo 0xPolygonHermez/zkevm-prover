@@ -20,6 +20,8 @@ CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-Wfatal-errors
 LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -fopenmp -liomp5 $(GRPCPP_LIBS)
+CXXFLAGS_W2DB := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2
+LDFLAGS_W2DB := -lgmp -lstdc++ -lgmpxx
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
 
@@ -128,7 +130,7 @@ $(BUILD_DIR)/$(TARGET_PLD): ./src/pols_diff/pols_diff.cpp
 witness2db: $(BUILD_DIR)/$(TARGET_W2DB)
 
 $(BUILD_DIR)/$(TARGET_W2DB): $(OBJS_W2DB)
-	$(CXX) $(OBJS_W2DB) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) $(OBJS_W2DB) $(CXXFLAGS_W2DB) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_W2DB) $(LDFLAGS_W2DB)
 
 .PHONY: clean
 
