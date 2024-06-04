@@ -399,7 +399,6 @@ Polinomial *Starks::transposeH1H2Columns(void *pAddress, uint64_t &numCommited, 
             transPols[indx] = fPol;
         } else {
             transPols[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsH1H2[fPolId]]), fPol.degree(), fPol.dim(), fPol.dim());
-            Polinomial::copy(transPols[indx], fPol);
         }
         indx++;
         
@@ -407,7 +406,6 @@ Polinomial *Starks::transposeH1H2Columns(void *pAddress, uint64_t &numCommited, 
             transPols[indx] = tPol;
         } else {
             transPols[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsH1H2[tPolId]]), tPol.degree(), tPol.dim(), tPol.dim());
-            Polinomial::copy(transPols[indx], tPol);
         }
         indx++;
 
@@ -416,20 +414,51 @@ Polinomial *Starks::transposeH1H2Columns(void *pAddress, uint64_t &numCommited, 
 
         transPols[indx].potConstruct(&(params.pols[starkInfo.mapOffsetsPolsH1H2[starkInfo.cm_n[numCommited + 2*i + 1]]]), h2.degree(), h2.dim(), h2.dim());
     }
+
+    #pragma omp parallel for
+    for(uint64_t l = 0; l < N; l += 4096) {
+        for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
+        {
+            int indx1 = 4 * i;
+            int indx2 = 4 * i + 1;
+            uint64_t fPolId = starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fExpId)];
+            uint64_t tPolId = starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tExpId)];
+
+            Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fExpId)]);
+            Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tExpId)]);
+            if(starkInfo.varPolMap[fPolId].section != eSection::tmpExp_n) {
+                for(uint64_t k = l; k < min(N, l + 4096); ++k) {
+                    std::memcpy(transPols[indx1][k], fPol[k], fPol.dim() * sizeof(Goldilocks::Element));
+                }
+            }
+
+            if(starkInfo.varPolMap[tPolId].section != eSection::tmpExp_n) {
+                for(uint64_t k = l; k < min(N, l + 4096); ++k) {
+                    std::memcpy(transPols[indx2][k], tPol[k], tPol.dim() * sizeof(Goldilocks::Element));
+                }
+            }
+        }
+    }
+
     return transPols;
 }
 void Starks::transposeH1H2Rows(void *pAddress, uint64_t &numCommited, Polinomial *transPols)
 {
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
 
-    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
-    {
-        int indx1 = 4 * i + 2;
-        int indx2 = 4 * i + 3;
-        Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
-        Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
-        Polinomial::copy(h1, transPols[indx1]);
-        Polinomial::copy(h2, transPols[indx2]);
+#pragma omp parallel for
+    for(uint64_t l = 0; l < N; l += 4096) {
+        for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
+        {
+            int indx1 = 4 * i + 2;
+            int indx2 = 4 * i + 3;
+            Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
+            Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
+            for(uint64_t k = l; k < min(N, l + 4096); ++k) {
+                std::memcpy(h1[k], transPols[indx1][k], h1.dim() * sizeof(Goldilocks::Element));
+                std::memcpy(h2[k], transPols[indx2][k], h2.dim() * sizeof(Goldilocks::Element));
+            }
+        }
     }
     if (starkInfo.puCtx.size() > 0)
     {
@@ -546,11 +575,16 @@ void Starks::transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *t
 {
     u_int64_t numpols = starkInfo.ciCtx.size() + starkInfo.peCtx.size() + starkInfo.puCtx.size();
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
-    for (uint64_t i = 0; i < numpols; i++)
-    {
-        int indx1 = 3 * i;
-        Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i]);
-        Polinomial::copy(z, transPols[indx1 + 2]);
+#pragma omp parallel for
+    for(uint64_t l = 0; l < N; l += 4096) {
+        for (uint64_t i = 0; i < numpols; i++)
+        {
+            int indx1 = 3 * i;
+            Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i]);
+            for(uint64_t k = l; k < min(N, l + 4096); ++k) {
+                std::memcpy(z[k], transPols[indx1 + 2][k], 3 * sizeof(Goldilocks::Element));
+            }
+        }
     }
     if (numpols > 0)
     {

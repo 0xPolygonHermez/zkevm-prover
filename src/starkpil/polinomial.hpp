@@ -118,7 +118,7 @@ public:
         }
         else
         {
-#pragma omp parallel for
+#pragma omp parallel for schedule(static)
             for (uint64_t i = 0; i < b.degree(); i++)
             {
                 std::memcpy(a[i], b[i], b.dim() * sizeof(Goldilocks::Element));
@@ -593,7 +593,7 @@ public:
         Goldilocks3::copy((Goldilocks3::Element *)&pZ[0], &Goldilocks3::one());
 
 
-        uint64_t stride = 2048;
+        uint64_t stride = 4096;
         for (uint64_t ii = 1; ii < size; ii += stride)
         {
             Polinomial denI(stride, 3);
