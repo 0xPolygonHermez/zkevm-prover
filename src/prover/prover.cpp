@@ -31,7 +31,36 @@
 #include "recursive2Steps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "recursive2Steps.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
+#include "memory.cuh"
 
+#ifdef __USE_CUDA__
+#include "cuda_utils.hpp"
+#include "ntt_goldilocks.hpp"
+#include <pthread.h>
+
+int asynctask(void* (*task)(void* args), void* arg)
+{
+	pthread_t th;
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	return pthread_create(&th, &attr, task, arg);
+}
+
+void* warmup_task(void* arg)
+{
+    warmup_all_gpus();
+    return NULL;
+}
+
+void warmup_gpu()
+{
+    asynctask(warmup_task, NULL);
+}
+#endif
 
 Prover::Prover(Goldilocks &fr,
                PoseidonGoldilocks &poseidon,
@@ -105,7 +134,7 @@ Prover::Prover(Goldilocks &fr,
             }
             else
             {
-                pAddress = calloc(polsSize, 1);
+                pAddress = calloc_zkevm(polsSize, 1);
                 if (pAddress == NULL)
                 {
                     zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
@@ -113,6 +142,11 @@ Prover::Prover(Goldilocks &fr,
                 }
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
+
+#ifdef __USE_CUDA__
+            alloc_pinned_mem(uint64_t(1<<24) * _starkInfo.mapSectionsN.section[eSection::cm1_n]);
+            warmup_gpu();
+#endif
 
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
             prover->setZkey(zkey.get());
@@ -165,9 +199,12 @@ Prover::~Prover()
         }
         else
         {
-            free(pAddress);
+            free_zkevm(pAddress);
         }
         free(pAddressStarksRecursiveF);
+#ifdef __USE_CUDA__
+        free_pinned_mem();
+#endif
 
         delete prover;
 
@@ -1031,7 +1068,7 @@ void Prover::execute(ProverRequest *pProverRequest)
     }
     else
     {
-        pExecuteAddress = calloc(polsSize, 1);
+        pExecuteAddress = calloc_zkevm(polsSize, 1);
         if (pExecuteAddress == NULL)
         {
             zklog.error("Prover::execute() failed calling malloc() of size " + to_string(polsSize));
@@ -1092,7 +1129,7 @@ void Prover::execute(ProverRequest *pProverRequest)
     }
     else
     {
-        free(pExecuteAddress);
+        free_zkevm(pExecuteAddress);
     }
 
     TimerStopAndLog(PROVER_EXECUTE);
