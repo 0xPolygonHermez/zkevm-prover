@@ -2239,8 +2239,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                          (!fr.equal(ctx.mem[addr].fe7, op7)) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
-                        logError(ctx, "Memory Read does not match op=" + fea2string(fr, op0, op1, op2, op3, op4, op5, op6, op7) +
-                            " mem=" + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
+                        logError(ctx, "Memory Read does not match op=" + fea2stringchain(fr, op0, op1, op2, op3, op4, op5, op6, op7) +
+                            " mem=" + fea2stringchain(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
@@ -5037,7 +5037,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, uint64_t(reserve));
+                proverRequest.countersReserve.steps = zkmax(proverRequest.countersReserve.steps, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersArithLabel))
             {
@@ -5046,7 +5046,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, uint64_t(reserve));
+                proverRequest.countersReserve.arith = zkmax(proverRequest.countersReserve.arith, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersBinaryLabel))
             {
@@ -5055,7 +5055,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, uint64_t(reserve));
+                proverRequest.countersReserve.binary = zkmax(proverRequest.countersReserve.binary, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersKeccakLabel))
             {
@@ -5064,7 +5064,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, uint64_t(reserve));
+                proverRequest.countersReserve.keccakF = zkmax(proverRequest.countersReserve.keccakF, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersSha256Label))
             {
@@ -5073,7 +5073,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, uint64_t(reserve));
+                proverRequest.countersReserve.sha256F = zkmax(proverRequest.countersReserve.sha256F, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersMemalignLabel))
             {
@@ -5082,7 +5082,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, uint64_t(reserve));
+                proverRequest.countersReserve.memAlign = zkmax(proverRequest.countersReserve.memAlign, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPoseidonLabel))
             {
@@ -5091,7 +5091,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, uint64_t(reserve));
+                proverRequest.countersReserve.poseidonG = zkmax(proverRequest.countersReserve.poseidonG, uint64_t(reserve));
             }
             else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPaddingLabel))
             {
@@ -5100,7 +5100,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 {
                     reserve = 0;
                 }
-                proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, uint64_t(reserve));
+                proverRequest.countersReserve.paddingPG = zkmax(proverRequest.countersReserve.paddingPG, uint64_t(reserve));
             }
 
             uint64_t jmpnCondValue = fr.toU64(op0);
@@ -5414,16 +5414,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
-        outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[nexti],16) << ":" << fr.toString(pols.B0[nexti],16) << ":" << fr.toString(pols.C0[nexti],16) << ":" << fr.toString(pols.D0[nexti],16) << ":" << fr.toString(pols.E0[nexti],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
-        /*outfile << "<-- Completed step=" << step << " zkPC=" << zkPC <<
+        //outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[nexti],16) << ":" << fr.toString(pols.B0[nexti],16) << ":" << fr.toString(pols.C0[nexti],16) << ":" << fr.toString(pols.D0[nexti],16) << ":" << fr.toString(pols.E0[nexti],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
+        outfile << "<-- Completed step=" << step << " zkPC=" << zkPC <<
                    " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) <<
                    " A=" << fr.toString(pols.A7[nexti],16) << ":" << fr.toString(pols.A6[nexti],16) << ":" << fr.toString(pols.A5[nexti],16) << ":" << fr.toString(pols.A4[nexti],16) << ":" << fr.toString(pols.A3[nexti],16) << ":" << fr.toString(pols.A2[nexti],16) << ":" << fr.toString(pols.A1[nexti],16) << ":" << fr.toString(pols.A0[nexti],16) <<
                    " B=" << fr.toString(pols.B7[nexti],16) << ":" << fr.toString(pols.B6[nexti],16) << ":" << fr.toString(pols.B5[nexti],16) << ":" << fr.toString(pols.B4[nexti],16) << ":" << fr.toString(pols.B3[nexti],16) << ":" << fr.toString(pols.B2[nexti],16) << ":" << fr.toString(pols.B1[nexti],16) << ":" << fr.toString(pols.B0[nexti],16) <<
                    " C=" << fr.toString(pols.C7[nexti],16) << ":" << fr.toString(pols.C6[nexti],16) << ":" << fr.toString(pols.C5[nexti],16) << ":" << fr.toString(pols.C4[nexti],16) << ":" << fr.toString(pols.C3[nexti],16) << ":" << fr.toString(pols.C2[nexti],16) << ":" << fr.toString(pols.C1[nexti],16) << ":" << fr.toString(pols.C0[nexti],16) <<
                    " D=" << fr.toString(pols.D7[nexti],16) << ":" << fr.toString(pols.D6[nexti],16) << ":" << fr.toString(pols.D5[nexti],16) << ":" << fr.toString(pols.D4[nexti],16) << ":" << fr.toString(pols.D3[nexti],16) << ":" << fr.toString(pols.D2[nexti],16) << ":" << fr.toString(pols.D1[nexti],16) << ":" << fr.toString(pols.D0[nexti],16) <<
                    " E=" << fr.toString(pols.E7[nexti],16) << ":" << fr.toString(pols.E6[nexti],16) << ":" << fr.toString(pols.E5[nexti],16) << ":" << fr.toString(pols.E4[nexti],16) << ":" << fr.toString(pols.E3[nexti],16) << ":" << fr.toString(pols.E2[nexti],16) << ":" << fr.toString(pols.E1[nexti],16) << ":" << fr.toString(pols.E0[nexti],16) <<
-                   " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) <<
-                   " addr=" << addr << endl;*/
+                   " FREE=" << fr.toString(pols.FREE7[i],16) << ":" << fr.toString(pols.FREE6[i],16) << ":" << fr.toString(pols.FREE5[i],16) << ":" << fr.toString(pols.FREE4[i],16) << ":" << fr.toString(pols.FREE3[i],16) << ":" << fr.toString(pols.FREE2[i],16) << ":" << fr.toString(pols.FREE1[i],16) << ":" << fr.toString(pols.FREE0[i],16) <<
+                   " addr=" << addr <<
+                   " RR=" << fr.toString(pols.RR[nexti],16) <<
+                   " RCX=" << fr.toString(pols.RCX[nexti],16) <<
+                   " HASHPOS=" << fr.toString(pols.HASHPOS[nexti],16) <<
+                   endl;
         outfile.close();
         //if (i==1000) break;
 #endif
@@ -5454,14 +5458,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
     proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);
     proverRequest.counters.steps = ctx.lastStep;
-    proverRequest.counters_reserve.arith = zkmax(proverRequest.counters_reserve.arith, proverRequest.counters.arith);
-    proverRequest.counters_reserve.binary = zkmax(proverRequest.counters_reserve.binary, proverRequest.counters.binary);
-    proverRequest.counters_reserve.keccakF = zkmax(proverRequest.counters_reserve.keccakF, proverRequest.counters.keccakF);
-    proverRequest.counters_reserve.memAlign = zkmax(proverRequest.counters_reserve.memAlign, proverRequest.counters.memAlign);
-    proverRequest.counters_reserve.paddingPG = zkmax(proverRequest.counters_reserve.paddingPG, proverRequest.counters.paddingPG);
-    proverRequest.counters_reserve.poseidonG = zkmax(proverRequest.counters_reserve.poseidonG, proverRequest.counters.poseidonG);
-    proverRequest.counters_reserve.sha256F = zkmax(proverRequest.counters_reserve.sha256F, proverRequest.counters.sha256F);
-    proverRequest.counters_reserve.steps = zkmax(proverRequest.counters_reserve.steps, proverRequest.counters.steps);
+    proverRequest.countersReserve.arith = zkmax(proverRequest.countersReserve.arith, proverRequest.counters.arith);
+    proverRequest.countersReserve.binary = zkmax(proverRequest.countersReserve.binary, proverRequest.counters.binary);
+    proverRequest.countersReserve.keccakF = zkmax(proverRequest.countersReserve.keccakF, proverRequest.counters.keccakF);
+    proverRequest.countersReserve.memAlign = zkmax(proverRequest.countersReserve.memAlign, proverRequest.counters.memAlign);
+    proverRequest.countersReserve.paddingPG = zkmax(proverRequest.countersReserve.paddingPG, proverRequest.counters.paddingPG);
+    proverRequest.countersReserve.poseidonG = zkmax(proverRequest.countersReserve.poseidonG, proverRequest.counters.poseidonG);
+    proverRequest.countersReserve.sha256F = zkmax(proverRequest.countersReserve.sha256F, proverRequest.counters.sha256F);
+    proverRequest.countersReserve.steps = zkmax(proverRequest.countersReserve.steps, proverRequest.counters.steps);
 
     // Set the error (all previous errors generated a return)
     proverRequest.result = ZKR_SUCCESS;

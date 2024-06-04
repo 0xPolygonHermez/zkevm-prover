@@ -27,40 +27,37 @@ void Rom::load(Goldilocks &fr, json &romJson)
     loadLabels(fr, romJson["labels"]);
 
     // Get labels offsets
-    if (config.dontLoadRomOffsets == false)
-    {
-        memLengthOffset        = getMemoryOffset("memLength");
-        txDestAddrOffset       = getMemoryOffset("txDestAddr");
-        txCalldataLenOffset    = getMemoryOffset("txCalldataLen");
-        txGasLimitOffset       = getMemoryOffset("txGasLimit");
-        txValueOffset          = getMemoryOffset("txValue");
-        txNonceOffset          = getMemoryOffset("txNonce");
-        txGasPriceRLPOffset    = getMemoryOffset("txGasPriceRLP");
-        txChainIdOffset        = getMemoryOffset("txChainId");
-        txROffset              = getMemoryOffset("txR");
-        txSOffset              = getMemoryOffset("txS");
-        txVOffset              = getMemoryOffset("txV");
-        txSrcOriginAddrOffset  = getMemoryOffset("txSrcOriginAddr");
-        retDataCTXOffset       = getMemoryOffset("retDataCTX");
-        retDataOffsetOffset    = getMemoryOffset("retDataOffset");
-        retDataLengthOffset    = getMemoryOffset("retDataLength");
-        newAccInputHashOffset  = getMemoryOffset("newAccInputHash");
-        oldNumBatchOffset      = getMemoryOffset("oldNumBatch");
-        newNumBatchOffset      = getMemoryOffset("newNumBatch");
-        newLocalExitRootOffset = getMemoryOffset("newLocalExitRoot");
-        depthOffset            = getMemoryOffset("depth");
-        gasRefundOffset        = getMemoryOffset("gasRefund");
-        txSrcAddrOffset        = getMemoryOffset("txSrcAddr");
-        gasCallOffset          = getMemoryOffset("gasCall");
-        isPreEIP155Offset      = getMemoryOffset("isPreEIP155");
-        isCreateContractOffset = getMemoryOffset("isCreateContract");
-        storageAddrOffset      = getMemoryOffset("storageAddr");
-        bytecodeLengthOffset   = getMemoryOffset("bytecodeLength");
-        originCTXOffset        = getMemoryOffset("originCTX");
-        currentCTXOffset       = getMemoryOffset("currentCTX");
-        gasCTXOffset           = getMemoryOffset("gasCTX");
-        isCreateOffset         = getMemoryOffset("isCreate");
-    }
+    memLengthOffset        = getMemoryOffset("memLength");
+    txDestAddrOffset       = getMemoryOffset("txDestAddr");
+    txCalldataLenOffset    = getMemoryOffset("txCalldataLen");
+    txGasLimitOffset       = getMemoryOffset("txGasLimit");
+    txValueOffset          = getMemoryOffset("txValue");
+    txNonceOffset          = getMemoryOffset("txNonce");
+    txGasPriceRLPOffset    = getMemoryOffset("txGasPriceRLP");
+    txChainIdOffset        = getMemoryOffset("txChainId");
+    txROffset              = getMemoryOffset("txR");
+    txSOffset              = getMemoryOffset("txS");
+    txVOffset              = getMemoryOffset("txV");
+    txSrcOriginAddrOffset  = getMemoryOffset("txSrcOriginAddr");
+    retDataCTXOffset       = getMemoryOffset("retDataCTX");
+    retDataOffsetOffset    = getMemoryOffset("retDataOffset");
+    retDataLengthOffset    = getMemoryOffset("retDataLength");
+    newAccInputHashOffset  = getMemoryOffset("newAccInputHash");
+    oldNumBatchOffset      = getMemoryOffset("oldNumBatch");
+    newNumBatchOffset      = getMemoryOffset("newNumBatch");
+    newLocalExitRootOffset = getMemoryOffset("newLocalExitRoot");
+    depthOffset            = getMemoryOffset("depth");
+    gasRefundOffset        = getMemoryOffset("gasRefund");
+    txSrcAddrOffset        = getMemoryOffset("txSrcAddr");
+    gasCallOffset          = getMemoryOffset("gasCall");
+    isPreEIP155Offset      = getMemoryOffset("isPreEIP155");
+    isCreateContractOffset = getMemoryOffset("isCreateContract");
+    storageAddrOffset      = getMemoryOffset("storageAddr");
+    bytecodeLengthOffset   = getMemoryOffset("bytecodeLength");
+    originCTXOffset        = getMemoryOffset("originCTX");
+    currentCTXOffset       = getMemoryOffset("currentCTX");
+    gasCTXOffset           = getMemoryOffset("gasCTX");
+    isCreateOffset         = getMemoryOffset("isCreate");
 
     // Load ROM constants
     MAX_CNT_STEPS_LIMIT      = getConstant(romJson, "MAX_CNT_STEPS_LIMIT");

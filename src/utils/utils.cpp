@@ -224,6 +224,7 @@ void json2file(const json &j, const string &fileName)
 
 void file2json(const string &fileName, json &j)
 {
+    j.clear();
     zklog.info("file2json() loading JSON file " + fileName);
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
@@ -245,11 +246,12 @@ void file2json(const string &fileName, json &j)
 
 void file2json(const string &fileName, ordered_json &j)
 {
+    j.clear();
     zklog.info("file2json() (ordered) loading JSON file " + fileName);
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
-        zklog.error("file2json() failed loading input JSON file " + fileName);
+        zklog.error("file2json() failed loading input JSON file " + fileName + "; does this file exist?");
         exitProcess();
     }
     try

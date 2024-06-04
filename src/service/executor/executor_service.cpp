@@ -1338,14 +1338,14 @@ using grpc::Status;
     response->set_cnt_sha256_hashes(proverRequest.counters.sha256F);
     response->set_cnt_steps(proverRequest.counters.steps);
     
-    response->set_cnt_reserve_keccak_hashes(proverRequest.counters_reserve.keccakF);
-    response->set_cnt_reserve_poseidon_hashes(proverRequest.counters_reserve.poseidonG);
-    response->set_cnt_reserve_poseidon_paddings(proverRequest.counters_reserve.paddingPG);
-    response->set_cnt_reserve_mem_aligns(proverRequest.counters_reserve.memAlign);
-    response->set_cnt_reserve_arithmetics(proverRequest.counters_reserve.arith);
-    response->set_cnt_reserve_binaries(proverRequest.counters_reserve.binary);
-    response->set_cnt_reserve_sha256_hashes(proverRequest.counters_reserve.sha256F);
-    response->set_cnt_reserve_steps(proverRequest.counters_reserve.steps);
+    response->set_cnt_reserve_keccak_hashes(proverRequest.countersReserve.keccakF);
+    response->set_cnt_reserve_poseidon_hashes(proverRequest.countersReserve.poseidonG);
+    response->set_cnt_reserve_poseidon_paddings(proverRequest.countersReserve.paddingPG);
+    response->set_cnt_reserve_mem_aligns(proverRequest.countersReserve.memAlign);
+    response->set_cnt_reserve_arithmetics(proverRequest.countersReserve.arith);
+    response->set_cnt_reserve_binaries(proverRequest.countersReserve.binary);
+    response->set_cnt_reserve_sha256_hashes(proverRequest.countersReserve.sha256F);
+    response->set_cnt_reserve_steps(proverRequest.countersReserve.steps);
 
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
@@ -1962,25 +1962,13 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.newLocalExitRoot = "0x0";
     proverRequest.input.publicInputsExtended.newBatchNum = 0;
 
-    // l1_info_tree_index_min_timestamp
-    google::protobuf::Map<google::protobuf::uint64, google::protobuf::uint64>::const_iterator minTimestampIt;
-    for (minTimestampIt = request->l1_info_tree_index_min_timestamp().begin(); minTimestampIt != request->l1_info_tree_index_min_timestamp().end(); minTimestampIt++)
-    {
-        proverRequest.input.minTimestampMap[minTimestampIt->first] = minTimestampIt->second;
-    }
-
     // Generate l1InfoTreeData from data stream and from l1_info_tree_index_min_timestamp
     for (uint64_t i = 0; i < batch.blocks.size(); i++)
     {
         L1Data data;
         data.blockHashL1.set_str(batch.blocks[i].l1BlockHash, 16);
         data.globalExitRoot.set_str(batch.blocks[i].globalExitRoot, 16);
-        unordered_map<uint64_t, uint64_t>::const_iterator it;
-        it = proverRequest.input.minTimestampMap.find(batch.blocks[i].l1InfoTreeIndex);
-        if (it != proverRequest.input.minTimestampMap.end())
-        {
-            data.minTimestamp = it->second;
-        }
+        data.minTimestamp = batch.blocks[i].minTimestamp;
         proverRequest.input.l1InfoTreeData[batch.blocks[i].l1InfoTreeIndex] = data;
     }
 
@@ -2053,14 +2041,14 @@ using grpc::Status;
     response->set_cnt_sha256_hashes(proverRequest.counters.sha256F);
     response->set_cnt_steps(proverRequest.counters.steps);
     
-    response->set_cnt_reserve_keccak_hashes(proverRequest.counters_reserve.keccakF);
-    response->set_cnt_reserve_poseidon_hashes(proverRequest.counters_reserve.poseidonG);
-    response->set_cnt_reserve_poseidon_paddings(proverRequest.counters_reserve.paddingPG);
-    response->set_cnt_reserve_mem_aligns(proverRequest.counters_reserve.memAlign);
-    response->set_cnt_reserve_arithmetics(proverRequest.counters_reserve.arith);
-    response->set_cnt_reserve_binaries(proverRequest.counters_reserve.binary);
-    response->set_cnt_reserve_sha256_hashes(proverRequest.counters_reserve.sha256F);
-    response->set_cnt_reserve_steps(proverRequest.counters_reserve.steps);
+    response->set_cnt_reserve_keccak_hashes(proverRequest.countersReserve.keccakF);
+    response->set_cnt_reserve_poseidon_hashes(proverRequest.countersReserve.poseidonG);
+    response->set_cnt_reserve_poseidon_paddings(proverRequest.countersReserve.paddingPG);
+    response->set_cnt_reserve_mem_aligns(proverRequest.countersReserve.memAlign);
+    response->set_cnt_reserve_arithmetics(proverRequest.countersReserve.arith);
+    response->set_cnt_reserve_binaries(proverRequest.countersReserve.binary);
+    response->set_cnt_reserve_sha256_hashes(proverRequest.countersReserve.sha256F);
+    response->set_cnt_reserve_steps(proverRequest.countersReserve.steps);
 
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));

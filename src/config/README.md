@@ -68,6 +68,7 @@ The configuration parameters can be of different uses:
 |`executorClientLoops`|test|u64|Executor client iterations|1|EXECUTOR_CLIENT_LOOPS|
 |`executorClientCheckNewStateRoot`|test|bool|Executor client checks the new state root returned in the response using CheckTree|false|EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT|
 |`executorClientResetDB`|test|bool|Executor client resets the database before processing a batch; it only works in debug mode|false|EXECUTOR_CLIENT_RESET_DB|
+|`executorClientClearCache`|test|bool|Executor client clears the database cache before checking the new state root; it only works in debug mode|true|EXECUTOR_CLIENT_CLEAR_CACHE|
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
 |**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
 |`hashDB64`|test|boolean|Use HashDB64 new database (do not use in  production, under development)|false|HASHDB64|
@@ -85,6 +86,7 @@ The configuration parameters can be of different uses:
 |`aggregatorClientMaxStreams`|test|u64|Max number of aggregator client streams, used to limit E2E test execution; if 0 then there is no limit|0|AGGREGATOR_CLIENT_MAX_STREAMS|
 |`aggregatorClientMaxRecvMsgSize`|test|u64|Max size of aggregator client received messages; if 0 then there is no limit|1024*1024*1024|AGGREGATOR_CLIENT_MAX_RECV_MSG_SIZE|
 |`executorROMLineTraces`|test|boolean|If true, the main state machine executor will log the content of every executed ROM program line; it only works with native main executor, not with generated code executor|false|EXECUTOR_ROM_LINE_TRACES|
+|`executorROMInstructions`|test|boolean|If true, the main state machine executor will log the zkasm instruction of every executed ROM program line; it only works with native main executor, not with generated code executor|false|EXECUTOR_ROM_INSTRUCTIONS|
 |`executorTimeStatistics`|test|boolean|If true, the main state machine executor will log the time metrics statistics of external calls|false|EXECUTOR_TIME_STATISTICS|
 |`opcodeTracer`|test|boolean|Generate main state machine executor opcode statistics|false|OPCODE_TRACER|
 |`logRemoteDbReads`|test|boolean|Log main state machine executor remote Database reads|false|LOG_REMOTE_DB_READS|
@@ -93,7 +95,7 @@ The configuration parameters can be of different uses:
 |`logExecutorServerInputGasThreshold`|test|u64|Log main state machine executor input if gas/s < this value; active if this value is > 0|0|LOG_EXECUTOR_SERVER_INPUT_GAS_THRESHOLD|
 |`logExecutorServerResponses`|test|bool|Log executor server resonses|false|LOG_EXECUTOR_SERVER_RESPONSES|
 |`logExecutorServerTxs`|test|bool|Log executor server transactins details|true|LOG_EXECUTOR_SERVER_TXS|
-|`dontLoadRomOffsets`|test|bool|Avoid loading ROM offsets; used with experimental or testing ROM.json files|false|DONT_LOAD_ROM_OFFSETS|
+|`loadDiagnosticRom`|test|bool|Loads a test diagnostic ROM to run a unit-test of the main executor; used with experimental or testing ROM.json files|false|LOAD_DIAGNOSTIC_ROM|
 |`inputFile`|test|string|Input file in some tests|"testvectors/batchProof/input_executor_0.json"|INPUT_FILE|
 |`inputFile2`|test|string|Second input file, used as the second input in genAggregatedProof|""|INPUT_FILE_2|
 |`outputPath`|test|string|Output directory for saved files|"output"|OUTPUT_PATH|

@@ -5,10 +5,12 @@ NVCC := /usr/local/cuda/bin/nvcc
 TARGET_ZKP := zkProver
 TARGET_ZKP_GPU := zkProver
 TARGET_BCT := bctree
-TARGET_MNG += mainGenerator
-TARGET_PLG += polsGenerator
-TARGET_PLD += polsDiff
+TARGET_MNG := mainGenerator
+TARGET_MNG_10 := mainGenerator10
+TARGET_PLG := polsGenerator
+TARGET_PLD := polsDiff
 TARGET_TEST := zkProverTest
+TARGET_W2DB := witness2db
 
 BUILD_DIR := ./build
 BUILD_DIR_GPU := ./build-gpu
@@ -23,8 +25,12 @@ endif
 CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-Wfatal-errors
+
 LDFLAGS_GPU := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -liomp5 $(GRPCPP_LIBS)
 LDFLAGS := $(LDFLAGS_GPU) -fopenmp
+CXXFLAGS_W2DB := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2
+LDFLAGS_W2DB := -lgmp -lstdc++ -lgmpxx
+
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
 
@@ -54,8 +60,9 @@ GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 INC_DIRS := $(shell find $(SRC_DIRS) -type d) $(sort $(dir))
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" ! -path "./src/goldilocks/utils/timer.cpp" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" ! -path "./src/goldilocks/utils/timer.cpp" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc) ! -path "./src/witness2db/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 SRCS_ZKP_GPU := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" ! -path "./src/goldilocks/utils/timer.cpp" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc -or -name *.cu ! -path "./src/goldilocks/utils/deviceQuery.cu" ! -path "./src/goldilocks/tests/*.cu")
+
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 OBJS_ZKP_GPU := $(SRCS_ZKP_GPU:%=$(BUILD_DIR_GPU)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
@@ -64,12 +71,16 @@ SRCS_BCT := ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
-SRCS_TEST := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_TEST := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" ! -path "./src/witness2db/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
 DEPS_TEST := $(OBJS_TEST:.o=.d)
 
-cpu: $(BUILD_DIR)/$(TARGET_ZKP)
 
+SRCS_W2DB := ./src/witness2db/witness2db.cpp  ./src/goldilocks/src/goldilocks_base_field.cpp ./src/goldilocks/src/poseidon_goldilocks.cpp
+OBJS_W2DB := $(SRCS_W2DB:%=$(BUILD_DIR)/%.o)
+DEPS_W2DB := $(OBJS_W2DB:.o=.d)
+
+cpu: $(BUILD_DIR)/$(TARGET_ZKP)
 gpu: $(BUILD_DIR_GPU)/$(TARGET_ZKP_GPU)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
@@ -123,24 +134,39 @@ $(BUILD_DIR_GPU)/%.cu.o: %.cu
 
 main_generator: $(BUILD_DIR)/$(TARGET_MNG)
 
-$(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp
+$(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp ./src/config/definitions.hpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/main_generator/main_generator.cpp -o $@ -lgmp
 
-generate: main_generator
+main_generator_10: $(BUILD_DIR)/$(TARGET_MNG_10)
+
+$(BUILD_DIR)/$(TARGET_MNG_10): ./src/main_generator/main_generator_10.cpp ./src/config/definitions.hpp
+	$(MKDIR_P) $(BUILD_DIR)
+	g++ -g ./src/main_generator/main_generator_10.cpp -o $@ -lgmp
+
+generate: main_generator main_generator_10
 	$(BUILD_DIR)/$(TARGET_MNG) all
+	$(BUILD_DIR)/$(TARGET_MNG_10) all
 
 pols_generator: $(BUILD_DIR)/$(TARGET_PLG)
 
-$(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp
+$(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp ./src/config/definitions.hpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/pols_generator/pols_generator.cpp -o $@ -lgmp
+
+pols: pols_generator
+	$(BUILD_DIR)/$(TARGET_PLG)
 
 pols_diff: $(BUILD_DIR)/$(TARGET_PLD)
 
 $(BUILD_DIR)/$(TARGET_PLD): ./src/pols_diff/pols_diff.cpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/pols_diff/pols_diff.cpp $(CXXFLAGS) $(INC_FLAGS) -o $@ $(LDFLAGS) 
+
+witness2db: $(BUILD_DIR)/$(TARGET_W2DB)
+
+$(BUILD_DIR)/$(TARGET_W2DB): $(OBJS_W2DB)
+	$(CXX) $(OBJS_W2DB) $(CXXFLAGS_W2DB) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_W2DB) $(LDFLAGS_W2DB)
 
 .PHONY: clean
 
