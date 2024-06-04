@@ -36,7 +36,6 @@ void StarkInfo::load(json j)
     nCm3 = j["nCm3"];
     nCm4 = j["nCm4"];
     friExpId = j["friExpId"];
-    nExps = j["nExps"];
     qDim = j["qDim"];
     qDeg = j["qDeg"];
 

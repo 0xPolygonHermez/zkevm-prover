@@ -44,7 +44,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     }
     else
     {
-        pConstPolsAddress = copyFile(config.recursivefConstPols, constPolsSize);
+        pConstPolsAddress = loadFileParallel(config.recursivefConstPols, constPolsSize);
         zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + config.recursivefConstPols);
     }
     pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree, starkInfo.nConstants);
@@ -82,7 +82,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
         }
         else
         {
-            pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
+            pConstTreeAddress = loadFileParallel(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
             zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant file " + config.recursivefConstantsTree);
         }
         pConstPolsAddress2ns = (uint8_t *)pConstTreeAddress + 2 * sizeof(uint64_t);
@@ -312,10 +312,6 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
         Polinomial::calculateZ(z, pNum, pDen);
     }
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_Z);
-
-    TimerStart(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
-    cHelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step3_after"]);
-    TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
 
     TimerStart(STARK_RECURSIVE_F_STEP_3_LDE_AND_MERKLETREE);
 
