@@ -36,21 +36,21 @@ public:
 
         if (source == NULL)
         {
-            source = (Goldilocks::Element *)calloc2(height * width, sizeof(Goldilocks::Element));
+            source = (Goldilocks::Element *)calloc_zkevm(height * width, sizeof(Goldilocks::Element));
             isSourceAllocated = true;
         }
-        nodes = (Goldilocks::Element *)calloc2(getTreeNumElements(), sizeof(Goldilocks::Element));
+        nodes = (Goldilocks::Element *)calloc_zkevm(getTreeNumElements(), sizeof(Goldilocks::Element));
         isNodesAllocated = true;
     };
     ~MerkleTreeGL()
     {
         if (isSourceAllocated)
         {
-            free2(source);
+            free_zkevm(source);
         }
         if (isNodesAllocated)
         {
-            free2(nodes);
+            free_zkevm(nodes);
         }
     };
     void copySource(Goldilocks::Element *_source)

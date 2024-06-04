@@ -62,13 +62,6 @@ void warmup_gpu()
 }
 #endif
 
-#ifndef __AVX512__
-#define NROWS_STEPS_ 4
-#else
-#define NROWS_STEPS_ 8
-#endif
-
-
 Prover::Prover(Goldilocks &fr,
                PoseidonGoldilocks &poseidon,
                const Config &config) : fr(fr),
@@ -141,7 +134,7 @@ Prover::Prover(Goldilocks &fr,
             }
             else
             {
-                pAddress = calloc2(polsSize, 1);
+                pAddress = calloc_zkevm(polsSize, 1);
                 if (pAddress == NULL)
                 {
                     zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
@@ -206,7 +199,7 @@ Prover::~Prover()
         }
         else
         {
-            free2(pAddress);
+            free_zkevm(pAddress);
         }
         free(pAddressStarksRecursiveF);
 #ifdef __USE_CUDA__
@@ -1075,7 +1068,7 @@ void Prover::execute(ProverRequest *pProverRequest)
     }
     else
     {
-        pExecuteAddress = calloc2(polsSize, 1);
+        pExecuteAddress = calloc_zkevm(polsSize, 1);
         if (pExecuteAddress == NULL)
         {
             zklog.error("Prover::execute() failed calling malloc() of size " + to_string(polsSize));
@@ -1136,7 +1129,7 @@ void Prover::execute(ProverRequest *pProverRequest)
     }
     else
     {
-        free2(pExecuteAddress);
+        free_zkevm(pExecuteAddress);
     }
 
     TimerStopAndLog(PROVER_EXECUTE);

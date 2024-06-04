@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 #ifdef __USE_CUDA__
-void *calloc2(uint64_t count, uint64_t size) {
+void *calloc_zkevm(uint64_t count, uint64_t size) {
     char *a;
     cudaMallocManaged(&a, count*size);
 #pragma omp parallel for
@@ -11,11 +11,11 @@ void *calloc2(uint64_t count, uint64_t size) {
     return a;
 }
 
-void *malloc2(uint64_t size) {
+void *malloc_zkevm(uint64_t size) {
     char *a;
     cudaMallocManaged(&a, size);
     return a;
 }
 
-void free2(void *ptr) { cudaFree(ptr); }
+void free_zkevm(void *ptr) { cudaFree(ptr); }
 #endif
