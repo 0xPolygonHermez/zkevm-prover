@@ -38,9 +38,6 @@
 #include "RecursiveFSteps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
-#include "recursive2Steps.hpp"
-#include "zklog.hpp"
-#include "exit_process.hpp"
 #include "memory.cuh"
 
 #ifdef __USE_CUDA__

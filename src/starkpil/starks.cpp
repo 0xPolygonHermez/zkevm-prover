@@ -189,9 +189,6 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
     transposeZRows(pAddress, numCommited, newpols_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
-    TimerStart(STARK_STEP_3_AFTER_CALCULATE_EXPS);
-    chelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step3_after"]);
-    TimerStopAndLog(STARK_STEP_3_AFTER_CALCULATE_EXPS);
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
 #ifdef __USE_CUDA__
     ncols = starkInfo.mapSectionsN.section[eSection::cm3_n];

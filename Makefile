@@ -3,7 +3,7 @@
 NVCC := /usr/local/cuda/bin/nvcc
 
 TARGET_ZKP := zkProver
-TARGET_ZKP_GPU := zkProver
+TARGET_ZKP_GPU := zkProverGpu
 TARGET_BCT := bctree
 TARGET_MNG := mainGenerator
 TARGET_MNG_10 := mainGenerator10
@@ -91,9 +91,6 @@ SRCS_W2DB := ./src/witness2db/witness2db.cpp  ./src/goldilocks/src/goldilocks_ba
 OBJS_W2DB := $(SRCS_W2DB:%=$(BUILD_DIR)/%.o)
 DEPS_W2DB := $(OBJS_W2DB:.o=.d)
 
-cpu: $(BUILD_DIR)/$(TARGET_ZKP)
-gpu: $(BUILD_DIR_GPU)/$(TARGET_ZKP_GPU)
-
 SRCS_EXPRESSIONS := $(shell find ./test/expressions/ ./src/XKCP ./src/goldilocks/src ./src/starkpil/stark_info.*  ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.*  ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/ffiasm ./src/utils ! -path "./src/starkpil/fri/friProveC12.*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_EXPRESSIONS := $(SRCS_EXPRESSIONS:%=$(BUILD_DIR)/%.o)
 DEPS_EXPRESSIONS := $(OBJS_EXPRESSIONS:.o=.d)
@@ -107,6 +104,9 @@ OBJS_SETUP := $(patsubst %,$(BUILD_DIR)/%.o,$(SRCS_SETUP))
 OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
 OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main_test.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
 DEPS_SETUP := $(OBJS_SETUP:.o=.d)
+
+cpu: $(BUILD_DIR)/$(TARGET_ZKP)
+gpu: $(BUILD_DIR_GPU)/$(TARGET_ZKP_GPU)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
 
