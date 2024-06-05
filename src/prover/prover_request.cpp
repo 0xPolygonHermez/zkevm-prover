@@ -66,12 +66,22 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
 
 void ProverRequest::CreateFullTracer(void)
 {
+    // Check the full tracer was not created before
     if (pFullTracer != NULL)
     {
         zklog.error("ProverRequest::CreateFullTracer() called with pFullTracer != NULL");
         exitProcess();
     }
-    switch (input.publicInputsExtended.publicInputs.forkID)
+
+    // Get the fork info
+    if (!getForkInfo(input.publicInputsExtended.publicInputs.forkID, forkInfo))
+    {
+        zklog.error("ProverRequest::CreateFullTracer() failed calling getForkInfo() with fork ID=" + to_string(input.publicInputsExtended.publicInputs.forkID));
+        result = ZKR_SM_MAIN_INVALID_FORK_ID;
+        return;
+    }
+
+    switch (forkInfo.parentId)
     {
         case 1: // fork_1
         {
@@ -199,7 +209,7 @@ void ProverRequest::DestroyFullTracer(void)
         zklog.error("ProverRequest::DestroyFullTracer() called with pFullTracer == NULL");
         exitProcess();
     }
-    switch (input.publicInputsExtended.publicInputs.forkID)
+    switch (forkInfo.parentId)
     {
         case 1: // fork_1
         {

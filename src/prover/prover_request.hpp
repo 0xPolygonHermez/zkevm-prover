@@ -9,6 +9,7 @@
 #include "full_tracer_interface.hpp"
 #include "database_map.hpp"
 #include "prover_request_type.hpp"
+#include "fork_info.hpp"
 
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
@@ -81,6 +82,8 @@ public:
 
     /* Debug info */
     string errorLog;
+
+    ForkInfo forkInfo;
 
     /* Constructor */
     ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);

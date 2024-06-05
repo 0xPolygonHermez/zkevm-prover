@@ -8,10 +8,19 @@
 #include "main_sm/fork_8/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_9/main_exec_generated/main_exec_generated_fast.hpp"
-#ifdef MAIN_SM_PROVER_GENERATED_CODE
-#include "main_sm/fork_10/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_24_fast.hpp"
+#if PROVER_FORK_ID >= 11
+#include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_25_fast.hpp"
 #endif
-#include "main_sm/fork_10/main_exec_generated/main_exec_generated_fast.hpp"
+
+#ifdef MAIN_SM_PROVER_GENERATED_CODE
+    #if (PROVER_FORK_ID == 10)
+        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_24.hpp"
+    #else
+        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_25.hpp"
+    #endif
+#endif
+
 #include "timer.hpp"
 #include "zklog.hpp"
 
@@ -314,7 +323,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
             {
                 TimerStart(MAIN_EXEC_GENERATED_FAST);
                 //zklog.info("Executor::processBatch() fork 10 generated");
-                fork_10::main_exec_generated_fast(mainExecutor_fork_10, proverRequest);
+                fork_10::main_exec_generated_10_24_fast(mainExecutor_fork_10, proverRequest);
                 TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
             }
             else
@@ -341,6 +350,42 @@ void Executor::processBatch (ProverRequest &proverRequest)
             }
             return;
         }
+#if PROVER_FORK_ID >= 11
+        case 11: // fork_11
+        {
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+            if (config.useMainExecGenerated)
+            {
+                TimerStart(MAIN_EXEC_GENERATED_FAST);
+                //zklog.info("Executor::processBatch() fork 10 generated");
+                fork_10::main_exec_generated_11_25_fast(mainExecutor_fork_10, proverRequest);
+                TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
+            }
+            else
+#endif
+            {
+                //zklog.info("Executor::processBatch() fork 10 native");
+
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_10::CommitPols::pilSize()) + ")");
+                    exitProcess();
+                }
+                fork_10::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_10::MainExecRequired required;
+
+                mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
+#endif
         default:
         {
             zklog.error("Executor::processBatch() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
@@ -533,7 +578,11 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
 #ifdef MAIN_SM_PROVER_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
-                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+#if (PROVER_FORK_ID == 10)
+                PROVER_FORK_NAMESPACE::main_exec_generated_10_24(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+#else
+                PROVER_FORK_NAMESPACE::main_exec_generated_11_25(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+#endif
             }
             else
 #endif
@@ -655,7 +704,11 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
 #ifdef MAIN_SM_PROVER_GENERATED_CODE
         if (config.useMainExecGenerated)
         {
-            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+#if (PROVER_FORK_ID == 10)
+            PROVER_FORK_NAMESPACE::main_exec_generated_10_24(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+#else
+            PROVER_FORK_NAMESPACE::main_exec_generated_11_25(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+#endif
         }
         else
 #endif

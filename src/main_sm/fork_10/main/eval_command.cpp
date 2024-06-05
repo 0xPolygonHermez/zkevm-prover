@@ -1263,7 +1263,8 @@ void eval_eventLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 #endif
 
-    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 10); // fork_10
+    zkassert(ctx.proverRequest.pFullTracer != NULL);
+    zkassert(ctx.proverRequest.forkInfo.parentId == 10); // fork_10
     cr.zkResult = ((fork_10::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
@@ -1768,7 +1769,8 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 10); // fork_10
+    zkassert(ctx.proverRequest.pFullTracer != NULL);
+    zkassert(ctx.proverRequest.forkInfo.parentId == 10); // fork_10
     cr.zkResult = ((fork_10::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
@@ -2512,7 +2514,8 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
 
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value, const Goldilocks::Element (&key)[4])
 {
-    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 10); // fork_10
+    zkassert(ctx.proverRequest.pFullTracer != NULL);
+    zkassert(ctx.proverRequest.forkInfo.parentId == 10); // fork_10
     return ((fork_10::FullTracer *)ctx.proverRequest.pFullTracer)->addReadWriteAddress(
         ctx.pols.A0[0], ctx.pols.A1[0], ctx.pols.A2[0], ctx.pols.A3[0], ctx.pols.A4[0], ctx.pols.A5[0], ctx.pols.A6[0], ctx.pols.A7[0],
         ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0],

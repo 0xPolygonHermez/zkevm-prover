@@ -43,6 +43,7 @@
 #include "zklog.hpp"
 #include "ecrecover.hpp"
 #include "sha256.hpp"
+#include "fork_info.hpp"
 
 
 using namespace std;
@@ -75,10 +76,9 @@ namespace fork_10
 
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
     fr(fr),
-    N(MainCommitPols::pilDegree()),
-    N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
-    romBatch(config, BATCH),
+    romBatch_10_24(config, BATCH),
+    romBatch_11_25(config, BATCH),
     romDiagnostic(config, DIAGNOSTIC),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
@@ -91,10 +91,12 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     TimerStart(ROM_LOAD);
 
-    // Load zkEVM ROM definition file
+    // Load zkEVM ROM definition files
     json romJson;
-    file2json("src/main_sm/fork_10/scripts/rom.json", romJson);
-    romBatch.load(fr, romJson);
+    file2json("src/main_sm/fork_10/scripts/rom_10_24.json", romJson);
+    romBatch_10_24.load(fr, romJson);
+    file2json("src/main_sm/fork_10/scripts/rom_11_25.json", romJson);
+    romBatch_11_25.load(fr, romJson);
 
     // Load diagnostic (unit test) ROM definition file
     if (config.loadDiagnosticRom)
@@ -116,21 +118,21 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 #endif
 
     // Get labels
-    finalizeExecutionLabel     = romBatch.getLabel(string("finalizeExecution"));
-    checkAndSaveFromLabel      = romBatch.getLabel(string("checkAndSaveFrom"));
-    ecrecoverStoreArgsLabel    = romBatch.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel          = romBatch.getLabel(string("ecrecover_end"));
-    checkFirstTxTypeLabel      = romBatch.getLabel(string("checkFirstTxType"));
-    writeBlockInfoRootLabel    = romBatch.getLabel(string("writeBlockInfoRoot"));
-    verifyMerkleProofEndLabel  = romBatch.getLabel(string("verifyMerkleProofEnd"));
-    outOfCountersStepLabel     = romBatch.getLabel(string("outOfCountersStep"));
-    outOfCountersArithLabel    = romBatch.getLabel(string("outOfCountersArith"));
-    outOfCountersBinaryLabel   = romBatch.getLabel(string("outOfCountersBinary"));
-    outOfCountersKeccakLabel   = romBatch.getLabel(string("outOfCountersKeccak"));
-    outOfCountersSha256Label   = romBatch.getLabel(string("outOfCountersSha256"));
-    outOfCountersMemalignLabel = romBatch.getLabel(string("outOfCountersMemalign"));
-    outOfCountersPoseidonLabel = romBatch.getLabel(string("outOfCountersPoseidon"));
-    outOfCountersPaddingLabel  = romBatch.getLabel(string("outOfCountersPadding"));
+    finalizeExecutionLabel     = romBatch_10_24.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel      = romBatch_10_24.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel    = romBatch_10_24.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel          = romBatch_10_24.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel      = romBatch_10_24.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel    = romBatch_10_24.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel  = romBatch_10_24.getLabel(string("verifyMerkleProofEnd"));
+    outOfCountersStepLabel     = romBatch_10_24.getLabel(string("outOfCountersStep"));
+    outOfCountersArithLabel    = romBatch_10_24.getLabel(string("outOfCountersArith"));
+    outOfCountersBinaryLabel   = romBatch_10_24.getLabel(string("outOfCountersBinary"));
+    outOfCountersKeccakLabel   = romBatch_10_24.getLabel(string("outOfCountersKeccak"));
+    outOfCountersSha256Label   = romBatch_10_24.getLabel(string("outOfCountersSha256"));
+    outOfCountersMemalignLabel = romBatch_10_24.getLabel(string("outOfCountersMemalign"));
+    outOfCountersPoseidonLabel = romBatch_10_24.getLabel(string("outOfCountersPoseidon"));
+    outOfCountersPaddingLabel  = romBatch_10_24.getLabel(string("outOfCountersPadding"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -202,7 +204,30 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     {
         zklog.info("Using diagnostic rom");
     }
-    Rom &rom = config.loadDiagnosticRom ? romDiagnostic : romBatch;
+    if ( (proverRequest.input.publicInputsExtended.publicInputs.forkID != 10) &&
+         (proverRequest.input.publicInputsExtended.publicInputs.forkID != 11) )
+    {
+        proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
+        zklog.error("MainExecutor::execute() called with invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
+        return;
+    }
+
+    // Get the proper rom
+    Rom &rom =                
+        config.loadDiagnosticRom ? romDiagnostic :
+        proverRequest.input.publicInputsExtended.publicInputs.forkID == 10 ? romBatch_10_24 :
+        romBatch_11_25;
+
+    // Get N and N_NoCounters 
+    ForkInfo forkInfo;
+    if (!getForkInfo(proverRequest.input.publicInputsExtended.publicInputs.forkID, forkInfo))
+    {
+        proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
+        zklog.error("MainExecutor::execute() called getForkInfo() with invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
+        return;
+    }
+    uint64_t N = forkInfo.N;
+    uint64_t N_NoCounters = forkInfo.N_NoCounters;
 
 #endif
 
@@ -2856,10 +2881,15 @@ void MainExecutor::logError (Context &ctx, const string &message)
     {
         romLine = (ctx.pZKPC != NULL) ? romDiagnostic.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
     }
-    else
+    else if (ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 10)
     {
-        romLine = (ctx.pZKPC != NULL) ? romBatch.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+        romLine = (ctx.pZKPC != NULL) ? romBatch_10_24.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
     }
+    else if (ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 11)
+    {
+        romLine = (ctx.pZKPC != NULL) ? romBatch_11_25.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+    }
+
     string log2 = string("proverRequest.result=") + zkresult2string(ctx.proverRequest.result) +
         " step=" + to_string(step) +
         " eval=" + to_string(evaluation) +

@@ -1,6 +1,7 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
+/* Only one fork can generate proofs */
 #define PROVER_FORK_ID 10
 #define PROVER_FORK_NAMESPACE fork_10
 #define PROVER_FORK_NAMESPACE_STRING "fork_10"

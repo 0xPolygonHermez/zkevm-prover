@@ -106,7 +106,7 @@ main_generator_10: $(BUILD_DIR)/$(TARGET_MNG_10)
 
 $(BUILD_DIR)/$(TARGET_MNG_10): ./src/main_generator/main_generator_10.cpp ./src/config/definitions.hpp
 	$(MKDIR_P) $(BUILD_DIR)
-	g++ -g ./src/main_generator/main_generator_10.cpp -o $@ -lgmp
+	g++ -g ./src/main_generator/main_generator_10.cpp ./src/config/fork_info.cpp -o $@ -lgmp
 
 generate: main_generator main_generator_10
 	$(BUILD_DIR)/$(TARGET_MNG) all

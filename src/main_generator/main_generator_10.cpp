@@ -4,7 +4,10 @@
 #include <nlohmann/json.hpp>
 #include <gmpxx.h>
 #include <sys/stat.h>
-#include "../config/definitions.hpp" // This is the only project file allowed to be included
+
+// The following are the only 2 project files allowed to be included, since they do not have internal dependencies
+#include "../config/definitions.hpp"
+#include "../config/fork_info.hpp"
 
 /* This code generates forks 10 onwards */
 
@@ -38,7 +41,7 @@ using json = nlohmann::json;
 // Forward declaration
 void file2json (json &rom, string &romFileName);
 void string2file (const string & s, const string & fileName);
-string generate(const json &rom, uint64_t forkID, string forkNamespace, const string &functionName, const string &fileName, bool bFastMode, bool bHeader);
+string generate(const json &rom, uint64_t forkID, string forkNamespace, const string &functionName, const string &fileName, bool bFastMode, bool bHeader, ForkInfo &forkInfo);
 string selector8 (const string &regName, const string &regValue, bool opInitialized, bool bFastMode);
 string selector1 (const string &regName, const string &regValue, bool opInitialized, bool bFastMode);
 string selectorConst (int64_t CONST, bool opInitialized, bool bFastMode);
@@ -63,6 +66,7 @@ int main (int argc, char **argv)
         if (argString == "all")
         {
             firstForkID = 10;
+            lastForkID = PROVER_FORK_ID;
         }
         else if (!stringIsDec(argString))
         {
@@ -79,17 +83,26 @@ int main (int argc, char **argv)
     {
         cout << "Main generator 10 starting for fork ID=" << forkID << endl;
 
+        // Get fork info for this fork ID
+        ForkInfo forkInfo;
+        if (!getForkInfo(forkID, forkInfo))
+        {
+            cerr << "Failed calling getForkInfo() with forkID=" << forkID << endl;
+            exit(-1);
+        }
+
         // Set fork namespace based on fork ID
-        string forkNamespace = "fork_" + to_string(forkID);
+        string forkNamespace = "fork_" + to_string(forkInfo.parentId);
 
         string codeGenerationName = "main_exec_generated";
 
-        string functionName = codeGenerationName;
-        string fileName = codeGenerationName;
+        string functionName = codeGenerationName + "_" + to_string(forkID) + "_" + to_string(forkInfo.Nbits);
+        string fileName = functionName;
         string directoryName = "src/main_sm/" + forkNamespace + "/" + codeGenerationName;
 
         // Load rom.json
-        string romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom.json";
+        string romFileName;
+        romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom_" + to_string(forkID) + "_" + to_string(forkInfo.Nbits) + ".json";
         cout << "ROM file name=" << romFileName << endl;
         json rom;
         file2json(rom, romFileName);
@@ -101,17 +114,19 @@ int main (int argc, char **argv)
 #ifdef MAIN_SM_PROVER_GENERATED_CODE
         if (forkID == PROVER_FORK_ID)
         {
-            string code = generate(rom, forkID, forkNamespace, functionName, fileName, false, false);
+            cout << "Generating code for prover with fork ID=" << forkID << endl;
+            string code = generate(rom, forkID, forkNamespace, functionName, fileName, false, false, forkInfo);
             string2file(code, directoryName + "/" + fileName + ".cpp");
-            string header = generate(rom, forkID, forkNamespace, functionName, fileName, false,  true);
+            string header = generate(rom, forkID, forkNamespace, functionName, fileName, false,  true, forkInfo);
             string2file(header, directoryName + "/" + fileName + ".hpp");
         }
 #endif
+        cout << "Generating code for executor with fork ID=" << forkID << endl;
         functionName += "_fast";
         fileName += "_fast";
-        string codeFast = generate(rom, forkID, forkNamespace, functionName, fileName, true, false);
+        string codeFast = generate(rom, forkID, forkNamespace, functionName, fileName, true, false, forkInfo);
         string2file(codeFast, directoryName + "/" + fileName + ".cpp");
-        string headerFast = generate(rom, forkID, forkNamespace, functionName, fileName, true,  true);
+        string headerFast = generate(rom, forkID, forkNamespace, functionName, fileName, true,  true, forkInfo);
         string2file(headerFast, directoryName + "/" + fileName + ".hpp");
     }
 
@@ -144,6 +159,7 @@ void string2file (const string & s, const string & fileName)
     outfile.open(fileName);
     outfile << s << endl;
     outfile.close();
+    cout << "Wrote file " << fileName << endl;
 }
 
 void scalar2fea (const string &s, uint64_t (&fea)[8])
@@ -187,7 +203,7 @@ std::string removeDuplicateSpaces(std::string const &str)
     return s;
 }
 
-string generate(const json &rom, uint64_t forkID, string forkNamespace, const string &functionName, const string &fileName, bool bFastMode, bool bHeader)
+string generate(const json &rom, uint64_t forkID, string forkNamespace, const string &functionName, const string &fileName, bool bFastMode, bool bHeader, ForkInfo &forkInfo)
 {
     //const Fr = new F1Field(0xffffffff00000001n);
 
@@ -214,8 +230,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     {
         if (bFastMode)
         {
-            code += "#ifndef MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "\n";
-            code += "#define MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "\n";
+            code += "#ifndef MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "_" + to_string(forkInfo.id) + "_" + to_string(forkInfo.parentId) + "\n";
+            code += "#define MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "_" + to_string(forkInfo.id) + "_" + to_string(forkInfo.parentId) + "\n";
         }
         else
         {
@@ -278,7 +294,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "#define ZK_INT32_MAX 0x80000000\n";
         code += "#define CTX_MAX      ((ZK_INT32_MAX / CTX_OFFSET) - 1) // 8192 - 1\n\n";
 
-        code += "#define N_NO_COUNTERS_MULTIPLICATION_FACTOR 8\n\n";
+        //code += "#define N_NO_COUNTERS_MULTIPLICATION_FACTOR 8\n\n";
 
         code += "#define FrFirst32Negative ( 0xFFFFFFFF00000001 - 0xFFFFFFFF )\n";
         code += "#define FrLast32Positive 0xFFFFFFFF\n\n";
@@ -320,9 +336,18 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    int32_t addrRel = 0; // Relative and absolute address auxiliary variables\n";
     code += "    uint64_t addr = 0;\n";
     code += "    uint64_t context;\n";
-    code += "    int32_t sp;\n";
+    code += "    int32_t sp;\n\n";
     
-    code += "    Rom &rom = config.loadDiagnosticRom ? mainExecutor.romDiagnostic : mainExecutor.romBatch;\n";
+    //code += "    Rom &rom = config.loadDiagnosticRom ? mainExecutor.romDiagnostic : mainExecutor.romBatch;\n";
+
+    code += "    if ( (proverRequest.input.publicInputsExtended.publicInputs.forkID != 10) && (proverRequest.input.publicInputsExtended.publicInputs.forkID != 11) )\n";
+    code += "    {\n";
+    code += "        proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;\n";
+    code += "        zklog.error(\"MainExecutor::execute() called with invalid fork ID=\" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));\n";
+    code += "        return;\n";
+    code += "    }\n";
+
+    code += "    Rom &rom = proverRequest.input.publicInputsExtended.publicInputs.forkID == 10 ? mainExecutor.romBatch_10_24 : mainExecutor.romBatch_11_25;\n";
 
     code += "    Goldilocks &fr = mainExecutor.fr;\n";
     code += "    uint64_t flushId;\n";
@@ -442,7 +467,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "    uint64_t i=0; // Step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time\n";
     if (!bFastMode)
         code += "    uint64_t nexti=1; // Next step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time\n";
-    code += "    ctx.N = mainExecutor.N; // Numer of evaluations\n";
     if (bFastMode)
     {
         code += "    uint64_t zero = 0;\n";
@@ -479,13 +503,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "            mainExecutor.logError(ctx, \"" + functionName + "()) found proverRequest.bNoCounters=true and bProcessBatch=false\");\n";
     code += "            return;\n";
     code += "        }\n";
-    code += "        N_Max = mainExecutor.N_NoCounters;\n";
+    code += "        N_Max = " + to_string(forkInfo.N_NoCounters) + ";\n";
     code += "    }\n";
     code += "    else\n";
     code += "    {\n";
-    code += "        N_Max = mainExecutor.N;\n";
+    code += "        N_Max = " + to_string(forkInfo.N) + ";\n";
     code += "    }\n\n";
     code += "    N_Max_minus_one = N_Max - 1;\n";
+    code += "    ctx.N = N_Max; // Numer of evaluations\n";
 
     // This code is only used when 'skipFirstChangeL2Block = true'
     // This only is triggered when executong transaction by transaction across batches
@@ -2840,7 +2865,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     
     code += "    if (mainExecutor.config.dbMetrics) proverRequest.dbReadLog->print();\n\n";
 
-    code += "    zklog.info(\"" + functionName + "() done lastStep=\" + to_string(ctx.lastStep) + \" (\" + to_string((double(ctx.lastStep)*100)/mainExecutor.N) + \"%)\", &proverRequest.tags);\n\n";
+    code += "    zklog.info(\"" + functionName + "() done lastStep=\" + to_string(ctx.lastStep) + \" (\" + to_string((double(ctx.lastStep)*100)/N_Max) + \"%)\", &proverRequest.tags);\n\n";
 
     code += "    return;\n\n";
 
