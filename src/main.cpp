@@ -10,8 +10,13 @@
 #include "config.hpp"
 #include "version.hpp"
 #include "proof2zkin.hpp"
-#include "calcwit.hpp"
-#include "circom.hpp"
+#if (PROVER_FORK_ID == 10)
+    #include "fork_10/calcwit.hpp"
+    #include "fork_10/circom.hpp"
+#else
+    #include "fork_11/calcwit.hpp"
+    #include "fork_11/circom.hpp"
+#endif
 #include "main.hpp"
 #include "prover.hpp"
 #include "service/executor/executor_server.hpp"

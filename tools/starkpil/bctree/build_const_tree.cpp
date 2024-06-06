@@ -32,7 +32,7 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
     uintmax_t constPolsSize = starkInfo.nConstants * sizeof(Goldilocks::Element) * N;
     
     TimerStart(LOADING_CONST_POLS);
-    Goldilocks::Element *pConstPols = (Goldilocks::Element *)copyFile(constFile, constPolsSize);
+    Goldilocks::Element *pConstPols = (Goldilocks::Element *)loadFileParallel(constFile, constPolsSize);
     Goldilocks::Element *pConstPolsExt = (Goldilocks::Element *)malloc(NExtended * nPols * sizeof(Goldilocks::Element));
     TimerStopAndLog(LOADING_CONST_POLS);
 
