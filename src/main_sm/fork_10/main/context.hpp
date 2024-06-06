@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <set>
 #include <gmpxx.h>
-#include "definitions.hpp"
 #include "main_sm/fork_10/main/rom.hpp"
 #include "main_sm/fork_10/main/rom_command.hpp"
 #include "main_sm/fork_10/pols_generated/commit_pols.hpp"
@@ -21,7 +20,6 @@
 #include "prover_request.hpp"
 #include "hashdb_interface.hpp"
 #include "hashdb_factory.hpp"
-#include "time_metric.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -170,17 +168,6 @@ public:
     uint64_t line; // From ROM JSON file instruction
 #endif
 
-    uint64_t incHashPos;
-    uint64_t incCounter;
-    bool bProcessBatch;
-
-    // To be used to get performance metrics
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    struct timeval t;
-    TimeMetricStorage mainMetrics;
-    TimeMetricStorage evalCommandMetrics;
-#endif
-
     Context( Goldilocks &fr,
              const Config &config,
              RawFec &fec,
@@ -204,11 +191,7 @@ public:
         pZKPC(NULL),
         pStep(NULL),
         pEvaluation(NULL),
-        N(0),
-        incHashPos(0),
-        incCounter(0),
-        bProcessBatch(proverRequest.type == prt_processBatch)
-        {}; // Constructor, setting references
+        N(0){}; // Constructor, setting references
 
     ~Context()
     {

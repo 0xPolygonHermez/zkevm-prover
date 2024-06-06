@@ -8,10 +8,6 @@
 #include "main_sm/fork_8/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_9/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_24_fast.hpp"
-#if PROVER_FORK_ID >= 11
-#include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_25_fast.hpp"
-#endif
 
 #ifdef MAIN_SM_PROVER_GENERATED_CODE
     #if (PROVER_FORK_ID == 10)

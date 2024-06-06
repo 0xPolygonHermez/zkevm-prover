@@ -4,7 +4,6 @@
 #include <gmpxx.h>
 #include "main_sm/fork_10/main/context.hpp"
 #include "main_sm/fork_10/main/rom_command.hpp"
-#include "main_sm/fork_10/main/main_exec_required.hpp"
 #include "goldilocks_base_field.hpp"
 #include "zkresult.hpp"
 #include "ecrecover.hpp"
@@ -49,7 +48,6 @@ public:
         type = crt_unknown;
         zkResult = ZKR_SUCCESS;
     }
-    void toFea (Context &ctx, Goldilocks::Element &fi0, Goldilocks::Element &fi1, Goldilocks::Element &fi2, Goldilocks::Element &fi3, Goldilocks::Element &fi4, Goldilocks::Element &fi5, Goldilocks::Element &fi6, Goldilocks::Element &fi7);
 };
 
 // Evaluates a ROM command, and returns command result

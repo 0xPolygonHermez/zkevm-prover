@@ -80,8 +80,8 @@ public:
     uint8_t isStack;
     uint8_t isMem;
     int32_t incStack;
-    Goldilocks::Element ind;
-    Goldilocks::Element indRR;
+    uint8_t ind;
+    uint8_t indRR;
     RomCommand freeInTag;
     uint8_t assert;
     uint8_t setA;

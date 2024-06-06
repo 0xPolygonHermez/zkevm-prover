@@ -49,9 +49,6 @@ string RomLine::toString(Goldilocks &fr)
     if (hashP1 != 0) result += " hashP1=" + to_string(hashP1);
     if (hashPLen != 0) result += " hashPLen=" + to_string(hashPLen);
     if (hashPDigest != 0) result += " hashPDigest=" + to_string(hashPDigest);
-    if (hashS != 0) result += " hashS=" + to_string(hashS);
-    if (hashSLen != 0) result += " hashSLen=" + to_string(hashSLen);
-    if (hashSDigest != 0) result += " hashSDigest=" + to_string(hashSDigest);
     if (JMP != 0) result += " JMP=" + to_string(JMP);
     if (JMPC != 0) result += " JMPC=" + to_string(JMPC);
     if (JMPN != 0) result += " JMPN=" + to_string(JMPN);
@@ -66,8 +63,8 @@ string RomLine::toString(Goldilocks &fr)
     if (isStack != 0) result += " isStack=" + to_string(isStack);
     if (isMem != 0) result += " isMem=" + to_string(isMem);
     if (incStack != 0) result += " incStack=" + to_string(incStack);
-    if (!fr.isZero(ind)) result += " ind=" + fr.toString(ind,10);
-    if (!fr.isZero(indRR)) result += " indRR=" + fr.toString(indRR,10);
+    if (ind != 0) result += " ind=" + to_string(ind);
+    if (indRR != 0) result += " indRR=" + to_string(indRR);
 
     if (assert != 0) result += " assert=" + to_string(assert);
 

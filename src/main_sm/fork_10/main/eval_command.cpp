@@ -79,7 +79,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_fpBN254inv:                      return eval_fpBN254inv(ctx, cmd, cr);
             
             default:
-                zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + "=" + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+                zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
                 exitProcess();
         }
     }
@@ -384,7 +384,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             cr.u64 = ctx.fr.toU64(ctx.pols.HASHPOS[*ctx.pStep]);
             break;
         default:
-            zklog.error("eval_getReg() Invalid register=" + reg2string(cmd.reg) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            zklog.error("eval_getReg() Invalid register: " + reg2string(cmd.reg) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
     }
 }
@@ -1263,8 +1263,7 @@ void eval_eventLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 #endif
 
-    zkassert(ctx.proverRequest.pFullTracer != NULL);
-    zkassert(ctx.proverRequest.forkInfo.parentId == 10); // fork_10
+    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 10); // fork_10
     cr.zkResult = ((fork_10::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
@@ -1769,8 +1768,7 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    zkassert(ctx.proverRequest.pFullTracer != NULL);
-    zkassert(ctx.proverRequest.forkInfo.parentId == 10); // fork_10
+    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 10); // fork_10
     cr.zkResult = ((fork_10::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
@@ -2514,8 +2512,7 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
 
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value, const Goldilocks::Element (&key)[4])
 {
-    zkassert(ctx.proverRequest.pFullTracer != NULL);
-    zkassert(ctx.proverRequest.forkInfo.parentId == 10); // fork_10
+    zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 10); // fork_10
     return ((fork_10::FullTracer *)ctx.proverRequest.pFullTracer)->addReadWriteAddress(
         ctx.pols.A0[0], ctx.pols.A1[0], ctx.pols.A2[0], ctx.pols.A3[0], ctx.pols.A4[0], ctx.pols.A5[0], ctx.pols.A6[0], ctx.pols.A7[0],
         ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0],
@@ -2668,14 +2665,8 @@ void eval_getTimestampLimit (Context &ctx, const RomCommand &cmd, CommandResult 
 #endif
 
     cr.type = crt_fea;
-    cr.fea0 = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.timestampLimit);
-    cr.fea1 = fr.zero();
-    cr.fea2 = fr.zero();
-    cr.fea3 = fr.zero();
-    cr.fea4 = fr.zero();
-    cr.fea5 = fr.zero();
-    cr.fea6 = fr.zero();
-    cr.fea7 = fr.zero();
+    mpz_class timestampLimit = ctx.proverRequest.input.publicInputsExtended.publicInputs.timestampLimit;
+    scalar2fea(fr, timestampLimit, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -3844,68 +3835,5 @@ void eval_fpBN254inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     fq.toMpz(cr.scalar.get_mpz_t(), aInv);
 }
 
-void CommandResult::toFea (Context &ctx, Goldilocks::Element &fi0, Goldilocks::Element &fi1, Goldilocks::Element &fi2, Goldilocks::Element &fi3, Goldilocks::Element &fi4, Goldilocks::Element &fi5, Goldilocks::Element &fi6, Goldilocks::Element &fi7)
-{
-    // Copy fi=command result, depending on its type 
-    switch (type)
-    {
-    case crt_fea:
-        fi0 = fea0;
-        fi1 = fea1;
-        fi2 = fea2;
-        fi3 = fea3;
-        fi4 = fea4;
-        fi5 = fea5;
-        fi6 = fea6;
-        fi7 = fea7;
-        break;
-    case crt_fe:
-        fi0 = fe;
-        fi1 = fr.zero();
-        fi2 = fr.zero();
-        fi3 = fr.zero();
-        fi4 = fr.zero();
-        fi5 = fr.zero();
-        fi6 = fr.zero();
-        fi7 = fr.zero();
-        break;
-    case crt_scalar:
-        scalar2fea(fr, scalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-        break;
-    case crt_u16:
-        fi0 = fr.fromU64(u16);
-        fi1 = fr.zero();
-        fi2 = fr.zero();
-        fi3 = fr.zero();
-        fi4 = fr.zero();
-        fi5 = fr.zero();
-        fi6 = fr.zero();
-        fi7 = fr.zero();
-        break;
-    case crt_u32:
-        fi0 = fr.fromU64(u32);
-        fi1 = fr.zero();
-        fi2 = fr.zero();
-        fi3 = fr.zero();
-        fi4 = fr.zero();
-        fi5 = fr.zero();
-        fi6 = fr.zero();
-        fi7 = fr.zero();
-        break;
-    case crt_u64:
-        fi0 = fr.fromU64(u64);
-        fi1 = fr.zero();
-        fi2 = fr.zero();
-        fi3 = fr.zero();
-        fi4 = fr.zero();
-        fi5 = fr.zero();
-        fi6 = fr.zero();
-        fi7 = fr.zero();
-        break;
-    default:
-        zklog.error("CommandResult::toFea() Unexpected command result type: " + to_string(type));
-        exitProcess();
-    }
-}
 
 } // namespace

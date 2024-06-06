@@ -17,14 +17,6 @@
 #include "main_sm/fork_10/main/rom.hpp"
 #include "main_sm/fork_10/main/context.hpp"
 #include "main_sm/fork_10/main/eval_command.hpp"
-#include "main_sm/fork_10/helpers/arith_helper.hpp"
-#include "main_sm/fork_10/helpers/binary_helper.hpp"
-#include "main_sm/fork_10/helpers/memory_helper.hpp"
-#include "main_sm/fork_10/helpers/memalign_helper.hpp"
-#include "main_sm/fork_10/helpers/storage_helper.hpp"
-#include "main_sm/fork_10/helpers/keccak_helper.hpp"
-#include "main_sm/fork_10/helpers/poseidon_helper.hpp"
-#include "main_sm/fork_10/helpers/sha_helper.hpp"
 #include "utils/time_metric.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
@@ -43,7 +35,6 @@
 #include "zklog.hpp"
 #include "ecrecover.hpp"
 #include "sha256.hpp"
-#include "fork_info.hpp"
 
 
 using namespace std;
@@ -54,11 +45,7 @@ namespace fork_10
 
 #define STACK_OFFSET 0x10000
 #define MEM_OFFSET   0x20000
-#define MAX_HASH_ADDRESS 0x100000000
-
 #define CTX_OFFSET   0x40000
-#define ZK_INT32_MAX 0x80000000 
-#define CTX_MAX      ((ZK_INT32_MAX / CTX_OFFSET) - 1) // 8192 - 1
 
 #define N_NO_COUNTERS_MULTIPLICATION_FACTOR 8
 
@@ -70,16 +57,15 @@ namespace fork_10
 #endif
 #define CHECK_MAX_CNT_AT_THE_END
 
-//#define LOG_START_STEPS_TO_FILE
 //#define LOG_COMPLETED_STEPS_TO_FILE
 //#define LOG_COMPLETED_STEPS
 
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
     fr(fr),
+    N(MainCommitPols::pilDegree()),
+    N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
-    romBatch_10_24(config, BATCH),
-    romBatch_11_25(config, BATCH),
-    romDiagnostic(config, DIAGNOSTIC),
+    rom(config),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
     rom_gas_limit_2147483647(config),
@@ -91,19 +77,12 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     TimerStart(ROM_LOAD);
 
-    // Load zkEVM ROM definition files
+    // Load file contents into a json instance
     json romJson;
     file2json("src/main_sm/fork_10/scripts/rom_10_24.json", romJson);
-    romBatch_10_24.load(fr, romJson);
-    file2json("src/main_sm/fork_10/scripts/rom_11_25.json", romJson);
-    romBatch_11_25.load(fr, romJson);
 
-    // Load diagnostic (unit test) ROM definition file
-    if (config.loadDiagnosticRom)
-    {
-        file2json("src/main_sm/fork_10/scripts/rom_diagnostic.json", romJson);
-        romDiagnostic.load(fr, romJson);
-    }
+    // Load ROM data from JSON data
+    rom.load(fr, romJson);
 
 #ifdef MULTI_ROM_TEST
     romJson.clear();
@@ -118,21 +97,21 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 #endif
 
     // Get labels
-    finalizeExecutionLabel     = romBatch_10_24.getLabel(string("finalizeExecution"));
-    checkAndSaveFromLabel      = romBatch_10_24.getLabel(string("checkAndSaveFrom"));
-    ecrecoverStoreArgsLabel    = romBatch_10_24.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel          = romBatch_10_24.getLabel(string("ecrecover_end"));
-    checkFirstTxTypeLabel      = romBatch_10_24.getLabel(string("checkFirstTxType"));
-    writeBlockInfoRootLabel    = romBatch_10_24.getLabel(string("writeBlockInfoRoot"));
-    verifyMerkleProofEndLabel  = romBatch_10_24.getLabel(string("verifyMerkleProofEnd"));
-    outOfCountersStepLabel     = romBatch_10_24.getLabel(string("outOfCountersStep"));
-    outOfCountersArithLabel    = romBatch_10_24.getLabel(string("outOfCountersArith"));
-    outOfCountersBinaryLabel   = romBatch_10_24.getLabel(string("outOfCountersBinary"));
-    outOfCountersKeccakLabel   = romBatch_10_24.getLabel(string("outOfCountersKeccak"));
-    outOfCountersSha256Label   = romBatch_10_24.getLabel(string("outOfCountersSha256"));
-    outOfCountersMemalignLabel = romBatch_10_24.getLabel(string("outOfCountersMemalign"));
-    outOfCountersPoseidonLabel = romBatch_10_24.getLabel(string("outOfCountersPoseidon"));
-    outOfCountersPaddingLabel  = romBatch_10_24.getLabel(string("outOfCountersPadding"));
+    finalizeExecutionLabel     = rom.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel      = rom.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel    = rom.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel          = rom.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel      = rom.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel    = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel  = rom.getLabel(string("verifyMerkleProofEnd"));
+    outOfCountersStepLabel     = rom.getLabel(string("outOfCountersStep"));
+    outOfCountersArithLabel    = rom.getLabel(string("outOfCountersArith"));
+    outOfCountersBinaryLabel   = rom.getLabel(string("outOfCountersBinary"));
+    outOfCountersKeccakLabel   = rom.getLabel(string("outOfCountersKeccak"));
+    outOfCountersSha256Label   = rom.getLabel(string("outOfCountersSha256"));
+    outOfCountersMemalignLabel = rom.getLabel(string("outOfCountersMemalign"));
+    outOfCountersPoseidonLabel = rom.getLabel(string("outOfCountersPoseidon"));
+    outOfCountersPaddingLabel  = rom.getLabel(string("outOfCountersPadding"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -172,6 +151,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 {
     TimerStart(MAIN_EXECUTOR_EXECUTE);
 
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    struct timeval t;
+    TimeMetricStorage mainMetrics;
+    TimeMetricStorage evalCommandMetrics;
+#endif
+
 #ifdef MULTI_ROM_TEST
 
     // Get the right rom based on gas limit
@@ -197,38 +182,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     ecrecoverEndLabel         = rom.getLabel(string("ecrecover_end"));
     checkFirstTxTypeLabel     = rom.getLabel(string("checkFirstTxType"));
     writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
     
-#else
-
-    if (config.loadDiagnosticRom)
-    {
-        zklog.info("Using diagnostic rom");
-    }
-    if ( (proverRequest.input.publicInputsExtended.publicInputs.forkID != 10) &&
-         (proverRequest.input.publicInputsExtended.publicInputs.forkID != 11) )
-    {
-        proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
-        zklog.error("MainExecutor::execute() called with invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
-        return;
-    }
-
-    // Get the proper rom
-    Rom &rom =                
-        config.loadDiagnosticRom ? romDiagnostic :
-        proverRequest.input.publicInputsExtended.publicInputs.forkID == 10 ? romBatch_10_24 :
-        romBatch_11_25;
-
-    // Get N and N_NoCounters 
-    ForkInfo forkInfo;
-    if (!getForkInfo(proverRequest.input.publicInputsExtended.publicInputs.forkID, forkInfo))
-    {
-        proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
-        zklog.error("MainExecutor::execute() called getForkInfo() with invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
-        return;
-    }
-    uint64_t N = forkInfo.N;
-    uint64_t N_NoCounters = forkInfo.N_NoCounters;
-
 #endif
 
     // Init execution flags
@@ -244,7 +199,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         return;
     }
 
-    // Get a HashDB interface
+    // Get a pointer to the HashDB interface
     HashDBInterface *pHashDB;
     if (config.hashDBSingleton)
     {
@@ -397,8 +352,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         zkPC = fr.toU64(pols.zkPC[i]); // This is the read line of ZK code
 
-        ctx.incHashPos = 0;
-        ctx.incCounter = 0;
+        uint64_t incHashPos = 0;
+        uint64_t incCounter = 0;
 
 #ifdef LOG_START_STEPS
         zklog.info("--> Starting step=" + to_string(step) + " zkPC=" + to_string(zkPC) + " zkasm=" + rom.line[zkPC].lineStr);
@@ -406,10 +361,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (config.executorROMLineTraces)
         {
             zklog.info("step=" + to_string(step) + " rom.line[" + to_string(zkPC) + "] =[" + rom.line[zkPC].toString(fr) + "]");
-        }
-        else if (config.executorROMInstructions)
-        {
-            cout << rom.line[zkPC].lineStr << endl;
         }
 #ifdef LOG_START_STEPS_TO_FILE
         {
@@ -420,7 +371,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 #endif
 
-        if ((zkPC == rom.labels.ecrecoverStoreArgsLabel) && config.ECRecoverPrecalc)
+        if (zkPC == ecrecoverStoreArgsLabel && config.ECRecoverPrecalc)
         {
             zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);
             mpz_class signature_, r_, s_, v_;
@@ -435,7 +386,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.ecRecoverPrecalcBuffer.filled = true;
             }
         }
-        if (zkPC == rom.labels.ecrecoverEndLabel)
+        if (zkPC == ecrecoverEndLabel)
         {
             if ( ctx.ecRecoverPrecalcBuffer.filled)
             {
@@ -481,7 +432,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Convert consolidatedState fea to pols.SR
             fea2fea(pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], consolidatedStateRoot);
-            //zklog.info("SR=" + fea2stringchain(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i]));
+            //zklog.info("SR=" + fea2string(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i]));
         }
 
 #ifdef LOG_FILENAME
@@ -494,14 +445,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         for (uint64_t j=0; j<rom.line[zkPC].cmdBefore.size(); j++)
         {
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            gettimeofday(&ctx.t, NULL);
+            gettimeofday(&t, NULL);
 #endif
             CommandResult cr;
             evalCommand(ctx, *rom.line[zkPC].cmdBefore[j], cr);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-            ctx.mainMetrics.add("Eval command", TimeDiff(ctx.t));
-            ctx.evalCommandMetrics.add(rom.line[zkPC].cmdBefore[j]->opAndFunction, TimeDiff(ctx.t));
+            mainMetrics.add("Eval command", TimeDiff(t));
+            evalCommandMetrics.add(rom.line[zkPC].cmdBefore[j]->opAndFunction, TimeDiff(t));
 #endif
             // In case of an external error, return it
             if (cr.zkResult != ZKR_SUCCESS)
@@ -641,7 +592,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inSR[i] = rom.line[zkPC].inSR;
 
 #ifdef LOG_INX
-            zklog.info("inSR op=" + fr.toString(op7, 16) + ":" + fr.toString(op6, 16) + ":" + fr.toString(op5, 16) + ":" + fr.toString(op4, 16) + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
+            zklog.info("inSR op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -806,7 +757,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inRCX, pols.RCX[i]));
             pols.inRCX[i] = rom.line[zkPC].inRCX;
 #ifdef LOG_INX
-            zklog.info("inRCX op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
+            zklog.info("inCntPaddingPG op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -860,29 +811,27 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             rom.line[zkPC].JMPZ==1 ||
             rom.line[zkPC].call==1)
         {
-            if (!fr.isZero(rom.line[zkPC].ind))
+            if (rom.line[zkPC].ind == 1)
             {
-                if (!fr.toS32(addrRel, fr.mul(rom.line[zkPC].ind, pols.E0[i])))
+                if (!fr.toS32(addrRel, pols.E0[i]))
                 {
                     proverRequest.result = ZKR_SM_MAIN_TOS32;
-                    logError(ctx, "Failed calling fr.toS32() with pols.E0[i]=" + fr.toString(pols.E0[i], 16) + " and ind=" + fr.toString(rom.line[zkPC].ind));
+                    logError(ctx, "Failed calling fr.toS32() with pols.E0[i]=" + fr.toString(pols.E0[i], 16));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
             }
-            if (!fr.isZero(rom.line[zkPC].indRR))
+            if (rom.line[zkPC].indRR == 1)
             {
-                int32_t aux;
-                if (!fr.toS32(aux, fr.mul(rom.line[zkPC].indRR, pols.RR[i])))
+                if (!fr.toS32(addrRel, pols.RR[i]))
                 {
                     proverRequest.result = ZKR_SM_MAIN_TOS32;
-                    logError(ctx, "Failed calling fr.toS32() with pols.RR[i]=" + fr.toString(pols.RR[i], 16) + " and inRR=" + fr.toString(rom.line[zkPC].inRR));
+                    logError(ctx, "Failed calling fr.toS32() with pols.RR[i]=" + fr.toString(pols.RR[i], 16));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
-                addrRel += aux;
             }
-            if (rom.line[zkPC].bOffsetPresent && (rom.line[zkPC].offset!=0))
+            if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
                 addrRel += rom.line[zkPC].offset;
             }
@@ -925,19 +874,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If useCTX, addr = addr + CTX*CTX_OFFSET
         if (rom.line[zkPC].useCTX == 1)
         {
-            // Check context range
-            uint64_t context = fr.toU64(pols.CTX[i]);
-            if (context > CTX_MAX)
-            {
-                proverRequest.result = ZKR_SM_MAIN_INVALID_MEMORY_CTX;
-                logError(ctx, "pols.CTX=" + to_string(context) + " > CTX_MAX=" + to_string(CTX_MAX));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-            // Add to address
             addr += fr.toU64(pols.CTX[i])*CTX_OFFSET;
-
             pols.useCTX[i] = fr.one();
 #ifdef LOG_ADDR
             zklog.info("useCTX addr=" + to_string(addr));
@@ -969,13 +906,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.incStack[i] = fr.fromS32(rom.line[zkPC].incStack);
         }
-        if (!fr.isZero(rom.line[zkPC].ind))
+        if (rom.line[zkPC].ind == 1)
         {
-            pols.ind[i] = rom.line[zkPC].ind;
+            pols.ind[i] = fr.one();
         }
-        if (!fr.isZero(rom.line[zkPC].indRR))
+        if (rom.line[zkPC].indRR == 1)
         {
-            pols.indRR[i] = rom.line[zkPC].indRR;
+            pols.indRR[i] = fr.one();
         }
 
         // If offset, record it the committed polynomial
@@ -1002,175 +939,1074 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Goldilocks::Element fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7;
 
             // If there is no operation specified in freeInTag.op, then get the free value directly from the corresponding source
-            if (rom.line[zkPC].freeInTag.op == op_empty)
-            {
+            if (rom.line[zkPC].freeInTag.op == op_empty) {
                 uint64_t nHits = 0;
 
                 // Memory read free in: get fi=mem[addr], if it exists
                 if ( (rom.line[zkPC].mOp==1) && (rom.line[zkPC].mWR==0) )
                 {
-                    Memory_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
+                    std::unordered_map<uint64_t, Fea>::iterator memIterator;
+                    memIterator = ctx.mem.find(addr);
+                    if (memIterator != ctx.mem.end()) {
+#ifdef LOG_MEMORY
+                        zklog.info("Memory read mRD: addr:" + to_string(addr) + " " + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
+#endif
+                        fi0 = memIterator->second.fe0;
+                        fi1 = memIterator->second.fe1;
+                        fi2 = memIterator->second.fe2;
+                        fi3 = memIterator->second.fe3;
+                        fi4 = memIterator->second.fe4;
+                        fi5 = memIterator->second.fe5;
+                        fi6 = memIterator->second.fe6;
+                        fi7 = memIterator->second.fe7;
+
+                    } else {
+                        fi0 = fr.zero();
+                        fi1 = fr.zero();
+                        fi2 = fr.zero();
+                        fi3 = fr.zero();
+                        fi4 = fr.zero();
+                        fi5 = fr.zero();
+                        fi6 = fr.zero();
+                        fi7 = fr.zero();
+                    }
                     nHits++;
                 }
 
                 // Storage read free in: get a poseidon hash, and read fi=sto[hash]
                 if (rom.line[zkPC].sRD == 1)
                 {
-                    zkresult zkr = Storage_read_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    if (zkr != ZKR_SUCCESS)
+                    zkresult zkResult;
+
+                    // Check the range of the registers A and B
+                    if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling Storage_read_calculate() result=" + zkresult2string(zkr));
+                        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
+                        logError(ctx, "Storage read free in found non-zero A-B storage registers");
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
+
+                    // Get old state root
+                    Goldilocks::Element oldRoot[4];
+                    sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
+
+                    // Track if we used the state override or not
+                    bool bStateOverride = false;
+                    mpz_class value;
+                    SmtGetResult smtGetResult;
+
+                    // If the input contains a state override section, then use it
+                    if (!proverRequest.input.stateOverride.empty())
+                    {
+                        // Get the key address
+                        mpz_class auxScalar;
+                        if (!fea2scalar(fr, auxScalar, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        string keyAddress = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+
+                        // Get the key type
+                        if (!fea2scalar(fr, auxScalar, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        uint64_t keyType = auxScalar.get_ui();
+
+                        // Get the key storage
+                        if (!fea2scalar(fr, auxScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        string keyStorage = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+                        unordered_map<string, OverrideEntry>::const_iterator it;
+                        it = proverRequest.input.stateOverride.find(keyAddress);
+                        if (it != proverRequest.input.stateOverride.end())
+                        {
+                            if ((keyType == rom.constants.SMT_KEY_BALANCE) && it->second.bBalance)
+                            {
+                                value = it->second.balance;
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.constants.SMT_KEY_NONCE) && (it->second.nonce > 0))
+                            {
+                                value = it->second.nonce;
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.constants.SMT_KEY_SC_CODE) && (it->second.code.size() > 0))
+                            {
+                                // Calculate the linear poseidon hash
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                                gettimeofday(&t, NULL);
+#endif
+                                Goldilocks::Element result[4];
+                                linearPoseidon(ctx, it->second.code, result);
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                                mainMetrics.add("Poseidon", TimeDiff(t));
+#endif
+                                // Convert to scalar
+                                fea2scalar(fr, value, result);
+
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.constants.SMT_KEY_SC_LENGTH) && (it->second.code.size() > 0))
+                            {
+                                value = it->second.code.size();
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.state.size() > 0))
+                            {
+                                unordered_map<string, mpz_class>::const_iterator itState;
+                                itState = it->second.state.find(keyStorage);
+                                if (itState != it->second.state.end())
+                                {
+                                    value = itState->second;
+                                }
+                                else
+                                {
+                                    value = 0;
+                                }
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.stateDiff.size() > 0))
+                            {
+                                unordered_map<string, mpz_class>::const_iterator itState;
+                                itState = it->second.stateDiff.find(keyStorage);
+                                if (itState != it->second.stateDiff.end())
+                                {
+                                    value = itState->second;
+                                }
+                                else
+                                {
+                                    value = 0;
+                                }
+                                bStateOverride = true;
+                            }
+                        }
+                    }
+
+                    if (bStateOverride)
+                    {
+                        smtGetResult.value = value;
+
+#ifdef LOG_SMT_KEY_DETAILS
+                    zklog.info("SMT get state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        " oldRoot=" + fea2string(fr, oldRoot) +
+                        " value=" + value.get_str(10));
+#endif
+                    }
+                    else
+                    {
+                        Goldilocks::Element Kin0[12];
+                        Kin0[0] = pols.C0[i];
+                        Kin0[1] = pols.C1[i];
+                        Kin0[2] = pols.C2[i];
+                        Kin0[3] = pols.C3[i];
+                        Kin0[4] = pols.C4[i];
+                        Kin0[5] = pols.C5[i];
+                        Kin0[6] = pols.C6[i];
+                        Kin0[7] = pols.C7[i];
+                        Kin0[8] = fr.zero();
+                        Kin0[9] = fr.zero();
+                        Kin0[10] = fr.zero();
+                        Kin0[11] = fr.zero();
+
+                        Goldilocks::Element Kin1[12];
+                        Kin1[0] = pols.A0[i];
+                        Kin1[1] = pols.A1[i];
+                        Kin1[2] = pols.A2[i];
+                        Kin1[3] = pols.A3[i];
+                        Kin1[4] = pols.A4[i];
+                        Kin1[5] = pols.A5[i];
+                        Kin1[6] = pols.B0[i];
+                        Kin1[7] = pols.B1[i];
+
+                        uint64_t b0 = fr.toU64(pols.B0[i]);
+                        bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        gettimeofday(&t, NULL);
+#endif
+                        // Call poseidon and get the hash key
+                        Goldilocks::Element Kin0Hash[4];
+                        poseidon.hash(Kin0Hash, Kin0);
+
+                        // Reinject the first resulting hash as the capacity for the next poseidon hash
+                        Kin1[8] = Kin0Hash[0];
+                        Kin1[9] = Kin0Hash[1];
+                        Kin1[10] = Kin0Hash[2];
+                        Kin1[11] = Kin0Hash[3];
+
+                        // Call poseidon hash
+                        Goldilocks::Element Kin1Hash[4];
+                        poseidon.hash(Kin1Hash, Kin1);
+
+                        Goldilocks::Element key[4];
+                        key[0] = Kin1Hash[0];
+                        key[1] = Kin1Hash[1];
+                        key[2] = Kin1Hash[2];
+                        key[3] = Kin1Hash[3];
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        mainMetrics.add("Poseidon", TimeDiff(t), 3);
+#endif
+
+#ifdef LOG_STORAGE
+                        zklog.info("Storage read sRD got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
+#endif
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        gettimeofday(&t, NULL);
+#endif
+                        // Collect the keys used to read or write store data
+                        if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
+                        {
+                            proverRequest.nodesKeys.insert(fea2string(fr, key));
+                        }
+
+                        zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+                        if (zkResult != ZKR_SUCCESS)
+                        {
+                            proverRequest.result = zkResult;
+                            logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, key));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        incCounter = smtGetResult.proofHashCounter + 2;
+
+#ifdef LOG_SMT_KEY_DETAILS
+                        zklog.info("SMT get C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                            " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                            " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                            " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                            " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                            " oldRoot=" + fea2string(fr, oldRoot) +
+                            " value=" + value.get_str(10));
+#endif
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        mainMetrics.add("SMT Get", TimeDiff(t));
+#endif
+
+                        if (bProcessBatch)
+                        {
+                            zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value, key);
+                            if (zkResult != ZKR_SUCCESS)
+                            {
+                                proverRequest.result = zkResult;
+                                logError(ctx, string("Failed calling eval_addReadWriteAddress() 1 result=") + zkresult2string(zkResult));
+                                pHashDB->cancelBatch(proverRequest.uuid);
+                                return;
+                            }
+                        }
+                    }
+
+                    scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+
                     nHits++;
+#ifdef LOG_STORAGE
+                    zklog.info("Storage read sRD read from key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " value:" + fr.toString(fi3, 16) + ":" + fr.toString(fi2, 16) + ":" + fr.toString(fi1, 16) + ":" + fr.toString(fi0, 16));
+#endif
                 }
 
                 // Storage write free in: calculate the poseidon hash key, check its entry exists in storage, and update new root hash
                 if (rom.line[zkPC].sWR == 1)
                 {
-                    zkresult zkr = Storage_write_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    if (zkr != ZKR_SUCCESS)
+                    zkresult zkResult;
+
+                    // Check the range of the registers A and B
+                    if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling Storage_write_calculate() result=" + zkresult2string(zkr));
+                        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
+                        logError(ctx, "Storage write free in found non-zero A-B registers");
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
+                    
+                    // Get old state root
+                    Goldilocks::Element oldRoot[4];
+                    sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
+
+                    // Get the value to write
+                    mpz_class value;
+                    if (!fea2scalar(fr, value, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                        logError(ctx, "Failed calling fea2scalar()");
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+
+                    // Track if we used the state override or not
+                    bool bStatusOverride = false;
+
+                    // If the input contains a state override section, then use it
+                    if (!proverRequest.input.stateOverride.empty())
+                    {
+                        // Get the key address
+                        mpz_class auxScalar;
+                        if (!fea2scalar(fr, auxScalar, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        string keyAddress = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+
+                        // Get the key type
+                        if (!fea2scalar(fr, auxScalar, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        uint64_t keyType = auxScalar.get_ui();
+
+                        // Get the key storage
+                        if (!fea2scalar(fr, auxScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        string keyStorage = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+                        unordered_map<string, OverrideEntry>::iterator it;
+                        it = proverRequest.input.stateOverride.find(keyAddress);
+                        if (it != proverRequest.input.stateOverride.end())
+                        {
+                            if ((keyType == rom.constants.SMT_KEY_BALANCE) && it->second.bBalance)
+                            {
+                                it->second.balance = value;
+                                it->second.bBalance = true;
+                                bStatusOverride = true;
+                            }
+                            else if ((keyType == rom.constants.SMT_KEY_NONCE) && (it->second.nonce > 0))
+                            {
+                                it->second.nonce = value.get_ui();
+                                bStatusOverride = true;
+                            }
+                            else if ((keyType == rom.constants.SMT_KEY_SC_CODE) && (it->second.code.size() > 0))
+                            {
+                                it->second.code = proverRequest.input.contractsBytecode[NormalizeTo0xNFormat(value.get_str(16), 64)];
+                                bStatusOverride = true;
+                            }
+                            else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.state.size() > 0))
+                            {
+                                it->second.state[keyStorage] = value;
+                                bStatusOverride = true;
+                            }
+                            else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.stateDiff.size() > 0))
+                            {
+                                it->second.stateDiff[keyStorage] = value;
+                                bStatusOverride = true;
+                            }
+                        }
+                    }
+
+                    if (bStatusOverride)
+                    {
+
+#ifdef LOG_SMT_KEY_DETAILS
+                    zklog.info("SMT set state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        " oldRoot=" + fea2string(fr, oldRoot) +
+                        " value=" + value.get_str(10));
+#endif
+                    }
+                    else
+                    {
+                        // reset lastSWrite
+                        ctx.lastSWrite.reset();
+                        Goldilocks::Element Kin0[12];
+                        Kin0[0] = pols.C0[i];
+                        Kin0[1] = pols.C1[i];
+                        Kin0[2] = pols.C2[i];
+                        Kin0[3] = pols.C3[i];
+                        Kin0[4] = pols.C4[i];
+                        Kin0[5] = pols.C5[i];
+                        Kin0[6] = pols.C6[i];
+                        Kin0[7] = pols.C7[i];
+                        Kin0[8] = fr.zero();
+                        Kin0[9] = fr.zero();
+                        Kin0[10] = fr.zero();
+                        Kin0[11] = fr.zero();
+
+                        Goldilocks::Element Kin1[12];
+                        Kin1[0] = pols.A0[i];
+                        Kin1[1] = pols.A1[i];
+                        Kin1[2] = pols.A2[i];
+                        Kin1[3] = pols.A3[i];
+                        Kin1[4] = pols.A4[i];
+                        Kin1[5] = pols.A5[i];
+                        Kin1[6] = pols.B0[i];
+                        Kin1[7] = pols.B1[i];
+
+                        uint64_t b0 = fr.toU64(pols.B0[i]);
+                        bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+                        bool bIsBlockL2Hash = (b0 > 6);
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        gettimeofday(&t, NULL);
+#endif
+                        // Call poseidon and get the hash key
+                        Goldilocks::Element Kin0Hash[4];
+                        poseidon.hash(Kin0Hash, Kin0);
+
+                        Kin1[8] = Kin0Hash[0];
+                        Kin1[9] = Kin0Hash[1];
+                        Kin1[10] = Kin0Hash[2];
+                        Kin1[11] = Kin0Hash[3];
+
+                        // Call poseidon hash
+                        Goldilocks::Element Kin1Hash[4];
+                        poseidon.hash(Kin1Hash, Kin1);
+
+                        // Store a copy of the data in ctx.lastSWrite
+                        if (!bProcessBatch)
+                        {
+                            for (uint64_t j=0; j<12; j++)
+                            {
+                                ctx.lastSWrite.Kin0[j] = Kin0[j];
+                            }
+                            for (uint64_t j=0; j<12; j++)
+                            {
+                                ctx.lastSWrite.Kin1[j] = Kin1[j];
+                            }
+                        }
+                        for (uint64_t j=0; j<4; j++)
+                        {
+                            ctx.lastSWrite.keyI[j] = Kin0Hash[j];
+                        }
+                        for (uint64_t j=0; j<4; j++)
+                        {
+                            ctx.lastSWrite.key[j] = Kin1Hash[j];
+                        }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        mainMetrics.add("Poseidon", TimeDiff(t));
+#endif
+
+#ifdef LOG_STORAGE
+                        zklog.info("Storage write sWR got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
+#endif
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        gettimeofday(&t, NULL);
+#endif
+                        // Collect the keys used to read or write store data
+                        if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
+                        {
+                            proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));
+                        }
+
+                        zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                        if (zkResult != ZKR_SUCCESS)
+                        {
+                            proverRequest.result = zkResult;
+                            logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, ctx.lastSWrite.key));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
+
+#ifdef LOG_SMT_KEY_DETAILS
+                        zklog.info("SMT set C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                            " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                            " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                            " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                            " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                            " oldRoot=" + fea2string(fr, oldRoot) +
+                            " value=" + value.get_str(10) +
+                            " newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot) +
+                            " siblingLeftChild=" + fea2string(fr, ctx.lastSWrite.res.siblingLeftChild) +
+                            " siblingRightChild=" + fea2string(fr, ctx.lastSWrite.res.siblingRightChild));
+#endif
+                    }
+                    if (bProcessBatch)
+                    {
+                        zkResult = eval_addReadWriteAddress(ctx, value, ctx.lastSWrite.key);
+                        if (zkResult != ZKR_SUCCESS)
+                        {
+                            proverRequest.result = zkResult;
+                            logError(ctx, string("Failed calling eval_addReadWriteAddress() 2 result=") + zkresult2string(zkResult));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                    }
+
+                    // If we just modified a balance
+                    if ( fr.isZero(pols.B0[i]) && fr.isZero(pols.B1[i]) )
+                    {
+                        mpz_class balanceDifference = ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue;
+                        ctx.totalTransferredBalance += balanceDifference;
+                        //cout << "Set balance: oldValue=" << ctx.lastSWrite.res.oldValue.get_str(10) <<
+                        //        " newValue=" << ctx.lastSWrite.res.newValue.get_str(10) <<
+                        //        " difference=" << balanceDifference.get_str(10) <<
+                        //        " total=" << ctx.totalTransferredBalance.get_str(10) << endl;
+                    }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                    mainMetrics.add("SMT Set", TimeDiff(t));
+#endif
+                    ctx.lastSWrite.step = i;
+
+                    sr4to8(fr, ctx.lastSWrite.newRoot[0], ctx.lastSWrite.newRoot[1], ctx.lastSWrite.newRoot[2], ctx.lastSWrite.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
+#ifdef LOG_STORAGE
+                    zklog.info("Storage write sWR stored at key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " newRoot: " + fr.toString(ctx.lastSWrite.res.newRoot, 16));
+#endif
                 }
 
                 // HashK free in
-                if ((rom.line[zkPC].hashK == 1) || (rom.line[zkPC].hashK1 == 1))
+                if ( (rom.line[zkPC].hashK == 1) || (rom.line[zkPC].hashK1 == 1) )
                 {
-                    zkresult zkr = HashK_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
-                    if (zkr != ZKR_SUCCESS)
+                    unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
+                    // If there is no entry in the hash database for this address, then create a new one
+                    hashKIterator = ctx.hashK.find(addr);
+                    if (hashKIterator == ctx.hashK.end())
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling HashK_calculate() result=" + zkresult2string(zkr));
+                        HashValue hashValue;
+                        ctx.hashK[addr] = hashValue;
+                        hashKIterator = ctx.hashK.find(addr);
+                        zkassert(hashKIterator != ctx.hashK.end());
+                    }
+
+                    // Get the size of the hash from D0
+                    uint64_t size = 1;
+                    if (rom.line[zkPC].hashK == 1)
+                    {
+                        size = fr.toU64(pols.D0[i]);
+                        if (size>32)
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
+                            logError(ctx, "Invalid size>32 for hashK 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                    }
+
+                    // Get the positon of the hash from HASHPOS
+                    int64_t iPos;
+                    fr.toS64(iPos, pols.HASHPOS[i]);
+                    if (iPos < 0)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;
+                        logError(ctx, "Invalid pos<0 for HashK 1: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
+                    uint64_t pos = iPos;
+
+                    // Check that pos+size do not exceed data size
+                    if ( (pos+size) > hashKIterator->second.data.size())
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                        logError(ctx, "HashK 1 invalid size of hash: pos=" + to_string(pos) + " + size=" + to_string(size) + " > data.size=" + to_string(hashKIterator->second.data.size()));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+
+                    // Copy data into fi
+                    mpz_class s;
+                    for (uint64_t j=0; j<size; j++)
+                    {
+                        uint8_t data = hashKIterator->second.data[pos+j];
+                        s = (s<<uint64_t(8)) + mpz_class(data);
+                    }
+                    scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+
                     nHits++;
+
+#ifdef LOG_HASHK
+                    zklog.info("hashK 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
+#endif
                 }
 
                 // HashKDigest free in
                 if (rom.line[zkPC].hashKDigest == 1)
                 {
-                    zkresult zkr = HashKDigest_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
-                    if (zkr != ZKR_SUCCESS)
+                    unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
+                    // If there is no entry in the hash database for this address, this is an error
+                    hashKIterator = ctx.hashK.find(addr);
+                    if (hashKIterator == ctx.hashK.end())
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling HashKDigest_calculate() result=" + zkresult2string(zkr));
+                        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND;
+                        logError(ctx, "HashKDigest 1: digest not defined for addr=" + to_string(addr));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-                    nHits++;
-                }
 
-                // HashKlen free in
-                if (rom.line[zkPC].hashKLen)
-                {
-                    HashKLen_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
+                    // If digest was not calculated, this is an error
+                    if (!hashKIterator->second.lenCalled)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED;
+                        logError(ctx, "HashKDigest 1: digest not calculated for addr=" + to_string(addr) + ".  Call hashKLen to finish digest.");
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+
+                    // Copy digest into fi
+                    scalar2fea(fr, hashKIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+
                     nHits++;
+
+#ifdef LOG_HASHK
+                    zklog.info("hashKDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashK[addr].digest.get_str(16));
+#endif
                 }
 
                 // HashP free in
-                if ((rom.line[zkPC].hashP == 1) || (rom.line[zkPC].hashP1 == 1))
+                if ( (rom.line[zkPC].hashP == 1) || (rom.line[zkPC].hashP1 == 1) )
                 {
-                    zkresult zkr = HashP_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
-                    if (zkr != ZKR_SUCCESS)
+                    unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+
+                    // If there is no entry in the hash database for this address, then create a new one
+                    hashPIterator = ctx.hashP.find(addr);
+                    if (hashPIterator == ctx.hashP.end())
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling HashP_calculate() result=" + zkresult2string(zkr));
+                        HashValue hashValue;
+                        ctx.hashP[addr] = hashValue;
+                        hashPIterator = ctx.hashP.find(addr);
+                        zkassert(hashPIterator != ctx.hashP.end());
+                    }
+
+                    // Get the size of the hash from D0
+                    uint64_t size = 1;
+                    if (rom.line[zkPC].hashP == 1)
+                    {
+                        size = fr.toU64(pols.D0[i]);
+                        if (size>32)
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
+                            logError(ctx, "Invalid size>32 for hashP 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                    }
+
+                    // Get the positon of the hash from HASHPOS
+                    int64_t iPos;
+                    fr.toS64(iPos, pols.HASHPOS[i]);
+                    if (iPos < 0)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;
+                        logError(ctx, "Invalid pos<0 for HashP 1: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
+                    uint64_t pos = iPos;
+
+                    // Check that pos+size do not exceed data size
+                    if ( (pos+size) > hashPIterator->second.data.size())
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                        logError(ctx, "HashP 1 invalid size of hash: pos=" + to_string(pos) + " size=" + to_string(size) + " data.size=" + to_string(ctx.hashP[addr].data.size()));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+
+                    // Copy data into fi
+                    mpz_class s;
+                    for (uint64_t j=0; j<size; j++)
+                    {
+                        uint8_t data = hashPIterator->second.data[pos+j];
+                        s = (s<<uint64_t(8)) + mpz_class(data);
+                    }
+                    scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+
                     nHits++;
                 }
 
                 // HashPDigest free in
                 if (rom.line[zkPC].hashPDigest == 1)
                 {
-                    zkresult zkr = HashPDigest_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
-                    if (zkr != ZKR_SUCCESS)
+                    unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+
+                    // If there is no entry in the hash database for this address, this is an error
+                    hashPIterator = ctx.hashP.find(addr);
+                    if (hashPIterator == ctx.hashP.end())
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling HashPDigest_calculate() result=" + zkresult2string(zkr));
+                        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND;
+                        logError(ctx, "HashPDigest 1: digest not defined addr=" + to_string(addr));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-                    nHits++;
-                }
 
-                // HashPLen free in
-                if (rom.line[zkPC].hashPLen)
-                {
-                    HashPLen_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
+                    // If digest was not calculated, this is an error
+                    if (!hashPIterator->second.lenCalled)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_NOT_COMPLETED;
+                        logError(ctx, "HashPDigest 1: digest not calculated.  Call hashPLen to finish digest.");
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+
+                    // Copy digest into fi
+                    scalar2fea(fr, hashPIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+
                     nHits++;
                 }
 
                 // HashS free in
-                if ((rom.line[zkPC].hashS == 1) || (rom.line[zkPC].hashS1 == 1))
+                if ( (rom.line[zkPC].hashS == 1) || (rom.line[zkPC].hashS1 == 1) )
                 {
-                    zkresult zkr = HashS_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
-                    if (zkr != ZKR_SUCCESS)
+                    unordered_map< uint64_t, HashValue >::iterator hashSIterator;
+
+                    // If there is no entry in the hash database for this address, then create a new one
+                    hashSIterator = ctx.hashS.find(addr);
+                    if (hashSIterator == ctx.hashS.end())
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling HashS_calculate() result=" + zkresult2string(zkr));
+                        HashValue hashValue;
+                        ctx.hashS[addr] = hashValue;
+                        hashSIterator = ctx.hashS.find(addr);
+                        zkassert(hashSIterator != ctx.hashS.end());
+                    }
+
+                    // Get the size of the hash from D0
+                    uint64_t size = 1;
+                    if (rom.line[zkPC].hashS == 1)
+                    {
+                        size = fr.toU64(pols.D0[i]);
+                        if (size>32)
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_HASHS_SIZE_OUT_OF_RANGE;
+                            logError(ctx, "Invalid size>32 for hashS 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                    }
+
+                    // Get the positon of the hash from HASHPOS
+                    int64_t iPos;
+                    fr.toS64(iPos, pols.HASHPOS[i]);
+                    if (iPos < 0)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHS_POSITION_NEGATIVE;
+                        logError(ctx, "Invalid pos<0 for HashS 1: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
+                    uint64_t pos = iPos;
+
+                    // Check that pos+size do not exceed data size
+                    if ( (pos+size) > hashSIterator->second.data.size())
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHS_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                        logError(ctx, "HashS 1 invalid size of hash: pos=" + to_string(pos) + " + size=" + to_string(size) + " > data.size=" + to_string(hashSIterator->second.data.size()));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+
+                    // Copy data into fi
+                    mpz_class s;
+                    for (uint64_t j=0; j<size; j++)
+                    {
+                        uint8_t data = hashSIterator->second.data[pos+j];
+                        s = (s<<uint64_t(8)) + mpz_class(data);
+                    }
+                    scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+
                     nHits++;
+
+#ifdef LOG_HASHS
+                    zklog.info("hashS 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
+#endif
                 }
 
                 // HashSDigest free in
                 if (rom.line[zkPC].hashSDigest == 1)
                 {
-                    zkresult zkr = HashSDigest_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
-                    if (zkr != ZKR_SUCCESS)
+                    unordered_map< uint64_t, HashValue >::iterator hashSIterator;
+
+                    // If there is no entry in the hash database for this address, this is an error
+                    hashSIterator = ctx.hashS.find(addr);
+                    if (hashSIterator == ctx.hashS.end())
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling HashSDigest_calculate() result=" + zkresult2string(zkr));
+                        proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_ADDRESS_NOT_FOUND;
+                        logError(ctx, "HashSDigest 1: digest not defined for addr=" + to_string(addr));
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-                    nHits++;
-                }
 
-                // HashSLen free in
-                if (rom.line[zkPC].hashSLen)
-                {
-                    HashSLen_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7, addr);
+                    // If digest was not calculated, this is an error
+                    if (!hashSIterator->second.lenCalled)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_NOT_COMPLETED;
+                        logError(ctx, "HashSDigest 1: digest not calculated for addr=" + to_string(addr) + ".  Call hashSLen to finish digest.");
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+
+                    // Copy digest into fi
+                    scalar2fea(fr, hashSIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);
+
                     nHits++;
+
+#ifdef LOG_HASHS
+                    zklog.info("hashSDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashS[addr].digest.get_str(16));
+#endif
                 }
 
                 // Binary free in
                 if (rom.line[zkPC].bin == 1)
                 {
-                    zkresult zkr = Binary_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    if (zkr != ZKR_SUCCESS)
+                    if (rom.line[zkPC].binOpcode == 0) // ADD
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling Binary_calculate() result=" + zkresult2string(zkr));
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = (a + b) & ScalarMask256;
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
                     }
-                    nHits++;
+                    else if (rom.line[zkPC].binOpcode == 1) // SUB
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = (a - b + ScalarTwoTo256) & ScalarMask256;
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
+                    }
+                    else if (rom.line[zkPC].binOpcode == 2) // LT
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = (a < b);
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
+                    }
+                    else if (rom.line[zkPC].binOpcode == 3) // SLT
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (a >= ScalarTwoTo255) a = a - ScalarTwoTo256;
+                        if (b >= ScalarTwoTo255) b = b - ScalarTwoTo256;
+                        c = (a < b);
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
+                    }
+                    else if (rom.line[zkPC].binOpcode == 4) // EQ
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = (a == b);
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
+                    }
+                    else if (rom.line[zkPC].binOpcode == 5) // AND
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = (a & b);
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
+                    }
+                    else if (rom.line[zkPC].binOpcode == 6) // OR
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = (a | b);
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
+                    }
+                    else if (rom.line[zkPC].binOpcode == 7) // XOR
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = (a ^ b);
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
+                    } else if ( rom.line[zkPC].binOpcode == 8 ) // LT4
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = lt4(a, b);
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
+                    }
+                    else
+                    {
+                        logError(ctx, "Invalid binary operation: opcode=" + to_string(rom.line[zkPC].binOpcode));
+                        exitProcess();
+                    }
                 }
 
-                // Mem align read free in
+                // Mem allign read free in
                 if (rom.line[zkPC].memAlignRD==1)
                 {
-                    zkresult zkr = Memalign_calculate(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
-                    if (zkr != ZKR_SUCCESS)
+                    mpz_class m0;
+                    if (!fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
                     {
-                        proverRequest.result = zkr;
-                        logError(ctx, "Failed calling Memalign_calculate() result=" + zkresult2string(zkr));
+                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                        logError(ctx, "Failed calling fea2scalar(pols.A)");
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
+                    mpz_class m1;
+                    if (!fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                        logError(ctx, "Failed calling fea2scalar(pols.B)");
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                    mpz_class offsetScalar;
+                    if (!fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                        logError(ctx, "Failed calling fea2scalar(pols.C)");
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                    if (offsetScalar<0 || offsetScalar>32)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
+                        logError(ctx, "MemAlign out of range offset=" + offsetScalar.get_str());
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                    uint64_t offset = offsetScalar.get_ui();
+                    mpz_class leftV;
+                    leftV = (m0 << (offset*8)) & ScalarMask256;
+                    mpz_class rightV;
+                    rightV = (m1 >> (256 - offset*8)) & (ScalarMask256 >> (256 - offset*8));
+                    mpz_class _V;
+                    _V = leftV | rightV;
+                    scalar2fea(fr, _V, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
                 }
 
@@ -1187,15 +2023,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else
             {
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                gettimeofday(&ctx.t, NULL);
+                gettimeofday(&t, NULL);
 #endif
                 // Call evalCommand()
                 CommandResult cr;
                 evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                ctx.mainMetrics.add("Eval command", TimeDiff(ctx.t));
-                ctx.evalCommandMetrics.add(rom.line[zkPC].freeInTag.opAndFunction, TimeDiff(ctx.t));
+                mainMetrics.add("Eval command", TimeDiff(t));
+                evalCommandMetrics.add(rom.line[zkPC].freeInTag.opAndFunction, TimeDiff(t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -1207,7 +2043,70 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Copy fi=command result, depending on its type
-                cr.toFea(ctx, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                if (cr.type == crt_fea)
+                {
+                    fi0 = cr.fea0;
+                    fi1 = cr.fea1;
+                    fi2 = cr.fea2;
+                    fi3 = cr.fea3;
+                    fi4 = cr.fea4;
+                    fi5 = cr.fea5;
+                    fi6 = cr.fea6;
+                    fi7 = cr.fea7;
+                }
+                else if (cr.type == crt_fe)
+                {
+                    fi0 = cr.fe;
+                    fi1 = fr.zero();
+                    fi2 = fr.zero();
+                    fi3 = fr.zero();
+                    fi4 = fr.zero();
+                    fi5 = fr.zero();
+                    fi6 = fr.zero();
+                    fi7 = fr.zero();
+                }
+                else if (cr.type == crt_scalar)
+                {
+                    scalar2fea(fr, cr.scalar, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                }
+                else if (cr.type == crt_u16)
+                {
+                    fi0 = fr.fromU64(cr.u16);
+                    fi1 = fr.zero();
+                    fi2 = fr.zero();
+                    fi3 = fr.zero();
+                    fi4 = fr.zero();
+                    fi5 = fr.zero();
+                    fi6 = fr.zero();
+                    fi7 = fr.zero();
+                }
+                else if (cr.type == crt_u32)
+                {
+                    fi0 = fr.fromU64(cr.u32);
+                    fi1 = fr.zero();
+                    fi2 = fr.zero();
+                    fi3 = fr.zero();
+                    fi4 = fr.zero();
+                    fi5 = fr.zero();
+                    fi6 = fr.zero();
+                    fi7 = fr.zero();
+                }
+                else if (cr.type == crt_u64)
+                {
+                    fi0 = fr.fromU64(cr.u64);
+                    fi1 = fr.zero();
+                    fi2 = fr.zero();
+                    fi3 = fr.zero();
+                    fi4 = fr.zero();
+                    fi5 = fr.zero();
+                    fi6 = fr.zero();
+                    fi7 = fr.zero();
+                }
+                else
+                {
+                    logError(ctx, "Unexpected command result type: " + to_string(cr.type));
+                    exitProcess();
+                }
             }
 
             // Store polynomial FREE=fi
@@ -1272,19 +2171,102 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Memory operation instruction
         if (rom.line[zkPC].mOp == 1)
         {
-            zkresult zkr = Memory_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            pols.mOp[i] = fr.one();
+
+            // If mWR, mem[addr]=op
+            if (rom.line[zkPC].mWR == 1)
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling Memory_verify() result=" + zkresult2string(zkr));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
+                pols.mWR[i] = fr.one();
+
+                ctx.mem[addr].fe0 = op0;
+                ctx.mem[addr].fe1 = op1;
+                ctx.mem[addr].fe2 = op2;
+                ctx.mem[addr].fe3 = op3;
+                ctx.mem[addr].fe4 = op4;
+                ctx.mem[addr].fe5 = op5;
+                ctx.mem[addr].fe6 = op6;
+                ctx.mem[addr].fe7 = op7;
+
+                if (!bProcessBatch)
+                {
+                    MemoryAccess memoryAccess;
+                    memoryAccess.bIsWrite = true;
+                    memoryAccess.address = addr;
+                    memoryAccess.pc = i;
+                    memoryAccess.fe0 = op0;
+                    memoryAccess.fe1 = op1;
+                    memoryAccess.fe2 = op2;
+                    memoryAccess.fe3 = op3;
+                    memoryAccess.fe4 = op4;
+                    memoryAccess.fe5 = op5;
+                    memoryAccess.fe6 = op6;
+                    memoryAccess.fe7 = op7;
+                    required.Memory.push_back(memoryAccess);
+                }
+
+#ifdef LOG_MEMORY
+                zklog.info("Memory write mWR: addr:" + to_string(addr) + " " + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
+#endif
+            }
+            else
+            {
+                if (!bProcessBatch)
+                {
+                    MemoryAccess memoryAccess;
+                    memoryAccess.bIsWrite = false;
+                    memoryAccess.address = addr;
+                    memoryAccess.pc = i;
+                    memoryAccess.fe0 = op0;
+                    memoryAccess.fe1 = op1;
+                    memoryAccess.fe2 = op2;
+                    memoryAccess.fe3 = op3;
+                    memoryAccess.fe4 = op4;
+                    memoryAccess.fe5 = op5;
+                    memoryAccess.fe6 = op6;
+                    memoryAccess.fe7 = op7;
+                    required.Memory.push_back(memoryAccess);
+                }
+
+                if (ctx.mem.find(addr) != ctx.mem.end())
+                {
+                    if ( (!fr.equal(ctx.mem[addr].fe0, op0)) ||
+                         (!fr.equal(ctx.mem[addr].fe1, op1)) ||
+                         (!fr.equal(ctx.mem[addr].fe2, op2)) ||
+                         (!fr.equal(ctx.mem[addr].fe3, op3)) ||
+                         (!fr.equal(ctx.mem[addr].fe4, op4)) ||
+                         (!fr.equal(ctx.mem[addr].fe5, op5)) ||
+                         (!fr.equal(ctx.mem[addr].fe6, op6)) ||
+                         (!fr.equal(ctx.mem[addr].fe7, op7)) )
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_MEMORY;
+                        logError(ctx, "Memory Read does not match op=" + fea2stringchain(fr, op0, op1, op2, op3, op4, op5, op6, op7) +
+                            " mem=" + fea2stringchain(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                }
+                else
+                {
+                    if ( (!fr.isZero(op0)) ||
+                         (!fr.isZero(op1)) ||
+                         (!fr.isZero(op2)) ||
+                         (!fr.isZero(op3)) ||
+                         (!fr.isZero(op4)) ||
+                         (!fr.isZero(op5)) ||
+                         (!fr.isZero(op6)) ||
+                         (!fr.isZero(op7)) )
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_MEMORY;
+                        logError(ctx, "Memory Read does not match (op!=0)");
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                }
             }
         }
 
-
-        // overwrite 'op' when hitting 'checkFirstTxType' label
-        if ((zkPC == rom.labels.checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
+        // overwrite 'op' when hiting 'checkFirstTxType' label
+        if ((zkPC == checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
         {
             op0 = fr.one();
             op1 = fr.one();
@@ -1296,8 +2278,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op7 = fr.one();
         }
 
-        // overwrite 'op' when hitting 'writeBlockInfoRoot' label
-        if ((zkPC == rom.labels.writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
+        // overwrite 'op' when hiting 'writeBlockInfoRoot' label
+        if ((zkPC == writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
         {
             op0 = fr.zero();
             op1 = fr.zero();
@@ -1312,149 +2294,1227 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Storage read instruction
         if (rom.line[zkPC].sRD == 1)
         {
-            zkresult zkr = Storage_read_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch) pols.sRD[i] = fr.one();
+
+            Goldilocks::Element Kin0[12];
+            Kin0[0] = pols.C0[i];
+            Kin0[1] = pols.C1[i];
+            Kin0[2] = pols.C2[i];
+            Kin0[3] = pols.C3[i];
+            Kin0[4] = pols.C4[i];
+            Kin0[5] = pols.C5[i];
+            Kin0[6] = pols.C6[i];
+            Kin0[7] = pols.C7[i];
+            Kin0[8] = fr.zero();
+            Kin0[9] = fr.zero();
+            Kin0[10] = fr.zero();
+            Kin0[11] = fr.zero();
+
+            Goldilocks::Element Kin1[12];
+            Kin1[0] = pols.A0[i];
+            Kin1[1] = pols.A1[i];
+            Kin1[2] = pols.A2[i];
+            Kin1[3] = pols.A3[i];
+            Kin1[4] = pols.A4[i];
+            Kin1[5] = pols.A5[i];
+            Kin1[6] = pols.B0[i];
+            Kin1[7] = pols.B1[i];
+
+            uint64_t b0 = fr.toU64(pols.B0[i]);
+            bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
+            if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling Storage_read_verify() result=" + zkresult2string(zkr));
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
+                logError(ctx, "Storage read instruction found non-zero A-B registers");
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
+            }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+            gettimeofday(&t, NULL);
+#endif
+            // Call poseidon and get the hash key
+            Goldilocks::Element Kin0Hash[4];
+            poseidon.hash(Kin0Hash, Kin0);
+
+            Goldilocks::Element keyI[4];
+            keyI[0] = Kin0Hash[0];
+            keyI[1] = Kin0Hash[1];
+            keyI[2] = Kin0Hash[2];
+            keyI[3] = Kin0Hash[3];
+
+            Kin1[8] = Kin0Hash[0];
+            Kin1[9] = Kin0Hash[1];
+            Kin1[10] = Kin0Hash[2];
+            Kin1[11] = Kin0Hash[3];
+
+            Goldilocks::Element Kin1Hash[4];
+            poseidon.hash(Kin1Hash, Kin1);
+
+            // Store PoseidonG required data
+            if (!bProcessBatch)
+            {
+                // Declare PoseidonG required data
+                array<Goldilocks::Element,17> pg;
+
+                // Store PoseidonG required data
+                for (uint64_t j=0; j<12; j++)
+                {
+                    pg[j] = Kin0[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    pg[12+j] = Kin0Hash[j];
+                }
+                pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
+                required.PoseidonG.push_back(pg);
+
+                // Store PoseidonG required data
+                for (uint64_t j=0; j<12; j++)
+                {
+                    pg[j] = Kin1[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    pg[12+j] = Kin1Hash[j];
+                }
+                pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
+                required.PoseidonG.push_back(pg);
+            }
+
+            Goldilocks::Element key[4];
+            key[0] = Kin1Hash[0];
+            key[1] = Kin1Hash[1];
+            key[2] = Kin1Hash[2];
+            key[3] = Kin1Hash[3];
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+            mainMetrics.add("Poseidon", TimeDiff(t), 3);
+#endif
+
+#ifdef LOG_STORAGE
+            zklog.info("Storage read sRD got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
+#endif
+            Goldilocks::Element oldRoot[4];
+            sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+            gettimeofday(&t, NULL);
+#endif
+
+            // Collect the keys used to read or write store data
+            if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
+            {
+                proverRequest.nodesKeys.insert(fea2string(fr, key));
+            }
+
+            SmtGetResult smtGetResult;
+            mpz_class value;
+            zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+            if (zkResult != ZKR_SUCCESS)
+            {
+                proverRequest.result = zkResult;
+                logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, key));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            incCounter = smtGetResult.proofHashCounter + 2;
+            //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
+
+            if (bProcessBatch)
+            {
+                zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value, key);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    proverRequest.result = zkResult;
+                    logError(ctx, string("Failed calling eval_addReadWriteAddress() 3 result=") + zkresult2string(zkResult));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+            }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+            mainMetrics.add("SMT Get", TimeDiff(t));
+#endif
+            if (!bProcessBatch)
+            {
+                SmtAction smtAction;
+                smtAction.bIsSet = false;
+                smtAction.getResult = smtGetResult;
+                required.Storage.push_back(smtAction);
+            }
+
+#ifdef LOG_STORAGE
+            zklog.info("Storage read sRD read from key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " value:" + value.get_str(16));
+#endif
+            mpz_class opScalar;
+            if (!fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            if (smtGetResult.value != opScalar)
+            {
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_READ_MISMATCH;
+                logError(ctx, "Storage read does not match: smtGetResult.value=" + smtGetResult.value.get_str() + " opScalar=" + opScalar.get_str());
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            for (uint64_t k=0; k<4; k++)
+            {
+                pols.sKeyI[k][i] = keyI[k];
+                pols.sKey[k][i] = key[k];
             }
         }
 
         // Storage write instruction
         if (rom.line[zkPC].sWR == 1)
         {
-            zkresult zkr = Storage_write_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required);
-            if (zkr != ZKR_SUCCESS)
+            // Copy ROM flags into the polynomials
+            if (!bProcessBatch) pols.sWR[i] = fr.one();
+
+            if ( (!bProcessBatch && (ctx.lastSWrite.step == 0)) || (ctx.lastSWrite.step != i) )
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling Storage_write_verify() result=" + zkresult2string(zkr));
+                // Reset lastSWrite
+                ctx.lastSWrite.reset();
+
+                Goldilocks::Element Kin0[12];
+                Kin0[0] = pols.C0[i];
+                Kin0[1] = pols.C1[i];
+                Kin0[2] = pols.C2[i];
+                Kin0[3] = pols.C3[i];
+                Kin0[4] = pols.C4[i];
+                Kin0[5] = pols.C5[i];
+                Kin0[6] = pols.C6[i];
+                Kin0[7] = pols.C7[i];
+                Kin0[8] = fr.zero();
+                Kin0[9] = fr.zero();
+                Kin0[10] = fr.zero();
+                Kin0[11] = fr.zero();
+
+                Goldilocks::Element Kin1[12];
+                Kin1[0] = pols.A0[i];
+                Kin1[1] = pols.A1[i];
+                Kin1[2] = pols.A2[i];
+                Kin1[3] = pols.A3[i];
+                Kin1[4] = pols.A4[i];
+                Kin1[5] = pols.A5[i];
+                Kin1[6] = pols.B0[i];
+                Kin1[7] = pols.B1[i];
+
+                uint64_t b0 = fr.toU64(pols.B0[i]);
+                bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+                bool bIsBlockL2Hash = (b0 > 6);
+
+                if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
+                {
+                    proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
+                    logError(ctx, "Storage write instruction found non-zero A-B registers");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                gettimeofday(&t, NULL);
+#endif
+                // Call poseidon and get the hash key
+                Goldilocks::Element Kin0Hash[4];
+                poseidon.hash(Kin0Hash, Kin0);
+
+                Kin1[8] = Kin0Hash[0];
+                Kin1[9] = Kin0Hash[1];
+                Kin1[10] = Kin0Hash[2];
+                Kin1[11] = Kin0Hash[3];
+
+                Goldilocks::Element Kin1Hash[4];
+                poseidon.hash(Kin1Hash, Kin1);
+
+                // Store a copy of the data in ctx.lastSWrite
+                if (!bProcessBatch)
+                {
+                    for (uint64_t j=0; j<12; j++)
+                    {
+                        ctx.lastSWrite.Kin0[j] = Kin0[j];
+                    }
+                    for (uint64_t j=0; j<12; j++)
+                    {
+                        ctx.lastSWrite.Kin1[j] = Kin1[j];
+                    }
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    ctx.lastSWrite.keyI[j] = Kin0Hash[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    ctx.lastSWrite.key[j] = Kin1Hash[j];
+                }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                mainMetrics.add("Poseidon", TimeDiff(t));
+#endif
+                // Call SMT to get the new Merkel Tree root hash
+                mpz_class scalarD;
+                if (!fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                gettimeofday(&t, NULL);
+#endif
+                Goldilocks::Element oldRoot[4];
+                sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
+
+                // Collect the keys used to read or write store data
+                if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
+                {
+                    proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));
+                }
+
+                zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    proverRequest.result = zkResult;
+                    logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, ctx.lastSWrite.key));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
+
+                if (bProcessBatch)
+                {
+                    zkResult = eval_addReadWriteAddress(ctx, scalarD, ctx.lastSWrite.key);
+                    if (zkResult != ZKR_SUCCESS)
+                    {
+                        proverRequest.result = zkResult;
+                        logError(ctx, string("Failed calling eval_addReadWriteAddress() 4 result=") + zkresult2string(zkResult));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                }
+
+                // If we just modified a balance
+                if ( fr.isZero(pols.B0[i]) && fr.isZero(pols.B1[i]) )
+                {
+                    mpz_class balanceDifference = ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue;
+                    ctx.totalTransferredBalance += balanceDifference;
+                }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                mainMetrics.add("SMT Set", TimeDiff(t));
+#endif
+                ctx.lastSWrite.step = i;
+            }
+
+            // Store PoseidonG required data
+            if (!bProcessBatch)
+            {
+                // Declare PoseidonG required data
+                array<Goldilocks::Element,17> pg;
+
+                // Store PoseidonG required data
+                for (uint64_t j=0; j<12; j++)
+                {
+                    pg[j] = ctx.lastSWrite.Kin0[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    pg[12+j] = ctx.lastSWrite.keyI[j];
+                }
+                pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
+                required.PoseidonG.push_back(pg);
+
+                // Store PoseidonG required data
+                for (uint64_t j=0; j<12; j++)
+                {
+                    pg[j] = ctx.lastSWrite.Kin1[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    pg[12+j] = ctx.lastSWrite.key[j];
+                }
+                pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
+                required.PoseidonG.push_back(pg);
+            }
+
+            if (!bProcessBatch)
+            {
+                SmtAction smtAction;
+                smtAction.bIsSet = true;
+                smtAction.setResult = ctx.lastSWrite.res;
+                zklog.info("SMT SIBLINGS SIZE=" + to_string(smtAction.setResult.siblings.size()));
+                required.Storage.push_back(smtAction);
+            }
+
+            // Check that the new root hash equals op0
+            Goldilocks::Element oldRoot[4];
+            sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
+
+            if ( !fr.equal(ctx.lastSWrite.newRoot[0], oldRoot[0]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[1], oldRoot[1]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[2], oldRoot[2]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[3], oldRoot[3]) )
+            {
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;
+                logError(ctx, "Storage write does not match: ctx.lastSWrite.newRoot: " + fr.toString(ctx.lastSWrite.newRoot[3], 16) + ":" + fr.toString(ctx.lastSWrite.newRoot[2], 16) + ":" + fr.toString(ctx.lastSWrite.newRoot[1], 16) + ":" + fr.toString(ctx.lastSWrite.newRoot[0], 16) +
+                    " oldRoot: " + fr.toString(oldRoot[3], 16) + ":" + fr.toString(oldRoot[2], 16) + ":" + fr.toString(oldRoot[1], 16) + ":" + fr.toString(oldRoot[0], 16));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-        }
 
-        
+            Goldilocks::Element fea[4];
+            sr8to4(fr, op0, op1, op2, op3, op4, op5, op6, op7, fea[0], fea[1], fea[2], fea[3]);
+            if ( !fr.equal(ctx.lastSWrite.newRoot[0], fea[0]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[1], fea[1]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[2], fea[2]) ||
+                 !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )
+            {
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;
+                logError(ctx, "Storage write does not match: ctx.lastSWrite.newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot) + " op=" + fea2string(fr, fea));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            for (uint64_t k=0; k<4; k++)
+            {
+                pols.sKeyI[k][i] =  ctx.lastSWrite.keyI[k];
+                pols.sKey[k][i] = ctx.lastSWrite.key[k];
+            }
+        }
 
         // HashK instruction
         if ( (rom.line[zkPC].hashK == 1) || (rom.line[zkPC].hashK1 == 1) )
         {
-            zkresult zkr = HashK_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch)
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling HashK_verify() result=" + zkresult2string(zkr));
+                if (rom.line[zkPC].hashK == 1)
+                {
+                    pols.hashK[i] = fr.one();
+                }
+                else
+                {
+                    pols.hashK1[i] = fr.one();
+                }
+            }
+
+            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
+            // If there is no entry in the hash database for this address, then create a new one
+            hashKIterator = ctx.hashK.find(addr);
+            if (hashKIterator == ctx.hashK.end())
+            {
+                HashValue hashValue;
+                ctx.hashK[addr] = hashValue;
+                hashKIterator = ctx.hashK.find(addr);
+                zkassert(hashKIterator != ctx.hashK.end());
+            }
+
+            // Get the size of the hash from D0
+            uint64_t size = 1;
+            if (rom.line[zkPC].hashK == 1)
+            {
+                size = fr.toU64(pols.D0[i]);
+                if (size>32)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "Invalid size>32 for hashK 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+            }
+
+            // Get the position of the hash from HASHPOS
+            int64_t iPos;
+            fr.toS64(iPos, pols.HASHPOS[i]);
+            if (iPos < 0)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;
+                logError(ctx, string("Invalid pos<0 for HashK 2: pols.HASHPOS[i]=") + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
+            uint64_t pos = iPos;
+
+            // Get contents of opN into a
+            mpz_class a;
+            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Fill the hash data vector with chunks of the scalar value
+            mpz_class result;
+            for (uint64_t j=0; j<size; j++)
+            {
+                result = (a >> ((size-j-1)*8)) & ScalarMask8;
+                uint8_t bm = result.get_ui();
+                if (hashKIterator->second.data.size() == (pos+j))
+                {
+                    hashKIterator->second.data.push_back(bm);
+                }
+                else if (hashKIterator->second.data.size() < (pos+j))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "HashK 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashK[addr].data.size()));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                else
+                {
+                    uint8_t bh;
+                    bh = hashKIterator->second.data[pos+j];
+                    if (bm != bh)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHK_VALUE_MISMATCH;
+                        logError(ctx, "HashK 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                }
+            }
+
+            // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size
+            mpz_class paddingA = a >> (size*8);
+            if (paddingA != 0)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHK_PADDING_MISMATCH;
+                logError(ctx, "HashK 2 incoherent size=" + to_string(size) + " a=" + a.get_str(16) + " paddingA=" + paddingA.get_str(16));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Record the read operation
+            unordered_map<uint64_t, uint64_t>::iterator readsIterator;
+            readsIterator = hashKIterator->second.reads.find(pos);
+            if ( readsIterator != hashKIterator->second.reads.end() )
+            {
+                if (readsIterator->second != size)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_MISMATCH;
+                    logError(ctx, "HashK 2 different read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos) + " ctx.hashK[addr].reads[pos]=" + to_string(ctx.hashK[addr].reads[pos]) + " size=" + to_string(size));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+            }
+            else
+            {
+                ctx.hashK[addr].reads[pos] = size;
+            }
+
+            // Store the size
+            incHashPos = size;
+
+#ifdef LOG_HASHK
+            zklog.info("hashK 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + a.get_str(16));
+#endif
         }
 
         // HashKLen instruction
         if (rom.line[zkPC].hashKLen == 1)
         {
-            zkresult zkr = HashKLen_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch) pols.hashKLen[i] = fr.one();
+
+            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
+            // Get the length
+            uint64_t lm = fr.toU64(op0);
+
+            // Find the entry in the hash database for this address
+            hashKIterator = ctx.hashK.find(addr);
+
+            // If it's undefined, compute a hash of 0 bytes
+            if (hashKIterator == ctx.hashK.end())
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling HashKLen_verify() result=" + zkresult2string(zkr));
+                // Check that length = 0
+                if (lm != 0)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
+                    logError(ctx, "HashKLen 2 hashK[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Create an empty entry in this address slot
+                HashValue hashValue;
+                ctx.hashK[addr] = hashValue;
+                hashKIterator = ctx.hashK.find(addr);
+                zkassert(hashKIterator != ctx.hashK.end());
+            }
+
+            if (ctx.hashK[addr].lenCalled)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHKLEN_CALLED_TWICE;
+                logError(ctx, "HashKLen 2 called more than once addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
+            ctx.hashK[addr].lenCalled = true;
+
+            uint64_t lh = hashKIterator->second.data.size();
+            if (lm != lh)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
+                logError(ctx, "HashKLen 2 length does not match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            if (!hashKIterator->second.digestCalled)
+            {
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                gettimeofday(&t, NULL);
+#endif
+                keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                mainMetrics.add("Keccak", TimeDiff(t));
+#endif
+
+#ifdef LOG_HASHK
+                {
+                    string s = "hashKLen 2 calculate hashKLen: addr:" + to_string(addr) + " hash:" + ctx.hashK[addr].digest.get_str(16) + " size:" + to_string(ctx.hashK[addr].data.size()) + " data:";
+                    for (uint64_t k=0; k<ctx.hashK[addr].data.size(); k++) s += byte2string(ctx.hashK[addr].data[k]) + ":";
+                    zklog.info(s);
+                }
+#endif
+            }
+
+#ifdef LOG_HASHK
+            zklog.info("hashKLen 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr));
+#endif
         }
 
         // HashKDigest instruction
         if (rom.line[zkPC].hashKDigest == 1)
         {
-            zkresult zkr = HashKDigest_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch) pols.hashKDigest[i] = fr.one();
+
+            unordered_map< uint64_t, HashValue >::iterator hashKIterator;
+
+            // Find the entry in the hash database for this address
+            hashKIterator = ctx.hashK.find(addr);
+            if (hashKIterator == ctx.hashK.end())
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling HashKDigest_verify() result=" + zkresult2string(zkr));
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND;
+                logError(ctx, "HashKDigest 2 could not find entry for addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
+
+            // Get contents of op into dg
+            mpz_class dg;
+            if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            if (dg != hashKIterator->second.digest)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH;
+                logError(ctx, "HashKDigest 2: Digest does not match op");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            if (ctx.hashK[addr].digestCalled)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_CALLED_TWICE;
+                logError(ctx, "HashKDigest 2 called more than once addr=" + to_string(addr));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            ctx.hashK[addr].digestCalled = true;
+
+            incCounter = ceil((double(hashKIterator->second.data.size()) + double(1)) / double(136));
+
+#ifdef LOG_HASHK
+            zklog.info("hashKDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashK[addr].digest.get_str(16));
+#endif
         }
 
         // HashP instruction
-        if ((rom.line[zkPC].hashP == 1) || (rom.line[zkPC].hashP1 == 1))
+        if ( (rom.line[zkPC].hashP == 1) || (rom.line[zkPC].hashP1 == 1) )
         {
-            zkresult zkr = HashP_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch)
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling HashP_verify() result=" + zkresult2string(zkr));
+                if (rom.line[zkPC].hashP == 1)
+                {
+                    pols.hashP[i] = fr.one();
+                }
+                else
+                {
+                    pols.hashP1[i] = fr.one();
+                }
+            }
+
+            unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+
+            // If there is no entry in the hash database for this address, then create a new one
+            hashPIterator = ctx.hashP.find(addr);
+            if (hashPIterator == ctx.hashP.end())
+            {
+                HashValue hashValue;
+                ctx.hashP[addr] = hashValue;
+                hashPIterator = ctx.hashP.find(addr);
+                zkassert(hashPIterator != ctx.hashP.end());
+            }
+
+            // Get the size of the hash from D0
+            uint64_t size = 1;
+            if (rom.line[zkPC].hashP == 1)
+            {
+                size = fr.toU64(pols.D0[i]);
+                if (size>32)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "Invalid size>32 for hashP 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+            }
+
+            // Get the positon of the hash from HASHPOS
+            int64_t iPos;
+            fr.toS64(iPos, pols.HASHPOS[i]);
+            if (iPos < 0)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;
+                logError(ctx, "Invalid pos<0 for HashP 2: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
+            uint64_t pos = iPos;
+
+            // Get contents of opN into a
+            mpz_class a;
+            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Fill the hash data vector with chunks of the scalar value
+            mpz_class result;
+            for (uint64_t j=0; j<size; j++) {
+                result = (a >> (size-j-1)*8) & ScalarMask8;
+                uint8_t bm = result.get_ui();
+
+                // Allow to fill the first byte with a zero
+                if (((pos+j) == 1) && hashPIterator->second.data.empty() && !hashPIterator->second.firstByteWritten)
+                {
+                    // Fill a zero
+                    hashPIterator->second.data.push_back(0);
+                    
+                    // Record the read operation
+                    unordered_map<uint64_t, uint64_t>::iterator readsIterator;
+                    readsIterator = hashPIterator->second.reads.find(0);
+                    if ( readsIterator != hashPIterator->second.reads.end() )
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;
+                        logError(ctx, "HashP 2 zero position already existed addr=" + to_string(addr) + " pos=" + to_string(pos));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                    else
+                    {
+                        ctx.hashP[addr].reads[0] = 1;
+                    }
+                }
+
+                // Allow to overwrite the first byte
+                if (((pos+j) == 0) && (size==1) && !hashPIterator->second.data.empty() && !hashPIterator->second.firstByteWritten)
+                {
+                    hashPIterator->second.data[0] = bm;
+                    hashPIterator->second.firstByteWritten = true;
+                }
+                else if (hashPIterator->second.data.size() == (pos+j))
+                {
+                    hashPIterator->second.data.push_back(bm);
+                }
+                else if (hashPIterator->second.data.size() < (pos+j))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "HashP 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashP[addr].data.size()));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                else
+                {
+                    uint8_t bh;
+                    bh = hashPIterator->second.data[pos+j];
+                    if (bm != bh)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_VALUE_MISMATCH;
+                        logError(ctx, "HashP 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                }
+            }
+
+            // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size
+            mpz_class paddingA = a >> (size*8);
+            if (paddingA != 0)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHP_PADDING_MISMATCH;
+                logError(ctx, "HashP2 incoherent size=" + to_string(size) + " a=" + a.get_str(16) + " paddingA=" + paddingA.get_str(16));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Record the read operation
+            unordered_map<uint64_t, uint64_t>::iterator readsIterator;
+            readsIterator = hashPIterator->second.reads.find(pos);
+            if ( readsIterator != hashPIterator->second.reads.end() )
+            {
+                if (readsIterator->second != size)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;
+                    logError(ctx, "HashP 2 diferent read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+            }
+            else
+            {
+                ctx.hashP[addr].reads[pos] = size;
+            }
+
+            // Store the size
+            incHashPos = size;
         }
 
         // HashPLen instruction
         if (rom.line[zkPC].hashPLen == 1)
         {
-            zkresult zkr = HashPLen_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch) pols.hashPLen[i] = fr.one();
+
+            unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+
+            // Get the length
+            uint64_t lm = fr.toU64(op0);
+
+            // Find the entry in the hash database for this address
+            hashPIterator = ctx.hashP.find(addr);
+
+            // If it's undefined, compute a hash of 0 bytes
+            if (hashPIterator == ctx.hashP.end())
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling HashPLen_verify() result=" + zkresult2string(zkr));
+                // Check that length = 0
+                if (lm != 0)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;
+                    logError(ctx, "HashPLen 2 hashP[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Create an empty entry in this address slot
+                HashValue hashValue;
+                ctx.hashP[addr] = hashValue;
+                hashPIterator = ctx.hashP.find(addr);
+                zkassert(hashPIterator != ctx.hashP.end());
+            }
+
+            if (ctx.hashP[addr].lenCalled)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHPLEN_CALLED_TWICE;
+                logError(ctx, "HashPLen 2 called more than once addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
+            }
+            ctx.hashP[addr].lenCalled = true;
+
+            uint64_t lh = hashPIterator->second.data.size();
+            if (lm != lh)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;
+                logError(ctx, "HashPLen 2 does not match match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            if (!hashPIterator->second.digestCalled)
+            {
+                // Calculate the linear poseidon hash
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                gettimeofday(&t, NULL);
+#endif
+                Goldilocks::Element result[4];
+                linearPoseidon(ctx, hashPIterator->second.data, result);
+                fea2scalar(fr, hashPIterator->second.digest, result);
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                mainMetrics.add("Poseidon", TimeDiff(t));
+#endif
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                gettimeofday(&t, NULL);
+#endif
+                // Collect the keys used to read or write program data
+                if (proverRequest.input.bGetKeys)
+                {
+                    proverRequest.programKeys.insert(fea2string(fr, result));
+                }
+
+                zkresult zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    proverRequest.result = zkResult;
+                    logError(ctx, string("Failed calling pHashDB->setProgram() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, result));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                mainMetrics.add("Set program", TimeDiff(t));
+#endif
+
+#ifdef LOG_HASH
+                {
+                    string s = "Hash calculate hashPLen 2: addr:" + to_string(addr) + " hash:" + ctx.hashP[addr].digest.get_str(16) + " size:" + to_string(ctx.hashP[addr].data.size()) + " data:";
+                    for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) s += byte2string(ctx.hashP[addr].data[k]) + ":";
+                    zklog.info(s);
+                }
+#endif
             }
         }
 
         // HashPDigest instruction
         if (rom.line[zkPC].hashPDigest == 1)
         {
-            zkresult zkr = HashPDigest_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch) pols.hashPDigest[i] = fr.one();
+
+            // Get contents of op into dg
+            mpz_class dg;
+            if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling HashPDigest_verify() result=" + zkresult2string(zkr));
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            unordered_map< uint64_t, HashValue >::iterator hashPIterator;
+            hashPIterator = ctx.hashP.find(addr);
+            if (hashPIterator == ctx.hashP.end())
+            {
+                HashValue hashValue;
+                hashValue.digest = dg;
+                Goldilocks::Element aux[4];
+                scalar2fea(fr, dg, aux);
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                gettimeofday(&t, NULL);
+#endif
+                // Collect the keys used to read or write store data
+                if (proverRequest.input.bGetKeys)
+                {
+                    proverRequest.programKeys.insert(fea2string(fr, aux));
+                }
+
+                zkresult zkResult = pHashDB->getProgram(proverRequest.uuid, aux, hashValue.data, proverRequest.dbReadLog);
+                if (zkResult != ZKR_SUCCESS)
+                {
+                    proverRequest.result = zkResult;
+                    logError(ctx, string("Failed calling pHashDB->getProgram() result=") + zkresult2string(zkResult) + " key=" + fea2string(fr, aux));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                mainMetrics.add("Get program", TimeDiff(t));
+#endif
+                ctx.hashP[addr] = hashValue;
+                hashPIterator = ctx.hashP.find(addr);
+                zkassert(hashPIterator != ctx.hashP.end());
+            }
+
+            if (ctx.hashP[addr].digestCalled)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_CALLED_TWICE;
+                logError(ctx, "HashPDigest 2 called more than once addr=" + to_string(addr));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            ctx.hashP[addr].digestCalled = true;
+
+            incCounter = ceil((double(hashPIterator->second.data.size()) + double(1)) / double(56));
+
+            // Check that digest equals op
+            if (dg != hashPIterator->second.digest)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;
+                logError(ctx, "HashPDigest 2: ctx.hashP[addr].digest=" + ctx.hashP[addr].digest.get_str(16) + " does not match op=" + dg.get_str(16));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
         }
 
-
         // HashS instruction
-        if ((rom.line[zkPC].hashS == 1) || (rom.line[zkPC].hashS1 == 1))
+        if ( (rom.line[zkPC].hashS == 1) || (rom.line[zkPC].hashS1 == 1) )
         {
-            zkresult zkr = HashS_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch)
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling HashS_verify() result=" + zkresult2string(zkr));
+                if (rom.line[zkPC].hashS == 1)
+                {
+                    pols.hashS[i] = fr.one();
+                }
+                else
+                {
+                    pols.hashS1[i] = fr.one();
+                }
+            }
+
+            unordered_map< uint64_t, HashValue >::iterator hashSIterator;
+
+            // If there is no entry in the hash database for this address, then create a new one
+            hashSIterator = ctx.hashS.find(addr);
+            if (hashSIterator == ctx.hashS.end())
+            {
+                HashValue hashValue;
+                ctx.hashS[addr] = hashValue;
+                hashSIterator = ctx.hashS.find(addr);
+                zkassert(hashSIterator != ctx.hashS.end());
+            }
+
+            // Get the size of the hash from D0
+            uint64_t size = 1;
+            if (rom.line[zkPC].hashS == 1)
+            {
+                size = fr.toU64(pols.D0[i]);
+                if (size>32)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHS_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "Invalid size>32 for hashS 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+            }
+
+            // Get the position of the hash from HASHPOS
+            int64_t iPos;
+            fr.toS64(iPos, pols.HASHPOS[i]);
+            if (iPos < 0)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHS_POSITION_NEGATIVE;
+                logError(ctx, string("Invalid pos<0 for HashS 2: pols.HASHPOS[i]=") + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
+            uint64_t pos = iPos;
+
+            // Get contents of opN into a
+            mpz_class a;
+            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Fill the hash data vector with chunks of the scalar value
+            mpz_class result;
+            for (uint64_t j=0; j<size; j++)
+            {
+                result = (a >> ((size-j-1)*8)) & ScalarMask8;
+                uint8_t bm = result.get_ui();
+                if (hashSIterator->second.data.size() == (pos+j))
+                {
+                    hashSIterator->second.data.push_back(bm);
+                }
+                else if (hashSIterator->second.data.size() < (pos+j))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHS_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "HashS 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashS[addr].data.size()));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                else
+                {
+                    uint8_t bh;
+                    bh = hashSIterator->second.data[pos+j];
+                    if (bm != bh)
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHS_VALUE_MISMATCH;
+                        logError(ctx, "HashS 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                }
+            }
+
+            // Check that the remaining of a (op) is zero, i.e. no more data exists beyond size
+            mpz_class paddingA = a >> (size*8);
+            if (paddingA != 0)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHS_PADDING_MISMATCH;
+                logError(ctx, "HashS 2 incoherent size=" + to_string(size) + " a=" + a.get_str(16) + " paddingA=" + paddingA.get_str(16));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Record the read operation
+            unordered_map<uint64_t, uint64_t>::iterator readsIterator;
+            readsIterator = hashSIterator->second.reads.find(pos);
+            if ( readsIterator != hashSIterator->second.reads.end() )
+            {
+                if (readsIterator->second != size)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHS_SIZE_MISMATCH;
+                    logError(ctx, "HashS 2 different read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos) + " ctx.hashS[addr].reads[pos]=" + to_string(ctx.hashS[addr].reads[pos]) + " size=" + to_string(size));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+            }
+            else
+            {
+                ctx.hashS[addr].reads[pos] = size;
+            }
+
+            // Store the size
+            incHashPos = size;
+
+#ifdef LOG_HASHS
+            zklog.info("hashS 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + a.get_str(16));
+#endif
         }
 
         // HashSLen instruction
         if (rom.line[zkPC].hashSLen == 1)
         {
-            zkresult zkr = HashSLen_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch) pols.hashSLen[i] = fr.one();
+
+            unordered_map< uint64_t, HashValue >::iterator hashSIterator;
+
+            // Get the length
+            uint64_t lm = fr.toU64(op0);
+
+            // Find the entry in the hash database for this address
+            hashSIterator = ctx.hashS.find(addr);
+
+            // If it's undefined, compute a hash of 0 bytes
+            if (hashSIterator == ctx.hashS.end())
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling HashSLen_verify() result=" + zkresult2string(zkr));
+                // Check that length = 0
+                if (lm != 0)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_HASHSLEN_LENGTH_MISMATCH;
+                    logError(ctx, "HashSLen 2 hashS[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Create an empty entry in this address slot
+                HashValue hashValue;
+                ctx.hashS[addr] = hashValue;
+                hashSIterator = ctx.hashS.find(addr);
+                zkassert(hashSIterator != ctx.hashS.end());
+            }
+
+            if (ctx.hashS[addr].lenCalled)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHSLEN_CALLED_TWICE;
+                logError(ctx, "HashSLen 2 called more than once addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
+            ctx.hashS[addr].lenCalled = true;
+
+            uint64_t lh = hashSIterator->second.data.size();
+            if (lm != lh)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHSLEN_LENGTH_MISMATCH;
+                logError(ctx, "HashSLen 2 length does not match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            if (!hashSIterator->second.digestCalled)
+            {
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                gettimeofday(&t, NULL);
+#endif
+                SHA256(hashSIterator->second.data.data(), hashSIterator->second.data.size(), hashSIterator->second.digest);
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                mainMetrics.add("SHA256", TimeDiff(t));
+#endif
+
+#ifdef LOG_HASHS
+                {
+                    string s = "hashSLen 2 calculate hashSLen: addr:" + to_string(addr) + " hash:" + ctx.hashS[addr].digest.get_str(16) + " size:" + to_string(ctx.hashS[addr].data.size()) + " data:";
+                    for (uint64_t k=0; k<ctx.hashS[addr].data.size(); k++) s += byte2string(ctx.hashS[addr].data[k]) + ":";
+                    zklog.info(s);
+                }
+#endif
+            }
+
+#ifdef LOG_HASHS
+            zklog.info("hashSLen 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr));
+#endif
         }
 
         // HashSDigest instruction
         if (rom.line[zkPC].hashSDigest == 1)
         {
-            zkresult zkr = HashSDigest_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
-            if (zkr != ZKR_SUCCESS)
+            if (!bProcessBatch) pols.hashSDigest[i] = fr.one();
+
+            unordered_map< uint64_t, HashValue >::iterator hashSIterator;
+
+            // Find the entry in the hash database for this address
+            hashSIterator = ctx.hashS.find(addr);
+            if (hashSIterator == ctx.hashS.end())
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling HashSDigest_verify() result=" + zkresult2string(zkr));
+                proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_NOT_FOUND;
+                logError(ctx, "HashSDigest 2 could not find entry for addr=" + to_string(addr));
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-        }
 
+            // Get contents of op into dg
+            mpz_class dg;
+            if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            if (dg != hashSIterator->second.digest)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_DIGEST_MISMATCH;
+                logError(ctx, "HashSDigest 2: Digest does not match op");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            if (ctx.hashS[addr].digestCalled)
+            {
+                proverRequest.result = ZKR_SM_MAIN_HASHSDIGEST_CALLED_TWICE;
+                logError(ctx, "HashSDigest 2 called more than once addr=" + to_string(addr));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            ctx.hashS[addr].digestCalled = true;
+
+            incCounter = ceil((double(hashSIterator->second.data.size()) + double(1+8)) / double(64));
+
+#ifdef LOG_HASHS
+            zklog.info("hashSDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashS[addr].digest.get_str(16));
+#endif
+        }
 
         // HashP or Storage write instructions, required data
         if (!bProcessBatch && (rom.line[zkPC].hashPDigest || rom.line[zkPC].sWR))
@@ -1481,54 +3541,1157 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Arith instruction
         if (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1)
         {
-            zkresult zkr;
-            zkr = Arith_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required);
-            if (zkr != ZKR_SUCCESS)
+            // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
+            if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling Arith_verify() result=" + zkresult2string(zkr));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
+                // Convert to scalar
+                mpz_class A, B, C, D, op;
+                if (!fea2scalar(fr, A, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, B, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, C, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, D, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Check the condition
+                if ( (A*B) + C != (D<<256) + op )
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
+                    mpz_class left = (A*B) + C;
+                    mpz_class right = (D<<256) + op;
+                    logError(ctx, "Arithmetic does not match: (A*B) + C = " + left.get_str(16) + ", (D<<256) + op = " + right.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Store the arith action to execute it later with the arith SM
+                if (!bProcessBatch)
+                {
+                    // Copy ROM flags into the polynomials
+                    pols.arithEq0[i] = fr.one();
+
+                    ArithAction arithAction;
+                    arithAction.x1 = A;
+                    arithAction.y1 = B;
+                    arithAction.x2 = C;
+                    arithAction.y2 = D;
+                    arithAction.x3 = 0;
+                    arithAction.y3 = op;
+                    arithAction.selEq0 = 1;
+                    arithAction.selEq1 = 0;
+                    arithAction.selEq2 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 0;
+                    arithAction.selEq6 = 0;
+                    required.Arith.push_back(arithAction);
+                }
+            }
+            // Arithmetic FP2 multiplication
+            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==1 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
+            {
+                // Convert to scalar
+                mpz_class x1, y1, x2, y2, x3, y3;
+                if (!fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // EQ5:  x1 * x2 - y1 * y2 = x3
+                // EQ6:  y1 * x2 + x1 * y2 = y3
+
+                RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
+                fq.fromMpz(x1fe, x1.get_mpz_t());
+                fq.fromMpz(y1fe, y1.get_mpz_t());
+                fq.fromMpz(x2fe, x2.get_mpz_t());
+                fq.fromMpz(y2fe, y2.get_mpz_t());
+                fq.fromMpz(x3fe, x3.get_mpz_t());
+                fq.fromMpz(y3fe, y3.get_mpz_t());
+
+                RawFq::Element _x3fe, _y3fe;
+                _x3fe = fq.sub(fq.mul(x1fe, x2fe), fq.mul(y1fe, y2fe));
+                _y3fe = fq.add(fq.mul(y1fe, x2fe), fq.mul(x1fe, y2fe));
+
+                bool x3eq = fq.eq(x3fe, _x3fe);
+                bool y3eq = fq.eq(y3fe, _y3fe);
+
+                if (!x3eq || !y3eq)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
+                    logError(ctx, "Arithmetic FP2 multiplication point does not match: x3=" + fq.toString(x3fe, 16) + " _x3=" + fq.toString(_x3fe, 16) + " y3=" + fq.toString(y3fe, 16) + " _y3=" + fq.toString(_y3fe, 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Store the arith action to execute it later with the arith SM
+                if (!bProcessBatch)
+                {
+                    // Copy ROM flags into the polynomials
+                    pols.arithEq3[i] = fr.one();
+
+                    ArithAction arithAction;
+                    arithAction.x1 = x1;
+                    arithAction.y1 = y1;
+                    arithAction.x2 = x2;
+                    arithAction.y2 = y2;
+                    arithAction.x3 = x3;
+                    arithAction.y3 = y3;
+                    arithAction.selEq0 = 0;
+                    arithAction.selEq1 = 0;
+                    arithAction.selEq2 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 1;
+                    arithAction.selEq5 = 0;
+                    arithAction.selEq6 = 0;
+                    required.Arith.push_back(arithAction);
+                }
+            }
+            // Arithmetic FP2 addition
+            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==1 && rom.line[zkPC].arithEq5==0)
+            {
+                // Convert to scalar
+                mpz_class x1, y1, x2, y2, x3, y3;
+                if (!fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // EQ7:  x1 + x2 = x3
+                // EQ8:  y1 + y2 = y3
+
+                RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
+                fq.fromMpz(x1fe, x1.get_mpz_t());
+                fq.fromMpz(y1fe, y1.get_mpz_t());
+                fq.fromMpz(x2fe, x2.get_mpz_t());
+                fq.fromMpz(y2fe, y2.get_mpz_t());
+                fq.fromMpz(x3fe, x3.get_mpz_t());
+                fq.fromMpz(y3fe, y3.get_mpz_t());
+
+                RawFq::Element _x3fe, _y3fe;
+                _x3fe = fq.add(x1fe, x2fe);
+                _y3fe = fq.add(y1fe, y2fe);
+
+                bool x3eq = fq.eq(x3fe, _x3fe);
+                bool y3eq = fq.eq(y3fe, _y3fe);
+
+                if (!x3eq || !y3eq)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
+                    logError(ctx, "Arithmetic FP2 addition point does not match: x3=" + fq.toString(x3fe, 16) + " _x3=" + fq.toString(_x3fe, 16) + " y3=" + fq.toString(y3fe, 16) + " _y3=" + fq.toString(_y3fe, 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Store the arith action to execute it later with the arith SM
+                if (!bProcessBatch)
+                {
+                    // Copy ROM flags into the polynomials
+                    pols.arithEq4[i] = fr.one();
+
+                    ArithAction arithAction;
+                    arithAction.x1 = x1;
+                    arithAction.y1 = y1;
+                    arithAction.x2 = x2;
+                    arithAction.y2 = y2;
+                    arithAction.x3 = x3;
+                    arithAction.y3 = y3;
+                    arithAction.selEq0 = 0;
+                    arithAction.selEq1 = 0;
+                    arithAction.selEq2 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 1;
+                    arithAction.selEq6 = 0;
+                    required.Arith.push_back(arithAction);
+                }
+            }
+            // Arithmetic FP2 subtraction
+            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==1)
+            {
+                // Convert to scalar
+                mpz_class x1, y1, x2, y2, x3, y3;
+                if (!fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // EQ7:  x1 - x2 = x3
+                // EQ8:  y1 - y2 = y3
+
+                RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
+                fq.fromMpz(x1fe, x1.get_mpz_t());
+                fq.fromMpz(y1fe, y1.get_mpz_t());
+                fq.fromMpz(x2fe, x2.get_mpz_t());
+                fq.fromMpz(y2fe, y2.get_mpz_t());
+                fq.fromMpz(x3fe, x3.get_mpz_t());
+                fq.fromMpz(y3fe, y3.get_mpz_t());
+
+                RawFq::Element _x3fe, _y3fe;
+                _x3fe = fq.sub(x1fe, x2fe);
+                _y3fe = fq.sub(y1fe, y2fe);
+
+                bool x3eq = fq.eq(x3fe, _x3fe);
+                bool y3eq = fq.eq(y3fe, _y3fe);
+
+                if (!x3eq || !y3eq)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
+                    logError(ctx, "Arithmetic FP2 subtraction point does not match: x3=" + fq.toString(x3fe, 16) + " _x3=" + fq.toString(_x3fe, 16) + " y3=" + fq.toString(y3fe, 16) + " _y3=" + fq.toString(_y3fe, 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Store the arith action to execute it later with the arith SM
+                if (!bProcessBatch)
+                {
+                    // Copy ROM flags into the polynomials
+                    pols.arithEq5[i] = fr.one();
+
+                    ArithAction arithAction;
+                    arithAction.x1 = x1;
+                    arithAction.y1 = y1;
+                    arithAction.x2 = x2;
+                    arithAction.y2 = y2;
+                    arithAction.x3 = x3;
+                    arithAction.y3 = y3;
+                    arithAction.selEq0 = 0;
+                    arithAction.selEq1 = 0;
+                    arithAction.selEq2 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 0;
+                    arithAction.selEq6 = 1;
+                    required.Arith.push_back(arithAction);
+                }
+            }
+            // Arith instruction: check curve points
+            else
+            {
+                // Convert to scalar
+                mpz_class x1, y1, x2, y2, x3, y3;
+                if (!fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Convert to RawFec::Element
+                RawFec::Element fecX1, fecY1, fecX2, fecY2;
+                fec.fromMpz(fecX1, x1.get_mpz_t());
+                fec.fromMpz(fecY1, y1.get_mpz_t());
+                fec.fromMpz(fecX2, x2.get_mpz_t());
+                fec.fromMpz(fecY2, y2.get_mpz_t());
+
+                // Check if this is a double operation
+                bool dbl = false;
+                if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
+                {
+                    dbl = false;
+                }
+                else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==1 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
+                {
+                    dbl = true;
+                }
+                else
+                {
+                    logError(ctx, "Invalid arithmetic op");
+                    exitProcess();
+                }
+
+                // Add the elliptic curve points
+                RawFec::Element fecX3, fecY3;
+                zkresult r = AddPointEc(ctx, dbl, fecX1, fecY1, dbl?fecX1:fecX2, dbl?fecY1:fecY2, fecX3, fecY3);
+                if (r != ZKR_SUCCESS)
+                {
+                    proverRequest.result = r;
+                    logError(ctx, "Failed calling AddPointEc() in arith operation");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Convert to scalar
+                mpz_class _x3, _y3;
+                fec.toMpz(_x3.get_mpz_t(), fecX3);
+                fec.toMpz(_y3.get_mpz_t(), fecY3);
+
+                // Compare
+                bool x3eq = (x3 == _x3);
+                bool y3eq = (y3 == _y3);
+
+                if (!x3eq || !y3eq)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_ECRECOVER_MISMATCH;
+                    logError(ctx, string("Arithmetic curve ") + (dbl?"dbl":"add") + " point does not match" +
+                        " x1=" + x1.get_str() +
+                        " y1=" + y1.get_str() +
+                        " x2=" + x2.get_str() +
+                        " y2=" + y2.get_str() +
+                        " x3=" + x3.get_str() +
+                        " y3=" + y3.get_str() +
+                        "_x3=" + _x3.get_str() +
+                        "_y3=" + _y3.get_str());
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                if (!bProcessBatch)
+                {
+                    pols.arithEq0[i] = fr.fromU64(rom.line[zkPC].arithEq0);
+                    pols.arithEq1[i] = fr.fromU64(rom.line[zkPC].arithEq1);
+                    pols.arithEq2[i] = fr.fromU64(rom.line[zkPC].arithEq2);
+
+                    // Store the arith action to execute it later with the arith SM
+                    ArithAction arithAction;
+                    arithAction.x1 = x1;
+                    arithAction.y1 = y1;
+                    arithAction.x2 = dbl ? x1 : x2;
+                    arithAction.y2 = dbl ? y1 : y2;
+                    arithAction.x3 = x3;
+                    arithAction.y3 = y3;
+                    arithAction.selEq0 = 0;
+                    arithAction.selEq1 = dbl ? 0 : 1;
+                    arithAction.selEq2 = dbl ? 1 : 0;
+                    arithAction.selEq3 = 1;
+                    arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 0;
+                    arithAction.selEq6 = 0;
+                    required.Arith.push_back(arithAction);
+                }
             }
         }
 
         // Binary instruction
-        //if (bProcessBatch) pols.carry[i] = fr.zero();
+        if (bProcessBatch) pols.carry[i] = fr.zero();
         if (rom.line[zkPC].bin == 1)
         {
-            zkresult zkr = Binary_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required);
-            if (zkr != ZKR_SUCCESS)
+            if (rom.line[zkPC].binOpcode == 0) // ADD
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling Binary_verify() result=" + zkresult2string(zkr));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                mpz_class expectedC;
+                expectedC = (a + b) & ScalarMask256;
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_ADD_MISMATCH;
+                    logError(ctx, "Binary ADD operation does not match c=op=" + c.get_str(16) + " expectedC=(a + b) & ScalarMask256=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                pols.carry[i] = fr.fromU64(((a + b) >> 256) > 0);
+
+                if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.zero();
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 0;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
             }
+            else if (rom.line[zkPC].binOpcode == 1) // SUB
+            {
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                mpz_class expectedC;
+                expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_SUB_MISMATCH;
+                    logError(ctx, "Binary SUB operation does not match c=op=" + c.get_str(16) + " expectedC=(a - b + ScalarTwoTo256) & ScalarMask256=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                pols.carry[i] = fr.fromU64((a - b) < 0);
+
+                if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.one();
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 1;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
+            }
+            else if (rom.line[zkPC].binOpcode == 2) // LT
+            {
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                mpz_class expectedC;
+                expectedC = (a < b);
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_LT_MISMATCH;
+                    logError(ctx, "Binary LY operation does not match c=op=" + c.get_str(16) + " expectedC=(a < b)=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                pols.carry[i] = fr.fromU64(a < b);
+
+                if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.fromU64(2);
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 2;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
+            }
+            else if (rom.line[zkPC].binOpcode == 3) // SLT
+            {
+                mpz_class a, b, c, _a, _b;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                _a = a;
+                _b = b;
+
+                if (a >= ScalarTwoTo255) _a = a - ScalarTwoTo256;
+                if (b >= ScalarTwoTo255) _b = b - ScalarTwoTo256;
+
+
+                mpz_class expectedC;
+                expectedC = (_a < _b);
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_SLT_MISMATCH;
+                    logError(ctx, "Binary SLT operation does not match a=" + a.get_str(16) + " b=" + b.get_str(16) + " c=" + c.get_str(16) + " _a=" + _a.get_str(16) + " _b=" + _b.get_str(16) + " expectedC=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                pols.carry[i] = fr.fromU64(_a < _b);
+
+                if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.fromU64(3);
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 3;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
+            }
+            else if (rom.line[zkPC].binOpcode == 4) // EQ
+            {
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                mpz_class expectedC;
+                expectedC = (a == b);
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_EQ_MISMATCH;
+                    logError( ctx, "Binary EQ operation does not match c=op=" + c.get_str(16) + " expectedC=(a==b)=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                pols.carry[i] = fr.fromU64((a == b));
+
+                if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.fromU64(4);
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 4;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
+            }
+            else if (rom.line[zkPC].binOpcode == 5) // AND
+            {
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                mpz_class expectedC;
+                expectedC = (a & b);
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_AND_MISMATCH;
+                    logError(ctx, "Binary AND operation does not match c=op=" + c.get_str(16) + " expectedC=(a&b)=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                if (c != 0)
+                {
+                    pols.carry[i] = fr.one();
+                }
+
+                if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.fromU64(5);
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 5;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
+            }
+            else if (rom.line[zkPC].binOpcode == 6) // OR
+            {
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                mpz_class expectedC;
+                expectedC = (a | b);
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_OR_MISMATCH;
+                    logError(ctx, "Binary OR operation does not match c=op=" + c.get_str(16) + " expectedC=(a|b)=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.fromU64(6);
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 6;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
+            }
+            else if (rom.line[zkPC].binOpcode == 7) // XOR
+            {
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                mpz_class expectedC;
+                expectedC = (a ^ b);
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_XOR_MISMATCH;
+                    logError(ctx, "Binary XOR operation does not match c=op=" + c.get_str(16) + " expectedC=(a^b)=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.fromU64(7);
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 7;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
+            } else if (rom.line[zkPC].binOpcode == 8) // LT4
+            {
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError( ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                   
+                mpz_class expectedC;
+                expectedC = lt4(a,b); 
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_LT4_MISMATCH; 
+                    logError(ctx, "Binary LT4 operation does not match c=op=" + c.get_str(16) + " expectedC=(a LT4 b)=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                pols.carry[i] = fr.fromScalar(c);
+
+                 if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.fromU64(8);
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 8;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
+            }
+            else
+            {
+                logError(ctx, "Invalid binary operation opcode=" + rom.line[zkPC].binOpcode);
+                exitProcess();
+            }
+            pols.bin[i] = fr.one();
         }
 
         // MemAlign instruction
         if ( (rom.line[zkPC].memAlignRD==1) || (rom.line[zkPC].memAlignWR==1) || (rom.line[zkPC].memAlignWR8==1) )
         {
-            zkresult zkr = Memalign_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required);
-            if (zkr != ZKR_SUCCESS)
+            mpz_class m0;
+            if (!fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
             {
-                proverRequest.result = zkr;
-                logError(ctx, "Failed calling Memalign_verify() result=" + zkresult2string(zkr));
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(pols.A)");
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
+            mpz_class m1;
+            if (!fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(pols.B)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            mpz_class v;
+            if (!fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            mpz_class offsetScalar;
+            if (!fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(pols.C)");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            if (offsetScalar<0 || offsetScalar>32)
+            {
+                proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
+                logError(ctx, "MemAlign out of range offset=" + offsetScalar.get_str());
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+            uint64_t offset = offsetScalar.get_ui();
+
+            if (rom.line[zkPC].memAlignRD==0 && rom.line[zkPC].memAlignWR==1 && rom.line[zkPC].memAlignWR8==0)
+            {
+                pols.memAlignWR[i] = fr.one();
+
+                mpz_class w0;
+                if (!fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                mpz_class w1;
+                if (!fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                mpz_class _W0;
+                _W0 = (m0 & (ScalarTwoTo256 - (ScalarOne << (256-offset*8)))) | (v >> offset*8);
+                mpz_class _W1;
+                _W1 = (m1 & (ScalarMask256 >> offset*8)) | ((v << (256 - offset*8)) & ScalarMask256);
+                if ( (w0 != _W0) || (w1 != _W1) )
+                {
+                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE_MISMATCH;
+                    logError(ctx, "MemAlign w0, w1 invalid: w0=" + w0.get_str(16) + " w1=" + w1.get_str(16) + " _W0=" + _W0.get_str(16) + " _W1=" + _W1.get_str(16) + " m0=" + m0.get_str(16) + " m1=" + m1.get_str(16) + " offset=" + to_string(offset) + " v=" + v.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                if (!bProcessBatch)
+                {
+                    MemAlignAction memAlignAction;
+                    memAlignAction.m0 = m0;
+                    memAlignAction.m1 = m1;
+                    memAlignAction.w0 = w0;
+                    memAlignAction.w1 = w1;
+                    memAlignAction.v = v;
+                    memAlignAction.offset = offset;
+                    memAlignAction.wr256 = 1;
+                    memAlignAction.wr8 = 0;
+                    required.MemAlign.push_back(memAlignAction);
+                }
+            }
+            else if (rom.line[zkPC].memAlignRD==0 && rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==1)
+            {
+                pols.memAlignWR8[i] = fr.one();
+
+                mpz_class w0;
+                if (!fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                mpz_class _W0;
+                mpz_class byteMaskOn256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+                _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));
+                if (w0 != _W0)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE8_MISMATCH;
+                    logError(ctx, "MemAlign w0 invalid: w0=" + w0.get_str(16) + " _W0=" + _W0.get_str(16) + " m0=" + m0.get_str(16) + " offset=" + to_string(offset) + " v=" + v.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                if (!bProcessBatch)
+                {
+                    MemAlignAction memAlignAction;
+                    memAlignAction.m0 = m0;
+                    memAlignAction.m1 = 0;
+                    memAlignAction.w0 = w0;
+                    memAlignAction.w1 = 0;
+                    memAlignAction.v = v;
+                    memAlignAction.offset = offset;
+                    memAlignAction.wr256 = 0;
+                    memAlignAction.wr8 = 1;
+                    required.MemAlign.push_back(memAlignAction);
+                }
+            }
+            else if (rom.line[zkPC].memAlignRD==1 && rom.line[zkPC].memAlignWR==0 && rom.line[zkPC].memAlignWR8==0)
+            {
+                pols.memAlignRD[i] = fr.one();
+
+                mpz_class leftV;
+                leftV = (m0 << offset*8) & ScalarMask256;
+                mpz_class rightV;
+                rightV = (m1 >> (256 - offset*8)) & (ScalarMask256 >> (256 - offset*8));
+                mpz_class _V;
+                _V = leftV | rightV;
+                if (v != _V)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH;
+                    logError(ctx, "MemAlign v invalid: v=" + v.get_str(16) + " _V=" + _V.get_str(16) + " m0=" + m0.get_str(16) + " m1=" + m1.get_str(16) + " offset=" + to_string(offset));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                if (!bProcessBatch)
+                {
+                    MemAlignAction memAlignAction;
+                    memAlignAction.m0 = m0;
+                    memAlignAction.m1 = m1;
+                    memAlignAction.w0 = 0;
+                    memAlignAction.w1 = 0;
+                    memAlignAction.v = v;
+                    memAlignAction.offset = offset;
+                    memAlignAction.wr256 = 0;
+                    memAlignAction.wr8 = 0;
+                    required.MemAlign.push_back(memAlignAction);
+                }
+            }
+            else
+            {
+                logError(ctx, "Invalid memAlign operation");
+                exitProcess();
+            }
+        }
+
+        // Repeat instruction
+        if ((rom.line[zkPC].repeat == 1) && (!bProcessBatch))
+        {
+            pols.repeat[i] = fr.one();
         }
 
         /***********/
         /* SETTERS */
         /***********/
 
-        // Set op
-        
-
         // If setA, A'=op
-        if (rom.line[zkPC].setA == 1)
-        {
+        if (rom.line[zkPC].setA == 1) {
             pols.A0[nexti] = op0;
             pols.A1[nexti] = op1;
             pols.A2[nexti] = op2;
@@ -1539,17 +4702,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.A7[nexti] = op7;
             pols.setA[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setA A[nexti]=" + fea2stringchain(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
+            zklog.info("setA A[nexti]=" + fea2string(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
 #endif
-        }
-        else if (bUnsignedTransaction && (zkPC == rom.labels.checkAndSaveFromLabel))
-        {
+        } else if (bUnsignedTransaction && (zkPC == checkAndSaveFromLabel)) {
             // Set A register with input.from to process unsigned transactions
             mpz_class from(proverRequest.input.from);
             scalar2fea(fr, from, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti] );
-        }
-        else
-        {
+        } else {
             pols.A0[nexti] = pols.A0[i];
             pols.A1[nexti] = pols.A1[i];
             pols.A2[nexti] = pols.A2[i];
@@ -1561,8 +4720,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setB, B'=op
-        if (rom.line[zkPC].setB == 1)
-        {
+        if (rom.line[zkPC].setB == 1) {
             pols.B0[nexti] = op0;
             pols.B1[nexti] = op1;
             pols.B2[nexti] = op2;
@@ -1573,11 +4731,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.B7[nexti] = op7;
             pols.setB[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setB B[nexti]=" + fea2stringchain(fr, pols.B0[nexti], pols.B1[nexti], pols.B2[nexti], pols.B3[nexti], pols.B4[nexti], pols.B5[nexti], pols.B6[nexti], pols.B7[nexti]));
+            zklog.info("setB B[nexti]=" + fea2string(fr, pols.B0[nexti], pols.B1[nexti], pols.B2[nexti], pols.B3[nexti], pols.B4[nexti], pols.B5[nexti], pols.B6[nexti], pols.B7[nexti]));
 #endif
-        }
-        else
-        {
+        } else {
             pols.B0[nexti] = pols.B0[i];
             pols.B1[nexti] = pols.B1[i];
             pols.B2[nexti] = pols.B2[i];
@@ -1589,8 +4745,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setC, C'=op
-        if (rom.line[zkPC].setC == 1)
-        {
+        if (rom.line[zkPC].setC == 1) {
             pols.C0[nexti] = op0;
             pols.C1[nexti] = op1;
             pols.C2[nexti] = op2;
@@ -1601,7 +4756,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.C7[nexti] = op7;
             pols.setC[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setC C[nexti]=" + fea2stringchain(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
+            zklog.info("setC C[nexti]=" + fea2string(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
         }            
         else if ((zkPC == verifyMerkleProofEndLabel) && proverRequest.input.bSkipVerifyL1InfoRoot)
@@ -1630,8 +4785,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setD, D'=op
-        if (rom.line[zkPC].setD == 1)
-        {
+        if (rom.line[zkPC].setD == 1) {
             pols.D0[nexti] = op0;
             pols.D1[nexti] = op1;
             pols.D2[nexti] = op2;
@@ -1642,11 +4796,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.D7[nexti] = op7;
             pols.setD[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setD D[nexti]=" + fea2stringchain(fr, pols.D0[nexti], pols.D1[nexti], pols.D2[nexti], pols.D3[nexti], pols.D4[nexti], pols.D5[nexti], pols.D6[nexti], pols.D7[nexti]));
+            zklog.info("setD D[nexti]=" + fea2string(fr, pols.D0[nexti], pols.D1[nexti], pols.D2[nexti], pols.D3[nexti], pols.D4[nexti], pols.D5[nexti], pols.D6[nexti], pols.D7[nexti]));
 #endif
-        }
-        else
-        {
+        } else {
             pols.D0[nexti] = pols.D0[i];
             pols.D1[nexti] = pols.D1[i];
             pols.D2[nexti] = pols.D2[i];
@@ -1658,8 +4810,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setE, E'=op
-        if (rom.line[zkPC].setE == 1)
-        {
+        if (rom.line[zkPC].setE == 1) {
             pols.E0[nexti] = op0;
             pols.E1[nexti] = op1;
             pols.E2[nexti] = op2;
@@ -1670,11 +4821,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.E7[nexti] = op7;
             pols.setE[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setE E[nexti]=" + fea2stringchain(fr, pols.E0[nexti], pols.E1[nexti], pols.E2[nexti], pols.E3[nexti], pols.E4[nexti], pols.E5[nexti], pols.E6[nexti], pols.E7[nexti]));
+            zklog.info("setE E[nexti]=" + fea2string(fr, pols.E0[nexti], pols.E1[nexti], pols.E2[nexti], pols.E3[nexti], pols.E4[nexti], pols.E5[nexti], pols.E6[nexti], pols.E7[nexti]));
 #endif
-        }
-        else
-        {
+        } else {
             pols.E0[nexti] = pols.E0[i];
             pols.E1[nexti] = pols.E1[i];
             pols.E2[nexti] = pols.E2[i];
@@ -1686,8 +4835,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setSR, SR'=op
-        if (rom.line[zkPC].setSR == 1)
-        {
+        if (rom.line[zkPC].setSR == 1) {
             pols.SR0[nexti] = op0;
             pols.SR1[nexti] = op1;
             pols.SR2[nexti] = op2;
@@ -1698,11 +4846,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.SR7[nexti] = op7;
             pols.setSR[i] = fr.one();
 #ifdef LOG_SETX
-            zklog.info("setSR SR[nexti]=" + fea2stringchain(fr, pols.SR0[nexti], pols.SR1[nexti], pols.SR2[nexti], pols.SR3[nexti], pols.SR4[nexti], pols.SR5[nexti], pols.SR6[nexti], pols.SR7[nexti]));
+            zklog.info("setSR SR[nexti]=" + fea2string(fr, pols.SR0[nexti], pols.SR1[nexti], pols.SR2[nexti], pols.SR3[nexti], pols.SR4[nexti], pols.SR5[nexti], pols.SR6[nexti], pols.SR7[nexti]));
 #endif
-        }
-        else
-        {
+        } else {
             pols.SR0[nexti] = pols.SR0[i];
             pols.SR1[nexti] = pols.SR1[i];
             pols.SR2[nexti] = pols.SR2[i];
@@ -1714,45 +4860,36 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If setCTX, CTX'=op
-        if (rom.line[zkPC].setCTX == 1)
-        {
+        if (rom.line[zkPC].setCTX == 1) {
             pols.CTX[nexti] = op0;
             pols.setCTX[i] = fr.one();
 #ifdef LOG_SETX
             zklog.info("setCTX CTX[nexti]=" + fr.toString(pols.CTX[nexti], 16));
 #endif
-        }
-        else
-        {
+        } else {
             pols.CTX[nexti] = pols.CTX[i];
         }
 
         // If setSP, SP'=op
-        if (rom.line[zkPC].setSP == 1)
-        {
+        if (rom.line[zkPC].setSP == 1) {
             pols.SP[nexti] = op0;
             pols.setSP[i] = fr.one();
 #ifdef LOG_SETX
             zklog.info("setSP SP[nexti]=" + fr.toString(pols.SP[nexti], 16));
 #endif
-        }
-        else
-        {
+        } else {
             // SP' = SP + incStack
             pols.SP[nexti] = fr.add(pols.SP[i], fr.fromS32(rom.line[zkPC].incStack));
         }
 
         // If setPC, PC'=op
-        if (rom.line[zkPC].setPC == 1)
-        {
+        if (rom.line[zkPC].setPC == 1) {
             pols.PC[nexti] = op0;
             pols.setPC[i] = fr.one();
 #ifdef LOG_SETX
             zklog.info("setPC PC[nexti]=" + fr.toString(pols.PC[nexti], 16));
 #endif
-        }
-        else
-        {
+        } else {
             // PC' = PC
             pols.PC[nexti] = pols.PC[i];
         }
@@ -1773,8 +4910,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If arith, increment pols.cntArith
-        if (!proverRequest.input.bNoCounters && (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1) )
-        {
+        if (!proverRequest.input.bNoCounters && (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1) ) {
             pols.cntArith[nexti] = fr.inc(pols.cntArith[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntArith[nexti]) > rom.constants.MAX_CNT_ARITH_LIMIT)
@@ -1789,15 +4925,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 exitProcess();
             }
 #endif
-        }
-        else
-        {
+        } else {
             pols.cntArith[nexti] = pols.cntArith[i];
         }
 
         // If bin, increment pols.cntBinary
-        if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters)
-        {
+        if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters) {
             pols.cntBinary[nexti] = fr.inc(pols.cntBinary[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntBinary[nexti]) > rom.constants.MAX_CNT_BINARY_LIMIT)
@@ -1812,15 +4945,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 exitProcess();
             }
 #endif
-        }
-        else
-        {
+        } else {
             pols.cntBinary[nexti] = pols.cntBinary[i];
         }
 
         // If memAlign, increment pols.cntMemAlign
-        if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters)
-        {
+        if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters) {
             pols.cntMemAlign[nexti] = fr.inc(pols.cntMemAlign[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntMemAlign[nexti]) > rom.constants.MAX_CNT_MEM_ALIGN_LIMIT)
@@ -1835,20 +4965,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 exitProcess();
             }
 #endif
-        }
-        else
-        {
+        } else {
             pols.cntMemAlign[nexti] = pols.cntMemAlign[i];
         }
 
         // If setRCX, RCX=op, else if RCX>0, RCX--
-        if (rom.line[zkPC].setRCX == 1)
+        if (rom.line[zkPC].setRCX)
         {
             pols.RCX[nexti] = op0;
             if (!bProcessBatch)
                 pols.setRCX[i] = fr.one();
         }
-        else if (rom.line[zkPC].repeat == 1)
+        else if (rom.line[zkPC].repeat)
         {
             currentRCX = pols.RCX[i];
             if (!fr.isZero(pols.RCX[i]))
@@ -1902,101 +5030,77 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_JMP
             zklog.info("JMPN: op0=" + fr.toString(op0));
 #endif
-            if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersStepLabel))
+            if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersStepLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_STEPS) - fr.toS64(op0);
-                if (reserve > 0)
+                if (reserve < 0)
                 {
-                    if (uint64_t(reserve) > proverRequest.countersReserve.steps)
-                    {
-                        proverRequest.countersReserve.steps = uint64_t(reserve);
-                        proverRequest.countersReserveZkpc.steps = zkPC;
-                    }
+                    reserve = 0;
                 }
+                proverRequest.countersReserve.steps = zkmax(proverRequest.countersReserve.steps, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersArithLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersArithLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_ARITH) - fr.toS64(op0);
-                if (reserve > 0)
+                if (reserve < 0)
                 {
-                    if (uint64_t(reserve) > proverRequest.countersReserve.arith)
-                    {
-                        proverRequest.countersReserve.arith = uint64_t(reserve);
-                        proverRequest.countersReserveZkpc.arith = zkPC;
-                    }
+                    reserve = 0;
                 }
+                proverRequest.countersReserve.arith = zkmax(proverRequest.countersReserve.arith, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersBinaryLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersBinaryLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_BINARY) - fr.toS64(op0);
-                if (reserve > 0)
+                if (reserve < 0)
                 {
-                    if (uint64_t(reserve) > proverRequest.countersReserve.binary)
-                    {
-                        proverRequest.countersReserve.binary = uint64_t(reserve);
-                        proverRequest.countersReserveZkpc.binary = zkPC;
-                    }
+                    reserve = 0;
                 }
+                proverRequest.countersReserve.binary = zkmax(proverRequest.countersReserve.binary, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersKeccakLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersKeccakLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_KECCAK_F) - fr.toS64(op0);
-                if (reserve > 0)
+                if (reserve < 0)
                 {
-                    if (uint64_t(reserve) > proverRequest.countersReserve.keccakF)
-                    {
-                        proverRequest.countersReserve.keccakF = uint64_t(reserve);
-                        proverRequest.countersReserveZkpc.keccakF = zkPC;
-                    }
+                    reserve = 0;
                 }
+                proverRequest.countersReserve.keccakF = zkmax(proverRequest.countersReserve.keccakF, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersSha256Label))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersSha256Label))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_SHA256_F) - fr.toS64(op0);
-                if (reserve > 0)
+                if (reserve < 0)
                 {
-                    if (uint64_t(reserve) > proverRequest.countersReserve.sha256F)
-                    {
-                        proverRequest.countersReserve.sha256F = uint64_t(reserve);
-                        proverRequest.countersReserveZkpc.sha256F = zkPC;
-                    }
+                    reserve = 0;
                 }
+                proverRequest.countersReserve.sha256F = zkmax(proverRequest.countersReserve.sha256F, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersMemalignLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersMemalignLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_MEM_ALIGN) - fr.toS64(op0);
-                if (reserve > 0)
+                if (reserve < 0)
                 {
-                    if (uint64_t(reserve) > proverRequest.countersReserve.memAlign)
-                    {
-                        proverRequest.countersReserve.memAlign = uint64_t(reserve);
-                        proverRequest.countersReserveZkpc.memAlign = zkPC;
-                    }
+                    reserve = 0;
                 }
+                proverRequest.countersReserve.memAlign = zkmax(proverRequest.countersReserve.memAlign, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersPoseidonLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPoseidonLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_POSEIDON_G) - fr.toS64(op0);
-                if (reserve > 0)
+                if (reserve < 0)
                 {
-                    if (uint64_t(reserve) > proverRequest.countersReserve.poseidonG)
-                    {
-                        proverRequest.countersReserve.poseidonG = uint64_t(reserve);
-                        proverRequest.countersReserveZkpc.poseidonG = zkPC;
-                    }
+                    reserve = 0;
                 }
+                proverRequest.countersReserve.poseidonG = zkmax(proverRequest.countersReserve.poseidonG, uint64_t(reserve));
             }
-            else if (rom.line[zkPC].jmpAddr == fr.fromU64(rom.labels.outOfCountersPaddingLabel))
+            else if (rom.line[zkPC].jmpAddr == fr.fromU64(outOfCountersPaddingLabel))
             {
                 int64_t reserve = int64_t(rom.constants.MAX_CNT_PADDING_PG) - fr.toS64(op0);
-                if (reserve > 0)
+                if (reserve < 0)
                 {
-                    if (uint64_t(reserve) > proverRequest.countersReserve.paddingPG)
-                    {
-                        proverRequest.countersReserve.paddingPG = uint64_t(reserve);
-                        proverRequest.countersReserveZkpc.paddingPG = zkPC;
-                    }
+                    reserve = 0;
                 }
+                proverRequest.countersReserve.paddingPG = zkmax(proverRequest.countersReserve.paddingPG, uint64_t(reserve));
             }
 
             uint64_t jmpnCondValue = fr.toU64(op0);
@@ -2044,8 +5148,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
-            jmpnCondValue = jmpnCondValue >> forkInfo.Nbits;
-            for (uint64_t index = 0; index < (32 - forkInfo.Nbits); ++index)
+            jmpnCondValue = jmpnCondValue >> 23;
+            for (uint64_t index = 0; index < 9; ++index)
             {
                 pols.hJmpnCondValueBit[index][i] = fr.fromU64(jmpnCondValue & 0x01);
                 jmpnCondValue = jmpnCondValue >> 1;
@@ -2158,10 +5262,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
         }
 
-        /****************************/
-        /* Set GAS, HASHPOS and RID */
-        /****************************/
-
         // If setGAS, GAS'=op
         if (rom.line[zkPC].setGAS == 1) {
             pols.GAS[nexti] = op0;
@@ -2175,29 +5275,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         // If setHASHPOS, HASHPOS' = op0 + incHashPos
         if (rom.line[zkPC].setHASHPOS == 1) {
-            pols.HASHPOS[nexti] = fr.add(op0, fr.fromU64(ctx.incHashPos));
+            pols.HASHPOS[nexti] = fr.add(op0, fr.fromU64(incHashPos));
             pols.setHASHPOS[i] = fr.one();
         } else {
-            pols.HASHPOS[nexti] = fr.add( pols.HASHPOS[i], fr.fromU64(ctx.incHashPos) );
+            pols.HASHPOS[nexti] = fr.add( pols.HASHPOS[i], fr.fromU64(incHashPos) );
         }
 
-        /************/
-        /* COUNTERS */
-        /************/
-
-        if (
-            rom.line[zkPC].hashSDigest ||
-            rom.line[zkPC].sRD ||
-            rom.line[zkPC].sWR ||
-            rom.line[zkPC].hashKDigest ||
-            rom.line[zkPC].hashPDigest )
+        if (rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashKDigest || rom.line[zkPC].hashPDigest || rom.line[zkPC].hashSDigest)
         {
-            pols.incCounter[i] = fr.fromU64(ctx.incCounter);
+            pols.incCounter[i] = fr.fromU64(incCounter);
         }
 
         if (rom.line[zkPC].hashKDigest && !proverRequest.input.bNoCounters)
         {
-            pols.cntKeccakF[nexti] = fr.add(pols.cntKeccakF[i], fr.fromU64(ctx.incCounter));
+            pols.cntKeccakF[nexti] = fr.add(pols.cntKeccakF[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntKeccakF[nexti]) > rom.constants.MAX_CNT_KECCAK_F_LIMIT)
             {
@@ -2219,7 +5310,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         if (rom.line[zkPC].hashPDigest && !proverRequest.input.bNoCounters)
         {
-            pols.cntPaddingPG[nexti] = fr.add(pols.cntPaddingPG[i], fr.fromU64(ctx.incCounter));
+            pols.cntPaddingPG[nexti] = fr.add(pols.cntPaddingPG[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntPaddingPG[nexti]) > rom.constants.MAX_CNT_PADDING_PG_LIMIT)
             {
@@ -2239,10 +5330,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.cntPaddingPG[nexti] = pols.cntPaddingPG[i];
         }
 
-
         if (rom.line[zkPC].hashSDigest && !proverRequest.input.bNoCounters)
         {
-            pols.cntSha256F[nexti] = fr.add(pols.cntSha256F[i], fr.fromU64(ctx.incCounter));
+            pols.cntSha256F[nexti] = fr.add(pols.cntSha256F[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntSha256F[nexti]) > rom.constants.MAX_CNT_SHA256_F_LIMIT)
             {
@@ -2264,7 +5354,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         if ((rom.line[zkPC].sRD || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest) && !proverRequest.input.bNoCounters)
         {
-            pols.cntPoseidonG[nexti] = fr.add(pols.cntPoseidonG[i], fr.fromU64(ctx.incCounter));
+            pols.cntPoseidonG[nexti] = fr.add(pols.cntPoseidonG[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntPoseidonG[nexti]) > rom.constants.MAX_CNT_POSEIDON_G_LIMIT)
             {
@@ -2292,14 +5382,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
             {
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                gettimeofday(&ctx.t, NULL);
+                gettimeofday(&t, NULL);
 #endif
                 CommandResult cr;
                 evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                ctx.mainMetrics.add("Eval command", TimeDiff(ctx.t));
-                ctx.evalCommandMetrics.add(rom.line[zkPC].cmdAfter[j]->opAndFunction, TimeDiff(ctx.t));
+                mainMetrics.add("Eval command", TimeDiff(t));
+                evalCommandMetrics.add(rom.line[zkPC].cmdAfter[j]->opAndFunction, TimeDiff(t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -2343,17 +5433,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
         // When processing a txs batch, break the loop when done to complete the execution faster
-        if ( zkPC == rom.labels.finalizeExecutionLabel )
+        if ( zkPC == finalizeExecutionLabel )
         {
-            // Update last step
             if (ctx.lastStep != 0)
             {
                 logError(ctx, "Called finalizeExecutionLabel with a non-zero ctx.lastStep=" + to_string(ctx.lastStep));
                 exitProcess();
             }
             ctx.lastStep = step;
-
-            // If processing, break
             if (bProcessBatch)
             {
                 break;
@@ -2393,7 +5480,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
     }
-
     if (!proverRequest.input.bNoCounters && (ctx.lastStep > rom.constants.MAX_CNT_STEPS_LIMIT))
     {
         proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
@@ -2603,8 +5689,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     if (config.executorTimeStatistics)
     {
-        ctx.mainMetrics.print("Main Executor calls");
-        ctx.evalCommandMetrics.print("Main Executor eval command calls");
+        mainMetrics.print("Main Executor calls");
+        evalCommandMetrics.print("Main Executor eval command calls");
     }
 #endif
 
@@ -2847,20 +5933,7 @@ void MainExecutor::logError (Context &ctx, const string &message)
     uint64_t step = (ctx.pStep != NULL) ? *ctx.pStep : INVALID_LOG_ERROR_VALUE;
     uint64_t evaluation = (ctx.pEvaluation != NULL) ? *ctx.pEvaluation : INVALID_LOG_ERROR_VALUE;
     uint64_t zkpc = (ctx.pZKPC != NULL) ? *ctx.pZKPC : INVALID_LOG_ERROR_VALUE;
-    string romLine;
-    if (config.loadDiagnosticRom)
-    {
-        romLine = (ctx.pZKPC != NULL) ? romDiagnostic.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
-    }
-    else if (ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 10)
-    {
-        romLine = (ctx.pZKPC != NULL) ? romBatch_10_24.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
-    }
-    else if (ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 11)
-    {
-        romLine = (ctx.pZKPC != NULL) ? romBatch_11_25.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
-    }
-
+    string romLine = (ctx.pZKPC != NULL) ? rom.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
     string log2 = string("proverRequest.result=") + zkresult2string(ctx.proverRequest.result) +
         " step=" + to_string(step) +
         " eval=" + to_string(evaluation) +

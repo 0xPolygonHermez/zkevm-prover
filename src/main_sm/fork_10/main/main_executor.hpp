@@ -35,14 +35,17 @@ public:
     // RawFnec instance
     RawFnec fnec;
 
+    // Number of evaluations, i.e. polynomials degree
+    const uint64_t N;
+
+    // Number of evaluations when counters are not used
+    const uint64_t N_NoCounters;
+
     // Poseidon instance
     PoseidonGoldilocks &poseidon;
 
     // ROM JSON file data:
-    Rom romBatch_10_24;
-    Rom romBatch_11_25;
-    Rom romDiagnostic;
-
+    Rom rom;
 #ifdef MULTI_ROM_TEST
     Rom rom_gas_limit_100000000;
     Rom rom_gas_limit_2147483647;
