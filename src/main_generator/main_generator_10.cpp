@@ -2816,22 +2816,11 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "    }\n";
     }
 
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    code += "    gettimeofday(&ctx.t, NULL);\n";
-#endif
-
-    code += "    if (ctx.config.hashDB64)\n";
+    code += "    if (ctx.config.hashDBSingleton)\n";
     code += "    {\n";
-    code += "        Goldilocks::Element newStateRoot[4];\n";
-    code += "        string2fea(fr, NormalizeToNFormat(proverRequest.pFullTracer->get_new_state_root(),64), newStateRoot);\n";
-    code += "        zkResult = pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
-    code += "        if (zkResult != ZKR_SUCCESS)\n";
-    code += "        {\n";
-    code += "            proverRequest.result = zkResult;\n";
-    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->purge() result=\") + zkresult2string(zkResult));\n";
-    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-    code += "            return;\n";
-    code += "        }\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    code += "        gettimeofday(&ctx.t, NULL);\n";
+#endif
     code += "        zkResult = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
     code += "        if (zkResult != ZKR_SUCCESS)\n";
     code += "        {\n";
@@ -2840,22 +2829,18 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
     code += "            return;\n";
     code += "        }\n";
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    code += "        ctx.mainMetrics.add(\"Flush\", TimeDiff(ctx.t));\n";
+#endif
     code += "    }\n";
     code += "    else\n";
     code += "    {\n";
-    code += "        zkResult = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
-    code += "        if (zkResult != ZKR_SUCCESS)\n";
-    code += "        {\n";
-    code += "            proverRequest.result = zkResult;\n";
-    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkResult));\n";
-    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-    code += "            return;\n";
-    code += "        }\n";
-    code += "    }\n\n";
+    code += "        proverRequest.flushId = 0;\n";
+    code += "        proverRequest.lastSentFlushId = 0;\n";
+    code += "    }\n";
+    code += "\n";
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    code += "    ctx.mainMetrics.add(\"Flush\", TimeDiff(ctx.t));\n";
-
     code += "    if (mainExecutor.config.executorTimeStatistics)\n";
     code += "    {\n";
     code += "        ctx.mainMetrics.print(\"Main Executor calls\");\n";
