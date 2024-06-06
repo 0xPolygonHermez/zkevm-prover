@@ -2044,8 +2044,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
-            jmpnCondValue = jmpnCondValue >> 23;
-            for (uint64_t index = 0; index < 9; ++index)
+            jmpnCondValue = jmpnCondValue >> forkInfo.Nbits;
+            for (uint64_t index = 0; index < (32 - forkInfo.Nbits); ++index)
             {
                 pols.hJmpnCondValueBit[index][i] = fr.fromU64(jmpnCondValue & 0x01);
                 jmpnCondValue = jmpnCondValue >> 1;

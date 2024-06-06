@@ -35,7 +35,7 @@ int main()
     uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
 
-    void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN.section[cm1_n] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+    void *pCommit = loadFileParallel(commitPols, starkInfo.mapSectionsN.section[cm1_n] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
 
     uint64_t N = (1 << starkInfo.starkStruct.nBits);

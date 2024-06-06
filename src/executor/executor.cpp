@@ -587,7 +587,7 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
             else
 #endif
             {
-                mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);
             }
 
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -713,7 +713,7 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
         else
 #endif
         {
-            mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);
         }
 
         // Save input to <timestamp>.input.json after execution including dbReadLog

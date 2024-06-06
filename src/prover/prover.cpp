@@ -6,10 +6,20 @@
 #include "scalar.hpp"
 #include "proof2zkin.hpp"
 #include "main.hpp"
-#include "main.recursive1.hpp"
-#include "main.recursive2.hpp"
-#include "main.recursiveF.hpp"
-#include "main.final.hpp"
+#if (PROVER_FORK_ID == 10)
+    #include "fork_10/main.hpp"
+    #include "fork_10/main.recursive1.hpp"
+    #include "fork_10/main.recursive2.hpp"
+    #include "fork_10/main.recursiveF.hpp"
+    #include "fork_10/main.final.hpp"
+#else
+    #include "fork_11/main.hpp"
+    #include "fork_11/main.recursive1.hpp"
+    #include "fork_11/main.recursive2.hpp"
+    #include "fork_11/main.recursiveF.hpp"
+    #include "fork_11/main.final.hpp"
+#endif
+
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "wtns_utils.hpp"
@@ -661,8 +671,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
 
         CommitPolsStarks cmPols12a((uint8_t *)pAddress + starksC12a->starkInfo.mapOffsets.section[cm1_n] * sizeof(Goldilocks::Element), (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
-
-        Circom::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
+    #if (PROVER_FORK_ID == 10)
+        CircomFork10::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
+    #else
+        CircomFork11::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
+    #endif
 
         // void *pointerCm12aPols = mapFile("config/c12a/c12a.commit", cmPols12a.size(), true);
         // memcpy(pointerCm12aPols, cmPols12a.address(), cmPols12a.size());
@@ -702,7 +715,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
         CommitPolsStarks cmPolsRecursive1((uint8_t *)pAddress + starksRecursive1->starkInfo.mapOffsets.section[cm1_n] * sizeof(Goldilocks::Element), (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.nCm1);
-        CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.nCm1);
+    #if (PROVER_FORK_ID == 10)
+        CircomRecursive1Fork10::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.nCm1);
+    #else
+        CircomRecursive1Fork11::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starksRecursive1->starkInfo.starkStruct.nBits), starksRecursive1->starkInfo.nCm1);
+    #endif
 
         // void *pointerCmRecursive1Pols = mapFile("config/recursive1/recursive1.commit", cmPolsRecursive1.size(), true);
         // memcpy(pointerCmRecursive1Pols, cmPolsRecursive1.address(), cmPolsRecursive1.size());
@@ -845,7 +862,11 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     }
 
     CommitPolsStarks cmPolsRecursive2((uint8_t *)pAddress + starksRecursive2->starkInfo.mapOffsets.section[cm1_n] * sizeof(Goldilocks::Element), (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.nCm1);
-    CircomRecursive2::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2, (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.nCm1);
+    #if (PROVER_FORK_ID == 10)
+        CircomRecursive2Fork10::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2, (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.nCm1);
+    #else
+        CircomRecursive2Fork11::getCommitedPols(&cmPolsRecursive2, config.recursive2Verifier, config.recursive2Exec, zkinInputRecursive2, (1 << starksRecursive2->starkInfo.starkStruct.nBits), starksRecursive2->starkInfo.nCm1);
+    #endif
 
     // void *pointerCmRecursive2Pols = mapFile("config/recursive2/recursive2.commit", cmPolsRecursive2.size(), true);
     // memcpy(pointerCmRecursive2Pols, cmPolsRecursive2.address(), cmPolsRecursive2.size());
@@ -948,7 +969,12 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
 
     CommitPolsStarks cmPolsRecursiveF((uint8_t *)pAddressStarksRecursiveF + starksRecursiveF->starkInfo.mapOffsets.section[cm1_n] * sizeof(Goldilocks::Element), (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.nCm1);
-    CircomRecursiveF::getCommitedPols(&cmPolsRecursiveF, config.recursivefVerifier, config.recursivefExec, zkinFinal, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.nCm1);
+    #if (PROVER_FORK_ID == 10)
+        CircomRecursiveFFork10::getCommitedPols(&cmPolsRecursiveF, config.recursivefVerifier, config.recursivefExec, zkinFinal, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.nCm1);
+    #else
+        CircomRecursiveFFork11::getCommitedPols(&cmPolsRecursiveF, config.recursivefVerifier, config.recursivefExec, zkinFinal, (1 << starksRecursiveF->starkInfo.starkStruct.nBits), starksRecursiveF->starkInfo.nCm1);
+    #endif
+    
 
     // void *pointercmPolsRecursiveF = mapFile("config/recursivef/recursivef.commit", cmPolsRecursiveF.size(), true);
     // memcpy(pointercmPolsRecursiveF, cmPolsRecursiveF.address(), cmPolsRecursiveF.size());
@@ -996,29 +1022,55 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     //  Verifier final
     //  ----------------------------------------------
 
-    TimerStart(CIRCOM_LOAD_CIRCUIT_FINAL);
-    CircomFinal::Circom_Circuit *circuitFinal = CircomFinal::loadCircuit(config.finalVerifier);
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_FINAL);
+    #if (PROVER_FORK_ID == 10)
+        TimerStart(CIRCOM_LOAD_CIRCUIT_FINAL);
+        CircomFinalFork10::Circom_Circuit *circuitFinal = CircomFinalFork10::loadCircuit(config.finalVerifier);
+        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_FINAL);
 
-    TimerStart(CIRCOM_FINAL_LOAD_JSON);
-    CircomFinal::Circom_CalcWit *ctxFinal = new CircomFinal::Circom_CalcWit(circuitFinal);
+        TimerStart(CIRCOM_FINAL_LOAD_JSON);
+        CircomFinalFork10::Circom_CalcWit *ctxFinal = new CircomFinalFork10::Circom_CalcWit(circuitFinal);
 
-    CircomFinal::loadJsonImpl(ctxFinal, zkinRecursiveF);
-    if (ctxFinal->getRemaingInputsToBeSet() != 0)
-    {
-        zklog.error("Prover::genProof() Not all inputs have been set. Only " + to_string(CircomFinal::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet()) + " out of " + to_string(CircomFinal::get_main_input_signal_no()));
-        exitProcess();
-    }
-    TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
+        CircomFinalFork10::loadJsonImpl(ctxFinal, zkinRecursiveF);
+        if (ctxFinal->getRemaingInputsToBeSet() != 0)
+        {
+            zklog.error("Prover::genProof() Not all inputs have been set. Only " + to_string(CircomFinalFork10::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet()) + " out of " + to_string(CircomFinalFork10::get_main_input_signal_no()));
+            exitProcess();
+        }
+        TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
 
-    TimerStart(CIRCOM_GET_BIN_WITNESS_FINAL);
-    AltBn128::FrElement *pWitnessFinal = NULL;
-    uint64_t witnessSizeFinal = 0;
-    CircomFinal::getBinWitness(ctxFinal, pWitnessFinal, witnessSizeFinal);
-    CircomFinal::freeCircuit(circuitFinal);
+        TimerStart(CIRCOM_GET_BIN_WITNESS_FINAL);
+        AltBn128::FrElement *pWitnessFinal = NULL;
+        uint64_t witnessSizeFinal = 0;
+        CircomFinalFork10::getBinWitness(ctxFinal, pWitnessFinal, witnessSizeFinal);
+        CircomFinalFork10::freeCircuit(circuitFinal);
+        delete ctxFinal;
+
+        TimerStopAndLog(CIRCOM_GET_BIN_WITNESS_FINAL);
+    #else
+        TimerStart(CIRCOM_LOAD_CIRCUIT_FINAL);
+        CircomFinalFork11::Circom_Circuit *circuitFinal = CircomFinalFork11::loadCircuit(config.finalVerifier);
+        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_FINAL);
+
+        TimerStart(CIRCOM_FINAL_LOAD_JSON);
+        CircomFinalFork11::Circom_CalcWit *ctxFinal = new CircomFinalFork11::Circom_CalcWit(circuitFinal);
+
+        CircomFinalFork11::loadJsonImpl(ctxFinal, zkinRecursiveF);
+        if (ctxFinal->getRemaingInputsToBeSet() != 0)
+        {
+            zklog.error("Prover::genProof() Not all inputs have been set. Only " + to_string(CircomFinalFork11::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet()) + " out of " + to_string(CircomFinalFork11::get_main_input_signal_no()));
+            exitProcess();
+        }
+        TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
+
+        TimerStart(CIRCOM_GET_BIN_WITNESS_FINAL);
+        AltBn128::FrElement *pWitnessFinal = NULL;
+        uint64_t witnessSizeFinal = 0;
+        CircomFinalFork11::getBinWitness(ctxFinal, pWitnessFinal, witnessSizeFinal);
+        CircomFinalFork11::freeCircuit(circuitFinal);
     delete ctxFinal;
 
     TimerStopAndLog(CIRCOM_GET_BIN_WITNESS_FINAL);
+    #endif
 
     TimerStart(SAVE_PUBLICS_JSON);
     // Save public file
