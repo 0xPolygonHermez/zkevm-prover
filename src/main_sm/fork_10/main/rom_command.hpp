@@ -71,6 +71,9 @@ typedef enum : int {
     f_fp2InvBN254_x,
     f_fp2InvBN254_y,
     f_fpBN254inv,
+    f_dumpRegs,
+    f_dump,
+    f_dumphex,
 } tFunction;
 
 // ROM command (op)
