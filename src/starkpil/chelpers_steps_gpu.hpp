@@ -118,7 +118,7 @@ public:
         }
     }
 
-#ifdef USE_GPU
+#ifdef __USE_CUDA__
 //rick: not coalesced accesses!
  __device__ __forceinline__ void storePolinomials_(StarkInfo &starkInfo, StepsParams &params, uint64_t row, uint64_t domainExtended) {
 
@@ -215,7 +215,7 @@ public:
         }
     }
 
-#ifdef USE_GPU
+#ifdef __USE_CUDA__
 //rick: not coalesced accesses!
 __device__ __forceinline__  void loadPolinomials(StarkInfo &starkInfo, StepsParams &params, uint64_t row, uint64_t stage, uint64_t domainExtended) {
     
@@ -286,7 +286,7 @@ virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, Par
     }
 }
 
-#ifdef USE_GPU
+#ifdef __USE_CUDA__
 void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
     
     bool domainExtended = parserParams.stage > 3 ? true : false;
@@ -812,7 +812,7 @@ void optcodeIteration(uint32_t nrowsPack, uint32_t nOps, uint32_t nArgs) {
 
 }
 
-#ifdef USE_GPU
+#ifdef __USE_CUDA__
 __device__ __forceinline__ void optcodeIteration(uint32_t nOps, uint32_t nArgs) {
 
     uint64_t i_args = 0;
@@ -1421,7 +1421,7 @@ void dataSetup(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs
     }    
 };
 
-#ifdef USE_GPU
+#ifdef __USE_CUDA__
 
 void dataSetup(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams){
 
