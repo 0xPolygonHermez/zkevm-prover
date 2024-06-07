@@ -8,16 +8,16 @@
 #include "main_sm/fork_8/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_9/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_24_fast.hpp"
+#include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_fast.hpp"
 #if PROVER_FORK_ID >= 11
-#include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_25_fast.hpp"
+#include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_fast.hpp"
 #endif
 
 #ifdef MAIN_SM_PROVER_GENERATED_CODE
     #if (PROVER_FORK_ID == 10)
-        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_24.hpp"
+        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_10.hpp"
     #else
-        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_25.hpp"
+        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_11.hpp"
     #endif
 #endif
 
@@ -323,7 +323,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
             {
                 TimerStart(MAIN_EXEC_GENERATED_FAST);
                 //zklog.info("Executor::processBatch() fork 10 generated");
-                fork_10::main_exec_generated_10_24_fast(mainExecutor_fork_10, proverRequest);
+                fork_10::main_exec_generated_10_fast(mainExecutor_fork_10, proverRequest);
                 TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
             }
             else
@@ -358,7 +358,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
             {
                 TimerStart(MAIN_EXEC_GENERATED_FAST);
                 //zklog.info("Executor::processBatch() fork 10 generated");
-                fork_10::main_exec_generated_11_25_fast(mainExecutor_fork_10, proverRequest);
+                fork_10::main_exec_generated_11_fast(mainExecutor_fork_10, proverRequest);
                 TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
             }
             else
@@ -579,9 +579,9 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
             if (config.useMainExecGenerated)
             {
 #if (PROVER_FORK_ID == 10)
-                PROVER_FORK_NAMESPACE::main_exec_generated_10_24(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated_10(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
 #else
-                PROVER_FORK_NAMESPACE::main_exec_generated_11_25(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated_11(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
 #endif
             }
             else
@@ -705,9 +705,9 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
         if (config.useMainExecGenerated)
         {
 #if (PROVER_FORK_ID == 10)
-            PROVER_FORK_NAMESPACE::main_exec_generated_10_24(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated_10(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
 #else
-            PROVER_FORK_NAMESPACE::main_exec_generated_11_25(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated_11(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
 #endif
         }
         else

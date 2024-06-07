@@ -77,8 +77,8 @@ namespace fork_10
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
     fr(fr),
     poseidon(poseidon),
-    romBatch_10_24(config, BATCH),
-    romBatch_11_25(config, BATCH),
+    romBatch_10(config, BATCH),
+    romBatch_11(config, BATCH),
     romDiagnostic(config, DIAGNOSTIC),
 #ifdef MULTI_ROM_TEST
     rom_gas_limit_100000000(config),
@@ -93,10 +93,10 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     // Load zkEVM ROM definition files
     json romJson;
-    file2json("src/main_sm/fork_10/scripts/rom_10_24.json", romJson);
-    romBatch_10_24.load(fr, romJson);
-    file2json("src/main_sm/fork_10/scripts/rom_11_25.json", romJson);
-    romBatch_11_25.load(fr, romJson);
+    file2json("src/main_sm/fork_10/scripts/rom_10.json", romJson);
+    romBatch_10.load(fr, romJson);
+    file2json("src/main_sm/fork_10/scripts/rom_11.json", romJson);
+    romBatch_11.load(fr, romJson);
 
     // Load diagnostic (unit test) ROM definition file
     if (config.loadDiagnosticRom)
@@ -118,21 +118,21 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 #endif
 
     // Get labels
-    finalizeExecutionLabel     = romBatch_10_24.getLabel(string("finalizeExecution"));
-    checkAndSaveFromLabel      = romBatch_10_24.getLabel(string("checkAndSaveFrom"));
-    ecrecoverStoreArgsLabel    = romBatch_10_24.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel          = romBatch_10_24.getLabel(string("ecrecover_end"));
-    checkFirstTxTypeLabel      = romBatch_10_24.getLabel(string("checkFirstTxType"));
-    writeBlockInfoRootLabel    = romBatch_10_24.getLabel(string("writeBlockInfoRoot"));
-    verifyMerkleProofEndLabel  = romBatch_10_24.getLabel(string("verifyMerkleProofEnd"));
-    outOfCountersStepLabel     = romBatch_10_24.getLabel(string("outOfCountersStep"));
-    outOfCountersArithLabel    = romBatch_10_24.getLabel(string("outOfCountersArith"));
-    outOfCountersBinaryLabel   = romBatch_10_24.getLabel(string("outOfCountersBinary"));
-    outOfCountersKeccakLabel   = romBatch_10_24.getLabel(string("outOfCountersKeccak"));
-    outOfCountersSha256Label   = romBatch_10_24.getLabel(string("outOfCountersSha256"));
-    outOfCountersMemalignLabel = romBatch_10_24.getLabel(string("outOfCountersMemalign"));
-    outOfCountersPoseidonLabel = romBatch_10_24.getLabel(string("outOfCountersPoseidon"));
-    outOfCountersPaddingLabel  = romBatch_10_24.getLabel(string("outOfCountersPadding"));
+    finalizeExecutionLabel     = romBatch_10.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel      = romBatch_10.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel    = romBatch_10.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel          = romBatch_10.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel      = romBatch_10.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel    = romBatch_10.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel  = romBatch_10.getLabel(string("verifyMerkleProofEnd"));
+    outOfCountersStepLabel     = romBatch_10.getLabel(string("outOfCountersStep"));
+    outOfCountersArithLabel    = romBatch_10.getLabel(string("outOfCountersArith"));
+    outOfCountersBinaryLabel   = romBatch_10.getLabel(string("outOfCountersBinary"));
+    outOfCountersKeccakLabel   = romBatch_10.getLabel(string("outOfCountersKeccak"));
+    outOfCountersSha256Label   = romBatch_10.getLabel(string("outOfCountersSha256"));
+    outOfCountersMemalignLabel = romBatch_10.getLabel(string("outOfCountersMemalign"));
+    outOfCountersPoseidonLabel = romBatch_10.getLabel(string("outOfCountersPoseidon"));
+    outOfCountersPaddingLabel  = romBatch_10.getLabel(string("outOfCountersPadding"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -215,8 +215,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // Get the proper rom
     Rom &rom =                
         config.loadDiagnosticRom ? romDiagnostic :
-        proverRequest.input.publicInputsExtended.publicInputs.forkID == 10 ? romBatch_10_24 :
-        romBatch_11_25;
+        proverRequest.input.publicInputsExtended.publicInputs.forkID == 10 ? romBatch_10 :
+        romBatch_11;
 
     // Get N and N_NoCounters 
     ForkInfo forkInfo;
@@ -2044,8 +2044,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
-            jmpnCondValue = jmpnCondValue >> forkInfo.Nbits;
-            for (uint64_t index = 0; index < (32 - forkInfo.Nbits); ++index)
+            jmpnCondValue = jmpnCondValue >> 23;
+            for (uint64_t index = 0; index < 9; ++index)
             {
                 pols.hJmpnCondValueBit[index][i] = fr.fromU64(jmpnCondValue & 0x01);
                 jmpnCondValue = jmpnCondValue >> 1;
@@ -2854,11 +2854,11 @@ void MainExecutor::logError (Context &ctx, const string &message)
     }
     else if (ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 10)
     {
-        romLine = (ctx.pZKPC != NULL) ? romBatch_10_24.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+        romLine = (ctx.pZKPC != NULL) ? romBatch_10.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
     }
     else if (ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 11)
     {
-        romLine = (ctx.pZKPC != NULL) ? romBatch_11_25.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+        romLine = (ctx.pZKPC != NULL) ? romBatch_11.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
     }
 
     string log2 = string("proverRequest.result=") + zkresult2string(ctx.proverRequest.result) +
