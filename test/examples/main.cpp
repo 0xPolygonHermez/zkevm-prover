@@ -6,6 +6,7 @@
     #include "chelpers_steps_avx512.hpp"
 #endif
 #include "chelpers_steps_pack.hpp"
+#include "chelpers_steps_gpu.hpp"
 #include "AllSteps.hpp"
 
 int main()
@@ -74,6 +75,8 @@ int main()
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
+#elif defined(__GPU__) 
+        CHelpersStepsGPU cHelpersSteps;
 #else
         CHelpersSteps cHelpersSteps;
 #endif

@@ -37,6 +37,7 @@
 #include "commit_pols_starks.hpp"
 #include "chelpers_steps.hpp"
 #include "chelpers_steps_pack.hpp"
+#include "chelpers_steps_gpu.hpp"
 #ifdef __AVX512__
 #include "chelpers_steps_avx512.hpp"
 #endif
@@ -641,6 +642,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
+#elif defined(__GPU__) 
+        CHelpersStepsGPU cHelpersSteps;
 #else
         CHelpersSteps cHelpersSteps;
 #endif
@@ -886,6 +889,8 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
+#elif defined(__GPU__) 
+        CHelpersStepsGPU cHelpersSteps;
 #else
         CHelpersSteps cHelpersSteps;
 #endif        
@@ -989,9 +994,11 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
     if(USE_GENERIC_PARSER) {
         #ifdef __AVX512__
-                CHelpersStepsAvx512 cHelpersSteps;
+            CHelpersStepsAvx512 cHelpersSteps;
         #elif defined(__PACK__) 
-                CHelpersStepsPack cHelpersSteps;
+            CHelpersStepsPack cHelpersSteps;
+        #elif defined(__GPU__) 
+            CHelpersStepsGPU cHelpersSteps;
         #else
                 CHelpersSteps cHelpersSteps;
         #endif
