@@ -130,7 +130,7 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    if (publicInputsExtended.publicInputs.forkID >= 7)
+    if ((publicInputsExtended.publicInputs.forkID >= 7) && !config.loadDiagnosticRom)
     {
         // Input JSON file must contain a l1InfoRoot key at the root level
         if ( !input.contains("l1InfoRoot") ||
@@ -145,7 +145,7 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    if (publicInputsExtended.publicInputs.forkID >= 7)
+    if ((publicInputsExtended.publicInputs.forkID >= 7) && !config.loadDiagnosticRom)
     {
         // Input JSON file must contain a forcedBlockHashL1 key at the root level
         if ( !input.contains("forcedBlockHashL1") ||

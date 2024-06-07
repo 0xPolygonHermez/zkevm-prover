@@ -2505,3 +2505,4 @@ inline const char * address2CommitPolName (uint64_t address)
 } // namespace
 
 #endif // COMMIT_POLS_HPP_fork_9
+
