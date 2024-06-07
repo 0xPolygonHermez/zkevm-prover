@@ -87,7 +87,14 @@ zkresult HashK_verify ( Context &ctx,
 
     if (!ctx.bProcessBatch)
     {
-        ctx.pols.hashK[i] = fr.one();
+        if (ctx.rom.line[zkPC].hashK == 1)
+        {
+            ctx.pols.hashK[i] = fr.one();
+        }
+        else
+        {
+            ctx.pols.hashK1[i] = fr.one();
+        }
     }
 
     unordered_map< uint64_t, HashValue >::iterator hashKIterator;

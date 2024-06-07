@@ -84,7 +84,14 @@ zkresult HashP_verify ( Context &ctx,
 
     if (!ctx.bProcessBatch)
     {
-        ctx.pols.hashP[i] = fr.one();
+        if (ctx.rom.line[zkPC].hashP == 1)
+        {
+            ctx.pols.hashP[i] = fr.one();
+        }
+        else
+        {
+            ctx.pols.hashP1[i] = fr.one();
+        }
     }
 
     unordered_map< uint64_t, HashValue >::iterator hashPIterator;
