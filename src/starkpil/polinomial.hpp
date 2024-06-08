@@ -593,7 +593,7 @@ public:
         Goldilocks3::copy((Goldilocks3::Element *)&pZ[0], &Goldilocks3::one());
 
 
-        uint64_t stride = 4096;
+        uint64_t stride = min(size, uint64_t(2048));
         for (uint64_t ii = 1; ii < size; ii += stride)
         {
             Polinomial denI(stride, 3);
