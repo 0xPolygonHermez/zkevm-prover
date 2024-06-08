@@ -77,6 +77,11 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_fp2InvBN254_x:                   return eval_fp2InvBN254_x(ctx, cmd, cr);
             case f_fp2InvBN254_y:                   return eval_fp2InvBN254_y(ctx, cmd, cr);
             case f_fpBN254inv:                      return eval_fpBN254inv(ctx, cmd, cr);
+
+            // Ignore diagnostic rom debug log functions
+            case f_dumpRegs:                        cr.zkResult = ZKR_SUCCESS; cr.type = crt_u64; cr.u64 = 0; return;
+            case f_dump:                            cr.zkResult = ZKR_SUCCESS; cr.type = crt_u64; cr.u64 = 0; return;
+            case f_dumphex:                         cr.zkResult = ZKR_SUCCESS; cr.type = crt_u64; cr.u64 = 0; return;
             
             default:
                 zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + "=" + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);

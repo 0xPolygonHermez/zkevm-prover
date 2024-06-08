@@ -97,6 +97,9 @@ tFunction string2Function(string s)
     else if (s == "fp2InvBN254_x")                  return f_fp2InvBN254_x;
     else if (s == "fp2InvBN254_y")                  return f_fp2InvBN254_y;
     else if (s == "fpBN254inv")                     return f_fpBN254inv;
+    else if (s == "dumpRegs")                       return f_dumpRegs;
+    else if (s == "dump")                           return f_dump;
+    else if (s == "dumphex")                        return f_dumphex;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -165,6 +168,9 @@ string function2String(tFunction f)
         case f_fp2InvBN254_x:                   return "fp2InvBN254_x";
         case f_fp2InvBN254_y:                   return "fp2InvBN254_y";
         case f_fpBN254inv:                      return "fpBN254inv";
+        case f_dumpRegs:                        return "dumpRegs";
+        case f_dump:                            return "dump";
+        case f_dumphex:                            return "dumphex";
         case f_empty:                           return "";
         default:                                return "unknown";
     }
