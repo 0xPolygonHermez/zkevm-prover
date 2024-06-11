@@ -1,12 +1,12 @@
 #!/bin/bash -x
 
-VERSION=v7.0.0-rc.0-fork.10
+VERSION=v7.0.0-rc.0-fork.11
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 PARENT_FORK_ID=fork_10
 EXCLUDE_CONSTTREE="true"
 
-WORKING_DIR=/releases/${VERSION}
+WORKING_DIR=../test_fork_10_2_25
 CONFIG_DIR=${WORKING_DIR}/config/
 C_FILES=${WORKING_DIR}/c_files
 CIRCOM_HEADER="#pragma GCC diagnostic push\n#pragma GCC diagnostic ignored \"-Wunused-variable\"\n#pragma GCC push_options\n#pragma GCC optimize (\"O0\")\n#include <stdio.h>\n#include <iostream>\n#include <assert.h>\n#include <cassert>\n"
@@ -86,7 +86,7 @@ fi
 if [ "$FORK_ID" == "$PARENT_FORK_ID" ]; then
     cp "${WORKING_DIR}/pil/zkevm/main.pil.json" "./src/main_sm/$PARENT_FORK_ID/scripts/"
 else
-    if ! diff -q "${WORKING_DIR}/pil/zkevm/main.pil.json" "./src/main_sm/$PARENT_FORK_ID/scripts/main.pil.json" >/dev/null; then
+    if ! diff -q "${WORKING_DIR}/pil/zkevm/main_2_25.pil.json" "./src/main_sm/$PARENT_FORK_ID/scripts/main.pil.json" >/dev/null; then
         echo "Warning: main.pil.json files differ. Not copying."
     fi
 fi

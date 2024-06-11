@@ -2043,9 +2043,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
             }
-            pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
-            jmpnCondValue = jmpnCondValue >> 23;
-            for (uint64_t index = 0; index < 9; ++index)
+
+            uint64_t JMPN_COND_VALUE_BITS = uint64_t(rom.constants.TOTAL_STEPS_LIMIT) == 16777216 ? 24 : 25;
+            pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & (rom.constants.TOTAL_STEPS_LIMIT - 1));
+            jmpnCondValue = jmpnCondValue >> JMPN_COND_VALUE_BITS;
+            for (uint64_t index = 0; index < 8; ++index)
             {
                 pols.hJmpnCondValueBit[index][i] = fr.fromU64(jmpnCondValue & 0x01);
                 jmpnCondValue = jmpnCondValue >> 1;
