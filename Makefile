@@ -41,6 +41,10 @@ else
       CXXFLAGS += -O3
 endif
 
+ifdef PROVER_FORK_ID
+	  CXXFLAGS += -DPROVER_FORK_ID=$(PROVER_FORK_ID)
+endif
+
 # Verify if AVX-512 is supported
 # for now disabled, to enable it, you only need to uncomment these lines
 #AVX512_SUPPORTED := $(shell cat /proc/cpuinfo | grep -E 'avx512' -m 1)
@@ -143,7 +147,7 @@ main_generator_10: $(BUILD_DIR)/$(TARGET_MNG_10)
 
 $(BUILD_DIR)/$(TARGET_MNG_10): ./src/main_generator/main_generator_10.cpp ./src/config/definitions.hpp
 	$(MKDIR_P) $(BUILD_DIR)
-	g++ -g ./src/main_generator/main_generator_10.cpp ./src/config/fork_info.cpp -o $@ -lgmp
+	g++ -g $(CXXFLAGS) ./src/main_generator/main_generator_10.cpp ./src/config/fork_info.cpp -o $@ -lgmp
 
 generate: main_generator main_generator_10
 	$(BUILD_DIR)/$(TARGET_MNG) all

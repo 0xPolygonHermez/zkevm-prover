@@ -1,11 +1,20 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
+#define CONCATENATE_DEFINES_AUX(x, y) x##y
+#define CONCATENATE_DEFINES(x, y) CONCATENATE_DEFINES_AUX(x, y)
+#define DEFINE_TO_STRING(x) #x
+
 /* Only one fork can generate proofs */
+#ifndef PROVER_FORK_ID
 #define PROVER_FORK_ID 10
+#pragma message "Defining fork_10"
+#endif
+
+/* Regardless of the PROVER_FORK_ID, proof generation code uses the same namespace from the parent fork ID */
 #define PROVER_FORK_NAMESPACE fork_10
-#define PROVER_FORK_NAMESPACE_STRING "fork_10"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_10
+#define PROVER_FORK_NAMESPACE_STRING DEFINE_TO_STRING(PROVER_FORK_NAMESPACE)
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_10 // Same pols definition for all proof generation files
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
