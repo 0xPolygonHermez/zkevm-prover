@@ -2044,9 +2044,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
 
-            uint64_t JMPN_COND_VALUE_BITS = uint64_t(rom.constants.TOTAL_STEPS_LIMIT) == 16777216 ? 24 : 25;
-            pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & (rom.constants.TOTAL_STEPS_LIMIT - 1));
-            jmpnCondValue = jmpnCondValue >> JMPN_COND_VALUE_BITS;
+            pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & (N - 1));
+            jmpnCondValue = jmpnCondValue >> forkInfo.Nbits;
             for (uint64_t index = 0; index < 8; ++index)
             {
                 pols.hJmpnCondValueBit[index][i] = fr.fromU64(jmpnCondValue & 0x01);

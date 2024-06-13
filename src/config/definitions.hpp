@@ -12,7 +12,7 @@
 
 /* Regardless of the PROVER_FORK_ID, proof generation code uses the same namespace from the parent fork ID */
 #define PROVER_FORK_NAMESPACE fork_10
-#define PROVER_FORK_NAMESPACE_STRING DEFINE_TO_STRING(PROVER_FORK_NAMESPACE)
+#define PROVER_FORK_NAMESPACE_STRING "fork_10"
 #define USING_PROVER_FORK_NAMESPACE using namespace fork_10 // Same pols definition for all proof generation files
 
 /* Log traces selector: uncomment to enable the corresponding trace */
