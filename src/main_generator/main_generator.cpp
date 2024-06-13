@@ -6294,33 +6294,11 @@ code += "    #endif\n";
         }
     }
 
+    code += "    if (ctx.config.hashDBSingleton)\n";
+    code += "    {\n";
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
-    code += "    gettimeofday(&t, NULL);\n";
+    code += "        gettimeofday(&t, NULL);\n";
     code += "#endif\n";
-
-    code += "    if (ctx.config.hashDB64)\n";
-    code += "    {\n";
-    code += "        Goldilocks::Element newStateRoot[4];\n";
-    code += "        string2fea(fr, NormalizeToNFormat(proverRequest.pFullTracer->get_new_state_root(),64), newStateRoot);\n";
-    code += "        zkresult zkr = pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
-    code += "        if (zkr != ZKR_SUCCESS)\n";
-    code += "        {\n";
-    code += "            proverRequest.result = zkr;\n";
-    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->purge() result=\") + zkresult2string(zkr));\n";
-    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-    code += "            return;\n";
-    code += "        }\n";
-    code += "        zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
-    code += "        if (zkr != ZKR_SUCCESS)\n";
-    code += "        {\n";
-    code += "            proverRequest.result = zkr;\n";
-    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
-    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-    code += "            return;\n";
-    code += "        }\n";
-    code += "    }\n";
-    code += "    else\n";
-    code += "    {\n";
     code += "        zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
     code += "        if (zkr != ZKR_SUCCESS)\n";
     code += "        {\n";
@@ -6329,11 +6307,16 @@ code += "    #endif\n";
     code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
     code += "            return;\n";
     code += "        }\n";
-    code += "    }\n\n";
-
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
-    code += "    mainMetrics.add(\"Flush\", TimeDiff(t));\n";
+    code += "        mainMetrics.add(\"Flush\", TimeDiff(t));\n";
     code += "#endif\n";
+    code += "    }\n";
+    code += "    else\n";
+    code += "    {\n";
+    code += "        proverRequest.flushId = 0;\n";
+    code += "        proverRequest.lastSentFlushId = 0;\n";
+    code += "    }\n";
+    code += "\n";
 
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
     code += "    if (mainExecutor.config.executorTimeStatistics)\n";
