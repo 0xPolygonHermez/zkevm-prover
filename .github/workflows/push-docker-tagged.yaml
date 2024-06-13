@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Executor
+      - name: Build and push Executor 10
         id: docker_build_executor
         uses: docker/build-push-action@v2
         with:
@@ -44,5 +44,19 @@ jobs:
           push: true
           target: executor
           tags: |
-            hermeznetwork/zkevm-prover:${{ github.ref_name }}
+            hermeznetwork/zkevm-prover:${{ github.ref_name }}-fork.10
+          build-args: PROVER_FORK_ID=10 
+
+      - name: Build and push Executor 11
+        id: docker_build_executor
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile-GHA
+          platforms: linux/amd64
+          push: true
+          target: executor
+          tags: |
+            hermeznetwork/zkevm-prover:${{ github.ref_name }}-fork.11
+          build-args: PROVER_FORK_ID=11 
             
