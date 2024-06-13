@@ -15706,74 +15706,16 @@
      {
       "CONST": "262144",
       "setE": 1,
-      "line": 2,
-      "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        0x40000 => E"
-     },
-     {
-      "CONST": "129024",
-      "setE": 1,
-      "line": 3,
-      "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        0x20000 - 2048 => E"
-     },
-     {
-      "CONST": "3141592",
-      "isStack": 0,
-      "isMem": 1,
-      "ind": 1,
-      "indRR": 0,
-      "incStack": 0,
-      "offset": 0,
-      "useCTX": 1,
-      "mOp": 1,
-      "mWR": 1,
-      "line": 4,
-      "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        3141592 :MSTORE(MEM:E)"
-     },
-     {
-      "CONST": "262144",
-      "setE": 1,
-      "line": 6,
-      "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        0x40000 => E"
-     },
-     {
-      "CONST": "129024",
-      "setRR": 1,
-      "line": 7,
-      "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        0x20000 - 2048 => RR"
-     },
-     {
-      "CONST": "3141592",
-      "isStack": 0,
-      "isMem": 1,
-      "ind": 0,
-      "indRR": 1,
-      "incStack": 0,
-      "offset": 0,
-      "useCTX": 1,
-      "mOp": 1,
-      "mWR": 1,
-      "line": 8,
-      "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        3141592 :MSTORE(MEM:RR)"
-     },
-     {
-      "CONST": "262144",
-      "setRR": 1,
       "line": 10,
       "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        0x40000 => RR"
+      "lineStr": "        0x40000 => E"
      },
      {
-      "CONST": "129124",
+      "CONST": "129023",
       "setE": 1,
       "line": 11,
       "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        0x20000 - 2048 + 100 => E"
+      "lineStr": "        0x20000 - 2049 => E"
      },
      {
       "CONST": "3141592",
@@ -15782,13 +15724,13 @@
       "ind": 1,
       "indRR": 0,
       "incStack": 0,
-      "offset": -100,
+      "offset": 0,
       "useCTX": 1,
       "mOp": 1,
       "mWR": 1,
       "line": 12,
       "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        3141592 :MSTORE(MEM:E - 100)"
+      "lineStr": "        3141592 :MSTORE(MEM:E)"
      },
      {
       "CONST": "262144",
@@ -15798,11 +15740,69 @@
       "lineStr": "        0x40000 => E"
      },
      {
-      "CONST": "129124",
+      "CONST": "129023",
       "setRR": 1,
       "line": 15,
       "fileName": "fix/maxmem.zkasm",
-      "lineStr": "        0x20000 - 2048 + 100 => RR"
+      "lineStr": "        0x20000 - 2049 => RR"
+     },
+     {
+      "CONST": "3141592",
+      "isStack": 0,
+      "isMem": 1,
+      "ind": 0,
+      "indRR": 1,
+      "incStack": 0,
+      "offset": 0,
+      "useCTX": 1,
+      "mOp": 1,
+      "mWR": 1,
+      "line": 16,
+      "fileName": "fix/maxmem.zkasm",
+      "lineStr": "        3141592 :MSTORE(MEM:RR)"
+     },
+     {
+      "CONST": "262144",
+      "setRR": 1,
+      "line": 18,
+      "fileName": "fix/maxmem.zkasm",
+      "lineStr": "        0x40000 => RR"
+     },
+     {
+      "CONST": "129123",
+      "setE": 1,
+      "line": 19,
+      "fileName": "fix/maxmem.zkasm",
+      "lineStr": "        0x20000 - 2049 + 100 => E"
+     },
+     {
+      "CONST": "3141592",
+      "isStack": 0,
+      "isMem": 1,
+      "ind": 1,
+      "indRR": 0,
+      "incStack": 0,
+      "offset": -100,
+      "useCTX": 1,
+      "mOp": 1,
+      "mWR": 1,
+      "line": 20,
+      "fileName": "fix/maxmem.zkasm",
+      "lineStr": "        3141592 :MSTORE(MEM:E - 100)"
+     },
+     {
+      "CONST": "262144",
+      "setE": 1,
+      "line": 22,
+      "fileName": "fix/maxmem.zkasm",
+      "lineStr": "        0x40000 => E"
+     },
+     {
+      "CONST": "129123",
+      "setRR": 1,
+      "line": 23,
+      "fileName": "fix/maxmem.zkasm",
+      "lineStr": "        0x20000 - 2049 + 100 => RR"
      },
      {
       "CONST": "3141592",
@@ -15815,7 +15815,7 @@
       "useCTX": 1,
       "mOp": 1,
       "mWR": 1,
-      "line": 16,
+      "line": 24,
       "fileName": "fix/maxmem.zkasm",
       "lineStr": "        3141592 :MSTORE(MEM:RR - 100)"
      },

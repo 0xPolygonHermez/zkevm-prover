@@ -698,6 +698,10 @@ bool Config::check (void)
     if (loadDiagnosticRom)
     {
         inputFile = "testvectors/diagnostic/input.json";
+        useMainExecGenerated = false;
+        runExecutorServer = false;
+        runExecutorClient = false;
+        runFileProcessBatch = true;
     }
 
     if (!hashDBSingleton && (databaseURL != "local"))
