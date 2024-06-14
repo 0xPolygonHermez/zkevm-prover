@@ -122,7 +122,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 464; }
     inline static uint64_t numPols (void) { return 58; }
 
@@ -363,7 +362,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 1416; }
     inline static uint64_t numPols (void) { return 177; }
 
@@ -456,7 +454,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 336; }
     inline static uint64_t numPols (void) { return 42; }
 
@@ -515,7 +512,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 152; }
     inline static uint64_t numPols (void) { return 19; }
 
@@ -619,7 +615,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 352; }
     inline static uint64_t numPols (void) { return 44; }
 
@@ -668,7 +663,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 112; }
     inline static uint64_t numPols (void) { return 14; }
 
@@ -847,7 +841,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 632; }
     inline static uint64_t numPols (void) { return 79; }
 
@@ -889,7 +882,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 96; }
     inline static uint64_t numPols (void) { return 12; }
 
@@ -914,7 +906,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 16; }
     inline static uint64_t numPols (void) { return 2; }
 
@@ -959,7 +950,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 96; }
     inline static uint64_t numPols (void) { return 12; }
 
@@ -1054,7 +1044,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 296; }
     inline static uint64_t numPols (void) { return 37; }
 
@@ -1096,7 +1085,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 104; }
     inline static uint64_t numPols (void) { return 13; }
 
@@ -1125,7 +1113,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 32; }
     inline static uint64_t numPols (void) { return 4; }
 
@@ -1150,7 +1137,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 16; }
     inline static uint64_t numPols (void) { return 2; }
 
@@ -1195,7 +1181,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 96; }
     inline static uint64_t numPols (void) { return 12; }
 
@@ -1294,7 +1279,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 312; }
     inline static uint64_t numPols (void) { return 39; }
 
@@ -1676,7 +1660,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t pilSize (void) { return 1472; }
     inline static uint64_t numPols (void) { return 184; }
 
@@ -1732,7 +1715,6 @@ public:
         _degree(degree) {}
 
     inline static uint64_t pilSize (void) { return 100663296000; }
-    inline static uint64_t pilDegree (void) { return 33554432; }
     inline static uint64_t numPols (void) { return 750; }
 
     inline void * address (void) { return _pAddress; }

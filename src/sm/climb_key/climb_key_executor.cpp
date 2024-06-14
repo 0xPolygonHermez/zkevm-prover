@@ -103,7 +103,7 @@ void ClimbKeyExecutor::execute (vector<ClimbKeyAction> &action)
         exitProcess();
         return;
     }
-    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    CommitPols cmPols(pAddress, N);
     execute(action, cmPols.ClimbKey);
     free(pAddress);
 }

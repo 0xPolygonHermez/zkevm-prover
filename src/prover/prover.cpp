@@ -82,6 +82,7 @@ Prover::Prover(Goldilocks &fr,
                                        poseidon(poseidon),
                                        executor(fr, config, poseidon),
                                        pCurrentRequest(NULL),
+                                       N(getForkN(PROVER_FORK_ID)),
                                        config(config),
                                        lastComputedRequestEndTime(0)
 {
@@ -487,7 +488,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     /************/
     TimerStart(EXECUTOR_EXECUTE_INITIALIZATION);
 
-    PROVER_FORK_NAMESPACE::CommitPols cmPols((uint8_t *)pAddress + starkZkevm->starkInfo.mapOffsets.section[cm1_n] * sizeof(Goldilocks::Element), PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
+    PROVER_FORK_NAMESPACE::CommitPols cmPols((uint8_t *)pAddress + starkZkevm->starkInfo.mapOffsets.section[cm1_n] * sizeof(Goldilocks::Element), N);
     // Goldilocks::parSetZero((Goldilocks::Element*)pAddress, cmPols.size()/sizeof(Goldilocks::Element), omp_get_max_threads()/2);
     uint64_t num_threads = omp_get_max_threads();
     uint64_t bytes_per_thread = cmPols.size() / num_threads;
@@ -503,7 +504,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     executor.executeBatch(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE_BATCH_PROOF);
 
-    uint64_t lastN = cmPols.pilDegree() - 1;
+    uint64_t lastN = N - 1;
 
     zklog.info("Prover::genBatchProof() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
         " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root() +
@@ -1207,14 +1208,14 @@ void Prover::execute(ProverRequest *pProverRequest)
     /* Executor */
     /************/
 
-    PROVER_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, PROVER_FORK_NAMESPACE::CommitPols::pilDegree());
+    PROVER_FORK_NAMESPACE::CommitPols cmPols(pExecuteAddress, N);
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_EXECUTE);
     executor.executeBatch(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE);
 
-    uint64_t lastN = cmPols.pilDegree() - 1;
+    uint64_t lastN = N - 1;
     zklog.info("Prover::execute() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
         " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root() +
         " pols.B[0]=" + fea2stringchain(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +

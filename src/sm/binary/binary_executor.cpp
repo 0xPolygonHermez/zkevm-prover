@@ -6,13 +6,14 @@
 #include "scalar.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
+#include "fork_info.hpp"
 
 using json = nlohmann::json;
 
 BinaryExecutor::BinaryExecutor (Goldilocks &fr, const Config &config) :
     fr(fr),
     config(config),
-    N(BinaryCommitPols::pilDegree())
+    N(getForkN(PROVER_FORK_ID))
 {
     TimerStart(BINARY_EXECUTOR);
 
@@ -416,7 +417,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action)
         zklog.error("BinaryExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
         exitProcess();
     }
-    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    CommitPols cmPols(pAddress, N);
     execute(action, cmPols.Binary);
     free(pAddress);
 }

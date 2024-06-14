@@ -51,12 +51,13 @@ endif
 # Verify if AVX-512 is supported
 # for now disabled, to enable it, you only need to uncomment these lines
 AVX512_SUPPORTED := $(shell cat /proc/cpuinfo | grep -E 'avx512' -m 1)
+AVX_SUPPORTED := $(shell cat /proc/cpuinfo | grep -E 'avx2' -m 1)
 
 ifneq ($(AVX512_SUPPORTED),)
 	CXXFLAGS += -mavx512f -D__AVX512__
+else ifeq ($(AVX_SUPPORTED),)
+	CXXFLAGS += -D __PACK__
 endif
-
-# CXXFLAGS += -D __PACK__
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))

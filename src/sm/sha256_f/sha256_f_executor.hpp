@@ -10,6 +10,7 @@
 #include "gate_state.hpp"
 #include "sha256.hpp"
 #include "sha256_config.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -42,7 +43,7 @@ public:
     Sha256FExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree()),
+        N(getForkN(PROVER_FORK_ID)),
         slotSize(31488),
         bitsPerElement(7),
         nSlots((N-1)/slotSize)

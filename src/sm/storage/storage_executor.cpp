@@ -1278,7 +1278,7 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         zklog.error("StorageExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
         exitProcess();
     }
-    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    CommitPols cmPols(pAddress, N);
     vector<array<Goldilocks::Element, 17>> poseidonRequired;
     vector<ClimbKeyAction> climbKeyRequired;
     execute(action, cmPols.Storage, poseidonRequired, climbKeyRequired);

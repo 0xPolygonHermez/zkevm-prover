@@ -5,6 +5,7 @@
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -33,7 +34,7 @@ public:
     MemoryExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(PROVER_FORK_NAMESPACE::MemCommitPols::pilDegree()) {}
+        N(getForkN(PROVER_FORK_ID)) {}
 
     void execute (vector<MemoryAccess> &input, PROVER_FORK_NAMESPACE::MemCommitPols &pols);
 

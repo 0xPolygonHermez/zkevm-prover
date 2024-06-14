@@ -6,6 +6,7 @@
 #include "keccak_f_executor.hpp"
 #include "keccak_executor_test.hpp"
 #include "timer.hpp"
+#include "fork_info.hpp"
 
 bool getBit(uint8_t byte, int position)
 {
@@ -24,7 +25,7 @@ void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 		zklog.error("KeccakSMTest() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
 		exitProcess();
 	}
-	CommitPols cmPols(pAddress, CommitPols::pilDegree());
+	CommitPols cmPols(pAddress, getForkN(PROVER_FORK_ID));
 
 	// How this test works:
 	// 1. We generate 54 test vectors, each is 135 random bytes.

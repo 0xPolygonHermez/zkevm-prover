@@ -9,6 +9,7 @@
 #include "padding_sha256bit_executor.hpp"
 #include "scalar.hpp"
 #include "sha256.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -54,7 +55,7 @@ public:
         blockSize(31488),
         bytesPerBlock(64),
         bitsPerElement(7),
-        N(PROVER_FORK_NAMESPACE::PaddingSha256CommitPols::pilDegree())
+        N(getForkN(PROVER_FORK_ID))
     {
         SHA256(NULL, 0, hashZeroScalar);
         scalar2fea(fr, hashZeroScalar, hash0);

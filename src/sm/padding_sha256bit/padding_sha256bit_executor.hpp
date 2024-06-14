@@ -5,6 +5,7 @@
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/bits2field_sha256/bits2field_sha256_executor.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -43,7 +44,7 @@ public:
     /* Constructor */
     PaddingSha256BitExecutor(Goldilocks &fr) :
         fr(fr),
-        N(PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree()),
+        N(getForkN(PROVER_FORK_ID)),
         slotSize(31488),
         bitsPerElement(7),
         nSlots(bitsPerElement*((N-1)/slotSize)) {};

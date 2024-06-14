@@ -5,6 +5,7 @@
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/bits2field/bits2field_executor.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -42,7 +43,7 @@ public:
     /* Constructor */
     PaddingKKBitExecutor(Goldilocks &fr) :
         fr(fr),
-        N(PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols::pilDegree()),
+        N(getForkN(PROVER_FORK_ID)),
         slotSize(155286),
         nSlots(44*((N-1)/slotSize)) {};
 

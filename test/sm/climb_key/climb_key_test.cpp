@@ -4,6 +4,7 @@
 #include "goldilocks_base_field.hpp"
 #include "scalar.hpp"
 #include "zkassert.hpp"
+#include "fork_info.hpp"
 
 using namespace std;
 uint64_t ClimbKeySMTest (Goldilocks &fr, const Config &config)
@@ -25,7 +26,7 @@ uint64_t ClimbKeySMTest (Goldilocks &fr, const Config &config)
         zklog.error("ClimbKeySMTest::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
         exitProcess();
     }
-    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    CommitPols cmPols(pAddress, getForkN(PROVER_FORK_ID));
 
     for (int i = 0; i < 5; ++i) {
         ClimbKeyAction climbKeyAction;
