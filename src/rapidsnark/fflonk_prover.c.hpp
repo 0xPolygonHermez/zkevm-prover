@@ -61,6 +61,8 @@ namespace Fflonk
             delete[] nonPrecomputedBigBuffer;
         }
 
+        delete additionsBuff;
+
         delete fft;
 
         mapBuffers.clear();
@@ -297,7 +299,23 @@ namespace Fflonk
             buffInternalWitness = new FrElement[zkey->nAdditions];
 
             LOG_TRACE("··· Loading additions");
-            additionsBuff = (Zkey::Addition<Engine> *)fdZkey->getSectionData(Zkey::ZKEY_FF_ADDITIONS_SECTION);
+            fdZkey->startReadSection(Zkey::ZKEY_FF_ADDITIONS_SECTION);
+
+            additionsBuff = new Zkey::Addition<Engine>[zkey->nAdditions];
+
+            for (uint64_t i = 0; i < zkey->nAdditions; i++) {
+                Zkey::Addition<Engine> addition;
+
+                addition.signalId1 = fdZkey->readU32LE();
+                addition.signalId2 = fdZkey->readU32LE();
+
+                addition.factor1 = *(FrElement *)fdZkey->read(sizeof(FrElement));
+                addition.factor2 = *(FrElement *)fdZkey->read(sizeof(FrElement));
+
+                additionsBuff[i] = addition;
+            }
+
+            fdZkey->endReadSection();
 
             LOG_TRACE("··· Loading map buffers");
             ThreadUtils::parset(mapBuffers["A"], 0, byteLength * 3, nThreads);
@@ -603,6 +621,8 @@ namespace Fflonk
     template <typename Engine>
     void FflonkProver<Engine>::calculateAdditions()
     {
+        cout << zkey->nAdditions << endl;
+
         for (u_int32_t i = 0; i < zkey->nAdditions; i++)
         {
             // Get witness value
@@ -642,7 +662,8 @@ namespace Fflonk
         for (u_int32_t i = 1; i < BLINDINGFACTORSLENGTH; i++)
         {
             memset((void *)&(blindingFactors[i].v[0]), 0, sizeof(FrElement));
-            randombytes_buf((void *)&(blindingFactors[i].v[0]), sizeof(FrElement)-1);
+            blindingFactors[i].v[0] = 1;
+            // randombytes_buf((void *)&(blindingFactors[i].v[0]), sizeof(FrElement)-1);
         }
 
         // STEP 1.2 - Compute wire polynomials a(X), b(X) and c(X)
@@ -825,12 +846,13 @@ namespace Fflonk
 
         G1Point C0;
         E.g1.copy(C0, *((G1PointAffine *)zkey->C0));
+        cout << E.g1.toString(C0) << endl;
         transcript->addPolCommitment(C0);
 
-        for (u_int32_t i = 0; i < zkey->nPublic; i++)
-        {
-            transcript->addScalar(buffers["A"][i]);
-        }
+        // for (u_int32_t i = 0; i < zkey->nPublic; i++)
+        // {
+        //     transcript->addScalar(buffers["A"][i]);
+        // }
 
         transcript->addPolCommitment(proof->getPolynomialCommitment("C1"));
         challenges["beta"] = transcript->getChallenge();

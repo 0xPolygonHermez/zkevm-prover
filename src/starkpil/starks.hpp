@@ -33,6 +33,7 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
+    bool reduceMemory;
 
 private:
     void *pConstPolsAddress;
@@ -65,6 +66,9 @@ private:
     Goldilocks::Element *p_f_2ns;
     Goldilocks::Element *p_tmpExp_n;
 
+    Goldilocks::Element *p_cm1_2ns_tmp;
+    Goldilocks::Element *p_cm2_2ns_tmp;
+
     void *pAddress;
 
     Polinomial x;
@@ -76,8 +80,9 @@ void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purp
 void merkelizeMemory(); // function for DBG purposes
 
 public:
-    Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
-                                                                           starkInfo(starkFiles.zkevmStarkInfo),
+    Starks(const Config &config, StarkFiles starkFiles, bool reduceMemory_, void *_pAddress) : config(config),
+                                                                           starkInfo(starkFiles.zkevmStarkInfo, reduceMemory_),
+                                                                           reduceMemory(reduceMemory_),
                                                                            starkFiles(starkFiles),
                                                                            N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
@@ -124,7 +129,11 @@ public:
             TimerStart(CALCULATE_CONST_TREE_TO_MEMORY);
             pConstPolsAddress2ns = (void *)malloc(NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element));
             TimerStart(EXTEND_CONST_POLS);
-            ntt.extendPol((Goldilocks::Element *)pConstPolsAddress2ns, (Goldilocks::Element *)pConstPolsAddress, NExtended, N, starkInfo.nConstants);
+            uint64_t nBlocks = 8;
+            uint64_t bufferSize = ((2 * NExtended * starkInfo.nConstants) * sizeof(Goldilocks::Element) / nBlocks);
+            Goldilocks::Element* nttHelper = (Goldilocks::Element *)malloc(bufferSize);
+            ntt.extendPol((Goldilocks::Element *)pConstPolsAddress2ns, (Goldilocks::Element *)pConstPolsAddress, NExtended, N, starkInfo.nConstants, nttHelper, 3, nBlocks);
+            free(nttHelper);
             TimerStopAndLog(EXTEND_CONST_POLS);
             TimerStart(MERKELIZE_CONST_TREE);
             treesGL[4] = new MerkleTreeGL(NExtended, starkInfo.nConstants, (Goldilocks::Element *)pConstPolsAddress2ns);
@@ -194,6 +203,9 @@ public:
         p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
         p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
 
+        p_cm1_2ns_tmp = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns_tmp]];
+        p_cm2_2ns_tmp = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns_tmp]];
+
         *x[0] = Goldilocks::shift();
 
         uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
@@ -204,8 +216,13 @@ public:
         }
 
         TimerStart(MERKLE_TREE_ALLOCATION);
-        treesGL[0] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-        treesGL[1] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
+        if(reduceMemory) {
+            treesGL[0] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns_tmp);
+            treesGL[1] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns_tmp);
+        } else {
+            treesGL[0] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
+            treesGL[1] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
+        }
         treesGL[2] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
         treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);

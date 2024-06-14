@@ -58,6 +58,11 @@ public:
         std::memcpy(source, _source, height * width * sizeof(Goldilocks::Element));
     }
 
+    void setSource(Goldilocks::Element *_source)
+    {
+        source = _source;
+    }
+
     void merkelize();
     Goldilocks::Element* get_nodes_ptr() {
         return nodes;

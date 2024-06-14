@@ -4,8 +4,9 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
-StarkInfo::StarkInfo(string file)
+StarkInfo::StarkInfo(string file, bool reduceMemory_)
 {
+    reduceMemory = reduceMemory_;
 
     // Load contents from json file
     TimerStart(STARK_INFO_LOAD);
@@ -222,8 +223,10 @@ void StarkInfo::setMapOffsets() {
     mapOffsets.section[cm2_2ns] = mapTotalN;
     mapTotalN += NExtended * mapSectionsN.section[cm2_2ns];
 
-    mapOffsets.section[cm3_2ns] = mapTotalN;
-    mapTotalN += NExtended * mapSectionsN.section[cm3_2ns];
+    if(!reduceMemory) {
+        mapOffsets.section[cm3_2ns] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN.section[cm3_2ns];
+    }
 
     mapOffsets.section[cm4_2ns] = mapTotalN;
     mapTotalN += NExtended * mapSectionsN.section[cm4_2ns];
@@ -231,23 +234,6 @@ void StarkInfo::setMapOffsets() {
     mapOffsets.section[q_2ns] = mapTotalN;
     mapTotalN += NExtended * qDim;
     
-    uint64_t offsetPolsBasefield = mapOffsets.section[cm3_2ns];
-
-    // Set offsets for all stages in the basefield field (cm1, cm2, cm3, tmpExp)
-    mapOffsets.section[cm3_n] = offsetPolsBasefield;
-    offsetPolsBasefield += N * mapSectionsN.section[cm3_n];
-
-    mapOffsets.section[cm1_n] = offsetPolsBasefield;
-    offsetPolsBasefield += N * mapSectionsN.section[cm1_n];
-
-    mapOffsets.section[cm2_n] = offsetPolsBasefield;
-    offsetPolsBasefield += N * mapSectionsN.section[cm2_n];
-
-    mapOffsets.section[tmpExp_n] = offsetPolsBasefield;
-    offsetPolsBasefield += N * mapSectionsN.section[tmpExp_n];
-
-    if(offsetPolsBasefield > mapTotalN) mapTotalN = offsetPolsBasefield;
-
     // Stage FRIPolynomial
     uint64_t offsetPolsFRI = mapOffsets.section[q_2ns];
     mapOffsets.section[xDivXSubXi_2ns] = offsetPolsFRI;
@@ -270,13 +256,69 @@ void StarkInfo::setMapOffsets() {
    
     if(offsetPolsEvals > mapTotalN) mapTotalN = offsetPolsEvals;
 
+    if(reduceMemory) {
+        mapOffsets.section[cm3_2ns] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN.section[cm3_2ns];
+    }
+
+    uint64_t offsetPolsBasefield;
+
+    uint64_t tmpExp_end_memory;
+    
+    // Set offsets for all stages in the basefield field (cm1, cm2, cm3, tmpExp)
+    if(reduceMemory) {
+        mapOffsets.section[cm1_n] = mapOffsets.section[cm1_2ns];
+
+        mapOffsets.section[cm2_n] = mapOffsets.section[cm2_2ns];
+
+        mapOffsets.section[cm3_n] = mapOffsets.section[cm3_2ns];
+        offsetPolsBasefield = mapOffsets.section[cm3_n] + N * mapSectionsN.section[cm3_n];
+
+        mapOffsets.section[tmpExp_n] = mapOffsets.section[cm1_n] + N * mapSectionsN.section[cm1_n];
+        assert(N * mapSectionsN.section[tmpExp_n] < NExtended * mapSectionsN.section[cm1_n] / 2);
+        tmpExp_end_memory = mapOffsets.section[tmpExp_n] + N * mapSectionsN.section[tmpExp_n];
+
+        // Add temporal position for extended stages 1 and 2
+        mapOffsets.section[cm1_2ns_tmp] = N * mapSectionsN.section[cm1_n];
+        uint64_t cm1_2ns_tmp_end_memory = mapOffsets.section[cm1_2ns_tmp] + NExtended * mapSectionsN.section[cm1_2ns];
+
+        if(cm1_2ns_tmp_end_memory > mapTotalN) {
+            mapTotalN = cm1_2ns_tmp_end_memory;
+        }
+
+        mapOffsets.section[cm2_2ns_tmp] = mapOffsets.section[cm3_n] + N * mapSectionsN.section[cm3_n];
+        uint64_t cm2_2ns_tmp_end_memory = mapOffsets.section[cm2_2ns_tmp] +  NExtended * mapSectionsN.section[cm2_2ns];
+
+        if(cm2_2ns_tmp_end_memory > mapTotalN) {
+            mapTotalN = cm2_2ns_tmp_end_memory;
+        }
+
+    } else {
+        offsetPolsBasefield = mapOffsets.section[cm3_2ns];
+
+        mapOffsets.section[cm3_n] = offsetPolsBasefield;
+        offsetPolsBasefield += N * mapSectionsN.section[cm3_n];
+
+        mapOffsets.section[cm1_n] = offsetPolsBasefield;
+        offsetPolsBasefield += N * mapSectionsN.section[cm1_n];
+
+        mapOffsets.section[cm2_n] = offsetPolsBasefield;
+        offsetPolsBasefield += N * mapSectionsN.section[cm2_n];
+
+        mapOffsets.section[tmpExp_n] = offsetPolsBasefield;
+        offsetPolsBasefield += N * mapSectionsN.section[tmpExp_n];
+
+        tmpExp_end_memory = mapOffsets.section[tmpExp_n] + N * mapSectionsN.section[tmpExp_n];
+    }
+
+    if(offsetPolsBasefield > mapTotalN) mapTotalN = offsetPolsBasefield;
+    
+    // Memory H1H2
     offsetsExtraMemoryH1H2.resize(puCtx.size());
 
     uint64_t additionalMemoryOffsetAvailable = offsetPolsBasefield;
-    uint64_t limitMemoryOffset = mapOffsets.section[cm3_2ns];
-
-    // Memory H1H2
-    uint64_t memoryOffsetH1H2 = mapOffsets.section[cm2_2ns];
+    uint64_t limitMemoryOffset = reduceMemory ? mapOffsets.section[cm2_2ns] : mapOffsets.section[cm3_2ns];
+    uint64_t memoryOffsetH1H2 = reduceMemory ? tmpExp_end_memory : mapOffsets.section[cm2_2ns];
 
     uint64_t numCommited = nCm1;
 
@@ -308,7 +350,7 @@ void StarkInfo::setMapOffsets() {
     numCommited = numCommited + puCtx.size() * 2;
     
     // Memory grand product
-    uint64_t memoryOffsetGrandProduct = additionalMemoryOffsetAvailable;
+    uint64_t memoryOffsetGrandProduct = reduceMemory ? tmpExp_end_memory : additionalMemoryOffsetAvailable;
     for(uint64_t i = 0; i < puCtx.size(); ++i) {
         setMemoryPol(3, exp2pol[to_string(puCtx[i].numId)], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
         setMemoryPol(3, exp2pol[to_string(puCtx[i].denId)], memoryOffsetGrandProduct, limitMemoryOffset, additionalMemoryOffsetAvailable);
@@ -336,23 +378,58 @@ void StarkInfo::setMapOffsets() {
 
     uint64_t startBuffer;
     uint64_t memoryAvailable;
-    uint64_t minBlocks = 4;
+    uint64_t minBlocks = 8;
 
-    // Stage 1 NTT Memory Helper
-    uint64_t startBufferExtended = mapOffsets.section[cm2_2ns];
-    uint64_t memoryAvailableEnd = mapTotalN - offsetPolsBasefield;
-    uint64_t memoryAvailableExtended =  mapOffsets.section[cm3_n] - startBufferExtended;
-    uint64_t nttMemoryHelper = NExtended * mapSectionsN.section[cm1_n];
-    if(memoryAvailableExtended > memoryAvailableEnd && memoryAvailableExtended * 8 > nttMemoryHelper) {
-        memoryAvailable = memoryAvailableExtended;
-        startBuffer = startBufferExtended;
-    } else {
-        memoryAvailable = memoryAvailableEnd;
-        startBuffer = offsetPolsBasefield;
+    if(reduceMemory) {
+        // Stage 1 NTT Memory Helper Tmp
+        uint64_t startBuffer = mapOffsets.section[cm1_2ns_tmp] + NExtended * mapSectionsN.section[cm1_2ns];
+        uint64_t memoryAvailable = mapTotalN - startBuffer;
+        uint64_t memoryNTTHelperStage1 = NExtended * mapSectionsN.section[cm1_2ns];
+        if(memoryAvailable * minBlocks < memoryNTTHelperStage1) {
+            memoryAvailable = memoryNTTHelperStage1 / minBlocks;
+            if(startBuffer + memoryAvailable > mapTotalN) {
+                mapTotalN = startBuffer + memoryAvailable;
+            }   
+        }
+        mapNTTOffsetsHelpers["cm1_tmp"] = std::make_pair(startBuffer, memoryAvailable);
+
+        // Stage 2 NTT Memory Helper Tmp
+        if((mapOffsets.section[cm2_2ns] - tmpExp_end_memory) > (mapOffsets.section[cm3_2ns] - mapOffsets.section[cm2_n] + N * mapSectionsN.section[cm2_n])) {
+            startBuffer = tmpExp_end_memory;
+        } else {
+            startBuffer = mapOffsets.section[cm2_n] + N * mapSectionsN.section[cm2_n];
+        }
+        memoryAvailable = mapOffsets.section[cm3_2ns] - startBuffer;
+        
+        uint64_t memoryNTTHelperStage2 = NExtended * mapSectionsN.section[cm2_2ns];
+        if(memoryAvailable * minBlocks < memoryNTTHelperStage2) {
+            memoryAvailable = memoryNTTHelperStage2 / minBlocks; 
+        }
+        mapNTTOffsetsHelpers["cm2_tmp"] = std::make_pair(startBuffer, memoryAvailable);
     }
 
+
+    // Stage 1 NTT Memory Helper
     uint64_t memoryNTTHelperStage1 = NExtended * mapSectionsN.section[cm1_2ns];
-    if(startBuffer >= offsetPolsBasefield && memoryAvailable * minBlocks < memoryNTTHelperStage1) {
+    if(!reduceMemory) {
+        uint64_t startBufferExtended = mapOffsets.section[cm2_2ns];
+        uint64_t startBufferEnd = offsetPolsBasefield;
+        uint64_t memoryAvailableEnd = mapTotalN - startBufferEnd;
+        uint64_t memoryAvailableExtended = mapOffsets.section[cm3_n] - startBufferExtended;
+
+        if(memoryAvailableExtended > memoryAvailableEnd && memoryAvailableExtended * minBlocks > memoryNTTHelperStage1) {
+            memoryAvailable = memoryAvailableExtended;
+            startBuffer = startBufferExtended;
+        } else {
+            memoryAvailable = memoryAvailableEnd;
+            startBuffer = startBufferEnd;
+        }
+    } else {
+        startBuffer = mapOffsets.section[cm2_2ns] + N * mapSectionsN.section[cm2_n];
+        memoryAvailable = mapOffsets.section[cm3_2ns] - startBuffer;
+    }
+    
+    if(memoryAvailable * minBlocks < memoryNTTHelperStage1) {
         memoryAvailable = memoryNTTHelperStage1 / minBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
@@ -361,10 +438,10 @@ void StarkInfo::setMapOffsets() {
     mapNTTOffsetsHelpers["cm1"] = std::make_pair(startBuffer, memoryAvailable);
 
     // Stage 2 NTT Memory Helper
-    memoryAvailable = mapTotalN - offsetPolsBasefield;
-    startBuffer = offsetPolsBasefield;
+    startBuffer = reduceMemory ? mapOffsets.section[cm4_2ns] : offsetPolsBasefield;
+    memoryAvailable = reduceMemory ? mapOffsets.section[cm3_2ns] - startBuffer : mapTotalN - startBuffer;
     uint64_t memoryNTTHelperStage2 = NExtended * mapSectionsN.section[cm2_2ns];
-    if(startBuffer >= offsetPolsBasefield && memoryAvailable * minBlocks < memoryNTTHelperStage2) {
+    if(memoryAvailable * minBlocks < memoryNTTHelperStage2) {
         memoryAvailable = memoryNTTHelperStage2 / minBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
@@ -373,22 +450,23 @@ void StarkInfo::setMapOffsets() {
     mapNTTOffsetsHelpers["cm2"] = std::make_pair(startBuffer, memoryAvailable);
 
     // Stage 3 NTT Memory Helper
-    startBuffer = mapOffsets.section[cm4_2ns];
-    memoryAvailable = mapTotalN - startBuffer;
+    startBuffer = reduceMemory ? mapOffsets.section[tmpExp_n] : mapOffsets.section[cm4_2ns];
+    memoryAvailable = reduceMemory ? mapOffsets.section[cm2_2ns] - startBuffer : mapTotalN - startBuffer;
     uint64_t memoryNTTHelperStage3 = NExtended * mapSectionsN.section[cm3_2ns];
-    if(startBuffer >= offsetPolsBasefield && memoryAvailable * minBlocks < memoryNTTHelperStage3) {
+    if(memoryAvailable * minBlocks < memoryNTTHelperStage3) {
         memoryAvailable = memoryNTTHelperStage3 / minBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
         }   
     }
+
     mapNTTOffsetsHelpers["cm3"] = std::make_pair(startBuffer, memoryAvailable);
 
     // Stage 4 NTT Memory Helper
     startBuffer = mapOffsets.section[q_2ns] + NExtended * qDim;
-    memoryAvailable = mapTotalN - startBuffer;
-     uint64_t memoryNTTHelperStage4 = NExtended * mapSectionsN.section[cm4_2ns];
-    if(startBuffer >= offsetPolsBasefield && memoryAvailable * minBlocks < memoryNTTHelperStage4) {
+    memoryAvailable = reduceMemory ? mapOffsets.section[cm3_2ns] - startBuffer : mapTotalN - startBuffer;
+    uint64_t memoryNTTHelperStage4 = NExtended * mapSectionsN.section[cm4_2ns];
+    if(memoryAvailable * minBlocks < memoryNTTHelperStage4) {
         memoryAvailable = memoryNTTHelperStage4 / minBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;

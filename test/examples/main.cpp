@@ -30,7 +30,9 @@ int main()
         cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
     }
 
-    StarkInfo starkInfo(starkInfoFile);
+    bool reduceMemory = true;
+
+    StarkInfo starkInfo(starkInfoFile, reduceMemory);
 
     uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
@@ -47,7 +49,7 @@ int main()
             starkInfo.mapSectionsN.section[cm1_n]*sizeof(Goldilocks::Element));
     }
 
-    Starks starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, pAddress);
+    Starks starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile, cHelpersFile}, reduceMemory, pAddress);
 
     Goldilocks::Element publicInputs[3] = {
         Goldilocks::fromU64(1),

@@ -49,7 +49,9 @@ typedef enum
     xDivXSubXi_2ns = 11,
     LEv = 12,
     evals = 13,
-    eSectionMax = 14
+    cm1_2ns_tmp = 14,
+    cm2_2ns_tmp = 15,
+    eSectionMax = 16
 } eSection;
 
 eSection string2section (const string s);
@@ -164,6 +166,8 @@ public:
 class StarkInfo
 {
 public:
+    bool reduceMemory;
+
     StarkStruct starkStruct;
 
     uint64_t nConstants;
@@ -204,7 +208,7 @@ public:
     void setMapOffsets();
 
     /* Constructor */
-    StarkInfo(string file);
+    StarkInfo(string file, bool reduceMemory = false);
 
     /* Loads data from a json object */
     void load (json j);
