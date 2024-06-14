@@ -27,7 +27,7 @@
   },
   {
    "inCTX": "1",
-   "CONST": "-10",
+   "CONST": "-11",
    "JMPZ": 1,
    "useJmpAddr": 1,
    "jmpAddr": 4,
@@ -184780,7 +184780,7 @@
    "fileName": "constants.zkasm"
   },
   "FORK_ID": {
-   "value": "10",
+   "value": "11",
    "type": "CONST",
    "line": 9,
    "fileName": "constants.zkasm"
