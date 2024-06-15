@@ -1,5 +1,5 @@
-#INFO := $(shell cd src/goldilocks && ./configure.sh && cd ../.. && sleep 2)
-#include src/goldilocks/CudaArch.mk
+INFO := $(shell cd src/goldilocks && ./configure.sh && cd ../.. && sleep 2)
+include src/goldilocks/CudaArch.mk
 NVCC := /usr/local/cuda/bin/nvcc
 
 TARGET_ZKP := zkProver
@@ -10,6 +10,7 @@ TARGET_MNG_10 := mainGenerator10
 TARGET_PLG := polsGenerator
 TARGET_PLD := polsDiff
 TARGET_TEST := zkProverTest
+TARGET_TEST_GPU := zkProverTestGpu
 TARGET_W2DB := witness2db
 TARGET_EXPRESSIONS := zkProverExpressions
 TARGET_SETUP := fflonkSetup
@@ -52,7 +53,7 @@ ifneq ($(AVX512_SUPPORTED),)
 	CXXFLAGS += -mavx512f -D__AVX512__
 endif
 
-CXXFLAGS += -D __GPU__
+CXXFLAGS += -D __PACK__
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
@@ -65,27 +66,32 @@ GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 INC_DIRS := $(shell find $(SRC_DIRS) -type d) $(sort $(dir))
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./src/fflonk_setup/fflonk_setup*" ! -path "./tools/starkpil/bctree/*" ! -path "./test/examples/*" ! -path "./test/expressions/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" ! -path "./src/witness2db/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
-SRCS_ZKP_GPU := $(shell find $(SRC_DIRS) ! -path "./src/fflonk_setup/fflonk_setup*" ! -path "./tools/starkpil/bctree/*" ! -path "./test/examples/*" ! -path "./test/expressions/*"  ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" ! -path "./src/witness2db/*" ! -path "./src/goldilocks/utils/deviceQuery.cu" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc -or -name *.cu)
+SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./src/fflonk_setup/fflonk_setup*" ! -path "./tools/starkpil/bctree/*" ! -path "./test/examples/*" ! -path "./test/expressions/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" ! -path "./src/witness2db/*" \( -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc \))
+SRCS_ZKP_GPU := $(shell find $(SRC_DIRS) ! -path "./src/fflonk_setup/fflonk_setup*" ! -path "./tools/starkpil/bctree/*" ! -path "./test/examples/*" ! -path "./test/expressions/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" ! -path "./src/witness2db/*" ! -path "./src/goldilocks/utils/deviceQuery.cu" \( -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc -or -name *.cu \))
 
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 OBJS_ZKP_GPU := $(SRCS_ZKP_GPU:%=$(BUILD_DIR_GPU)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
-SRCS_BCT := $(shell find ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree/main.cpp ./src/goldilocks/src ./src/starkpil/merkleTree/merkleTreeBN128.cpp ./src/starkpil/merkleTree/merkleTreeGL.cpp ./src/poseidon_opt/poseidon_opt.cpp ./src/XKCP ./src/ffiasm ./src/starkpil/stark_info.* ./src/utils/* -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_BCT := $(shell find ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree/main.cpp ./src/goldilocks/src ./src/starkpil/merkleTree/merkleTreeBN128.cpp ./src/starkpil/merkleTree/merkleTreeGL.cpp ./src/poseidon_opt/poseidon_opt.cpp ./src/XKCP ./src/ffiasm ./src/starkpil/stark_info.* ./src/utils/* \( -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc \))
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
-SRCS_TEST := $(shell find ./test/examples/ ./src/XKCP ./src/goldilocks/src ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/merkleTreeGL.* ./src/starkpil/transcript/transcript.* ./src/starkpil/fri ./src/ffiasm ./src/utils ! -path "./src/starkpil/fri/friProveC12.*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
-OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
-DEPS_TEST := $(OBJS_TEST:.o=.d)
+SRCS_TEST := $(shell find ./test/examples/ ./src/XKCP ./src/goldilocks/src ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/merkleTreeGL.* ./src/starkpil/transcript/transcript.* ./src/starkpil/fri ./src/ffiasm ./src/utils ! -path "./src/starkpil/fri/friProveC12.*" \( -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc \))
 
+SRCS_TEST_GPU := $(shell find ./test/examples/ ./src/XKCP ./src/goldilocks/src ./src/goldilocks/utils ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/merkleTreeGL.* ./src/starkpil/transcript/transcript.* ./src/starkpil/fri ./src/ffiasm ./src/utils ! -path "./src/starkpil/fri/friProveC12.*" ! -path "./src/goldilocks/utils/deviceQuery.cu" \( -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc -or -name *.cu \))
+OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
+OBJS_TEST_GPU := $(SRCS_TEST_GPU:%=$(BUILD_DIR_GPU)/%.o)
+#print $(OBJS_TEST_GPU)
+$(info Hello)
+$(info $(OBJS_TEST_GPU))
+DEPS_TEST := $(OBJS_TEST:.o=.d)
 
 SRCS_W2DB := ./src/witness2db/witness2db.cpp  ./src/goldilocks/src/goldilocks_base_field.cpp ./src/goldilocks/src/poseidon_goldilocks.cpp
 OBJS_W2DB := $(SRCS_W2DB:%=$(BUILD_DIR)/%.o)
 DEPS_W2DB := $(OBJS_W2DB:.o=.d)
 
-SRCS_EXPRESSIONS := $(shell find ./test/expressions/ ./src/XKCP ./src/goldilocks/src ./src/starkpil/stark_info.*  ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.*  ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/ffiasm ./src/utils ! -path "./src/starkpil/fri/friProveC12.*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_EXPRESSIONS := $(shell find ./test/expressions/ ./src/XKCP ./src/goldilocks/src ./src/starkpil/stark_info.*  ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.*  ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/ffiasm ./src/utils ! -path "./src/starkpil/fri/friProveC12.*"  \( -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc \))
 OBJS_EXPRESSIONS := $(SRCS_EXPRESSIONS:%=$(BUILD_DIR)/%.o)
 DEPS_EXPRESSIONS := $(OBJS_EXPRESSIONS:.o=.d)
 
@@ -104,6 +110,7 @@ gpu: $(BUILD_DIR_GPU)/$(TARGET_ZKP_GPU)
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
 
 test: $(BUILD_DIR)/$(TARGET_TEST)
+test_gpu:  $(BUILD_DIR_GPU)/$(TARGET_TEST_GPU)
 
 expressions: ${BUILD_DIR}/$(TARGET_EXPRESSIONS)
 
@@ -118,6 +125,9 @@ $(BUILD_DIR)/$(TARGET_BCT): $(OBJS_BCT)
 
 $(BUILD_DIR)/$(TARGET_TEST): $(OBJS_TEST)
 	$(CXX) $(OBJS_TEST) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
+
+$(BUILD_DIR_GPU)/$(TARGET_TEST_GPU): $(OBJS_TEST_GPU)
+	$(NVCC) $(OBJS_TEST_GPU) -O3 -arch=$(CUDA_ARCH) -o $@ $(LDFLAGS_GPU)
 
 $(BUILD_DIR)/$(TARGET_EXPRESSIONS): $(OBJS_EXPRESSIONS)
 	$(CXX) $(OBJS_EXPRESSIONS) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
