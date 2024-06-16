@@ -214,6 +214,8 @@ void StarkInfo::setMapOffsets() {
     uint64_t N = (1 << starkStruct.nBits);
     uint64_t NExtended = (1 << starkStruct.nBitsExt);
 
+    uint64_t minBlocks = reduceMemory ? 8 : 4;
+
     mapTotalN = 0;
 
     // Set offsets for all stages in the extended field (cm1, cm2, cm3, cm4)
@@ -257,6 +259,9 @@ void StarkInfo::setMapOffsets() {
     if(offsetPolsEvals > mapTotalN) mapTotalN = offsetPolsEvals;
 
     if(reduceMemory) {
+        while(NExtended * mapSectionsN.section[cm2_2ns] > minBlocks * (mapTotalN - mapOffsets.section[cm4_2ns])) {
+            mapTotalN += NExtended;
+        }
         mapOffsets.section[cm3_2ns] = mapTotalN;
         mapTotalN += NExtended * mapSectionsN.section[cm3_2ns];
     }
@@ -378,7 +383,6 @@ void StarkInfo::setMapOffsets() {
 
     uint64_t startBuffer;
     uint64_t memoryAvailable;
-    uint64_t minBlocks = 8;
 
     if(reduceMemory) {
         // Stage 1 NTT Memory Helper Tmp
@@ -429,7 +433,7 @@ void StarkInfo::setMapOffsets() {
         memoryAvailable = mapOffsets.section[cm3_2ns] - startBuffer;
     }
     
-    if(memoryAvailable * minBlocks < memoryNTTHelperStage1) {
+    if(!reduceMemory && memoryAvailable * minBlocks < memoryNTTHelperStage1) {
         memoryAvailable = memoryNTTHelperStage1 / minBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
@@ -441,7 +445,7 @@ void StarkInfo::setMapOffsets() {
     startBuffer = reduceMemory ? mapOffsets.section[cm4_2ns] : offsetPolsBasefield;
     memoryAvailable = reduceMemory ? mapOffsets.section[cm3_2ns] - startBuffer : mapTotalN - startBuffer;
     uint64_t memoryNTTHelperStage2 = NExtended * mapSectionsN.section[cm2_2ns];
-    if(memoryAvailable * minBlocks < memoryNTTHelperStage2) {
+    if(!reduceMemory && memoryAvailable * minBlocks < memoryNTTHelperStage2) {
         memoryAvailable = memoryNTTHelperStage2 / minBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
@@ -453,7 +457,7 @@ void StarkInfo::setMapOffsets() {
     startBuffer = reduceMemory ? mapOffsets.section[tmpExp_n] : mapOffsets.section[cm4_2ns];
     memoryAvailable = reduceMemory ? mapOffsets.section[cm2_2ns] - startBuffer : mapTotalN - startBuffer;
     uint64_t memoryNTTHelperStage3 = NExtended * mapSectionsN.section[cm3_2ns];
-    if(memoryAvailable * minBlocks < memoryNTTHelperStage3) {
+    if(!reduceMemory && memoryAvailable * minBlocks < memoryNTTHelperStage3) {
         memoryAvailable = memoryNTTHelperStage3 / minBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
@@ -466,7 +470,7 @@ void StarkInfo::setMapOffsets() {
     startBuffer = mapOffsets.section[q_2ns] + NExtended * qDim;
     memoryAvailable = reduceMemory ? mapOffsets.section[cm3_2ns] - startBuffer : mapTotalN - startBuffer;
     uint64_t memoryNTTHelperStage4 = NExtended * mapSectionsN.section[cm4_2ns];
-    if(memoryAvailable * minBlocks < memoryNTTHelperStage4) {
+    if(!reduceMemory && memoryAvailable * minBlocks < memoryNTTHelperStage4) {
         memoryAvailable = memoryNTTHelperStage4 / minBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;

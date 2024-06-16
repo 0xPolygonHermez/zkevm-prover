@@ -7,7 +7,7 @@
 
 /* Only one fork can generate proofs */
 #ifndef PROVER_FORK_ID
-#define PROVER_FORK_ID 11
+#define PROVER_FORK_ID 10
 #endif
 
 /* Regardless of the PROVER_FORK_ID, proof generation code uses the same namespace from the parent fork ID */

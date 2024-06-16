@@ -286,7 +286,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     while((nttOffsetHelperStage4.second * nBlocksStage4 < buffHelperElementsStage4) || (starkInfo.mapSectionsN.section[eSection::cm4_2ns] > 256*nBlocksStage4) ) {
         nBlocksStage4++;
     }
-    nttExtended.INTT(params.q_2ns, params.q_2ns, NExtended, starkInfo.qDim);
+    nttExtended.INTT(params.q_2ns, params.q_2ns, NExtended, starkInfo.qDim, pBuffHelperStage4, 3, nBlocksStage4);
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
@@ -312,7 +312,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
-    nttExtended.NTT(cm4_2ns, cm4_2ns, NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns]);
+    nttExtended.NTT(cm4_2ns, cm4_2ns, NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], pBuffHelperStage4, 3, nBlocksStage4);
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
 
     TimerStart(STARK_STEP_4_MERKLETREE);

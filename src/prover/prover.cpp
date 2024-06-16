@@ -50,9 +50,6 @@
 #include "exit_process.hpp"
 #include "memory.cuh"
 
-#include <chrono>
-#include <thread>
-
 #ifdef __USE_CUDA__
 #include "cuda_utils.hpp"
 #include "ntt_goldilocks.hpp"
@@ -105,7 +102,7 @@ Prover::Prover(Goldilocks &fr,
             pthread_create(&proverPthread, NULL, proverThread, this);
             pthread_create(&cleanerPthread, NULL, cleanerThread, this);
 
-            bool reduceMemoryZkevm = false;
+            bool reduceMemoryZkevm = true;
 
             StarkInfo _starkInfo(config.zkevmStarkInfo, reduceMemoryZkevm);
 
@@ -174,15 +171,10 @@ Prover::Prover(Goldilocks &fr,
                 prover->setZkey(zkey.get());
             }
 
-                std::this_thread::sleep_for(std::chrono::seconds(2)); 
-
-
             BinFileUtils::BinFile *pZkey = zkey.release();
             assert(zkey.get() == nullptr);
             assert(zkey == nullptr);
             delete pZkey;
-
-    std::this_thread::sleep_for(std::chrono::seconds(2)); 
 
             TimerStopAndLog(PROVER_INIT_FFLONK);
 
@@ -196,18 +188,18 @@ Prover::Prover(Goldilocks &fr,
             string recursive1Chelpers = USE_GENERIC_PARSER ? config.recursive1GenericCHelpers : config.recursive1CHelpers;
             string recursive2Chelpers = USE_GENERIC_PARSER ? config.recursive2GenericCHelpers : config.recursive2CHelpers;
             TimerStopAndLog(PROVER_INIT_STARKINFO);
-            // TimerStart(PROVER_INIT_STARK_ZKEVM);    
-            // starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, zkevmChelpers}, reduceMemoryZkevm, pAddress);
-            // TimerStopAndLog(PROVER_INIT_STARK_ZKEVM);
-            // TimerStart(PROVER_INIT_STARK_C12A);
-            // starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, c12aChelpers}, false, pAddress);
-            // TimerStopAndLog(PROVER_INIT_STARK_C12A);
-            // TimerStart(PROVER_INIT_STARK_RECURSIVE1);
-            // starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, recursive1Chelpers}, false, pAddress);
-            // TimerStopAndLog(PROVER_INIT_STARK_RECURSIVE1);
-            // TimerStart(PROVER_INIT_STARK_RECURSIVE2);
-            // starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, recursive2Chelpers}, false, pAddress);
-            // TimerStopAndLog(PROVER_INIT_STARK_RECURSIVE2);
+            TimerStart(PROVER_INIT_STARK_ZKEVM);    
+            starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo, zkevmChelpers}, reduceMemoryZkevm, pAddress);
+            TimerStopAndLog(PROVER_INIT_STARK_ZKEVM);
+            TimerStart(PROVER_INIT_STARK_C12A);
+            starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo, c12aChelpers}, false, pAddress);
+            TimerStopAndLog(PROVER_INIT_STARK_C12A);
+            TimerStart(PROVER_INIT_STARK_RECURSIVE1);
+            starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo, recursive1Chelpers}, false, pAddress);
+            TimerStopAndLog(PROVER_INIT_STARK_RECURSIVE1);
+            TimerStart(PROVER_INIT_STARK_RECURSIVE2);
+            starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo, recursive2Chelpers}, false, pAddress);
+            TimerStopAndLog(PROVER_INIT_STARK_RECURSIVE2);
             TimerStart(PROVER_INIT_STARK_RECURSIVEF);
             starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
             TimerStopAndLog(PROVER_INIT_STARK_RECURSIVEF);

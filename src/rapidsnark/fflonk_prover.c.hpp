@@ -309,8 +309,8 @@ namespace Fflonk
                 addition.signalId1 = fdZkey->readU32LE();
                 addition.signalId2 = fdZkey->readU32LE();
 
-                addition.factor1 = *(FrElement *)fdZkey->read(sizeof(FrElement));
-                addition.factor2 = *(FrElement *)fdZkey->read(sizeof(FrElement));
+                memcpy(&addition.factor1, fdZkey->read(sizeof(FrElement)), sizeof(FrElement));
+                memcpy(&addition.factor2, fdZkey->read(sizeof(FrElement)), sizeof(FrElement));
 
                 additionsBuff[i] = addition;
             }
@@ -662,8 +662,7 @@ namespace Fflonk
         for (u_int32_t i = 1; i < BLINDINGFACTORSLENGTH; i++)
         {
             memset((void *)&(blindingFactors[i].v[0]), 0, sizeof(FrElement));
-            blindingFactors[i].v[0] = 1;
-            // randombytes_buf((void *)&(blindingFactors[i].v[0]), sizeof(FrElement)-1);
+            randombytes_buf((void *)&(blindingFactors[i].v[0]), sizeof(FrElement)-1);
         }
 
         // STEP 1.2 - Compute wire polynomials a(X), b(X) and c(X)
@@ -846,13 +845,12 @@ namespace Fflonk
 
         G1Point C0;
         E.g1.copy(C0, *((G1PointAffine *)zkey->C0));
-        cout << E.g1.toString(C0) << endl;
         transcript->addPolCommitment(C0);
 
-        // for (u_int32_t i = 0; i < zkey->nPublic; i++)
-        // {
-        //     transcript->addScalar(buffers["A"][i]);
-        // }
+        for (u_int32_t i = 0; i < zkey->nPublic; i++)
+        {
+            transcript->addScalar(buffers["A"][i]);
+        }
 
         transcript->addPolCommitment(proof->getPolynomialCommitment("C1"));
         challenges["beta"] = transcript->getChallenge();
