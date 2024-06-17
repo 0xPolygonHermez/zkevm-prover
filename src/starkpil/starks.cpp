@@ -40,6 +40,11 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
         q_2ns : p_q_2ns,
         f_2ns : p_f_2ns
     };
+
+    if(reduceMemory) {
+        treesGL[0]->setSource(p_cm1_2ns_tmp);
+        treesGL[1]->setSource(p_cm2_2ns_tmp);
+    }
     TimerStopAndLog(STARK_INITIALIZATION);
     //--------------------------------
     // 1.- Calculate p_cm1_2ns
