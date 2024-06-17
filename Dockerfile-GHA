@@ -15,7 +15,7 @@ COPY ./src ./src
 COPY ./test ./test
 COPY ./tools ./tools
 COPY Makefile .
-RUN make generate
+RUN make PROVER_FORK_ID=$ARG_PROVER_FORK_ID generate
 RUN make PROVER_FORK_ID=$ARG_PROVER_FORK_ID -j
 
 
