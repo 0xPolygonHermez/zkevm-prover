@@ -11,7 +11,7 @@
 #include "utils.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "climb_key_executor.hpp"
-
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -28,7 +28,7 @@ public:
         fr(fr),
         poseidon(poseidon),
         config(config),
-        N(PROVER_FORK_NAMESPACE::StorageCommitPols::pilDegree())
+        N(getForkN(PROVER_FORK_ID))
     {
         // Init rom from file
         json romJson;

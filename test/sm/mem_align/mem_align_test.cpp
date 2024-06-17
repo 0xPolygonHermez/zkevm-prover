@@ -5,6 +5,7 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
+#include "fork_info.hpp"
 
 using namespace std;
 
@@ -109,13 +110,13 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.wr256 = 1;    
     input.push_back(action);    
 
-    void * pAddress = malloc(CommitPols::pilSize());
+    void * pAddress = malloc(CommitPols::numPols()*sizeof(Goldilocks::Element)*getForkN(PROVER_FORK_ID));
     if (pAddress == NULL)
     {
-        zklog.error("MemAlignSMTest() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        zklog.error("MemAlignSMTest() failed calling malloc() of size=" + to_string(CommitPols::numPols()*sizeof(Goldilocks::Element)*getForkN(PROVER_FORK_ID)));
         exitProcess();
     }
-    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    CommitPols cmPols(pAddress, getForkN(PROVER_FORK_ID));
 
     MemAlignExecutor memAlignExecutor(fr, config);
     memAlignExecutor.execute(input,cmPols.MemAlign);

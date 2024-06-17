@@ -39,8 +39,8 @@ public:
     PoseidonGoldilocks &poseidon;
 
     // ROM JSON file data:
-    Rom romBatch_10_24;
-    Rom romBatch_11_25;
+    Rom romBatch_10;
+    Rom romBatch_11;
     Rom romDiagnostic;
 
 #ifdef MULTI_ROM_TEST

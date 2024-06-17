@@ -1272,13 +1272,13 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 // To be used only for testing, since it allocates a lot of memory
 void StorageExecutor::execute (vector<SmtAction> &action)
 {
-    void * pAddress = malloc(CommitPols::pilSize());
+    void * pAddress = malloc(CommitPols::numPols()*sizeof(Goldilocks::Element)*N);
     if (pAddress == NULL)
     {
-        zklog.error("StorageExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        zklog.error("StorageExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::numPols()*sizeof(Goldilocks::Element)*N));
         exitProcess();
     }
-    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    CommitPols cmPols(pAddress, N);
     vector<array<Goldilocks::Element, 17>> poseidonRequired;
     vector<ClimbKeyAction> climbKeyRequired;
     execute(action, cmPols.Storage, poseidonRequired, climbKeyRequired);

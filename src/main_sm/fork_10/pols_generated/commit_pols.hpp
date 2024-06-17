@@ -15,7 +15,7 @@ private:
     uint64_t _index;
 public:
     CommitPol(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
-    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*751]; };
+    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*750]; };
     inline Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
     inline Goldilocks::Element * address (void) { return _pAddress; }
@@ -122,8 +122,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 464; }
     inline static uint64_t numPols (void) { return 58; }
 
     inline void * address (void) { return _pAddress; }
@@ -363,8 +361,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 1416; }
     inline static uint64_t numPols (void) { return 177; }
 
     inline void * address (void) { return _pAddress; }
@@ -456,8 +452,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 336; }
     inline static uint64_t numPols (void) { return 42; }
 
     inline void * address (void) { return _pAddress; }
@@ -515,8 +509,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 152; }
     inline static uint64_t numPols (void) { return 19; }
 
     inline void * address (void) { return _pAddress; }
@@ -619,8 +611,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 352; }
     inline static uint64_t numPols (void) { return 44; }
 
     inline void * address (void) { return _pAddress; }
@@ -668,8 +658,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 112; }
     inline static uint64_t numPols (void) { return 14; }
 
     inline void * address (void) { return _pAddress; }
@@ -847,8 +835,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 632; }
     inline static uint64_t numPols (void) { return 79; }
 
     inline void * address (void) { return _pAddress; }
@@ -889,8 +875,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 96; }
     inline static uint64_t numPols (void) { return 12; }
 
     inline void * address (void) { return _pAddress; }
@@ -914,8 +898,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 16; }
     inline static uint64_t numPols (void) { return 2; }
 
     inline void * address (void) { return _pAddress; }
@@ -959,8 +941,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 96; }
     inline static uint64_t numPols (void) { return 12; }
 
     inline void * address (void) { return _pAddress; }
@@ -1054,8 +1034,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 296; }
     inline static uint64_t numPols (void) { return 37; }
 
     inline void * address (void) { return _pAddress; }
@@ -1096,8 +1074,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 104; }
     inline static uint64_t numPols (void) { return 13; }
 
     inline void * address (void) { return _pAddress; }
@@ -1125,8 +1101,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 32; }
     inline static uint64_t numPols (void) { return 4; }
 
     inline void * address (void) { return _pAddress; }
@@ -1150,8 +1124,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 16; }
     inline static uint64_t numPols (void) { return 2; }
 
     inline void * address (void) { return _pAddress; }
@@ -1195,8 +1167,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 96; }
     inline static uint64_t numPols (void) { return 12; }
 
     inline void * address (void) { return _pAddress; }
@@ -1294,8 +1264,6 @@ public:
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 312; }
     inline static uint64_t numPols (void) { return 39; }
 
     inline void * address (void) { return _pAddress; }
@@ -1468,7 +1436,6 @@ public:
     CommitPol inCntPaddingPG;
     CommitPol incCounter;
     CommitPol lJmpnCondValue;
-    CommitPol hJmpnCondValueBit[9];
     CommitPol RCXInv;
     CommitPol op0Inv;
     CommitPol jmpAddr;
@@ -1477,6 +1444,7 @@ public:
     CommitPol useElseAddr;
     CommitPol sKeyI[4];
     CommitPol sKey[4];
+    CommitPol hJmpnCondValueBit[8];
 private:
     void * _pAddress;
     uint64_t _degree;
@@ -1645,45 +1613,42 @@ public:
         inCntPaddingPG((Goldilocks::Element *)((uint8_t *)pAddress + 5800), degree, 725),
         incCounter((Goldilocks::Element *)((uint8_t *)pAddress + 5808), degree, 726),
         lJmpnCondValue((Goldilocks::Element *)((uint8_t *)pAddress + 5816), degree, 727),
-        hJmpnCondValueBit{
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5824), degree, 728),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5832), degree, 729),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5840), degree, 730),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5848), degree, 731),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5856), degree, 732),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5864), degree, 733),
+        RCXInv((Goldilocks::Element *)((uint8_t *)pAddress + 5824), degree, 728),
+        op0Inv((Goldilocks::Element *)((uint8_t *)pAddress + 5832), degree, 729),
+        jmpAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5840), degree, 730),
+        elseAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5848), degree, 731),
+        useJmpAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5856), degree, 732),
+        useElseAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5864), degree, 733),
+        sKeyI{
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5872), degree, 734),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5880), degree, 735),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5888), degree, 736)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5888), degree, 736),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5896), degree, 737)
         },
-        RCXInv((Goldilocks::Element *)((uint8_t *)pAddress + 5896), degree, 737),
-        op0Inv((Goldilocks::Element *)((uint8_t *)pAddress + 5904), degree, 738),
-        jmpAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5912), degree, 739),
-        elseAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5920), degree, 740),
-        useJmpAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5928), degree, 741),
-        useElseAddr((Goldilocks::Element *)((uint8_t *)pAddress + 5936), degree, 742),
-        sKeyI{
+        sKey{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5904), degree, 738),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5912), degree, 739),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5920), degree, 740),
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5928), degree, 741)
+        },
+        hJmpnCondValueBit{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5936), degree, 742),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5944), degree, 743),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5952), degree, 744),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5960), degree, 745),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5968), degree, 746)
-        },
-        sKey{
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5968), degree, 746),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5976), degree, 747),
             CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5984), degree, 748),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5992), degree, 749),
-            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 6000), degree, 750)
+            CommitPol((Goldilocks::Element *)((uint8_t *)pAddress + 5992), degree, 749)
         },
         _pAddress(pAddress),
         _degree(degree) {};
 
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 1480; }
-    inline static uint64_t numPols (void) { return 185; }
+    inline static uint64_t numPols (void) { return 184; }
 
     inline void * address (void) { return _pAddress; }
     inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*185*sizeof(Goldilocks::Element); }
+    inline uint64_t size (void) { return _degree*184*sizeof(Goldilocks::Element); }
 };
 
 class CommitPols
@@ -1732,13 +1697,11 @@ public:
         _pAddress(pAddress),
         _degree(degree) {}
 
-    inline static uint64_t pilSize (void) { return 50398756864; }
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t numPols (void) { return 751; }
+    inline static uint64_t numPols (void) { return 750; }
 
     inline void * address (void) { return _pAddress; }
     inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*751*sizeof(Goldilocks::Element); }
+    inline uint64_t size (void) { return _degree*750*sizeof(Goldilocks::Element); }
 
     inline Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
     {
@@ -2476,33 +2439,32 @@ inline const char * address2CommitPolName (uint64_t address)
     if ((address >= 5800) && (address <= 5807)) return "Main.inCntPaddingPG";
     if ((address >= 5808) && (address <= 5815)) return "Main.incCounter";
     if ((address >= 5816) && (address <= 5823)) return "Main.lJmpnCondValue";
-    if ((address >= 5824) && (address <= 5831)) return "Main.hJmpnCondValueBit[0]";
-    if ((address >= 5832) && (address <= 5839)) return "Main.hJmpnCondValueBit[1]";
-    if ((address >= 5840) && (address <= 5847)) return "Main.hJmpnCondValueBit[2]";
-    if ((address >= 5848) && (address <= 5855)) return "Main.hJmpnCondValueBit[3]";
-    if ((address >= 5856) && (address <= 5863)) return "Main.hJmpnCondValueBit[4]";
-    if ((address >= 5864) && (address <= 5871)) return "Main.hJmpnCondValueBit[5]";
-    if ((address >= 5872) && (address <= 5879)) return "Main.hJmpnCondValueBit[6]";
-    if ((address >= 5880) && (address <= 5887)) return "Main.hJmpnCondValueBit[7]";
-    if ((address >= 5888) && (address <= 5895)) return "Main.hJmpnCondValueBit[8]";
-    if ((address >= 5896) && (address <= 5903)) return "Main.RCXInv";
-    if ((address >= 5904) && (address <= 5911)) return "Main.op0Inv";
-    if ((address >= 5912) && (address <= 5919)) return "Main.jmpAddr";
-    if ((address >= 5920) && (address <= 5927)) return "Main.elseAddr";
-    if ((address >= 5928) && (address <= 5935)) return "Main.useJmpAddr";
-    if ((address >= 5936) && (address <= 5943)) return "Main.useElseAddr";
-    if ((address >= 5944) && (address <= 5951)) return "Main.sKeyI[0]";
-    if ((address >= 5952) && (address <= 5959)) return "Main.sKeyI[1]";
-    if ((address >= 5960) && (address <= 5967)) return "Main.sKeyI[2]";
-    if ((address >= 5968) && (address <= 5975)) return "Main.sKeyI[3]";
-    if ((address >= 5976) && (address <= 5983)) return "Main.sKey[0]";
-    if ((address >= 5984) && (address <= 5991)) return "Main.sKey[1]";
-    if ((address >= 5992) && (address <= 5999)) return "Main.sKey[2]";
-    if ((address >= 6000) && (address <= 6007)) return "Main.sKey[3]";
+    if ((address >= 5824) && (address <= 5831)) return "Main.RCXInv";
+    if ((address >= 5832) && (address <= 5839)) return "Main.op0Inv";
+    if ((address >= 5840) && (address <= 5847)) return "Main.jmpAddr";
+    if ((address >= 5848) && (address <= 5855)) return "Main.elseAddr";
+    if ((address >= 5856) && (address <= 5863)) return "Main.useJmpAddr";
+    if ((address >= 5864) && (address <= 5871)) return "Main.useElseAddr";
+    if ((address >= 5872) && (address <= 5879)) return "Main.sKeyI[0]";
+    if ((address >= 5880) && (address <= 5887)) return "Main.sKeyI[1]";
+    if ((address >= 5888) && (address <= 5895)) return "Main.sKeyI[2]";
+    if ((address >= 5896) && (address <= 5903)) return "Main.sKeyI[3]";
+    if ((address >= 5904) && (address <= 5911)) return "Main.sKey[0]";
+    if ((address >= 5912) && (address <= 5919)) return "Main.sKey[1]";
+    if ((address >= 5920) && (address <= 5927)) return "Main.sKey[2]";
+    if ((address >= 5928) && (address <= 5935)) return "Main.sKey[3]";
+    if ((address >= 5936) && (address <= 5943)) return "Main.hJmpnCondValueBit[0]";
+    if ((address >= 5944) && (address <= 5951)) return "Main.hJmpnCondValueBit[1]";
+    if ((address >= 5952) && (address <= 5959)) return "Main.hJmpnCondValueBit[2]";
+    if ((address >= 5960) && (address <= 5967)) return "Main.hJmpnCondValueBit[3]";
+    if ((address >= 5968) && (address <= 5975)) return "Main.hJmpnCondValueBit[4]";
+    if ((address >= 5976) && (address <= 5983)) return "Main.hJmpnCondValueBit[5]";
+    if ((address >= 5984) && (address <= 5991)) return "Main.hJmpnCondValueBit[6]";
+    if ((address >= 5992) && (address <= 5999)) return "Main.hJmpnCondValueBit[7]";
     return "ERROR_NOT_FOUND";
 }
 
 } // namespace
 
-#endif // COMMIT_POLS_HPP_fork_9
+#endif // COMMIT_POLS_HPP_fork_10
 

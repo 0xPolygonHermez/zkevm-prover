@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include "../config/definitions.hpp"
 #include "../main_sm/fork_10/pols_generated/commit_pols.hpp"
+#include "fork_info.hpp"
 
 using namespace std;
 using namespace fork_10;
@@ -113,7 +114,7 @@ int main (int argc, char **argv)
                 uint64_t evaluation = bytePosition / (CommitPols::numPols() * 8);
 
                 // Read zkPC for this evaluation in file 1
-                CommitPols commitPols(0, CommitPols::pilDegree());
+                CommitPols commitPols(0, getForkN(PROVER_FORK_ID));
                 uint64_t zkPCOffset = (uint64_t)(commitPols.Main.zkPC.address() + evaluation*CommitPols::numPols());
                 fpos_t pos1;
                 fgetpos(file1, &pos1);

@@ -141,6 +141,16 @@ The configuration parameters can be of different uses:
 |`keccakConnectionsFile`|production|string|Keccak-f connections file|"keccak_connections.json"|KECCAK_CONNECTIONS_FILE|
 |`sha256ConnectionsFile`|production|string|SHA-256 connections file|"sha256_connections.json"|KECCAK_CONNECTIONS_FILE|
 |`zkevmStarkInfo`|production|string|zkEVN STARK info file|config + "/zkevm/zkevm.starkinfo.json"|ZKEVM_STARK_INFO|
+|`zkevmCHelpers`|production|string|zkEVM STARK chelpers binary file|config + "/zkevm/zkevm.chelpers.bin"|ZKEVM_CHELPERS|
+|`c12aCHelpers`|production|string|C12a STARK chelpers binary file|config + "/c12a/c12a.chelpers.bin"|C12A_CHELPERS|
+|`recursive1CHelpers`|production|string|Recursive1 STARK chelpers binary file|config + "/recursive1/recursive1.chelpers.bin"|RECURSIVE1_CHELPERS|
+|`recursive2CHelpers`|production|string|Recursive2 STARK chelpers binary file|config + "/recursive2/recursive2.chelpers.bin"|RECURSIVE2_CHELPERS|
+|`recursivefCHelpers`|production|string|RecursiveF STARK chelpers binary file|config + "/recursivef/recursivef.chelpers.bin"|RECURSIVEF_CHELPERS|
+|`zkevmGenericCHelpers`|production|string|zkEVM STARK generic chelpers binary file|config + "/zkevm/zkevm.chelpers_generic.bin"|ZKEVM_GENERIC_CHELPERS|
+|`c12aGenericCHelpers`|production|string|C12a STARK generic chelpers binary file|config + "/c12a/c12a.chelpers_generic.bin"|C12A_GENERIC_CHELPERS|
+|`recursive1GenericCHelpers`|production|string|Recursive1 STARK generic chelpers binary file|config + "/recursive1/recursive1.chelpers_generic.bin"|RECURSIVE1_GENERIC_CHELPERS|
+|`recursive2GenericCHelpers`|production|string|Recursive2 STARK generic chelpers binary file|config + "/recursive2/recursive2.chelpers_generic.bin"|RECURSIVE2_GENERIC_CHELPERS|
+|`recursivefGenericCHelpers`|production|string|RecursiveF STARK generic chelpers binary file|config + "/recursivef/recursivef.chelpers_generic.bin"|RECURSIVEF_GENERIC_CHELPERS|
 |`storageRomFile`|production|string|Storage ROM file|config + "/scripts/storage_sm_rom.json"|STORAGE_ROM_FILE|
 |`recursive1ConstantsTree`|production|string|Recursive 1 contant polynomials tree file|config + "/recursive1/recursive1.consttree"|
 |`recursive2ConstantsTree`|production|string|Recursive 2 contant polynomials tree file|config + "/recursive2/recursive2.consttree"|

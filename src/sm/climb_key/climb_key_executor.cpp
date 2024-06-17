@@ -96,14 +96,14 @@ void ClimbKeyExecutor::execute (vector<ClimbKeyAction> &input, ClimbKeyCommitPol
 
 void ClimbKeyExecutor::execute (vector<ClimbKeyAction> &action)
 {
-    void * pAddress = malloc(CommitPols::pilSize());
+    void * pAddress = malloc(CommitPols::numPols()*sizeof(Goldilocks::Element)*N);
     if (pAddress == NULL)
     {
-        zklog.error("ClimbKeyExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        zklog.error("ClimbKeyExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::numPols()*sizeof(Goldilocks::Element)*N));
         exitProcess();
         return;
     }
-    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    CommitPols cmPols(pAddress, N);
     execute(action, cmPols.ClimbKey);
     free(pAddress);
 }

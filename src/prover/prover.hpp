@@ -56,6 +56,8 @@ private:
     void *pAddress = NULL;
     void *pAddressStarksRecursiveF = NULL;
     int protocolId;
+    uint64_t polsSize;
+    uint64_t N;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available

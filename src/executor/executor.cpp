@@ -8,16 +8,16 @@
 #include "main_sm/fork_8/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_9/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_24_fast.hpp"
+#include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_fast.hpp"
 #if PROVER_FORK_ID >= 11
-#include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_25_fast.hpp"
+#include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_fast.hpp"
 #endif
 
 #ifdef MAIN_SM_PROVER_GENERATED_CODE
     #if (PROVER_FORK_ID == 10)
-        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_24.hpp"
+        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_10.hpp"
     #else
-        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_25.hpp"
+        #include "main_sm/fork_10/main_exec_generated/main_exec_generated_11.hpp"
     #endif
 #endif
 
@@ -44,7 +44,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_1::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_1::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_1::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_1::CommitPols commitPols(pAddress,1);
@@ -73,7 +73,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_2::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_2::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_2::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_2::CommitPols commitPols(pAddress,1);
@@ -102,7 +102,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_3::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_3::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_3::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_3::CommitPols commitPols(pAddress,1);
@@ -134,7 +134,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_4::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_4::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_4::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_4::CommitPols commitPols(pAddress,1);
@@ -166,7 +166,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_5::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_5::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_5::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_5::CommitPols commitPols(pAddress,1);
@@ -198,7 +198,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_6::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_6::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_6::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_6::CommitPols commitPols(pAddress,1);
@@ -230,7 +230,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_7::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_7::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_7::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_7::CommitPols commitPols(pAddress,1);
@@ -267,7 +267,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_8::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_8::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_8::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_8::CommitPols commitPols(pAddress,1);
@@ -301,7 +301,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_9::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_9::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_9::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_9::CommitPols commitPols(pAddress,1);
@@ -323,7 +323,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
             {
                 TimerStart(MAIN_EXEC_GENERATED_FAST);
                 //zklog.info("Executor::processBatch() fork 10 generated");
-                fork_10::main_exec_generated_10_24_fast(mainExecutor_fork_10, proverRequest);
+                fork_10::main_exec_generated_10_fast(mainExecutor_fork_10, proverRequest);
                 TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
             }
             else
@@ -335,7 +335,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_10::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_10::CommitPols commitPols(pAddress,1);
@@ -358,7 +358,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
             {
                 TimerStart(MAIN_EXEC_GENERATED_FAST);
                 //zklog.info("Executor::processBatch() fork 10 generated");
-                fork_10::main_exec_generated_11_25_fast(mainExecutor_fork_10, proverRequest);
+                fork_10::main_exec_generated_11_fast(mainExecutor_fork_10, proverRequest);
                 TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
             }
             else
@@ -370,7 +370,7 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 void * pAddress = calloc(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_10::CommitPols::pilSize()) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_10::CommitPols commitPols(pAddress,1);
@@ -579,9 +579,9 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
             if (config.useMainExecGenerated)
             {
 #if (PROVER_FORK_ID == 10)
-                PROVER_FORK_NAMESPACE::main_exec_generated_10_24(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated_10(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
 #else
-                PROVER_FORK_NAMESPACE::main_exec_generated_11_25(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated_11(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
 #endif
             }
             else
@@ -705,9 +705,9 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
         if (config.useMainExecGenerated)
         {
 #if (PROVER_FORK_ID == 10)
-            PROVER_FORK_NAMESPACE::main_exec_generated_10_24(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated_10(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
 #else
-            PROVER_FORK_NAMESPACE::main_exec_generated_11_25(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated_11(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
 #endif
         }
         else

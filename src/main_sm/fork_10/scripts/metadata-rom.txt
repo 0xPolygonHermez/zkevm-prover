@@ -1,2 +1,2 @@
-COMMIT=29afcedcf4fec91eca258a9926ad1fd40334168f
-SHA256SUM=f53d7b028c6582b444cf2cf52e83eedb94f6b52ff7e419add7c44eec6c87f61a  ./build/rom.json
+COMMIT=eb213c16c6ce74f3ff77ab42f2d14b127ed884e2
+SHA256SUM=75217d596342164e7af3d05c1d5ab5b7a6355ef44e3cc6e8a5b8cddcd338b67c  ./build/rom.json

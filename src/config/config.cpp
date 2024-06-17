@@ -237,6 +237,16 @@ void Config::load(json &config)
     ParseString(config, "zkevmStarkInfo", "ZKEVM_STARK_INFO", zkevmStarkInfo, configPath + "/zkevm/zkevm.starkinfo.json");
     ParseString(config, "zkevmVerifier", "ZKEVM_VERIFIER", zkevmVerifier, configPath + "/zkevm/zkevm.verifier.dat");
     ParseString(config, "zkevmVerkey", "ZKEVM_VERKEY", zkevmVerkey, configPath + "/zkevm/zkevm.verkey.json");
+    ParseString(config, "zkevmCHelpers", "ZKEVM_CHELPERS", zkevmCHelpers, configPath + "/zkevm/zkevm.chelpers.bin");
+    ParseString(config, "c12aCHelpers", "C12A_CHELPERS", c12aCHelpers, configPath + "/c12a/c12a.chelpers.bin");
+    ParseString(config, "recursive1CHelpers", "RECURSIVE1_CHELPERS", recursive1CHelpers, configPath + "/recursive1/recursive1.chelpers.bin");
+    ParseString(config, "recursive2CHelpers", "RECURSIVE2_CHELPERS", recursive2CHelpers, configPath + "/recursive2/recursive2.chelpers.bin");
+    ParseString(config, "recursivefCHelpers", "RECURSIVEF_CHELPERS", recursivefCHelpers, configPath + "/recursivef/recursivef.chelpers.bin");
+    ParseString(config, "zkevmGenericCHelpers", "ZKEVM_GENERIC_CHELPERS", zkevmGenericCHelpers, configPath + "/zkevm/zkevm.chelpers_generic.bin");
+    ParseString(config, "c12aGenericCHelpers", "C12A_GENERIC_CHELPERS", c12aGenericCHelpers, configPath + "/c12a/c12a.chelpers_generic.bin");
+    ParseString(config, "recursive1GenericCHelpers", "RECURSIVE1_GENERIC_CHELPERS", recursive1GenericCHelpers, configPath + "/recursive1/recursive1.chelpers_generic.bin");
+    ParseString(config, "recursive2GenericCHelpers", "RECURSIVE2_GENERIC_CHELPERS", recursive2GenericCHelpers, configPath + "/recursive2/recursive2.chelpers_generic.bin");
+    ParseString(config, "recursivefGenericCHelpers", "RECURSIVEF_GENERIC_CHELPERS", recursivefGenericCHelpers, configPath + "/recursivef/recursivef.chelpers_generic.bin");
     ParseString(config, "c12aConstPols", "C12A_CONST_POLS", c12aConstPols, configPath + "/c12a/c12a.const");
     ParseString(config, "c12aConstantsTree", "C12A_CONSTANTS_TREE", c12aConstantsTree, configPath + "/c12a/c12a.consttree");
     ParseString(config, "c12aExec", "C12A_EXEC", c12aExec, configPath + "/c12a/c12a.exec");
@@ -480,6 +490,16 @@ void Config::print(void)
     zklog.info("    recursivefVerkey=" + recursivefVerkey);
     zklog.info("    finalVerifier=" + finalVerifier);
     zklog.info("    finalStarkZkey=" + finalStarkZkey);
+    zklog.info("    zkevmCHelpers=" + zkevmCHelpers);
+    zklog.info("    c12aCHelpers=" + c12aCHelpers);
+    zklog.info("    recursive1CHelpers=" + recursive1CHelpers);
+    zklog.info("    recursive2CHelpers=" + recursive2CHelpers);
+    zklog.info("    recursivefCHelpers=" + recursivefCHelpers);
+    zklog.info("    zkevmGenericCHelpers=" + zkevmGenericCHelpers);
+    zklog.info("    c12aGenericCHelpers=" + c12aGenericCHelpers);
+    zklog.info("    recursive1GenericCHelpers=" + recursive1GenericCHelpers);
+    zklog.info("    recursive2GenericCHelpers=" + recursive2GenericCHelpers);
+    zklog.info("    recursivefGenericCHelpers=" + recursivefGenericCHelpers);
     zklog.info("    publicsOutput=" + publicsOutput);
     zklog.info("    proofFile=" + proofFile);
     zklog.info("    keccakScriptFile=" + keccakScriptFile);
@@ -557,27 +577,27 @@ bool Config::check (void)
             bError = true;
         }
 
-        if (!fileExists(zkevmConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(zkevmConstantsTree))
         {
             zklog.error("required file config.zkevmConstantsTree=" + zkevmConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(c12aConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(c12aConstantsTree))
         {
             zklog.error("required file config.c12aConstantsTree=" + c12aConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive1ConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(recursive1ConstantsTree))
         {
             zklog.error("required file config.recursive1ConstantsTree=" + recursive1ConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive2ConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(recursive2ConstantsTree))
         {
             zklog.error("required file config.recursive2ConstantsTree=" + recursive2ConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursivefConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(recursivefConstantsTree))
         {
             zklog.error("required file config.recursivefConstantsTree=" + recursivefConstantsTree + " does not exist");
             bError = true;
@@ -665,6 +685,56 @@ bool Config::check (void)
         if (!fileExists(recursivefStarkInfo))
         {
             zklog.error("required file config.recursivefStarkInfo=" + recursivefStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(zkevmCHelpers))
+        {
+            zklog.error("required file config.zkevmCHelpers=" + zkevmCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(c12aCHelpers))
+        {
+            zklog.error("required file config.c12aCHelpers=" + c12aCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive1CHelpers))
+        {
+            zklog.error("required file config.recursive1CHelpers=" + recursive1CHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2CHelpers))
+        {
+            zklog.error("required file config.recursive2CHelpers=" + recursive2CHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursivefCHelpers))
+        {
+            zklog.error("required file config.recursivefCHelpers=" + recursivefCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(zkevmGenericCHelpers))
+        {
+            zklog.error("required file config.zkevmGenericCHelpers=" + zkevmGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(c12aGenericCHelpers))
+        {
+            zklog.error("required file config.c12aGenericCHelpers=" + c12aGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive1GenericCHelpers))
+        {
+            zklog.error("required file config.recursive1GenericCHelpers=" + recursive1GenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2GenericCHelpers))
+        {
+            zklog.error("required file config.recursive2GenericCHelpers=" + recursive2GenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursivefGenericCHelpers))
+        {
+            zklog.error("required file config.recursivefGenericCHelpers=" + recursivefGenericCHelpers + " does not exist");
             bError = true;
         }
         if (!fileExists(c12aExec))

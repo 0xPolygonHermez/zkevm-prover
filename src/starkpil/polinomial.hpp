@@ -6,6 +6,7 @@
 #include "compare_fe.hpp"
 #include <math.h> /* log2 */
 #include "zklog.hpp"
+#include "zkassert.hpp"
 #include "exit_process.hpp"
 
 class Polinomial
@@ -117,7 +118,7 @@ public:
         }
         else
         {
-#pragma omp parallel for
+#pragma omp parallel for schedule(static)
             for (uint64_t i = 0; i < b.degree(); i++)
             {
                 std::memcpy(a[i], b[i], b.dim() * sizeof(Goldilocks::Element));
@@ -587,20 +588,30 @@ public:
     {
         uint64_t size = num.degree();
 
-        Polinomial denI(size, 3);
         Polinomial checkVal(1, 3);
         Goldilocks::Element *pZ = z[0];
         Goldilocks3::copy((Goldilocks3::Element *)&pZ[0], &Goldilocks3::one());
 
-        batchInverse(denI, den);
-        for (uint64_t i = 1; i < size; i++)
+
+        uint64_t stride = min(size, uint64_t(4096));
+        for (uint64_t ii = 1; ii < size; ii += stride)
         {
-            Polinomial tmp(1, 3);
-            Polinomial::mulElement(tmp, 0, num, i - 1, denI, i - 1);
-            Polinomial::mulElement(z, i, z, i - 1, tmp, 0);
+            Polinomial denI(stride, 3);
+            Polinomial den_(den[ii - 1], stride, 3, 3);
+            Polinomial::batchInverse(denI, den_);
+
+            uint64_t c = 0;
+            for (uint64_t k = ii; k < min(size, ii + stride); ++k) {
+                Polinomial tmp(1, 3);                
+                Polinomial::mulElement(tmp, 0, num, k - 1, denI, c);
+                Polinomial::mulElement(z, k, z, k - 1, tmp, 0);
+                c++;
+            }
         }
         Polinomial tmp(1, 3);
-        Polinomial::mulElement(tmp, 0, num, size - 1, denI, size - 1);
+        Polinomial denI(1, 3);
+        Goldilocks3::inv((Goldilocks3::Element *)denI[0], (Goldilocks3::Element *)den[size - 1]);
+        Polinomial::mulElement(tmp, 0, num, size - 1, denI, 0);
         Polinomial::mulElement(checkVal, 0, z, size - 1, tmp, 0);
 
         zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));
@@ -741,5 +752,25 @@ public:
             out[2] = out[2] + B - G;
         }
     }
+
+    static void buildZHInv(Polinomial& zi, uint64_t nBits, uint64_t nBitsExt) {
+        uint64_t extendBits = nBitsExt - nBits;
+        uint64_t extend = (1 << extendBits);
+        uint64_t NExtended = (1 << nBitsExt);
+
+        Goldilocks::Element w = Goldilocks::one();
+        Goldilocks::Element sn = Goldilocks::shift();
+
+        for (uint64_t i = 0; i < nBits; i++) Goldilocks::square(sn, sn);
+
+        for (uint64_t i=0; i<extend; i++) {
+            Goldilocks::inv(*zi[i], (sn * w) - Goldilocks::one());
+            Goldilocks::mul(w, w, Goldilocks::w(extendBits));
+        }
+
+        #pragma omp parallel for
+        for (uint64_t i=extend; i<NExtended; i++) *zi[i] = zi[i % extend][0];
+    }
+
 };
 #endif

@@ -96,13 +96,13 @@ int main (int argc, char **argv)
 
         string codeGenerationName = "main_exec_generated";
 
-        string functionName = codeGenerationName + "_" + to_string(forkID) + "_" + to_string(forkInfo.Nbits);
+        string functionName = codeGenerationName + "_" + to_string(forkID);
         string fileName = functionName;
         string directoryName = "src/main_sm/" + forkNamespace + "/" + codeGenerationName;
 
         // Load rom.json
         string romFileName;
-        romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom_" + to_string(forkID) + "_" + to_string(forkInfo.Nbits) + ".json";
+        romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom_" + to_string(forkID) + ".json";
         cout << "ROM file name=" << romFileName << endl;
         json rom;
         file2json(rom, romFileName);
@@ -347,7 +347,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     code += "        return;\n";
     code += "    }\n";
 
-    code += "    Rom &rom = proverRequest.input.publicInputsExtended.publicInputs.forkID == 10 ? mainExecutor.romBatch_10_24 : mainExecutor.romBatch_11_25;\n";
+    code += "    Rom &rom = proverRequest.input.publicInputsExtended.publicInputs.forkID == 10 ? mainExecutor.romBatch_10 : mainExecutor.romBatch_11;\n";
 
     code += "    Goldilocks &fr = mainExecutor.fr;\n";
     code += "    uint64_t flushId;\n";

@@ -8,6 +8,7 @@
 #include "goldilocks_base_field.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "scalar.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -51,7 +52,7 @@ public:
         fr(fr),
         blockSize(155286),
         bytesPerBlock(136),
-        N(PROVER_FORK_NAMESPACE::PaddingKKCommitPols::pilDegree())
+        N(getForkN(PROVER_FORK_ID))
     {
         keccak256(NULL, 0, hashZeroScalar);
         scalar2fea(fr, hashZeroScalar, hash0);

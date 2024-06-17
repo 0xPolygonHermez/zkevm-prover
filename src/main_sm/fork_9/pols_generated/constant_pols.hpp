@@ -1086,4 +1086,3 @@ inline const char * address2ConstantPolName (uint64_t address)
 } // namespace
 
 #endif // CONSTANT_POLS_HPP_fork_9
-

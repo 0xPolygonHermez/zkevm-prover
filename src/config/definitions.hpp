@@ -3,16 +3,15 @@
 
 #define CONCATENATE_DEFINES_AUX(x, y) x##y
 #define CONCATENATE_DEFINES(x, y) CONCATENATE_DEFINES_AUX(x, y)
-#define DEFINE_TO_STRING(x) #x
 
 /* Only one fork can generate proofs */
 #ifndef PROVER_FORK_ID
-#define PROVER_FORK_ID 11
+#define PROVER_FORK_ID 10
 #endif
 
 /* Regardless of the PROVER_FORK_ID, proof generation code uses the same namespace from the parent fork ID */
 #define PROVER_FORK_NAMESPACE fork_10
-#define PROVER_FORK_NAMESPACE_STRING DEFINE_TO_STRING(PROVER_FORK_NAMESPACE)
+#define PROVER_FORK_NAMESPACE_STRING "fork_10"
 #define USING_PROVER_FORK_NAMESPACE using namespace fork_10 // Same pols definition for all proof generation files
 
 /* Log traces selector: uncomment to enable the corresponding trace */
@@ -86,20 +85,13 @@
 #define MAIN_SM_EXECUTOR_GENERATED_CODE
 #define MAIN_SM_PROVER_GENERATED_CODE
 
+#define LOAD_CONST_FILES false
+
+#define REDUCE_ZKEVM_MEMORY true
+
+#define USE_GENERIC_PARSER true
+
 //#define MULTI_ROM_TEST
-
-#define USE_CHELPERS_PARSER
-
-/* chelpers defines */
-#ifdef USE_CHELPERS_PARSER
-    #ifndef __AVX512__
-        #define NROWS_STEPS_ 4
-    #else
-        #define NROWS_STEPS_ 8
-    #endif
-#else
-#define NROWS_STEPS_ 1
-#endif
 
 
 #endif

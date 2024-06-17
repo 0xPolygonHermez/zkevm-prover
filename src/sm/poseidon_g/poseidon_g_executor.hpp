@@ -7,6 +7,7 @@
 #include "sm/pols_generated/commit_pols.hpp"
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -29,7 +30,7 @@ public:
     PoseidonGExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon) :
         fr(fr),
         poseidon(poseidon),
-        N(PROVER_FORK_NAMESPACE::PoseidonGCommitPols::pilDegree()),
+        N(getForkN(PROVER_FORK_ID)),
         t(12),
         nRoundsF(8),
         nRoundsP(22),
