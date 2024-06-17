@@ -8,10 +8,9 @@
 #include <cuda_runtime.h>
 #endif
 
-#ifdef __USE_CUDA__     
-__global__ void blockCalculation(StarkInfo &starkInfo, StepsParams &params, uint64_t domainSize, bool domainExtended, uint64_t stage, uint32_t nOps, uint32_t nArgs);
-#endif
 
+
+class gl64_t;
 class CHelpersStepsGPU : public CHelpersSteps {
 public:
     uint64_t nCols;
@@ -43,56 +42,36 @@ public:
     Goldilocks::Element ** tmp1_d;
     Goldilocks::Element ** tmp3_d;
 
+#ifdef __USE_CUDA__     
 
-    void setBufferTInfo(StarkInfo& starkInfo, uint64_t stage) override {
-        bool domainExtended = stage <= 3 ? false : true;
-        nColsStagesAcc.resize(10 + 2);
-        nColsStages.resize(10 + 2);
-        offsetsStages.resize(10 + 2);
+    uint64_t* nColsStages_d_;
+    uint64_t* nColsStagesAcc_d_;
+    uint64_t* offsetsStages_d_;
 
-        nColsStages[0] = starkInfo.nConstants + 2;
-        offsetsStages[0] = 0;
+    uint32_t *ops_d_;
+    uint32_t *args_d_;
+    gl64_t *numbers_d_;
+    gl64_t *challenges_d_;
+    gl64_t *challenges_ops_d_;
+    gl64_t *publics_d_;
+    gl64_t *evals_d_;
+    uint32_t *storePol_d_;
 
-        for(uint64_t s = 1; s <= 3; ++s) {
-            nColsStages[s] = starkInfo.mapSectionsN.section[string2section("cm" + to_string(s) + "_n")];
-            if(domainExtended) {
-                offsetsStages[s] = starkInfo.mapOffsets.section[string2section("cm" + to_string(s) + "_2ns")];
-            } else {
-                offsetsStages[s] = starkInfo.mapOffsets.section[string2section("cm" + to_string(s) + "_n")];
-            }
-        }
-        if(domainExtended) {
-            nColsStages[4] = starkInfo.mapSectionsN.section[eSection::cm4_2ns];
-            offsetsStages[4] = starkInfo.mapOffsets.section[eSection::cm4_2ns];
-        } else {
-            nColsStages[4] = starkInfo.mapSectionsN.section[eSection::tmpExp_n];
-            offsetsStages[4] = starkInfo.mapOffsets.section[eSection::tmpExp_n];
-        }
-        for(uint64_t o = 0; o < 2; ++o) {
-            for(uint64_t s = 0; s < 5; ++s) {
-                if(s == 0) {
-                    if(o == 0) {
-                        nColsStagesAcc[0] = 0;
-                    } else {
-                        nColsStagesAcc[5*o] = nColsStagesAcc[5*o - 1] + nColsStages[4];
-                    }
-                } else {
-                    nColsStagesAcc[5*o + s] = nColsStagesAcc[5*o + (s - 1)] + nColsStages[(s - 1)];
-                }
-            }
-        }
-        nColsStagesAcc[10] = nColsStagesAcc[9] + nColsStages[9]; // Polinomials f & q
-        if(stage == 4) {
-            offsetsStages[10] = starkInfo.mapOffsets.section[eSection::q_2ns];
-            nColsStages[10] = starkInfo.qDim;
-        } else if(stage == 5) {
-            offsetsStages[10] = starkInfo.mapOffsets.section[eSection::f_2ns];
-            nColsStages[10] = 3;
-        }
-        nColsStagesAcc[11] = nColsStagesAcc[10] + 3; // xDivXSubXi
-        nCols = nColsStagesAcc[11] + 6;
-    }
+    gl64_t *constPols_d_;
+    gl64_t *constPols2ns_d_;
+    gl64_t *x_d_;
+    gl64_t *x_2ns_d_;
+    gl64_t *zi_d_;
+    gl64_t *pols_d_;
+    gl64_t *xDivXSubXi_d_;
 
+    gl64_t ** bufferT_d_;
+    gl64_t ** tmp1_d_;
+    gl64_t ** tmp3_d_;
+#endif
+
+
+    void setBufferTInfo(StarkInfo& starkInfo, uint64_t stage) override;
     void storePolinomials(StarkInfo &starkInfo, StepsParams &params, uint32_t* storePol, uint64_t row, uint64_t nrowsPack, uint64_t domainExtended)  {
         
         Goldilocks::Element *bufferT_ = bufferT_d[omp_get_thread_num()];
@@ -194,24 +173,7 @@ __device__  void storePolinomials_(StarkInfo &starkInfo, StepsParams &params, ui
 __device__ __forceinline__  void loadPolinomials_(StarkInfo &starkInfo, StepsParams &params, uint64_t row, uint64_t stage, uint64_t domainExtended);
 #endif
 
- void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams)  {
-
-    uint32_t nrowsPack =  4;
-    bool domainExtended = parserParams.stage > 3 ? true : false;
-    uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
-    
-
-    setBufferTInfo(starkInfo, parserParams.stage);
-    dataSetup(starkInfo, params, parserArgs, parserParams);
-
-    #pragma omp parallel for
-    for (uint64_t i = 0; i < domainSize; i+= nrowsPack) {
-
-        loadPolinomials(starkInfo, params, i, parserParams.stage, nrowsPack, domainExtended);
-        optcodeIteration(nrowsPack,  parserParams.nOps, parserParams.nArgs);
-        storePolinomials(starkInfo, params, storePol_d, i, nrowsPack, domainExtended);
-    }
-}
+ void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams);
 
 #ifdef __USE_CUDA__
 
@@ -835,4 +797,9 @@ void dataSetup_(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArg
 #endif
 
 };
+
+#ifdef __USE_CUDA__     
+__global__ void blockCalculation(CHelpersStepsGPU* chelpers_,StarkInfo &starkInfo, StepsParams &params, uint64_t domainSize, bool domainExtended, uint64_t stage, uint32_t nOps, uint32_t nArgs);
+#endif
+
 #endif
