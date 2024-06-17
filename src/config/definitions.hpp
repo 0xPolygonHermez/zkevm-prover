@@ -87,7 +87,9 @@
 
 #define LOAD_CONST_FILES false
 
+#ifndef REDUCE_ZKEVM_MEMORY
 #define REDUCE_ZKEVM_MEMORY true
+#endif
 
 #define USE_GENERIC_PARSER true
 

@@ -80,8 +80,8 @@ echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEFINAL_CPP}
 
 #Copy pols_generated files
 cp ${CONFIG_DIR}/scripts/rom.json ./src/main_sm/$PARENT_FORK_ID/scripts/rom_${FORK_VERSION}.json
+cp ${CONFIG_DIR}/scripts/metadata-rom.txt ./src/main_sm/$PARENT_FORK_ID/scripts/metadata-rom_${FORK_VERSION}.txt
 if [ "$FORK_ID" == "$PARENT_FORK_ID" ]; then
-    cp ${CONFIG_DIR}/scripts/metadata-rom.txt ./src/main_sm/$PARENT_FORK_ID/scripts/
     cp "${WORKING_DIR}/pil/zkevm/main.pil.json" "./src/main_sm/$PARENT_FORK_ID/scripts/"
 fi
 
