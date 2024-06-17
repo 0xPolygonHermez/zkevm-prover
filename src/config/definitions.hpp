@@ -6,7 +6,7 @@
 
 /* Only one fork can generate proofs */
 #ifndef PROVER_FORK_ID
-#define PROVER_FORK_ID 11
+#define PROVER_FORK_ID 10
 #endif
 
 /* Regardless of the PROVER_FORK_ID, proof generation code uses the same namespace from the parent fork ID */
@@ -86,6 +86,8 @@
 #define MAIN_SM_PROVER_GENERATED_CODE
 
 #define LOAD_CONST_FILES false
+
+#define REDUCE_ZKEVM_MEMORY true
 
 #define USE_GENERIC_PARSER true
 

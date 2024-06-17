@@ -102,7 +102,7 @@ Prover::Prover(Goldilocks &fr,
             pthread_create(&proverPthread, NULL, proverThread, this);
             pthread_create(&cleanerPthread, NULL, cleanerThread, this);
 
-            bool reduceMemoryZkevm = true;
+            bool reduceMemoryZkevm = REDUCE_ZKEVM_MEMORY ? true : false;
 
             StarkInfo _starkInfo(config.zkevmStarkInfo, reduceMemoryZkevm);
 
