@@ -20,10 +20,10 @@ uint64_t ClimbKeySMTest (Goldilocks &fr, const Config &config)
     vector<ClimbKeyAction> input;
     vector<ClimbKeyAction> output;
 
-    void * pAddress = malloc(CommitPols::pilSize());
+    void * pAddress = malloc(CommitPols::numPols()*sizeof(Goldilocks::Element)*getForkN(PROVER_FORK_ID));
     if (pAddress == NULL)
     {
-        zklog.error("ClimbKeySMTest::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        zklog.error("ClimbKeySMTest::execute() failed calling malloc() of size=" + to_string(CommitPols::numPols()*sizeof(Goldilocks::Element)*getForkN(PROVER_FORK_ID)));
         exitProcess();
     }
     CommitPols cmPols(pAddress, getForkN(PROVER_FORK_ID));

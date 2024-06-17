@@ -110,10 +110,10 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     action.wr256 = 1;    
     input.push_back(action);    
 
-    void * pAddress = malloc(CommitPols::pilSize());
+    void * pAddress = malloc(CommitPols::numPols()*sizeof(Goldilocks::Element)*getForkN(PROVER_FORK_ID));
     if (pAddress == NULL)
     {
-        zklog.error("MemAlignSMTest() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        zklog.error("MemAlignSMTest() failed calling malloc() of size=" + to_string(CommitPols::numPols()*sizeof(Goldilocks::Element)*getForkN(PROVER_FORK_ID)));
         exitProcess();
     }
     CommitPols cmPols(pAddress, getForkN(PROVER_FORK_ID));

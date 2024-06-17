@@ -19,10 +19,10 @@ bool getBit(uint8_t byte, int position)
 
 void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 {
-	void *pAddress = malloc(CommitPols::pilSize());
+	void *pAddress = malloc(CommitPols::numPols()*sizeof(Goldilocks::Element)*getForkN(PROVER_FORK_ID));
 	if (pAddress == NULL)
 	{
-		zklog.error("KeccakSMTest() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+		zklog.error("KeccakSMTest() failed calling malloc() of size=" + to_string(CommitPols::numPols()*sizeof(Goldilocks::Element)*getForkN(PROVER_FORK_ID)));
 		exitProcess();
 	}
 	CommitPols cmPols(pAddress, getForkN(PROVER_FORK_ID));

@@ -3,11 +3,10 @@
 
 #define CONCATENATE_DEFINES_AUX(x, y) x##y
 #define CONCATENATE_DEFINES(x, y) CONCATENATE_DEFINES_AUX(x, y)
-#define DEFINE_TO_STRING(x) #x
 
 /* Only one fork can generate proofs */
 #ifndef PROVER_FORK_ID
-#define PROVER_FORK_ID 10
+#define PROVER_FORK_ID 11
 #endif
 
 /* Regardless of the PROVER_FORK_ID, proof generation code uses the same namespace from the parent fork ID */
@@ -83,8 +82,8 @@
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
 #define USE_NEW_KVTREE
 
-// #define MAIN_SM_EXECUTOR_GENERATED_CODE
-// #define MAIN_SM_PROVER_GENERATED_CODE
+#define MAIN_SM_EXECUTOR_GENERATED_CODE
+#define MAIN_SM_PROVER_GENERATED_CODE
 
 #define LOAD_CONST_FILES false
 

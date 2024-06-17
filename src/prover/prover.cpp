@@ -112,8 +112,7 @@ Prover::Prover(Goldilocks &fr,
             polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element);
             zkassert(_starkInfo.mapSectionsN.section[eSection::cm1_2ns] * sizeof(Goldilocks::Element) <= polsSize - _starkInfo.mapSectionsN.section[eSection::cm2_2ns] * sizeof(Goldilocks::Element));
 
-            zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() <= polsSize);
-            zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() == _starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element));
+            zkassert(PROVER_FORK_NAMESPACE::CommitPols::numPols()*sizeof(Goldilocks::Element)*N <= polsSize);
 
             if (config.zkevmCmPols.size() > 0)
             {
@@ -1191,7 +1190,7 @@ void Prover::execute(ProverRequest *pProverRequest)
 
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
-    uint64_t commitPolsSize = PROVER_FORK_NAMESPACE::CommitPols::pilSize();
+    uint64_t commitPolsSize = PROVER_FORK_NAMESPACE::CommitPols::numPols()*sizeof(Goldilocks::Element)*N;
     void *pExecuteAddress = NULL;
 
     if (config.zkevmCmPols.size() > 0)

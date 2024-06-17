@@ -411,10 +411,10 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 // To be used only for testing, since it allocates a lot of memory
 void BinaryExecutor::execute (vector<BinaryAction> &action)
 {
-    void * pAddress = malloc(CommitPols::pilSize());
+    void * pAddress = malloc(CommitPols::numPols()*sizeof(Goldilocks::Element)*N);
     if (pAddress == NULL)
     {
-        zklog.error("BinaryExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        zklog.error("BinaryExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::numPols()*sizeof(Goldilocks::Element)*N));
         exitProcess();
     }
     CommitPols cmPols(pAddress, N);
