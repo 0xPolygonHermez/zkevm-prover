@@ -67,6 +67,9 @@ public:
     DatabaseCacheRecord* allocRecord(const string key, const void * value) override;
     void freeRecord(DatabaseCacheRecord* record) override;
     void updateRecord(DatabaseCacheRecord* record, const void * value) override;
+    
+    uint32_t fillCache(); //fuctin only for benchmarkin purposes
+    uint32_t fillCacheCahotic(); //fuctin only for benchmarkin purposes
 };
 
 class DatabaseProgramCache : public DatabaseCache

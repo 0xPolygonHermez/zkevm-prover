@@ -9,6 +9,7 @@
 #include "full_tracer_interface.hpp"
 #include "database_map.hpp"
 #include "prover_request_type.hpp"
+#include "fork_info.hpp"
 
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
@@ -59,7 +60,8 @@ public:
 
     /* Execution generated data */
     Counters counters; // Counters of the batch execution
-    Counters counters_reserve; // Counters reserve of the batch execution
+    Counters countersReserve; // Counters reserve of the batch execution
+    Counters countersReserveZkpc; // Counters reserver zkPC
     DatabaseMap *dbReadLog; // Database reads logs done during the execution (if enabled)
     FullTracerInterface * pFullTracer; // Execution traces interface
 
@@ -77,6 +79,11 @@ public:
     /* Keys */
     unordered_set<string> nodesKeys;
     unordered_set<string> programKeys;
+
+    /* Debug info */
+    string errorLog;
+
+    ForkInfo forkInfo;
 
     /* Constructor */
     ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);

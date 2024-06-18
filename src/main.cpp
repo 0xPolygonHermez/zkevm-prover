@@ -10,8 +10,13 @@
 #include "config.hpp"
 #include "version.hpp"
 #include "proof2zkin.hpp"
-#include "calcwit.hpp"
-#include "circom.hpp"
+#if (PROVER_FORK_ID == 10)
+    #include "fork_10/calcwit.hpp"
+    #include "fork_10/circom.hpp"
+#else
+    #include "fork_11/calcwit.hpp"
+    #include "fork_11/circom.hpp"
+#endif
 #include "main.hpp"
 #include "prover.hpp"
 #include "service/executor/executor_server.hpp"
@@ -401,44 +406,6 @@ int main(int argc, char **argv)
         SHA256GenerateScript(config);
     }
 
-#ifdef DATABASE_USE_CACHE
-
-    /* INIT DB CACHE */
-    if(config.useAssociativeCache){
-        Database::useAssociativeCache = true;
-        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
-    }
-    else{
-        Database::useAssociativeCache = false;
-        Database::dbMTCache.setName("MTCache");
-        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
-    }
-    Database::dbProgramCache.setName("ProgramCache");
-    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
-
-    if (config.databaseURL != "local") // remote DB
-    {
-
-        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
-        {
-            TimerStart(DB_CACHE_LOAD);
-            // if we have a db cache enabled
-            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
-            {
-                if (config.loadDBToMemCacheInParallel) {
-                    // Run thread that loads the DB into the dbCache
-                    std::thread loadDBThread (loadDb2MemCache, config);
-                    loadDBThread.detach();
-                } else {
-                    loadDb2MemCache(config);
-                }
-            }
-            TimerStopAndLog(DB_CACHE_LOAD);
-        }
-    }
-
-#endif // DATABASE_USE_CACHE
-
     /* TESTS */
 
     // Test Keccak SM
@@ -495,6 +462,7 @@ int main(int argc, char **argv)
     if (config.runDatabaseCacheTest)
     {
         DatabaseCacheTest();
+        //DatabaseCacheBenchmark();
     }
 
     // Test check tree

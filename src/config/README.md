@@ -53,9 +53,6 @@ The configuration parameters can be of different uses:
 |`saveResponseToFile`|test|boolean|Saves executor GRPC response to file, in text format|false|SAVE_RESPONSE_TO_FILE|
 |`saveProofToFile`|test|boolean|Saves generated proof to file, in JSON format|false|SAVE_PROOF_TO_FILE|
 |`saveFilesInSubfolders`|test|boolean|Saves files in folders named as per hour, e.g. `output/2023/01/10/18`|false|SAVE_FILES_IN_SUBFOLDERS|
-|`loadDBToMemCache`|test|boolean|Fill database cache with content during initialization|false|LOAD_DB_TO_MEM_CACHE|
-|`loadDBToMemCacheInParallel`|test|boolean|Fill database cache in parallel with the normal execution|false|LOAD_DB_TO_MEM_CACHE_IN_PARALLEL|
-|`loadDBToMemTimeout`|test|u64|Fill database cache up to a certain time, in microseconds|30000000 (30 seconds)|LOAD_DB_TO_MEM_TIMEOUT|
 |**`dbMTCacheSize`**|production|s64|Database MT cache size, in MB|8*1024 (8 GB)|DB_MT_CACHE_SIZE|
 |**`useAssociativeCache`**|production|boolean|Use associative cache as Database MT cache, which is faster than regular cache|false|USE_ASSOCIATIVE_CACHE|
 |`log2DbMTAssociativeCacheSize`|production|s64|log2 of the size in entries of the DatabaseMTAssociativeCache; note that 1 cache entry = 128 bytes|25|LOG2_DB_MT_ASSOCIATIVE_CACHE_SIZE|
@@ -80,13 +77,16 @@ The configuration parameters can be of different uses:
 |`hashDBFileName`|test|string|Core name used for the hashDB files (path,numbering and extension not included). If hashDBFileName is empty in-memory version of the hashDB is used (only for DEBUG purposes). |""|HASHDB_FILE_NAME|
 |`hashDBFileSize`|test|u64|HashDB files size in GB|128|HASHDB_FILE_SIZE|failures
 |`hashDBFolder`|test|string|Folder containing the hashDB files|hashdb|HASHDB_FOLDER|
+|`hashDBSingleton`|production|boolean|Use HashDB singleton.  Set to false when databaseURL=local to get one dedicated cache per thread.|true|HASHDB_SINGLETON|
 |`aggregatorServerPort`|test|u16|Aggregator server GRPC port|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientPort`**|production|u16|Aggregator client GRPC port to connect to|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientHost`**|production|string|Aggregator client GRPC host name to connect to, i.e. Aggregator server host name|"127.0.0.1"|AGGREGATOR_CLIENT_HOST|
 |`aggregatorClientMockTimeout`|test|u64|Aggregator client mock timeout, in microseconds|60000000 (60 seconds)|AGGREGATOR_CLIENT_MOCK_TIMEOUT|
 |**`aggregatorClientWatchdogTimeout`**|production|u64|Aggregator client watchdog timeout, in microseconds|60000000 (60 seconds)|AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT|
 |`aggregatorClientMaxStreams`|test|u64|Max number of aggregator client streams, used to limit E2E test execution; if 0 then there is no limit|0|AGGREGATOR_CLIENT_MAX_STREAMS|
+|`aggregatorClientMaxRecvMsgSize`|test|u64|Max size of aggregator client received messages; if 0 then there is no limit|1024*1024*1024|AGGREGATOR_CLIENT_MAX_RECV_MSG_SIZE|
 |`executorROMLineTraces`|test|boolean|If true, the main state machine executor will log the content of every executed ROM program line; it only works with native main executor, not with generated code executor|false|EXECUTOR_ROM_LINE_TRACES|
+|`executorROMInstructions`|test|boolean|If true, the main state machine executor will log the zkasm instruction of every executed ROM program line; it only works with native main executor, not with generated code executor|false|EXECUTOR_ROM_INSTRUCTIONS|
 |`executorTimeStatistics`|test|boolean|If true, the main state machine executor will log the time metrics statistics of external calls|false|EXECUTOR_TIME_STATISTICS|
 |`opcodeTracer`|test|boolean|Generate main state machine executor opcode statistics|false|OPCODE_TRACER|
 |`logRemoteDbReads`|test|boolean|Log main state machine executor remote Database reads|false|LOG_REMOTE_DB_READS|
@@ -95,7 +95,7 @@ The configuration parameters can be of different uses:
 |`logExecutorServerInputGasThreshold`|test|u64|Log main state machine executor input if gas/s < this value; active if this value is > 0|0|LOG_EXECUTOR_SERVER_INPUT_GAS_THRESHOLD|
 |`logExecutorServerResponses`|test|bool|Log executor server resonses|false|LOG_EXECUTOR_SERVER_RESPONSES|
 |`logExecutorServerTxs`|test|bool|Log executor server transactins details|true|LOG_EXECUTOR_SERVER_TXS|
-|`dontLoadRomOffsets`|test|bool|Avoid loading ROM offsets; used with experimental or testing ROM.json files|false|DONT_LOAD_ROM_OFFSETS|
+|`loadDiagnosticRom`|test|bool|Loads a test diagnostic ROM to run a unit-test of the main executor; used with experimental or testing ROM.json files|false|LOAD_DIAGNOSTIC_ROM|
 |`inputFile`|test|string|Input file in some tests|"testvectors/batchProof/input_executor_0.json"|INPUT_FILE|
 |`inputFile2`|test|string|Second input file, used as the second input in genAggregatedProof|""|INPUT_FILE_2|
 |`outputPath`|test|string|Output directory for saved files|"output"|OUTPUT_PATH|
@@ -141,6 +141,16 @@ The configuration parameters can be of different uses:
 |`keccakConnectionsFile`|production|string|Keccak-f connections file|"keccak_connections.json"|KECCAK_CONNECTIONS_FILE|
 |`sha256ConnectionsFile`|production|string|SHA-256 connections file|"sha256_connections.json"|KECCAK_CONNECTIONS_FILE|
 |`zkevmStarkInfo`|production|string|zkEVN STARK info file|config + "/zkevm/zkevm.starkinfo.json"|ZKEVM_STARK_INFO|
+|`zkevmCHelpers`|production|string|zkEVM STARK chelpers binary file|config + "/zkevm/zkevm.chelpers.bin"|ZKEVM_CHELPERS|
+|`c12aCHelpers`|production|string|C12a STARK chelpers binary file|config + "/c12a/c12a.chelpers.bin"|C12A_CHELPERS|
+|`recursive1CHelpers`|production|string|Recursive1 STARK chelpers binary file|config + "/recursive1/recursive1.chelpers.bin"|RECURSIVE1_CHELPERS|
+|`recursive2CHelpers`|production|string|Recursive2 STARK chelpers binary file|config + "/recursive2/recursive2.chelpers.bin"|RECURSIVE2_CHELPERS|
+|`recursivefCHelpers`|production|string|RecursiveF STARK chelpers binary file|config + "/recursivef/recursivef.chelpers.bin"|RECURSIVEF_CHELPERS|
+|`zkevmGenericCHelpers`|production|string|zkEVM STARK generic chelpers binary file|config + "/zkevm/zkevm.chelpers_generic.bin"|ZKEVM_GENERIC_CHELPERS|
+|`c12aGenericCHelpers`|production|string|C12a STARK generic chelpers binary file|config + "/c12a/c12a.chelpers_generic.bin"|C12A_GENERIC_CHELPERS|
+|`recursive1GenericCHelpers`|production|string|Recursive1 STARK generic chelpers binary file|config + "/recursive1/recursive1.chelpers_generic.bin"|RECURSIVE1_GENERIC_CHELPERS|
+|`recursive2GenericCHelpers`|production|string|Recursive2 STARK generic chelpers binary file|config + "/recursive2/recursive2.chelpers_generic.bin"|RECURSIVE2_GENERIC_CHELPERS|
+|`recursivefGenericCHelpers`|production|string|RecursiveF STARK generic chelpers binary file|config + "/recursivef/recursivef.chelpers_generic.bin"|RECURSIVEF_GENERIC_CHELPERS|
 |`storageRomFile`|production|string|Storage ROM file|config + "/scripts/storage_sm_rom.json"|STORAGE_ROM_FILE|
 |`recursive1ConstantsTree`|production|string|Recursive 1 contant polynomials tree file|config + "/recursive1/recursive1.consttree"|
 |`recursive2ConstantsTree`|production|string|Recursive 2 contant polynomials tree file|config + "/recursive2/recursive2.consttree"|
@@ -165,7 +175,8 @@ The configuration parameters can be of different uses:
 |`cleanerPollingPeriod`|production|u64|Polling period of the cleaner thread that deletes completed Prover batches, in seconds|600|CLEANER_POLLING_PERIOD|
 |`requestsPersistence`|production|u64|Time that completed batches stay before being cleaned up|3600|REQUESTS_PERSISTENCE|
 |`maxExecutorThreads`|production|u64|Maximum number of GRPC Executor service threads|20|MAX_EXECUTOR_THREADS|
-|`maxProverThreads`|test|u64|Maximum number of GRPC Prover service threads|8|MAX_PROVER_THREADS|
+|`maxExecutorReceiveMessageSize`|production|u64|Maximum size of GRPC Executor service receive message, in bytes|1024*1024*1024|MAX_EXECUTOR_RECEIVE_MESSAGE_SIZE|
+|`maxExecutorSendMessageSize`|production|u64|Maximum size of GRPC Executor service send message, in bytes; 0 means no limit|0|MAX_EXECUTOR_SEND_MESSAGE_SIZE|
 |`maxHashDBThreads`|production|u64|Maximum number of GRPC HashDB service threads|8|MAX_HASHDB_THREADS|
 |`fullTracerTraceReserveSize`|production|u64|Full tracer number of reserved traces|256*1024|FULL_TRACER_TRACE_RESERVE_SIZE|
 |`proverName`|production|string|Prover name, used to identy the prover when connecting to the Aggregator service|"UNSPECIFIED"|PROVER_NAME|

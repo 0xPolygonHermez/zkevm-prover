@@ -272,8 +272,6 @@ string generate(const ordered_json &pols, const string &type, const string &name
         code += "        _pAddress(pAddress),\n";
         code += "        _degree(degree) {};\n";
         code += "\n";
-        code += "    inline static uint64_t pilDegree (void) { return " + to_string(degree[i]) + "; }\n";
-        code += "    inline static uint64_t pilSize (void) { return " + to_string(localOffset[i]) + "; }\n";
         code += "    inline static uint64_t numPols (void) { return " + to_string(numberOfPols[i]) + "; }\n\n";
         code += "    inline void * address (void) { return _pAddress; }\n";
         code += "    inline uint64_t degree (void) { return _degree; }\n";
@@ -305,8 +303,6 @@ string generate(const ordered_json &pols, const string &type, const string &name
     code += "        _pAddress(pAddress),\n";
     code += "        _degree(degree) {}\n";
     code += "\n";
-    code += "    inline static uint64_t pilSize (void) { return " + to_string(offset) + "; }\n";
-    code += "    inline static uint64_t pilDegree (void) { return " + to_string(maxDegree) + "; }\n";
     code += "    inline static uint64_t numPols (void) { return " + to_string(numPols) + "; }\n\n";
     code += "    inline void * address (void) { return _pAddress; }\n";
     code += "    inline uint64_t degree (void) { return _degree; }\n";

@@ -18,7 +18,8 @@ public:
     static void evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinomial &x);
     static void queryPol(FRIProof &fproof, MerkleTreeGL **treeGL, uint64_t idx, uint64_t treeIdx);
     static void queryPol(FRIProof &fproof, MerkleTreeGL *treeGL, uint64_t idx, uint64_t treeIdx);
-    static void getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits);
+    static void getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits, uint64_t degree);
+    // static void getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits);
 };
 
 #endif

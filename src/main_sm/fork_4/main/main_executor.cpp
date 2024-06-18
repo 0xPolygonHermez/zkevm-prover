@@ -87,11 +87,18 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     pthread_mutex_init(&labelsMutex, NULL);
 
     /* Get a HashDBInterface interface, according to the configuration */
-    pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
-    if (pHashDB == NULL)
+    if (config.hashDBSingleton)
     {
-        zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
-        exitProcess();
+        pHashDBSingleton = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDBSingleton == NULL)
+        {
+            zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
+    }
+    else
+    {
+        pHashDBSingleton = NULL;
     }
     
     TimerStopAndLog(ROM_LOAD);
@@ -101,7 +108,11 @@ MainExecutor::~MainExecutor ()
 {
     TimerStart(MAIN_EXECUTOR_DESTRUCTOR_fork_4);
 
-    HashDBClientFactory::freeHashDBClient(pHashDB);
+    if (config.hashDBSingleton)
+    {
+        zkassertpermanent(pHashDBSingleton != NULL);
+        HashDBClientFactory::freeHashDBClient(pHashDBSingleton);
+    }
 
     TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_4);
 }
@@ -129,6 +140,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         return;
     }
 
+    // Get a pointer to the HashDB interface
+    HashDBInterface *pHashDB;
+    if (config.hashDBSingleton)
+    {
+        pHashDB = pHashDBSingleton;
+    }
+    else
+    {
+        pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDB == NULL)
+        {
+            zklog.error("MainExecutor::execute() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
+    }
+
     // Create context and store a finite field reference in it
     Context ctx(fr, config, fec, fnec, pols, rom, proverRequest, pHashDB);
 
@@ -138,6 +165,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
     remove("c.txt");
 #endif
+
+    // Clear cache if configured and we are using a local database
+    if (config.dbClearCache && (config.databaseURL == "local"))
+    {
+        pHashDB->clearCache();
+    }
 
     // Copy input database content into context database
     if (proverRequest.input.db.size() > 0)
@@ -1057,17 +1090,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
-                    }
 
-                    if (bProcessBatch)
-                    {
-                        zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value);
-                        if (zkResult != ZKR_SUCCESS)
+                        if (bProcessBatch)
                         {
-                            proverRequest.result = zkResult;
-                            logError(ctx, string("Failed calling eval_addReadWriteAddress() 1 result=") + zkresult2string(zkResult));
-                            pHashDB->cancelBatch(proverRequest.uuid);
-                            return;
+                            zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value, key);
+                            if (zkResult != ZKR_SUCCESS)
+                            {
+                                proverRequest.result = zkResult;
+                                logError(ctx, string("Failed calling eval_addReadWriteAddress() 1 result=") + zkresult2string(zkResult));
+                                pHashDB->cancelBatch(proverRequest.uuid);
+                                return;
+                            }
                         }
                     }
 
@@ -1290,7 +1323,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     if (bProcessBatch)
                     {
-                        zkResult = eval_addReadWriteAddress(ctx, value);
+                        zkResult = eval_addReadWriteAddress(ctx, value, ctx.lastSWrite.key);
                         if (zkResult != ZKR_SUCCESS)
                         {
                             proverRequest.result = zkResult;
@@ -2116,7 +2149,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (bProcessBatch)
             {
-                zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value);
+                zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value, key);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -2276,7 +2309,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (bProcessBatch)
                 {
-                    zkResult = eval_addReadWriteAddress(ctx, scalarD);
+                    zkResult = eval_addReadWriteAddress(ctx, scalarD, ctx.lastSWrite.key);
                     if (zkResult != ZKR_SUCCESS)
                     {
                         proverRequest.result = zkResult;

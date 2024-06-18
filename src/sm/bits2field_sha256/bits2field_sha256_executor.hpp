@@ -5,6 +5,7 @@
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/sha256_f/sha256_f_executor.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -38,7 +39,7 @@ public:
     Bits2FieldSha256Executor(Goldilocks &fr) :
         fr(fr),
         slotSize(31488),
-        N(Bits2FieldSha256CommitPols::pilDegree()),
+        N(getForkN(PROVER_FORK_ID)),
         bitsPerElement(7),
         nSlots((N-1)/slotSize) {};
 

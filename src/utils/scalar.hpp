@@ -19,9 +19,13 @@ extern mpz_class ScalarMask8;
 extern mpz_class ScalarMask16;
 extern mpz_class ScalarMask20;
 extern mpz_class ScalarMask32;
+extern mpz_class ScalarMask48;
 extern mpz_class ScalarMask64;
+extern mpz_class ScalarMask128;
 extern mpz_class ScalarMask160;
 extern mpz_class ScalarMask256;
+extern mpz_class ScalarMask384;
+extern mpz_class ScalarMask512;
 extern mpz_class ScalarTwoTo8;
 extern mpz_class ScalarTwoTo16;
 extern mpz_class ScalarTwoTo18;
@@ -35,8 +39,12 @@ extern mpz_class ScalarTwoTo256;
 extern mpz_class ScalarTwoTo257;
 extern mpz_class ScalarTwoTo258;
 extern mpz_class ScalarTwoTo259;
+extern mpz_class ScalarTwoTo384;
+extern mpz_class ScalarTwoTo388;
 extern mpz_class ScalarZero;
 extern mpz_class ScalarOne;
+extern mpz_class ScalarTwo;
+extern mpz_class ScalarFour;
 extern mpz_class ScalarGoldilocksPrime;
 extern mpz_class Scalar4xGoldilocksPrime;
 
@@ -322,6 +330,119 @@ inline void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Ele
     scalar2fea(fr, scalar, fea[0], fea[1], fea[2], fea[3], fea[4], fea[5], fea[6], fea[7]);
 }
 
+/**
+* Field element 48 bits array to Scalar
+* result = arr[0] + arr[1]*(2^48) + arr[2]*(2^96) + arr[3]*(2^144) + arr[4]*(2^192) + arr[5]*(2^240) + arr[6]*(2^288) + arr[7]*(2^336)
+*/
+inline bool fea384ToScalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3, const Goldilocks::Element &fe4, const Goldilocks::Element &fe5, const Goldilocks::Element &fe6, const Goldilocks::Element &fe7)
+{
+    // Add field element 7
+    uint64_t aux = fr.toU64(fe7);
+    if (aux >= 0x1000000000000)
+    {
+        zklog.error("fea384ToScalar() found element 7 has a too high value=" + fr.toString(fe7, 16));
+        return false;
+    }
+    scalar = aux;
+    scalar <<= 48;
+
+    // Add field element 6
+    aux = fr.toU64(fe6);
+    if (aux >= 0x1000000000000)
+    {
+        zklog.error("fea384ToScalar() found element 6 has a too high value=" + fr.toString(fe6, 16));
+        return false;
+    }
+    scalar += aux;
+    scalar <<= 48;
+
+    // Add field element 5
+    aux = fr.toU64(fe5);
+    if (aux >= 0x1000000000000)
+    {
+        zklog.error("fea384ToScalar() found element 5 has a too high value=" + fr.toString(fe5, 16));
+        return false;
+    }
+    scalar += aux;
+    scalar <<= 48;
+
+    // Add field element 4
+    aux = fr.toU64(fe4);
+    if (aux >= 0x1000000000000)
+    {
+        zklog.error("fea384ToScalar() found element 4 has a too high value=" + fr.toString(fe4, 16));
+        return false;
+    }
+    scalar += aux;
+    scalar <<= 48;
+
+    // Add field element 3
+    aux = fr.toU64(fe3);
+    if (aux >= 0x1000000000000)
+    {
+        zklog.error("fea384ToScalar() found element 3 has a too high value=" + fr.toString(fe3, 16));
+        return false;
+    }
+    scalar += aux;
+    scalar <<= 48;
+
+    // Add field element 2
+    aux = fr.toU64(fe2);
+    if (aux >= 0x1000000000000)
+    {
+        zklog.error("fea384ToScalar() found element 2 has a too high value=" + fr.toString(fe2, 16));
+        return false;
+    }
+    scalar += aux;
+    scalar <<= 48;
+
+    // Add field element 1
+    aux = fr.toU64(fe1);
+    if (aux >= 0x1000000000000)
+    {
+        zklog.error("fea384ToScalar() found element 1 has a too high value=" + fr.toString(fe1, 16));
+        return false;
+    }
+    scalar += aux;
+    scalar <<= 48;
+
+    // Add field element 0
+    aux = fr.toU64(fe0);
+    if (aux >= 0x1000000000000)
+    {
+        zklog.error("fea384ToScalar() found element 0 has a too high value=" + fr.toString(fe0, 16));
+        return false;
+    }
+    scalar += aux;
+
+    return true;
+}
+
+/**
+ * Converts a Scalar into an array of 8 elements encoded as Fields elements where each one represents 48 bits
+ * result = [Scalar[0:47], scalar[48:95], scalar[96:143], scalar[144:191], scalar[192:239], scalar[240:287], scalar[288:335], scalar[336:383]]
+ */
+inline void scalar2fea384 (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
+{
+    mpz_class aux;
+    aux = scalar & ScalarMask48;
+    fe0 = fr.fromU64(aux.get_ui());
+    aux = scalar>>48 & ScalarMask48;
+    fe1 = fr.fromU64(aux.get_ui());
+    aux = scalar>>96 & ScalarMask48;
+    fe2 = fr.fromU64(aux.get_ui());
+    aux = scalar>>144 & ScalarMask48;
+    fe3 = fr.fromU64(aux.get_ui());
+    aux = scalar>>192 & ScalarMask48;
+    fe4 = fr.fromU64(aux.get_ui());
+    aux = scalar>>240 & ScalarMask48;
+    fe5 = fr.fromU64(aux.get_ui());
+    aux = scalar>>288 & ScalarMask48;
+    fe6 = fr.fromU64(aux.get_ui());
+    aux = scalar>>336 & ScalarMask48;
+    fe7 = fr.fromU64(aux.get_ui());
+}
+
 /* Scalar to/from a Sparse Merkle Tree key conversion, interleaving bits */
 void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4]);
 
@@ -331,7 +452,8 @@ void string2fea (Goldilocks &fr, const string& os, vector<Goldilocks::Element> &
 void string2fea (Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3);
-string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7);
+// Fea2stringchain returns fea7:fea6:...:fea0 in hexa, useful for debugging
+string fea2stringchain (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7);
 
 /* Normalized strings */
 string Remove0xIfPresent      (const string &s);
@@ -453,6 +575,7 @@ void scalar2bytesBE(mpz_class s, uint8_t *pBytes); // pBytes must be a 32-bytes 
 
 /* Scalar to byte array string conversion */
 string scalar2ba(const mpz_class &s);
+string scalar2ba48(const mpz_class &s);
 
 inline void ba2scalar(mpz_class &s, const string &ba)
 {

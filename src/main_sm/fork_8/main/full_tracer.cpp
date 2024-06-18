@@ -452,17 +452,15 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
          full_trace.empty() )
     {
-        if (currentBlock.responses.size() > txIndex)
-        {
-            currentBlock.responses[txIndex].error = lastError;
-        }
-        else
+        if (currentBlock.responses.empty())
         {
             zklog.error("FullTracer::onError() got error=" + lastError + " with txIndex=" + to_string(txIndex) + " but currentBlock.responses.size()=" + to_string(currentBlock.responses.size()));
             exitProcess();
         }
+        currentBlock.responses[currentBlock.responses.size() - 1].error = lastError;
+        
 #ifdef LOG_FULL_TRACER_ON_ERROR
-        zklog.info("FullTracer::onError() 4 error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()));
+        zklog.info("FullTracer::onError() 4 error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " block=" + to_string(currentBlock.block_number) + " responses.size=" + to_string(currentBlock.responses.size()) + " txIndex=" + to_string(txIndex));
 #endif
 #ifdef LOG_TIME_STATISTICS
         tms.add("onError", TimeDiff(t));
@@ -514,7 +512,7 @@ zkresult FullTracer::onError(ContextC &ctxc, const string &error)
     lastErrorOpcode = numberOfOpcodesInThisTx;
 
     // Intrinsic error should be set at tx level (not opcode)
-    if ( (responseErrors.find(lastError) != responseErrors.end()) ||
+    /*if ( (responseErrors.find(lastError) != responseErrors.end()) ||
          (full_trace.size() == 0) )
     {
         if (currentBlock.responses.size() > txIndex)
@@ -540,7 +538,7 @@ zkresult FullTracer::onError(ContextC &ctxc, const string &error)
     }
 
     // Revert logs
-    /*uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+    uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     mpz_class auxScalar;
     zkr = getVarFromCtx(ctx, true, ctx.rom.lastCtxUsedOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
@@ -621,8 +619,20 @@ zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
         // Data length is stored in C
         mpz_class cScalar;
         getRegFromCtx(ctx, reg_C, cScalar);
+
+        // Data always should be 32 or less but limit to 32 for safety
         uint64_t size = zkmin(cScalar.get_ui(), 32);
-        string dataString = PrependZeros(data.get_str(16), size*2);
+
+        // Convert data to hex string and append zeros, left zeros are stored in logs, for example if data = 0x01c8 and size=32, data is 0x00000000000000000000000000000000000000000000000000000000000001c8
+        string dataString = data.get_str(16);
+        if ((size * 2) > dataString.size())
+        {
+            dataString = PrependZeros(dataString, size*2);
+        }
+
+        // Get only left size length from bytes, example if size=1 and data= 0xaa00000000000000000000000000000000000000000000000000000000000000, we get 0xaa
+        dataString = dataString.substr(0, size * 2);
+        
         it->second.data.push_back(dataString);
     }
 
@@ -642,8 +652,13 @@ zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
         return zkr;
     }
     it->second.block_number = auxScalar.get_ui();
-    it->second.tx_hash = currentBlock.responses[txIndex].tx_hash;
-    it->second.tx_hash_l2 = currentBlock.responses[txIndex].tx_hash_l2;
+    if (currentBlock.responses.empty())
+    {
+        zklog.error("FullTracer::onStoreLog() found currentBlock.responses empty");
+        exitProcess();
+    }
+    it->second.tx_hash = currentBlock.responses[currentBlock.responses.size() - 1].tx_hash;
+    it->second.tx_hash_l2 = currentBlock.responses[currentBlock.responses.size() - 1].tx_hash_l2;
     it->second.tx_index = txIndex;
     it->second.index = indexLog;
 
@@ -914,48 +929,31 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
     // Clear logs
     currentBlock.logs.clear();
 
-    // Order all logs (from all CTX) in order of index
     map<uint64_t, LogV2> auxLogs;
-    map<uint64_t, map<uint64_t, LogV2>>::iterator logIt;
-    map<uint64_t, LogV2>::const_iterator it;
-    for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
+
+    // Add blockhash to all logs on every tx, and add logs to block response
+    for (uint64_t r = 0; r < currentBlock.responses.size(); r++)
     {
-        for (it = logIt->second.begin(); it != logIt->second.end(); it++)
+        // Set block hash to all txs of block
+        currentBlock.responses[r].block_hash = currentBlock.block_hash;
+        currentBlock.responses[r].block_number = currentBlock.block_number;
+
+        for (uint64_t l = 0; l < currentBlock.responses[r].logs.size(); l++)
         {
-            auxLogs[it->second.index] = it->second;
+            currentBlock.responses[r].logs[l].block_hash = currentBlock.block_hash;
+
+            // Store all logs in auxLogs, in order of index
+            auxLogs[currentBlock.responses[r].logs[l].index] = currentBlock.responses[r].logs[l];
         }
     }
 
     // Append to response logs, overwriting log indexes to be sequential
-    //uint64_t logIndex = 0;
     map<uint64_t, LogV2>::iterator auxLogsIt;
     for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
     {
-        // Set log index
-        //auxLogsIt->second.index = logIndex;
-        //logIndex++;
-
-        // Set block hash
-        auxLogsIt->second.block_hash = currentBlock.block_hash;
-
         // Store block log
         currentBlock.logs.emplace_back(auxLogsIt->second);
-
-        // Store transaction log
-        if (auxLogsIt->second.tx_index >= currentBlock.responses.size())
-        {            
-            zklog.error("FullTracer::onFinishBlock() found log.tx_index=" + to_string(auxLogsIt->second.tx_index) + " >= currentBlock.responses.size=" + to_string(currentBlock.responses.size()));
-            exitProcess();
-        }
-        currentBlock.responses[auxLogsIt->second.tx_index].logs.emplace_back(auxLogsIt->second);
     }
-
-    // Set block hash to all txs of block
-    for (uint64_t tx=0; tx<currentBlock.responses.size(); tx++)
-    {
-        currentBlock.responses[tx].block_hash = currentBlock.block_hash;
-        currentBlock.responses[tx].block_number = currentBlock.block_number;
-    };
 
     // Append block to final trace
     finalTrace.block_responses.emplace_back(currentBlock);
@@ -1526,7 +1524,7 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     }
 
     zkresult zkr;
-    ResponseV2 &response = currentBlock.responses[txIndex];
+    ResponseV2 &response = currentBlock.responses[currentBlock.responses.size() - 1];
 
     // Set from address
     mpz_class fromScalar;
@@ -1675,11 +1673,11 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     currentBlock.responses[currentBlock.responses.size() - 1].has_gasprice_opcode = hasGaspriceOpcode;
     currentBlock.responses[currentBlock.responses.size() - 1].has_balance_opcode = hasBalanceOpcode;
 
-    // Increase transaction index
-    txIndex++;
-
     // Check TX status
-    if ((response.error.empty() && (response.status == 0)) || (!response.error.empty() && (response.status == 1)))
+    if ((responseErrors.find(response.error) == responseErrors.end()) &&
+        ( (response.error.empty() && (response.status == 0)) ||
+          (!response.error.empty() && (response.status == 1)) )
+       )
     {
         zklog.error("FullTracer::onFinishTx() invalid TX status-error error=" + response.error + " status=" + to_string(response.status));
         return ZKR_SM_MAIN_INVALID_TX_STATUS_ERROR;
@@ -1692,6 +1690,30 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Reset opcodes counters
     numberOfOpcodesInThisTx = 0;
     lastErrorOpcode = 0;
+
+    // Order all logs (from all CTX) in order of index
+    map<uint64_t, LogV2> auxLogs;
+    map<uint64_t, map<uint64_t, LogV2>>::iterator logIt;
+    map<uint64_t, LogV2>::const_iterator it;
+    for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
+    {
+        for (it = logIt->second.begin(); it != logIt->second.end(); it++)
+        {
+            auxLogs[it->second.index] = it->second;
+        }
+    }
+
+    // Append to response logs, overwriting log indexes to be sequential
+    map<uint64_t, LogV2>::iterator auxLogsIt;
+    uint64_t lastTx = currentBlock.responses.size() - 1;
+    currentBlock.responses[lastTx].logs.clear();
+    for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
+    {
+        currentBlock.responses[lastTx].logs.push_back(auxLogsIt->second);
+    }
+
+    // Reset logs
+    logs.clear();
 
     // Call finishTx()
     ctx.pHashDB->finishTx(ctx.proverRequest.uuid, response.state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
@@ -1713,6 +1735,7 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
     gettimeofday(&t, NULL);
 #endif
     //zkresult zkr;
+#if 0
     ResponseV2 &response = currentBlock.responses[txIndex];
 
     // Set from address
@@ -1724,7 +1747,6 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
     response.gas_used = ctxc.batch.tx[ctxc.tx].gas.get_ui();
     response.full_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
-    /*
 
     // Set return data always; get it from memory
     {
@@ -1769,7 +1791,7 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
 
     // Set gas left
     response.gas_left -= response.gas_used;
-*/
+
     // Set new State Root
     fea2scalar(ctxc.fr, auxScalar, ctxc.root);
     response.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
@@ -1855,6 +1877,9 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
 #ifdef LOG_FULL_TRACER
     //zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
 #endif
+
+#endif
+
 #ifdef LOG_TIME_STATISTICS
     tms.add("onFinishTx", TimeDiff(t));
 #endif
@@ -1963,6 +1988,14 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     // New batch number
     // getVarFromCtx(ctx, true, "newNumBatch", auxScalar);
     // finalTrace.new_batch_num = auxScalar.get_ui();
+
+    // Call fillInReadWriteAddresses
+    zkr = fillInReadWriteAddresses(ctx);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBatch() failed calling fillInReadWriteAddresses()");
+        return zkr;
+    }
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishBatch() new_state_root=" + finalTrace.new_state_root);
@@ -2176,8 +2209,13 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             return zkr;
         }
         it->second.block_number = auxScalar.get_ui();
-        it->second.tx_hash = currentBlock.responses[txIndex].tx_hash;
-        it->second.tx_hash_l2 = currentBlock.responses[txIndex].tx_hash_l2;
+        if (currentBlock.responses.empty())
+        {
+            zklog.error("FullTracer::onOpcode() found currentBlock.responses empty");
+            exitProcess();
+        }
+        it->second.tx_hash = currentBlock.responses[currentBlock.responses.size() - 1].tx_hash;
+        it->second.tx_hash_l2 = currentBlock.responses[currentBlock.responses.size() - 1].tx_hash_l2;
         it->second.tx_index = txIndex;
         it->second.index = indexLog;
     }
@@ -2720,6 +2758,9 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
 #define SMT_KEY_BALANCE 0
 #define SMT_KEY_NONCE 1
+#define SMT_KEY_SC_CODE 2
+#define SMT_KEY_SC_STORAGE 3
+#define SMT_KEY_SC_LENGTH 4
 
 /*
    Add an address when it is either read/write in the state-tree
@@ -2730,11 +2771,15 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
 zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &address3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
                                            const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
-                                           const mpz_class &value )
+                                           const Goldilocks::Element &storageKey0, const Goldilocks::Element &storageKey1, const Goldilocks::Element &storageKey2, const Goldilocks::Element &storageKey3, const Goldilocks::Element &storageKey4, const Goldilocks::Element &storageKey5, const Goldilocks::Element &storageKey6, const Goldilocks::Element &storageKey7,
+                                           const mpz_class &value,
+                                           const Goldilocks::Element (&key)[4] )
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+
+    zkassert(!fr.isZero(key[0]) || !fr.isZero(key[1]) || !fr.isZero(key[2]) || !fr.isZero(key[3]));
 
     // Get address
     mpz_class address;
@@ -2761,11 +2806,19 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
         {
             InfoReadWrite infoReadWrite;
             infoReadWrite.balance = value.get_str();
+            infoReadWrite.balanceKey[0]= key[0];
+            infoReadWrite.balanceKey[1]= key[1];
+            infoReadWrite.balanceKey[2]= key[2];
+            infoReadWrite.balanceKey[3]= key[3];
             read_write_addresses[addressHex] = infoReadWrite;
         }
         else
         {
             it->second.balance = value.get_str();
+            it->second.balanceKey[0]= key[0];
+            it->second.balanceKey[1]= key[1];
+            it->second.balanceKey[2]= key[2];
+            it->second.balanceKey[3]= key[3];
         }
     }
     else if (keyType == SMT_KEY_NONCE)
@@ -2775,17 +2828,119 @@ zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, 
         {
             InfoReadWrite infoReadWrite;
             infoReadWrite.nonce = value.get_str();
+            infoReadWrite.nonceKey[0]= key[0];
+            infoReadWrite.nonceKey[1]= key[1];
+            infoReadWrite.nonceKey[2]= key[2];
+            infoReadWrite.nonceKey[3]= key[3];
             read_write_addresses[addressHex] = infoReadWrite;
         }
         else
         {
             it->second.nonce = value.get_str();
+            it->second.nonceKey[0]= key[0];
+            it->second.nonceKey[1]= key[1];
+            it->second.nonceKey[2]= key[2];
+            it->second.nonceKey[3]= key[3];
         }
     }
+    else if (keyType == SMT_KEY_SC_CODE)
+    {
+        it = read_write_addresses.find(addressHex);
+        if (it == read_write_addresses.end())
+        {
+            InfoReadWrite infoReadWrite;
+            infoReadWrite.sc_code = value.get_str(16);
+            read_write_addresses[addressHex] = infoReadWrite;
+        }
+        else
+        {
+            it->second.sc_code = value.get_str(16);
+        }
+    }
+    else if (keyType == SMT_KEY_SC_STORAGE)
+    {
+        // Get storage key
+        mpz_class storageKey;
+        if (!fea2scalar(fr, storageKey, storageKey0, storageKey1, storageKey2, storageKey3, storageKey4, storageKey5, storageKey6, storageKey7))
+        {
+            zklog.error("FullTracer::addReadWriteAddress() failed calling fea2scalar(storageKey)");
+            return ZKR_SM_MAIN_FEA2SCALAR;
+        }
+
+        it = read_write_addresses.find(addressHex);
+        if (it == read_write_addresses.end())
+        {
+            InfoReadWrite infoReadWrite;
+            infoReadWrite.sc_storage[storageKey.get_str(16)] = value.get_str(16);
+            read_write_addresses[addressHex] = infoReadWrite;
+        }
+        else
+        {
+            it->second.sc_storage[storageKey.get_str(16)] = value.get_str(16);
+        }
+    }
+    else if (keyType == SMT_KEY_SC_LENGTH)
+    {
+        it = read_write_addresses.find(addressHex);
+        if (it == read_write_addresses.end())
+        {
+            InfoReadWrite infoReadWrite;
+            infoReadWrite.sc_length = value.get_str();
+            read_write_addresses[addressHex] = infoReadWrite;
+        }
+        else
+        {
+            it->second.sc_length = value.get_str();
+        }
+    }    
 
 #ifdef LOG_TIME_STATISTICS
     tms.add("addReadWriteAddress", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
+}
+
+zkresult FullTracer::fillInReadWriteAddresses (Context &ctx)
+{
+    zkresult zkr;
+
+    // Get new state root fea
+    Goldilocks::Element newStateRoot[4];
+    string2fea(fr, NormalizeToNFormat(finalTrace.new_state_root, 64), newStateRoot);
+
+    // For all entries in read_write_addresses
+    unordered_map<string, InfoReadWrite>::iterator it;
+    for (it = read_write_addresses.begin(); it != read_write_addresses.end(); it++)
+    {
+        // Re-read balance for this state root
+        if (!it->second.balance.empty())
+        {
+            zkassert(!fr.isZero(it->second.balanceKey[0]) || !fr.isZero(it->second.balanceKey[1]) || !fr.isZero(it->second.balanceKey[2]) || !fr.isZero(it->second.balanceKey[3]));
+            mpz_class balance;
+            zkr = ctx.pHashDB->get(ctx.proverRequest.uuid, newStateRoot, it->second.balanceKey, balance, NULL, NULL);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::fillInReadWriteAddresses() failed calling ctx.pHashDB->get(balance) result=" + zkresult2string(zkr));
+                return zkr;
+            }
+            it->second.balance = balance.get_str();
+        }
+
+        // Re-read nonce for this state root
+        if (!it->second.nonce.empty())
+        {
+            zkassert(!fr.isZero(it->second.nonceKey[0]) || !fr.isZero(it->second.nonceKey[1]) || !fr.isZero(it->second.nonceKey[2]) || !fr.isZero(it->second.nonceKey[3]));
+            mpz_class nonce;
+            zkr = ctx.pHashDB->get(ctx.proverRequest.uuid, newStateRoot, it->second.nonceKey, nonce, NULL, NULL);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::fillInReadWriteAddresses() failed calling ctx.pHashDB->get(nonce) result=" + zkresult2string(zkr));
+                return zkr;
+            }
+            it->second.nonce = nonce.get_str();
+        }
+    }
 
     return ZKR_SUCCESS;
 }

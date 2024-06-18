@@ -13,8 +13,11 @@ AggregatorClientMock::AggregatorClientMock (Goldilocks &fr, const Config &config
     fr(fr),
     config(config)
 {
+    grpc::ChannelArguments channelArguments;
+    channelArguments.SetMaxReceiveMessageSize((config.aggregatorClientMaxRecvMsgSize == 0) ? -1 : config.aggregatorClientMaxRecvMsgSize);
+
     // Create channel
-    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateChannel(config.aggregatorClientHost + ":" + to_string(config.aggregatorClientPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateCustomChannel(config.aggregatorClientHost + ":" + to_string(config.aggregatorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new aggregator::v1::AggregatorService::Stub(channel);
@@ -89,6 +92,24 @@ bool AggregatorClientMock::GenBatchProof (const aggregator::v1::GenBatchProofReq
 
 #ifdef LOG_SERVICE
     cout << "AggregatorClientMock::GenBatchProof() returns: " << genBatchProofResponse.DebugString() << endl;
+#endif
+    return true;
+}
+
+bool AggregatorClientMock::GenStatelessBatchProof (const aggregator::v1::GenStatelessBatchProofRequest &genStatelessBatchProofRequest, aggregator::v1::GenBatchProofResponse &genBatchProofResponse)
+{
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenStatelessBatchProof() called with request: " << genStatelessBatchProofRequest.DebugString() << endl;
+#endif
+    requestType = prt_genBatchProof;
+    // Build the response as Ok, returning the UUID assigned by the prover to this request
+    genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
+    lastAggregatorUUID = getUUID();
+    genBatchProofResponse.set_id(lastAggregatorUUID);
+    gettimeofday(&lastAggregatorGenProof,NULL);
+
+#ifdef LOG_SERVICE
+    cout << "AggregatorClientMock::GenStatelessBatchProof() returns: " << genBatchProofResponse.DebugString() << endl;
 #endif
     return true;
 }
@@ -298,6 +319,20 @@ void* aggregatorClientMockThread(void* arg)
 
                     // Call GenBatchProof
                     pAggregatorClientMock->GenBatchProof(aggregatorMessage.gen_batch_proof_request(), *pGenBatchProofResponse);
+
+                    // Set the gen batch proof response
+                    proverMessage.set_allocated_gen_batch_proof_response(pGenBatchProofResponse);
+                    break;
+                }
+
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenStatelessBatchProofRequest:
+                {
+                    // Allocate a new gen batch proof response
+                    aggregator::v1::GenBatchProofResponse * pGenBatchProofResponse = new aggregator::v1::GenBatchProofResponse();
+                    zkassert(pGenBatchProofResponse != NULL);
+
+                    // Call GenBatchProof
+                    pAggregatorClientMock->GenStatelessBatchProof(aggregatorMessage.gen_stateless_batch_proof_request(), *pGenBatchProofResponse);
 
                     // Set the gen batch proof response
                     proverMessage.set_allocated_gen_batch_proof_response(pGenBatchProofResponse);

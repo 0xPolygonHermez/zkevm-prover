@@ -4,22 +4,21 @@
 #include "ntt_goldilocks.hpp"
 #include "fr.hpp"
 #include "poseidon_opt.hpp"
-#include "starkRecursiveFSteps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
 #define NUM_CHALLENGES 8
 
 StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config(config),
-                                                                          starkInfo(config, config.recursivefStarkInfo),
-                                                                          zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
-                                                                             config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
+                                                                          starkInfo(config.recursivefStarkInfo),
                                                                           N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                           NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                                           ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                           nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                                           x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
                                                                           x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                                                          zi(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                                                          x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0),
                                                                           pAddress(_pAddress)
 {
     // Avoid unnecessary initialization if we are not going to generate any proof
@@ -45,41 +44,55 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     }
     else
     {
-        pConstPolsAddress = copyFile(config.recursivefConstPols, constPolsSize);
+        pConstPolsAddress = loadFileParallel(config.recursivefConstPols, constPolsSize);
         zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + config.recursivefConstPols);
     }
     pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree, starkInfo.nConstants);
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
 
-    // Map constants tree file to memory
 
-    TimerStart(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
-    pConstTreeAddress = NULL;
-    if (config.recursivefConstantsTree.size() == 0)
-    {
-        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree");
-        exitProcess();
-    }
+    if(!LOAD_CONST_FILES) {
+        TimerStart(CALCULATE_CONST_TREE_TO_MEMORY);
+        pConstPolsAddress2ns = (void *)malloc(NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element));
+        TimerStart(EXTEND_CONST_POLS);
+        ntt.extendPol((Goldilocks::Element *)pConstPolsAddress2ns, (Goldilocks::Element *)pConstPolsAddress, NExtended, N, starkInfo.nConstants);
+        TimerStopAndLog(EXTEND_CONST_POLS);
+        TimerStart(MERKELIZE_CONST_TREE);
+        treesBN128[4] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.nConstants, (Goldilocks::Element *)pConstPolsAddress2ns);
+        treesBN128[4]->merkelize();
+        TimerStopAndLog(MERKELIZE_CONST_TREE);
+        RawFr::Element rootC;
+        treesBN128[4]->getRoot(&rootC);
+        zklog.info("MerkleTree root C: [ " + RawFr::field.toString(rootC, 10) + " ]");
+        TimerStopAndLog(CALCULATE_CONST_TREE_TO_MEMORY);
+    } else {
+        TimerStart(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
+        // Map constants tree file to memory
+        pConstTreeAddress = NULL;
+        if (config.recursivefConstantsTree.size() == 0)
+        {
+            zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree");
+            exitProcess();
+        }
 
-    if (config.mapConstantsTreeFile)
-    {
-        pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant tree file " + config.recursivefConstantsTree);
+        if (config.mapConstantsTreeFile)
+        {
+            pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity), false);
+            zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant tree file " + config.recursivefConstantsTree);
+        }
+        else
+        {
+            pConstTreeAddress = loadFileParallel(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
+            zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity)) + " bytes from constant file " + config.recursivefConstantsTree);
+        }
+        pConstPolsAddress2ns = (uint8_t *)pConstTreeAddress + 2 * sizeof(uint64_t);
+        treesBN128[4] = new MerkleTreeBN128(starkInfo.merkleTreeArity, pConstTreeAddress);
+        TimerStopAndLog(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
     }
-    else
-    {
-        pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant file " + config.recursivefConstantsTree);
-    }
-    TimerStopAndLog(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
+    
 
-    // Initialize and allocate ConstantPols2ns
-    TimerStart(LOAD_RECURSIVE_F_CONST_POLS_2NS_TO_MEMORY);
-    pConstPolsAddress2ns = (void *)calloc(starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt), sizeof(Goldilocks::Element));
+    // Allocate ConstantPols2ns
     pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, (1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants);
-    std::memcpy(pConstPolsAddress2ns, (uint8_t *)pConstTreeAddress + 2 * sizeof(Goldilocks::Element), starkInfo.nConstants * (1 << starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element));
-
-    TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_2NS_TO_MEMORY);
 
     // TODO x_n and x_2ns could be precomputed
     TimerStart(COMPUTE_X_N_AND_X_2_NS);
@@ -96,6 +109,19 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
     }
     TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
+    
+    *x[0] = Goldilocks::shift();
+
+    uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
+
+    for (uint64_t k = 1; k < (N << extendBits); k++)
+    {
+        Polinomial::mulElement(x, k, x, k - 1, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
+    }
+
+    TimerStart(COMPUTE_ZHINV);    
+    Polinomial::buildZHInv(zi, starkInfo.starkStruct.nBits, starkInfo.starkStruct.nBitsExt);
+    TimerStopAndLog(COMPUTE_ZHINV);
 
     mem = (Goldilocks::Element *)_pAddress;
     pBuffer = (Goldilocks::Element *)malloc(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION * sizeof(Goldilocks::Element));
@@ -109,6 +135,19 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
     p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
+
+    TimerStart(MERKLE_TREE_ALLOCATION);
+    treesBN128[0] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
+    treesBN128[1] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
+    treesBN128[2] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
+    treesBN128[3] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
+    TimerStopAndLog(MERKLE_TREE_ALLOCATION);
+
+    TimerStart(CHELPERS_ALLOCATION);
+    string recursivefChelpers = (USE_GENERIC_PARSER) ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
+    cHelpersBinFile = BinFileUtils::openExisting(recursivefChelpers, "chps", 1);
+    chelpers.loadCHelpers(cHelpersBinFile.get());
+    TimerStopAndLog(CHELPERS_ALLOCATION);
 }
 
 StarkRecursiveF::~StarkRecursiveF()
@@ -118,40 +157,44 @@ StarkRecursiveF::~StarkRecursiveF()
 
     delete pConstPols;
     delete pConstPols2ns;
-    free(pConstPolsAddress2ns);
 
-    if (config.mapConstPolsFile)
-    {
+    if (config.mapConstPolsFile){
         unmapFile(pConstPolsAddress, constPolsSize);
-    }
-    else
-    {
+    } else {
         free(pConstPolsAddress);
     }
 
-    if (config.mapConstantsTreeFile)
-    {
-        unmapFile(pConstTreeAddress, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
-    }
-    else
-    {
-        free(pConstTreeAddress);
+    if(LOAD_CONST_FILES) {
+        if (config.mapConstantsTreeFile) {
+            unmapFile(pConstTreeAddress, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants, starkInfo.merkleTreeArity));
+        } else {
+            free(pConstTreeAddress);
+        }
+    } else {
+        free(pConstPolsAddress2ns);
     }
 
     free(pBuffer);
+
+    for (uint i = 0; i < 5; i++)
+    {
+        delete treesBN128[i];
+    }
+
+    BinFileUtils::BinFile *pCHelpers = cHelpersBinFile.release();
+    assert(cHelpersBinFile.get() == nullptr);
+    assert(cHelpersBinFile == nullptr);
+    delete pCHelpers;
 }
 
-void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
+void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8], CHelpersSteps *cHelpersSteps)
 {
 
-    StarkRecursiveFSteps recurisveFsteps;
-    StarkRecursiveFSteps *steps = &recurisveFsteps;
     // Initialize vars
     uint64_t numCommited = starkInfo.nCm1;
     TranscriptBN128 transcript;
-    Polinomial evals(N, FIELD_EXTENSION);
-    Polinomial xDivXSubXi(NExtended, FIELD_EXTENSION);
-    Polinomial xDivXSubWXi(NExtended, FIELD_EXTENSION);
+    Polinomial evals(starkInfo.evMap.size(), FIELD_EXTENSION);
+    Polinomial xDivXSubXi(2 * NExtended, FIELD_EXTENSION);
     Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
 
     CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n], numCommited);
@@ -161,13 +204,6 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     RawFr::Element root1;
     RawFr::Element root2;
     RawFr::Element root3;
-
-    MerkleTreeBN128 *treesBN128[STARK_RECURSIVE_F_NUM_TREES];
-    treesBN128[0] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-    treesBN128[1] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
-    treesBN128[2] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
-    treesBN128[3] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
-    treesBN128[4] = new MerkleTreeBN128(pConstTreeAddress);
 
     treesBN128[4]->getRoot(&rootC);
 
@@ -183,7 +219,6 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
         zi : zi,
         evals : evals,
         xDivXSubXi : xDivXSubXi,
-        xDivXSubWXi : xDivXSubWXi,
         publicInputs : publicInputs,
         q_2ns : p_q_2ns,
         f_2ns : p_f_2ns
@@ -213,12 +248,7 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     transcript.getField((uint64_t *)challenges[0]); // u
     transcript.getField((uint64_t *)challenges[1]); // defVal
     TimerStart(STARK_RECURSIVE_F_STEP_2_CALCULATE_EXPS);
-
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
-    {
-        steps->step2prev_first(params, i);
-    }
+    cHelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step2"]);
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_2_CALCULATE_EXPS);
 
     TimerStart(STARK_RECURSIVE_F_STEP_2_CALCULATEH1H2);
@@ -254,11 +284,7 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     transcript.getField((uint64_t *)challenges[3]); // betta
 
     TimerStart(STARK_RECURSIVE_F_STEP_3_PREV_CALCULATE_EXPS);
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
-    {
-        steps->step3prev_first(params, i);
-    }
+    cHelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step3"]);
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_PREV_CALCULATE_EXPS);
     TimerStart(STARK_RECURSIVE_F_STEP_3_CALCULATE_Z);
 
@@ -287,14 +313,6 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     }
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_Z);
 
-    TimerStart(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
-    #pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
-    {
-        steps->step3_first(params, i);
-    }
-    TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
-
     TimerStart(STARK_RECURSIVE_F_STEP_3_LDE_AND_MERKLETREE);
 
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
@@ -320,11 +338,7 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     TimerStart(STARK_RECURSIVE_F_STEP_4_CALCULATE_EXPS_2NS);
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
 
-#pragma omp parallel for
-    for (uint64_t i = 0; i < NExtended; i++)
-    {
-        steps->step42ns_first(params, i);
-    }
+    cHelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step4"]);
 
     Polinomial qq1 = Polinomial(NExtended, starkInfo.qDim, "qq1");
     Polinomial qq2 = Polinomial(NExtended * starkInfo.qDeg, starkInfo.qDim, "qq2");
@@ -596,42 +610,33 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     transcript.getField((uint64_t *)challenges[5]); // v1
     transcript.getField((uint64_t *)challenges[6]); // v2
 
-    // Calculate xDivXSubXi, xDivXSubWXi
+    // Calculate xDivXSubXi
+    TimerStart(STARK_STEP_5_XDIVXSUB);
     Polinomial xi(1, FIELD_EXTENSION);
     Polinomial wxi(1, FIELD_EXTENSION);
 
     Polinomial::copyElement(xi, 0, challenges, 7);
     Polinomial::mulElement(wxi, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
 
-    Polinomial x(1, FIELD_EXTENSION);
-    *x[0] = Goldilocks::shift();
-
+#pragma omp parallel for
     for (uint64_t k = 0; k < (N << extendBits); k++)
     {
-        Polinomial::subElement(xDivXSubXi, k, x, 0, xi, 0);
-        Polinomial::subElement(xDivXSubWXi, k, x, 0, wxi, 0);
-        Polinomial::mulElement(x, 0, x, 0, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
+        Polinomial::subElement(xDivXSubXi, k, x, k, xi, 0);
+        Polinomial::subElement(xDivXSubXi, k + NExtended, x, k, wxi, 0);
     }
 
     Polinomial::batchInverseParallel(xDivXSubXi, xDivXSubXi);
-    Polinomial::batchInverseParallel(xDivXSubWXi, xDivXSubWXi);
-
-    Polinomial x1(1, FIELD_EXTENSION);
-    *x1[0] = Goldilocks::shift();
-
-    for (uint64_t k = 0; k < (N << extendBits); k++)
-    {
-        Polinomial::mulElement(xDivXSubXi, k, xDivXSubXi, k, x1, 0);
-        Polinomial::mulElement(xDivXSubWXi, k, xDivXSubWXi, k, x1, 0);
-        Polinomial::mulElement(x1, 0, x1, 0, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
-    }
-    TimerStart(STARK_RECURSIVE_F_STEP_5_CALCULATE_EXPS);
 
 #pragma omp parallel for
-    for (uint64_t i = 0; i < NExtended; i++)
+    for (uint64_t k = 0; k < (N << extendBits); k++)
     {
-        steps->step52ns_first(params, i);
+        Polinomial::mulElement(xDivXSubXi, k, xDivXSubXi, k, x, k);
+        Polinomial::mulElement(xDivXSubXi, k + NExtended, xDivXSubXi, k + NExtended, x, k);
     }
+    TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
+    TimerStart(STARK_RECURSIVE_F_STEP_5_CALCULATE_EXPS);
+
+    cHelpersSteps->calculateExpressions(starkInfo, params, chelpers.cHelpersArgs, chelpers.stagesInfo["step5"]);
 
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_5_CALCULATE_EXPS);
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_5);
@@ -646,9 +651,5 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     std::memcpy(&proof.proofs.root2[0], &root1, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root3[0], &root2, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root4[0], &root3, sizeof(RawFr::Element));
-    for (uint i = 0; i < 5; i++)
-    {
-        delete treesBN128[i];
-    }
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_FRI);
 }

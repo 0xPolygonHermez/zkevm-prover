@@ -168,12 +168,6 @@ void Config::load(json &config)
     ParseBool(config, "saveProofToFile", "SAVE_PROOF_TO_FILE", saveProofToFile, false);
     ParseBool(config, "saveFilesInSubfolders", "SAVE_FILES_IN_SUBFOLDERS", saveFilesInSubfolders, false);
 
-    // Load DB to mem cache TODO: Discontinue this functionality
-    //ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
-    loadDBToMemCache = false;
-    ParseBool(config, "loadDBToMemCacheInParallel", "LOAD_DB_TO_MEM_CACHE_IN_PARALLEL", loadDBToMemCacheInParallel, false);
-    ParseU64(config, "loadDBToMemTimeout", "LOAD_DB_TO_MEM_TIMEOUT", loadDBToMemTimeout, 30*1000*1000); // Default = 30 seconds
-
     // MT cache
     ParseS64(config, "dbMTCacheSize", "DB_MT_CACHE_SIZE", dbMTCacheSize, 8*1024); // Default = 8 GB
 
@@ -206,15 +200,18 @@ void Config::load(json &config)
     ParseString(config, "hashDBFileName", "HASHDB_FILE_NAME", hashDBFileName, "");
     ParseU64(config, "hashDBFileSize", "HASHDB_FILE_SIZE", hashDBFileSize, 128);
     ParseString(config, "hashDBFolder", "HASHDB_FOLDER", hashDBFolder, "hashdb");
+    ParseBool(config, "hashDBSingleton", "HASHDB_SINGLETON", hashDBSingleton, true);
     ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
     ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
     ParseString(config, "aggregatorClientHost", "AGGREGATOR_CLIENT_HOST", aggregatorClientHost, "127.0.0.1");
     ParseU64(config, "aggregatorClientMockTimeout", "AGGREGATOR_CLIENT_MOCK_TIMEOUT", aggregatorClientMockTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientWatchdogTimeout", "AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT", aggregatorClientWatchdogTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientMaxStreams", "AGGREGATOR_CLIENT_MAX_STREAMS", aggregatorClientMaxStreams, 0);
+    ParseU64(config, "aggregatorClientMaxRecvMsgSize", "AGGREGATOR_CLIENT_MAX_RECV_MSG_SIZE", aggregatorClientMaxRecvMsgSize, 1024*1024*1024);
 
     // Logs
     ParseBool(config, "executorROMLineTraces", "EXECUTOR_ROM_LINE_TRACES", executorROMLineTraces, false);
+    ParseBool(config, "executorROMInstructions", "EXECUTOR_ROM_INSTRUCTIONS", executorROMInstructions, false);
     ParseBool(config, "executorTimeStatistics", "EXECUTOR_TIME_STATISTICS", executorTimeStatistics, false);
     ParseBool(config, "opcodeTracer", "OPCODE_TRACER", opcodeTracer, false);
     ParseBool(config, "logRemoteDbReads", "LOG_REMOTE_DB_READS", logRemoteDbReads, false);
@@ -223,7 +220,7 @@ void Config::load(json &config)
     ParseU64(config, "logExecutorServerInputGasThreshold", "LOG_EXECUTOR_SERVER_INPUT_GAS_THRESHOLD", logExecutorServerInputGasThreshold, 0);
     ParseBool(config, "logExecutorServerResponses", "LOG_EXECUTOR_SERVER_RESPONSES", logExecutorServerResponses, false);
     ParseBool(config, "logExecutorServerTxs", "LOG_EXECUTOR_SERVER_TXS", logExecutorServerTxs, true);
-    ParseBool(config, "dontLoadRomOffsets", "DONT_LOAD_ROM_OFFSETS", dontLoadRomOffsets, false);
+    ParseBool(config, "loadDiagnosticRom", "LOAD_DIAGNOSTIC_ROM", loadDiagnosticRom, false);
 
     // Files and paths
     ParseString(config, "inputFile", "INPUT_FILE", inputFile, "testvectors/batchProof/input_executor_0.json");
@@ -240,6 +237,16 @@ void Config::load(json &config)
     ParseString(config, "zkevmStarkInfo", "ZKEVM_STARK_INFO", zkevmStarkInfo, configPath + "/zkevm/zkevm.starkinfo.json");
     ParseString(config, "zkevmVerifier", "ZKEVM_VERIFIER", zkevmVerifier, configPath + "/zkevm/zkevm.verifier.dat");
     ParseString(config, "zkevmVerkey", "ZKEVM_VERKEY", zkevmVerkey, configPath + "/zkevm/zkevm.verkey.json");
+    ParseString(config, "zkevmCHelpers", "ZKEVM_CHELPERS", zkevmCHelpers, configPath + "/zkevm/zkevm.chelpers.bin");
+    ParseString(config, "c12aCHelpers", "C12A_CHELPERS", c12aCHelpers, configPath + "/c12a/c12a.chelpers.bin");
+    ParseString(config, "recursive1CHelpers", "RECURSIVE1_CHELPERS", recursive1CHelpers, configPath + "/recursive1/recursive1.chelpers.bin");
+    ParseString(config, "recursive2CHelpers", "RECURSIVE2_CHELPERS", recursive2CHelpers, configPath + "/recursive2/recursive2.chelpers.bin");
+    ParseString(config, "recursivefCHelpers", "RECURSIVEF_CHELPERS", recursivefCHelpers, configPath + "/recursivef/recursivef.chelpers.bin");
+    ParseString(config, "zkevmGenericCHelpers", "ZKEVM_GENERIC_CHELPERS", zkevmGenericCHelpers, configPath + "/zkevm/zkevm.chelpers_generic.bin");
+    ParseString(config, "c12aGenericCHelpers", "C12A_GENERIC_CHELPERS", c12aGenericCHelpers, configPath + "/c12a/c12a.chelpers_generic.bin");
+    ParseString(config, "recursive1GenericCHelpers", "RECURSIVE1_GENERIC_CHELPERS", recursive1GenericCHelpers, configPath + "/recursive1/recursive1.chelpers_generic.bin");
+    ParseString(config, "recursive2GenericCHelpers", "RECURSIVE2_GENERIC_CHELPERS", recursive2GenericCHelpers, configPath + "/recursive2/recursive2.chelpers_generic.bin");
+    ParseString(config, "recursivefGenericCHelpers", "RECURSIVEF_GENERIC_CHELPERS", recursivefGenericCHelpers, configPath + "/recursivef/recursivef.chelpers_generic.bin");
     ParseString(config, "c12aConstPols", "C12A_CONST_POLS", c12aConstPols, configPath + "/c12a/c12a.const");
     ParseString(config, "c12aConstantsTree", "C12A_CONSTANTS_TREE", c12aConstantsTree, configPath + "/c12a/c12a.consttree");
     ParseString(config, "c12aExec", "C12A_EXEC", c12aExec, configPath + "/c12a/c12a.exec");
@@ -300,7 +307,8 @@ void Config::load(json &config)
     ParseU64(config, "cleanerPollingPeriod", "CLEANER_POLLING_PERIOD", cleanerPollingPeriod, 600);
     ParseU64(config, "requestsPersistence", "REQUESTS_PERSISTENCE", requestsPersistence, 3600);
     ParseU64(config, "maxExecutorThreads", "MAX_EXECUTOR_THREADS", maxExecutorThreads, 20);
-    ParseU64(config, "maxProverThreads", "MAX_PROVER_THREADS", maxProverThreads, 8);
+    ParseU64(config, "maxExecutorReceiveMessageSize", "MAX_EXECUTOR_RECEIVE_MESSAGE_SIZE", maxExecutorReceiveMessageSize, 1*1024*1024*1024);
+    ParseU64(config, "maxExecutorSendMessageSize", "MAX_EXECUTOR_SEND_MESSAGE_SIZE", maxExecutorSendMessageSize, 0);
     ParseU64(config, "maxHashDBThreads", "MAX_HASHDB_THREADS", maxHashDBThreads, 8);
 
     // Prover name, name of this instance as per configuration
@@ -395,6 +403,8 @@ void Config::print(void)
 
     if (executorROMLineTraces)
         zklog.info("    executorROMLineTraces=true");
+    if (executorROMInstructions)
+        zklog.info("    executorROMInstructions=true");
 
     zklog.info("    executorTimeStatistics=" + to_string(executorTimeStatistics));
 
@@ -414,10 +424,7 @@ void Config::print(void)
         zklog.info("    saveFilesInSubfolders=true");
     if (saveResponseToFile)
         zklog.info("    saveResponseToFile=true");
-    zklog.info("    loadDBToMemCache=" + to_string(loadDBToMemCache));
-    if (loadDBToMemCacheInParallel)
-        zklog.info("    loadDBToMemCacheInParallel=true");
-    if (opcodeTracer)
+   if (opcodeTracer)
         zklog.info("    opcodeTracer=true");
     if (logRemoteDbReads)
         zklog.info("    logRemoteDbReads=true");
@@ -431,8 +438,8 @@ void Config::print(void)
         zklog.info("    logExecutorServerResponses=true");
     if (logExecutorServerTxs)
         zklog.info("    logExecutorServerTxs=true");
-    if (dontLoadRomOffsets)
-        zklog.info("    dontLoadRomOffsets=true");
+    if (loadDiagnosticRom)
+        zklog.info("    loadDiagnosticRom=true");
 
     zklog.info("    executorServerPort=" + to_string(executorServerPort));
     zklog.info("    executorClientPort=" + to_string(executorClientPort));
@@ -449,12 +456,14 @@ void Config::print(void)
     zklog.info("    hashDBFileName=" + hashDBFileName);
     zklog.info("    hashDBFileSize=" + to_string(hashDBFileSize));
     zklog.info("    hastDBFolder=" + hashDBFolder);
+    zklog.info("    hashDBSingleton=" + to_string(hashDBSingleton));
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
     zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
     zklog.info("    aggregatorClientMockTimeout=" + to_string(aggregatorClientMockTimeout));
     zklog.info("    aggregatorClientWatchdogTimeout=" + to_string(aggregatorClientWatchdogTimeout));
     zklog.info("    aggregatorClientMaxStreams=" + to_string(aggregatorClientMaxStreams));
+    zklog.info("    aggregatorClientMaxRecvMsgSize=" + to_string(aggregatorClientMaxRecvMsgSize));
 
     zklog.info("    inputFile=" + inputFile);
     zklog.info("    inputFile2=" + inputFile2);
@@ -481,6 +490,16 @@ void Config::print(void)
     zklog.info("    recursivefVerkey=" + recursivefVerkey);
     zklog.info("    finalVerifier=" + finalVerifier);
     zklog.info("    finalStarkZkey=" + finalStarkZkey);
+    zklog.info("    zkevmCHelpers=" + zkevmCHelpers);
+    zklog.info("    c12aCHelpers=" + c12aCHelpers);
+    zklog.info("    recursive1CHelpers=" + recursive1CHelpers);
+    zklog.info("    recursive2CHelpers=" + recursive2CHelpers);
+    zklog.info("    recursivefCHelpers=" + recursivefCHelpers);
+    zklog.info("    zkevmGenericCHelpers=" + zkevmGenericCHelpers);
+    zklog.info("    c12aGenericCHelpers=" + c12aGenericCHelpers);
+    zklog.info("    recursive1GenericCHelpers=" + recursive1GenericCHelpers);
+    zklog.info("    recursive2GenericCHelpers=" + recursive2GenericCHelpers);
+    zklog.info("    recursivefGenericCHelpers=" + recursivefGenericCHelpers);
     zklog.info("    publicsOutput=" + publicsOutput);
     zklog.info("    proofFile=" + proofFile);
     zklog.info("    keccakScriptFile=" + keccakScriptFile);
@@ -509,7 +528,8 @@ void Config::print(void)
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));
-    zklog.info("    maxProverThreads=" + to_string(maxProverThreads));
+    zklog.info("    maxExecutorReceiveMessageSize=" + to_string(maxExecutorReceiveMessageSize));
+    zklog.info("    maxExecutorSendMessageSize=" + to_string(maxExecutorSendMessageSize));
     zklog.info("    maxHashDBThreads=" + to_string(maxHashDBThreads));
     zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
     zklog.info("    useAssociativeCache=" + to_string(useAssociativeCache));
@@ -520,7 +540,6 @@ void Config::print(void)
     zklog.info("    log2DbVersionsAssociativeCacheSize=" + to_string(log2DbVersionsAssociativeCacheSize));
     zklog.info("    log2DbVersionsAssociativeCacheIndexesSize=" + to_string(log2DbVersionsAssociativeCacheIndexesSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
-    zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
     zklog.info("    ECRecoverPrecalc=" + to_string(ECRecoverPrecalc));
     zklog.info("    ECRecoverPrecalcNThreads=" + to_string(ECRecoverPrecalcNThreads));
@@ -558,27 +577,27 @@ bool Config::check (void)
             bError = true;
         }
 
-        if (!fileExists(zkevmConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(zkevmConstantsTree))
         {
             zklog.error("required file config.zkevmConstantsTree=" + zkevmConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(c12aConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(c12aConstantsTree))
         {
             zklog.error("required file config.c12aConstantsTree=" + c12aConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive1ConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(recursive1ConstantsTree))
         {
             zklog.error("required file config.recursive1ConstantsTree=" + recursive1ConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursive2ConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(recursive2ConstantsTree))
         {
             zklog.error("required file config.recursive2ConstantsTree=" + recursive2ConstantsTree + " does not exist");
             bError = true;
         }
-        if (!fileExists(recursivefConstantsTree))
+        if (LOAD_CONST_FILES && !fileExists(recursivefConstantsTree))
         {
             zklog.error("required file config.recursivefConstantsTree=" + recursivefConstantsTree + " does not exist");
             bError = true;
@@ -668,6 +687,56 @@ bool Config::check (void)
             zklog.error("required file config.recursivefStarkInfo=" + recursivefStarkInfo + " does not exist");
             bError = true;
         }
+        if (!fileExists(zkevmCHelpers))
+        {
+            zklog.error("required file config.zkevmCHelpers=" + zkevmCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(c12aCHelpers))
+        {
+            zklog.error("required file config.c12aCHelpers=" + c12aCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive1CHelpers))
+        {
+            zklog.error("required file config.recursive1CHelpers=" + recursive1CHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2CHelpers))
+        {
+            zklog.error("required file config.recursive2CHelpers=" + recursive2CHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursivefCHelpers))
+        {
+            zklog.error("required file config.recursivefCHelpers=" + recursivefCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(zkevmGenericCHelpers))
+        {
+            zklog.error("required file config.zkevmGenericCHelpers=" + zkevmGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(c12aGenericCHelpers))
+        {
+            zklog.error("required file config.c12aGenericCHelpers=" + c12aGenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive1GenericCHelpers))
+        {
+            zklog.error("required file config.recursive1GenericCHelpers=" + recursive1GenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2GenericCHelpers))
+        {
+            zklog.error("required file config.recursive2GenericCHelpers=" + recursive2GenericCHelpers + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursivefGenericCHelpers))
+        {
+            zklog.error("required file config.recursivefGenericCHelpers=" + recursivefGenericCHelpers + " does not exist");
+            bError = true;
+        }
         if (!fileExists(c12aExec))
         {
             zklog.error("required file config.c12aExec=" + c12aExec + " does not exist");
@@ -693,6 +762,21 @@ bool Config::check (void)
     if (hashDB64 && !stateManager)
     {
         zklog.error("hashDB64=true but stateManager=false");
+        bError = true;
+    }
+
+    if (loadDiagnosticRom)
+    {
+        inputFile = "testvectors/diagnostic/input.json";
+        useMainExecGenerated = false;
+        runExecutorServer = false;
+        runExecutorClient = false;
+        runFileProcessBatch = true;
+    }
+
+    if (!hashDBSingleton && (databaseURL != "local"))
+    {
+        zklog.error("hashDBSingleton=false but databaseURL!=local");
         bError = true;
     }
 

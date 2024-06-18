@@ -14,6 +14,9 @@ using namespace std;
 
 #define PRE_CLIMB_UP_LIMIT 0x7FFFFFFF80000000ULL
 
+//#define LOG_STORAGE_EXECUTOR
+//#define LOG_STORAGE_EXECUTOR_ROM_LINE
+
 void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<Goldilocks::Element, 17>> &poseidonRequired, vector<ClimbKeyAction> &climbKeyRequired)
 {
     uint64_t l=0; // rom line number, so current line is rom.line[l]
@@ -781,7 +784,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
 #ifdef LOG_STORAGE_EXECUTOR
             {
-                string s = "StorageExecutor iHash iHashType=" + to_string(rom.line[l].iHashType) + " hash=" + fea2string(fr, op) + " value=";
+                string s = "StorageExecutor iHash hashType=" + to_string(rom.line[l].hashType) + " hash=" + fea2string(fr, op) + " value=";
                 for (uint64_t i=0; i<12; i++) s += fr.toString(auxFea[i],16) + ":";
                 zklog.info(s);
             }
@@ -824,7 +827,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             climbKeyRequired.push_back(climbKeyAction);
 
 #ifdef LOG_STORAGE_EXECUTOR
-            zklog.info("StorageExecutor iClimbRkey bit=" + to_string(bit) + " rkey=" + fea2string(fr,rkeys)+ " op=" + feastring(fr, op));
+            zklog.info("StorageExecutor iClimbRkey bit=" + to_string(bit) + " rkey=" + fea2string(fr,rkeys)+ " op=" + fea2string(fr, op));
 #endif
         }
 
@@ -857,7 +860,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             climbKeyRequired.push_back(climbKeyAction);
 
 #ifdef LOG_STORAGE_EXECUTOR
-            zklog.info("StorageExecutor ClimbSiblingRkey bit=" + to_string(bit) + " rkey=" + fea2string(fr,rkeys)+ " op=" + feastring(fr, op));
+            zklog.info("StorageExecutor ClimbSiblingRkey bit=" + to_string(bit) + " rkey=" + fea2string(fr,rkeys)+ " op=" + fea2string(fr, op));
 #endif
         }
         // Latch get: at this point consistency is granted: OLD_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
@@ -1269,13 +1272,13 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 // To be used only for testing, since it allocates a lot of memory
 void StorageExecutor::execute (vector<SmtAction> &action)
 {
-    void * pAddress = malloc(CommitPols::pilSize());
+    void * pAddress = malloc(CommitPols::numPols()*sizeof(Goldilocks::Element)*N);
     if (pAddress == NULL)
     {
-        zklog.error("StorageExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        zklog.error("StorageExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::numPols()*sizeof(Goldilocks::Element)*N));
         exitProcess();
     }
-    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    CommitPols cmPols(pAddress, N);
     vector<array<Goldilocks::Element, 17>> poseidonRequired;
     vector<ClimbKeyAction> climbKeyRequired;
     execute(action, cmPols.Storage, poseidonRequired, climbKeyRequired);

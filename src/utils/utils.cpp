@@ -19,6 +19,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 #include "zklog.hpp"
+#include "memory.cuh"
 
 using namespace std;
 using namespace std::filesystem;
@@ -223,6 +224,7 @@ void json2file(const json &j, const string &fileName)
 
 void file2json(const string &fileName, json &j)
 {
+    j.clear();
     zklog.info("file2json() loading JSON file " + fileName);
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
@@ -244,11 +246,12 @@ void file2json(const string &fileName, json &j)
 
 void file2json(const string &fileName, ordered_json &j)
 {
+    j.clear();
     zklog.info("file2json() (ordered) loading JSON file " + fileName);
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
-        zklog.error("file2json() failed loading input JSON file " + fileName);
+        zklog.error("file2json() failed loading input JSON file " + fileName + "; does this file exist?");
         exitProcess();
     }
     try
@@ -389,7 +392,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
         return pAddress;
 
     // Allocate memory
-    void *pMemAddress = malloc(size);
+    void *pMemAddress = malloc_zkevm(size);
     if (pMemAddress == NULL)
     {
         zklog.error("mapFile() failed calling malloc() of size: " + to_string(size));
@@ -423,6 +426,53 @@ void unmapFile(void *pAddress, uint64_t size)
         zklog.error("unmapFile() failed calling munmap() of address=" + to_string(uint64_t(pAddress)) + " size=" + to_string(size));
         exitProcess();
     }
+}
+
+void* loadFileParallel(const string &fileName, uint64_t size) {
+
+    // Check file size
+    struct stat sb;
+    if (lstat(fileName.c_str(), &sb) == -1) {
+        zklog.error("loadFileParallel() failed calling lstat() of file " + fileName);
+        exitProcess();
+    }
+    if ((uint64_t)sb.st_size != size) {
+        zklog.error("loadFileParallel() found size of file " + fileName + " to be " + to_string(sb.st_size) + " B instead of " + to_string(size) + " B");
+        exitProcess();
+    }
+
+    // Allocate memory
+    void* buffer = malloc(size);
+    if (buffer == NULL) {
+        zklog.error("loadFileParallel() failed calling malloc() of size: " + to_string(size));
+        exitProcess();
+    }
+
+    // Determine the number of chunks and the size of each chunk
+    size_t numChunks = 8; //omp_get_max_threads()/2;
+    if(numChunks == 0 ) numChunks = 1;
+    size_t chunkSize = size / numChunks;
+    size_t remainder = size - numChunks*chunkSize;
+    
+    #pragma omp parallel for num_threads(numChunks)
+    for(size_t i=0; i<numChunks; i++){
+        // Open the file
+        FILE* file = fopen(fileName.c_str(), "rb");
+        if(file == NULL){
+            zklog.error("loadFileParallel() failed to open the file");
+            exitProcess();
+        }
+        size_t chunkSize_ = i == numChunks -1 ? chunkSize + remainder : chunkSize;
+        size_t offset = i * chunkSize;
+        fseek(file, offset, SEEK_SET);
+        size_t readed = fread((uint8_t*)buffer + offset, 1, chunkSize_, file);
+        if(readed != chunkSize_){
+            zklog.error("loadFileParallel() failed to read the file");
+        }
+        fclose(file);
+    }
+
+    return buffer;
 }
 
 string sha256(string str)

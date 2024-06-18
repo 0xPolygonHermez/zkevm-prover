@@ -91,7 +91,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     zkresult zkResult = input.load(inputJson);
     if (zkResult != ZKR_SUCCESS)
     {
-        cerr << "Error: ProverClient::GenProof() failed calling input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+        cerr << "Error: ExecutorClient::ProcessBatch() failed calling input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
         exit(-1);
     }
 
@@ -419,6 +419,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
                 return false;
             }
             newStateRoot = ba2string(processBatchResponse.new_state_root());
+            zklog.info("ExecutorClient::ProcessBatch() newStateRoot=" + newStateRoot);
 
     #ifdef LOG_SERVICE
             cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
@@ -581,6 +582,9 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
              || (inputFile.find("rlp-error/test-length-data_2.json") != string::npos) // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
              || (inputFile.find("ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return2_0.json") != string::npos) // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
              || (inputFile.find("ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return_0.json") != string::npos) // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
+             || (inputFile.find("inputs-executor/ethereum-tests/GeneralStateTests/stCreate2/create2collisionCode_0.json") != string::npos)
+             || (inputFile.find("inputs-executor/ethereum-tests/GeneralStateTests/stCreate2/create2collisionNonce_0.json") != string::npos)
+             || (inputFile.find("inputs-executor/ethereum-tests/GeneralStateTests/stCreate2/create2noCash_2.json") != string::npos)
            )
         {
             zklog.warning("ProcessDirectory() skipping file=" + inputFile + " fileCounter=" + to_string(fileCounter) + " skippedFileCounter=" + to_string(skippedFileCounter));

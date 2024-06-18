@@ -10,6 +10,7 @@
 #include "timer.hpp"
 #include "gate_state.hpp"
 #include "keccak.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -45,7 +46,7 @@ public:
     KeccakFExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(PROVER_FORK_NAMESPACE::KeccakFCommitPols::pilDegree()),
+        N(getForkN(PROVER_FORK_ID)),
         numberOfSlots((N-1)/KeccakGateConfig.slotSize)
     {
         bLoaded = false;

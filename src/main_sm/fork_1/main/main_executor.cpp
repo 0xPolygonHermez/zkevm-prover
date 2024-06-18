@@ -93,11 +93,18 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     pthread_mutex_init(&flushMutex, NULL);
 
     /* Get a HashDBInterface interface, according to the configuration */
-    pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
-    if (pHashDB == NULL)
+    if (config.hashDBSingleton)
     {
-        zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
-        exitProcess();
+        pHashDBSingleton = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDBSingleton == NULL)
+        {
+            zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
+    }
+    else
+    {
+        pHashDBSingleton = NULL;
     }
 
     TimerStopAndLog(ROM_LOAD);
@@ -114,7 +121,11 @@ MainExecutor::~MainExecutor ()
     }
     flushUnlock();
 
-    HashDBClientFactory::freeHashDBClient(pHashDB);
+    if (config.hashDBSingleton)
+    {
+        zkassertpermanent(pHashDBSingleton != NULL);
+        HashDBClientFactory::freeHashDBClient(pHashDBSingleton);
+    }
 
     TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_1);
 }
@@ -142,6 +153,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         return;
     }
 
+    // Get a pointer to the HashDB interface
+    HashDBInterface *pHashDB;
+    if (config.hashDBSingleton)
+    {
+        pHashDB = pHashDBSingleton;
+    }
+    else
+    {
+        pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDB == NULL)
+        {
+            zklog.error("MainExecutor::execute() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
+    }
+
     // Create context and store a finite field reference in it
     Context ctx(fr, config, fec, fnec, pols, rom, proverRequest, pHashDB);
 
@@ -151,6 +178,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
     remove("c.txt");
 #endif
+
+    // Clear cache if configured and we are using a local database
+    if (config.dbClearCache && (config.databaseURL == "local"))
+    {
+        pHashDB->clearCache();
+    }
 
     // Copy input database content into context database
     if (proverRequest.input.db.size() > 0)
@@ -1032,11 +1065,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
-                    }
 
-                    if (bProcessBatch)
-                    {
-                        eval_addReadWriteAddress(ctx, smtGetResult.value);
+                        if (bProcessBatch)
+                        {
+                            eval_addReadWriteAddress(ctx, smtGetResult.value, key);
+                        }
                     }
 
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
@@ -1258,7 +1291,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     if (bProcessBatch)
                     {
-                        eval_addReadWriteAddress(ctx, value);
+                        eval_addReadWriteAddress(ctx, value, ctx.lastSWrite.key);
                     }
 
                     // If we just modified a balance
@@ -1965,7 +1998,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (bProcessBatch)
             {
-                eval_addReadWriteAddress(ctx, smtGetResult.value);
+                eval_addReadWriteAddress(ctx, smtGetResult.value, key);
             }
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
@@ -2107,7 +2140,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (bProcessBatch)
                 {
-                    eval_addReadWriteAddress(ctx, scalarD);
+                    eval_addReadWriteAddress(ctx, scalarD, ctx.lastSWrite.key);
                 }
 
                 // If we just modified a balance

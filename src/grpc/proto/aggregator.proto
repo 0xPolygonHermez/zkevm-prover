@@ -276,14 +276,17 @@ message PublicInputs {
 
 message StatelessPublicInputs {
     bytes witness = 1;
-    bytes data_stream = 2;
-    bytes old_acc_input_hash = 3;
-    bytes l1_info_root = 4;
-    uint64 timestamp_limit = 5;
-    string sequencer_addr = 6;
-    bytes forced_blockhash_l1 = 7;
-    string aggregator_addr = 8;
-    map<uint32, L1Data> l1_info_tree_data = 9;
+    bytes old_acc_input_hash = 2;
+    uint64 old_batch_num = 3;
+    uint64 chain_id = 4;
+    uint64 fork_id = 5;
+    bytes batch_l2_data = 6;
+    bytes l1_info_root = 7;
+    uint64 timestamp_limit = 8;
+    string sequencer_addr = 9;
+    bytes forced_blockhash_l1 = 10;
+    string aggregator_addr = 11;
+    map<uint32, L1Data> l1_info_tree_data = 12;
 }
 
 // l1InfoTree leaf values

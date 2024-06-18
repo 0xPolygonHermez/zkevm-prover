@@ -61,6 +61,8 @@ namespace Fflonk
             delete[] nonPrecomputedBigBuffer;
         }
 
+        delete additionsBuff;
+
         delete fft;
 
         mapBuffers.clear();
@@ -297,7 +299,23 @@ namespace Fflonk
             buffInternalWitness = new FrElement[zkey->nAdditions];
 
             LOG_TRACE("··· Loading additions");
-            additionsBuff = (Zkey::Addition<Engine> *)fdZkey->getSectionData(Zkey::ZKEY_FF_ADDITIONS_SECTION);
+            fdZkey->startReadSection(Zkey::ZKEY_FF_ADDITIONS_SECTION);
+
+            additionsBuff = new Zkey::Addition<Engine>[zkey->nAdditions];
+
+            for (uint64_t i = 0; i < zkey->nAdditions; i++) {
+                Zkey::Addition<Engine> addition;
+
+                addition.signalId1 = fdZkey->readU32LE();
+                addition.signalId2 = fdZkey->readU32LE();
+
+                memcpy(&addition.factor1, fdZkey->read(sizeof(FrElement)), sizeof(FrElement));
+                memcpy(&addition.factor2, fdZkey->read(sizeof(FrElement)), sizeof(FrElement));
+
+                additionsBuff[i] = addition;
+            }
+
+            fdZkey->endReadSection();
 
             LOG_TRACE("··· Loading map buffers");
             ThreadUtils::parset(mapBuffers["A"], 0, byteLength * 3, nThreads);
@@ -603,6 +621,8 @@ namespace Fflonk
     template <typename Engine>
     void FflonkProver<Engine>::calculateAdditions()
     {
+        cout << zkey->nAdditions << endl;
+
         for (u_int32_t i = 0; i < zkey->nAdditions; i++)
         {
             // Get witness value

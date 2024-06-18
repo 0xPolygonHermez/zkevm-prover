@@ -496,11 +496,18 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
 
     } while ((numberOfOpcodes == 1) && (numberOfCodeOpcodes == 1));
 
+#ifdef LOG_WITNESS
+    zklog.info("calculateWitnessHash() returns hash=" + fea2string(fr, hash));
+#endif
+
     return ZKR_SUCCESS;
 }
 
 zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap::ProgramMap &programs, mpz_class &stateRoot)
 {
+    db.clear();
+    programs.clear();
+    
     zkresult zkr;
 
     // Check witness is not empty
@@ -522,9 +529,8 @@ zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap:
     }
     ctx.p++;
 
-    // Calculate witness hash
+    // Calculate witness hash    
     Goldilocks::Element hash[4];
-    vector<uint8_t> bits;
     zkr = calculateWitnessHash(ctx, hash);
     if (zkr != ZKR_SUCCESS)
     {
@@ -535,7 +541,7 @@ zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap:
     // Convert state root
     fea2scalar(fr, stateRoot, hash);
 
-    zklog.info("witness2db() calculated stateRoot=" + stateRoot.get_str(16));
+    zklog.info("witness2db() calculated stateRoot=" + stateRoot.get_str(16) + " from size=" + to_string(witness.size()));
 
 #ifdef WITNESS_CHECK_SMT
     zklog.info("witness2db() calculated SMT root=" + fea2string(fr, ctx.root));

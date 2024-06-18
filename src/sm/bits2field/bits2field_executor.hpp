@@ -4,6 +4,7 @@
 #include <vector>
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -36,7 +37,7 @@ public:
     Bits2FieldExecutor(Goldilocks &fr) :
         fr(fr),
         slotSize(155286),
-        N(Bits2FieldCommitPols::pilDegree()),
+        N(getForkN(PROVER_FORK_ID)),
         nSlots((N-1)/slotSize) {};
 
     /* Executor */

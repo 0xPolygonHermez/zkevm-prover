@@ -15,8 +15,11 @@ AggregatorClient::AggregatorClient (Goldilocks &fr, const Config &config, Prover
     config(config),
     prover(prover)
 {
+    grpc::ChannelArguments channelArguments;
+    channelArguments.SetMaxReceiveMessageSize((config.aggregatorClientMaxRecvMsgSize == 0) ? -1 : config.aggregatorClientMaxRecvMsgSize);
+
     // Create channel
-    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateChannel(config.aggregatorClientHost + ":" + to_string(config.aggregatorClientPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateCustomChannel(config.aggregatorClientHost + ":" + to_string(config.aggregatorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new aggregator::v1::AggregatorService::Stub(channel);
@@ -389,8 +392,8 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     // Parse public inputs
     
     // Get witness
-    const string &witness = genStatelessBatchProofRequest.input().public_inputs().witness();
-    if (witness.empty())
+    pProverRequest->input.publicInputsExtended.publicInputs.witness = genStatelessBatchProofRequest.input().public_inputs().witness();
+    if (pProverRequest->input.publicInputsExtended.publicInputs.witness.empty())
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() got an empty witness", &pProverRequest->tags);
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
@@ -399,50 +402,10 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
 
     // Parse witness and get db, programs and old state root
     zkresult zkr;
-    zkr = witness2db(witness, pProverRequest->input.db, pProverRequest->input.contractsBytecode, pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot);
+    zkr = witness2db(pProverRequest->input.publicInputsExtended.publicInputs.witness, pProverRequest->input.db, pProverRequest->input.contractsBytecode, pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() failed calling witness2db() result=" + zkresult2string(zkr), &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-
-    // Get data stream
-    const string &dataStream = genStatelessBatchProofRequest.input().public_inputs().data_stream();
-    if (dataStream.empty())
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() got an empty data stream", &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-
-    // Parse data stream and get a binary structure
-    DataStreamBatch batch;
-    zkr = dataStream2batch(dataStream, batch);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() failed calling dataStream2batch() result=" + zkresult2string(zkr), &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-    if (batch.blocks.empty())
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() called dataStream2batch() but got zero blocks=", &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-
-    // Get batchL2Data
-    zkr = dataStreamBatch2batchL2Data(batch, pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() failed calling dataStreamBatch2batchL2Data() result=" + zkresult2string(zkr), &pProverRequest->tags);
-        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
-        return false;
-    }
-    if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
-    {
-        zklog.error("AggregatorClient::GenStatelessBatchProof() found batchL2Data.size()=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE), &pProverRequest->tags);
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -457,10 +420,10 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash, genStatelessBatchProofRequest.input().public_inputs().old_acc_input_hash());
 
     // Get oldBatchNum
-    pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber;
+    pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = genStatelessBatchProofRequest.input().public_inputs().old_batch_num();
 
     // Get chain ID
-    pProverRequest->input.publicInputsExtended.publicInputs.chainID = batch.chainId;
+    pProverRequest->input.publicInputsExtended.publicInputs.chainID = genStatelessBatchProofRequest.input().public_inputs().chain_id();
     if (pProverRequest->input.publicInputsExtended.publicInputs.chainID == 0)
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() got chainID = 0");
@@ -469,7 +432,7 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     }
 
     // Get fork ID
-    pProverRequest->input.publicInputsExtended.publicInputs.forkID = batch.forkId;
+    pProverRequest->input.publicInputsExtended.publicInputs.forkID = genStatelessBatchProofRequest.input().public_inputs().fork_id();
     if (pProverRequest->input.publicInputsExtended.publicInputs.forkID != PROVER_FORK_ID)
     {
         zklog.error("AggregatorClient::GenStatelessBatchProof() got an invalid prover ID=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.forkID) + " different from expected=" + to_string(PROVER_FORK_ID));
@@ -485,6 +448,15 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
+
+    // Get batch L2 data
+    if (genStatelessBatchProofRequest.input().public_inputs().batch_l2_data().size() > MAX_BATCH_L2_DATA_SIZE)
+    {
+        zklog.error("AggregatorClient::GenStatelessBatchProof() found batchL2Data.size()=" + to_string(genStatelessBatchProofRequest.input().public_inputs().batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+    pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genStatelessBatchProofRequest.input().public_inputs().batch_l2_data();
 
     // Get L1 info root
     if (genStatelessBatchProofRequest.input().public_inputs().l1_info_root().size() > 32)
@@ -585,7 +557,7 @@ bool AggregatorClient::GenStatelessBatchProof (const aggregator::v1::GenStateles
     // ROOT
 
     // Get from
-    pProverRequest->input.from = "0x0";
+    pProverRequest->input.from = "0x";
 
     // Flags
     pProverRequest->input.bUpdateMerkleTree = false;
@@ -884,9 +856,11 @@ void* aggregatorClientThread(void* arg)
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
-                case aggregator::v1::AggregatorMessage::RequestCase::kGenStatelessBatchProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
                     zklog.info("aggregatorClientThread() got: " + aggregatorMessage.ShortDebugString());
+                    break;
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenStatelessBatchProofRequest:
+                    zklog.info("aggregatorClientThread() got genStatelessBatchProof() request");
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
                     zklog.info("aggregatorClientThread() got genAggregatedProof() request");

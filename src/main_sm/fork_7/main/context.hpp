@@ -19,6 +19,7 @@
 #include "ffiasm/fnec.hpp"
 #include "prover_request.hpp"
 #include "hashdb_interface.hpp"
+#include "hashdb_factory.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -192,6 +193,14 @@ public:
         pEvaluation(NULL),
         N(0){}; // Constructor, setting references
 
+    ~Context()
+    {
+        if (!config.hashDBSingleton)
+        {
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+        }
+    }
+
     // HashK database, used in Keccak-f hash instructions hashK, hashK1, hashKLen and hashKDigest
     unordered_map< uint64_t, HashValue > hashK;
 
@@ -217,11 +226,13 @@ public:
     vector<mpz_class> quotient;
 
     // Print functions
-    void printRegs();
+    void printRegs(string &log);
     void printVars();
     void printMem();
     void printReg(string name, Goldilocks::Element &fe);
+    string reg2string(Goldilocks::Element &fe);
     void printReg(string name, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7);
+    string reg2string(Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7);
     void printU64(string name, uint64_t v);
     void printU32(string name, uint32_t v);
     void printU16(string name, uint16_t v);

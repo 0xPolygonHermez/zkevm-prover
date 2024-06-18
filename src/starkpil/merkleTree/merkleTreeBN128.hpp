@@ -6,9 +6,7 @@
 #include "goldilocks_base_field.hpp"
 #include "poseidon_opt.hpp"
 
-#define MT_BN128_ARITY 16
 #define GOLDILOCKS_ELEMENTS 3
-#define HASH_SIZE 4
 
 class MerkleTreeBN128
 {
@@ -23,18 +21,18 @@ public:
     uint64_t height;
     uint64_t width;
     uint64_t source_width;
+    uint64_t arity;
     bool intialized = false;
     bool isSourceAllocated = false;
     bool isNodesAllocated = false;
-    MerkleTreeBN128(){};
-    MerkleTreeBN128(uint64_t _height, uint64_t _width);
-    MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::Element *source);
-    MerkleTreeBN128(void *source);
+    MerkleTreeBN128(uint64_t arity, uint64_t _height, uint64_t _width);
+    MerkleTreeBN128(uint64_t arity, uint64_t _height, uint64_t _width, Goldilocks::Element *source);
+    MerkleTreeBN128(uint64_t arity, void *source);
     ~MerkleTreeBN128();
     void getRoot(RawFr::Element *root);
-    static uint64_t getNumNodes(uint64_t n);
-    static uint64_t getMerkleProofLength(uint64_t n);
-    static uint64_t getMerkleProofSize(uint64_t n);
+    static uint64_t getNumNodes(uint64_t n, uint64_t arity);
+    static uint64_t getMerkleProofLength(uint64_t n, uint64_t arity);
+    static uint64_t getMerkleProofSize(uint64_t n, uint64_t arity);
     RawFr::Element *address() { return nodes; };
     void getGroupProof(void *res, uint64_t idx);
     Goldilocks::Element getElement(uint64_t idx, uint64_t subIdx);

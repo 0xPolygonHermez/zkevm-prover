@@ -6,6 +6,7 @@
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -34,7 +35,7 @@ public:
     ClimbKeyExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(PROVER_FORK_NAMESPACE::ClimbKeyCommitPols::pilDegree()) {}
+        N(getForkN(PROVER_FORK_ID)) {}
     void execute (vector<ClimbKeyAction> &input, PROVER_FORK_NAMESPACE::ClimbKeyCommitPols &pols);
 
     // To be used only for testing, since it allocates a lot of memory

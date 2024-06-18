@@ -4,6 +4,7 @@
 #include "blake_gate.hpp"
 #include "zkassert.hpp"
 #include "timer.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 

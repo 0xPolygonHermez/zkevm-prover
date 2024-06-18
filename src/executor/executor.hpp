@@ -12,6 +12,8 @@
 #include "main_sm/fork_7/main/main_executor.hpp"
 #include "main_sm/fork_8/main/main_executor.hpp"
 #include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
+#include "main_sm/fork_9/main/main_executor.hpp"
+#include "main_sm/fork_10/main/main_executor.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/binary/binary_executor.hpp"
@@ -44,6 +46,8 @@ public:
     fork_7::MainExecutor mainExecutor_fork_7;
     fork_8::MainExecutor mainExecutor_fork_8;
     fork_8::MainExecutorC mainExecutorC_fork_8;
+    fork_9::MainExecutor mainExecutor_fork_9;
+    fork_10::MainExecutor mainExecutor_fork_10;
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
     BinaryExecutor binaryExecutor;
@@ -74,6 +78,8 @@ public:
         mainExecutor_fork_7(fr, poseidon, config),
         mainExecutor_fork_8(fr, poseidon, config),
         mainExecutorC_fork_8(mainExecutor_fork_8),
+        mainExecutor_fork_9(fr, poseidon, config),
+        mainExecutor_fork_10(fr, poseidon, config),
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),
         binaryExecutor(fr, config),
@@ -93,10 +99,10 @@ public:
         {};
 
     // Full version: all polynomials are evaluated, in all evaluations
-    void execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols);
+    void executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols);
 
     // Reduced version: only 2 evaluations are allocated, and assert is disabled
-    void process_batch (ProverRequest &proverRequest);
+    void processBatch (ProverRequest &proverRequest);
 };
 
 #endif

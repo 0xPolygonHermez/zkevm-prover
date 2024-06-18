@@ -8,6 +8,7 @@
 #include "sm/pols_generated/commit_pols.hpp"
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
+#include "fork_info.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -45,7 +46,7 @@ public:
         bytesPerElement(7),
         nElements(8),
         bytesPerBlock(bytesPerElement*nElements),
-        N(PROVER_FORK_NAMESPACE::PaddingPGCommitPols::pilDegree()) {};
+        N(getForkN(PROVER_FORK_ID)) {};
     void execute (vector<PaddingPGExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingPGCommitPols &pols, vector<array<Goldilocks::Element, 17>> &required);
 };
 

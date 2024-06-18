@@ -24,8 +24,6 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
         pol2N = 1 << (polBits - reductionBits);
         uint64_t nX = (1 << polBits) / pol2N;
 
-        Polinomial pol2_e(pol2N, FIELD_EXTENSION);
-
         Polinomial special_x(1, FIELD_EXTENSION);
         transcript.getField(special_x.address());
 
@@ -84,11 +82,7 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
 
             for (uint64_t g = init; g < end; g++)
             {
-                if (si == 0)
-                {
-                    Polinomial::copyElement(pol2_e, g, friPol, g);
-                }
-                else
+                if (si != 0)
                 {
                     Polinomial ppar(nX, FIELD_EXTENSION);
                     Polinomial ppar_c(nX, FIELD_EXTENSION);
@@ -101,7 +95,7 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
 
                     ntt.INTT(ppar_c.address(), ppar.address(), nX, FIELD_EXTENSION);
                     polMulAxi(ppar_c, Goldilocks::one(), sinv_); // Multiplies coefs by 1, shiftInv, shiftInv^2, shiftInv^3, ......
-                    evalPol(pol2_e, g, ppar_c, special_x);
+                    evalPol(friPol, g, ppar_c, special_x);
                     sinv_ = sinv_ * (*wi[0]);
                 }
             }
@@ -114,7 +108,7 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
 
             // Re-org in groups
             Polinomial aux(pol2N, FIELD_EXTENSION);
-            getTransposed(aux, pol2_e, starkInfo.starkStruct.steps[si + 1].nBits);
+            getTransposed(aux, friPol, starkInfo.starkStruct.steps[si + 1].nBits, pol2N);
 
             Polinomial rootGL(HASH_SIZE, 1);
             treesFRIGL[si + 1] = new MerkleTreeGL(nGroups, groupSize * FIELD_EXTENSION, NULL);
@@ -129,14 +123,8 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
         {
             for (uint64_t i = 0; i < pol2N; i++)
             {
-                transcript.put(pol2_e[i], FIELD_EXTENSION);
+                transcript.put(friPol[i], FIELD_EXTENSION);
             }
-        }
-
-#pragma omp parallel for
-        for (uint64_t i = 0; i < pol2_e.degree(); i++)
-        {
-            Polinomial::copyElement(friPol, i, pol2_e, i);
         }
 
         polBits = polBits - reductionBits;
@@ -147,6 +135,7 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
             Goldilocks::mul(*polShift[0], *polShift[0], *polShift[0]);
         }
     }
+
     //TimerStopAndLog(STARK_FRI_PROVE_STEPS);
     fproof.proofs.fri.setPol(friPol.address());
 
@@ -249,10 +238,10 @@ void FRIProve::queryPol(FRIProof &fproof, MerkleTreeGL *treeGL, uint64_t idx, ui
     return;
 }
 
-void FRIProve::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits)
+void FRIProve::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t trasposeBits, uint64_t degree)
 {
     uint64_t w = (1 << trasposeBits);
-    uint64_t h = pol.degree() / w;
+    uint64_t h = degree / w;
 
 #pragma omp parallel for
     for (uint64_t i = 0; i < w; i++)
@@ -262,8 +251,6 @@ void FRIProve::getTransposed(Polinomial &aux, Polinomial &pol, uint64_t traspose
 
             uint64_t fi = j * w + i;
             uint64_t di = i * h + j;
-            assert(di < aux.degree());
-            assert(fi < pol.degree());
 
             Polinomial::copyElement(aux, di, pol, fi);
         }

@@ -4,7 +4,6 @@
 #include <string>
 #include <iostream>
 #include <nlohmann/json.hpp>
-#include "definitions.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -62,9 +61,6 @@ public:
     bool saveResponseToFile; // Saves the grpc service response, in text format
     bool saveFilesInSubfolders; // Saves output files in folders per hour, e.g. output/2023/01/10/18
 
-    bool loadDBToMemCache;
-    bool loadDBToMemCacheInParallel;
-    uint64_t loadDBToMemTimeout;
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
     bool useAssociativeCache; // Use the associative cache for MT records?
     int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 128 bytes
@@ -93,6 +89,7 @@ public:
     string hashDBFileName;
     uint64_t hashDBFileSize;
     string hashDBFolder;
+    bool hashDBSingleton;
 
     // Aggregator service (client)
     uint16_t aggregatorServerPort;
@@ -101,9 +98,11 @@ public:
     uint64_t aggregatorClientMockTimeout;
     uint64_t aggregatorClientWatchdogTimeout;
     uint64_t aggregatorClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
+    uint64_t aggregatorClientMaxRecvMsgSize; // Max received message size, in bytes
 
     // Executor debugging
     bool executorROMLineTraces;
+    bool executorROMInstructions;
     bool executorTimeStatistics;
     bool opcodeTracer;
     bool logRemoteDbReads;
@@ -112,13 +111,14 @@ public:
     uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
     bool logExecutorServerResponses;
     bool logExecutorServerTxs;
-    bool dontLoadRomOffsets;
+    bool loadDiagnosticRom;
 
     // Files
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
     string configPath;
+    
     string zkevmCmPols; // Maps commit pols memory into file, which slows down a bit the executor
     string zkevmCmPolsAfterExecutor; // Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning
     string c12aCmPols;
@@ -129,6 +129,7 @@ public:
     string recursive2ConstPols;
     string recursivefConstPols;
     bool mapConstPolsFile;
+
     string zkevmConstantsTree;
     string c12aConstantsTree;
     string recursive1ConstantsTree;
@@ -165,6 +166,16 @@ public:
     string recursive1StarkInfo;
     string recursive2StarkInfo;
     string recursivefStarkInfo;
+    string zkevmCHelpers;
+    string c12aCHelpers;
+    string recursive1CHelpers;
+    string recursive2CHelpers;
+    string recursivefCHelpers;
+    string zkevmGenericCHelpers;
+    string c12aGenericCHelpers;
+    string recursive1GenericCHelpers;
+    string recursive2GenericCHelpers;
+    string recursivefGenericCHelpers;
 
     // Database
     string databaseURL;
@@ -189,7 +200,8 @@ public:
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
-    uint64_t maxProverThreads;
+    uint64_t maxExecutorReceiveMessageSize;
+    uint64_t maxExecutorSendMessageSize;
     uint64_t maxHashDBThreads;
     string proverName;
     uint64_t fullTracerTraceReserveSize;

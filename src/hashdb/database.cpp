@@ -15,22 +15,6 @@
 #include "zkmax.hpp"
 #include "hashdb_remote.hpp"
 
-#ifdef DATABASE_USE_CACHE
-
-// Create static Database::dbMTCache and DatabaseCacheProgram objects
-// This will be used to store DB records in memory and it will be shared for all the instances of Database class
-// DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
-DatabaseMTAssociativeCache Database::dbMTACache;
-DatabaseMTCache Database::dbMTCache;
-DatabaseProgramCache Database::dbProgramCache;
-
-string Database::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
-Goldilocks::Element Database::dbStateRootvKey[4] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
-bool Database::useAssociativeCache = false;
-
-
-#endif
-
 // Helper functions
 string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
 
@@ -40,6 +24,30 @@ Database::Database (Goldilocks &fr, const Config &config) :
         connectionsPool(NULL),
         multiWrite(fr)
 {
+#ifdef DATABASE_USE_CACHE
+
+    // Init state root key
+    dbStateRootvKey[0].fe = 0xFFFFFFFFFFFFFFFF;
+    dbStateRootvKey[1].fe = 0xFFFFFFFFFFFFFFFF;
+    dbStateRootvKey[2].fe = 0xFFFFFFFFFFFFFFFF;
+    dbStateRootvKey[3].fe = 0xFFFFFFFFFFFFFFFF;
+
+    /* INIT DB CACHE */
+    if (config.useAssociativeCache)
+    {
+        useAssociativeCache = true;
+        dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
+    }
+    else{
+        useAssociativeCache = false;
+        dbMTCache.setName("MTCache");
+        dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+    }
+    dbProgramCache.setName("ProgramCache");
+    dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
+
+#endif // DATABASE_USE_CACHE
+
     // Init mutex
     pthread_mutex_init(&connMutex, NULL);
 
@@ -159,7 +167,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         r = ZKR_SUCCESS;
     }
     // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
-    else if (config.dbGetTree && (keys != NULL))
+    else if (useRemoteDB && config.dbGetTree && (keys != NULL))
     {
         // Get the tree
         uint64_t numberOfFields;
@@ -1963,167 +1971,6 @@ void *dbCacheSynchThread (void *arg)
 
     zklog.info("dbCacheSynchThread() done");
     return NULL;
-}
-
-void loadDb2MemCache(const Config &config)
-{
-    if (config.databaseURL == "local")
-    {
-        zklog.error("loadDb2MemCache() called with config.databaseURL==local");
-        exitProcess();
-    }
-
-#ifdef DATABASE_USE_CACHE
-
-    TimerStart(LOAD_DB_TO_CACHE);
-
-    Goldilocks fr;
-    HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
-
-    vector<Goldilocks::Element> dbValue;
-    zkresult zkr = pHashDB->db.read(Database::dbStateRootKey, Database::dbStateRootvKey, dbValue, NULL, true);
-
-    if (zkr == ZKR_DB_KEY_NOT_FOUND)
-    {
-        zklog.warning("loadDb2MemCache() dbStateRootKey=" +  Database::dbStateRootKey + " not found in database; normal only if database is empty");
-        TimerStopAndLog(LOAD_DB_TO_CACHE);
-        return;
-    }
-    else if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("loadDb2MemCache() failed calling db.read result=" + zkresult2string(zkr));
-        TimerStopAndLog(LOAD_DB_TO_CACHE);
-        return;
-    }
-    
-    string stateRootKey = fea2string(fr, dbValue[0], dbValue[1], dbValue[2], dbValue[3]);
-    zklog.info("loadDb2MemCache() found state root=" + stateRootKey);
-
-    if (stateRootKey == "0")
-    {
-        zklog.warning("loadDb2MemCache() found an empty tree");
-        TimerStopAndLog(LOAD_DB_TO_CACHE);
-        return;
-    }
-
-    struct timeval loadCacheStartTime;
-    gettimeofday(&loadCacheStartTime, NULL);
-
-    unordered_map<uint64_t, vector<string>> treeMap;
-    vector<string> emptyVector;
-    string hash, leftHash, rightHash;
-    uint64_t counter = 0;
-
-    treeMap[0] = emptyVector;
-    treeMap[0].push_back(stateRootKey);
-    unordered_map<uint64_t, std::vector<std::string>>::iterator treeMapIterator;
-    for (uint64_t level=0; level<256; level++)
-    {
-        // Spend only 10 seconds
-        if (TimeDiff(loadCacheStartTime) > config.loadDBToMemTimeout)
-        {
-            break;
-        }
-
-        treeMapIterator = treeMap.find(level);
-        if (treeMapIterator == treeMap.end())
-        {
-            break;
-        }
-
-        if (treeMapIterator->second.size()==0)
-        {
-            break;
-        }
-
-        treeMap[level+1] = emptyVector;
-
-        //zklog.info("loadDb2MemCache() searching at level=" + to_string(level) + " for elements=" + to_string(treeMapIterator->second.size()));
-        
-        for (uint64_t i=0; i<treeMapIterator->second.size(); i++)
-        {
-            // Spend only 10 seconds
-            if (TimeDiff(loadCacheStartTime) > config.loadDBToMemTimeout)
-            {
-                break;
-            }
-
-            hash = treeMapIterator->second[i];
-            dbValue.clear();
-            Goldilocks::Element vhash[4];
-            string hashNorm = NormalizeToNFormat(hash, 64);
-            if(pHashDB->db.usingAssociativeCache()) string2fea(fr, hashNorm, vhash);
-            zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
-
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") result=" + zkresult2string(zkr));
-                TimerStopAndLog(LOAD_DB_TO_CACHE);
-                return;
-            }
-            if (dbValue.size() != 12)
-            {
-                zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") dbValue.size()=" + to_string(dbValue.size()));
-                TimerStopAndLog(LOAD_DB_TO_CACHE);
-                return;
-            }
-            counter++;
-            if(Database::dbMTCache.enabled()){
-                double sizePercentage = double(Database::dbMTCache.getCurrentSize())*100.0/double(Database::dbMTCache.getMaxSize());
-                if ( sizePercentage > 90 )
-                {
-                    zklog.info("loadDb2MemCache() stopping since size percentage=" + to_string(sizePercentage));
-                    break;
-                }
-            }
-            // If capaxity is X000
-            if (fr.isZero(dbValue[9]) && fr.isZero(dbValue[10]) && fr.isZero(dbValue[11]))
-            {
-                // If capacity is 0000, this is an intermediate node that contains left and right hashes of its children
-                if (fr.isZero(dbValue[8]))
-                {
-                    leftHash = fea2string(fr, dbValue[0], dbValue[1], dbValue[2], dbValue[3]);
-                    if (leftHash != "0")
-                    {
-                        treeMap[level+1].push_back(leftHash);
-                        //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found leftHash=" + leftHash);
-                    }
-                    rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
-                    if (rightHash != "0")
-                    {
-                        treeMap[level+1].push_back(rightHash);
-                        //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found rightHash=" + rightHash);
-                    }
-                }
-                // If capacity is 1000, this is a leaf node that contains right hash of the value node
-                else if (fr.isOne(dbValue[8]))
-                {
-                    rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
-                    if (rightHash != "0")
-                    {
-                        //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found value rightHash=" + rightHash);
-                        dbValue.clear();
-                        Goldilocks::Element vRightHash[4]={dbValue[4], dbValue[5], dbValue[6], dbValue[7]};
-                        zkresult zkr = pHashDB->db.read(rightHash, vRightHash, dbValue, NULL, true);
-                        if (zkr != ZKR_SUCCESS)
-                        {
-                            zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));
-                            TimerStopAndLog(LOAD_DB_TO_CACHE);
-                            return;
-                        }
-                        counter++;
-                    }
-                }
-            }
-        }
-    }
-
-    if(Database::dbMTCache.enabled()){
-        zklog.info("loadDb2MemCache() done counter=" + to_string(counter) + " cache at " + to_string((double(Database::dbMTCache.getCurrentSize())/double(Database::dbMTCache.getMaxSize()))*100) + "%");
-    }
-    TimerStopAndLog(LOAD_DB_TO_CACHE);
-
-#endif
 }
 
 zkresult Database::resetDB(void)

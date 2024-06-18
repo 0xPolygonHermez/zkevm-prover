@@ -4,5 +4,6 @@
 #include <cstdint>
 
 uint64_t DatabaseCacheTest (void);
+uint64_t DatabaseCacheBenchmark (void);
 
 #endif

@@ -2,6 +2,7 @@
 #define ZKEY_FFLONK_H
 
 #include <gmp.h>
+#include <cstring>
 
 namespace Zkey {
     const int ZKEY_FF_NSECTIONS = 17;

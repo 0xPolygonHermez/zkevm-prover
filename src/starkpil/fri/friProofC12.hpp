@@ -3,6 +3,7 @@
 
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
+#include "merkleTreeBN128.hpp"
 #include "fr.hpp"
 #include <vector>
 
@@ -14,7 +15,7 @@ public:
     std::vector<std::vector<Goldilocks::Element>> v;
     std::vector<std::vector<RawFr::Element>> mp;
 
-    MerkleProofC12(uint64_t nLinears, uint64_t elementsTree, void *pointer) : v(nLinears, std::vector<Goldilocks::Element>(1, Goldilocks::zero())), mp(elementsTree, std::vector<RawFr::Element>(16, RawFr::field.zero()))
+    MerkleProofC12(uint64_t arity, uint64_t nLinears, uint64_t elementsTree, void *pointer) : v(nLinears, std::vector<Goldilocks::Element>(1, Goldilocks::zero())), mp(elementsTree, std::vector<RawFr::Element>(arity, RawFr::field.zero()))
     {
         for (uint64_t i = 0; i < nLinears; i++)
         {
@@ -23,7 +24,7 @@ public:
         RawFr::Element *mpCursor = (RawFr::Element *)&((Goldilocks::Element *)pointer)[nLinears];
         for (uint64_t j = 0; j < elementsTree; j++)
         {
-            std::memcpy(&mp[j][0], &mpCursor[j * 16], 16 * sizeof(RawFr::Element));
+            std::memcpy(&mp[j][0], &mpCursor[j * arity], arity * sizeof(RawFr::Element));
         }
     };
     ordered_json merkleProof2json()
