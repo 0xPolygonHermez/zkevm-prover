@@ -8,10 +8,12 @@
 #include "state_manager.hpp"
 #include "key_utils.hpp"
 
+//#define LOG_SMT
+
 zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
-    zklog.info("Smt::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
+    zklog.info("Smt::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistence=" + persistence2string(persistence));
 #endif
 
     zkresult zkr;
