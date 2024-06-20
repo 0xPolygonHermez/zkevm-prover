@@ -124,7 +124,6 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     TimerStopAndLog(COMPUTE_ZHINV);
 
     mem = (Goldilocks::Element *)_pAddress;
-    pBuffer = (Goldilocks::Element *)malloc(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION * sizeof(Goldilocks::Element));
 
     p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
     p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
@@ -135,13 +134,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
     p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
-
-    TimerStart(MERKLE_TREE_ALLOCATION);
-    treesBN128[0] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-    treesBN128[1] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
-    treesBN128[2] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
-    treesBN128[3] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
-    TimerStopAndLog(MERKLE_TREE_ALLOCATION);
+    pBuffer = &mem[starkInfo.mapTotalN];
 
     TimerStart(CHELPERS_ALLOCATION);
     string recursivefChelpers = (USE_GENERIC_PARSER) ? config.recursivefGenericCHelpers : config.recursivefCHelpers;
@@ -174,8 +167,6 @@ StarkRecursiveF::~StarkRecursiveF()
         free(pConstPolsAddress2ns);
     }
 
-    free(pBuffer);
-
     for (uint i = 0; i < 5; i++)
     {
         delete treesBN128[i];
@@ -198,6 +189,13 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
 
     CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n], numCommited);
+
+    TimerStart(MERKLE_TREE_ALLOCATION);
+    treesBN128[0] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
+    treesBN128[1] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
+    treesBN128[2] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
+    treesBN128[3] = new MerkleTreeBN128(starkInfo.merkleTreeArity, NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
+    TimerStopAndLog(MERKLE_TREE_ALLOCATION);
 
     RawFr::Element rootC;
     RawFr::Element root0;
@@ -652,4 +650,9 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     std::memcpy(&proof.proofs.root3[0], &root2, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root4[0], &root3, sizeof(RawFr::Element));
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_FRI);
+
+    for (uint i = 0; i < 4; i++)
+    {
+        delete treesBN128[i];
+    }
 }

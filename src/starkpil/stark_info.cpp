@@ -214,64 +214,57 @@ void StarkInfo::setMapOffsets() {
     uint64_t N = (1 << starkStruct.nBits);
     uint64_t NExtended = (1 << starkStruct.nBitsExt);
 
-    uint64_t minBlocks = reduceMemory ? 8 : 4;
+    uint64_t maxBlocks = 8;
 
     mapTotalN = 0;
 
-    // Set offsets for all stages in the extended field (cm1, cm2, cm3, cm4)
-    mapOffsets.section[cm1_2ns] = mapTotalN;
-    mapTotalN += NExtended * mapSectionsN.section[cm1_2ns];
-
-    mapOffsets.section[cm2_2ns] = mapTotalN;
-    mapTotalN += NExtended * mapSectionsN.section[cm2_2ns];
-
-    if(!reduceMemory) {
-        mapOffsets.section[cm3_2ns] = mapTotalN;
-        mapTotalN += NExtended * mapSectionsN.section[cm3_2ns];
-    }
-
-    mapOffsets.section[cm4_2ns] = mapTotalN;
-    mapTotalN += NExtended * mapSectionsN.section[cm4_2ns];
-
-    mapOffsets.section[q_2ns] = mapTotalN;
-    mapTotalN += NExtended * qDim;
+    uint64_t offsetPolsBasefield;
+    uint64_t tmpExp_end_memory;
     
-    // Stage FRIPolynomial
-    uint64_t offsetPolsFRI = mapOffsets.section[q_2ns];
-    mapOffsets.section[xDivXSubXi_2ns] = offsetPolsFRI;
-    offsetPolsFRI += 2 * NExtended * FIELD_EXTENSION;
-    
-    mapOffsets.section[f_2ns] = offsetPolsFRI;
-    offsetPolsFRI += NExtended * FIELD_EXTENSION;
-
-    if(offsetPolsFRI > mapTotalN) mapTotalN = offsetPolsFRI;
-
-    uint64_t offsetPolsEvals = mapOffsets.section[q_2ns];
-    mapOffsets.section[LEv] = offsetPolsEvals;
-    offsetPolsEvals += 2 * N * FIELD_EXTENSION;
-    
-    mapOffsets.section[evals] = offsetPolsEvals;
-    offsetPolsEvals += evMap.size() * omp_get_max_threads() * FIELD_EXTENSION;
-
-    mapNTTOffsetsHelpers["LEv"] = std::make_pair(offsetPolsEvals, N * FIELD_EXTENSION * 2);
-    offsetPolsEvals += N * FIELD_EXTENSION * 2;
-   
-    if(offsetPolsEvals > mapTotalN) mapTotalN = offsetPolsEvals;
 
     if(reduceMemory) {
-        while(NExtended * mapSectionsN.section[cm2_2ns] > minBlocks * (mapTotalN - mapOffsets.section[cm4_2ns])) {
+        // Set offsets for all stages in the extended field (cm1, cm2, cm3, cm4)
+        mapOffsets.section[cm1_2ns] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN.section[cm1_2ns];
+
+        mapOffsets.section[cm2_2ns] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN.section[cm2_2ns];
+
+        mapOffsets.section[cm4_2ns] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN.section[cm4_2ns];
+
+        mapOffsets.section[q_2ns] = mapTotalN;
+        mapTotalN += NExtended * qDim;
+    
+        // Stage FRIPolynomial
+        uint64_t offsetPolsFRI = mapOffsets.section[q_2ns];
+        mapOffsets.section[xDivXSubXi_2ns] = offsetPolsFRI;
+        offsetPolsFRI += 2 * NExtended * FIELD_EXTENSION;
+        
+        mapOffsets.section[f_2ns] = offsetPolsFRI;
+        offsetPolsFRI += NExtended * FIELD_EXTENSION;
+
+        if(offsetPolsFRI > mapTotalN) mapTotalN = offsetPolsFRI;
+
+        uint64_t offsetPolsEvals = mapOffsets.section[q_2ns];
+        mapOffsets.section[LEv] = offsetPolsEvals;
+        offsetPolsEvals += 2 * N * FIELD_EXTENSION;
+        
+        mapOffsets.section[evals] = offsetPolsEvals;
+        offsetPolsEvals += evMap.size() * omp_get_max_threads() * FIELD_EXTENSION;
+
+        mapNTTOffsetsHelpers["LEv"] = std::make_pair(offsetPolsEvals, N * FIELD_EXTENSION * 2);
+        offsetPolsEvals += N * FIELD_EXTENSION * 2;
+    
+        if(offsetPolsEvals > mapTotalN) mapTotalN = offsetPolsEvals;
+
+        while(NExtended * mapSectionsN.section[cm2_2ns] > maxBlocks * (mapTotalN - mapOffsets.section[cm4_2ns])) {
             mapTotalN += NExtended;
         }
         mapOffsets.section[cm3_2ns] = mapTotalN;
         mapTotalN += NExtended * mapSectionsN.section[cm3_2ns];
-    }
 
-    uint64_t offsetPolsBasefield;
-
-    uint64_t tmpExp_end_memory;
-    
-    // Set offsets for all stages in the basefield field (cm1, cm2, cm3, tmpExp)
-    if(reduceMemory) {
+        // Set offsets for all stages in the basefield field (cm1, cm2, cm3, tmpExp)
         mapOffsets.section[cm1_n] = mapOffsets.section[cm1_2ns];
 
         mapOffsets.section[cm2_n] = mapOffsets.section[cm2_2ns];
@@ -297,8 +290,24 @@ void StarkInfo::setMapOffsets() {
         if(cm2_2ns_tmp_end_memory > mapTotalN) {
             mapTotalN = cm2_2ns_tmp_end_memory;
         }
-
     } else {
+        // Set offsets for all stages in the extended field (cm1, cm2, cm3, cm4)
+        mapOffsets.section[cm1_2ns] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN.section[cm1_2ns];
+
+        mapOffsets.section[cm2_2ns] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN.section[cm2_2ns];
+
+        mapOffsets.section[cm3_2ns] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN.section[cm3_2ns];    
+
+        mapOffsets.section[cm4_2ns] = mapTotalN;
+        mapTotalN += NExtended * mapSectionsN.section[cm4_2ns];
+
+        mapOffsets.section[q_2ns] = mapTotalN;
+        mapTotalN += NExtended * qDim;
+        
+        // Set offsets for all stages in the basefield field (cm1, cm2, cm3, tmpExp)
         offsetPolsBasefield = mapOffsets.section[cm3_2ns];
 
         mapOffsets.section[cm3_n] = offsetPolsBasefield;
@@ -314,9 +323,30 @@ void StarkInfo::setMapOffsets() {
         offsetPolsBasefield += N * mapSectionsN.section[tmpExp_n];
 
         tmpExp_end_memory = mapOffsets.section[tmpExp_n] + N * mapSectionsN.section[tmpExp_n];
-    }
+        if(offsetPolsBasefield > mapTotalN) mapTotalN = offsetPolsBasefield;
 
-    if(offsetPolsBasefield > mapTotalN) mapTotalN = offsetPolsBasefield;
+        // Stage FRIPolynomial
+        uint64_t offsetPolsFRI = mapOffsets.section[q_2ns];
+        mapOffsets.section[xDivXSubXi_2ns] = offsetPolsFRI;
+        offsetPolsFRI += 2 * NExtended * FIELD_EXTENSION;
+        
+        mapOffsets.section[f_2ns] = offsetPolsFRI;
+        offsetPolsFRI += NExtended * FIELD_EXTENSION;
+
+        if(offsetPolsFRI > mapTotalN) mapTotalN = offsetPolsFRI;
+
+        uint64_t offsetPolsEvals = mapOffsets.section[q_2ns];
+        mapOffsets.section[LEv] = offsetPolsEvals;
+        offsetPolsEvals += 2 * N * FIELD_EXTENSION;
+        
+        mapOffsets.section[evals] = offsetPolsEvals;
+        offsetPolsEvals += evMap.size() * omp_get_max_threads() * FIELD_EXTENSION;
+
+        mapNTTOffsetsHelpers["LEv"] = std::make_pair(offsetPolsEvals, N * FIELD_EXTENSION * 2);
+        offsetPolsEvals += N * FIELD_EXTENSION * 2;
+    
+        if(offsetPolsEvals > mapTotalN) mapTotalN = offsetPolsEvals;
+    }
     
     // Memory H1H2
     offsetsExtraMemoryH1H2.resize(puCtx.size());
@@ -389,8 +419,8 @@ void StarkInfo::setMapOffsets() {
         uint64_t startBuffer = mapOffsets.section[cm1_2ns_tmp] + NExtended * mapSectionsN.section[cm1_2ns];
         uint64_t memoryAvailable = mapTotalN - startBuffer;
         uint64_t memoryNTTHelperStage1 = NExtended * mapSectionsN.section[cm1_2ns];
-        if(memoryAvailable * minBlocks < memoryNTTHelperStage1) {
-            memoryAvailable = memoryNTTHelperStage1 / minBlocks;
+        if(memoryAvailable * maxBlocks < memoryNTTHelperStage1) {
+            memoryAvailable = memoryNTTHelperStage1 / maxBlocks;
             if(startBuffer + memoryAvailable > mapTotalN) {
                 mapTotalN = startBuffer + memoryAvailable;
             }   
@@ -406,8 +436,8 @@ void StarkInfo::setMapOffsets() {
         memoryAvailable = mapOffsets.section[cm3_2ns] - startBuffer;
         
         uint64_t memoryNTTHelperStage2 = NExtended * mapSectionsN.section[cm2_2ns];
-        if(memoryAvailable * minBlocks < memoryNTTHelperStage2) {
-            memoryAvailable = memoryNTTHelperStage2 / minBlocks; 
+        if(memoryAvailable * maxBlocks < memoryNTTHelperStage2) {
+            memoryAvailable = memoryNTTHelperStage2 / maxBlocks; 
         }
         mapNTTOffsetsHelpers["cm2_tmp"] = std::make_pair(startBuffer, memoryAvailable);
     }
@@ -421,7 +451,7 @@ void StarkInfo::setMapOffsets() {
         uint64_t memoryAvailableEnd = mapTotalN - startBufferEnd;
         uint64_t memoryAvailableExtended = mapOffsets.section[cm3_n] - startBufferExtended;
 
-        if(memoryAvailableExtended > memoryAvailableEnd && memoryAvailableExtended * minBlocks > memoryNTTHelperStage1) {
+        if(memoryAvailableExtended > memoryAvailableEnd && memoryAvailableExtended * maxBlocks > memoryNTTHelperStage1) {
             memoryAvailable = memoryAvailableExtended;
             startBuffer = startBufferExtended;
         } else {
@@ -433,8 +463,8 @@ void StarkInfo::setMapOffsets() {
         memoryAvailable = mapOffsets.section[cm3_2ns] - startBuffer;
     }
     
-    if(!reduceMemory && memoryAvailable * minBlocks < memoryNTTHelperStage1) {
-        memoryAvailable = memoryNTTHelperStage1 / minBlocks;
+    if(!reduceMemory && startBuffer >= offsetPolsBasefield && memoryAvailable * maxBlocks < memoryNTTHelperStage1) {
+        memoryAvailable = memoryNTTHelperStage1 / maxBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
         }   
@@ -445,8 +475,8 @@ void StarkInfo::setMapOffsets() {
     startBuffer = reduceMemory ? mapOffsets.section[cm4_2ns] : offsetPolsBasefield;
     memoryAvailable = reduceMemory ? mapOffsets.section[cm3_2ns] - startBuffer : mapTotalN - startBuffer;
     uint64_t memoryNTTHelperStage2 = NExtended * mapSectionsN.section[cm2_2ns];
-    if(!reduceMemory && memoryAvailable * minBlocks < memoryNTTHelperStage2) {
-        memoryAvailable = memoryNTTHelperStage2 / minBlocks;
+    if(!reduceMemory && startBuffer >= offsetPolsBasefield && memoryAvailable * maxBlocks < memoryNTTHelperStage2) {
+        memoryAvailable = memoryNTTHelperStage2 / maxBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
         }   
@@ -457,8 +487,8 @@ void StarkInfo::setMapOffsets() {
     startBuffer = reduceMemory ? mapOffsets.section[tmpExp_n] : mapOffsets.section[cm4_2ns];
     memoryAvailable = reduceMemory ? mapOffsets.section[cm2_2ns] - startBuffer : mapTotalN - startBuffer;
     uint64_t memoryNTTHelperStage3 = NExtended * mapSectionsN.section[cm3_2ns];
-    if(!reduceMemory && memoryAvailable * minBlocks < memoryNTTHelperStage3) {
-        memoryAvailable = memoryNTTHelperStage3 / minBlocks;
+    if(!reduceMemory && startBuffer >= offsetPolsBasefield && memoryAvailable * maxBlocks < memoryNTTHelperStage3) {
+        memoryAvailable = memoryNTTHelperStage3 / maxBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
         }   
@@ -470,8 +500,8 @@ void StarkInfo::setMapOffsets() {
     startBuffer = mapOffsets.section[q_2ns] + NExtended * qDim;
     memoryAvailable = reduceMemory ? mapOffsets.section[cm3_2ns] - startBuffer : mapTotalN - startBuffer;
     uint64_t memoryNTTHelperStage4 = NExtended * mapSectionsN.section[cm4_2ns];
-    if(!reduceMemory && memoryAvailable * minBlocks < memoryNTTHelperStage4) {
-        memoryAvailable = memoryNTTHelperStage4 / minBlocks;
+    if(!reduceMemory && startBuffer >= offsetPolsBasefield && memoryAvailable * maxBlocks < memoryNTTHelperStage4) {
+        memoryAvailable = memoryNTTHelperStage4 / maxBlocks;
         if(startBuffer + memoryAvailable > mapTotalN) {
             mapTotalN = startBuffer + memoryAvailable;
         }   
