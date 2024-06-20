@@ -38,6 +38,7 @@ namespace Fflonk {
 
         FrElement *reservedMemoryPtr;
         uint64_t reservedMemorySize;
+        bool useReservedMemoryForPrecomputedBuffer;
 
         FrElement *precomputedBigBuffer;
         G1PointAffine *PTau;
@@ -50,9 +51,12 @@ namespace Fflonk {
         FrElement *buffInternalWitness;
         FrElement *buffWitness;
 
-        Zkey::Addition<Engine> *additionsBuff;
+        u_int32_t *additionsSignalId1;
+        u_int32_t *additionsSignalId2;
+        FrElement *additionsFactor1;
+        FrElement *additionsFactor2;
 
-        u_int64_t lengthBatchInversesBuffer;
+        u_int64_t lengthAdditionalBuffer;
 
         FrElement *inverses;
         FrElement *products;
@@ -77,11 +81,13 @@ namespace Fflonk {
         SnarkProof<Engine> *proof;
     public:
         FflonkProver(Engine &E);
-        FflonkProver(Engine &E, void* reservedMemoryPtr, uint64_t reservedMemorySize);
+        FflonkProver(Engine &E, void* reservedMemoryPtr, uint64_t reservedMemorySize, bool useReservedMemoryForPrecomputedBuffer = false);
 
         ~FflonkProver();
 
         void setZkey(BinFileUtils::BinFile *fdZkey);
+
+        uint64_t getLengthPrecomputedBuffer(uint64_t domainSize, uint64_t nPublics);
 
         std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns);
         std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, FrElement *wtns, WtnsUtils::Header* wtnsHeader = NULL);
@@ -90,7 +96,7 @@ namespace Fflonk {
         std::tuple <json, json> prove(FrElement *wtns, WtnsUtils::Header* wtnsHeader = NULL);
 
     protected:
-        void initialize(void* reservedMemoryPtr, uint64_t reservedMemorySize = 0);
+        void initialize(void* reservedMemoryPtr, uint64_t reservedMemorySize = 0, bool useReservedMemoryForPrecomputedBuffer = false);
 
         void removePrecomputedData();
 

@@ -16,11 +16,12 @@ using namespace CPlusPlusLogging;
 namespace Fflonk
 {
     template <typename Engine>
-    void FflonkProver<Engine>::initialize(void* reservedMemoryPtr, uint64_t reservedMemorySize)
+    void FflonkProver<Engine>::initialize(void* reservedMemoryPtr, uint64_t reservedMemorySize, bool useReservedMemoryForPrecomputedBuffer)
     {
         zkey = NULL;
         this->reservedMemoryPtr = (FrElement *)reservedMemoryPtr;
         this->reservedMemorySize = reservedMemorySize;
+        this->useReservedMemoryForPrecomputedBuffer = useReservedMemoryForPrecomputedBuffer;
 
         curveName = CurveUtils::getCurveNameByEngine();
 
@@ -35,9 +36,9 @@ namespace Fflonk
     }
 
     template <typename Engine>
-    FflonkProver<Engine>::FflonkProver(Engine &_E, void* reservedMemoryPtr, uint64_t reservedMemorySize) : E(_E)
+    FflonkProver<Engine>::FflonkProver(Engine &_E, void* reservedMemoryPtr, uint64_t reservedMemorySize, bool useReservedMemoryForPrecomputedBuffer) : E(_E)
     {
-        initialize(reservedMemoryPtr, reservedMemorySize);
+        initialize(reservedMemoryPtr, reservedMemorySize, useReservedMemoryForPrecomputedBuffer);
     }
 
     template <typename Engine>
@@ -51,17 +52,21 @@ namespace Fflonk
     template<typename Engine>
     void FflonkProver<Engine>::removePrecomputedData() {
         // DELETE RESERVED MEMORY (if necessary)
-        delete[] precomputedBigBuffer;
-        delete[] mapBuffersBigBuffer;
-        delete[] buffInternalWitness;
-
         if(NULL == reservedMemoryPtr) {
             delete[] inverses;
             delete[] products;
+            delete[] buffInternalWitness;
             delete[] nonPrecomputedBigBuffer;
+            delete[] additionsFactor1;
+            delete[] additionsFactor2;
+            delete[] mapBuffersBigBuffer;
+            delete[] additionsSignalId1;
+            delete[] additionsSignalId2;
+        } else {
+            if(!useReservedMemoryForPrecomputedBuffer) {
+                delete[] precomputedBigBuffer;
+            }
         }
-
-        delete additionsBuff;
 
         delete fft;
 
@@ -92,9 +97,27 @@ namespace Fflonk
     }
 
     template<typename Engine>
+    uint64_t FflonkProver<Engine>::getLengthPrecomputedBuffer(uint64_t domainSize, uint64_t nPublics) {
+        uint64_t lengthPrecomputedBigBuffer = 0;
+        lengthPrecomputedBigBuffer += domainSize * 1 * 8; // Polynomials QL, QR, QM, QO, QC, Sigma1, Sigma2 & Sigma3
+        lengthPrecomputedBigBuffer += domainSize * 8 * 1; // Polynomial  C0
+
+        // Precomputed 2 > evaluations buffer
+        lengthPrecomputedBigBuffer += domainSize * 4 * 8; // Evaluations QL, QR, QM, QO, QC, Sigma1, Sigma2, Sigma3
+        lengthPrecomputedBigBuffer += domainSize * 4 * nPublics; // Evaluations Lagrange1
+
+        // Precomputed 3 > ptau buffer
+        lengthPrecomputedBigBuffer += domainSize * 9 * sizeof(G1PointAffine) / sizeof(FrElement); // PTau buffer
+
+        return lengthPrecomputedBigBuffer;
+    }
+
+    template<typename Engine>
     void FflonkProver<Engine>::setZkey(BinFileUtils::BinFile *fdZkey) {
         try
         {
+            std::ostringstream ss;
+
             if(NULL != zkey) {
                 removePrecomputedData();
             }
@@ -130,16 +153,20 @@ namespace Fflonk
             // PRECOMPUTED BIG BUFFER
             ////////////////////////////////////////////////////
             // Precomputed 1 > polynomials buffer
-            uint64_t lengthPrecomputedBigBuffer = 0;
-            lengthPrecomputedBigBuffer += zkey->domainSize * 1 * 8; // Polynomials QL, QR, QM, QO, QC, Sigma1, Sigma2 & Sigma3
-            lengthPrecomputedBigBuffer += zkey->domainSize * 8 * 1; // Polynomial  C0
-            // Precomputed 2 > evaluations buffer
-            lengthPrecomputedBigBuffer += zkey->domainSize * 4 * 8; // Evaluations QL, QR, QM, QO, QC, Sigma1, Sigma2, Sigma3
-            lengthPrecomputedBigBuffer += zkey->domainSize * 4 * zkey->nPublic; // Evaluations Lagrange1
-            // Precomputed 3 > ptau buffer
-            lengthPrecomputedBigBuffer += zkey->domainSize * 9 * sizeof(G1PointAffine) / sizeof(FrElement); // PTau buffer
+            uint64_t lengthPrecomputedBigBuffer = getLengthPrecomputedBuffer(zkey->domainSize, zkey->nPublic);
 
-            precomputedBigBuffer = new FrElement[lengthPrecomputedBigBuffer];
+            if(reservedMemoryPtr != NULL && this->useReservedMemoryForPrecomputedBuffer) {
+                if(lengthPrecomputedBigBuffer * sizeof(FrElement) > reservedMemorySize) {
+                    ss.str("");
+                    ss << "Not enough reserved memory to store all precomputed buffer. Increase reserved memory size at least to "
+                        << (lengthPrecomputedBigBuffer) * sizeof(FrElement) << " bytes";
+                    throw std::runtime_error(ss.str());
+                } else {
+                    precomputedBigBuffer = reservedMemoryPtr;
+                }
+            } else {
+                precomputedBigBuffer = new FrElement[lengthPrecomputedBigBuffer];
+            }
 
             polPtr["Sigma1"] = &precomputedBigBuffer[0];
             polPtr["Sigma2"] = polPtr["Sigma1"] + zkey->domainSize;
@@ -198,7 +225,6 @@ namespace Fflonk
             polynomials["QO"]->fixDegree();
             polynomials["QC"]->fixDegree();
 
-            std::ostringstream ss;
             ss << "... Reading Q selector evaluations ";
 
             // Reserve memory for Q's evaluations
@@ -285,52 +311,6 @@ namespace Fflonk
                                 (G1PointAffine *)fdZkey->getSectionData(Zkey::ZKEY_FF_PTAU_SECTION),
                                 (zkey->domainSize * 9) * sizeof(G1PointAffine), nThreads);
 
-            // Load A, B & C map buffers
-            LOG_TRACE("... Loading A, B & C map buffers");
-
-            u_int64_t byteLength = sizeof(u_int32_t) * zkey->nConstraints;
-
-            mapBuffersBigBuffer = new u_int32_t[zkey->nConstraints * 3];
-
-            mapBuffers["A"] = mapBuffersBigBuffer;
-            mapBuffers["B"] = mapBuffers["A"] + zkey->nConstraints;
-            mapBuffers["C"] = mapBuffers["B"] + zkey->nConstraints;
-
-            buffInternalWitness = new FrElement[zkey->nAdditions];
-
-            LOG_TRACE("··· Loading additions");
-            fdZkey->startReadSection(Zkey::ZKEY_FF_ADDITIONS_SECTION);
-
-            additionsBuff = new Zkey::Addition<Engine>[zkey->nAdditions];
-
-            for (uint64_t i = 0; i < zkey->nAdditions; i++) {
-                Zkey::Addition<Engine> addition;
-
-                addition.signalId1 = fdZkey->readU32LE();
-                addition.signalId2 = fdZkey->readU32LE();
-
-                memcpy(&addition.factor1, fdZkey->read(sizeof(FrElement)), sizeof(FrElement));
-                memcpy(&addition.factor2, fdZkey->read(sizeof(FrElement)), sizeof(FrElement));
-
-                additionsBuff[i] = addition;
-            }
-
-            fdZkey->endReadSection();
-
-            LOG_TRACE("··· Loading map buffers");
-            ThreadUtils::parset(mapBuffers["A"], 0, byteLength * 3, nThreads);
-
-            // Read zkey sections and fill the buffers
-            ThreadUtils::parcpy(mapBuffers["A"],
-                                (FrElement *)fdZkey->getSectionData(Zkey::ZKEY_FF_A_MAP_SECTION),
-                                byteLength, nThreads);
-            ThreadUtils::parcpy(mapBuffers["B"],
-                                (FrElement *)fdZkey->getSectionData(Zkey::ZKEY_FF_B_MAP_SECTION),
-                                byteLength, nThreads);
-            ThreadUtils::parcpy(mapBuffers["C"],
-                                (FrElement *)fdZkey->getSectionData(Zkey::ZKEY_FF_C_MAP_SECTION),
-                                byteLength, nThreads);
-
             transcript = new Keccak256Transcript<Engine>(E);
             proof = new SnarkProof<Engine>(E, "fflonk");
 
@@ -342,16 +322,13 @@ namespace Fflonk
             roots["S2h2"] = new FrElement[3];
             roots["S2h3"] = new FrElement[3];
 
-            lengthBatchInversesBuffer = zkey->domainSize * 2;
-
-            if(NULL == this->reservedMemoryPtr) {
-                inverses = new FrElement[zkey->domainSize];
-                products = new FrElement[zkey->domainSize];
-            } else {
-                inverses = this->reservedMemoryPtr;
-                products = inverses + zkey->domainSize;
-            }
-
+            lengthAdditionalBuffer = zkey->domainSize; // Inverses
+            lengthAdditionalBuffer += zkey->domainSize; // Products
+            lengthAdditionalBuffer += zkey->nAdditions; // BuffInternalWitness
+            lengthAdditionalBuffer += 2* zkey->nAdditions; // AdditionsFactor1 && AdditionsFactor2
+            lengthAdditionalBuffer += zkey->nAdditions * 2 * sizeof(u_int32_t) / sizeof(FrElement); // AdditionsSignalId1 && AdditionsSignalId2
+            lengthAdditionalBuffer += zkey->nConstraints * 3 * sizeof(u_int32_t) / sizeof(FrElement); // mapBuffersBigBuffer 
+            
             ////////////////////////////////////////////////////
             // NON-PRECOMPUTED BIG BUFFER
             ////////////////////////////////////////////////////
@@ -374,14 +351,24 @@ namespace Fflonk
             if(NULL == this->reservedMemoryPtr) {
                 nonPrecomputedBigBuffer = new FrElement[lengthNonPrecomputedBigBuffer];
             } else {
-                if((lengthBatchInversesBuffer + lengthNonPrecomputedBigBuffer) * sizeof(FrElement) > reservedMemorySize) {
+                uint64_t totalLength = lengthAdditionalBuffer + lengthNonPrecomputedBigBuffer;
+
+                if(useReservedMemoryForPrecomputedBuffer) {
+                    totalLength += lengthPrecomputedBigBuffer;
+                }
+
+                if(totalLength * sizeof(FrElement) > reservedMemorySize) {
                     ss.str("");
                     ss << "Not enough reserved memory to generate a prove. Increase reserved memory size at least to "
-                        << (lengthBatchInversesBuffer + lengthNonPrecomputedBigBuffer) * sizeof(FrElement) << " bytes";
+                        << totalLength * sizeof(FrElement) << " bytes";
                     throw std::runtime_error(ss.str());
                 }
 
-                nonPrecomputedBigBuffer = this->reservedMemoryPtr + lengthBatchInversesBuffer;
+                if(!useReservedMemoryForPrecomputedBuffer) {
+                    nonPrecomputedBigBuffer = this->reservedMemoryPtr + lengthAdditionalBuffer;
+                } else {
+                    nonPrecomputedBigBuffer = this->reservedMemoryPtr + lengthAdditionalBuffer + lengthPrecomputedBigBuffer;
+                }      
             }
             
             polPtr["L"] = &nonPrecomputedBigBuffer[0];
@@ -419,6 +406,61 @@ namespace Fflonk
             buffers["T1z"]    = buffers["tmp"] + zkey->domainSize * 2;
             buffers["T2"]     = buffers["tmp"];
             buffers["T2z"]    = buffers["tmp"] + zkey->domainSize * 4;
+
+            if(NULL == this->reservedMemoryPtr) {
+                inverses = new FrElement[zkey->domainSize];
+                products = new FrElement[zkey->domainSize];
+                buffInternalWitness = new FrElement[zkey->nAdditions];
+                additionsFactor1 = new FrElement[zkey->nAdditions];
+                additionsFactor2 = new FrElement[zkey->nAdditions];
+                additionsSignalId1 = new u_int32_t[zkey->nAdditions];
+                additionsSignalId2 = new u_int32_t[zkey->nAdditions];
+                mapBuffersBigBuffer = new u_int32_t[zkey->nConstraints * 3];
+            } else {
+                inverses = this->reservedMemoryPtr;
+                if(useReservedMemoryForPrecomputedBuffer) inverses = inverses + lengthPrecomputedBigBuffer;
+                products = inverses + zkey->domainSize;
+                buffInternalWitness = products + zkey->domainSize;
+                additionsFactor1 = buffInternalWitness + zkey->nAdditions;
+                additionsFactor2 = additionsFactor1 + zkey->nAdditions;
+                additionsSignalId1 = (u_int32_t *)(additionsFactor2 + zkey->nAdditions);
+                additionsSignalId2 = additionsSignalId1 + zkey->nAdditions;
+                mapBuffersBigBuffer = additionsSignalId2 + zkey->nAdditions;
+            }
+
+            LOG_TRACE("··· Loading additions");
+            fdZkey->startReadSection(Zkey::ZKEY_FF_ADDITIONS_SECTION);
+
+            for (uint64_t i = 0; i < zkey->nAdditions; i++) {
+                additionsSignalId1[i] = fdZkey->readU32LE();
+                additionsSignalId2[i] = fdZkey->readU32LE();
+
+                memcpy(&additionsFactor1[i], fdZkey->read(sizeof(FrElement)), sizeof(FrElement));
+                memcpy(&additionsFactor2[i], fdZkey->read(sizeof(FrElement)), sizeof(FrElement));
+            }
+
+            fdZkey->endReadSection();
+
+            // Load A, B & C map buffers
+            LOG_TRACE("... Loading A, B & C map buffers");
+
+            mapBuffers["A"] = mapBuffersBigBuffer;
+            mapBuffers["B"] = mapBuffers["A"] + zkey->nConstraints;
+            mapBuffers["C"] = mapBuffers["B"] + zkey->nConstraints;
+
+            LOG_TRACE("··· Loading map buffers");
+            ThreadUtils::parset(mapBuffers["A"], 0, sizeof(u_int32_t) * zkey->nConstraints * 3, nThreads);
+
+            // Read zkey sections and fill the buffers
+            ThreadUtils::parcpy(mapBuffers["A"],
+                                (FrElement *)fdZkey->getSectionData(Zkey::ZKEY_FF_A_MAP_SECTION),
+                                sizeof(u_int32_t) * zkey->nConstraints, nThreads);
+            ThreadUtils::parcpy(mapBuffers["B"],
+                                (FrElement *)fdZkey->getSectionData(Zkey::ZKEY_FF_B_MAP_SECTION),
+                                sizeof(u_int32_t) * zkey->nConstraints, nThreads);
+            ThreadUtils::parcpy(mapBuffers["C"],
+                                (FrElement *)fdZkey->getSectionData(Zkey::ZKEY_FF_C_MAP_SECTION),
+                                sizeof(u_int32_t) * zkey->nConstraints, nThreads);
         }
         catch (const std::exception &e)
         {
@@ -621,17 +663,15 @@ namespace Fflonk
     template <typename Engine>
     void FflonkProver<Engine>::calculateAdditions()
     {
-        cout << zkey->nAdditions << endl;
-
         for (u_int32_t i = 0; i < zkey->nAdditions; i++)
         {
             // Get witness value
-            FrElement witness1 = getWitness(additionsBuff[i].signalId1);
-            FrElement witness2 = getWitness(additionsBuff[i].signalId2);
+            FrElement witness1 = getWitness(additionsSignalId1[i]);
+            FrElement witness2 = getWitness(additionsSignalId2[i]);
 
             // Calculate final result
-            witness1 = E.fr.mul(additionsBuff[i].factor1, witness1);
-            witness2 = E.fr.mul(additionsBuff[i].factor2, witness2);
+            witness1 = E.fr.mul(additionsFactor1[i], witness1);
+            witness2 = E.fr.mul(additionsFactor2[i], witness2);
             buffInternalWitness[i] = E.fr.add(witness1, witness2);
         }
     }

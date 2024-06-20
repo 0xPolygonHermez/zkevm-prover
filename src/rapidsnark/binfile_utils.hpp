@@ -11,6 +11,8 @@ namespace BinFileUtils
     class BinFile
     {
 
+        bool useReservedMemory = false;
+        
         void *addr;
         u_int64_t size;
         u_int64_t pos;
@@ -33,7 +35,7 @@ namespace BinFileUtils
 
     public:
         BinFile(void *data, uint64_t size, std::string type, uint32_t maxVersion);
-        BinFile(std::string fileName, std::string type, uint32_t maxVersion);
+        BinFile(std::string fileName, std::string type, uint32_t maxVersion, void* reservedMemoryPtr = NULL, uint64_t reservedMemorySize = 0);
 
         ~BinFile();
 
@@ -55,7 +57,7 @@ namespace BinFileUtils
         void *read(uint64_t l);
     };
 
-    std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion);
+    std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion, void* reservedMemoryPtr = NULL, uint64_t reservedMemorySize = 0);
 }
 
 #endif // BINFILE_UTILS_H
