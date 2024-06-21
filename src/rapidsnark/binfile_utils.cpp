@@ -55,7 +55,7 @@ namespace BinFileUtils
         readingSection = NULL;
     }
 
-    BinFile::BinFile(std::string fileName, std::string _type, uint32_t maxVersion)
+    BinFile::BinFile(std::string fileName, std::string _type, uint32_t maxVersion,  void* reservedMemoryPtr, uint64_t reservedMemorySize)
     {
 
         int fd;
@@ -70,8 +70,16 @@ namespace BinFileUtils
 
         size = sb.st_size;
         close(fd);
-        addr = malloc(size);
 
+        if(NULL == reservedMemoryPtr) {
+            addr = malloc(size);
+        } else {
+            if(size > reservedMemorySize) {
+                throw std::runtime_error("There is not enough memory");
+            }
+            useReservedMemory = true;
+            addr = reservedMemoryPtr;
+        }
 
         // Determine the number of chunks and the size of each chunk
         size_t numChunks = 8; //omp_get_max_threads()/2;
@@ -130,7 +138,9 @@ namespace BinFileUtils
 
     BinFile::~BinFile()
     {
-        free(addr);
+        if(!useReservedMemory) {
+            free(addr);
+        }
     }
 
     void BinFile::startReadSection(u_int32_t sectionId, u_int32_t sectionPos)
@@ -241,9 +251,9 @@ namespace BinFileUtils
         return res;
     }
 
-    std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion)
+    std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion, void* reservedMemoryPtr, uint64_t reservedMemorySize)
     {
-        return std::unique_ptr<BinFile>(new BinFile(filename, type, maxVersion));
+        return std::unique_ptr<BinFile>(new BinFile(filename, type, maxVersion, reservedMemoryPtr, reservedMemorySize));
     }
 
 } // Namespace

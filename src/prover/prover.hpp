@@ -9,7 +9,6 @@
 #include "rom.hpp"
 #include "proof_fflonk.hpp"
 #include "alt_bn128.hpp"
-#include "groth16.hpp"
 #include "binfile_utils.hpp"
 #include "zkey_utils.hpp"
 #include "prover_request.hpp"
@@ -37,9 +36,7 @@ class Prover
     Starks *starksRecursive2;
 
     Fflonk::FflonkProver<AltBn128::Engine> *prover;
-    std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
-    std::unique_ptr<ZKeyUtils::Header> zkeyHeader;
     mpz_t altBbn128r;
 
 public:
@@ -54,10 +51,12 @@ private:
     pthread_t cleanerPthread; // Garbage collector
     pthread_mutex_t mutex;    // Mutex to protect the requests queues
     void *pAddress = NULL;
-    void *pAddressStarksRecursiveF = NULL;
     int protocolId;
     uint64_t polsSize;
     uint64_t N;
+
+    uint64_t domainSizeFflonk;
+    uint64_t nPublicsFflonk;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
