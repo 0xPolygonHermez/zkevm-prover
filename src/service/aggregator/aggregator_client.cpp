@@ -602,9 +602,21 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
 #endif
 
     // Set the 2 inputs
-    pProverRequest->aggregatedProofInput1 = json::parse(genAggregatedProofRequest.recursive_proof_1());
-    pProverRequest->aggregatedProofInput2 = json::parse(genAggregatedProofRequest.recursive_proof_2());
-
+    try {
+        pProverRequest->aggregatedProofInput1 = json::parse(genAggregatedProofRequest.recursive_proof_1());
+    } catch(json::parse_error &ex) {
+        zklog.error("AggregatorClient::GenAggregatedProof() parse recursive_proof_1, error = "  string(ex));
+        genAggregatedProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return fasle;
+    }
+    try {
+        pProverRequest->aggregatedProofInput2 = json::parse(genAggregatedProofRequest.recursive_proof_2());
+    } catch(json::parse_error &ex) {
+        zklog.error("AggregatorClient::GenAggregatedProof() parse recursive_proof_2, error = "  string(ex));
+        genAggregatedProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return fasle;
+    }
+    
     // Submit the prover request
     string uuid = prover.submitRequest(pProverRequest);
 
@@ -634,7 +646,13 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
 #endif
 
     // Set the input
-    pProverRequest->finalProofInput = json::parse(genFinalProofRequest.recursive_proof());
+    try {
+        pProverRequest->finalProofInput = json::parse(genFinalProofRequest.recursive_proof());
+    } catch(json::parse_error &ex) {
+        zklog.error("AggregatorClient::GenFinalProof() parse recursive_proof, error = "  string(ex));
+        genFinalProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return fasle;
+    }
 
     // Set the aggregator address
     string auxString = Remove0xIfPresent(genFinalProofRequest.aggregator_addr());
