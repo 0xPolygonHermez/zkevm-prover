@@ -76,6 +76,7 @@ int main()
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
+        cHelpersSteps.nrowsPack = NROWS_PACK;
 #else
         CHelpersSteps cHelpersSteps;
 #endif
