@@ -6,6 +6,7 @@
 
 class CHelpersStepsAvx512 : public CHelpersSteps {
 public:
+    uint64_t nrowsPack = 8;
     uint64_t nCols;
     vector<uint64_t> nColsStages;
     vector<uint64_t> nColsStagesAcc;
@@ -155,7 +156,7 @@ public:
     }
 
     virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
-        uint32_t nrowsPack =  8;
+        assert(nrowsPack == 8);
         bool domainExtended = parserParams.stage > 3 ? true : false;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint8_t *ops = &parserArgs.ops[parserParams.opsOffset];

@@ -93,6 +93,8 @@
 
 #define USE_GENERIC_PARSER true
 
+#define NROWS_PACK 4
+
 //#define MULTI_ROM_TEST
 
 

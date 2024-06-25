@@ -3,6 +3,7 @@
 
 class AllSteps : public CHelpersSteps {
 public:
+    uint64_t nrowsPack = 4;
     uint64_t nCols;
     vector<uint64_t> nColsStages;
     vector<uint64_t> nColsStagesAcc;
@@ -152,7 +153,7 @@ public:
     }
 
     void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
-        uint32_t nrowsPack =  4;
+        assert(nrowsPack == 4);
         bool domainExtended = parserParams.stage > 3 ? true : false;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint8_t *ops = &parserArgs.ops[parserParams.opsOffset];

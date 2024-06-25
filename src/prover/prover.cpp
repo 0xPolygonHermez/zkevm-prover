@@ -593,6 +593,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
+        cHelpersSteps.nrowsPack = NROWS_PACK;
 #else
         CHelpersSteps cHelpersSteps;
 #endif
@@ -838,6 +839,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
+        cHelpersSteps.nrowsPack = NROWS_PACK;
 #else
         CHelpersSteps cHelpersSteps;
 #endif        
@@ -944,6 +946,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
                 CHelpersStepsAvx512 cHelpersSteps;
         #elif defined(__PACK__) 
                 CHelpersStepsPack cHelpersSteps;
+                cHelpersSteps.nrowsPack = NROWS_PACK;
         #else
                 CHelpersSteps cHelpersSteps;
         #endif
