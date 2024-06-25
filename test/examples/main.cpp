@@ -6,6 +6,7 @@
     #include "chelpers_steps_avx512.hpp"
 #endif
 #include "chelpers_steps_pack.hpp"
+#include "chelpers_steps_gpu.hpp"
 #include "AllSteps.hpp"
 
 int main()
@@ -72,7 +73,9 @@ int main()
     allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
 
     if(USE_GENERIC_PARSER) {
-#ifdef __AVX512__
+#ifdef __USE_CUDA__
+        CHelpersStepsGPU cHelpersSteps;
+#elif defined(__AVX512__)
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
