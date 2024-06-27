@@ -6,7 +6,6 @@
 #include "main_sm/fork_6/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_7/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_8/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_8/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_9/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_fast.hpp"
 #if PROVER_FORK_ID >= 11
@@ -247,13 +246,8 @@ void Executor::processBatch (ProverRequest &proverRequest)
         }
         case 8: // fork_8
         {
-            if (config.useMainExecC) // Do not use in production; under development
-            {
-                //zklog.info("Executor::processBatch() fork 8 C");
-                mainExecutorC_fork_8.execute(proverRequest);
-            }
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            else if (config.useMainExecGenerated)
+            if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::processBatch() fork 8 generated");
                 fork_8::main_exec_generated_fast(mainExecutor_fork_8, proverRequest);
