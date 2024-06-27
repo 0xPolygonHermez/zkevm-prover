@@ -449,8 +449,7 @@ using grpc::Status;
         " oldAccInputHash=" + proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
         " oldBatchNum=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
         " chainId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.chainID) +
-        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
-            (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 7) && config.useMainExecC) ? " C" :
+        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) + (
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
              ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" :
 #endif
@@ -1284,8 +1283,7 @@ using grpc::Status;
         " oldAccInputHash=" + proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
         " oldBatchNum=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
         " chainId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.chainID) +
-        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
-            (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 7) && config.useMainExecC) ? " C" :
+        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) + (
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
              ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" :
 #endif
@@ -1987,8 +1985,7 @@ using grpc::Status;
         " oldAccInputHash=" + proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
         " oldBatchNum=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
         " chainId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.chainID) +
-        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
-            (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 7) && config.useMainExecC) ? " C" :
+        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) + (
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
              ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" :
 #endif

@@ -44,7 +44,6 @@ The configuration parameters can be of different uses:
 |`runUnitTest`|test|boolean|Runs a unit test that includes several component tests|false|RUN_UNIT_TEST|
 |**`executeInParallel`**|production|boolean|Executes secondary state machines in parallel, when possible|true|EXECUTE_IN_PARALLEL|
 |**`useMainExecGenerated`**|production|boolean|Executes main state machines in generated code, which is faster than native code|true|USE_MAIN_EXEC_GENERATED|
-|`useMainExecC`|tools|boolean|Executes main state machines in C code, instead of executing the ROM (do not use in production, under development)|false|USE_MAIN_EXEC_C|
 |`saveRequestToFile`|test|boolean|Saves executor GRPC requests to file, in text format|false|SAVE_REQUESTS_TO_FILE|
 |`saveInputToFile`|test|boolean|Saves executor GRPC input to file, in JSON format|false|SAVE_INPUT_TO_FILE|
 |`saveDbReadsToFile`|test|boolean|Saves executor reads to database to file, together with the input, in JSON format; the resulting file can be used as a self-contained input file that does not depend on any external database|false|SAVE_DB_READS_TO_FILE|

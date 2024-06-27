@@ -155,8 +155,6 @@ void Config::load(json &config)
     // Main SM executor
     ParseBool(config, "executeInParallel", "EXECUTE_IN_PARALLEL", executeInParallel, true);
     ParseBool(config, "useMainExecGenerated", "USE_MAIN_EXEC_GENERATED", useMainExecGenerated, true);
-    //ParseBool(config, "useMainExecC", "USE_MAIN_EXEC_C", useMainExecC, false);
-    useMainExecC = false; // Do not use in production; under development
 
     // Save to file
     ParseBool(config, "saveRequestToFile", "SAVE_REQUESTS_TO_FILE", saveRequestToFile, false);
@@ -399,7 +397,6 @@ void Config::print(void)
 
     zklog.info("    executeInParallel=" + to_string(executeInParallel));
     zklog.info("    useMainExecGenerated=" + to_string(useMainExecGenerated));
-    zklog.info("    useMainExecC=" + to_string(useMainExecC));
 
     if (executorROMLineTraces)
         zklog.info("    executorROMLineTraces=true");
