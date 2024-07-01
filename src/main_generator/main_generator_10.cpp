@@ -2164,9 +2164,9 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "    }\n";
             if (!bFastMode)
             {
-                code += "    pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);\n";
-                code += "    jmpnCondValue = jmpnCondValue >> 23;\n";
-                code += "    for (uint64_t index = 0; index < 9; ++index)\n";
+                code += "    pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue &" + to_string(forkInfo.N - 1) + ");\n";
+                code += "    jmpnCondValue = jmpnCondValue >>" + to_string(forkInfo.Nbits) + ";\n";
+                code += "    for (uint64_t index = 0; index < 8; ++index)\n";
                 code += "    {\n";
                 code += "        pols.hJmpnCondValueBit[index][i] = fr.fromU64(jmpnCondValue & 0x01);\n";
                 code += "        jmpnCondValue = jmpnCondValue >> 1;\n";
