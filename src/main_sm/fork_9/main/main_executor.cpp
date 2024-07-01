@@ -374,7 +374,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         outfile.close();
         }
 #endif
-
+#ifdef ENABLE_EXPERIMENTAL_CODE  
         if (zkPC == ecrecoverStoreArgsLabel && config.ECRecoverPrecalc)
         {
             zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);
@@ -398,6 +398,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.ecRecoverPrecalcBuffer.filled = false;
             }
         }
+#endif
 
 #ifdef LOG_FILENAME
         // Store fileName and line

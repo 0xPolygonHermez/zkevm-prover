@@ -2265,12 +2265,16 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 void eval_xAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element x3;
+#ifdef ENABLE_EXPERIMENTAL_CODE  
     if(ctx.ecRecoverPrecalcBuffer.filled == true){
         x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
     }else{
+#endif
         RawFec::Element y3;
         eval_AddPointEc(ctx, cmd, false, x3, y3);    
+#ifdef ENABLE_EXPERIMENTAL_CODE  
     }
+#endif
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
@@ -2278,12 +2282,16 @@ void eval_xAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element y3;
+#ifdef ENABLE_EXPERIMENTAL_CODE  
     if(ctx.ecRecoverPrecalcBuffer.filled == true){
         y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
     }else{
+#endif
         RawFec::Element x3;
         eval_AddPointEc(ctx, cmd, false, x3, y3);  
+#ifdef ENABLE_EXPERIMENTAL_CODE  
     }
+#endif
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
@@ -2291,12 +2299,16 @@ void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_xDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element x3;
+#ifdef ENABLE_EXPERIMENTAL_CODE  
     if(ctx.ecRecoverPrecalcBuffer.filled == true){
         x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
     }else{
+#endif
         RawFec::Element y3;
         eval_AddPointEc(ctx, cmd, true, x3, y3);    
+#ifdef ENABLE_EXPERIMENTAL_CODE  
     }
+#endif
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
@@ -2304,12 +2316,16 @@ void eval_xDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_yDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element y3;
+#ifdef ENABLE_EXPERIMENTAL_CODE  
     if(ctx.ecRecoverPrecalcBuffer.filled == true){
         y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
     }else{
+#endif
         RawFec::Element x3;
         eval_AddPointEc(ctx, cmd, true, x3, y3);    
+#ifdef ENABLE_EXPERIMENTAL_CODE  
     }
+#endif
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
@@ -2403,7 +2419,8 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3)
 {
-    
+
+#ifdef ENABLE_EXPERIMENTAL_CODE  
     // Check if results are buffered
     if(ctx.ecRecoverPrecalcBuffer.filled == true){
         if(ctx.ecRecoverPrecalcBuffer.pos < 2){
@@ -2414,6 +2431,7 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
         y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos-1];
         return ZKR_SUCCESS;
     }
+#endif
 
     // Check if we have just computed this operation
     if ( (ctx.lastECAdd.bDouble == dbl) &&

@@ -225,7 +225,7 @@ ECRecoverResult ECRecover(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_
     return ECR_NO_ERROR;
 }
 
-
+#ifdef ENABLE_EXPERIMENTAL_CODE
 int ECRecoverPrecalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, RawFec::Element* buffer, int nthreads){
 
     // Set the ECRecoverPrecalc s upper limit
@@ -330,6 +330,7 @@ int ECRecoverPrecalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class
     return mulPointEcJacobian1bitSave(p1_x, p1_y, k1, p2_x, p2_y, k2, p3_x, p3_y, buffer, nthreads);
    
 }
+#endif
 
 //
 // Implementation fiel operations:

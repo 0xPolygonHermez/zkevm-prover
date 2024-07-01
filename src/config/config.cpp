@@ -307,8 +307,7 @@ void Config::load(json &config)
     ParseU64(config, "fullTracerTraceReserveSize", "FULL_TRACER_TRACE_RESERVE_SIZE", fullTracerTraceReserveSize, 256*1024);
 
     // ECRecover
-    //ParseBool(config, "ECRecoverPrecalc", "ECRECOVER_PRECALC", ECRecoverPrecalc, false);
-    ECRecoverPrecalc = false; // Do not use in production; under development
+    ParseBool(config, "ECRecoverPrecalc_experimental", "ECRECOVER_PRECALC_EXPERIMENTAL", ECRecoverPrecalc_experimental, false);
     ParseU64(config, "ECRecoverPrecalcNThreads", "ECRECOVER_PRECALC_N_THREADS", ECRecoverPrecalcNThreads, 16);
 
     // Logs
@@ -518,7 +517,7 @@ void Config::print(void)
     zklog.info("    log2DbVersionsAssociativeCacheIndexesSize=" + to_string(log2DbVersionsAssociativeCacheIndexesSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
-    zklog.info("    ECRecoverPrecalc=" + to_string(ECRecoverPrecalc));
+    zklog.info("    ECRecoverPrecalc_experimental=" + to_string(ECRecoverPrecalc_experimental));
     zklog.info("    ECRecoverPrecalcNThreads=" + to_string(ECRecoverPrecalcNThreads));
 }
 

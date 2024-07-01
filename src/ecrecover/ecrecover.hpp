@@ -18,7 +18,9 @@ typedef enum
 } ECRecoverResult;
 
 ECRecoverResult ECRecover(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, mpz_class &address);
+#ifdef ENABLE_EXPERIMENTAL_CODE
 int ECRecoverPrecalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, RawFec::Element* buffer, int nthreads = 16);
+#endif
 
 // We use that p = 3 mod 4 => r = a^((p+1)/4) is a square root of a
 // https://www.rieselprime.de/ziki/Modular_square_root

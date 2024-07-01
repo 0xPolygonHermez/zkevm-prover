@@ -198,7 +198,7 @@ public:
     uint64_t fullTracerTraceReserveSize;
 
     // EC Recover
-    bool ECRecoverPrecalc;
+    bool ECRecoverPrecalc_experimental;
     uint64_t ECRecoverPrecalcNThreads;
 
     // Logs format
