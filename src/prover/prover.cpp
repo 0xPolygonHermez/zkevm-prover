@@ -50,7 +50,7 @@
 #include "exit_process.hpp"
 #include "memory.cuh"
 
-#ifdef __USE_CUDA__
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
 #include "cuda_utils.hpp"
 #include "ntt_goldilocks.hpp"
 #include <pthread.h>
@@ -130,7 +130,7 @@ Prover::Prover(Goldilocks &fr,
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
-#ifdef __USE_CUDA__
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
             alloc_pinned_mem(uint64_t(1<<24) * _starkInfo.mapSectionsN.section[eSection::cm1_n]);
             warmup_gpu();
 #endif
@@ -187,7 +187,7 @@ Prover::~Prover()
         {
             free_zkevm(pAddress);
         }
-#ifdef __USE_CUDA__
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
         free_pinned_mem();
 #endif
 
