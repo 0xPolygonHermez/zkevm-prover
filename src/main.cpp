@@ -334,6 +334,13 @@ int main(int argc, char **argv)
     // Print the number of cores
     zklog.info("Number of cores=" + to_string(getNumberOfCores()));
 
+    // Print AVX mode used
+#ifdef __AVX512__
+    zklog.info(" Vectorization based on AVX512");
+#else
+    zklog.info(" Vectorization based on AVX2");
+#endif
+
     // Print the hostname and the IP address
     string ipAddress;
     getIPAddress(ipAddress);
