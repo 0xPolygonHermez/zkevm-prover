@@ -1721,6 +1721,15 @@ using grpc::Status;
         return Status::CANCELLED;
     }
 
+    // If the config.hashDBSingleton is set to true, reject any request
+    // We can only process stateless requests if they don't share the DB cache with other requests
+    if (config.hashDBSingleton)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() called with config.hashDBSingleton=true");
+        response->set_error(executor::v1::EXECUTOR_ERROR_DB_ERROR);
+        return Status::OK;
+    }
+
     //TimerStart(EXECUTOR_PROCESS_BATCH);
     struct timeval EXECUTOR_PROCESS_BATCH_start;
     gettimeofday(&EXECUTOR_PROCESS_BATCH_start,NULL);
