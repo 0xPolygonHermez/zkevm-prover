@@ -284,6 +284,11 @@ uint32_t DatabaseMTCache::fillCacheCahotic(){
     uint32_t ndist = 1<<20;
     uint32_t mask = ndist-1;
     char ** memory_distorsion = (char**) malloc(ndist*sizeof(char*));
+    if(memory_distorsion == NULL)
+    {
+        zklog.error("DatabaseMTCache::fillCacheCahotic() failed calling malloc()");
+        exitProcess();
+    }
     for (uint32_t i=0; i<ndist; i++)
     {
         memory_distorsion[i] = NULL;
@@ -313,6 +318,11 @@ uint32_t DatabaseMTCache::fillCacheCahotic(){
             free(memory_distorsion[i & mask]);
         }
         memory_distorsion[i & mask] = (char*) malloc((1<<20)*sizeof(char));
+        if(memory_distorsion[i & mask] == NULL)
+        {
+            zklog.error("DatabaseMTCache::fillCacheCahotic() failed calling malloc()");
+            exitProcess();
+        }
         if(i%2==0) memory_distorsion[i & mask][3728] = 'a';
     }
     for(uint32_t i=0; i<ndist; i++)

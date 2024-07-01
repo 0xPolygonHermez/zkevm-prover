@@ -3,6 +3,9 @@
 #include "zkey.hpp"
 #include "zkey_fflonk.hpp"
 #include <iostream>
+#include "zklog.hpp"
+#include "exit_process.hpp"
+
 
 namespace Zkey {
     FflonkZkeyHeader::FflonkZkeyHeader() {
@@ -44,14 +47,46 @@ namespace Zkey {
         fflonkZkeyHeader->nConstraints = f->readU32LE();
 
          // Memory allocation for void* members (assuming FrElement is a known size)
-        fflonkZkeyHeader->k1 = malloc(fflonkZkeyHeader->n8r); 
+        fflonkZkeyHeader->k1 = malloc(fflonkZkeyHeader->n8r);
+        if(fflonkZkeyHeader->k1 == NULL){
+            zklog.error("Memory allocation failed for k1");
+            exitProcess();
+        } 
         fflonkZkeyHeader->k2 = malloc(fflonkZkeyHeader->n8r);
+        if(fflonkZkeyHeader->k2 == NULL){
+            zklog.error("Memory allocation failed for k2");
+            exitProcess();
+        }
         fflonkZkeyHeader->w3 = malloc(fflonkZkeyHeader->n8r);
+        if(fflonkZkeyHeader->w3 == NULL){
+            zklog.error("Memory allocation failed for w3");
+            exitProcess();
+        }
         fflonkZkeyHeader->w4 = malloc(fflonkZkeyHeader->n8r);
+        if(fflonkZkeyHeader->w4 == NULL){
+            zklog.error("Memory allocation failed for w4");
+            exitProcess();
+        }
         fflonkZkeyHeader->w8 = malloc(fflonkZkeyHeader->n8r);
+        if(fflonkZkeyHeader->w8 == NULL){
+            zklog.error("Memory allocation failed for w8");
+            exitProcess();
+        }
         fflonkZkeyHeader->wr = malloc(fflonkZkeyHeader->n8r);
+        if(fflonkZkeyHeader->wr == NULL){
+            zklog.error("Memory allocation failed for wr");
+            exitProcess();
+        }
         fflonkZkeyHeader->X2 = malloc(fflonkZkeyHeader->n8q * 4);
+        if(fflonkZkeyHeader->X2 == NULL){
+            zklog.error("Memory allocation failed for X2");
+            exitProcess();
+        }
         fflonkZkeyHeader->C0 = malloc(fflonkZkeyHeader->n8q * 2);
+        if(fflonkZkeyHeader->C0 == NULL){
+            zklog.error("Memory allocation failed for C0");
+            exitProcess();
+        }
 
         memcpy(fflonkZkeyHeader->k1, f->read(fflonkZkeyHeader->n8r), fflonkZkeyHeader->n8r);
         memcpy(fflonkZkeyHeader->k2, f->read(fflonkZkeyHeader->n8r), fflonkZkeyHeader->n8r);
