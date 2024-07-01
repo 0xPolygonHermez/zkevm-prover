@@ -345,6 +345,7 @@ void ECRecoverTest(void)
                 zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " address=" + address.get_str(16) + " expectedAddress=" + ecrecoverTestVectors[i].address);
                 failed = true;
             }
+#ifdef ENABLE_EXPERIMENTAL_CODE  
             RawFec::Element buffer[1026];
             int precres = ECRecoverPrecalc(signature, r, s, v, ecrecoverTestVectors[i].precompiled, buffer, 2);
             if(result != ECR_NO_ERROR )
@@ -361,6 +362,7 @@ void ECRecoverTest(void)
                     failed = true;
                 }
             }
+#endif
             if (failed)
                 failedTests++;
 #endif

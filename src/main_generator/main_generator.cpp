@@ -610,6 +610,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         code += "    outfile.close();\n";
 #endif
 
+#ifdef ENABLE_EXPERIMENTAL_CODE
         // ECRECOVER PRE-CALCULATION 
         if(rom["labels"].contains("ecrecover_store_args") && zkPC == rom["labels"]["ecrecover_store_args"]){
             code += "    //ECRecover pre-calculation \n";
@@ -643,7 +644,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "       ctx.ecRecoverPrecalcBuffer.filled = false;\n";
             code += "    }\n";
         }
-        
+ #endif       
         // INITIALIZATION
 
         bool opInitialized = false;
