@@ -33,24 +33,6 @@ HashDBRemote::~HashDBRemote()
     tms.print("HashDBRemote");
 #endif
 }
-zkresult HashDBRemote::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]){
-
-    ::grpc::ClientContext context;
-    ::google::protobuf::Empty request;
-    ::hashdb::v1::GetLatestStateRootResponse response;
-
-    grpc::Status s = stub->GetLatestStateRoot(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK)
-    {
-        zklog.error("HashDBRemote::getLatestStateRoot() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
-        return ZKR_HASHDB_GRPC_ERROR;
-    }
-
-    grpc2fea(fr, response.latest_root(), stateRoot);
-
-    return ZKR_SUCCESS;
-
-}
 
 zkresult HashDBRemote::set (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
@@ -406,77 +388,6 @@ zkresult HashDBRemote::flush(const string &batchUUID, const string &newStateRoot
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult HashDBRemote::purge (const string &batchUUID, const Goldilocks::Element (&newStateRoot)[4], const Persistence persistence)
-{
-#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
-    gettimeofday(&t, NULL);
-#endif
-    ::grpc::ClientContext context;
-    ::hashdb::v1::PurgeRequest request;
-    request.set_batch_uuid(batchUUID);
-    hashdb::v1::Fea *new_state_root = new hashdb::v1::Fea();
-    if (new_state_root == NULL)
-    {
-        zklog.error("HashDBRemote::purge() failed allocating hashdb::v1::Fea for new_state_root");
-        exitProcess();
-    }
-    new_state_root->set_fe0(fr.toU64(newStateRoot[0]));
-    new_state_root->set_fe1(fr.toU64(newStateRoot[1]));
-    new_state_root->set_fe2(fr.toU64(newStateRoot[2]));
-    new_state_root->set_fe3(fr.toU64(newStateRoot[3]));
-    request.set_allocated_new_state_root(new_state_root);
-    request.set_persistence((hashdb::v1::Persistence)persistence);
-    ::hashdb::v1::PurgeResponse response;
-    grpc::Status s = stub->Purge(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK)
-    {
-        zklog.error("HashDBRemote:purge() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
-    }
-
-#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
-    tms.add("purge", TimeDiff(t));
-#endif
-    return ZKR_SUCCESS;
-}
-
-zkresult HashDBRemote::consolidateState (const Goldilocks::Element (&virtualStateRoot)[4], const Persistence persistence, Goldilocks::Element (&consolidatedStateRoot)[4], uint64_t &flushId, uint64_t &storedFlushId)
-{
-#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
-    gettimeofday(&t, NULL);
-#endif
-    ::grpc::ClientContext context;
-
-    // Prepare the ConsolidateStateRequest
-    ::hashdb::v1::ConsolidateStateRequest request;
-    hashdb::v1::Fea *virtual_state_root = new hashdb::v1::Fea();
-    if (virtual_state_root == NULL)
-    {
-        zklog.error("HashDBRemote::consolidateState() failed allocating hashdb::v1::Fea");
-        exitProcess();
-    }
-    fea2grpc(fr, virtualStateRoot, virtual_state_root);
-    request.set_allocated_virtual_state_root(virtual_state_root);
-    request.set_persistence((hashdb::v1::Persistence)persistence);
-
-    // Call ConsolidateState()
-    ::hashdb::v1::ConsolidateStateResponse response;
-    grpc::Status s = stub->ConsolidateState(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK)
-    {
-        zklog.error("HashDBRemote:consolidateState() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
-    }
-
-    // Get return data from the response
-    grpc2fea(fr, response.consolidated_state_root(), consolidatedStateRoot);
-    flushId = response.flush_id();
-    storedFlushId = response.stored_flush_id();
-
-#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
-    tms.add("consolidateState", TimeDiff(t));
-#endif
-    return static_cast<zkresult>(response.result().code());
-}
-
 zkresult HashDBRemote::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
@@ -559,78 +470,6 @@ zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, u
 #endif
 
     return ZKR_SUCCESS;
-}
-
-zkresult HashDBRemote::readTree (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> &hashValues)
-{
-#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
-    gettimeofday(&t, NULL);
-#endif
-    ::grpc::ClientContext context;
-
-    // Prepare the ReadTreeRequest
-    ::hashdb::v1::ReadTreeRequest request;
-    hashdb::v1::Fea *state_root = new hashdb::v1::Fea();
-    if (state_root == NULL)
-    {
-        zklog.error("HashDBRemote::readTree() failed allocating hashdb::v1::Fea");
-        exitProcess();
-    }
-    fea2grpc(fr, root, state_root);
-    request.set_allocated_state_root(state_root);
-
-    // Prepare the keys
-    for (uint64_t i=0; i<keyValues.size(); i++)
-    {
-        hashdb::v1::Fea *keyFea = request.add_keys();
-        fea2grpc(fr, keyValues[i].key, keyFea);
-    }
-
-    // Call ReadTree()
-    ::hashdb::v1::ReadTreeResponse response;
-    grpc::Status s = stub->ReadTree(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK)
-    {
-        zklog.error("HashDBRemote:readTree() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
-    }
-    else
-    {
-        // Get return data from the response
-        keyValues.clear();
-        for (int64_t i=0; i<response.key_value_size(); i++)
-        {
-            KeyValue kv;
-            kv.key[0] = fr.fromU64(response.key_value(i).key().fe0());
-            kv.key[1] = fr.fromU64(response.key_value(i).key().fe1());
-            kv.key[2] = fr.fromU64(response.key_value(i).key().fe2());
-            kv.key[3] = fr.fromU64(response.key_value(i).key().fe3());
-            string valueString = response.key_value(i).value();
-            if (!stringIsHex(valueString))
-            {
-                zklog.error("HashDBRemote:readTree() found invalid valueString=" + valueString);
-                exitProcess();
-            }
-            if (valueString.size() > 64)
-            {
-                zklog.error("HashDBRemote:readTree() found invalid valueString.size=" + to_string(valueString.size()));
-                exitProcess();
-            }
-            kv.value.set_str(response.key_value(i).value(), 16);
-            keyValues.emplace_back(kv);
-        }
-    }
-
-#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
-    tms.add("consolidateState", TimeDiff(t));
-#endif
-
-    return static_cast<zkresult>(response.result().code());
-}
-
-zkresult HashDBRemote::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent)
-{
-    zklog.error("HashDBRemote::writeTree() called, but this method is only allowed locally");
-    return ZKR_UNSPECIFIED;
 }
 
 zkresult HashDBRemote::cancelBatch (const string &batchUUID)

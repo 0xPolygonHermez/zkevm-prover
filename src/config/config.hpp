@@ -43,9 +43,6 @@ public:
     bool runCheckTreeTest;
     string checkTreeRoot;
     bool runDatabasePerformanceTest;
-    bool runPageManagerTest;
-    bool runKeyValueTreeTest;
-    bool runSMT64Test;
     bool runUnitTest;
 
     bool executeInParallel;
@@ -82,12 +79,7 @@ public:
     // HashDB service
     uint16_t hashDBServerPort;
     string hashDBURL;
-    bool hashDB64;
-    uint64_t kvDBMaxVersions;
     string dbCacheSynchURL;
-    string hashDBFileName;
-    uint64_t hashDBFileSize;
-    string hashDBFolder;
     bool hashDBSingleton;
 
     // Aggregator service (client)

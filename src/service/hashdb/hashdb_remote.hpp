@@ -14,7 +14,6 @@
 #include "zkresult.hpp"
 #include "utils/time_metric.hpp"
 #include "timer.hpp"
-#include "database_64.hpp"
 
 class HashDBRemote : public HashDBInterface
 {
@@ -32,7 +31,6 @@ public:
 
     // HashDBInterface methods
         
-    zkresult getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]);
     zkresult set                (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog);
     zkresult get                (const string &batchUUID, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog);
     zkresult setProgram         (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence);
@@ -43,13 +41,9 @@ public:
     void     startBlock         (const string &batchUUID, const string &oldStateRoot, const Persistence persistence);
     void     finishBlock        (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult flush              (const string &batchUUID, const string &newStateRoot, const Persistence persistence, uint64_t &flushId, uint64_t &storedFlushId);
-    zkresult purge              (const string &batchUUID, const Goldilocks::Element (&newStateRoot)[4], const Persistence persistence);
-    zkresult consolidateState   (const Goldilocks::Element (&virtualStateRoot)[4], const Persistence persistence, Goldilocks::Element (&consolidatedStateRoot)[4], uint64_t &flushId, uint64_t &storedFlushId);
     zkresult getFlushStatus     (uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId);
     zkresult getFlushData       (uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);
     void     clearCache         (void) {};
-    zkresult readTree           (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> &hashValues);
-    zkresult writeTree          (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent);
     zkresult cancelBatch        (const string &batchUUID);
     zkresult resetDB            (void);
 };
