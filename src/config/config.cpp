@@ -147,9 +147,6 @@ void Config::load(json &config)
     ParseBool(config, "runCheckTreeTest", "RUN_CHECK_TREE_TEST", runCheckTreeTest, false);
     ParseString(config, "checkTreeRoot", "CHECK_TREE_ROOT", checkTreeRoot, "auto");
     ParseBool(config, "runDatabasePerformanceTest", "RUN_DATABASE_PERFORMANCE_TEST", runDatabasePerformanceTest, false);
-    ParseBool(config, "runPageManagerTest", "RUN_PAGE_MANAGER_TEST", runPageManagerTest, false);
-    ParseBool(config, "runKeyValueTreeTest", "RUN_KEY_VALUE_TREE_TEST", runKeyValueTreeTest, false);
-    ParseBool(config, "runSMT64Test", "RUN_SMT64_TEST", runSMT64Test, false);
     ParseBool(config, "runUnitTest", "RUN_UNIT_TEST", runUnitTest, false);
 
     // Main SM executor
@@ -191,13 +188,7 @@ void Config::load(json &config)
     ParseBool(config, "executorClientClearCache", "EXECUTOR_CLIENT_CLEAR_CACHE", executorClientClearCache, true);
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
-    //ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
-    hashDB64 = false; // Do not use in production; under development
-    ParseU64(config, "kvDBMaxVersions", "HASHDB64_MAX_VERSIONS", kvDBMaxVersions, 131072);
     ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
-    ParseString(config, "hashDBFileName", "HASHDB_FILE_NAME", hashDBFileName, "");
-    ParseU64(config, "hashDBFileSize", "HASHDB_FILE_SIZE", hashDBFileSize, 128);
-    ParseString(config, "hashDBFolder", "HASHDB_FOLDER", hashDBFolder, "hashdb");
     ParseBool(config, "hashDBSingleton", "HASHDB_SINGLETON", hashDBSingleton, true);
     ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
     ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
@@ -386,12 +377,6 @@ void Config::print(void)
     }
     if (runDatabasePerformanceTest)
         zklog.info("    runDatabasePerformanceTest=true");
-    if (runPageManagerTest)
-        zklog.info("    runPageManagerTest=true");
-    if (runKeyValueTreeTest)
-        zklog.info("    runKeyValueTreeTest=true");
-    if (runSMT64Test)
-        zklog.info("    runSMT64Test=true");
     if (runUnitTest)
         zklog.info("    runUnitTest=true");
 
@@ -447,12 +432,7 @@ void Config::print(void)
     zklog.info("    executorClientClearCache=" + to_string(executorClientClearCache));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
-    zklog.info("    hashDB64=" + to_string(hashDB64));
-    zklog.info("    kvDBMaxVersions=" + to_string(kvDBMaxVersions));
     zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
-    zklog.info("    hashDBFileName=" + hashDBFileName);
-    zklog.info("    hashDBFileSize=" + to_string(hashDBFileSize));
-    zklog.info("    hastDBFolder=" + hashDBFolder);
     zklog.info("    hashDBSingleton=" + to_string(hashDBSingleton));
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
@@ -754,12 +734,6 @@ bool Config::check (void)
             zklog.error("required file config.recursivefExec=" + recursivefExec + " does not exist");
             bError = true;
         }
-    }
-
-    if (hashDB64 && !stateManager)
-    {
-        zklog.error("hashDB64=true but stateManager=false");
-        bError = true;
     }
 
     if (loadDiagnosticRom)

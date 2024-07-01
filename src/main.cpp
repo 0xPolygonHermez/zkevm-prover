@@ -45,14 +45,10 @@
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
 #include "state_manager.hpp"
-#include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
 #include "database_performance_test.hpp"
-#include "smt_64_test.hpp"
 #include "sha256.hpp"
-#include "page_manager_test.hpp"
 #include "zkglobals.hpp"
-#include "key_value_tree_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -374,14 +370,7 @@ int main(int argc, char **argv)
     hashDBSingleton.init(fr, config);
 
     // Init the StateManager singleton
-    if (config.hashDB64)
-    {
-        stateManager64.init();
-    }
-    else
-    {
-        stateManager.init(config);
-    }
+    stateManager.init(config);
 
     // Init goldilocks precomputed
     TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
@@ -471,22 +460,6 @@ int main(int argc, char **argv)
     if (config.runDatabasePerformanceTest)
     {
         DatabasePerformanceTest();
-    }
-    // Test PageManager
-    if (config.runPageManagerTest)
-    {
-        PageManagerTest();
-    }
-    // Test KeyValueTree
-    if (config.runKeyValueTreeTest)
-    {
-        KeyValueTreeTest();
-    }
-
-    // Test SMT64
-    if (config.runSMT64Test)
-    {
-        Smt64Test(config);
     }
 
     // Unit test

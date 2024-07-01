@@ -191,31 +191,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             }
         }
     }*/
-    // Set consolidateStateRootZKPC based on fork ID
-    uint64_t consolidateStateRootZKPC;
-    switch (forkID)
-    {
-        case 4:
-        {
-            consolidateStateRootZKPC = 4925;
-            break;
-        }
-        case 5:
-        {
-            consolidateStateRootZKPC = 4924;
-            break;
-        }
-        case 6:
-        {
-            consolidateStateRootZKPC = 4928;
-            break;
-        }
-        default:
-        {
-            consolidateStateRootZKPC = uint64_t(0xFFFFFFFFFFFFFFFF);
-            break;
-        }
-    }
 
     // INCLUDES
 
@@ -667,47 +642,6 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             code += "       zkassert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);\n";
             code += "       ctx.ecRecoverPrecalcBuffer.filled = false;\n";
             code += "    }\n";
-        }
-
-        if (bFastMode && (zkPC == consolidateStateRootZKPC))
-        {
-            code += "    if (config.hashDB64)\n";
-            code += "    {\n";
-            code += "    // Consolidate the state and store it in SR, just before we save SR into SMT\n";
-            code += "    // Convert pols.SR to virtualStateRoot fea\n";
-            code += "    Goldilocks::Element virtualStateRoot[4];\n";
-            code += "    if (!fea2fea(virtualStateRoot, pols.SR0[0], pols.SR1[0], pols.SR2[0], pols.SR3[0], pols.SR4[0], pols.SR5[0], pols.SR6[0], pols.SR7[0]))\n";
-            code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
-            code += "        mainExecutor.logError(ctx, string(\"Failed calling fea2fea()\"));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-
-            code += "    // Call purge()\n";
-            code += "    zkResult = pHashDB->purge(proverRequest.uuid, virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
-            code += "    if (zkResult != ZKR_SUCCESS)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = zkResult;\n";
-            code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->purge() result=\") + zkresult2string(zkResult));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-
-            code += "    // Call consolidateState()\n";
-            code += "    Goldilocks::Element consolidatedStateRoot[4];\n";
-            code += "    zkResult = pHashDB->consolidateState(virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE , consolidatedStateRoot, flushId, lastSentFlushId);\n";
-            code += "    if (zkResult != ZKR_SUCCESS)\n";
-            code += "    {\n";
-            code += "        proverRequest.result = zkResult;\n";
-            code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->consolidateState() result=\") + zkresult2string(proverRequest.result));\n";
-            code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
-            code += "        return;\n";
-            code += "    }\n";
-
-            code += "    // Convert consolidatedState fea to pols.SR\n";
-            code += "    fea2fea(pols.SR0[0], pols.SR1[0], pols.SR2[0], pols.SR3[0], pols.SR4[0], pols.SR5[0], pols.SR6[0], pols.SR7[0], consolidatedStateRoot);\n";
-            code += "    }\n\n";
         }
         
         // INITIALIZATION
@@ -6350,37 +6284,13 @@ code += "    #endif\n";
     code += "    gettimeofday(&t, NULL);\n";
 #endif
 
-    code += "    if (ctx.config.hashDB64)\n";
+    code += "    zkResult = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
+    code += "    if (zkResult != ZKR_SUCCESS)\n";
     code += "    {\n";
-    code += "        Goldilocks::Element newStateRoot[4];\n";
-    code += "        string2fea(fr, NormalizeToNFormat(proverRequest.pFullTracer->get_new_state_root(),64), newStateRoot);\n";
-    code += "        zkresult zkr = pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
-    code += "        if (zkr != ZKR_SUCCESS)\n";
-    code += "        {\n";
-    code += "            proverRequest.result = zkr;\n";
-    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->purge() result=\") + zkresult2string(zkr));\n";
-    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-    code += "            return;\n";
-    code += "        }\n";
-    code += "        zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
-    code += "        if (zkr != ZKR_SUCCESS)\n";
-    code += "        {\n";
-    code += "            proverRequest.result = zkr;\n";
-    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
-    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-    code += "            return;\n";
-    code += "        }\n";
-    code += "    }\n";
-    code += "    else\n";
-    code += "    {\n";
-    code += "        zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
-    code += "        if (zkr != ZKR_SUCCESS)\n";
-    code += "        {\n";
-    code += "            proverRequest.result = zkr;\n";
-    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
-    code += "            pHashDB->cancelBatch(proverRequest.uuid);\n";
-    code += "            return;\n";
-    code += "        }\n";
+    code += "        proverRequest.result = zkResult;\n";
+    code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkResult));\n";
+    code += "        pHashDB->cancelBatch(proverRequest.uuid);\n";
+    code += "        return;\n";
     code += "    }\n\n";
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR

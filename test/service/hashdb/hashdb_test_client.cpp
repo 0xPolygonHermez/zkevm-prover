@@ -68,14 +68,7 @@ void* hashDBTestClientThread (const Config& config)
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         zkassertpermanent(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassertpermanent(config.hashDB64 || (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3])));
-
-        zkr = client->purge(uuid, root, persistence);
-        zkassertpermanent(zkr==ZKR_SUCCESS);
-
-        Goldilocks::Element consolidatedStateRoot[4];
-        zkr = client->consolidateState(root, persistence, consolidatedStateRoot, flushId, storedFlushId);
-        zkassertpermanent(zkr==ZKR_SUCCESS);
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
         
         cout << "HashDB client test 1 done" << endl;
     }
@@ -129,7 +122,7 @@ void* hashDBTestClientThread (const Config& config)
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
-        zkassertpermanent(config.hashDB64 || (fr.equal(initialRoot[0], root[0]) && fr.equal(initialRoot[1], root[1]) && fr.equal(initialRoot[2], root[2]) && fr.equal(initialRoot[3], root[3])));
+        zkassertpermanent(fr.equal(initialRoot[0], root[0]) && fr.equal(initialRoot[1], root[1]) && fr.equal(initialRoot[2], root[2]) && fr.equal(initialRoot[3], root[3]));
 
         zkr = client->get(uuid, root, key, value, &getResult, NULL);
         cout << "GET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << endl;
@@ -186,7 +179,7 @@ void* hashDBTestClientThread (const Config& config)
         zkr = client->set(uuid, block, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key2=" << fea2string(fr, key2) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassertpermanent(config.hashDB64 || (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3])));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
         
         zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
         zkassertpermanent(zkr==ZKR_SUCCESS);
@@ -237,7 +230,7 @@ void* hashDBTestClientThread (const Config& config)
         zkr = client->set(uuid, block, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key2=" << fea2string(fr, key2) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassertpermanent(config.hashDB64 || (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3])));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
         
         zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
         zkassertpermanent(zkr==ZKR_SUCCESS);
@@ -305,7 +298,7 @@ void* hashDBTestClientThread (const Config& config)
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key3=" << fea2string(fr, key3) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
 
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassertpermanent(config.hashDB64 || (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3])));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
         
         zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
         zkassertpermanent(zkr==ZKR_SUCCESS);
@@ -351,7 +344,7 @@ void* hashDBTestClientThread (const Config& config)
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         }
 
-        zkassertpermanent(config.hashDB64 || (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3])));
+        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
 
         zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
         zkassertpermanent(zkr==ZKR_SUCCESS);
@@ -444,7 +437,7 @@ void* hashDBTestClientThread (const Config& config)
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkassertpermanent(config.hashDB64 || (fr.equal(expectedRoot[0], root[0]) && fr.equal(expectedRoot[1], root[1]) && fr.equal(expectedRoot[2], root[2]) && fr.equal(expectedRoot[3], root[3])));
+        zkassertpermanent(fr.equal(expectedRoot[0], root[0]) && fr.equal(expectedRoot[1], root[1]) && fr.equal(expectedRoot[2], root[2]) && fr.equal(expectedRoot[3], root[3]));
         
         zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
         zkassertpermanent(zkr==ZKR_SUCCESS);
@@ -512,7 +505,7 @@ void* hashDBTestClientThread (const Config& config)
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkassertpermanent(config.hashDB64 || (fr.equal(expectedRoot[0], root[0]) && fr.equal(expectedRoot[1], root[1]) && fr.equal(expectedRoot[2], root[2]) && fr.equal(expectedRoot[3], root[3])));
+        zkassertpermanent(fr.equal(expectedRoot[0], root[0]) && fr.equal(expectedRoot[1], root[1]) && fr.equal(expectedRoot[2], root[2]) && fr.equal(expectedRoot[3], root[3]));
         
         zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
         zkassertpermanent(zkr==ZKR_SUCCESS);
@@ -558,8 +551,8 @@ void* hashDBTestClientThread (const Config& config)
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
-        zkassertpermanent(config.hashDB64 || (setResult.mode=="zeroToZero"));
-        zkassertpermanent(config.hashDB64 || !setResult.isOld0);
+        zkassertpermanent(setResult.mode=="zeroToZero");
+        zkassertpermanent(!setResult.isOld0);
         
         zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
         zkassertpermanent(zkr==ZKR_SUCCESS);
@@ -599,8 +592,8 @@ void* hashDBTestClientThread (const Config& config)
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
-        zkassertpermanent(config.hashDB64 || (setResult.mode=="zeroToZero"));
-        zkassertpermanent(config.hashDB64 || !setResult.isOld0);
+        zkassertpermanent(setResult.mode=="zeroToZero");
+        zkassertpermanent(!setResult.isOld0);
         
         zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
         zkassertpermanent(zkr==ZKR_SUCCESS);
