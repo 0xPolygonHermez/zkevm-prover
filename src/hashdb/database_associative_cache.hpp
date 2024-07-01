@@ -6,7 +6,7 @@
 #include "zklog.hpp"
 #include "zkassert.hpp"
 
-
+#ifdef ENABLE_EXPERIMENTAL_CODE
 using namespace std;
 class DatabaseMTAssociativeCache
 {
@@ -136,4 +136,5 @@ void DatabaseMTAssociativeCache::cleanExpiredAuxBufferKeysValues_() {
         }
     }
 }
+#endif
 #endif

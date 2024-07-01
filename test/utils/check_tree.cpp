@@ -10,7 +10,9 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
 
     vector<Goldilocks::Element> value;
     Goldilocks::Element vKey[4];
+#ifdef ENABLE_EXPERIMENTAL_CODE
     if(db.useAssociativeCache) string2fea(db.fr, key, vKey);
+#endif
     zkresult result = db.read(key, vKey, value, NULL, false);
     if (result != ZKR_SUCCESS)
     {

@@ -69,7 +69,9 @@ public:
 #ifdef DATABASE_USE_CACHE
     // Cache instances
     bool useAssociativeCache;
+#ifdef  ENABLE_EXPERIMENTAL_CODE
     DatabaseMTAssociativeCache dbMTACache;
+#endif
     DatabaseMTCache dbMTCache;
     DatabaseProgramCache dbProgramCache;
 
