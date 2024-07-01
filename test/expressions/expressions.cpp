@@ -16,7 +16,7 @@
 #include "chelpers_steps_avx512.hpp"
 #endif
 #include "ZkevmSteps.hpp"
-
+#include "exit_process.hpp"
 
 #define NUM_ITERATIONS 3
 
@@ -47,8 +47,22 @@ int main()
     uint64_t NExtended = 1 << starkInfo.starkStruct.nBitsExt;
 
     Goldilocks::Element* mem = (Goldilocks::Element *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
+    if (mem == NULL)
+    {
+        zklog.error("Memory allocation failed for mem");
+        exitProcess();
+    }
+
     Goldilocks::Element *pConstPolsAddress = (Goldilocks::Element *)malloc(N * starkInfo.nConstants * sizeof(Goldilocks::Element));
+    if(pConstPolsAddress == NULL) {
+        zklog.error("Memory allocation failed for pConstPolsAddress");
+        exitProcess();
+    }
     Goldilocks::Element *pConstPolsAddressExt = (Goldilocks::Element *)malloc(NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element));
+    if(pConstPolsAddressExt == NULL) {
+        zklog.error("Memory allocation failed for pConstPolsAddressExt");
+        exitProcess();
+    }
 
     ConstantPolsStarks *pConstPols = new ConstantPolsStarks(pConstPolsAddress, N, starkInfo.nConstants);
     ConstantPolsStarks *pConstPols2ns = new ConstantPolsStarks(pConstPolsAddressExt, NExtended, starkInfo.nConstants);

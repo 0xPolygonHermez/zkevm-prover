@@ -34,6 +34,11 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
     TimerStart(LOADING_CONST_POLS);
     Goldilocks::Element *pConstPols = (Goldilocks::Element *)loadFileParallel(constFile, constPolsSize);
     Goldilocks::Element *pConstPolsExt = (Goldilocks::Element *)malloc(NExtended * nPols * sizeof(Goldilocks::Element));
+    if (pConstPolsExt == NULL)
+    {
+        zklog.error("Memory allocation failed for pConstPolsExt");
+        exitProcess();
+    }
     TimerStopAndLog(LOADING_CONST_POLS);
 
     TimerStart(EXTEND_CONST_POLS);

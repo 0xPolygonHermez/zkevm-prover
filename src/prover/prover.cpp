@@ -1152,7 +1152,7 @@ void Prover::execute(ProverRequest *pProverRequest)
         pExecuteAddress = calloc_zkevm(polsSize, 1);
         if (pExecuteAddress == NULL)
         {
-            zklog.error("Prover::execute() failed calling malloc() of size " + to_string(commitPolsSize));
+            zklog.error("Prover::execute() failed calling calloc() of size " + to_string(commitPolsSize));
             exitProcess();
         }
         zklog.info("Prover::execute() successfully allocated " + to_string(commitPolsSize) + " bytes");
