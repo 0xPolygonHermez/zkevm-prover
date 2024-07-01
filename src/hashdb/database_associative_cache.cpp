@@ -9,6 +9,7 @@
 #include "scalar.hpp"
 #include "zkassert.hpp"
 
+#ifdef ENABLE_EXPERIMENTAL_CODE
 DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
 {
     log2IndexesSize = 0;
@@ -485,3 +486,4 @@ bool DatabaseMTAssociativeCache::findKey_(const Goldilocks::Element (&key)[4], v
     }
     return false;
 }
+#endif

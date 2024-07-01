@@ -336,9 +336,9 @@ int main(int argc, char **argv)
 
     // Print AVX mode used
 #ifdef __AVX512__
-    zklog.info(" Vectorization based on AVX512");
+    zklog.info("Vectorization based on AVX512");
 #else
-    zklog.info(" Vectorization based on AVX2");
+    zklog.info("Vectorization based on AVX2");
 #endif
 
     // Print the hostname and the IP address
