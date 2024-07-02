@@ -7,6 +7,8 @@
 #endif
 #include "chelpers_steps_pack.hpp"
 #include "AllSteps.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 int main()
 {
@@ -39,6 +41,11 @@ int main()
 
     void *pCommit = loadFileParallel(commitPols, starkInfo.mapSectionsN.section[cm1_n] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
+    if (pAddress == NULL)
+    {
+        zklog.error("Memory allocation failed for pAddress");
+        exitProcess();
+    }
 
     uint64_t N = (1 << starkInfo.starkStruct.nBits);
     #pragma omp parallel for

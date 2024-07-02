@@ -131,6 +131,7 @@ public:
     };
 };
 
+#ifdef ENABLE_EXPERIMENTAL_CODE
 class ECRecoverPrecalcBuffer
 {
 public:
@@ -141,6 +142,7 @@ public:
 
     ECRecoverPrecalcBuffer() : filled(false), pos(0), posUsed(0) {};
 };
+#endif
 
 class Context
 {
@@ -158,7 +160,9 @@ public:
     uint64_t lastStep;
     mpz_class totalTransferredBalance; // Total transferred balance of all accounts, which should be 0 after any transfer
     EllipticCurveAddition lastECAdd; // Micro-cache of the last couple of added points, and the result
+#ifdef ENABLE_EXPERIMENTAL_CODE
     ECRecoverPrecalcBuffer ecRecoverPrecalcBuffer; // Buffer for precalculated points for ECRecover
+#endif
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter
@@ -200,7 +204,9 @@ public:
         pHashDB(pHashDB),
         lastStep(0),
         lastECAdd(fec),
+    #ifdef ENABLE_EXPERIMENTAL_CODE
         ecRecoverPrecalcBuffer(),
+    #endif
         pZKPC(NULL),
         pStep(NULL),
         pEvaluation(NULL),

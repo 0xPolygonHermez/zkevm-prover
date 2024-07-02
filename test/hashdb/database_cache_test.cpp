@@ -55,6 +55,7 @@ uint64_t DatabaseCacheTest (void)
 
     TimerStopAndLog(DATABASE_CACHE_TEST);
 
+#ifdef ENABLE_EXPERIMENTAL_CODE
     TimerStart(DATABASE_ASSOCIATIVE_CACHE_TEST);
 
     DatabaseMTAssociativeCache cache1(20, 17, "cache1");
@@ -478,6 +479,7 @@ uint64_t DatabaseCacheTest (void)
 
     }
     TimerStopAndLog(DATABASE_ASSOCIATIVE_CACHE_TEST);
+#endif
     assert(numberOfFailed == 0);
     return numberOfFailed;
 }
@@ -535,7 +537,7 @@ uint64_t DatabaseCacheBenchmark (void){
 
     }
     TimerStopAndLog(DATABASE_CACHE_BENCHMARK);
-
+#ifdef ENABLE_EXPERIMENTAL_CODE
     DatabaseMTAssociativeCache cache_ass(28, 25, "associativeCache");
     TimerStart(DATABASE_CACHE_ASSOCIATIVE_BENCHMARK);
     for (uint64_t i=0; i<Nbench; i++)
@@ -552,6 +554,7 @@ uint64_t DatabaseCacheBenchmark (void){
 
     }
     TimerStopAndLog(DATABASE_CACHE_ASSOCIATIVE_BENCHMARK);
+#endif
     delete[] keys;
     return count_hits;
 

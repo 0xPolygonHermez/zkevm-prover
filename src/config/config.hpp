@@ -58,7 +58,7 @@ public:
     bool saveFilesInSubfolders; // Saves output files in folders per hour, e.g. output/2023/01/10/18
 
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
-    bool useAssociativeCache; // Use the associative cache for MT records?
+    bool useAssociativeCache_experimental; // Use the associative cache for MT records?
     int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 128 bytes
     int64_t log2DbMTAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indexes. Note index entry = 4 bytes
     int64_t log2DbKVAssociativeCacheSize; // log2 of the size in entries of the DatabaseKVAssociativeCache. Note 1 cache entry = 80 bytes
@@ -198,7 +198,7 @@ public:
     uint64_t fullTracerTraceReserveSize;
 
     // EC Recover
-    bool ECRecoverPrecalc;
+    bool ECRecoverPrecalc_experimental;
     uint64_t ECRecoverPrecalcNThreads;
 
     // Logs format

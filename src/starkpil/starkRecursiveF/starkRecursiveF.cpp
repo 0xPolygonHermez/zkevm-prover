@@ -54,6 +54,10 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     if(!LOAD_CONST_FILES) {
         TimerStart(CALCULATE_CONST_TREE_TO_MEMORY);
         pConstPolsAddress2ns = (void *)malloc(NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element));
+        if(pConstPolsAddress2ns == NULL){
+            zklog.error("StarkRecursiveF::StarkRecursiveF() failed allocating memory size: " + to_string(NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element)));
+            exitProcess();
+        }
         TimerStart(EXTEND_CONST_POLS);
         ntt.extendPol((Goldilocks::Element *)pConstPolsAddress2ns, (Goldilocks::Element *)pConstPolsAddress, NExtended, N, starkInfo.nConstants);
         TimerStopAndLog(EXTEND_CONST_POLS);
@@ -446,6 +450,10 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
 
     u_int64_t size_eval = starkInfo.evMap.size();
     u_int64_t *sorted_evMap = (u_int64_t *)malloc(5 * size_eval * sizeof(u_int64_t));
+    if(sorted_evMap == NULL){
+        std::cout << "Error: StarkRecursiveF::genProof() failed allocating memory size: " << 5 * size_eval * sizeof(u_int64_t) << std::endl;
+        exitProcess();
+    }
     u_int64_t counters[5] = {0, 0, 0, 0, 0};
 
     for (uint64_t i = 0; i < size_eval; i++)
@@ -512,9 +520,17 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     // Buffer for partial results of the matrix-vector product (columns distribution)
     int num_threads = omp_get_max_threads();
     Goldilocks::Element **evals_acc = (Goldilocks::Element **)malloc(num_threads * sizeof(Goldilocks::Element *));
+    if(evals_acc==NULL){
+            std::cout << "Error: StarkRecursiveF::genProof() failed allocating memory evals_acc" << std::endl;
+            exitProcess();
+        }
     for (int i = 0; i < num_threads; ++i)
     {
         evals_acc[i] = (Goldilocks::Element *)malloc(size_eval * FIELD_EXTENSION * sizeof(Goldilocks::Element));
+        if(evals_acc[i]==NULL){
+            std::cout << "Error: StarkRecursiveF::genProof() failed allocating memory size: " << size_eval * FIELD_EXTENSION * sizeof(Goldilocks::Element) << std::endl;
+            exitProcess();
+        }
     }
 
 #pragma omp parallel
