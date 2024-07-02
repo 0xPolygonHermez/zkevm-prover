@@ -102,13 +102,6 @@ void Database::init(void)
         // Sender thread creation
         pthread_create(&senderPthread, NULL, dbSenderThread, this);
 
-        // Cache synchronization thread creation
-        if (config.dbCacheSynchURL.size() > 0)
-        {
-            pthread_create(&cacheSynchPthread, NULL, dbCacheSynchThread, this);
-
-        }
-
         initRemote();
         useRemoteDB = true;
     }
@@ -1922,102 +1915,6 @@ void *dbSenderThread (void *arg)
     }
 
     zklog.info("dbSenderThread() done");
-    return NULL;
-}
-
-void *dbCacheSynchThread (void *arg)
-{
-    Database *pDatabase = (Database *)arg;
-    zklog.info("dbCacheSynchThread() started");
-
-    uint64_t storedFlushId = 0;
-
-    Config config = pDatabase->config;
-    config.hashDBURL = config.dbCacheSynchURL;
-
-    while (true)
-    {
-        HashDBInterface *pHashDBRemote = new HashDBRemote (pDatabase->fr, config);
-        if (pHashDBRemote == NULL)
-        {
-            zklog.error("dbCacheSynchThread() failed calling new HashDBRemote()");
-            sleep(10);
-            continue;
-        }
-
-        while (true)
-        {
-            unordered_map<string, string> nodes;
-            unordered_map<string, string> program;
-            string nodesStateRoot;
-            
-            // Call getFlushData() remotelly
-            zkresult zkr = pHashDBRemote->getFlushData(storedFlushId, storedFlushId, nodes, program, nodesStateRoot);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("dbCacheSynchThread() failed calling pHashDB->getFlushData() result=" + zkresult2string(zkr));
-                sleep(10);
-                break;
-            }
-
-            if (nodes.size()==0 && program.size()==0 && nodesStateRoot.size()==0)
-            {
-                zklog.info("dbCacheSynchThread() called getFlushData() remotely and got no data: storedFlushId=" + to_string(storedFlushId));
-                continue;
-            }
-
-            TimerStart(DATABASE_CACHE_SYNCH);
-            zklog.info("dbCacheSynchThread() called getFlushData() remotely and got: storedFlushId=" + to_string(storedFlushId) + " nodes=" + to_string(nodes.size()) + " program=" + to_string(program.size()) + " nodesStateRoot=" + nodesStateRoot);
-
-            // Save nodes to cache
-            unordered_map<string, string>::const_iterator it;
-            if (nodes.size() > 0)
-            {
-                for (it = nodes.begin(); it != nodes.end(); it++)
-                {
-                    vector<Goldilocks::Element> value;
-                    string2fea(pDatabase->fr, it->second, value);
-                    pDatabase->write(it->first, NULL, value, false);
-                }
-            }
-
-            // Save program to cache
-            if (program.size() > 0)
-            {
-                for (it = program.begin(); it != program.end(); it++)
-                {
-                    vector<uint8_t> value;
-                    string2ba(it->second, value);
-                    pDatabase->setProgram(it->first, value, false);
-                }
-            }
-
-            /* TODO: We cannot overwrite state root to DB.  Do we need to update cache?
-            if (nodesStateRoot.size() > 0)
-            {
-                vector<Goldilocks::Element> value;
-                string2fea(pDatabase->fr, nodesStateRoot, value);
-                if (value.size() < 4)
-                {
-                    zklog.error("dbCacheSynchThread() got nodeStateRoot too short=" + nodesStateRoot);
-                }
-                else
-                {
-                    Goldilocks::Element stateRoot[4];
-                    for (uint64_t i=0; i<4; i++)
-                    {
-                        stateRoot[i] = value[i];
-                    }
-                    pDatabase->updateStateRoot(stateRoot);
-                }
-            }*/
-
-            TimerStopAndLog(DATABASE_CACHE_SYNCH);
-        }
-        delete pHashDBRemote;
-    }
-
-    zklog.info("dbCacheSynchThread() done");
     return NULL;
 }
 
