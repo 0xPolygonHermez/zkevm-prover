@@ -83,7 +83,6 @@ public:
     // HashDB service
     uint16_t hashDBServerPort;
     string hashDBURL;
-    string dbCacheSynchURL;
     bool hashDBSingleton;
 
     // Aggregator service (client)

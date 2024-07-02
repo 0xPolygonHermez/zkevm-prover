@@ -190,7 +190,6 @@ void Config::load(json &config)
     ParseBool(config, "executorClientClearCache", "EXECUTOR_CLIENT_CLEAR_CACHE", executorClientClearCache, true);
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
-    ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
     ParseBool(config, "hashDBSingleton", "HASHDB_SINGLETON", hashDBSingleton, true);
     ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
     ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
@@ -435,7 +434,6 @@ void Config::print(void)
     zklog.info("    executorClientClearCache=" + to_string(executorClientClearCache));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
-    zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
     zklog.info("    hashDBSingleton=" + to_string(hashDBSingleton));
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
