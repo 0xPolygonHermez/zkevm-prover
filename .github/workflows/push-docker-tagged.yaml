@@ -44,8 +44,34 @@ jobs:
           push: true
           target: executor
           tags: |
+            hermeznetwork/zkevm-prover:${{ github.ref_name }}-fork.10.avx512
+          build-args: ARG_PROVER_FORK_ID=10 avx512=1
+
+      - name: Build and push Executor 11
+        id: docker_build_executor_11
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile-GHA
+          platforms: linux/amd64
+          push: true
+          target: executor
+          tags: |
+            hermeznetwork/zkevm-prover:${{ github.ref_name }}-fork.11.avx512
+          build-args: ARG_PROVER_FORK_ID=11 avx512=1
+
+      - name: Build and push Executor 10
+        id: docker_build_executor_10
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile-GHA
+          platforms: linux/amd64
+          push: true
+          target: executor
+          tags: |
             hermeznetwork/zkevm-prover:${{ github.ref_name }}-fork.10
-          build-args: ARG_PROVER_FORK_ID=10 
+          build-args: ARG_PROVER_FORK_ID=10 avx512=0
 
       - name: Build and push Executor 11
         id: docker_build_executor_11
@@ -58,5 +84,5 @@ jobs:
           target: executor
           tags: |
             hermeznetwork/zkevm-prover:${{ github.ref_name }}-fork.11
-          build-args: ARG_PROVER_FORK_ID=11 
+          build-args: ARG_PROVER_FORK_ID=11 avx512=0
             
