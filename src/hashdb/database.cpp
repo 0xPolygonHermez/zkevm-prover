@@ -34,7 +34,7 @@ Database::Database (Goldilocks &fr, const Config &config) :
 
     /* INIT DB CACHE */
 #ifdef ENABLE_EXPERIMENTAL_CODE
-    if (config.useAssociativeCache)
+    if (config.useAssociativeCache_experimental)
     {
         useAssociativeCache = true;
         dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
