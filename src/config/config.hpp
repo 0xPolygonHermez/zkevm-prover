@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include "definitions.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -58,6 +59,8 @@ public:
     bool saveFilesInSubfolders; // Saves output files in folders per hour, e.g. output/2023/01/10/18
 
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
+
+#ifdef ENABLE_EXPERIMENTAL_CODE
     bool useAssociativeCache_experimental; // Use the associative cache for MT records?
     int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 128 bytes
     int64_t log2DbMTAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indexes. Note index entry = 4 bytes
@@ -65,6 +68,7 @@ public:
     int64_t log2DbKVAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseKVAssociativeCache indexes. Note index entry = 4 bytes
     int64_t log2DbVersionsAssociativeCacheSize; // log2 of the size in entries of the DatabaseVersionsAssociativeCache. Note 1 cache entry = 40 bytes
     int64_t log2DbVersionsAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseVersionsAssociativeCache indexes. Note index entry = 4 bytes
+#endif
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
 
     // Executor service
@@ -198,8 +202,10 @@ public:
     uint64_t fullTracerTraceReserveSize;
 
     // EC Recover
+#ifdef ENABLE_EXPERIMENTAL_CODE
     bool ECRecoverPrecalc_experimental;
     uint64_t ECRecoverPrecalcNThreads;
+#endif
 
     // Logs format
     bool jsonLogs;

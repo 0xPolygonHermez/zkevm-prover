@@ -169,15 +169,13 @@ void Config::load(json &config)
    // MT associative cache
 #ifdef ENABLE_EXPERIMENTAL_CODE
     ParseBool(config, "useAssociativeCache_experimental", "USE_ASSOCIATIVE_CACHE_EXPERIMENTAL", useAssociativeCache_experimental, false);
-#else
-    useAssociativeCache_experimental = false;
-#endif
     ParseS64(config, "log2DbMTAssociativeCacheSize", "LOG2_DB_MT_ASSOCIATIVE_CACHE_SIZE", log2DbMTAssociativeCacheSize, 25);
     ParseS64(config, "log2DbMTAssociativeCacheIndexesSize", "LOG2_DB_MT_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbMTAssociativeCacheIndexesSize, 28);
     ParseS64(config, "log2DbKVAssociativeCacheSize", "LOG2_DB_KV_ASSOCIATIVE_CACHE_SIZE", log2DbKVAssociativeCacheSize, 25);
     ParseS64(config, "log2DbKVAssociativeCacheIndexesSize", "LOG2_DB_KV_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbKVAssociativeCacheIndexesSize, 28);
     ParseS64(config, "log2DbVersionsAssociativeCacheSize", "LOG2_DB_VERSIONS_ASSOCIATIVE_CACHE_SIZE", log2DbVersionsAssociativeCacheSize, 25);
     ParseS64(config, "log2DbVersionsAssociativeCacheIndexesSize", "LOG2_DB_VERSIONS_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbVersionsAssociativeCacheIndexesSize, 28);
+#endif
 
      // Program (SC) cache
     ParseS64(config, "dbProgramCacheSize", "DB_PROGRAM_CACHE_SIZE", dbProgramCacheSize, 1*1024); // Default = 1 GB
@@ -313,10 +311,8 @@ void Config::load(json &config)
     // ECRecover
 #ifdef ENABLE_EXPERIMENTAL_CODE
     ParseBool(config, "ECRecoverPrecalc_experimental", "ECRECOVER_PRECALC_EXPERIMENTAL", ECRecoverPrecalc_experimental, false);
-#else
-    ECRecoverPrecalc_experimental = false;
-#endif
     ParseU64(config, "ECRecoverPrecalcNThreads", "ECRECOVER_PRECALC_N_THREADS", ECRecoverPrecalcNThreads, 16);
+#endif
 
     // Logs
     ParseBool(config, "jsonLogs", "JSON_LOGS", jsonLogs, false);
@@ -516,6 +512,7 @@ void Config::print(void)
     zklog.info("    maxExecutorSendMessageSize=" + to_string(maxExecutorSendMessageSize));
     zklog.info("    maxHashDBThreads=" + to_string(maxHashDBThreads));
     zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
+#ifdef ENABLE_EXPERIMENTAL_CODE
     zklog.info("    useAssociativeCache_experimental=" + to_string(useAssociativeCache_experimental));
     zklog.info("    log2DbMTAssociativeCacheSize=" + to_string(log2DbMTAssociativeCacheSize));
     zklog.info("    log2DbMTAssociativeCacheIndexesSize=" + to_string(log2DbMTAssociativeCacheIndexesSize));
@@ -523,10 +520,13 @@ void Config::print(void)
     zklog.info("    log2DbKVAssociativeCacheIndexesSize=" + to_string(log2DbKVAssociativeCacheIndexesSize));
     zklog.info("    log2DbVersionsAssociativeCacheSize=" + to_string(log2DbVersionsAssociativeCacheSize));
     zklog.info("    log2DbVersionsAssociativeCacheIndexesSize=" + to_string(log2DbVersionsAssociativeCacheIndexesSize));
+#endif
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
+#ifdef ENABLE_EXPERIMENTAL_CODE
     zklog.info("    ECRecoverPrecalc_experimental=" + to_string(ECRecoverPrecalc_experimental));
     zklog.info("    ECRecoverPrecalcNThreads=" + to_string(ECRecoverPrecalcNThreads));
+#endif
 }
 
 bool Config::check (void)
