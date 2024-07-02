@@ -167,7 +167,11 @@ void Config::load(json &config)
     ParseS64(config, "dbMTCacheSize", "DB_MT_CACHE_SIZE", dbMTCacheSize, 8*1024); // Default = 8 GB
 
    // MT associative cache
+#ifdef ENABLE_EXPERIMENTAL_CODE
     ParseBool(config, "useAssociativeCache_experimental", "USE_ASSOCIATIVE_CACHE_EXPERIMENTAL", useAssociativeCache_experimental, false);
+#else
+    useAssociativeCache_experimental = false;
+#endif
     ParseS64(config, "log2DbMTAssociativeCacheSize", "LOG2_DB_MT_ASSOCIATIVE_CACHE_SIZE", log2DbMTAssociativeCacheSize, 25);
     ParseS64(config, "log2DbMTAssociativeCacheIndexesSize", "LOG2_DB_MT_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbMTAssociativeCacheIndexesSize, 28);
     ParseS64(config, "log2DbKVAssociativeCacheSize", "LOG2_DB_KV_ASSOCIATIVE_CACHE_SIZE", log2DbKVAssociativeCacheSize, 25);
@@ -307,7 +311,11 @@ void Config::load(json &config)
     ParseU64(config, "fullTracerTraceReserveSize", "FULL_TRACER_TRACE_RESERVE_SIZE", fullTracerTraceReserveSize, 256*1024);
 
     // ECRecover
+#ifdef ENABLE_EXPERIMENTAL_CODE
     ParseBool(config, "ECRecoverPrecalc_experimental", "ECRECOVER_PRECALC_EXPERIMENTAL", ECRecoverPrecalc_experimental, false);
+#else
+    ECRecoverPrecalc_experimental = false;
+#endif
     ParseU64(config, "ECRecoverPrecalcNThreads", "ECRECOVER_PRECALC_N_THREADS", ECRecoverPrecalcNThreads, 16);
 
     // Logs
