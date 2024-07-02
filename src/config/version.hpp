@@ -6,15 +6,15 @@
 #if (PROVER_FORK_ID==10)
 
 #ifdef __AVX512__
-#define ZKEVM_PROVER_VERSION "v7.0.0-RC12-fork.10.avx512"
+#define ZKEVM_PROVER_VERSION "v7.0.0-RC13-fork.10.avx512"
 #else
-#define ZKEVM_PROVER_VERSION "v7.0.0-RC12-fork.10"
+#define ZKEVM_PROVER_VERSION "v7.0.0-RC13-fork.10"
 #endif
 #elif (PROVER_FORK_ID==11)
 #ifdef __AVX512__
-#define ZKEVM_PROVER_VERSION "v7.0.0-RC12-fork.11.avx512"
+#define ZKEVM_PROVER_VERSION "v7.0.0-RC13-fork.11.avx512"
 #else
-#define ZKEVM_PROVER_VERSION "v7.0.0-RC12-fork.11"
+#define ZKEVM_PROVER_VERSION "v7.0.0-RC13-fork.11"
 #endif
 
 #else
