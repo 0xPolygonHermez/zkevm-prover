@@ -5,6 +5,7 @@
 #include <shared_mutex>
 #include "zklog.hpp"
 #include "zkassert.hpp"
+#include "definitions.hpp"
 
 #ifdef ENABLE_EXPERIMENTAL_CODE
 using namespace std;

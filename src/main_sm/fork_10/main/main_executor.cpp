@@ -420,7 +420,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 #endif
 #ifdef ENABLE_EXPERIMENTAL_CODE
-        if ((zkPC == rom.labels.ecrecoverStoreArgsLabel) && config.ECRecoverPrecalc)
+        if ((zkPC == rom.labels.ecrecoverStoreArgsLabel) && config.ECRecoverPrecalc_experimental)
         {
             zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);
             mpz_class signature_, r_, s_, v_;
