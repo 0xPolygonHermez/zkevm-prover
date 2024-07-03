@@ -49,43 +49,43 @@ namespace Zkey {
          // Memory allocation for void* members (assuming FrElement is a known size)
         fflonkZkeyHeader->k1 = malloc(fflonkZkeyHeader->n8r);
         if(fflonkZkeyHeader->k1 == NULL){
-            zklog.error("Memory allocation failed for k1");
-            exitProcess();
+            cerr << "Memory allocation failed for k1" << endl;
+            exit(-1);
         } 
         fflonkZkeyHeader->k2 = malloc(fflonkZkeyHeader->n8r);
         if(fflonkZkeyHeader->k2 == NULL){
-            zklog.error("Memory allocation failed for k2");
-            exitProcess();
+            cerr << "Memory allocation failed for k2" << endl;
+            exit(-1);
         }
         fflonkZkeyHeader->w3 = malloc(fflonkZkeyHeader->n8r);
         if(fflonkZkeyHeader->w3 == NULL){
-            zklog.error("Memory allocation failed for w3");
-            exitProcess();
+            cerr << "Memory allocation failed for w3" << endl;
+            exit(-1);
         }
         fflonkZkeyHeader->w4 = malloc(fflonkZkeyHeader->n8r);
         if(fflonkZkeyHeader->w4 == NULL){
-            zklog.error("Memory allocation failed for w4");
-            exitProcess();
+            cerr << "Memory allocation failed for w4" << endl;
+            exit(-1);
         }
         fflonkZkeyHeader->w8 = malloc(fflonkZkeyHeader->n8r);
         if(fflonkZkeyHeader->w8 == NULL){
-            zklog.error("Memory allocation failed for w8");
-            exitProcess();
+            cerr << "Memory allocation failed for w8" << endl;
+            exit(-1);
         }
         fflonkZkeyHeader->wr = malloc(fflonkZkeyHeader->n8r);
         if(fflonkZkeyHeader->wr == NULL){
-            zklog.error("Memory allocation failed for wr");
-            exitProcess();
+            cerr << "Memory allocation failed for wr" << endl;
+            exit(-1);
         }
         fflonkZkeyHeader->X2 = malloc(fflonkZkeyHeader->n8q * 4);
         if(fflonkZkeyHeader->X2 == NULL){
-            zklog.error("Memory allocation failed for X2");
-            exitProcess();
+            cerr << "Memory allocation failed for X2" << endl;
+            exit(-1);
         }
         fflonkZkeyHeader->C0 = malloc(fflonkZkeyHeader->n8q * 2);
         if(fflonkZkeyHeader->C0 == NULL){
-            zklog.error("Memory allocation failed for C0");
-            exitProcess();
+            cerr << "Memory allocation failed for C0" << endl;
+            exit(-1);
         }
 
         memcpy(fflonkZkeyHeader->k1, f->read(fflonkZkeyHeader->n8r), fflonkZkeyHeader->n8r);
