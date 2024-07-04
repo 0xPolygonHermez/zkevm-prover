@@ -268,20 +268,35 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
     starks->ffi_treesGL_get_root(index, (Goldilocks::Element *)dst);
 }
 
-void compute_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pTranscript, void *pChelpersSteps)
+void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps)
 {
     // type == 1 => Goldilocks
     // type == 2 => BN128
     switch (elementType)
     {
     case 1:
-        ((Starks<Goldilocks::Element> *)pStarks)->computeStage(step, *(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof, *(TranscriptGL *)pTranscript, (CHelpersSteps *)pChelpersSteps);
+        ((Starks<Goldilocks::Element> *)pStarks)->computeStageExpressions(step, *(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof, (CHelpersSteps *)pChelpersSteps);
         break;
     default:
         cerr << "Invalid elementType: " << elementType << endl;
         break;
     }
 }
+
+void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof) {
+    // type == 1 => Goldilocks
+    // type == 2 => BN128
+    switch (elementType)
+    {
+    case 1:
+        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, *(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
+        break;
+    default:
+        cerr << "Invalid elementType: " << elementType << endl;
+        break;
+    }
+}
+
 
 void compute_evals(void *pStarks, void *pParams, void *pProof)
 {

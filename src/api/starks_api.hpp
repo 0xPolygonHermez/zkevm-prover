@@ -58,7 +58,8 @@
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
-    void compute_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pTranscript, void *pChelpersSteps);
+    void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
+    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof);
     void compute_evals(void *pStarks, void *pParams, void *pProof);
 
     void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps);

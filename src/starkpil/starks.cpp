@@ -81,10 +81,17 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
             }
         }
 
-        computeStage(step, params, proof, transcript, chelpersSteps);
+        computeStageExpressions(step, params, proof, chelpersSteps);
+        commitStage(step, params, proof);
 
         if (debug)
         {
+            for (uint64_t i = 0; i < chelpers.constraintsInfoDebug.size(); i++)
+            {
+                if(chelpers.constraintsInfoDebug[i].stage == step) {
+                    calculateConstraint(i, params, chelpersSteps);
+                }
+            }
             Goldilocks::Element randomValues[4] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
             addTranscriptGL(transcript, randomValues, 4);
         }
@@ -108,7 +115,9 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         }
     }
     
-    computeStage(starkInfo.nStages + 1, params, proof, transcript, chelpersSteps);
+    computeStageExpressions(starkInfo.nStages + 1, params, proof, chelpersSteps);
+
+    commitStage(starkInfo.nStages + 1, params, proof);
 
     if (debug)
     {
@@ -268,58 +277,9 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams &params,
 }
 
 template <typename ElementType>
-void Starks<ElementType>::computeStage(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof, TranscriptType &transcript, CHelpersSteps *chelpersSteps)
-{
-    calculateExpressions(step, params, chelpersSteps);
-
-    calculateHints(step, params);
-
-    if (step <= starkInfo.nStages)
-    {
-        TimerStartExpr(STARK_TRY_CALCULATE_EXPS_STEP, step);
-        uint64_t symbolsToBeCalculated = isStageCalculated(step);
-        while (symbolsToBeCalculated > 0)
-        {
-            for (uint64_t i = 0; i < chelpers.expressionsInfo.size(); i++) {
-                if(chelpers.expressionsInfo[i].stage == step) {
-                    bool isCalculated = true;
-                    for(uint64_t j = 0; j < chelpers.expressionsInfo[i].nCmPolsCalculated; j++) {
-                        uint64_t cmPolCalculatedId = chelpers.cHelpersArgsExpressions.cmPolsCalculatedIds[chelpers.expressionsInfo[i].cmPolsCalculatedOffset + j];
-                        if (!isSymbolCalculated(opType::cm, cmPolCalculatedId)) {
-                            isCalculated = false;
-                            break;
-                        }
-                    }
-                    if (!isCalculated && canExpressionBeCalculated(chelpers.expressionsInfo[i])) {
-                        calculateExpression(i, params, chelpersSteps);
-                    }
-                }
-            }
-            calculateHints(step, params);
-            uint64_t newSymbolsToBeCalculated = isStageCalculated(step);
-            if (newSymbolsToBeCalculated == symbolsToBeCalculated)
-            {
-                zklog.info("Something went wrong when calculating stage " + to_string(step));
-                exitProcess();
-                exit(-1);
-            }
-            symbolsToBeCalculated = newSymbolsToBeCalculated;
-        }
-        TimerStopAndLogExpr(STARK_TRY_CALCULATE_EXPS_STEP, step);
-    }
-    
-
-    if (debug && step <= starkInfo.nStages)
-    {
-        for (uint64_t i = 0; i < chelpers.constraintsInfoDebug.size(); i++)
-        {
-            if(chelpers.constraintsInfoDebug[i].stage == step) {
-                calculateConstraint(i, params, chelpersSteps);
-            }
-        }
-    }
-    else
-    {
+void Starks<ElementType>::commitStage(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof)
+{   
+    if(!debug) {
         if (step <= starkInfo.nStages)
         {
             extendAndMerkelize(step, params, proof);
@@ -333,6 +293,47 @@ void Starks<ElementType>::computeStage(uint64_t step, StepsParams &params, FRIPr
     if(step == starkInfo.nStages) {
         proof.proofs.setSubAirValues(params.subproofValues);
     }
+}
+
+template <typename ElementType>
+void Starks<ElementType>::computeStageExpressions(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof, CHelpersSteps *chelpersSteps)
+{
+    calculateExpressions(step, params, chelpersSteps);
+
+    if(step == starkInfo.nStages + 1) return;
+
+    calculateHints(step, params);
+
+    TimerStartExpr(STARK_TRY_CALCULATE_EXPS_STEP, step);
+    uint64_t symbolsToBeCalculated = isStageCalculated(step);
+    while (symbolsToBeCalculated > 0)
+    {
+        for (uint64_t i = 0; i < chelpers.expressionsInfo.size(); i++) {
+            if(chelpers.expressionsInfo[i].stage == step) {
+                bool isCalculated = true;
+                for(uint64_t j = 0; j < chelpers.expressionsInfo[i].nCmPolsCalculated; j++) {
+                    uint64_t cmPolCalculatedId = chelpers.cHelpersArgsExpressions.cmPolsCalculatedIds[chelpers.expressionsInfo[i].cmPolsCalculatedOffset + j];
+                    if (!isSymbolCalculated(opType::cm, cmPolCalculatedId)) {
+                        isCalculated = false;
+                        break;
+                    }
+                }
+                if (!isCalculated && canExpressionBeCalculated(chelpers.expressionsInfo[i])) {
+                    calculateExpression(i, params, chelpersSteps);
+                }
+            }
+        }
+        calculateHints(step, params);
+        uint64_t newSymbolsToBeCalculated = isStageCalculated(step);
+        if (newSymbolsToBeCalculated == symbolsToBeCalculated)
+        {
+            zklog.info("Something went wrong when calculating stage " + to_string(step));
+            exitProcess();
+            exit(-1);
+        }
+        symbolsToBeCalculated = newSymbolsToBeCalculated;
+    }
+    TimerStopAndLogExpr(STARK_TRY_CALCULATE_EXPS_STEP, step);
 }
 
 template <typename ElementType>
