@@ -79,14 +79,14 @@ int main()
     allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
 
     if(USE_GENERIC_PARSER) {
-#ifdef __AVX512__
-        CHelpersStepsAvx512 cHelpersSteps;
-#elif defined(__PACK__) 
+// #ifdef __AVX512__
+//         CHelpersStepsAvx512 cHelpersSteps;
+// #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
         cHelpersSteps.nrowsPack = NROWS_PACK;
-#else
-        CHelpersSteps cHelpersSteps;
-#endif
+// #else
+//         CHelpersSteps cHelpersSteps;
+// #endif
         starks.genProof(fproof, &publicInputs[0], allVerkey, &cHelpersSteps); 
     } else {
         AllSteps allSteps;

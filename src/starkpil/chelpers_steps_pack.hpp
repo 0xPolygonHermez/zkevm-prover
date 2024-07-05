@@ -75,14 +75,21 @@ public:
                 bool isTmpPol = !domainExtended && s == 4;
                 for(uint64_t k = 0; k < nColsStages[s]; ++k) {
                     uint64_t dim = storePol[nColsStagesAcc[s] + k];
-                    if(storePol[nColsStagesAcc[s] + k]) {
-                        Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k)* nrowsPack];
-                        if(isTmpPol) {
-                            for(uint64_t i = 0; i < dim; ++i) {
-                                Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k * domainSize + row * dim + i], uint64_t(dim), &buffT[i*nrowsPack]);
-                            }
-                        } else {
+                    if(!TRANSPOSE_TMP_POLS) {
+                        for(uint64_t k = 0; k < nColsStages[s]; ++k) {
+                            Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k)* nrowsPack];
                             Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT);
+                        }
+                    } else {
+                        if(storePol[nColsStagesAcc[s] + k]) {
+                            Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k)* nrowsPack];
+                            if(isTmpPol) {
+                                for(uint64_t i = 0; i < dim; ++i) {
+                                    Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k * domainSize + row * dim + i], uint64_t(dim), &buffT[i*nrowsPack]);
+                                }
+                            } else {
+                                Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT);
+                            }
                         }
                     }
                 }
