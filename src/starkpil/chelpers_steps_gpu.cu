@@ -1,19 +1,25 @@
 #include "chelpers_steps_gpu.hpp"
+#include "chelpers_steps_pack.hpp"
 #ifdef __USE_CUDA__
 #include "gl64_t.cuh"
 #include "goldilocks_cubic_extension.cuh"
 #include <inttypes.h>
 #endif
 
+// rick: falta borrar tot el que no s'usi de la CPU
+// rick: jo no estic copiant p i q i funciona??
+
+#ifdef ENABLE_EXPERIMENTAL_CODE
 
 void CHelpersStepsGPU::dataSetup(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams)
 {
+    bool domainExtended = parserParams.stage <= 3 ? false : true;
+    uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
+    uint64_t nextStride = domainExtended ? 1 << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 1;
 
     /*
         Metadata
     */
-    nRowsPack = 32;
-    bool domainExtended = parserParams.stage <= 3 ? false : true;
     nColsStagesAcc.resize(10 + 2);
     nColsStages.resize(10 + 2);
     offsetsStages.resize(10 + 2);
@@ -64,7 +70,7 @@ void CHelpersStepsGPU::dataSetup(StarkInfo &starkInfo, StepsParams &params, Pars
             }
         }
     }
-    nColsStagesAcc[10] = nColsStagesAcc[9] + nColsStages[9]; // Polinomials f & q
+    nColsStagesAcc[10] = nColsStagesAcc[9] + nColsStages[4]; // Polinomials f & q
     if (parserParams.stage == 4)
     {
         offsetsStages[10] = starkInfo.mapOffsets.section[eSection::q_2ns];
@@ -77,7 +83,11 @@ void CHelpersStepsGPU::dataSetup(StarkInfo &starkInfo, StepsParams &params, Pars
     }
     nColsStagesAcc[11] = nColsStagesAcc[10] + 3; // xDivXSubXi
     nCols = nColsStagesAcc[11] + 6;
-
+    
+    stepPointers_h.domainSize = domainSize;
+    stepPointers_h.nConstants = starkInfo.nConstants;
+    stepPointers_h.nextStride = nextStride;
+    
     cudaMalloc((void **)&(stepPointers_h.nColsStages_d), nColsStages.size() * sizeof(uint64_t));
     cudaMemcpy(stepPointers_h.nColsStages_d, nColsStages.data(), nColsStages.size() * sizeof(uint64_t), cudaMemcpyHostToDevice);
 
@@ -107,76 +117,106 @@ void CHelpersStepsGPU::dataSetup(StarkInfo &starkInfo, StepsParams &params, Pars
     delete[] args_aux;
 
     uint64_t *numbers = &parserArgs.numbers[parserParams.numbersOffset];
-    Goldilocks::Element *numbers_aux = new Goldilocks::Element[parserParams.nNumbers * nRowsPack];
+    Goldilocks::Element *numbers_aux = new Goldilocks::Element[parserParams.nNumbers * nrowsPack];
     for (uint64_t i = 0; i < parserParams.nNumbers; ++i)
     {
-        for (uint64_t j = 0; j < nRowsPack; ++j)
+        for (uint64_t j = 0; j < nrowsPack; ++j)
         {
-            numbers_aux[i * nRowsPack + j] = Goldilocks::fromU64(numbers[i]);
+            numbers_aux[i * nrowsPack + j] = Goldilocks::fromU64(numbers[i]);
         }
     }
-    cudaMalloc((void **)&(stepPointers_h.numbers_d), parserParams.nNumbers * nRowsPack * sizeof(gl64_t));
-    cudaMemcpy(stepPointers_h.numbers_d, numbers_aux, parserParams.nNumbers * nRowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&(stepPointers_h.numbers_d), parserParams.nNumbers * nrowsPack * sizeof(gl64_t));
+    cudaMemcpy(stepPointers_h.numbers_d, numbers_aux, parserParams.nNumbers * nrowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
     delete[] numbers_aux;
 
-    Goldilocks::Element challenges[params.challenges.degree() * FIELD_EXTENSION * nRowsPack];
-    Goldilocks::Element challenges_ops[params.challenges.degree() * FIELD_EXTENSION * nRowsPack];
+    Goldilocks::Element challenges[params.challenges.degree() * FIELD_EXTENSION * nrowsPack];
+    Goldilocks::Element challenges_ops[params.challenges.degree() * FIELD_EXTENSION * nrowsPack];
     for (uint64_t i = 0; i < params.challenges.degree(); ++i)
     {
-        for (uint64_t j = 0; j < nRowsPack; ++j)
+        for (uint64_t j = 0; j < nrowsPack; ++j)
         {
-            challenges[(i * FIELD_EXTENSION) * nRowsPack + j] = params.challenges[i][0];
-            challenges[(i * FIELD_EXTENSION + 1) * nRowsPack + j] = params.challenges[i][1];
-            challenges[(i * FIELD_EXTENSION + 2) * nRowsPack + j] = params.challenges[i][2];
-            challenges_ops[(i * FIELD_EXTENSION) * nRowsPack + j] = params.challenges[i][0] + params.challenges[i][1];
-            challenges_ops[(i * FIELD_EXTENSION + 1) * nRowsPack + j] = params.challenges[i][0] + params.challenges[i][2];
-            challenges_ops[(i * FIELD_EXTENSION + 2) * nRowsPack + j] = params.challenges[i][1] + params.challenges[i][2];
+            challenges[(i * FIELD_EXTENSION) * nrowsPack + j] = params.challenges[i][0];
+            challenges[(i * FIELD_EXTENSION + 1) * nrowsPack + j] = params.challenges[i][1];
+            challenges[(i * FIELD_EXTENSION + 2) * nrowsPack + j] = params.challenges[i][2];
+            challenges_ops[(i * FIELD_EXTENSION) * nrowsPack + j] = params.challenges[i][0] + params.challenges[i][1];
+            challenges_ops[(i * FIELD_EXTENSION + 1) * nrowsPack + j] = params.challenges[i][0] + params.challenges[i][2];
+            challenges_ops[(i * FIELD_EXTENSION + 2) * nrowsPack + j] = params.challenges[i][1] + params.challenges[i][2];
         }
     }
 
-    cudaMalloc((void **)&(stepPointers_h.challenges_d), params.challenges.degree() * FIELD_EXTENSION * nRowsPack * sizeof(gl64_t));
-    cudaMemcpy(stepPointers_h.challenges_d, challenges, params.challenges.degree() * FIELD_EXTENSION * nRowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&(stepPointers_h.challenges_d), params.challenges.degree() * FIELD_EXTENSION * nrowsPack * sizeof(gl64_t));
+    cudaMemcpy(stepPointers_h.challenges_d, challenges, params.challenges.degree() * FIELD_EXTENSION * nrowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
 
-    cudaMalloc((void **)&(stepPointers_h.challenges_ops_d), params.challenges.degree() * FIELD_EXTENSION * nRowsPack * sizeof(gl64_t));
-    cudaMemcpy(stepPointers_h.challenges_ops_d, challenges_ops, params.challenges.degree() * FIELD_EXTENSION * nRowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&(stepPointers_h.challenges_ops_d), params.challenges.degree() * FIELD_EXTENSION * nrowsPack * sizeof(gl64_t));
+    cudaMemcpy(stepPointers_h.challenges_ops_d, challenges_ops, params.challenges.degree() * FIELD_EXTENSION * nrowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
 
-    Goldilocks::Element *publics_aux = new Goldilocks::Element[starkInfo.nPublics * nRowsPack];
+    Goldilocks::Element *publics_aux = new Goldilocks::Element[starkInfo.nPublics * nrowsPack];
     for (uint64_t i = 0; i < starkInfo.nPublics; ++i)
     {
-        for (uint64_t j = 0; j < nRowsPack; ++j)
+        for (uint64_t j = 0; j < nrowsPack; ++j)
         {
-            publics_aux[i * nRowsPack + j] = params.publicInputs[i];
+            publics_aux[i * nrowsPack + j] = params.publicInputs[i];
         }
     }
-    cudaMalloc((void **)&(stepPointers_h.publics_d), starkInfo.nPublics * nRowsPack * sizeof(gl64_t));
-    cudaMemcpy(stepPointers_h.publics_d, publics_aux, starkInfo.nPublics * nRowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&(stepPointers_h.publics_d), starkInfo.nPublics * nrowsPack * sizeof(gl64_t));
+    cudaMemcpy(stepPointers_h.publics_d, publics_aux, starkInfo.nPublics * nrowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
     delete[] publics_aux;
 
-    Goldilocks::Element *evals_aux = new Goldilocks::Element[params.evals.degree() * FIELD_EXTENSION * nRowsPack];
+    Goldilocks::Element *evals_aux = new Goldilocks::Element[params.evals.degree() * FIELD_EXTENSION * nrowsPack];
     for (uint64_t i = 0; i < params.evals.degree(); ++i)
     {
-        for (uint64_t j = 0; j < nRowsPack; ++j)
+        for (uint64_t j = 0; j < nrowsPack; ++j)
         {
-            evals_aux[(i * FIELD_EXTENSION) * nRowsPack + j] = params.evals[i][0];
-            evals_aux[(i * FIELD_EXTENSION + 1) * nRowsPack + j] = params.evals[i][1];
-            evals_aux[(i * FIELD_EXTENSION + 2) * nRowsPack + j] = params.evals[i][2];
+            evals_aux[(i * FIELD_EXTENSION) * nrowsPack + j] = params.evals[i][0];
+            evals_aux[(i * FIELD_EXTENSION + 1) * nrowsPack + j] = params.evals[i][1];
+            evals_aux[(i * FIELD_EXTENSION + 2) * nrowsPack + j] = params.evals[i][2];
         }
     }
-    cudaMalloc((void **)&(stepPointers_h.evals_d), params.evals.degree() * FIELD_EXTENSION * nRowsPack * sizeof(gl64_t));
-    cudaMemcpy(stepPointers_h.evals_d, evals_aux, params.evals.degree() * FIELD_EXTENSION * nRowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&(stepPointers_h.evals_d), params.evals.degree() * FIELD_EXTENSION * nrowsPack * sizeof(gl64_t));
+    cudaMemcpy(stepPointers_h.evals_d, evals_aux, params.evals.degree() * FIELD_EXTENSION * nrowsPack * sizeof(gl64_t), cudaMemcpyHostToDevice);
     delete[] evals_aux;
+
+    cudaMalloc((void**)&(stepPointers_h.x_n_d), params.x_n.degree()*sizeof(gl64_t));
+    cudaMemcpy(stepPointers_h.x_n_d, params.x_n.address(), params.x_n.degree()*sizeof(gl64_t), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**)&(stepPointers_h.x_2ns_d), params.x_2ns.degree()*sizeof(gl64_t));
+    cudaMemcpy(stepPointers_h.x_2ns_d, params.x_2ns.address(), params.x_2ns.degree()*sizeof(gl64_t), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**)&(stepPointers_h.zi_d), params.zi.degree()*sizeof(gl64_t));
+    cudaMemcpy(stepPointers_h.zi_d, params.zi.address(), params.zi.degree()*sizeof(gl64_t), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**)&(stepPointers_h.xDivXSubXi_d), params.xDivXSubXi.degree()*params.xDivXSubXi.dim()*sizeof(gl64_t));
+    cudaMemcpy(stepPointers_h.xDivXSubXi_d, params.xDivXSubXi.address(), params.xDivXSubXi.degree()*params.xDivXSubXi.dim()*sizeof(gl64_t), cudaMemcpyHostToDevice);
 
     /*
         temporal buffers
-    */
-    nStreams = 1;
-    stepPointers_h.dimBufferT = 2 * nCols * nRowsPack;
-    cudaMalloc((void **)&(stepPointers_h.bufferT_d), stepPointers_h.dimBufferT * nStreams * sizeof(gl64_t));
-    stepPointers_h.bufferT_h = new Goldilocks::Element[stepPointers_h.dimBufferT * nStreams];
-    stepPointers_h.dimTmp1 = parserParams.nTemp1 * nRowsPack;
-    cudaMalloc((void **)&(stepPointers_h.tmp1_d), stepPointers_h.dimTmp1 * nStreams * sizeof(gl64_t));
-    stepPointers_h.dimTmp3 = parserParams.nTemp3 * nRowsPack * FIELD_EXTENSION;
-    cudaMalloc((void **)&(stepPointers_h.tmp3_d), stepPointers_h.dimTmp3 * nStreams * sizeof(gl64_t));
+    */    
+
+    stepPointers_h.dimBufferT = 2 * nCols * nrowsPack;
+    cudaMalloc((void **)&(stepPointers_h.bufferT_d), stepPointers_h.dimBufferT * nstreams * sizeof(gl64_t));
+    stepPointers_h.bufferT_h = new Goldilocks::Element[stepPointers_h.dimBufferT * nstreams];
+    
+    stepPointers_h.dimBufferPols = 0;
+    uint64_t nStages = 3;
+    for (uint64_t s = 1; s <= nStages; ++s){
+        stepPointers_h.dimBufferPols += nColsStages[s];
+    }
+    if(parserParams.stage==5){
+        stepPointers_h.dimBufferPols += nColsStages[nStages + 1] + 10;
+    }
+    stepPointers_h.dimBufferPols = stepPointers_h.dimBufferPols * (nrowsPack+nextStride);
+    stepPointers_h.dimBufferPols = 1000000;
+    cudaMalloc((void **)&(stepPointers_h.bufferPols_d), stepPointers_h.dimBufferPols * nstreams * sizeof(gl64_t));
+
+    stepPointers_h.dimBufferConsts = starkInfo.nConstants * (nrowsPack+nextStride);
+    cudaMalloc((void **)&(stepPointers_h.bufferConsts_d), stepPointers_h.dimBufferConsts * nstreams * sizeof(gl64_t));
+    
+    stepPointers_h.dimTmp1 = parserParams.nTemp1 * nrowsPack;
+    cudaMalloc((void **)&(stepPointers_h.tmp1_d), stepPointers_h.dimTmp1 * nstreams * sizeof(gl64_t));
+    
+    stepPointers_h.dimTmp3 = parserParams.nTemp3 * nrowsPack * FIELD_EXTENSION;
+    cudaMalloc((void **)&(stepPointers_h.tmp3_d), stepPointers_h.dimTmp3 * nstreams * sizeof(gl64_t));
+
     /*
         copy to device
     */
@@ -184,85 +224,9 @@ void CHelpersStepsGPU::dataSetup(StarkInfo &starkInfo, StepsParams &params, Pars
     cudaMemcpy(stepPointers_d, &stepPointers_h, sizeof(StepsPointers), cudaMemcpyHostToDevice);
 }
 
-void CHelpersStepsGPU::loadPolinomials_(StarkInfo &starkInfo, StepsParams &params, uint64_t row, uint64_t stage, uint64_t nRowsPack, uint64_t domainExtended)
+void CHelpersStepsGPU::storePolinomials_(StarkInfo &starkInfo, StepsParams &params, uint8_t *storePol, uint64_t row, uint64_t domainExtended)
 {
-    uint32_t stream = (row / nRowsPack) % nStreams;
-    Goldilocks::Element *bufferT_ = &stepPointers_h.bufferT_h[stepPointers_h.dimBufferT * stream];
-
-    ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
-    uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
-    Polinomial &x = domainExtended ? params.x_2ns : params.x_n;
-    uint64_t nStages = 3;
-    uint64_t nextStride = domainExtended ? 1 << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 1;
-    std::vector<uint64_t> nextStrides = {0, nextStride};
-    for (uint64_t k = 0; k < starkInfo.nConstants; ++k)
-    {
-        for (uint64_t o = 0; o < 2; ++o)
-        {
-            for (uint64_t j = 0; j < nRowsPack; ++j)
-            {
-                uint64_t l = (row + j + nextStrides[o]) % domainSize;
-                bufferT_[(nColsStagesAcc[5 * o] + k) * nRowsPack + j] = ((Goldilocks::Element *)constPols->address())[l * starkInfo.nConstants + k];
-            }
-        }
-    }
-
-    // Load x and Zi
-    for (uint64_t j = 0; j < nRowsPack; ++j)
-    {
-        bufferT_[starkInfo.nConstants * nRowsPack + j] = x[row + j][0];
-    }
-    for (uint64_t j = 0; j < nRowsPack; ++j)
-    {
-        bufferT_[(starkInfo.nConstants + 1) * nRowsPack + j] = params.zi[row + j][0];
-    }
-
-    for (uint64_t s = 1; s <= nStages; ++s)
-    {
-        for (uint64_t k = 0; k < nColsStages[s]; ++k)
-        {
-            for (uint64_t o = 0; o < 2; ++o)
-            {
-                for (uint64_t j = 0; j < nRowsPack; ++j)
-                {
-                    uint64_t l = (row + j + nextStrides[o]) % domainSize;
-                    bufferT_[(nColsStagesAcc[5 * o + s] + k) * nRowsPack + j] = params.pols[offsetsStages[s] + l * nColsStages[s] + k];
-                }
-            }
-        }
-    }
-
-    if (stage == 5)
-    {
-        for (uint64_t k = 0; k < nColsStages[nStages + 1]; ++k)
-        {
-            for (uint64_t o = 0; o < 2; ++o)
-            {
-                for (uint64_t j = 0; j < nRowsPack; ++j)
-                {
-                    uint64_t l = (row + j + nextStrides[o]) % domainSize;
-                    bufferT_[(nColsStagesAcc[5 * o + nStages + 1] + k) * nRowsPack + j] = params.pols[offsetsStages[nStages + 1] + l * nColsStages[nStages + 1] + k];
-                }
-            }
-        }
-
-        // Load xDivXSubXi & xDivXSubWXi
-        for (uint64_t d = 0; d < 2; ++d)
-        {
-            for (uint64_t i = 0; i < FIELD_EXTENSION; ++i)
-            {
-                for (uint64_t j = 0; j < nRowsPack; ++j)
-                {
-                    bufferT_[(nColsStagesAcc[11] + FIELD_EXTENSION * d + i) * nRowsPack + j] = params.xDivXSubXi[d * domainSize + row + j][i];
-                }
-            }
-        }
-    }
-}
-
-void CHelpersStepsGPU::storePolinomials_(StarkInfo &starkInfo, StepsParams &params, uint8_t *storePol, uint64_t row, uint64_t nRowsPack, uint64_t domainExtended)
-{
-    uint32_t stream = (row / nRowsPack) % nStreams;
+    uint32_t stream = (row / nrowsPack) % nstreams;
     Goldilocks::Element *bufferT_ = &stepPointers_h.bufferT_h[stepPointers_h.dimBufferT * stream];
 
     if (domainExtended)
@@ -270,8 +234,8 @@ void CHelpersStepsGPU::storePolinomials_(StarkInfo &starkInfo, StepsParams &para
         // Store either polinomial f or polinomial q
         for (uint64_t k = 0; k < nColsStages[10]; ++k)
         {
-            Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[10] + k) * nRowsPack];
-            Goldilocks::copy_pack(nRowsPack, &params.pols[offsetsStages[10] + k + row * nColsStages[10]], nColsStages[10], buffT);
+            Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[10] + k) * nrowsPack];
+            Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[10] + k + row * nColsStages[10]], nColsStages[10], buffT);
         }
     }
     else
@@ -286,17 +250,18 @@ void CHelpersStepsGPU::storePolinomials_(StarkInfo &starkInfo, StepsParams &para
                 uint64_t dim = storePol[nColsStagesAcc[s] + k];
                 if (storePol[nColsStagesAcc[s] + k])
                 {
-                    Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k) * nRowsPack];
+                    Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k) * nrowsPack];
                     if (isTmpPol)
                     {
                         for (uint64_t i = 0; i < dim; ++i)
                         {
-                            Goldilocks::copy_pack(nRowsPack, &params.pols[offsetsStages[s] + k * domainSize + row * dim + i], uint64_t(dim), &buffT[i * nRowsPack]);
+                            //offsetsStages[4]+ncolsStages[4] i !domainExetended
+                            Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k * domainSize + row * dim + i], uint64_t(dim), &buffT[i * nrowsPack]);
                         }
                     }
                     else
                     {
-                        Goldilocks::copy_pack(nRowsPack, &params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT);
+                        Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT);
                     }
                 }
             }
@@ -304,46 +269,96 @@ void CHelpersStepsGPU::storePolinomials_(StarkInfo &starkInfo, StepsParams &para
     }
 }
 
+void CHelpersStepsGPU::loadData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row){
+
+    cudaError_t err;
+    bool domainExtended = parserParams.stage > 3 ? true : false;
+    uint32_t iStream = (row / nrowsPack) % nstreams; 
+    Goldilocks::Element *bufferT_h = &stepPointers_h.bufferT_h[stepPointers_h.dimBufferT * iStream];
+    gl64_t *bufferConsts_d = &stepPointers_h.bufferConsts_d[stepPointers_h.dimBufferConsts * iStream];
+    gl64_t *bufferPols_d = &stepPointers_h.bufferPols_d[stepPointers_h.dimBufferPols * iStream];
+    ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
+
+
+    err = cudaMemcpy(bufferConsts_d, &(((Goldilocks::Element *)constPols->address())[row * starkInfo.nConstants]), stepPointers_h.dimBufferConsts*sizeof(Goldilocks::Element), cudaMemcpyHostToDevice);
+    checkCudaError(err, "copy constants to device");
+    
+    uint64_t nStages=3; // do I relly need to copy all
+    uint64_t offset_pols_d=0;
+    for (uint64_t s = 1; s <= nStages; ++s) //optimize copies that can be avoided...
+    {
+        
+        uint64_t offset_pols_h = offsetsStages[s] + row * nColsStages[s];
+        uint64_t size_copy = nColsStages[s]*(nrowsPack+stepPointers_h.nextStride);
+
+        err = cudaMemcpy(&(bufferPols_d[offset_pols_d]), &(params.pols[offset_pols_h]), size_copy*sizeof(Goldilocks::Element), cudaMemcpyHostToDevice);
+        checkCudaError(err, "copy pols to device");
+        offset_pols_d += size_copy;
+    }
+    if (parserParams.stage == 5){
+
+        uint64_t offset_pols_h = offsetsStages[nStages + 1] + row * nColsStages[nStages + 1];
+        uint64_t size_copy = nColsStages[nStages + 1]*(nrowsPack+stepPointers_h.nextStride);
+
+        err = cudaMemcpy(&(bufferPols_d[offset_pols_d]), &(params.pols[offset_pols_h]), size_copy*sizeof(Goldilocks::Element), cudaMemcpyHostToDevice);
+        checkCudaError(err, "copy pols to device");
+    }
+
+
+}
+
+void CHelpersStepsGPU::storeData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row){
+
+    cudaError_t err;
+    uint32_t iStream = (row / nrowsPack) % nstreams; 
+    uint32_t buffSize = stepPointers_h.dimBufferT * sizeof(gl64_t);
+    bool domainExtended = parserParams.stage > 3 ? true : false;
+    Goldilocks::Element *bufferT_h = &stepPointers_h.bufferT_h[stepPointers_h.dimBufferT * iStream];
+    gl64_t *bufferT_d = &stepPointers_h.bufferT_d[stepPointers_h.dimBufferT * iStream];
+    err = cudaMemcpy(bufferT_h, bufferT_d, buffSize, cudaMemcpyDeviceToHost);
+    checkCudaError(err, "copy to host");
+    //store data (full)
+    storePolinomials_(starkInfo, params, &parserArgs.storePols[parserParams.storePolsOffset], row, domainExtended);
+
+}
 
 void CHelpersStepsGPU::calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams)
 {
 
-    cudaError_t err;
-    uint32_t nRowsPack = 32;
+    // rick: condition, nrowsPack should cover the opening and divide domainSize!!
     bool domainExtended = parserParams.stage > 3 ? true : false;
     uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
+    cudaError_t err;
+    nrowsPack = 4;
+    nstreams = 1;
 
+    // The first and last chunk of rows will be solved uwing the chelpers_pack
+    CHelpersStepsPack chelpersPack;
+    chelpersPack.calculateExpressionsRows(starkInfo, params, parserArgs, parserParams, domainSize-nrowsPack, domainSize);
+
+    
     dataSetup(starkInfo, params, parserArgs, parserParams);
-    cudaStream_t *streams = new cudaStream_t[nStreams];
-    for (int i = 0; i < nStreams; i++)
+    cudaStream_t *streams = new cudaStream_t[nstreams];
+    for (int i = 0; i < nstreams; i++)
     {
         cudaStreamCreate(&streams[i]);
     }
 
-    uint32_t buffSize = stepPointers_h.dimBufferT * sizeof(gl64_t);
-
-    for (uint64_t i = 0; i < domainSize; i += nRowsPack)
+    for (uint64_t i = 0; i < domainSize-nrowsPack; i += nrowsPack) //rick, asum next is < nrowsPack
     {
-        uint32_t iStream = (i / nRowsPack) % nStreams;
-        Goldilocks::Element *bufferT_h = &stepPointers_h.bufferT_h[stepPointers_h.dimBufferT * iStream];
-        gl64_t *bufferT_d = &stepPointers_h.bufferT_d[stepPointers_h.dimBufferT * iStream];
-        cudaStream_t &stream = streams[iStream];
-
-        loadPolinomials_(starkInfo, params, i, parserParams.stage, nRowsPack, domainExtended);
-
-        err = cudaMemcpy(bufferT_d, bufferT_h, buffSize, cudaMemcpyHostToDevice);
-        checkCudaError(err, "copyi to device");
-
-        _rowComputation<<<1, nRowsPack>>>(stepPointers_d, domainSize, parserParams.nOps, parserParams.nArgs, iStream);
-
-        err = cudaMemcpy(bufferT_h, bufferT_d, buffSize, cudaMemcpyDeviceToHost);
-        checkCudaError(err, "copy to host");
-
-        storePolinomials_(starkInfo, params, &parserArgs.storePols[parserParams.storePolsOffset], i, nRowsPack, domainExtended);
+        uint32_t iStream = (i / nrowsPack) % nstreams; 
+        loadData(starkInfo, params, parserArgs, parserParams, i);
+        _loadPolinomials<<<1, nrowsPack>>>(stepPointers_d, i, parserParams.stage, domainExtended, iStream);
+        _rowComputation<<<1, nrowsPack>>>(stepPointers_d, domainSize, parserParams.nOps, parserParams.nArgs, iStream);
+        storeData(starkInfo, params, parserArgs, parserParams, i);
+    
     }
 
+    //
+    // Free pointers and destroy streams
+    //
     freePointers();
-    for (int i = 0; i < nStreams; i++)
+    for (int i = 0; i < nstreams; i++)
     {
         cudaStreamDestroy(streams[i]);
     }
@@ -363,6 +378,8 @@ void CHelpersStepsGPU::freePointers()
     cudaFree(stepPointers_h.publics_d);
     cudaFree(stepPointers_h.evals_d);
     cudaFree(stepPointers_h.bufferT_d);
+    cudaFree(stepPointers_h.bufferPols_d);
+    cudaFree(stepPointers_h.bufferConsts_d);
     cudaFree(stepPointers_h.tmp1_d);
     cudaFree(stepPointers_h.tmp3_d);
     cudaFree(stepPointers_d);
@@ -957,3 +974,102 @@ __global__ void _rowComputation(StepsPointers *stepPointers_d, uint32_t N, uint3
         }
     }
 }
+
+__global__ void _loadPolinomials(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream){
+
+    gl64_t *bufferT_ = &(stepPointers_d->bufferT_d[stream * stepPointers_d->dimBufferT]);
+    gl64_t *bufferConsts_ = &(stepPointers_d->bufferConsts_d[stream * stepPointers_d->dimBufferConsts]);
+    gl64_t *bufferPols_ = &(stepPointers_d->bufferPols_d[stream * stepPointers_d->dimBufferPols]);
+    gl64_t * x = domainExtended ? stepPointers_d->x_2ns_d : stepPointers_d->x_n_d;
+
+    uint64_t nextStrides[2] = {0, stepPointers_d->nextStride};
+    for (uint64_t k = 0; k < stepPointers_d->nConstants; ++k)
+    {
+        for (uint64_t o = 0; o < 2; ++o)
+        {
+            bufferT_[(stepPointers_d->nColsStagesAcc_d[5 * o] + k) * blockDim.x + threadIdx.x] = bufferConsts_[(threadIdx.x+nextStrides[o])* stepPointers_d->nConstants + k]; //this transpose can be optimized
+            //if(bufferT_[(stepPointers_d->nColsStagesAcc_d[5 * o] + k) * blockDim.x + threadIdx.x].get_val() != bufferConsts_[(threadIdx.x+nextStrides[o])* stepPointers_d->nConstants + k].get_val()){
+            //    printf("diferences in constants %d\n", stage);
+            //}
+        }
+    }
+
+    bufferT_[stepPointers_d->nConstants * blockDim.x + threadIdx.x] = x[row + threadIdx.x];
+    /*if(bufferT_[stepPointers_d->nConstants * blockDim.x + threadIdx.x].get_val() != x[row + threadIdx.x].get_val()){
+        printf("diferences in x %d\n", stage);
+    }*/
+    bufferT_[(stepPointers_d->nConstants + 1) * blockDim.x + threadIdx.x] = stepPointers_d->zi_d[row + threadIdx.x];
+    /*if(bufferT_[(stepPointers_d->nConstants + 1) * blockDim.x + threadIdx.x].get_val() != stepPointers_d->zi_d[row + threadIdx.x].get_val()){
+        printf("diferences in zi %d\n", stage);
+    }*/
+    
+    
+
+    uint32_t offset_pols = 0;
+    uint64_t nStages = 3;
+    for (uint64_t s = 1; s <= nStages; ++s) 
+    {
+        for (uint64_t k = 0; k < stepPointers_d->nColsStages_d[s]; ++k)
+        {
+            for (uint64_t o = 0; o < 2; ++o) 
+            {
+                
+                uint64_t l = threadIdx.x + nextStrides[o];
+                bufferT_[(stepPointers_d->nColsStagesAcc_d[5 * o + s] + k) * blockDim.x + threadIdx.x] = bufferPols_[offset_pols + l * stepPointers_d->nColsStages_d[s] + k];
+                /*if(bufferT_[(stepPointers_d->nColsStagesAcc_d[5 * o + s] + k) * blockDim.x + threadIdx.x].get_val() != bufferPols_[offset_pols + l * stepPointers_d->nColsStages_d[s] + k].get_val()){
+                    printf("diferences in stage %lu %d\n", s, stage);
+                }*/
+            }
+        }
+        offset_pols += stepPointers_d->nColsStages_d[s] * (blockDim.x+stepPointers_d->nextStride);
+    }
+    if (stage == 5)
+    {
+        for (uint64_t k = 0; k < stepPointers_d->nColsStages_d[nStages + 1]; ++k)
+        {
+            for (uint64_t o = 0; o < 2; ++o)
+            {
+                uint64_t l = threadIdx.x + nextStrides[o];
+                bufferT_[(stepPointers_d->nColsStagesAcc_d[5 * o + nStages + 1] + k) * blockDim.x + threadIdx.x] = bufferPols_[offset_pols + l * stepPointers_d->nColsStages_d[nStages + 1] + k];
+                /*if(bufferT_[(stepPointers_d->nColsStagesAcc_d[5 * o + nStages + 1] + k) * blockDim.x + threadIdx.x].get_val() != bufferPols_[offset_pols + l * stepPointers_d->nColsStages_d[nStages + 1] + k].get_val()){
+                    printf("Error in polinomials loading %lu %lu %lu %lu - %lu %lu %lu %lu - %d %d\n", 
+                    k, 
+                    o, 
+                    l, 
+                    stepPointers_d->nColsStages_d[nStages + 1], 
+                    (stepPointers_d->nColsStagesAcc_d[5 * o + nStages + 1] + k) * blockDim.x + threadIdx.x,  
+                    offset_pols + l * stepPointers_d->nColsStages_d[nStages + 1] + k,
+                    bufferT_[(stepPointers_d->nColsStagesAcc_d[5 * o + nStages + 1] + k) * blockDim.x + threadIdx.x].get_val(), 
+                    bufferPols_[offset_pols + l * stepPointers_d->nColsStages_d[nStages + 1] + k].get_val(),
+                    stream,
+                    stream * stepPointers_d->dimBufferT);
+                    //printf("diferences in stage 5\n");
+                }else{
+                    printf("correctly %lu %lu %lu %lu - %lu %lu %lu %lu - %d %d\n", 
+                    k, 
+                    o, 
+                    l, 
+                    stepPointers_d->nColsStages_d[nStages + 1], 
+                    (stepPointers_d->nColsStagesAcc_d[5 * o + nStages + 1] + k) * blockDim.x + threadIdx.x,  
+                    offset_pols + l * stepPointers_d->nColsStages_d[nStages + 1] + k,
+                    bufferT_[(stepPointers_d->nColsStagesAcc_d[5 * o + nStages + 1] + k) * blockDim.x + threadIdx.x].get_val(), 
+                    bufferPols_[offset_pols + l * stepPointers_d->nColsStages_d[nStages + 1] + k].get_val(),
+                    stream,
+                    stream * stepPointers_d->dimBufferT);
+                }*/
+
+            }
+        }
+
+        for (uint64_t d = 0; d < 2; ++d)
+        {
+            for (uint64_t i = 0; i < FIELD_EXTENSION; ++i)
+            {
+                bufferT_[(stepPointers_d->nColsStagesAcc_d[11] + FIELD_EXTENSION * d + i) * blockDim.x + threadIdx.x] = stepPointers_d->xDivXSubXi_d[(d * stepPointers_d->domainSize + row + threadIdx.x)*FIELD_EXTENSION+i];
+            }
+        }
+    }
+     
+}
+
+#endif

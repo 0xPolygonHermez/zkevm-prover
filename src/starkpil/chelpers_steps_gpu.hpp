@@ -7,14 +7,17 @@
 #ifdef __USE_CUDA__
 #include <cuda_runtime.h>
 #endif
-
+#define ENABLE_EXPERIMENTAL_CODE
+#ifdef ENABLE_EXPERIMENTAL_CODE
 class gl64_t;
 struct StepsPointers
 {
-
+    uint64_t domainSize;
+    uint64_t nConstants;
     uint64_t *nColsStages_d;
     uint64_t *nColsStagesAcc_d;
     uint64_t *offsetsStages_d;
+    uint64_t nextStride;
 
     uint32_t *ops_d;
     uint32_t *args_d;
@@ -23,14 +26,22 @@ struct StepsPointers
     gl64_t *challenges_ops_d;
     gl64_t *publics_d;
     gl64_t *evals_d;
+    gl64_t *x_n_d;
+    gl64_t *x_2ns_d;
+    gl64_t *zi_d;
+    gl64_t *xDivXSubXi_d;
 
     gl64_t *bufferT_d;
+    gl64_t *bufferPols_d;
+    gl64_t *bufferConsts_d;
     gl64_t *tmp1_d;
     gl64_t *tmp3_d;
 
-    Goldilocks::Element *bufferT_h;
+    Goldilocks::Element *bufferT_h; //rick: va fora
 
     uint32_t dimBufferT;
+    uint32_t dimBufferPols;
+    uint32_t dimBufferConsts;
     uint32_t dimTmp1;
     uint32_t dimTmp3;
 };
@@ -38,20 +49,23 @@ class CHelpersStepsGPU : public CHelpersSteps
 {
 
 public:
-    uint64_t nCols;
-    uint32_t nRowsPack;
-    uint32_t nStreams;
-
+    uint32_t nstreams;
     StepsPointers *stepPointers_d;
     StepsPointers stepPointers_h;
 
     void dataSetup(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams);
-    void loadPolinomials_(StarkInfo &starkInfo, StepsParams &params, uint64_t row, uint64_t stage, uint64_t nrowsPack, uint64_t domainExtended);
-    void storePolinomials_(StarkInfo &starkInfo, StepsParams &params, uint8_t *storePol, uint64_t row, uint64_t nrowsPack, uint64_t domainExtended);
+    void loadData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row);
+    void storeData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row);
+    void storePolinomials_(StarkInfo &starkInfo, StepsParams &params, uint8_t *storePol, uint64_t row, uint64_t domainExtended);
     void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams);
     void freePointers();
+
+};
 #ifdef __USE_CUDA__
-    inline void checkCudaError(cudaError_t err, const char *operation)
+__global__ void _loadPolinomials(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
+__global__ void _rowComputation(StepsPointers *stepPointers_d, uint32_t N, uint32_t nOps, uint32_t nArgs, uint32_t stream);
+
+inline void checkCudaError(cudaError_t err, const char *operation)
     {
         if (err != cudaSuccess)
         {
@@ -60,8 +74,5 @@ public:
         }
     }
 #endif
-};
-#ifdef __USE_CUDA__
-__global__ void _rowComputation(StepsPointers *stepPointers_d, uint32_t N, uint32_t nOps, uint32_t nArgs, uint32_t stream);
 #endif
 #endif
