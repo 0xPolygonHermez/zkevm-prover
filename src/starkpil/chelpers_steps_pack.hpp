@@ -49,7 +49,7 @@ public:
                 }
             }
         }
-        nColsStagesAcc[10] = nColsStagesAcc[9] + nColsStages[9]; // Polinomials f & q
+        nColsStagesAcc[10] = nColsStagesAcc[9] + nColsStages[4]; // Polinomials f & q
         if(stage == 4) {
             offsetsStages[10] = starkInfo.mapOffsets.section[eSection::q_2ns];
             nColsStages[10] = starkInfo.qDim;
@@ -57,8 +57,8 @@ public:
             offsetsStages[10] = starkInfo.mapOffsets.section[eSection::f_2ns];
             nColsStages[10] = 3;
         }
-        nColsStagesAcc[11] = nColsStagesAcc[10] + 3; // xDivXSubXi
-        nCols = nColsStagesAcc[11] + 6;
+        nColsStagesAcc[11] = nColsStagesAcc[10] + nColsStages[10]; // xDivXSubXi
+        nCols = nColsStagesAcc[11] + 6; // 3 for xDivXSubXi and 3 for xDivXSubWxi
     }
 
     inline virtual void storePolinomials(StarkInfo &starkInfo, StepsParams &params, Goldilocks::Element *bufferT_, uint8_t* storePol, uint64_t row, uint64_t nrowsPack, uint64_t domainExtended) {
