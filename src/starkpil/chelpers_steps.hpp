@@ -6,7 +6,7 @@
 
 class CHelpersSteps {
 public:
-    uint64_t nRowsPack = 4;
+    uint64_t nrowsPack = 4;
     uint64_t nCols;
     vector<uint64_t> nColsStages;
     vector<uint64_t> nColsStagesAcc;
@@ -61,7 +61,7 @@ public:
         nCols = nColsStagesAcc[11] + 6;
     }
 
-    inline virtual void storePolinomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint8_t* storePol, uint64_t row, uint64_t nRowsPack, uint64_t domainExtended) {
+    inline virtual void storePolinomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint8_t* storePol, uint64_t row, uint64_t nrowsPack, uint64_t domainExtended) {
         if(domainExtended) {
             // Store either polinomial f or polinomial q
             for(uint64_t k = 0; k < nColsStages[10]; ++k) {
@@ -90,8 +90,8 @@ public:
         }
     }
 
-    inline virtual void loadPolinomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint64_t row, uint64_t stage, uint64_t nRowsPack, uint64_t domainExtended) {
-        Goldilocks::Element bufferT[2*nRowsPack];
+    inline virtual void loadPolinomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint64_t row, uint64_t stage, uint64_t nrowsPack, uint64_t domainExtended) {
+        Goldilocks::Element bufferT[2*nrowsPack];
         ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
         Polinomial &x = domainExtended ? params.x_2ns : params.x_n;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
@@ -100,20 +100,20 @@ public:
         std::vector<uint64_t> nextStrides = {0, nextStride};
         for(uint64_t k = 0; k < starkInfo.nConstants; ++k) {
             for(uint64_t o = 0; o < 2; ++o) {
-                for(uint64_t j = 0; j < nRowsPack; ++j) {
+                for(uint64_t j = 0; j < nrowsPack; ++j) {
                     uint64_t l = (row + j + nextStrides[o]) % domainSize;
-                    bufferT[nRowsPack*o + j] = ((Goldilocks::Element *)constPols->address())[l * starkInfo.nConstants + k];
+                    bufferT[nrowsPack*o + j] = ((Goldilocks::Element *)constPols->address())[l * starkInfo.nConstants + k];
                 }
-                Goldilocks::load_avx(bufferT_[nColsStagesAcc[5*o] + k], &bufferT[nRowsPack*o]);
+                Goldilocks::load_avx(bufferT_[nColsStagesAcc[5*o] + k], &bufferT[nrowsPack*o]);
             }
         }
 
         // Load x and Zi
-        for(uint64_t j = 0; j < nRowsPack; ++j) {
+        for(uint64_t j = 0; j < nrowsPack; ++j) {
             bufferT[j] = x[row + j][0];
         }
         Goldilocks::load_avx(bufferT_[starkInfo.nConstants], &bufferT[0]);
-        for(uint64_t j = 0; j < nRowsPack; ++j) {
+        for(uint64_t j = 0; j < nrowsPack; ++j) {
             bufferT[j] = params.zi[row + j][0];
         }
 
@@ -123,11 +123,11 @@ public:
             if(stage < s) break;
             for(uint64_t k = 0; k < nColsStages[s]; ++k) {
                 for(uint64_t o = 0; o < 2; ++o) {
-                    for(uint64_t j = 0; j < nRowsPack; ++j) {
+                    for(uint64_t j = 0; j < nrowsPack; ++j) {
                         uint64_t l = (row + j + nextStrides[o]) % domainSize;
-                        bufferT[nRowsPack*o + j] = params.pols[offsetsStages[s] + l * nColsStages[s] + k];
+                        bufferT[nrowsPack*o + j] = params.pols[offsetsStages[s] + l * nColsStages[s] + k];
                     }
-                    Goldilocks::load_avx(bufferT_[nColsStagesAcc[5*o + s] + k], &bufferT[nRowsPack*o]);
+                    Goldilocks::load_avx(bufferT_[nColsStagesAcc[5*o + s] + k], &bufferT[nrowsPack*o]);
                 }
             }
         }
@@ -135,18 +135,18 @@ public:
         if(stage == 5) {
            for(uint64_t k = 0; k < nColsStages[nStages + 1]; ++k) {
                for(uint64_t o = 0; o < 2; ++o) {
-                   for(uint64_t j = 0; j < nRowsPack; ++j) {
+                   for(uint64_t j = 0; j < nrowsPack; ++j) {
                        uint64_t l = (row + j + nextStrides[o]) % domainSize;
-                       bufferT[nRowsPack*o + j] = params.pols[offsetsStages[nStages + 1] + l * nColsStages[nStages + 1] + k];
+                       bufferT[nrowsPack*o + j] = params.pols[offsetsStages[nStages + 1] + l * nColsStages[nStages + 1] + k];
                    }
-                   Goldilocks::load_avx(bufferT_[nColsStagesAcc[5*o + nStages + 1] + k], &bufferT[nRowsPack*o]);
+                   Goldilocks::load_avx(bufferT_[nColsStagesAcc[5*o + nStages + 1] + k], &bufferT[nrowsPack*o]);
                }
            }
 
            // Load xDivXSubXi & xDivXSubWXi
            for(uint64_t d = 0; d < 2; ++d) {
                for(uint64_t i = 0; i < FIELD_EXTENSION; ++i) {
-                   for(uint64_t j = 0; j < nRowsPack; ++j) {
+                   for(uint64_t j = 0; j < nrowsPack; ++j) {
                        bufferT[j] = params.xDivXSubXi[d*domainSize + row + j][i];
                    }
                    Goldilocks::load_avx(bufferT_[nColsStagesAcc[11] + FIELD_EXTENSION*d + i], &bufferT[0]);
@@ -156,7 +156,7 @@ public:
     }
 
     virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
-        assert(nRowsPack == 4);
+        assert(nrowsPack == 4);
         bool domainExtended = parserParams.stage > 3 ? true : false;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint8_t *ops = &parserArgs.ops[parserParams.opsOffset];
@@ -199,14 +199,14 @@ public:
         }
 
     #pragma omp parallel for
-        for (uint64_t i = 0; i < domainSize; i+= nRowsPack) {
+        for (uint64_t i = 0; i < domainSize; i+= nrowsPack) {
             uint64_t i_args = 0;
 
             __m256i bufferT_[2*nCols];
             __m256i tmp1[parserParams.nTemp1];
             Goldilocks3::Element_avx tmp3[parserParams.nTemp3];
 
-            loadPolinomials(starkInfo, params, bufferT_, i, parserParams.stage, nRowsPack, domainExtended);
+            loadPolinomials(starkInfo, params, bufferT_, i, parserParams.stage, nrowsPack, domainExtended);
 
             for (uint64_t kk = 0; kk < parserParams.nOps; ++kk) {
                 switch (ops[kk]) {
@@ -696,7 +696,7 @@ public:
                     }
                 }
             }
-            storePolinomials(starkInfo, params, bufferT_, storePol, i, nRowsPack, domainExtended);
+            storePolinomials(starkInfo, params, bufferT_, storePol, i, nrowsPack, domainExtended);
             if (i_args != parserParams.nArgs) std::cout << " " << i_args << " - " << parserParams.nArgs << std::endl;
             assert(i_args == parserParams.nArgs);
         }
