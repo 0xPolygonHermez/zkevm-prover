@@ -80,7 +80,7 @@ int main()
     allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
 
     if(USE_GENERIC_PARSER) {
-#ifdef __USE_CUDA__
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
         CHelpersStepsGPU cHelpersSteps;
 #elif defined(__AVX512__)
         CHelpersStepsAvx512 cHelpersSteps;

@@ -1,5 +1,5 @@
-INFO := $(shell cd src/goldilocks && ./configure.sh && cd ../.. && sleep 2)
-include src/goldilocks/CudaArch.mk
+#INFO := $(shell cd src/goldilocks && ./configure.sh && cd ../.. && sleep 2)
+#include src/goldilocks/CudaArch.mk
 NVCC := /usr/local/cuda/bin/nvcc
 
 TARGET_ZKP := zkProver
