@@ -4,7 +4,6 @@
 #include "definitions.hpp"
 
 #if (PROVER_FORK_ID==10)
-
 #ifdef __AVX512__
 #define ZKEVM_PROVER_VERSION "v7.0.0-RC14-fork.10.avx512"
 #else
@@ -16,7 +15,6 @@
 #else
 #define ZKEVM_PROVER_VERSION "v7.0.0-RC14-fork.11"
 #endif
-
 #else
 #error "Invalid PROVER_FORK_ID"
 #endif
