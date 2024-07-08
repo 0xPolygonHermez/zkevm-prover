@@ -6,8 +6,6 @@
 #include <inttypes.h>
 #endif
 
-// rick: falta borrar tot el que no s'usi de la CPU
-// rick: jo no estic copiant p i q i funciona??
 
 #ifdef ENABLE_EXPERIMENTAL_CODE
 
@@ -202,8 +200,9 @@ void CHelpersStepsGPU::dataSetup(StarkInfo &starkInfo, StepsParams &params, Pars
         stepPointers_h.dimBufferPols += nColsStages[s];
     }
     if(parserParams.stage==5){
-        stepPointers_h.dimBufferPols += nColsStages[nStages + 1] + 10;
+        stepPointers_h.dimBufferPols += nColsStages[nStages + 1];
     }
+    stepPointers_h.dimBufferPols = stepPointers_h.dimBufferPols * nColsStages[10]; //for the store
     stepPointers_h.dimBufferPols = stepPointers_h.dimBufferPols * (nrowsPack+nextStride);
     stepPointers_h.dimBufferPols = 1000000;
     cudaMalloc((void **)&(stepPointers_h.bufferPols_d), stepPointers_h.dimBufferPols * nstreams * sizeof(gl64_t));
@@ -229,16 +228,7 @@ void CHelpersStepsGPU::storePolinomials_(StarkInfo &starkInfo, StepsParams &para
     uint32_t stream = (row / nrowsPack) % nstreams;
     Goldilocks::Element *bufferT_ = &stepPointers_h.bufferT_h[stepPointers_h.dimBufferT * stream];
 
-    if (domainExtended)
-    {
-        // Store either polinomial f or polinomial q
-        for (uint64_t k = 0; k < nColsStages[10]; ++k)
-        {
-            Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[10] + k) * nrowsPack];
-            Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[10] + k + row * nColsStages[10]], nColsStages[10], buffT);
-        }
-    }
-    else
+    if (!domainExtended)
     {
         uint64_t nStages = 3;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
@@ -319,13 +309,20 @@ void CHelpersStepsGPU::storeData(StarkInfo &starkInfo, StepsParams &params, Pars
     checkCudaError(err, "copy to host");
     //store data (full)
     storePolinomials_(starkInfo, params, &parserArgs.storePols[parserParams.storePolsOffset], row, domainExtended);
+    
+    uint64_t size_copy = nColsStages[10]*nrowsPack;
+    gl64_t *bufferPols_ = &(stepPointers_h.bufferPols_d[(iStream+1) * stepPointers_h.dimBufferPols-size_copy]);
+
+
+    err = cudaMemcpy(&(params.pols[offsetsStages[10] + row * nColsStages[10]]), bufferPols_, size_copy*sizeof(Goldilocks::Element), cudaMemcpyDeviceToHost);
+    checkCudaError(err, "copy pols to device");
 
 }
 
 void CHelpersStepsGPU::calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams)
 {
 
-    // rick: condition, nrowsPack should cover the opening and divide domainSize!!
+    // condition, nrowsPack should cover the opening and divide domainSize!!
     bool domainExtended = parserParams.stage > 3 ? true : false;
     uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
     cudaError_t err;
@@ -344,12 +341,13 @@ void CHelpersStepsGPU::calculateExpressions(StarkInfo &starkInfo, StepsParams &p
         cudaStreamCreate(&streams[i]);
     }
 
-    for (uint64_t i = 0; i < domainSize-nrowsPack; i += nrowsPack) //rick, asum next is < nrowsPack
+    for (uint64_t i = 0; i < domainSize-nrowsPack; i += nrowsPack) //asume next is < nrowsPack
     {
         uint32_t iStream = (i / nrowsPack) % nstreams; 
         loadData(starkInfo, params, parserArgs, parserParams, i);
         _loadPolinomials<<<1, nrowsPack>>>(stepPointers_d, i, parserParams.stage, domainExtended, iStream);
         _rowComputation<<<1, nrowsPack>>>(stepPointers_d, domainSize, parserParams.nOps, parserParams.nArgs, iStream);
+        _storePolinomials<<<1, nrowsPack>>>(stepPointers_d, i, parserParams.stage, domainExtended, iStream);
         storeData(starkInfo, params, parserArgs, parserParams, i);
     
     }
@@ -1070,6 +1068,21 @@ __global__ void _loadPolinomials(StepsPointers *stepPointers_d, uint64_t row, ui
         }
     }
      
+}
+
+__global__ void _storePolinomials(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream){
+
+    gl64_t *bufferT_ = &(stepPointers_d->bufferT_d[stream * stepPointers_d->dimBufferT]);
+    gl64_t *bufferPols_ = &(stepPointers_d->bufferPols_d[(stream+1) * stepPointers_d->dimBufferPols-stepPointers_d->nColsStages_d[10]*blockDim.x]);
+
+    if (domainExtended)
+    {
+        // Store either polinomial f or polinomial q
+        for (uint64_t k = 0; k < stepPointers_d->nColsStages_d[10]; ++k)
+        {
+            bufferPols_[threadIdx.x*stepPointers_d->nColsStages_d[10]+k] = bufferT_[(stepPointers_d->nColsStagesAcc_d[10] + k) * blockDim.x + threadIdx.x];
+        }
+    }
 }
 
 #endif

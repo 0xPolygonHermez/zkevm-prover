@@ -7,7 +7,6 @@
 #ifdef __USE_CUDA__
 #include <cuda_runtime.h>
 #endif
-#define ENABLE_EXPERIMENTAL_CODE
 #ifdef ENABLE_EXPERIMENTAL_CODE
 class gl64_t;
 struct StepsPointers
@@ -37,7 +36,7 @@ struct StepsPointers
     gl64_t *tmp1_d;
     gl64_t *tmp3_d;
 
-    Goldilocks::Element *bufferT_h; //rick: va fora
+    Goldilocks::Element *bufferT_h; //to be eliminated
 
     uint32_t dimBufferT;
     uint32_t dimBufferPols;
@@ -63,6 +62,7 @@ public:
 };
 #ifdef __USE_CUDA__
 __global__ void _loadPolinomials(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
+__global__ void _storePolinomials(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
 __global__ void _rowComputation(StepsPointers *stepPointers_d, uint32_t N, uint32_t nOps, uint32_t nArgs, uint32_t stream);
 
 inline void checkCudaError(cudaError_t err, const char *operation)
