@@ -1,0 +1,104 @@
+name: deb_packager
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '**'
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+
+jobs:
+  build:
+    permissions:
+      id-token: write
+      contents: write
+    runs-on: [self-hosted, linux, X64, hc, hm]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 19
+      # Variables
+      - name: Adding TAG to ENV
+        run: echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
+      - name: adding version
+        run: |
+          NUMERIC_VERSION=$( echo ${{ env.GIT_TAG }} | sed 's/[^0-9.]//g' ) 
+          echo "VERSION=$NUMERIC_VERSION" >> $GITHUB_ENV
+
+      - name: running update
+        run: sudo apt update -y
+
+      - name: installing dependencies
+        run: sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev -y
+
+      - name: make clean for sanity
+        run: make clean
+
+      - name: build grpc
+        run: cd src/grpc && make && cd ../..
+
+      - name: build the generate
+        run: make generate
+
+      - name: build the prover
+        run: make -j
+
+      - name: making directory structure
+        run: mkdir -p packaging/deb/zkevm-prover/usr/bin
+      - name: making directory structure for toml
+        run: mkdir -p packaging/deb/zkevm-prover/opt/zkevm-prover
+      - name: copy the binary for amd64 over
+        run: cp -rp build/zkProver packaging/deb/zkevm-prover/usr/bin/
+      - name: create systemd directory for service file
+        run: mkdir -p packaging/deb/zkevm-prover/lib/systemd/system
+      - name: copy the zkevm-prover service file for systemd
+        run: cp -rp packaging/package_scripts/systemd/zkevm-prover.service packaging/deb/zkevm-prover/lib/systemd/system/
+
+
+      # Create control file and packaging
+      - name: create control file
+        run: |
+          touch packaging/deb/zkevm-prover/DEBIAN/control
+          echo "Package: zkevm-prover" >> packaging/deb/zkevm-prover/DEBIAN/control
+          echo "Version: ${{ env.VERSION }}" >> packaging/deb/zkevm-prover/DEBIAN/control
+          echo "Section: base" >> packaging/deb/zkevm-prover/DEBIAN/control
+          echo "Priority: optional" >> packaging/deb/zkevm-prover/DEBIAN/control
+          echo "Architecture: amd64" >> packaging/deb/zkevm-prover/DEBIAN/control
+          echo "Maintainer: devops@polygon.technology" >> packaging/deb/zkevm-prover/DEBIAN/control
+          echo "Description: zkevm-prover package" >> packaging/deb/zkevm-prover/DEBIAN/control
+
+      - name: Creating package directory for binary for zkevm-prover ${{ env.ARCH }}
+        run: cp -rp packaging/deb/zkevm-prover packaging/deb/zkevm-prover-${{ env.GIT_TAG }}-${{ env.ARCH }}
+        env:
+          ARCH: amd64
+      - name: Running package build  for ${{ env.ARCH }}
+        run: dpkg-deb --build --root-owner-group packaging/deb/zkevm-prover-${{ env.GIT_TAG }}-${{ env.ARCH }}
+        env:
+         ARCH: amd64
+
+      - name: shasum the ${{ env.ARCH }} debian package
+        run: cd packaging/deb/ && sha256sum zkevm-prover-${{ env.GIT_TAG }}-${{ env.ARCH }}.deb > zkevm-prover-${{ env.GIT_TAG }}-${{ env.ARCH }}.deb.checksum
+        env:
+          ARCH: amd64
+
+      # Confirm packages built and upload
+      - name: Confirming package built
+        run: ls -ltr packaging/deb/ | grep zkevm-prover
+
+      - name: Release zkevm-prover Packages
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.GIT_TAG }}
+          prerelease: true
+          files: |
+              packaging/deb/zkevm-prover**.deb
+              packaging/deb/zkevm-prover**.deb.checksum
+
+
