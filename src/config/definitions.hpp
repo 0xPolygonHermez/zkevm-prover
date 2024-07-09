@@ -95,6 +95,8 @@
 
 #define NROWS_PACK 4
 
+#define TRANSPOSE_TMP_POLS true
+
 //#define MULTI_ROM_TEST
 
 //#define ENABLE_EXPERIMENTAL_CODE

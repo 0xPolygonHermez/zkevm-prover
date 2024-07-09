@@ -80,6 +80,7 @@ int main()
     allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
 
     if(USE_GENERIC_PARSER) {
+
 #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
         CHelpersStepsGPU cHelpersSteps;
 #elif defined(__AVX512__)
@@ -87,9 +88,9 @@ int main()
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
         cHelpersSteps.nrowsPack = NROWS_PACK;
-#else
-        CHelpersSteps cHelpersSteps;
-#endif
+// #else
+//         CHelpersSteps cHelpersSteps;
+// #endif
         starks.genProof(fproof, &publicInputs[0], allVerkey, &cHelpersSteps); 
     } else {
         AllSteps allSteps;

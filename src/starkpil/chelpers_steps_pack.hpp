@@ -51,7 +51,7 @@ public:
                 }
             }
         }
-        nColsStagesAcc[10] = nColsStagesAcc[9] + nColsStages[9]; // Polinomials f & q
+        nColsStagesAcc[10] = nColsStagesAcc[9] + nColsStages[4]; // Polinomials f & q
         if(stage == 4) {
             offsetsStages[10] = starkInfo.mapOffsets.section[eSection::q_2ns];
             nColsStages[10] = starkInfo.qDim;
@@ -59,8 +59,8 @@ public:
             offsetsStages[10] = starkInfo.mapOffsets.section[eSection::f_2ns];
             nColsStages[10] = 3;
         }
-        nColsStagesAcc[11] = nColsStagesAcc[10] + 3; // xDivXSubXi
-        nCols = nColsStagesAcc[11] + 6;
+        nColsStagesAcc[11] = nColsStagesAcc[10] + nColsStages[10]; // xDivXSubXi
+        nCols = nColsStagesAcc[11] + 6; // 3 for xDivXSubXi and 3 for xDivXSubWxi
     }
 
     inline virtual void storePolinomials(StarkInfo &starkInfo, StepsParams &params, Goldilocks::Element *bufferT_, uint8_t* storePol, uint64_t row, uint64_t nrowsPack, uint64_t domainExtended) {
@@ -77,14 +77,21 @@ public:
                 bool isTmpPol = !domainExtended && s == 4;
                 for(uint64_t k = 0; k < nColsStages[s]; ++k) {
                     uint64_t dim = storePol[nColsStagesAcc[s] + k];
-                    if(storePol[nColsStagesAcc[s] + k]) {
-                        Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k)* nrowsPack];
-                        if(isTmpPol) {
-                            for(uint64_t i = 0; i < dim; ++i) {
-                                Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k * domainSize + row * dim + i], uint64_t(dim), &buffT[i*nrowsPack]);
-                            }
-                        } else {
+                    if(!TRANSPOSE_TMP_POLS) {
+                        for(uint64_t k = 0; k < nColsStages[s]; ++k) {
+                            Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k)* nrowsPack];
                             Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT);
+                        }
+                    } else {
+                        if(storePol[nColsStagesAcc[s] + k]) {
+                            Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k)* nrowsPack];
+                            if(isTmpPol) {
+                                for(uint64_t i = 0; i < dim; ++i) {
+                                    Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k * domainSize + row * dim + i], uint64_t(dim), &buffT[i*nrowsPack]);
+                                }
+                            } else {
+                                Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT);
+                            }
                         }
                     }
                 }
