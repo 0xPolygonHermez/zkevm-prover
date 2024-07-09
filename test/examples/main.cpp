@@ -88,9 +88,9 @@ int main()
 #elif defined(__PACK__) 
         CHelpersStepsPack cHelpersSteps;
         cHelpersSteps.nrowsPack = NROWS_PACK;
-// #else
-//         CHelpersSteps cHelpersSteps;
-// #endif
+#else
+         CHelpersSteps cHelpersSteps;
+#endif
         starks.genProof(fproof, &publicInputs[0], allVerkey, &cHelpersSteps); 
     } else {
         AllSteps allSteps;
