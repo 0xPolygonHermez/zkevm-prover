@@ -3,6 +3,8 @@
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
 #include "steps.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 class CHelpersStepsPack : public CHelpersSteps {
 public:
@@ -153,13 +155,29 @@ public:
         }
     }
 
-    virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
+    virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams){
+        bool domainExtended = parserParams.stage > 3 ? true : false;
+        uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;   
+        calculateExpressionsRows(starkInfo, params, parserArgs, parserParams, 0, domainSize);
+    }
+    
+    void calculateExpressionsRows(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams,
+    uint64_t rowIni, uint64_t rowEnd){
+    
         bool domainExtended = parserParams.stage > 3 ? true : false;
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint8_t *ops = &parserArgs.ops[parserParams.opsOffset];
         uint16_t *args = &parserArgs.args[parserParams.argsOffset];
         uint64_t *numbers = &parserArgs.numbers[parserParams.numbersOffset];
         uint8_t *storePol = &parserArgs.storePols[parserParams.storePolsOffset];
+
+        if(rowEnd < rowIni || rowEnd > domainSize) {
+            zklog.info("Invalid range for rowIni and rowEnd");
+            exitProcess();
+        }
+        if(rowEnd -rowIni % nrowsPack != 0) {
+           nrowsPack = 1;
+        }
 
         setBufferTInfo(starkInfo, parserParams.stage);
         Goldilocks::Element challenges[params.challenges.degree()*FIELD_EXTENSION*nrowsPack];
@@ -198,8 +216,9 @@ public:
             }
         }
 
+    
     #pragma omp parallel for
-        for (uint64_t i = 0; i < domainSize; i+= nrowsPack) {
+        for (uint64_t i = rowIni; i < rowEnd; i+= nrowsPack) {
             uint64_t i_args = 0;
 
             Goldilocks::Element bufferT_[2*nCols*nrowsPack];
