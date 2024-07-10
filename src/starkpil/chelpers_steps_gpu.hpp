@@ -14,10 +14,9 @@ struct StepsPointers
 {
     uint64_t domainSize;
     uint64_t nConstants;
+    uint64_t nextStride;
     uint64_t *nColsStages_d;
     uint64_t *nColsStagesAcc_d;
-    uint64_t *offsetsStages_d;
-    uint64_t nextStride;
 
     uint32_t *ops_d;
     uint32_t *args_d;
@@ -36,8 +35,6 @@ struct StepsPointers
     gl64_t *bufferConsts_d;
     gl64_t *tmp1_d;
     gl64_t *tmp3_d;
-
-    Goldilocks::Element *bufferT_h; //to be eliminated
 
     uint32_t dimBufferT;
     uint32_t dimBufferPols;
@@ -61,18 +58,17 @@ public:
 
 };
 #ifdef __USE_CUDA__
-__global__ void _loadPolinomials(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
-__global__ void _storePolinomials(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
-__global__ void _rowComputation(StepsPointers *stepPointers_d, uint32_t N, uint32_t nOps, uint32_t nArgs, uint32_t stream);
+__global__ void _transposeToBuffer(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
+__global__ void _transposeFromBuffer(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
+__global__ void _packComputation(StepsPointers *stepPointers_d, uint32_t N, uint32_t nOps, uint32_t nArgs, uint32_t stream);
 
-inline void checkCudaError(cudaError_t err, const char *operation)
+inline void checkCudaError(cudaError_t err, const char *operation){
+    if (err != cudaSuccess)
     {
-        if (err != cudaSuccess)
-        {
-            printf("%s failed: %s\n", operation, cudaGetErrorString(err));
-            exit(EXIT_FAILURE);
-        }
+        printf("%s failed: %s\n", operation, cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
     }
+}
 #endif
 #endif
 #endif
