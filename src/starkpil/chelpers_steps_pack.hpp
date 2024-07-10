@@ -1,5 +1,6 @@
 #ifndef CHELPERS_STEPS_PACK_HPP
 #define CHELPERS_STEPS_PACK_HPP
+#include "definitions.hpp"
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
 #include "steps.hpp"

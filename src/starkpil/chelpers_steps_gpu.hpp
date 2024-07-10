@@ -1,6 +1,7 @@
 
 #ifndef CHELPERS_STEPS_GPU_HPP
 #define CHELPERS_STEPS_GPU_HPP
+#include "definitions.hpp"
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
 #include "steps.hpp"
@@ -55,7 +56,6 @@ public:
     void dataSetup(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams);
     void loadData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row);
     void storeData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row);
-    void storePolinomials_(StarkInfo &starkInfo, StepsParams &params, uint8_t *storePol, uint64_t row, uint64_t domainExtended);
     void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams);
     void freePointers();
 
