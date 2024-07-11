@@ -760,3 +760,57 @@ void poseidonLinearHash (const vector<uint8_t> &_data, Goldilocks::Element (&res
     // Free allocated memory
     delete[] pBuffer;
 }
+
+void checkSetupHash(std::string datFileName) {
+    int fd;
+    struct stat sb;
+
+    fd = open(datFileName.c_str(), O_RDONLY);
+    if (fd == -1)
+    {
+      std::cout << ".dat file not found: " << datFileName << "\n";
+      throw std::system_error(errno, std::generic_category(), "open");
+    }
+
+    if (fstat(fd, &sb) == -1)
+    {
+      throw std::system_error(errno, std::generic_category(), "fstat");
+    }
+
+
+    uint8_t *bdata = (uint8_t *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+    string hash;
+    SHA256(bdata, sb.st_size, hash);
+
+    string hashFormatted = hash.substr(2);
+    if(hash.size() % 2 != 0) hashFormatted = "0" + hashFormatted;
+
+    std::string setupFile = "src/config/setup-" + to_string(PROVER_FORK_ID) + ".txt";
+    std::ifstream file(setupFile);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << setupFile << std::endl;
+        exit(1);
+    }
+
+    std::string line;
+    std::string setupHash;
+    while (std::getline(file, line)) {
+        if (line.find(datFileName) != std::string::npos) {
+            std::istringstream iss(line);
+            iss >> setupHash;
+        }
+    }
+    
+    if(setupHash == "") {
+        std::cerr << "Hash not found in setup file" << endl;
+        exit(1);
+    }
+
+    if(hashFormatted != setupHash) {
+        std::cerr << datFileName + "hash is different in setup file: " + setupHash + " than the actual hash " + hashFormatted << endl;
+        exit(1);
+    } else {
+        std::cout << datFileName + " config file is correct" << endl;
+    }
+}

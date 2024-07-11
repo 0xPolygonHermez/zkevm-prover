@@ -30,6 +30,9 @@ rsync -avz --progress ${EXCLUDE_OPTION} ${CONFIG_DIR}/ config/
 rm config/scripts/rom.json
 rm config/scripts/metadata-rom.txt
 
+# Copy setup files
+cp ${CONFIG_DIR}/../build/sha256.txt src/config/setup-${FORK_VERSION}.txt
+
 #Uncomment the following line if you want to generate source code the first time after the release files generation
 
 #Copy the chelpers files
