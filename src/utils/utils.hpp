@@ -7,6 +7,7 @@
 #include "input.hpp"
 #include "proof_fflonk.hpp"
 #include "definitions.hpp"
+#include "sha256.hpp"
 
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
@@ -107,5 +108,7 @@ extern string emptyString;
 
 // Calculates the Poseidon linear hash of a buffer
 void poseidonLinearHash (const vector<uint8_t> &_data, Goldilocks::Element (&result)[4]);
+
+void checkSetupHash (std::string datFilename);
 
 #endif
