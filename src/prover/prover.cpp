@@ -95,11 +95,11 @@ Prover::Prover(Goldilocks &fr,
         {
             TimerStart(PROVER_INIT);
 
-            checkSetupHash("config/zkevm/zkevm.verifier.dat");
-            checkSetupHash("config/recursive1/recursive1.verifier.dat");
-            checkSetupHash("config/recursive2/recursive2.verifier.dat");
-            checkSetupHash("config/recursivef/recursivef.verifier.dat");
-            checkSetupHash("config/final/final.verifier.dat");
+            checkSetupHash(config.zkevmVerifier);
+            checkSetupHash(config.recursive1Verifier);
+            checkSetupHash(config.recursive2Verifier);
+            checkSetupHash(config.recursivefVerifier);
+            checkSetupHash(config.finalVerifier);
 
             lastComputedRequestEndTime = 0;
 
