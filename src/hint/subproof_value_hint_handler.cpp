@@ -4,7 +4,7 @@ namespace Hints
 {
     std::string SubproofValueHintHandler::getName()
     {
-        return "subproofvalue";
+        return "subproofValue";
     }
 
     std::vector<std::string> SubproofValueHintHandler::getSources() const
@@ -17,12 +17,7 @@ namespace Hints
         return {"reference"};
     }
 
-    size_t SubproofValueHintHandler::getMemoryNeeded(uint64_t N) const
-    {
-        return 0;
-    }
-
-    void SubproofValueHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
+    void SubproofValueHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials) const
     {
         assert(polynomials.size() == 1);
 

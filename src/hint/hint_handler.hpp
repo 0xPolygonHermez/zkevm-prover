@@ -29,7 +29,8 @@ class HintField
 public:
     opType operand;
     uint64_t id;
-    uint64_t value;    
+    uint64_t dim;
+    uint64_t value;
 };
 
 
@@ -56,11 +57,8 @@ namespace Hints
         // Return the destination names of the hint, so the fields that will be updated
         virtual std::vector<std::string> getDestinations() const = 0;
 
-        // Returns the extra memory needed in bytes to resolve the hint
-        virtual size_t getMemoryNeeded(uint64_t N) const = 0;
-
         // Resolve the hint
-        virtual void resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *mem) const = 0;
+        virtual void resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials) const = 0;
     };
 
 }

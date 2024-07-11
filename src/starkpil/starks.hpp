@@ -105,6 +105,7 @@ public:
     {
         debug = debug_;
 
+        cout << "HOLI " << endl;
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
@@ -363,14 +364,14 @@ public:
 
     void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps *chelpersSteps);
     
-    void calculateHints(uint64_t step, StepsParams& params);
+    void calculateHints(uint64_t step, StepsParams& params, CHelpersSteps *chelpersSteps);
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
-    void calculateExpressions(uint64_t step, StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateExpression(uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpression(Goldilocks::Element* dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended);
     void calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps);
-    
+    void calculateImPolsExpressions(StepsParams &params, CHelpersSteps *chelpersSteps);
+
     void commitStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
     void computeStageExpressions(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, CHelpersSteps *chelpersSteps);
     void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);

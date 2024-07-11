@@ -17,12 +17,7 @@ namespace Hints
         return {"reference"};
     }
 
-    size_t GProdHintHandler::getMemoryNeeded(uint64_t N) const
-    {
-        return 0;
-    }
-
-    void GProdHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
+    void GProdHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials) const
     {
         assert(polynomials.size() == 3);
 
@@ -40,7 +35,7 @@ namespace Hints
 
         assert(numPol.dim() == denPol.dim());
         assert(numPol.dim() == zPol.dim());
-
+        
         // Calculate z
         calculateZ(zPol, numPol, denPol);
     }

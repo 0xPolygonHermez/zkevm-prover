@@ -87,7 +87,6 @@ int main(int argc, char **argv)
 
         StarkInfo starkInfo(starkInfoFile);
         CHelpers cHelpers(cHelpersFile);
-        starkInfo.setMapOffsets(cHelpers.hints);
 
         void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
         void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));

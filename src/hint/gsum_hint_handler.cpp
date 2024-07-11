@@ -17,12 +17,7 @@ namespace Hints
         return {"reference"};
     }
 
-    size_t GSumHintHandler::getMemoryNeeded(uint64_t N) const
-    {
-        return 0;
-    }
-
-    void GSumHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
+    void GSumHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials) const
     {
         assert(polynomials.size() == 2);
 
@@ -40,6 +35,7 @@ namespace Hints
         Goldilocks::Element numeratorValue = Goldilocks::fromS64(hint.fields["numerator"].value);
         numeratorValue = Goldilocks::negone(); // TODO: NOT HARDCODE THIS!
 
+        cout << denPol.degree() << " " << sPol.degree() << endl;
         calculateS(sPol, denPol, numeratorValue);
     }
 
@@ -50,8 +46,12 @@ namespace Hints
         Polinomial denI(size, 3);
         Polinomial checkVal(1, 3);
 
+        cout << "BATCH INVERSE " << endl;
+
         Polinomial::batchInverse(denI, den);
         
+                cout << "MUL ELEMENT " << endl;
+
         Polinomial::mulElement(s, 0, denI, 0, multiplicity);
         for (uint64_t i = 1; i < size; i++)
         {

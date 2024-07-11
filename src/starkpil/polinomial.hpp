@@ -73,6 +73,24 @@ public:
         _allocated = false;
     }
 
+    void potConstruct(uint64_t degree,
+                      uint64_t dim
+    )
+    {
+        if (degree == 0 || dim == 0)
+            return;
+        _pAddress = (Goldilocks::Element *)calloc(degree * dim, sizeof(Goldilocks::Element));
+        if (_pAddress == NULL)
+        {
+            zklog.error("Polinomial::Polinomial() failed allocating polinomial with size: " + to_string(_degree * _dim * sizeof(Goldilocks::Element)));
+            exitProcess();
+        }
+        _dim = dim;
+        _degree = degree;
+        _offset = dim;
+        _allocated = true;
+    }
+
     inline Goldilocks::Element *address(void) { return _pAddress; }
     inline uint64_t degree(void) { return _degree; }
     inline uint64_t dim(void) { return _dim; }

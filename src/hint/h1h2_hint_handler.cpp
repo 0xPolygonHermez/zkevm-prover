@@ -17,13 +17,10 @@ namespace Hints
         return {"referenceH1", "referenceH2"};
     }
 
-    size_t H1H2HintHandler::getMemoryNeeded(uint64_t N) const
+    void H1H2HintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials) const
     {
-        return 8 * N;
-    }
+        Goldilocks::Element* ptr_extra_mem = new Goldilocks::Element[8*N];
 
-    void H1H2HintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials, void *ptr_extra_mem) const
-    {
         assert(polynomials.size() == 4);
 
         auto h1 = polynomials.find("referenceH1");
@@ -54,6 +51,8 @@ namespace Hints
         {
             calculateH1H2_opt3(h1Pol, h2Pol, fPol, tPol, 0, (uint64_t *) ptr_extra_mem, 3 * N);
         }
+
+        delete ptr_extra_mem;
     }
 
     void H1H2HintHandler::calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol) const

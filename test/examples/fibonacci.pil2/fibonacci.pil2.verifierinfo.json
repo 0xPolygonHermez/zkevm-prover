@@ -1,28 +1,7 @@
 {
  "qVerifier": {
-  "tmpUsed": 44,
+  "tmpUsed": 45,
   "code": [
-   {
-    "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "prime": 0,
-     "id": 17,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "eval",
-      "id": 0,
-      "dim": 3
-     },
-     {
-      "type": "eval",
-      "id": 1,
-      "dim": 3
-     }
-    ]
-   },
    {
     "op": "sub",
     "dest": {
@@ -33,13 +12,34 @@
     },
     "src": [
      {
+      "type": "eval",
+      "id": 7,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": 0,
+     "id": 19,
+     "dim": 3
+    },
+    "src": [
+     {
       "type": "number",
       "value": "1",
       "dim": 1
      },
      {
       "type": "eval",
-      "id": 2,
+      "id": 1,
       "dim": 3
      }
     ]
@@ -49,21 +49,21 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 19,
+     "id": 20,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
       "expId": 0,
-      "id": 17,
+      "id": 18,
       "prime": 0,
       "dim": 3
      },
      {
       "type": "tmp",
       "expId": 1,
-      "id": 18,
+      "id": 19,
       "prime": 0,
       "dim": 3
      }
@@ -74,13 +74,13 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 20,
+     "id": 21,
      "dim": 3
     },
     "src": [
      {
       "type": "eval",
-      "id": 3,
+      "id": 6,
       "dim": 3
      },
      {
@@ -95,19 +95,19 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 21,
+     "id": 22,
      "dim": 3
     },
     "src": [
      {
       "type": "eval",
-      "id": 4,
+      "id": 0,
       "dim": 3
      },
      {
       "type": "tmp",
       "expId": 3,
-      "id": 20,
+      "id": 21,
       "prime": 0,
       "dim": 3
      }
@@ -115,27 +115,6 @@
    },
    {
     "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "prime": 0,
-     "id": 22,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "eval",
-      "id": 1,
-      "dim": 3
-     },
-     {
-      "type": "public",
-      "id": 1,
-      "dim": 1
-     }
-    ]
-   },
-   {
-    "op": "mul",
     "dest": {
      "type": "tmp",
      "prime": 0,
@@ -149,9 +128,30 @@
       "dim": 3
      },
      {
+      "type": "public",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "prime": 0,
+     "id": 24,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     },
+     {
       "type": "tmp",
       "expId": 5,
-      "id": 22,
+      "id": 23,
       "prime": 0,
       "dim": 3
      }
@@ -162,42 +162,19 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 24,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "eval",
-      "id": 1,
-      "dim": 3
-     },
-     {
-      "type": "public",
-      "id": 2,
-      "dim": 1
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "prime": 0,
      "id": 25,
      "dim": 3
     },
     "src": [
      {
       "type": "eval",
-      "id": 5,
+      "id": 4,
       "dim": 3
      },
      {
-      "type": "tmp",
-      "expId": 7,
-      "id": 24,
-      "prime": 0,
-      "dim": 3
+      "type": "public",
+      "id": 2,
+      "dim": 1
      }
     ]
    },
@@ -212,14 +189,37 @@
     "src": [
      {
       "type": "eval",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "expId": 7,
+      "id": 25,
+      "prime": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "prime": 0,
+     "id": 27,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
       "expId": 23,
-      "id": 6,
+      "id": 10,
       "dim": 3
      },
      {
       "type": "eval",
       "expId": 35,
-      "id": 7,
+      "id": 11,
       "dim": 3
      }
     ]
@@ -229,14 +229,14 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 27,
+     "id": 28,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
       "expId": 36,
-      "id": 26,
+      "id": 27,
       "prime": 0,
       "dim": 3
      },
@@ -252,13 +252,13 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 28,
+     "id": 29,
      "dim": 3
     },
     "src": [
      {
       "type": "eval",
-      "id": 8,
+      "id": 9,
       "dim": 3
      },
      {
@@ -273,19 +273,19 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 29,
+     "id": 30,
      "dim": 3
     },
     "src": [
      {
       "type": "eval",
-      "id": 2,
+      "id": 1,
       "dim": 3
      },
      {
       "type": "tmp",
       "expId": 38,
-      "id": 28,
+      "id": 29,
       "prime": 0,
       "dim": 3
      }
@@ -296,7 +296,7 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 30,
+     "id": 31,
      "dim": 3
     },
     "src": [
@@ -307,30 +307,7 @@
      },
      {
       "type": "eval",
-      "id": 4,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "prime": 0,
-     "id": 31,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "eval",
-      "id": 9,
-      "dim": 3
-     },
-     {
-      "type": "tmp",
-      "expId": 21,
-      "id": 30,
-      "prime": 0,
+      "id": 0,
       "dim": 3
      }
     ]
@@ -346,7 +323,30 @@
     "src": [
      {
       "type": "eval",
-      "id": 10,
+      "id": 8,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "expId": 21,
+      "id": 31,
+      "prime": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "prime": 0,
+     "id": 33,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 2,
       "dim": 3
      },
      {
@@ -361,7 +361,7 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 33,
+     "id": 34,
      "dim": 3
     },
     "src": [
@@ -372,36 +372,13 @@
      },
      {
       "type": "eval",
-      "id": 10,
+      "id": 2,
       "dim": 3
      }
     ]
    },
    {
     "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "prime": 0,
-     "id": 34,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "expId": 25,
-      "id": 33,
-      "prime": 0,
-      "dim": 3
-     },
-     {
-      "type": "eval",
-      "id": 11,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
     "dest": {
      "type": "tmp",
      "prime": 0,
@@ -411,22 +388,20 @@
     "src": [
      {
       "type": "tmp",
-      "expId": 24,
-      "id": 32,
+      "expId": 25,
+      "id": 34,
       "prime": 0,
       "dim": 3
      },
      {
-      "type": "tmp",
-      "expId": 26,
-      "id": 34,
-      "prime": 0,
+      "type": "eval",
+      "id": 5,
       "dim": 3
      }
     ]
    },
    {
-    "op": "mul",
+    "op": "add",
     "dest": {
      "type": "tmp",
      "prime": 0,
@@ -436,17 +411,17 @@
     "src": [
      {
       "type": "tmp",
-      "expId": 27,
-      "id": 35,
+      "expId": 24,
+      "id": 33,
       "prime": 0,
       "dim": 3
      },
      {
-      "type": "challenge",
-      "id": 0,
-      "stageId": 0,
-      "dim": 3,
-      "stage": 2
+      "type": "tmp",
+      "expId": 26,
+      "id": 35,
+      "prime": 0,
+      "dim": 3
      }
     ]
    },
@@ -460,19 +435,23 @@
     },
     "src": [
      {
-      "type": "eval",
-      "id": 1,
+      "type": "tmp",
+      "expId": 27,
+      "id": 36,
+      "prime": 0,
       "dim": 3
      },
      {
-      "type": "eval",
-      "id": 1,
-      "dim": 3
+      "type": "challenge",
+      "id": 0,
+      "stageId": 0,
+      "dim": 3,
+      "stage": 2
      }
     ]
    },
    {
-    "op": "add",
+    "op": "mul",
     "dest": {
      "type": "tmp",
      "prime": 0,
@@ -481,38 +460,13 @@
     },
     "src": [
      {
-      "type": "tmp",
-      "expId": 28,
-      "id": 36,
-      "prime": 0,
-      "dim": 3
-     },
-     {
-      "type": "tmp",
-      "expId": 29,
-      "id": 37,
-      "prime": 0,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "prime": 0,
-     "id": 39,
-     "dim": 3
-    },
-    "src": [
-     {
       "type": "eval",
-      "id": 3,
+      "id": 4,
       "dim": 3
      },
      {
       "type": "eval",
-      "id": 3,
+      "id": 4,
       "dim": 3
      }
     ]
@@ -522,21 +476,21 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 40,
+     "id": 39,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "expId": 30,
-      "id": 38,
+      "expId": 28,
+      "id": 37,
       "prime": 0,
       "dim": 3
      },
      {
       "type": "tmp",
-      "expId": 31,
-      "id": 39,
+      "expId": 29,
+      "id": 38,
       "prime": 0,
       "dim": 3
      }
@@ -544,6 +498,27 @@
    },
    {
     "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "prime": 0,
+     "id": 40,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
     "dest": {
      "type": "tmp",
      "prime": 0,
@@ -553,8 +528,33 @@
     "src": [
      {
       "type": "tmp",
-      "expId": 32,
+      "expId": 30,
+      "id": 39,
+      "prime": 0,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "expId": 31,
       "id": 40,
+      "prime": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "prime": 0,
+     "id": 42,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "expId": 32,
+      "id": 41,
       "prime": 0,
       "dim": 3
      },
@@ -572,14 +572,14 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 42,
+     "id": 43,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
       "expId": 33,
-      "id": 41,
+      "id": 42,
       "prime": 0,
       "dim": 3
      },
@@ -608,7 +608,7 @@
      {
       "type": "tmp",
       "expId": 2,
-      "id": 19,
+      "id": 20,
       "prime": 0,
       "dim": 3
      }
@@ -630,7 +630,7 @@
      {
       "type": "tmp",
       "expId": 4,
-      "id": 21,
+      "id": 22,
       "prime": 0,
       "dim": 3
      }
@@ -674,7 +674,7 @@
      {
       "type": "tmp",
       "expId": 6,
-      "id": 23,
+      "id": 24,
       "prime": 0,
       "dim": 3
      }
@@ -718,7 +718,7 @@
      {
       "type": "tmp",
       "expId": 8,
-      "id": 25,
+      "id": 26,
       "prime": 0,
       "dim": 3
      }
@@ -762,7 +762,7 @@
      {
       "type": "tmp",
       "expId": 37,
-      "id": 27,
+      "id": 28,
       "prime": 0,
       "dim": 3
      }
@@ -806,7 +806,7 @@
      {
       "type": "tmp",
       "expId": 39,
-      "id": 29,
+      "id": 30,
       "prime": 0,
       "dim": 3
      }
@@ -844,13 +844,13 @@
     "src": [
      {
       "type": "eval",
-      "id": 8,
+      "id": 9,
       "dim": 3
      },
      {
       "type": "tmp",
       "expId": 22,
-      "id": 31,
+      "id": 32,
       "prime": 0,
       "dim": 3
      }
@@ -865,13 +865,13 @@
     },
     "src": [
      {
-      "type": "tmp",
-      "id": 11,
+      "type": "eval",
+      "id": 10,
       "dim": 3
      },
      {
-      "type": "eval",
-      "id": 6,
+      "type": "tmp",
+      "id": 11,
       "dim": 3
      }
     ]
@@ -929,7 +929,7 @@
      {
       "type": "tmp",
       "expId": 34,
-      "id": 42,
+      "id": 43,
       "prime": 0,
       "dim": 3
      },
@@ -951,420 +951,13 @@
     },
     "src": [
      {
-      "type": "tmp",
-      "id": 15,
-      "dim": 3
-     },
-     {
       "type": "eval",
-      "id": 7,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "prime": 0,
-     "id": 43,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 14,
-      "dim": 3
-     },
-     {
-      "type": "tmp",
-      "id": 16,
-      "dim": 3
-     }
-    ]
-   }
-  ]
- },
- "queryVerifier": {
-  "tmpUsed": 53,
-  "code": [
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 0,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "challenge",
-      "id": 4,
-      "stageId": 0,
-      "dim": 3,
-      "stage": 5
-     },
-     {
-      "type": "tree1",
-      "id": 0,
-      "prime": 0,
-      "dim": 1,
-      "stageId": 0,
-      "treePos": 0
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 1,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 0,
-      "dim": 3
-     },
-     {
-      "type": "tree1",
-      "id": 1,
-      "prime": 0,
-      "dim": 1,
-      "stageId": 1,
-      "treePos": 1
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 2,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "challenge",
-      "id": 4,
-      "stageId": 0,
-      "dim": 3,
-      "stage": 5
-     },
-     {
-      "type": "tmp",
-      "id": 1,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 3,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 2,
-      "dim": 3
-     },
-     {
-      "type": "tree2",
-      "id": 2,
-      "prime": 0,
-      "dim": 3,
-      "stageId": 0,
-      "treePos": 0
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 4,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "challenge",
-      "id": 4,
-      "stageId": 0,
-      "dim": 3,
-      "stage": 5
-     },
-     {
-      "type": "tmp",
-      "id": 3,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 5,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 4,
-      "dim": 3
-     },
-     {
-      "type": "tree2",
-      "id": 3,
-      "prime": 0,
-      "dim": 3,
-      "stageId": 1,
-      "treePos": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 6,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "challenge",
-      "id": 4,
-      "stageId": 0,
-      "dim": 3,
-      "stage": 5
-     },
-     {
-      "type": "tmp",
-      "id": 5,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 7,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 6,
-      "dim": 3
-     },
-     {
-      "type": "tree2",
-      "id": 4,
-      "prime": 0,
-      "dim": 3,
-      "stageId": 2,
-      "treePos": 6
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 8,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "challenge",
-      "id": 4,
-      "stageId": 0,
-      "dim": 3,
-      "stage": 5
-     },
-     {
-      "type": "tmp",
-      "id": 7,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 9,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 8,
-      "dim": 3
-     },
-     {
-      "type": "tree3",
-      "id": 5,
-      "prime": 0,
-      "dim": 3,
-      "stageId": 0,
-      "treePos": 0
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 10,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "challenge",
-      "id": 4,
-      "stageId": 0,
-      "dim": 3,
-      "stage": 5
-     },
-     {
-      "type": "tmp",
-      "id": 9,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "id": 11,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tree1",
-      "id": 0,
-      "prime": 0,
-      "dim": 1,
-      "stageId": 0,
-      "treePos": 0
-     },
-     {
-      "type": "eval",
-      "id": 1,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 12,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
       "id": 11,
       "dim": 3
      },
      {
-      "type": "challenge",
-      "id": 5,
-      "stageId": 1,
-      "dim": 3,
-      "stage": 5
-     }
-    ]
-   },
-   {
-    "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "id": 13,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tree1",
-      "id": 1,
-      "prime": 0,
-      "dim": 1,
-      "stageId": 1,
-      "treePos": 1
-     },
-     {
-      "type": "eval",
-      "id": 3,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 14,
-     "dim": 3
-    },
-    "src": [
-     {
       "type": "tmp",
-      "id": 12,
-      "dim": 3
-     },
-     {
-      "type": "tmp",
-      "id": 13,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 15,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 14,
-      "dim": 3
-     },
-     {
-      "type": "challenge",
-      "id": 5,
-      "stageId": 1,
-      "dim": 3,
-      "stage": 5
-     }
-    ]
-   },
-   {
-    "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "id": 16,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "const",
-      "id": 0,
-      "prime": 0,
-      "dim": 1
-     },
-     {
-      "type": "eval",
-      "id": 4,
+      "id": 15,
       "dim": 3
      }
     ]
@@ -1379,7 +972,7 @@
     "src": [
      {
       "type": "tmp",
-      "id": 15,
+      "id": 14,
       "dim": 3
      },
      {
@@ -1393,13 +986,60 @@
     "op": "mul",
     "dest": {
      "type": "tmp",
-     "id": 18,
+     "prime": 0,
+     "id": 44,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
       "id": 17,
+      "dim": 3
+     },
+     {
+      "type": "Zi",
+      "boundaryId": 0,
+      "dim": 3
+     }
+    ]
+   }
+  ]
+ },
+ "queryVerifier": {
+  "tmpUsed": 41,
+  "code": [
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
       "dim": 3
      },
      {
@@ -1415,7 +1055,7 @@
     "op": "sub",
     "dest": {
      "type": "tmp",
-     "id": 19,
+     "id": 2,
      "dim": 3
     },
     "src": [
@@ -1427,7 +1067,7 @@
      },
      {
       "type": "eval",
-      "id": 5,
+      "id": 3,
       "dim": 3
      }
     ]
@@ -1436,18 +1076,18 @@
     "op": "add",
     "dest": {
      "type": "tmp",
-     "id": 20,
+     "id": 3,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "id": 18,
+      "id": 1,
       "dim": 3
      },
      {
       "type": "tmp",
-      "id": 19,
+      "id": 2,
       "dim": 3
      }
     ]
@@ -1456,13 +1096,13 @@
     "op": "mul",
     "dest": {
      "type": "tmp",
-     "id": 21,
+     "id": 4,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "id": 20,
+      "id": 3,
       "dim": 3
      },
      {
@@ -1478,17 +1118,82 @@
     "op": "sub",
     "dest": {
      "type": "tmp",
-     "id": 22,
+     "id": 5,
      "dim": 3
     },
     "src": [
      {
-      "type": "tree2",
-      "id": 3,
+      "type": "tree1",
+      "id": 0,
       "prime": 0,
-      "dim": 3,
+      "dim": 1,
+      "stageId": 0,
+      "treePos": 0
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 5,
       "stageId": 1,
-      "treePos": 3
+      "dim": 3,
+      "stage": 5
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": 0,
+      "dim": 1,
+      "stageId": 1,
+      "treePos": 1
      },
      {
       "type": "eval",
@@ -1501,83 +1206,18 @@
     "op": "add",
     "dest": {
      "type": "tmp",
-     "id": 23,
+     "id": 9,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "id": 21,
-      "dim": 3
-     },
-     {
-      "type": "tmp",
-      "id": 22,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 24,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 23,
-      "dim": 3
-     },
-     {
-      "type": "challenge",
-      "id": 5,
-      "stageId": 1,
-      "dim": 3,
-      "stage": 5
-     }
-    ]
-   },
-   {
-    "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "id": 25,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tree2",
-      "id": 4,
-      "prime": 0,
-      "dim": 3,
-      "stageId": 2,
-      "treePos": 6
-     },
-     {
-      "type": "eval",
       "id": 7,
       "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 26,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 24,
-      "dim": 3
      },
      {
       "type": "tmp",
-      "id": 25,
+      "id": 8,
       "dim": 3
      }
     ]
@@ -1586,13 +1226,13 @@
     "op": "mul",
     "dest": {
      "type": "tmp",
-     "id": 27,
+     "id": 10,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "id": 26,
+      "id": 9,
       "dim": 3
      },
      {
@@ -1608,7 +1248,7 @@
     "op": "sub",
     "dest": {
      "type": "tmp",
-     "id": 28,
+     "id": 11,
      "dim": 3
     },
     "src": [
@@ -1622,7 +1262,7 @@
      },
      {
       "type": "eval",
-      "id": 8,
+      "id": 9,
       "dim": 3
      }
     ]
@@ -1631,18 +1271,18 @@
     "op": "add",
     "dest": {
      "type": "tmp",
-     "id": 29,
+     "id": 12,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "id": 27,
+      "id": 10,
       "dim": 3
      },
      {
       "type": "tmp",
-      "id": 28,
+      "id": 11,
       "dim": 3
      }
     ]
@@ -1651,13 +1291,13 @@
     "op": "mul",
     "dest": {
      "type": "tmp",
-     "id": 30,
+     "id": 13,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "id": 29,
+      "id": 12,
       "dim": 3
      },
      {
@@ -1673,7 +1313,137 @@
     "op": "sub",
     "dest": {
      "type": "tmp",
-     "id": 31,
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree2",
+      "id": 3,
+      "prime": 0,
+      "dim": 3,
+      "stageId": 1,
+      "treePos": 3
+     },
+     {
+      "type": "eval",
+      "id": 10,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 5,
+      "stageId": 1,
+      "dim": 3,
+      "stage": 5
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree2",
+      "id": 4,
+      "prime": 0,
+      "dim": 3,
+      "stageId": 2,
+      "treePos": 6
+     },
+     {
+      "type": "eval",
+      "id": 11,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 19,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 5,
+      "stageId": 1,
+      "dim": 3,
+      "stage": 5
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 20,
      "dim": 3
     },
     "src": [
@@ -1696,13 +1466,248 @@
     "op": "add",
     "dest": {
      "type": "tmp",
-     "id": 32,
+     "id": 21,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 20,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 22,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 21,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubXi",
+      "id": 1,
+      "opening": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 23,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "stageId": 0,
+      "dim": 3,
+      "stage": 5
+     },
+     {
+      "type": "tmp",
+      "id": 22,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 24,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 25,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 24,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 5,
+      "stageId": 1,
+      "dim": 3,
+      "stage": 5
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 26,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": 0,
+      "dim": 1,
+      "stageId": 0,
+      "treePos": 0
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 27,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 25,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 26,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 28,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 27,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 5,
+      "stageId": 1,
+      "dim": 3,
+      "stage": 5
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 29,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": 0,
+      "dim": 1,
+      "stageId": 1,
+      "treePos": 1
+     },
+     {
+      "type": "eval",
+      "id": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 30,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 28,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 29,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 31,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
       "id": 30,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubXi",
+      "id": 2,
+      "opening": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 32,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 23,
       "dim": 3
      },
      {
@@ -1721,20 +1726,21 @@
     },
     "src": [
      {
-      "type": "tmp",
-      "id": 32,
-      "dim": 3
+      "type": "challenge",
+      "id": 4,
+      "stageId": 0,
+      "dim": 3,
+      "stage": 5
      },
      {
-      "type": "xDivXSubXi",
-      "id": 1,
-      "opening": 0,
+      "type": "tmp",
+      "id": 32,
       "dim": 3
      }
     ]
    },
    {
-    "op": "add",
+    "op": "sub",
     "dest": {
      "type": "tmp",
      "id": 34,
@@ -1742,13 +1748,14 @@
     },
     "src": [
      {
-      "type": "tmp",
-      "id": 10,
-      "dim": 3
+      "type": "const",
+      "id": 0,
+      "prime": 0,
+      "dim": 1
      },
      {
-      "type": "tmp",
-      "id": 33,
+      "type": "eval",
+      "id": 2,
       "dim": 3
      }
     ]
@@ -1762,265 +1769,8 @@
     },
     "src": [
      {
-      "type": "challenge",
-      "id": 4,
-      "stageId": 0,
-      "dim": 3,
-      "stage": 5
-     },
-     {
       "type": "tmp",
       "id": 34,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "id": 36,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tree1",
-      "id": 1,
-      "prime": 0,
-      "dim": 1,
-      "stageId": 1,
-      "treePos": 1
-     },
-     {
-      "type": "eval",
-      "id": 0,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 37,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 36,
-      "dim": 3
-     },
-     {
-      "type": "challenge",
-      "id": 5,
-      "stageId": 1,
-      "dim": 3,
-      "stage": 5
-     }
-    ]
-   },
-   {
-    "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "id": 38,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "const",
-      "id": 0,
-      "prime": 0,
-      "dim": 1
-     },
-     {
-      "type": "eval",
-      "id": 2,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 39,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 37,
-      "dim": 3
-     },
-     {
-      "type": "tmp",
-      "id": 38,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 40,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 39,
-      "dim": 3
-     },
-     {
-      "type": "challenge",
-      "id": 5,
-      "stageId": 1,
-      "dim": 3,
-      "stage": 5
-     }
-    ]
-   },
-   {
-    "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "id": 41,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tree1",
-      "id": 0,
-      "prime": 0,
-      "dim": 1,
-      "stageId": 0,
-      "treePos": 0
-     },
-     {
-      "type": "eval",
-      "id": 11,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 42,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 40,
-      "dim": 3
-     },
-     {
-      "type": "tmp",
-      "id": 41,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 43,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 42,
-      "dim": 3
-     },
-     {
-      "type": "xDivXSubXi",
-      "id": 2,
-      "opening": 1,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "add",
-    "dest": {
-     "type": "tmp",
-     "id": 44,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 35,
-      "dim": 3
-     },
-     {
-      "type": "tmp",
-      "id": 43,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 45,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "challenge",
-      "id": 4,
-      "stageId": 0,
-      "dim": 3,
-      "stage": 5
-     },
-     {
-      "type": "tmp",
-      "id": 44,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "sub",
-    "dest": {
-     "type": "tmp",
-     "id": 46,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "const",
-      "id": 0,
-      "prime": 0,
-      "dim": 1
-     },
-     {
-      "type": "eval",
-      "id": 10,
-      "dim": 3
-     }
-    ]
-   },
-   {
-    "op": "mul",
-    "dest": {
-     "type": "tmp",
-     "id": 47,
-     "dim": 3
-    },
-    "src": [
-     {
-      "type": "tmp",
-      "id": 46,
       "dim": 3
      },
      {
@@ -2035,18 +1785,18 @@
     "op": "add",
     "dest": {
      "type": "tmp",
-     "id": 48,
+     "id": 36,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "id": 45,
+      "id": 33,
       "dim": 3
      },
      {
       "type": "tmp",
-      "id": 47,
+      "id": 35,
       "dim": 3
      }
     ]
@@ -2055,7 +1805,7 @@
     "op": "mul",
     "dest": {
      "type": "tmp",
-     "id": 49,
+     "id": 37,
      "dim": 3
     },
     "src": [
@@ -2068,7 +1818,7 @@
      },
      {
       "type": "tmp",
-      "id": 48,
+      "id": 36,
       "dim": 3
      }
     ]
@@ -2077,7 +1827,7 @@
     "op": "sub",
     "dest": {
      "type": "tmp",
-     "id": 50,
+     "id": 38,
      "dim": 3
     },
     "src": [
@@ -2091,7 +1841,7 @@
      },
      {
       "type": "eval",
-      "id": 9,
+      "id": 8,
       "dim": 3
      }
     ]
@@ -2100,13 +1850,13 @@
     "op": "mul",
     "dest": {
      "type": "tmp",
-     "id": 51,
+     "id": 39,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "id": 50,
+      "id": 38,
       "dim": 3
      },
      {
@@ -2122,24 +1872,83 @@
     "dest": {
      "type": "tmp",
      "prime": 0,
-     "id": 52,
+     "id": 40,
      "dim": 3
     },
     "src": [
      {
       "type": "tmp",
-      "id": 49,
+      "id": 37,
       "dim": 3
      },
      {
       "type": "tmp",
-      "id": 51,
+      "id": 39,
       "dim": 3
      }
     ]
    }
   ],
   "symbolsCalculated": [],
-  "symbolsUsed": []
+  "symbolsUsed": [
+   {
+    "op": "const",
+    "stage": 0,
+    "id": 0
+   },
+   {
+    "op": "const",
+    "stage": 0,
+    "id": 1
+   },
+   {
+    "op": "cm",
+    "stage": 1,
+    "stageId": 0,
+    "id": 0
+   },
+   {
+    "op": "cm",
+    "stage": 1,
+    "stageId": 1,
+    "id": 1
+   },
+   {
+    "op": "cm",
+    "stage": 2,
+    "stageId": 0,
+    "id": 2
+   },
+   {
+    "op": "cm",
+    "stage": 2,
+    "stageId": 1,
+    "id": 3
+   },
+   {
+    "op": "cm",
+    "stage": 2,
+    "stageId": 2,
+    "id": 4
+   },
+   {
+    "op": "cm",
+    "stage": 3,
+    "stageId": 0,
+    "id": 5
+   },
+   {
+    "op": "challenge",
+    "stage": 5,
+    "stageId": 0,
+    "id": 4
+   },
+   {
+    "op": "challenge",
+    "stage": 5,
+    "stageId": 1,
+    "id": 5
+   }
+  ]
  }
 }

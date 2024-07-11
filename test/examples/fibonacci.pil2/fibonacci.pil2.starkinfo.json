@@ -1,129 +1,139 @@
 {
+ "name": "Fibonacci",
  "cmPolsMap": [
   {
-   "stage": "cm1",
-   "stageNum": 1,
+   "stage": 1,
    "name": "Fibonacci.a",
    "dim": 1,
-   "imPol": false,
+   "polsMapId": 0,
    "stageId": 0,
    "stagePos": 0
   },
   {
-   "stage": "cm1",
-   "stageNum": 1,
+   "stage": 1,
    "name": "Fibonacci.b",
    "dim": 1,
-   "imPol": false,
+   "polsMapId": 1,
    "stageId": 1,
    "stagePos": 1
   },
   {
-   "stage": "cm2",
-   "stageNum": 2,
+   "stage": 2,
    "name": "Fibonacci.gsum",
    "dim": 3,
-   "imPol": false,
+   "polsMapId": 2,
    "stageId": 0,
    "stagePos": 0
   },
   {
-   "stage": "cm2",
-   "stageNum": 2,
-   "name": "ImPol.23",
+   "stage": 2,
+   "name": "Fibonacci.ImPol",
    "dim": 3,
+   "polsMapId": 3,
+   "stageId": 1,
    "imPol": true,
-   "stagePos": 3,
-   "stageId": 1
+   "expId": 23,
+   "stagePos": 3
   },
   {
-   "stage": "cm2",
-   "stageNum": 2,
-   "name": "ImPol.35",
+   "stage": 2,
+   "name": "Fibonacci.ImPol",
    "dim": 3,
+   "polsMapId": 4,
+   "stageId": 2,
    "imPol": true,
-   "stagePos": 6,
-   "stageId": 2
+   "expId": 35,
+   "stagePos": 6
   },
   {
-   "stage": "cm3",
-   "stageNum": 3,
+   "stage": 3,
    "name": "Q0",
    "dim": 3,
-   "imPol": false,
-   "stagePos": 0,
-   "stageId": 0
-  },
-  {
-   "stage": "tmpExp",
-   "stageNum": 2,
-   "name": "tmpPol20",
-   "dim": 3,
-   "imPol": false,
+   "polsMapId": 5,
    "stagePos": 0,
    "stageId": 0
   }
  ],
  "constPolsMap": [
   {
-   "stage": "const",
-   "stageNum": 0,
+   "stage": 0,
    "name": "Fibonacci.L1",
    "dim": 1,
-   "imPol": false,
+   "polsMapId": 0,
    "stageId": 0
   },
   {
-   "stage": "const",
-   "stageNum": 0,
+   "stage": 0,
    "name": "Fibonacci.LLAST",
    "dim": 1,
-   "imPol": false,
+   "polsMapId": 1,
    "stageId": 1
   }
  ],
  "challengesMap": [
   {
    "name": "std_alpha",
-   "stageNum": 2,
+   "stage": 2,
    "dim": 3,
    "stageId": 0
   },
   {
    "name": "std_beta",
-   "stageNum": 2,
+   "stage": 2,
    "dim": 3,
    "stageId": 1
   },
   {
    "name": "std_vc",
-   "stageNum": 3,
+   "stage": 3,
    "dim": 3,
    "stageId": 0
   },
   {
    "name": "std_xi",
-   "stageNum": 4,
+   "stage": 4,
    "dim": 3,
    "stageId": 0
   },
   {
    "name": "std_vf1",
-   "stageNum": 5,
+   "stage": 5,
    "dim": 3,
    "stageId": 0
   },
   {
    "name": "std_vf2",
-   "stageNum": 5,
+   "stage": 5,
    "dim": 3,
    "stageId": 1
+  }
+ ],
+ "publicsMap": [
+  {
+   "name": "in1",
+   "stage": 1
+  },
+  {
+   "name": "in2",
+   "stage": 1
+  },
+  {
+   "name": "out",
+   "stage": 1
+  },
+  {
+   "name": "mod",
+   "stage": 1
+  }
+ ],
+ "subproofValuesMap": [
+  {
+   "name": "Fibonacci.gsum_fibonacci"
   }
  ],
  "pil2": true,
  "mapSectionsN": {
   "const": 2,
-  "tmpExp": 3,
   "cm1": 2,
   "cm2": 9,
   "cm3": 3
@@ -133,7 +143,7 @@
  "nConstants": 2,
  "nPublics": 4,
  "aggregationTypes": [],
- "nSubAirValues": 1,
+ "nSubproofValues": 1,
  "nStages": 2,
  "starkStruct": {
   "nBits": 6,
@@ -163,73 +173,89 @@
   1,
   2
  ],
+ "cExpId": 45,
  "qDim": 3,
  "qDeg": 1,
+ "nCommitmentsStage1": 0,
  "evMap": [
   {
-   "type": "cm",
-   "id": 1,
-   "prime": 1
-  },
-  {
-   "type": "cm",
+   "type": "const",
    "id": 0,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 1
   },
   {
    "type": "const",
    "id": 0,
-   "prime": 1
-  },
-  {
-   "type": "cm",
-   "id": 1,
-   "prime": 0
+   "prime": 1,
+   "openingPos": 2
   },
   {
    "type": "const",
    "id": 0,
-   "prime": 0
+   "prime": 2,
+   "openingPos": 3
   },
   {
    "type": "const",
    "id": 1,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 0,
+   "prime": 0,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 0,
+   "prime": 1,
+   "openingPos": 2
+  },
+  {
+   "type": "cm",
+   "id": 1,
+   "prime": 0,
+   "openingPos": 1
+  },
+  {
+   "type": "cm",
+   "id": 1,
+   "prime": 1,
+   "openingPos": 2
+  },
+  {
+   "type": "cm",
+   "id": 2,
+   "prime": -1,
+   "openingPos": 0
+  },
+  {
+   "type": "cm",
+   "id": 2,
+   "prime": 0,
+   "openingPos": 1
   },
   {
    "type": "cm",
    "id": 3,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 1
   },
   {
    "type": "cm",
    "id": 4,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 2,
-   "prime": 0
-  },
-  {
-   "type": "cm",
-   "id": 2,
-   "prime": -1
-  },
-  {
-   "type": "const",
-   "id": 0,
-   "prime": 2
-  },
-  {
-   "type": "cm",
-   "id": 0,
-   "prime": 1
+   "prime": 0,
+   "openingPos": 1
   },
   {
    "type": "cm",
    "id": 5,
-   "prime": 0
+   "prime": 0,
+   "openingPos": 1
   }
- ]
+ ],
+ "friExpId": 48
 }

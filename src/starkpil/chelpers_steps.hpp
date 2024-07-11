@@ -6,23 +6,14 @@
 class CHelpersSteps {
 public:
     virtual void storePolinomial(Goldilocks::Element* pols, __m256i* bufferT, uint64_t* nColsSteps, uint64_t *offsetsSteps, uint64_t *buffTOffsetsSteps, uint64_t *nextStrides, uint64_t nOpenings, uint64_t domainSize, bool domainExtended, uint64_t nStages, bool needModule, uint64_t row, uint64_t stage, uint64_t stagePos, uint64_t openingPointIndex, uint64_t dim) {
-        bool isTmpPol = !domainExtended && nStages + 1 == stage;
         if(needModule) {
             uint64_t offsetsDest[4];
             uint64_t nextStrideOffset = row + nextStrides[openingPointIndex];
-            if(isTmpPol) {
-                uint64_t stepOffset = offsetsSteps[stage] + stagePos * domainSize;
-                offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * dim;
-                offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * dim;
-                offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * dim;
-                offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * dim;
-            } else {
-                uint64_t stepOffset = offsetsSteps[stage] + stagePos;
-                offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[stage];
-                offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[stage];
-                offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[stage];
-                offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[stage];
-            }
+            uint64_t stepOffset = offsetsSteps[stage] + stagePos;
+            offsetsDest[0] = stepOffset + (nextStrideOffset % domainSize) * nColsSteps[stage];
+            offsetsDest[1] = stepOffset + ((nextStrideOffset + 1) % domainSize) * nColsSteps[stage];
+            offsetsDest[2] = stepOffset + ((nextStrideOffset + 2) % domainSize) * nColsSteps[stage];
+            offsetsDest[3] = stepOffset + ((nextStrideOffset + 3) % domainSize) * nColsSteps[stage];
             if(dim == 1) {
                 Goldilocks::store_avx(&pols[0], offsetsDest, bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
             } else {
@@ -30,22 +21,14 @@ public:
             }
         } else {
             if(dim == 1) {
-                if(isTmpPol) {
-                    Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex])], uint64_t(1), bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
-                } else {
-                    Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
-                }
+                Goldilocks::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex]);
             } else {
-                if(isTmpPol) {
-                    Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos * domainSize + (row + nextStrides[openingPointIndex]) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
-                } else {
-                    Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
-                }
+                Goldilocks3::store_avx(&pols[offsetsSteps[stage] + stagePos + (row + nextStrides[openingPointIndex]) * nColsSteps[stage]], nColsSteps[stage], &bufferT[buffTOffsetsSteps[stage] + nOpenings * stagePos + openingPointIndex], nOpenings);
             }
         }
     }
 
-    virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint32_t nrowsBatch, bool domainExtended) {
+    virtual void calculateExpressions(Goldilocks::Element* dest, StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint32_t nrowsBatch, bool domainExtended) {
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint64_t extendBits = (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits);
         int64_t extend = domainExtended ? (1 << extendBits) : 1;
@@ -92,17 +75,16 @@ public:
             buffTOffsetsSteps_[stage] = buffTOffsetsSteps_[stage - 1] + nOpenings*nColsSteps[stage - 1];
             nCols += nColsSteps[stage];
         }
-        if(parserParams.stage <= nStages) {
-            offsetsSteps[nStages + 1] = starkInfo.mapOffsets[std::make_pair("tmpExp", false)];
-            nColsSteps[nStages + 1] = starkInfo.mapSectionsN["tmpExp"];
-        } else {
+        
+        if(domainExtended) {
             std::string section = "cm" + to_string(nStages + 1);
             offsetsSteps[nStages + 1] = starkInfo.mapOffsets[std::make_pair(section, true)];
             nColsSteps[nStages + 1] = starkInfo.mapSectionsN[section];
+            
+            nColsStepsAccumulated[nStages + 1] = nColsStepsAccumulated[nStages] + nColsSteps[nStages];
+            buffTOffsetsSteps_[nStages + 1] = buffTOffsetsSteps_[nStages] + nOpenings*nColsSteps[nStages];
+            nCols += nColsSteps[nStages + 1];
         }
-        nColsStepsAccumulated[nStages + 1] = nColsStepsAccumulated[nStages] + nColsSteps[nStages];
-        buffTOffsetsSteps_[nStages + 1] = buffTOffsetsSteps_[nStages] + nOpenings*nColsSteps[nStages];
-        nCols += nColsSteps[nStages + 1];
 
     #pragma omp parallel for
         for(uint64_t i = 0; i < starkInfo.challengesMap.size(); ++i) {
@@ -176,19 +158,13 @@ public:
             for(uint64_t k = 0; k < parserParams.nCmPolsUsed; ++k) {
                 uint64_t polId = cmPolsUsed[k];
                 PolMap polInfo = starkInfo.cmPolsMap[polId];
-                bool isTmpPol = polInfo.stage == string("tmpExp") && !domainExtended;
-                uint64_t stage = isTmpPol ? nStages + 1 : polInfo.stageNum;
+                uint64_t stage = polInfo.stage;
                 uint64_t stagePos = polInfo.stagePos;
-                uint64_t dim = polInfo.dim;
                 for(uint64_t d = 0; d < polInfo.dim; ++d) {
                     for(uint64_t o = 0; o < nOpenings; ++o) {
                         for(uint64_t j = 0; j < nrowsBatch; ++j) {
                             uint64_t l = (i + j + nextStrides[o]) % domainSize;
-                            if(isTmpPol) {
-                                bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[stage] + stagePos * domainSize + l*dim + d];
-                            } else {
-                                bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[stage] + l * nColsSteps[stage] + stagePos + d];
-                            }
+                            bufferT[nrowsBatch*o + j] = params.pols[offsetsSteps[stage] + l * nColsSteps[stage] + stagePos + d];
                         }
                         Goldilocks::load_avx(bufferT_[nOpenings * nColsStepsAccumulated[stage] + nOpenings * (stagePos + d) + o], &bufferT[nrowsBatch*o]);
                     }
@@ -963,36 +939,66 @@ public:
                 break;
             }
             case 102: {
+                // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: Zi
+                Goldilocks::load_avx(tmp1_1, &params.zi[i + args[i_args + 3] * domainSize], uint64_t(1));
+                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], tmp1_1);
+                i_args += 4;
+                break;
+            }
+            case 103: {
+                // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: Zi
+                Goldilocks::load_avx(tmp1_1, &params.zi[i + args[i_args + 5] * domainSize], uint64_t(1));
+                Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + nOpenings * args[i_args + 3] + args[i_args + 4]], tmp1_1);
+                i_args += 6;
+                break;
+            }
+            case 104: {
+                // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: Zi
+                Goldilocks::load_avx(tmp1_1, &params.zi[i + args[i_args + 3] * domainSize], uint64_t(1));
+                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp1_1);
+                i_args += 4;
+                break;
+            }
+            case 105: {
+                // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: Zi
+                Goldilocks::load_avx(tmp1_1, &params.zi[i + args[i_args + 5] * domainSize], uint64_t(1));
+                Goldilocks3::op_31_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
+                        &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + nOpenings * args[i_args + 3] + args[i_args + 4]], nOpenings, 
+                        tmp1_1);
+                i_args += 6;
+                break;
+            }
+            case 106: {
                 // COPY eval to tmp3
                 Goldilocks3::copy_avx(tmp3[args[i_args]], evals[args[i_args + 1]]);
                 i_args += 2;
                 break;
             }
-            case 103: {
+            case 107: {
                 // MULTIPLICATION WITH DEST: tmp3 - SRC0: eval - SRC1: challenge
                 Goldilocks3::mul_avx(tmp3[args[i_args + 1]], evals[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
                 i_args += 4;
                 break;
             }
-            case 104: {
+            case 108: {
                 // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: eval
                 Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], evals[args[i_args + 3]]);
                 i_args += 4;
                 break;
             }
-            case 105: {
+            case 109: {
                 // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: eval
                 Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], evals[args[i_args + 3]]);
                 i_args += 4;
                 break;
             }
-            case 106: {
+            case 110: {
                 // OPERATION WITH DEST: tmp3 - SRC0: eval - SRC1: commit1
                 Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], evals[args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + nOpenings * args[i_args + 4] + args[i_args + 5]]);
                 i_args += 6;
                 break;
             }
-            case 107: {
+            case 111: {
                 // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: eval
                 Goldilocks3::op_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + nOpenings * args[i_args + 3] + args[i_args + 4]], nOpenings, 
@@ -1000,14 +1006,14 @@ public:
                 i_args += 6;
                 break;
             }
-            case 108: {
+            case 112: {
                 // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: xDivXSubXi
                 Goldilocks3::load_avx(tmp3_1, &params.xDivXSubXi[(i + args[i_args + 3]*domainSize)*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
                 Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3_1);
                 i_args += 4;
                 break;
             }
-            case 109: {
+            case 113: {
                 // OPERATION WITH DEST: q - SRC0: tmp3 - SRC1: Zi
                 Goldilocks::Element tmp_inv[3];
                 Goldilocks::Element ti0[4];
@@ -1022,10 +1028,10 @@ public:
                     tmp_inv[2] = ti2[j];
                     Goldilocks3::mul((Goldilocks3::Element &)(params.q_2ns[(i + j) * FIELD_EXTENSION]), params.zi[i + j],(Goldilocks3::Element &)tmp_inv);
                 }
-                i_args += 1;
+                i_args += 2;
                 break;
             }
-            case 110: {
+            case 114: {
                 // OPERATION WITH DEST: f - SRC0: tmp3 - SRC1: tmp3
                 Goldilocks3::op_avx(args[i_args], tmp3_, tmp3[args[i_args + 1]], tmp3[args[i_args + 2]]);
                 Goldilocks3::store_avx(&params.f_2ns[i*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3_);
@@ -1038,11 +1044,13 @@ public:
                     }
                 }
             }
-            if (parserParams.destDim != 0) {
+            if (dest == nullptr && parserParams.destDim != 0) {
                 if(parserParams.destDim == 1) {
                     Goldilocks::Element res[4];
                     Goldilocks::store_avx(res, tmp1[parserParams.destId]);
                     for(uint64_t j = 0; j < 4; ++j) {
+                        if(i + j < parserParams.firstRow) continue;
+                        if(i + j >= parserParams.lastRow) break;
                         if(!Goldilocks::isZero(res[j])) {
                             validConstraint[i + j] = false;
                         }
@@ -1052,17 +1060,29 @@ public:
                     Goldilocks::store_avx(&res[0], tmp3[parserParams.destId][0]);
                     Goldilocks::store_avx(&res[4], tmp3[parserParams.destId][1]);
                     Goldilocks::store_avx(&res[8], tmp3[parserParams.destId][2]);
-                    for(uint64_t j = 0; j < 12; ++j) {
-                        if(!Goldilocks::isZero(res[j])) {
-                            validConstraint[i + j%4] = false;
+                    for(uint64_t j = 0; j < 4; ++j) {
+                        if(i + j < parserParams.firstRow) continue;
+                        if(i + j >= parserParams.lastRow) break;
+                        for(uint64_t k = 0; k < 3; ++k) {
+                            if(!Goldilocks::isZero(res[3*j + k])) {
+                                validConstraint[i + j] = false;
+                            }
                         }
                     }
                 } 
+            } else if(dest != nullptr) {
+                if(parserParams.destDim == 1) {
+                    Goldilocks::store_avx(&dest[i], uint64_t(1), tmp1[parserParams.destId]);
+                } else {
+                    Goldilocks::store_avx(&dest[i*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][0]);
+                    Goldilocks::store_avx(&dest[i*FIELD_EXTENSION + 1], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][1]);
+                    Goldilocks::store_avx(&dest[i*FIELD_EXTENSION + 2], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][2]);
+                }
             }
             if (i_args != parserParams.nArgs) std::cout << " " << i_args << " - " << parserParams.nArgs << std::endl;
             assert(i_args == parserParams.nArgs);
         }
-        if(parserParams.destDim != 0) {
+        if(dest == nullptr && parserParams.destDim != 0) {
             bool isValidConstraint = true;
             uint64_t nInvalidRows = 0;
             uint64_t maxInvalidRowsDisplay = 100;

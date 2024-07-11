@@ -3,7 +3,7 @@
 
 class FibonacciPil2Steps : public CHelpersSteps {
 public:
-    void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint32_t nrowsBatch, bool domainExtended) {
+    void calculateExpressions(Goldilocks::Element* dest, StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint32_t nrowsBatch, bool domainExtended) {
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint64_t extendBits = (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits);
         int64_t extend = domainExtended ? (1 << extendBits) : 1;
@@ -134,7 +134,7 @@ public:
         for(uint64_t k = 0; k < parserParams.nCmPolsUsed; ++k) {
             uint64_t polId = cmPolsUsed[k];
             PolMap polInfo = starkInfo.cmPolsMap[polId];
-            uint64_t stage = polInfo.stage == string("tmpExp") ? nStages + 1 : polInfo.stageNum;
+            uint64_t stage = polInfo.stage;
             uint64_t stagePos = polInfo.stagePos;
             for(uint64_t d = 0; d < polInfo.dim; ++d) {
                 for(uint64_t o = 0; o < nOpenings; ++o) {
@@ -147,7 +147,7 @@ public:
             uint64_t polId = cmPolsCalculated[k];
             if(std::find(cmPolsUsed, cmPolsUsed + parserParams.nCmPolsUsed, polId) != cmPolsUsed + parserParams.nCmPolsUsed) continue;
             PolMap polInfo = starkInfo.cmPolsMap[polId];
-            uint64_t stage = polInfo.stage == string("tmpExp") ? nStages + 1 : polInfo.stageNum;
+            uint64_t stage = polInfo.stage;
             uint64_t stagePos = polInfo.stagePos;
             for(uint64_t d = 0; d < polInfo.dim; ++d) {
                 for(uint64_t o = 0; o < nOpenings; ++o) {
@@ -186,7 +186,7 @@ public:
             for(uint64_t k = 0; k < parserParams.nCmPolsUsed; ++k) {
                 uint64_t polId = cmPolsUsed[k];
                 PolMap polInfo = starkInfo.cmPolsMap[polId];
-                uint64_t stage = polInfo.stage == string("tmpExp") ? nStages + 1 : polInfo.stageNum;
+                uint64_t stage = polInfo.stage;
                 uint64_t stagePos = polInfo.stagePos;
                 for(uint64_t d = 0; d < polInfo.dim; ++d) {
                     for(uint64_t o = 0; o < nOpenings; ++o) {

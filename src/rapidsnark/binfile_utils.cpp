@@ -120,7 +120,6 @@ namespace BinFileUtils
 
     void BinFile::startReadSection(u_int32_t sectionId, u_int32_t sectionPos)
     {
-
         if (sections.find(sectionId) == sections.end())
         {
             throw new std::range_error("Section does not exist: " + std::to_string(sectionId));

@@ -186,11 +186,11 @@ public:
     ElementType **roots;
     Fri<ElementType> fri;
     std::vector<std::vector<Goldilocks::Element>> evals;
-    std::vector<std::vector<Goldilocks::Element>> subAirValues;
+    std::vector<std::vector<Goldilocks::Element>> subproofValues;
     Proofs(StarkInfo starkInfo) :
         fri(starkInfo),
         evals(starkInfo.evMap.size(), std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
-        subAirValues(starkInfo.nSubProofValues, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero()))
+        subproofValues(starkInfo.nSubProofValues, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero()))
         {
             nStages = starkInfo.nStages + 1;
             roots = new ElementType*[nStages];
@@ -216,10 +216,10 @@ public:
         }
     }
 
-    void setSubAirValues(Goldilocks::Element *_subAirValues) {
-        for (uint64_t i = 0; i < subAirValues.size(); i++)
+    void setSubproofValues(Goldilocks::Element *_subproofValues) {
+        for (uint64_t i = 0; i < subproofValues.size(); i++)
         {
-            std::memcpy(&subAirValues[i][0], &_subAirValues[i * subAirValues[i].size()], subAirValues[i].size() * sizeof(Goldilocks::Element));
+            std::memcpy(&subproofValues[i][0], &_subproofValues[i * subproofValues[i].size()], subproofValues[i].size() * sizeof(Goldilocks::Element));
         }
     }
 
@@ -252,18 +252,18 @@ public:
         }
         j["evals"] = json_evals;
 
-        ordered_json json_subAirValues = ordered_json::array();
-        for (uint i = 0; i < subAirValues.size(); i++)
+        ordered_json json_subproofValues = ordered_json::array();
+        for (uint i = 0; i < subproofValues.size(); i++)
         {
             ordered_json element = ordered_json::array();
-            for (uint j = 0; j < subAirValues[i].size(); j++)
+            for (uint j = 0; j < subproofValues[i].size(); j++)
             {
-                element.push_back(Goldilocks::toString(subAirValues[i][j]));
+                element.push_back(Goldilocks::toString(subproofValues[i][j]));
             }
-            json_subAirValues.push_back(element);
+            json_subproofValues.push_back(element);
         }
 
-        j["subAirValues"] = json_subAirValues;
+        j["subproofValues"] = json_subproofValues;
         
         j["fri"] = fri.FriP2json();
         return j;

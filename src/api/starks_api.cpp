@@ -159,7 +159,6 @@ void set_mapOffsets(void *pStarkInfo, void *pChelpers)
 {
     auto starkInfo = (StarkInfo *)pStarkInfo;
     auto cHelpers = (CHelpers *)pChelpers;
-    starkInfo->setMapOffsets(cHelpers->hints);
 }
 
 uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag)

@@ -43,7 +43,7 @@ public:
         }
     }
 
-    void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint32_t nrowsBatch, bool domainExtended) {
+    void calculateExpressions(Goldilocks::Element* dest, StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint32_t nrowsBatch, bool domainExtended) {
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint64_t extendBits = (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits);
         int64_t extend = domainExtended ? (1 << extendBits) : 1;
@@ -173,8 +173,8 @@ public:
             for(uint64_t k = 0; k < parserParams.nCmPolsUsed; ++k) {
                 uint64_t polId = cmPolsUsed[k];
                 PolMap polInfo = starkInfo.cmPolsMap[polId];
-                bool isTmpPol = polInfo.stage == string("tmpExp") && !domainExtended;
-                uint64_t stage = isTmpPol ? nStages + 1 : polInfo.stageNum;
+                bool isTmpPol = false;
+                uint64_t stage = isTmpPol ? nStages + 1 : polInfo.stage;
                 uint64_t stagePos = polInfo.stagePos;
                 uint64_t dim = polInfo.dim;
                 for(uint64_t d = 0; d < polInfo.dim; ++d) {

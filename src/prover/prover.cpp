@@ -117,13 +117,6 @@ Prover::Prover(Goldilocks &fr,
                 cHelpersRecursive2 = new CHelpers(recursive2CHelpers);
                 cHelpersRecursiveF = new CHelpers(recursivefCHelpers);
 
-                // Set the map offsets
-                starkInfoZkevm->setMapOffsets(cHelpersZkevm->hints);
-                starkInfoC12a->setMapOffsets(cHelpersC12a->hints);
-                starkInfoRecursive1->setMapOffsets(cHelpersRecursive1->hints);
-                starkInfoRecursive2->setMapOffsets(cHelpersRecursive2->hints);
-                starkInfoRecursiveF->setMapOffsets(cHelpersRecursiveF->hints);
-
                 polsSize = starkInfoZkevm->mapTotalN * sizeof(Goldilocks::Element);
 
                 zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() <= polsSize);

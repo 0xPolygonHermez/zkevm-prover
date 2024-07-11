@@ -14,9 +14,10 @@
 #include <cassert>
 
 const int CHELPERS_STAGES_SECTION = 2;
-const int CHELPERS_EXPRESSIONS_SECTION = 3;
-const int CHELPERS_CONSTRAINTS_SECTION = 4;
-const int CHELPERS_HINTS_SECTION = 5;
+const int CHELPERS_IMPOLS_SECTION = 3;
+const int CHELPERS_EXPRESSIONS_SECTION = 4;
+const int CHELPERS_CONSTRAINTS_SECTION = 5;
+const int CHELPERS_HINTS_SECTION = 6;
 
 struct ParserParams
 {
@@ -43,6 +44,8 @@ struct ParserParams
     uint32_t subproofValuesOffset;
     uint32_t nCmPolsCalculated;
     uint32_t cmPolsCalculatedOffset;
+    uint32_t firstRow;
+    uint32_t lastRow;
     uint32_t destDim;
     uint32_t destId;
 };
@@ -65,9 +68,11 @@ class CHelpers
 public:
     std::vector<ParserParams> stagesInfo;
 
-    std::vector<ParserParams> expressionsInfo;
+    std::map<uint64_t, ParserParams> expressionsInfo;
 
     std::vector<ParserParams> constraintsInfoDebug;
+
+    ParserParams imPolsInfo;
 
     std::vector<Hint> hints;
     
@@ -75,6 +80,8 @@ public:
 
     ParserArgs cHelpersArgsDebug;
 
+    ParserArgs cHelpersArgsImPols;
+    
     ParserArgs cHelpersArgsExpressions;
 
     ~CHelpers() {
@@ -87,6 +94,16 @@ public:
         if (cHelpersArgs.publicsIds) delete[] cHelpersArgs.publicsIds;
         if (cHelpersArgs.subproofValuesIds) delete[] cHelpersArgs.subproofValuesIds;
         if (cHelpersArgs.cmPolsCalculatedIds) delete[] cHelpersArgs.cmPolsCalculatedIds;
+
+        if (cHelpersArgsImPols.ops) delete[] cHelpersArgsImPols.ops;
+        if (cHelpersArgsImPols.args) delete[] cHelpersArgsImPols.args;
+        if (cHelpersArgsImPols.numbers) delete[] cHelpersArgsImPols.numbers;
+        if (cHelpersArgsImPols.constPolsIds) delete[] cHelpersArgsImPols.constPolsIds;
+        if (cHelpersArgsImPols.cmPolsIds) delete[] cHelpersArgsImPols.cmPolsIds;
+        if (cHelpersArgsImPols.challengesIds) delete[] cHelpersArgsImPols.challengesIds;
+        if (cHelpersArgsImPols.publicsIds) delete[] cHelpersArgsImPols.publicsIds;
+        if (cHelpersArgsImPols.subproofValuesIds) delete[] cHelpersArgsImPols.subproofValuesIds;
+        if (cHelpersArgsImPols.cmPolsCalculatedIds) delete[] cHelpersArgsImPols.cmPolsCalculatedIds;
 
         if (cHelpersArgsExpressions.ops) delete[] cHelpersArgsExpressions.ops;
         if (cHelpersArgsExpressions.args) delete[] cHelpersArgsExpressions.args;
