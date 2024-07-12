@@ -140,3 +140,7 @@ To execute a proof test:
 2. For the `"inputFile"` parameter, specify the desired input test data file. As an example, use the file `testvectors/batchProof/input_executor_0.json`.
 3. Launch the Prover from the project root directory using the command: `build/zkProver`.
 4. The proof's result files will be saved in the directory defined by the `"outputPath"` configuration parameter.
+
+## Contact
+
+For more discussions, please head to the [R&D Discord](https://discord.gg/0xPolygonRnD)
