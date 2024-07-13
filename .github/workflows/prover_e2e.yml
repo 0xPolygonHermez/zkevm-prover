@@ -41,8 +41,8 @@ jobs:
       run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
     - name: run snarkjs verification
       run: snarkjs ffv config/final/final.fflonk.verkey.json $(ls -t runtime/output/*.gen_final_proof_public.json | head -n1) $(ls -t runtime/output/*.final_proof.proof.json | head -n1)
-    - name: clear
-      run: make clear
+    - name: clean
+      run: make clean
     - name: make 11
       run: cd src/grpc && make && cd ../.. && make PROVER_FORK_ID=11 generate && make PROVER_FORK_ID=11 -j
     - name: remove all config 11
