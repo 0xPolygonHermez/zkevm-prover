@@ -326,8 +326,8 @@ namespace Fflonk
             lengthAdditionalBuffer += zkey->domainSize; // Products
             lengthAdditionalBuffer += zkey->nAdditions; // BuffInternalWitness
             lengthAdditionalBuffer += 2* zkey->nAdditions; // AdditionsFactor1 && AdditionsFactor2
-            lengthAdditionalBuffer += zkey->nAdditions * 2 * sizeof(u_int32_t) / sizeof(FrElement); // AdditionsSignalId1 && AdditionsSignalId2
-            lengthAdditionalBuffer += zkey->nConstraints * 3 * sizeof(u_int32_t) / sizeof(FrElement); // mapBuffersBigBuffer 
+            lengthAdditionalBuffer += zkey->nAdditions * 2 * sizeof(u_int32_t); // AdditionsSignalId1 && AdditionsSignalId2
+            lengthAdditionalBuffer += zkey->nConstraints * 3 * sizeof(u_int32_t); // mapBuffersBigBuffer 
             
             ////////////////////////////////////////////////////
             // NON-PRECOMPUTED BIG BUFFER
@@ -426,7 +426,7 @@ namespace Fflonk
                 additionsSignalId1 = (u_int32_t *)(additionsFactor2 + zkey->nAdditions);
                 additionsSignalId2 = additionsSignalId1 + zkey->nAdditions;
                 mapBuffersBigBuffer = additionsSignalId2 + zkey->nAdditions;
-            }
+                            }
 
             LOG_TRACE("··· Loading additions");
             fdZkey->startReadSection(Zkey::ZKEY_FF_ADDITIONS_SECTION);

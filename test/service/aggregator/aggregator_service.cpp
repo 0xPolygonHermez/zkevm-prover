@@ -10,7 +10,7 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-#define AGGREGATOR_SERVER_NUMBER_OF_LOOPS 1
+#define AGGREGATOR_SERVER_NUMBER_OF_LOOPS 2
 
 #define AGGREGATOR_SERVER_RETRY_SLEEP 10
 #define AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES 600  // 600 retries every 10 seconds = 6000 seconds = 100 minutes
@@ -29,31 +29,31 @@ using grpc::Status;
     string proof;
 
     const string inputFile0  = "testvectors/e2e/fork_" + to_string(PROVER_FORK_ID) + "/input_executor_0.json";
-    const string outputFile0 = "testvectors/aggregatedProof/recursive1.zkin.proof_0.json";
+    const string outputFile0 = "testvectors/aggregatedProof/fork_" + to_string(PROVER_FORK_ID) + "/recursive1.zkin.proof_0.json";
 
     const string inputFile1  = "testvectors/e2e/fork_" + to_string(PROVER_FORK_ID) + "/input_executor_1.json";
-    const string outputFile1 = "testvectors/aggregatedProof/recursive1.zkin.proof_1.json";
+    const string outputFile1 = "testvectors/aggregatedProof/fork_" + to_string(PROVER_FORK_ID) + "/recursive1.zkin.proof_1.json";
 
     const string inputFile01a = outputFile0;
     const string inputFile01b = outputFile1;
-    const string outputFile01 = "testvectors/finalProof/recursive2.zkin.proof_01.json";
+    const string outputFile01 = "testvectors/finalProof/fork_" + to_string(PROVER_FORK_ID) + "/recursive2.zkin.proof_01.json";
 
     const string inputFile2  = "testvectors/e2e/fork_" + to_string(PROVER_FORK_ID) + "/input_executor_2.json";
-    const string outputFile2 = "testvectors/aggregatedProof/recursive1.zkin.proof_2.json";
+    const string outputFile2 = "testvectors/aggregatedProof/fork_" + to_string(PROVER_FORK_ID) + "/recursive1.zkin.proof_2.json";
     
     const string inputFile3  = "testvectors/e2e/fork_" + to_string(PROVER_FORK_ID) + "/input_executor_3.json";
-    const string outputFile3 = "testvectors/aggregatedProof/recursive1.zkin.proof_3.json";
+    const string outputFile3 = "testvectors/aggregatedProof/fork_" + to_string(PROVER_FORK_ID) + "/recursive1.zkin.proof_3.json";
 
     const string inputFile23a = outputFile2;
     const string inputFile23b = outputFile3;
-    const string outputFile23 = "testvectors/finalProof/recursive2.zkin.proof_23.json";
+    const string outputFile23 = "testvectors/finalProof/fork_" + to_string(PROVER_FORK_ID) + "/recursive2.zkin.proof_23.json";
 
     const string inputFile03a = outputFile01;
     const string inputFile03b = outputFile23;
-    const string outputFile03 = "testvectors/finalProof/recursive2.zkin.proof_03.json";
+    const string outputFile03 = "testvectors/finalProof/fork_" + to_string(PROVER_FORK_ID) + "/recursive2.zkin.proof_03.json";
 
     const string inputFileFinal  = outputFile03;
-    const string outputFileFinal = "testvectors/finalProof/proof.json";
+    const string outputFileFinal = "testvectors/finalProof/fork_" + to_string(PROVER_FORK_ID) + "/proof.json";
 
 
     // Get status
