@@ -41,3 +41,25 @@ jobs:
       run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
     - name: run snarkjs verification
       run: snarkjs ffv config/final/final.fflonk.verkey.json $(ls -t runtime/output/*.gen_final_proof_public.json | head -n1) $(ls -t runtime/output/*.final_proof.proof.json | head -n1)
+    - name: clear
+      run: make clear
+    - name: make 11
+      run: cd src/grpc && make && cd ../.. && make PROVER_FORK_ID=11 generate && make PROVER_FORK_ID=11 -j
+    - name: remove all config 11
+      run: rm -rf config
+    - name: remove old proofs 11
+      run: rm -rf runtime/output/*
+    - name: list gha config files 11
+      run: ls /home/gha/v7.0.0-rc.14-fork.11/config/
+    - name: link files 11
+      run: ln -s /home/gha/v7.0.0-rc.14-fork.11/config/ config
+    - name: list local config files 11
+      run: ls config
+    - name: run collection native tests 11
+      run: ./build/zkProver -c testvectors/config_collection_native.json
+    - name: run collection generated tests 11
+      run: ./build/zkProver -c testvectors/config_collection_generated.json
+    - name: run e2e tests 11
+      run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
+    - name: run snarkjs verification 11
+      run: snarkjs ffv config/final/final.fflonk.verkey.json $(ls -t runtime/output/*.gen_final_proof_public.json | head -n1) $(ls -t runtime/output/*.final_proof.proof.json | head -n1)
