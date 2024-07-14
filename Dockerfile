@@ -22,6 +22,7 @@ COPY --from=build /usr/src/app/build/zkProver /usr/local/bin
 
 COPY ./testvectors ./testvectors
 COPY ./config ./config
+COPY ./setup ./setup
 COPY ./src/main_sm/fork_1/scripts/rom.json ./src/main_sm/fork_1/scripts/rom.json
 COPY ./src/main_sm/fork_2/scripts/rom.json ./src/main_sm/fork_2/scripts/rom.json
 COPY ./src/main_sm/fork_3/scripts/rom.json ./src/main_sm/fork_3/scripts/rom.json

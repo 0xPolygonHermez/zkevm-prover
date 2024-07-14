@@ -786,7 +786,7 @@ void checkSetupHash(std::string datFileName) {
     string hashFormatted = hash.substr(2);
     if(hash.size() % 2 != 0) hashFormatted = "0" + hashFormatted;
 
-    std::string setupFile = "src/config/setup-" + to_string(PROVER_FORK_ID) + ".txt";
+    std::string setupFile = "setup/setup-" + to_string(PROVER_FORK_ID) + ".txt";
     std::ifstream file(setupFile);
     if (!file.is_open()) {
         std::cerr << "Error opening file: " << setupFile << std::endl;
