@@ -70,19 +70,19 @@ void Proof::load(json &proof, json &publicSignalsJson)
 
     if (!proof["polynomials"].contains("C2") || !proof["polynomials"]["C2"].is_array())
     {
-        zklog.error("Proof::load() proof does not contain C1 polynomial");
+        zklog.error("Proof::load() proof does not contain C2 polynomial");
         exitProcess();
     }
 
     if (!proof["polynomials"].contains("W1") || !proof["polynomials"]["W1"].is_array())
     {
-        zklog.error("Proof::load() proof does not contain C1 polynomial");
+        zklog.error("Proof::load() proof does not contain W1 polynomial");
         exitProcess();
     }
 
     if (!proof["polynomials"].contains("W2") || !proof["polynomials"]["W2"].is_array())
     {
-        zklog.error("Proof::load() proof does not contain C1 polynomial");
+        zklog.error("Proof::load() proof does not contain W2 polynomial");
         exitProcess();
     }
 
