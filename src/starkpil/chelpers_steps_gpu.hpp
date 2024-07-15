@@ -5,10 +5,10 @@
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
 #include "steps.hpp"
-#ifdef __USE_CUDA__
+
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
+
 #include <cuda_runtime.h>
-#endif
-#ifdef ENABLE_EXPERIMENTAL_CODE
 class gl64_t;
 struct StepsPointers
 {
@@ -51,13 +51,12 @@ public:
     StepsPointers stepPointers_h;
 
     void dataSetup(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams);
-    void loadData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row);
-    void storeData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row);
+    void loadData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row, cudaStream_t& stream);
+    void storeData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row, cudaStream_t& stream);
+#
     void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams);
     void freePointers();
-
 };
-#ifdef __USE_CUDA__
 __global__ void _transposeToBuffer(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
 __global__ void _transposeFromBuffer(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
 __global__ void _packComputation(StepsPointers *stepPointers_d, uint32_t N, uint32_t nOps, uint32_t nArgs, uint32_t stream);
@@ -69,6 +68,6 @@ inline void checkCudaError(cudaError_t err, const char *operation){
         exit(EXIT_FAILURE);
     }
 }
-#endif
+
 #endif
 #endif
