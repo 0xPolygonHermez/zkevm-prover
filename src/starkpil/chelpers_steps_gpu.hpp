@@ -1,12 +1,12 @@
 
 #ifndef CHELPERS_STEPS_GPU_HPP
 #define CHELPERS_STEPS_GPU_HPP
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
+
 #include "definitions.hpp"
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
 #include "steps.hpp"
-
-#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
 
 #include <cuda_runtime.h>
 class gl64_t;
