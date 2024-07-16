@@ -1,0 +1,12 @@
+#!/bin/bash
+# This is a postinstallation script so the service can be configured and started when requested
+#
+sudo adduser --disabled-password --disabled-login --shell /usr/sbin/nologin --quiet --system --no-create-home --home /nonexistent zkevm-prover
+if [ -d "/opt/zkevm-prover" ]
+then
+    echo "Directory /opt/zkevm-prover exists."
+else
+    mkdir -p /opt/zkevm-prover
+    sudo chown -R zkevm-prover /opt/zkevm-prover
+fi
+sudo systemctl daemon-reload

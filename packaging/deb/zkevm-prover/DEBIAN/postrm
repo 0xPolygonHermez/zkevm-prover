@@ -1,0 +1,8 @@
+#!/bin/bash
+#
+###############
+# Remove zkevm-prover installs
+##############
+sudo rm -rf /lib/systemd/system/zkevm-prover.service
+sudo deluser zkevm-prover
+sudo systemctl daemon-reload
