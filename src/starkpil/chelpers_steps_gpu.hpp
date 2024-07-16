@@ -1,22 +1,22 @@
 
 #ifndef CHELPERS_STEPS_GPU_HPP
 #define CHELPERS_STEPS_GPU_HPP
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
+
+#include "definitions.hpp"
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
 #include "steps.hpp"
-#ifdef __USE_CUDA__
+
 #include <cuda_runtime.h>
-#endif
-#ifdef ENABLE_EXPERIMENTAL_CODE
 class gl64_t;
 struct StepsPointers
 {
     uint64_t domainSize;
     uint64_t nConstants;
+    uint64_t nextStride;
     uint64_t *nColsStages_d;
     uint64_t *nColsStagesAcc_d;
-    uint64_t *offsetsStages_d;
-    uint64_t nextStride;
 
     uint32_t *ops_d;
     uint32_t *args_d;
@@ -36,8 +36,6 @@ struct StepsPointers
     gl64_t *tmp1_d;
     gl64_t *tmp3_d;
 
-    Goldilocks::Element *bufferT_h; //to be eliminated
-
     uint32_t dimBufferT;
     uint32_t dimBufferPols;
     uint32_t dimBufferConsts;
@@ -53,26 +51,23 @@ public:
     StepsPointers stepPointers_h;
 
     void dataSetup(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams);
-    void loadData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row);
-    void storeData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row);
-    void storePolinomials_(StarkInfo &starkInfo, StepsParams &params, uint8_t *storePol, uint64_t row, uint64_t domainExtended);
+    void loadData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row, cudaStream_t& stream);
+    void storeData(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, uint64_t row, cudaStream_t& stream);
+#
     void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams);
     void freePointers();
-
 };
-#ifdef __USE_CUDA__
-__global__ void _loadPolinomials(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
-__global__ void _storePolinomials(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
-__global__ void _rowComputation(StepsPointers *stepPointers_d, uint32_t N, uint32_t nOps, uint32_t nArgs, uint32_t stream);
+__global__ void _transposeToBuffer(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
+__global__ void _transposeFromBuffer(StepsPointers *stepPointers_d, uint64_t row, uint32_t stage, bool domainExtended, uint32_t stream);
+__global__ void _packComputation(StepsPointers *stepPointers_d, uint32_t N, uint32_t nOps, uint32_t nArgs, uint32_t stream);
 
-inline void checkCudaError(cudaError_t err, const char *operation)
+inline void checkCudaError(cudaError_t err, const char *operation){
+    if (err != cudaSuccess)
     {
-        if (err != cudaSuccess)
-        {
-            printf("%s failed: %s\n", operation, cudaGetErrorString(err));
-            exit(EXIT_FAILURE);
-        }
+        printf("%s failed: %s\n", operation, cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
     }
-#endif
+}
+
 #endif
 #endif

@@ -1,5 +1,6 @@
 #ifndef CHELPERS_STEPS_PACK_HPP
 #define CHELPERS_STEPS_PACK_HPP
+#include "definitions.hpp"
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
 #include "steps.hpp"
@@ -13,6 +14,10 @@ public:
     vector<uint64_t> nColsStages;
     vector<uint64_t> nColsStagesAcc;
     vector<uint64_t> offsetsStages;
+
+    using CHelpersSteps::storePolinomials;  // Just to avoid compiation warnings
+    using CHelpersSteps::loadPolinomials;   // Just to avoid compiation warnings
+
 
     inline virtual void setBufferTInfo(StarkInfo& starkInfo, uint64_t stage) {
         bool domainExtended = stage <= 3 ? false : true;
