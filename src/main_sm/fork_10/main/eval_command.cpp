@@ -2691,14 +2691,7 @@ void eval_getTimestampLimit (Context &ctx, const RomCommand &cmd, CommandResult 
 #endif
 
     cr.type = crt_fea;
-    cr.fea0 = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.timestampLimit);
-    cr.fea1 = fr.zero();
-    cr.fea2 = fr.zero();
-    cr.fea3 = fr.zero();
-    cr.fea4 = fr.zero();
-    cr.fea5 = fr.zero();
-    cr.fea6 = fr.zero();
-    cr.fea7 = fr.zero();
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.timestampLimit, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
