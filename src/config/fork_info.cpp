@@ -3,20 +3,22 @@
 
 using namespace std;
 
+#define NO_COUNTERS_MULTIPLIER uint64_t(256)
+
 array<ForkInfo, 12> forkInfo = {
 //            ID   PID  Nbits        N N_NoCounters
     ForkInfo(  0,    0,   0,        0,          0 ),
-    ForkInfo(  1,    1,  23,  8388608,   67108864 ),
-    ForkInfo(  2,    2,  23,  8388608,   67108864 ),
-    ForkInfo(  3,    3,  23,  8388608,   67108864 ),
-    ForkInfo(  4,    4,  23,  8388608,   67108864 ),
-    ForkInfo(  5,    5,  23,  8388608,   67108864 ),
-    ForkInfo(  6,    6,  23,  8388608,   67108864 ),
-    ForkInfo(  7,    7,  23,  8388608,   67108864 ),
-    ForkInfo(  8,    8,  23,  8388608,   67108864 ),
-    ForkInfo(  9,    9,  23,  8388608,   67108864 ),
-    ForkInfo( 10,   10,  24, 16777216,  134217728 ),
-    ForkInfo( 11,   10,  25, 33554432,  268435456 )
+    ForkInfo(  1,    1,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
+    ForkInfo(  2,    2,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
+    ForkInfo(  3,    3,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
+    ForkInfo(  4,    4,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
+    ForkInfo(  5,    5,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
+    ForkInfo(  6,    6,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
+    ForkInfo(  7,    7,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
+    ForkInfo(  8,    8,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
+    ForkInfo(  9,    9,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
+    ForkInfo( 10,   10,  24, 16777216,  NO_COUNTERS_MULTIPLIER * 16777216 ),
+    ForkInfo( 11,   10,  25, 33554432,  NO_COUNTERS_MULTIPLIER * 33554432 )
 };
 
 bool getForkInfo (uint64_t forkID, ForkInfo &_forkInfo)
