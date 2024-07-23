@@ -62,7 +62,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     TimerStopAndLog(STARK_STEP_1);
 
     //--------------------------------
-    // 2.- Caluculate plookups h1 and h2
+    // 2.- Calculate plookups h1 and h2
     //--------------------------------
     TimerStart(STARK_STEP_2);
     transcript.getField(challenges[0]); // u

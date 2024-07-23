@@ -751,7 +751,7 @@ int main(int argc, char **argv)
         pAggregatorClientMock->runThread();
     }
 
-    /* WAIT FOR CLIENT THREADS COMPETION */
+    /* WAIT FOR CLIENT THREADS COMPETITION */
 
     // Wait for the executor client thread to end
     if (config.runExecutorClient)
