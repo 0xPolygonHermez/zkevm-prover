@@ -184,6 +184,17 @@ void *starks_new(void *pConfig, char *constPols, bool mapConstPolsFile, char *co
     return new Starks<Goldilocks::Element>(*(Config *)pConfig, {constPols, mapConstPolsFile, constantsTree}, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, false);
 }
 
+void *starks_new_default(char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress)
+{
+    Config configLocal;
+    configLocal.runFileGenBatchProof = true; //to force function generateProof to return true
+
+    Goldilocks::Element* addressElements = (Goldilocks::Element *)pAddress;
+
+    return new Starks<Goldilocks::Element>(configLocal, {constPols, mapConstPolsFile, constantsTree}, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, false);
+}
+
+
 void *get_stark_info(void *pStarks)
 {
     return &((Starks<Goldilocks::Element> *)pStarks)->starkInfo;
@@ -197,7 +208,6 @@ void starks_free(void *pStarks)
 
 void *chelpers_new(char *cHelpers)
 {
-    cout << "loading " << cHelpers << endl;
     return new CHelpers(cHelpers);
 }
 
@@ -280,6 +290,11 @@ void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t ste
         cerr << "Invalid elementType: " << elementType << endl;
         break;
     }
+}
+
+void calculate_expression(void *pStarks, void* dest, uint64_t id, void * params, void * chelpersSteps, bool domainExtended)
+{
+    ((Starks<Goldilocks::Element> *)pStarks)->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)params, (CHelpersSteps *)chelpersSteps, domainExtended);
 }
 
 void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof) {

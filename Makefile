@@ -69,6 +69,7 @@ SRCS_ZKEVM_LIB := $(shell find $(SRC_DIRS) \
 	! -path "./src/pols_generator/*" \
 	! -path "./src/pols_diff/*" \
 	! -path "./src/rapidsnark/*" \
+	! -path ".src/fflonk_setup/*" \
 	-name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_ZKEVM_LIB := $(SRCS_ZKEVM_LIB:%=$(BUILD_DIR)/%.o)
 DEPS_ZKEVM_LIB := $(OBJS_ZKEVM_LIB:.o=.d)
@@ -126,7 +127,7 @@ zkevm_lib: LDFLAGS_EXT  := -L../zkevm-prover-rust/target/release -lzkevm_sm
 zkevm_lib: INC_FLAGS_EXT := -I./../zkevm-prover-rust/include
 zkevm_lib: $(LIB_DIR)/$(TARGET_ZKEVM_LIB)
 
-starks_lib: CXXFLAGS_EXT := -D__ZKEVM_LIB__ #we decided to use the same flags for both libraries
+starks_lib: CXXFLAGS_EXT := -D__ZKEVM_LIB__ -fPIC#we decided to use the same flags for both libraries
 starks_lib: $(LIB_DIR)/$(TARGET_STARKS_LIB)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)

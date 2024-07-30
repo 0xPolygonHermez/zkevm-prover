@@ -105,7 +105,6 @@ public:
     {
         debug = debug_;
 
-        cout << "HOLI " << endl;
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;

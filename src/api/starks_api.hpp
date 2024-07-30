@@ -44,6 +44,8 @@
     // ========================================================================================
     void *starks_new(void *pConfig, char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress);
 
+    void *starks_new_default(char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress);
+
     void *get_stark_info(void *pStarks);
     void starks_free(void *pStarks);
 
@@ -59,6 +61,7 @@
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
     void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
+    void calculate_expression(void *pStarks, void* dest, uint64_t id, void * params, void * chelpersSteps, bool domainExtended);
     void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof);
     void compute_evals(void *pStarks, void *pParams, void *pProof);
 
