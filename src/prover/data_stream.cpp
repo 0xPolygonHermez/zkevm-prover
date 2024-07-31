@@ -850,8 +850,11 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                 continue;
             }
 
-            case datastream::v1::ENTRY_TYPE_L2_BLOCK_END:
+            case datastream::v1::ENTRY_TYPE_L2_BLOCK_END: // L2 block end
             {
+                // Ignore, just pretend to have parsed this data
+                p += dataLength;
+
                 continue;
             }
 #endif
