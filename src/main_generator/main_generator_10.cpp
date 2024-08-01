@@ -2401,8 +2401,8 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
-#ifdef CHECK_MAX_CNT_ASAP
             code += "        pols.cntSha256F[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntSha256F[" + string(bFastMode?"0":"i") + "], fr.fromU64(ctx.incCounter));\n";
+#ifdef CHECK_MAX_CNT_ASAP
             code += "        if (fr.toU64(pols.cntSha256F[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_SHA256_F_LIMIT"]["value"] + ")\n";
             code += "        {\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
