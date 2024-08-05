@@ -323,6 +323,9 @@ int main(int argc, char **argv)
     // Print the zkProver version
     zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));
 
+    // Printe the prover fork ID
+    zklog.info("Prover fork ID: " + to_string(PROVER_FORK_ID));
+
     // Test that stderr is properly logged
     cerr << "Checking error channel; ignore this trace\n";
     zklog.warning("Checking warning channel; ignore this trace");

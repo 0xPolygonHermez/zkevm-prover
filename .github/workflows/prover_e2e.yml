@@ -19,27 +19,31 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
+    - name: List installed global packages
+      run: npm ls -g
     - name: Install snarkjs
-      run: npm -g install snarkjs
+      run: npm list -g snarkjs || npm -g install snarkjs
     - name: make
       run: cd src/grpc && make && cd ../.. && make generate && make -j
     - name: remove all config 
       run: rm -rf config
     - name: remove old proofs
       run: rm -rf runtime/output/*
-    - name: list gha config files
+    - name: list gha config files 10
       run: ls /home/gha/v7.0.0-rc.14-fork.10/config/
-    - name: link files
+    - name: link files 10
       run: ln -s /home/gha/v7.0.0-rc.14-fork.10/config/ config
-    - name: list local config files
+    - name: list local config files 10
       run: ls config
-    - name: run collection native tests
+    - name: run collection native tests 10
       run: ./build/zkProver -c testvectors/config_collection_native.json
-    - name: run collection generated tests
+    - name: run collection generated tests 10
       run: ./build/zkProver -c testvectors/config_collection_generated.json
-    - name: run e2e tests
+    - name: run diagnostic rom 10
+      run: ./build/zkProver -c testvectors/config_diagnostic_rom.json
+    - name: run e2e tests 10
       run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
-    - name: run snarkjs verification
+    - name: run snarkjs verification 10
       run: snarkjs ffv config/final/final.fflonk.verkey.json $(ls -t runtime/output/*.gen_final_proof_public.json | head -n1) $(ls -t runtime/output/*.final_proof.proof.json | head -n1)
     - name: clean
       run: make clean
@@ -59,6 +63,8 @@ jobs:
       run: ./build/zkProver -c testvectors/config_collection_native.json
     - name: run collection generated tests 11
       run: ./build/zkProver -c testvectors/config_collection_generated.json
+    - name: run diagnostic rom 11
+      run: ./build/zkProver -c testvectors/config_diagnostic_rom.json
     - name: run e2e tests 11
       run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
     - name: run snarkjs verification 11

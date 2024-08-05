@@ -747,6 +747,7 @@ bool Config::check (void)
         useMainExecGenerated = false;
         runExecutorServer = false;
         runExecutorClient = false;
+        runHashDBServer = false;
         runFileProcessBatch = true;
     }
 
