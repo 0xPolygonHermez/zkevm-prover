@@ -22,7 +22,7 @@ jobs:
     - name: List installed global packages
       run: npm ls -g
     - name: Install snarkjs
-      run: npm -g install snarkjs
+      run: npm list -g snarkjs || npm -g install snarkjs
     - name: make
       run: cd src/grpc && make && cd ../.. && make generate && make -j
     - name: remove all config 
