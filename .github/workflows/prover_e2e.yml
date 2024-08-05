@@ -20,7 +20,7 @@ jobs:
       with:
         node-version: '16'
     - name: Install snarkjs
-      run: npm -g install snarkjs
+      run: npm list -g snarkjs || npm -g install snarkjs
     - name: make
       run: cd src/grpc && make && cd ../.. && make generate && make -j
     - name: remove all config 
