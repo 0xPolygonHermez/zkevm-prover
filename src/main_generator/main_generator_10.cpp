@@ -340,14 +340,28 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     
     //code += "    Rom &rom = config.loadDiagnosticRom ? mainExecutor.romDiagnostic : mainExecutor.romBatch;\n";
 
-    code += "    if ( (proverRequest.input.publicInputsExtended.publicInputs.forkID != 10) && (proverRequest.input.publicInputsExtended.publicInputs.forkID != 11) )\n";
+    if ((forkID == 10) || (forkID == 11))
+    {
+        code += "    if ( (proverRequest.input.publicInputsExtended.publicInputs.forkID != 10) && (proverRequest.input.publicInputsExtended.publicInputs.forkID != 11) )\n";
+    }
+    else
+    {
+        code += "    if ( proverRequest.input.publicInputsExtended.publicInputs.forkID != " + to_string(forkID) + ")\n";
+    }
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;\n";
     code += "        zklog.error(\"MainExecutor::execute() called with invalid fork ID=\" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));\n";
     code += "        return;\n";
     code += "    }\n";
 
-    code += "    Rom &rom = proverRequest.input.publicInputsExtended.publicInputs.forkID == 10 ? mainExecutor.romBatch_10 : mainExecutor.romBatch_11;\n";
+    if ((forkID == 10) || (forkID == 11))
+    {
+        code += "    Rom &rom = proverRequest.input.publicInputsExtended.publicInputs.forkID == 10 ? mainExecutor.romBatch_10 : mainExecutor.romBatch_11;\n";
+    }
+    else
+    {
+        code += "    Rom &rom = mainExecutor.romBatch_" + to_string(forkID) + ";\n";
+    }
 
     code += "    Goldilocks &fr = mainExecutor.fr;\n";
     code += "    uint64_t flushId;\n";
