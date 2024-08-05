@@ -19,6 +19,8 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
+    - name: List installed global packages
+      run: npm ls -g
     - name: Install snarkjs
       run: npm -g install snarkjs
     - name: make
