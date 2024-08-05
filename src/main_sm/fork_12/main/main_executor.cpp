@@ -2000,7 +2000,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & (N - 1));
             jmpnCondValue = jmpnCondValue >> forkInfo.Nbits;
-            for (uint64_t index = 0; index < 8; ++index)
+            for (uint64_t index = 0; index < 7; ++index)
             {
                 pols.hJmpnCondValueBit[index][i] = fr.fromU64(jmpnCondValue & 0x01);
                 jmpnCondValue = jmpnCondValue >> 1;

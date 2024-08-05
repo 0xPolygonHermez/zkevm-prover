@@ -1,9 +1,9 @@
 #!/bin/bash -x
 
-VERSION=v7.0.0-rc.14-fork.10
+VERSION=v8.0.0-rc.1-fork.12
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
-PARENT_FORK_ID=fork_10
+PARENT_FORK_ID=fork_12
 EXCLUDE_CONSTTREE="true"
 
 WORKING_DIR=/releases/${VERSION}

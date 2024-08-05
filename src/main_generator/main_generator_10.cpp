@@ -2182,7 +2182,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
             {
                 code += "    pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue &" + to_string(forkInfo.N - 1) + ");\n";
                 code += "    jmpnCondValue = jmpnCondValue >>" + to_string(forkInfo.Nbits) + ";\n";
-                code += "    for (uint64_t index = 0; index < 8; ++index)\n";
+                if (forkID < 12)
+                {
+                    code += "    for (uint64_t index = 0; index < 8; ++index)\n";
+                }
+                else
+                {
+                    code += "    for (uint64_t index = 0; index < 7; ++index)\n";
+                }
                 code += "    {\n";
                 code += "        pols.hJmpnCondValueBit[index][i] = fr.fromU64(jmpnCondValue & 0x01);\n";
                 code += "        jmpnCondValue = jmpnCondValue >> 1;\n";
