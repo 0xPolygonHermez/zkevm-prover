@@ -4,9 +4,9 @@
 #include "definitions.hpp"
 
 #ifdef __AVX512__
-#define ZKEVM_PROVER_VERSION "v8.0.0-RC4.avx512"
+#define ZKEVM_PROVER_VERSION "v8.0.0-RC5.avx512"
 #else
-#define ZKEVM_PROVER_VERSION "v8.0.0-RC4"
+#define ZKEVM_PROVER_VERSION "v8.0.0-RC5"
 #endif
 
 #endif
