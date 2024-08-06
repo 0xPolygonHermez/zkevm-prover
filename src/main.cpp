@@ -10,12 +10,11 @@
 #include "config.hpp"
 #include "version.hpp"
 #include "proof2zkin.hpp"
-#if (PROVER_FORK_ID == 10)
-    #include "fork_10/calcwit.hpp"
-    #include "fork_10/circom.hpp"
+#if (PROVER_FORK_ID == 12)
+    #include "fork_12/calcwit.hpp"
+    #include "fork_12/circom.hpp"
 #else
-    #include "fork_11/calcwit.hpp"
-    #include "fork_11/circom.hpp"
+    #error "Invalid PROVER_FORK_ID"
 #endif
 #include "main.hpp"
 #include "prover.hpp"
