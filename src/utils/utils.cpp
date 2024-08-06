@@ -519,6 +519,11 @@ void string2file (const string & s, const string & fileName)
 {
     std::ofstream outfile;
     outfile.open(fileName);
+    if (outfile.fail())
+    {
+        zklog.error("string2file() failed writing to file=" + fileName);
+        exitProcess();
+    }
     outfile << s << endl;
     outfile.close();
 }
@@ -527,6 +532,11 @@ void file2string (const string &fileName, string &s)
 {
     std::ifstream infile;
     infile.open(fileName);
+    if (infile.fail())
+    {
+        zklog.error("file2string() failed writing to file=" + fileName);
+        exitProcess();
+    }
     std::stringstream ss;
     ss << infile.rdbuf();
     s = ss.str();
