@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <unistd.h>
 #include "prover.hpp"
+#include "definitions.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "proof2zkin.hpp"
