@@ -60,8 +60,10 @@
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
+    void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended);
+    void calculate_impols_expressions(void* pStarks, void *pParams, void *pChelpersSteps);
+
     void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
-    void calculate_expression(void *pStarks, void* dest, uint64_t id, void * params, void * chelpersSteps, bool domainExtended);
     void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof);
     void compute_evals(void *pStarks, void *pParams, void *pProof);
 

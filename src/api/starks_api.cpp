@@ -276,6 +276,18 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
     starks->ffi_treesGL_get_root(index, (Goldilocks::Element *)dst);
 }
 
+void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended)
+{
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    starks->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps, domainExtended);
+}
+
+void calculate_impols_expressions(void* pStarks, void *pParams, void *pChelpersSteps)
+{
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    starks->calculateImPolsExpressions(*(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps);
+}
+
 void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps)
 {
     // type == 1 => Goldilocks
@@ -289,11 +301,6 @@ void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t ste
         cerr << "Invalid elementType: " << elementType << endl;
         break;
     }
-}
-
-void calculate_expression(void *pStarks, void* dest, uint64_t id, void * params, void * chelpersSteps, bool domainExtended)
-{
-    ((Starks<Goldilocks::Element> *)pStarks)->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)params, (CHelpersSteps *)chelpersSteps, domainExtended);
 }
 
 void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof) {
