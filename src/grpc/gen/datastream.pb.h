@@ -48,7 +48,7 @@ struct TableStruct_datastream_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[7]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[8]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -72,6 +72,9 @@ extern DebugDefaultTypeInternal _Debug_default_instance_;
 class L2Block;
 class L2BlockDefaultTypeInternal;
 extern L2BlockDefaultTypeInternal _L2Block_default_instance_;
+class L2BlockEnd;
+class L2BlockEndDefaultTypeInternal;
+extern L2BlockEndDefaultTypeInternal _L2BlockEnd_default_instance_;
 class Transaction;
 class TransactionDefaultTypeInternal;
 extern TransactionDefaultTypeInternal _Transaction_default_instance_;
@@ -86,6 +89,7 @@ template<> ::datastream::v1::BatchStart* Arena::CreateMaybeMessage<::datastream:
 template<> ::datastream::v1::BookMark* Arena::CreateMaybeMessage<::datastream::v1::BookMark>(Arena*);
 template<> ::datastream::v1::Debug* Arena::CreateMaybeMessage<::datastream::v1::Debug>(Arena*);
 template<> ::datastream::v1::L2Block* Arena::CreateMaybeMessage<::datastream::v1::L2Block>(Arena*);
+template<> ::datastream::v1::L2BlockEnd* Arena::CreateMaybeMessage<::datastream::v1::L2BlockEnd>(Arena*);
 template<> ::datastream::v1::Transaction* Arena::CreateMaybeMessage<::datastream::v1::Transaction>(Arena*);
 template<> ::datastream::v1::UpdateGER* Arena::CreateMaybeMessage<::datastream::v1::UpdateGER>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -125,12 +129,13 @@ enum EntryType : int {
   ENTRY_TYPE_TRANSACTION = 3,
   ENTRY_TYPE_BATCH_END = 4,
   ENTRY_TYPE_UPDATE_GER = 5,
+  ENTRY_TYPE_L2_BLOCK_END = 6,
   EntryType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   EntryType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool EntryType_IsValid(int value);
 constexpr EntryType EntryType_MIN = ENTRY_TYPE_UNSPECIFIED;
-constexpr EntryType EntryType_MAX = ENTRY_TYPE_UPDATE_GER;
+constexpr EntryType EntryType_MAX = ENTRY_TYPE_L2_BLOCK_END;
 constexpr int EntryType_ARRAYSIZE = EntryType_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* EntryType_descriptor();
@@ -152,12 +157,13 @@ enum BatchType : int {
   BATCH_TYPE_REGULAR = 1,
   BATCH_TYPE_FORCED = 2,
   BATCH_TYPE_INJECTED = 3,
+  BATCH_TYPE_INVALID = 4,
   BatchType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   BatchType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool BatchType_IsValid(int value);
 constexpr BatchType BatchType_MIN = BATCH_TYPE_UNSPECIFIED;
-constexpr BatchType BatchType_MAX = BATCH_TYPE_INJECTED;
+constexpr BatchType BatchType_MAX = BATCH_TYPE_INVALID;
 constexpr int BatchType_ARRAYSIZE = BatchType_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* BatchType_descriptor();
@@ -962,6 +968,143 @@ class L2Block PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class L2BlockEnd PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:datastream.v1.L2BlockEnd) */ {
+ public:
+  inline L2BlockEnd() : L2BlockEnd(nullptr) {};
+  virtual ~L2BlockEnd();
+
+  L2BlockEnd(const L2BlockEnd& from);
+  L2BlockEnd(L2BlockEnd&& from) noexcept
+    : L2BlockEnd() {
+    *this = ::std::move(from);
+  }
+
+  inline L2BlockEnd& operator=(const L2BlockEnd& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline L2BlockEnd& operator=(L2BlockEnd&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const L2BlockEnd& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const L2BlockEnd* internal_default_instance() {
+    return reinterpret_cast<const L2BlockEnd*>(
+               &_L2BlockEnd_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    3;
+
+  friend void swap(L2BlockEnd& a, L2BlockEnd& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(L2BlockEnd* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(L2BlockEnd* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline L2BlockEnd* New() const final {
+    return CreateMaybeMessage<L2BlockEnd>(nullptr);
+  }
+
+  L2BlockEnd* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<L2BlockEnd>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const L2BlockEnd& from);
+  void MergeFrom(const L2BlockEnd& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(L2BlockEnd* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "datastream.v1.L2BlockEnd";
+  }
+  protected:
+  explicit L2BlockEnd(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_datastream_2eproto);
+    return ::descriptor_table_datastream_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNumberFieldNumber = 1,
+  };
+  // uint64 number = 1;
+  void clear_number();
+  ::PROTOBUF_NAMESPACE_ID::uint64 number() const;
+  void set_number(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_number() const;
+  void _internal_set_number(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:datastream.v1.L2BlockEnd)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 number_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_datastream_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Transaction PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:datastream.v1.Transaction) */ {
  public:
@@ -1004,7 +1147,7 @@ class Transaction PROTOBUF_FINAL :
                &_Transaction_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(Transaction& a, Transaction& b) {
     a.Swap(&b);
@@ -1248,7 +1391,7 @@ class UpdateGER PROTOBUF_FINAL :
                &_UpdateGER_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    5;
 
   friend void swap(UpdateGER& a, UpdateGER& b) {
     a.Swap(&b);
@@ -1519,7 +1662,7 @@ class BookMark PROTOBUF_FINAL :
                &_BookMark_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(BookMark& a, BookMark& b) {
     a.Swap(&b);
@@ -1667,7 +1810,7 @@ class Debug PROTOBUF_FINAL :
                &_Debug_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    7;
 
   friend void swap(Debug& a, Debug& b) {
     a.Swap(&b);
@@ -2928,6 +3071,30 @@ inline void L2Block::set_allocated_debug(::datastream::v1::Debug* debug) {
 
 // -------------------------------------------------------------------
 
+// L2BlockEnd
+
+// uint64 number = 1;
+inline void L2BlockEnd::clear_number() {
+  number_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 L2BlockEnd::_internal_number() const {
+  return number_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 L2BlockEnd::number() const {
+  // @@protoc_insertion_point(field_get:datastream.v1.L2BlockEnd.number)
+  return _internal_number();
+}
+inline void L2BlockEnd::_internal_set_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  number_ = value;
+}
+inline void L2BlockEnd::set_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_number(value);
+  // @@protoc_insertion_point(field_set:datastream.v1.L2BlockEnd.number)
+}
+
+// -------------------------------------------------------------------
+
 // Transaction
 
 // uint64 l2block_number = 1;
@@ -3793,6 +3960,8 @@ inline void Debug::unsafe_arena_set_allocated_message(
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
