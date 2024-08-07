@@ -13,11 +13,10 @@
 #include <immintrin.h>
 #include <cassert>
 
-const int CHELPERS_STAGES_SECTION = 2;
-const int CHELPERS_IMPOLS_SECTION = 3;
-const int CHELPERS_EXPRESSIONS_SECTION = 4;
-const int CHELPERS_CONSTRAINTS_SECTION = 5;
-const int CHELPERS_HINTS_SECTION = 6;
+const int CHELPERS_IMPOLS_SECTION = 2;
+const int CHELPERS_EXPRESSIONS_SECTION = 3;
+const int CHELPERS_CONSTRAINTS_SECTION = 4;
+const int CHELPERS_HINTS_SECTION = 5;
 
 struct ParserParams
 {
@@ -66,8 +65,6 @@ struct ParserArgs
 class CHelpers
 {
 public:
-    std::vector<ParserParams> stagesInfo;
-
     std::map<uint64_t, ParserParams> expressionsInfo;
 
     std::vector<ParserParams> constraintsInfoDebug;
@@ -75,8 +72,6 @@ public:
     ParserParams imPolsInfo;
 
     std::vector<Hint> hints;
-    
-    ParserArgs cHelpersArgs;
 
     ParserArgs cHelpersArgsDebug;
 
@@ -85,16 +80,6 @@ public:
     ParserArgs cHelpersArgsExpressions;
 
     ~CHelpers() {
-        if (cHelpersArgs.ops) delete[] cHelpersArgs.ops;
-        if (cHelpersArgs.args) delete[] cHelpersArgs.args;
-        if (cHelpersArgs.numbers) delete[] cHelpersArgs.numbers;
-        if (cHelpersArgs.constPolsIds) delete[] cHelpersArgs.constPolsIds;
-        if (cHelpersArgs.cmPolsIds) delete[] cHelpersArgs.cmPolsIds;
-        if (cHelpersArgs.challengesIds) delete[] cHelpersArgs.challengesIds;
-        if (cHelpersArgs.publicsIds) delete[] cHelpersArgs.publicsIds;
-        if (cHelpersArgs.subproofValuesIds) delete[] cHelpersArgs.subproofValuesIds;
-        if (cHelpersArgs.cmPolsCalculatedIds) delete[] cHelpersArgs.cmPolsCalculatedIds;
-
         if (cHelpersArgsImPols.ops) delete[] cHelpersArgsImPols.ops;
         if (cHelpersArgsImPols.args) delete[] cHelpersArgsImPols.args;
         if (cHelpersArgsImPols.numbers) delete[] cHelpersArgsImPols.numbers;

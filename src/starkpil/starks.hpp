@@ -22,7 +22,6 @@
 #include "hint/h1h2_hint_handler.hpp"
 #include "hint/gprod_hint_handler.hpp"
 #include "hint/gsum_hint_handler.hpp"
-#include "hint/subproof_value_hint_handler.hpp"
 
 using namespace Hints;
 
@@ -90,6 +89,7 @@ private:
 
 void merkelizeMemory(); // function for DBG purposes
 void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
+void printPol(Goldilocks::Element* pol, uint64_t dim);
 
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress, StarkInfo &starkInfo_, CHelpers &chelpers_, bool debug_) : config(config),
@@ -400,6 +400,7 @@ private:
     bool isSymbolCalculated(opType operand, uint64_t id);
     void setSymbolCalculated(opType operand, uint64_t id);
 
+    void calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity);
 public:
     void cleanSymbolsCalculated();
 

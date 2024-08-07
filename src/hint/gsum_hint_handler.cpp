@@ -1,3 +1,4 @@
+#include <iostream>
 #include "gsum_hint_handler.hpp"
 
 namespace Hints
@@ -14,7 +15,7 @@ namespace Hints
 
     std::vector<std::string> GSumHintHandler::getDestinations() const
     {
-        return {"reference"};
+        return {"reference", "result"};
     }
 
     void GSumHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials) const
@@ -32,11 +33,15 @@ namespace Hints
 
         assert(denPol.dim() == sPol.dim());
 
-        Goldilocks::Element numeratorValue = Goldilocks::fromS64(hint.fields["numerator"].value);
-        numeratorValue = Goldilocks::negone(); // TODO: NOT HARDCODE THIS!
+        Goldilocks::Element numeratorValue = Goldilocks::fromU64(hint.fields["numerator"].value);
 
-        cout << denPol.degree() << " " << sPol.degree() << endl;
         calculateS(sPol, denPol, numeratorValue);
+        
+        uint64_t subproofValueId = hint.fields["result"].id;
+        
+        params.subproofValues[subproofValueId * FIELD_EXTENSION] = sPol[N - 1][0];
+        params.subproofValues[subproofValueId * FIELD_EXTENSION + 1] = sPol[N - 1][1];
+        params.subproofValues[subproofValueId * FIELD_EXTENSION + 2] = sPol[N - 1][2];
     }
 
     void GSumHintHandler::calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity) const
@@ -46,23 +51,21 @@ namespace Hints
         Polinomial denI(size, 3);
         Polinomial checkVal(1, 3);
 
-        cout << "BATCH INVERSE " << endl;
-
         Polinomial::batchInverse(denI, den);
         
-                cout << "MUL ELEMENT " << endl;
-
         Polinomial::mulElement(s, 0, denI, 0, multiplicity);
+        
         for (uint64_t i = 1; i < size; i++)
         {
             Polinomial tmp(1, 3);
             Polinomial::mulElement(tmp, 0, denI, i, multiplicity);
             Polinomial::addElement(s, i, s, i - 1, tmp, 0);
         }
+
         Polinomial tmp(1, 3);
         Polinomial::mulElement(tmp, 0, denI, size - 1, multiplicity);
         Polinomial::addElement(checkVal, 0, s, size - 1, tmp, 0);
-
+        
         zkassert(Goldilocks3::isZero((Goldilocks3::Element &)*checkVal[0]));
     }
 

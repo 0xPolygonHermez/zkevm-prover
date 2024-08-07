@@ -14,7 +14,7 @@ namespace Hints
 
     std::vector<std::string> GProdHintHandler::getDestinations() const
     {
-        return {"reference"};
+        return {"reference", "result"};
     }
 
     void GProdHintHandler::resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials) const
@@ -38,6 +38,12 @@ namespace Hints
         
         // Calculate z
         calculateZ(zPol, numPol, denPol);
+
+        uint64_t subproofValueId = hint.fields["result"].id;
+
+        params.subproofValues[subproofValueId * FIELD_EXTENSION] = zPol[N - 1][0];
+        params.subproofValues[subproofValueId * FIELD_EXTENSION + 1] = zPol[N - 1][1];
+        params.subproofValues[subproofValueId * FIELD_EXTENSION + 2] = zPol[N - 1][2];
     }
 
     void GProdHintHandler::calculateZ(Polinomial &z, Polinomial &num, Polinomial &den) const

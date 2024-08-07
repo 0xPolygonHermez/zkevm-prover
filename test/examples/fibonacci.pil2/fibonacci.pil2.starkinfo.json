@@ -173,7 +173,7 @@
   1,
   2
  ],
- "cExpId": 45,
+ "cExpId": 43,
  "qDim": 3,
  "qDeg": 1,
  "nCommitmentsStage1": 0,
@@ -257,5 +257,5 @@
    "openingPos": 1
   }
  ],
- "friExpId": 48
+ "friExpId": 46
 }

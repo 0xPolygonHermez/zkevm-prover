@@ -97,7 +97,6 @@ Prover::Prover(Goldilocks &fr,
                 HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
                 HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
                 HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
-                HintHandlerBuilder::registerBuilder(SubproofValueHintHandler::getName(), std::make_unique<SubproofValueHintHandlerBuilder>());
 
                 starkInfoZkevm = new StarkInfo(config.zkevmStarkInfo);
                 starkInfoC12a = new StarkInfo(config.c12aStarkInfo);
