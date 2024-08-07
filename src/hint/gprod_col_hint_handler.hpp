@@ -1,0 +1,34 @@
+#ifndef GPROD_COL_HINT_H
+#define GPROD_COL_HINT_H
+
+#include "hint_handler.hpp"
+#include "hint_handler_builder.hpp"
+
+namespace Hints
+{
+    class GProdColHintHandler : public HintHandler
+    {
+    public:
+        // Return the name of the hint
+        static std::string getName();
+
+        // Return the source names of the hint, so the fields needed to resolve the hint
+        virtual std::vector<std::string> getSources() const override;
+
+        // Return the destination names of the hint, so the fields that will be updated
+        virtual std::vector<std::string> getDestinations() const override;
+
+        // Resolve the hint
+        virtual void resolveHint(int N, StepsParams &params, Hint hint, const std::map<std::string, Polinomial *> &polynomials) const override;
+
+        void calculateZ(Polinomial &z, Polinomial &num, Polinomial &den) const;
+    };
+
+    class GProdColHintHandlerBuilder : public HintHandlerBuilder
+    {
+    public:
+        std::shared_ptr<HintHandler> build() const override;
+    };
+}
+
+#endif

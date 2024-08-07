@@ -75,7 +75,6 @@ public:
             buffTOffsetsSteps_[stage] = buffTOffsetsSteps_[stage - 1] + nOpenings*nColsSteps[stage - 1];
             nCols += nColsSteps[stage];
         }
-        
         if(domainExtended) {
             std::string section = "cm" + to_string(nStages + 1);
             offsetsSteps[nStages + 1] = starkInfo.mapOffsets[std::make_pair(section, true)];
@@ -128,7 +127,7 @@ public:
             evals[i][2] = _mm256_set1_epi64x(params.evals[i * FIELD_EXTENSION + 2].fe);
         }
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
         for (uint64_t i = 0; i < domainSize; i+= nrowsBatch) {
             bool const needModule = ((static_cast<int64_t>(i + nrowsBatch) + extend*starkInfo.openingPoints[nOpenings - 1]) >= static_cast<int64_t>(domainSize)) || ((static_cast<int64_t>(i) + extend*starkInfo.openingPoints[0]) < 0);
             uint64_t i_args = 0;
@@ -293,13 +292,35 @@ public:
                 break;
             }
             case 17: {
+                /*Goldilocks::Element* aux0= new Goldilocks::Element[4];
+                Goldilocks::Element* aux1= new Goldilocks::Element[4];
+                
+                Goldilocks::store_avx(aux0, bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + nOpenings * args[i_args + 3] + args[i_args + 4]]);
+                Goldilocks::store_avx(aux1, tmp1[args[i_args + 5]]);
+                // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: public
+                if(i<4){
+                    for(int ll=0; ll<1; ++ll){
+                    std::cout<< "arg17 = " << aux0[ll].fe << " "<<aux1[ll].fe<<std::endl;
+                    }
+                }*/
                 // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: tmp1
                 Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + nOpenings * args[i_args + 3] + args[i_args + 4]], tmp1[args[i_args + 5]]);
                 i_args += 6;
                 break;
             }
             case 18: {
+                /*Goldilocks::Element* aux0= new Goldilocks::Element[4];
+                Goldilocks::Element* aux1= new Goldilocks::Element[4];
+
+                Goldilocks::store_avx(aux0, bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + nOpenings * args[i_args + 3] + args[i_args + 4]]);
+                Goldilocks::store_avx(aux1, publics[args[i_args + 5]]);*/
                 // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: public
+                /*if(i<4){
+                    for(int ll=0; ll<1; ++ll){
+                    std::cout<< "arg18 = " << aux0[ll].fe << " "<<aux1[ll].fe<<std::endl;
+                    }
+                }*/
+
                 Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[buffTOffsetsSteps_[args[i_args + 2]] + nOpenings * args[i_args + 3] + args[i_args + 4]], publics[args[i_args + 5]]);
                 i_args += 6;
                 break;
@@ -492,11 +513,15 @@ public:
             }
             case 43: {
                 // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: x
+                std::cout<<"a1"<<std::endl;
                 Goldilocks::load_avx(tmp1_1, &x[i], uint64_t(1));
+                std::cout<<"a2"<<std::endl;
                 Goldilocks3::op_31_avx(args[i_args], &bufferT_[buffTOffsetsSteps_[args[i_args + 1]] + nOpenings * args[i_args + 2] + args[i_args + 3]], nOpenings, 
                         &(challenges[args[i_args + 4]][0]), 1, 
                         tmp1_1);
+                std::cout<<"a3"<<std::endl;
                 storePolinomial(params.pols, bufferT_, nColsSteps, offsetsSteps, buffTOffsetsSteps_, nextStrides, nOpenings, domainSize, domainExtended, nStages, needModule, i, args[i_args + 1], args[i_args + 2], args[i_args + 3], FIELD_EXTENSION);
+                std::cout<<"a4"<<std::endl;
                 i_args += 5;
                 break;
             }
@@ -885,12 +910,32 @@ public:
                 break;
             }
             case 93: {
+                Goldilocks::Element* aux0= new Goldilocks::Element[4];
+                Goldilocks::Element* aux1= new Goldilocks::Element[4];
+                
+                Goldilocks::store_avx(aux0, tmp3[args[i_args + 2]][0]);
+                Goldilocks::store_avx(aux1, tmp3[args[i_args + 3]][0]);
+                if(i<4){
+                    for(int ll=0; ll<1; ++ll){
+                    std::cout<< "arg93 = " << aux0[ll].fe << " "<<aux1[ll].fe<<std::endl;
+                    }
+                }
                 // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: tmp3
                 Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3[args[i_args + 3]]);
                 i_args += 4;
                 break;
             }
             case 94: {
+                Goldilocks::Element* aux0= new Goldilocks::Element[4];
+                Goldilocks::Element* aux1= new Goldilocks::Element[4];
+                
+                Goldilocks::store_avx(aux0, tmp3[args[i_args + 2]][0]);
+                Goldilocks::store_avx(aux1,challenges[args[i_args + 3]][0]);
+                if(i<4){
+                    for(int ll=0; ll<1; ++ll){
+                    std::cout<< "arg94 = " << aux0[ll].fe << " "<<aux1[ll].fe<<std::endl;
+                    }
+                }
                 // MULTIPLICATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: challenge
                 Goldilocks3::mul_avx(tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
                 i_args += 4;
@@ -993,6 +1038,17 @@ public:
                 break;
             }
             case 110: {
+                Goldilocks::Element* aux0= new Goldilocks::Element[4];
+                Goldilocks::Element* aux1= new Goldilocks::Element[4];
+                
+                Goldilocks::store_avx(aux0, evals[args[i_args + 2]][0]);
+                Goldilocks::store_avx(aux1, bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + nOpenings * args[i_args + 4] + args[i_args + 5]]);
+                if(i<4){
+                    for(int ll=0; ll<1; ++ll){
+                    std::cout<< "arg110 = " << aux0[ll].fe << " "<<aux1[ll].fe<<std::endl;
+                    }
+                }
+                
                 // OPERATION WITH DEST: tmp3 - SRC0: eval - SRC1: commit1
                 Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], evals[args[i_args + 2]], bufferT_[buffTOffsetsSteps_[args[i_args + 3]] + nOpenings * args[i_args + 4] + args[i_args + 5]]);
                 i_args += 6;
@@ -1026,12 +1082,24 @@ public:
                     tmp_inv[0] = ti0[j];
                     tmp_inv[1] = ti1[j];
                     tmp_inv[2] = ti2[j];
+                    /*if(i<1) std::cout<< "arg113 = " << tmp_inv[0].fe << " "<< tmp_inv[1].fe<<" "<<tmp_inv[2].fe<<" "<<params.zi[i + j + 0].fe<<" "<<params.zi[i + j + 1].fe<<" "<<params.zi[i + j + 2].fe<<std::endl;*/
                     Goldilocks3::mul((Goldilocks3::Element &)(params.q_2ns[(i + j) * FIELD_EXTENSION]), params.zi[i + j],(Goldilocks3::Element &)tmp_inv);
                 }
                 i_args += 2;
                 break;
             }
             case 114: {
+                Goldilocks::Element* aux0= new Goldilocks::Element[4];
+                Goldilocks::Element* aux1= new Goldilocks::Element[4];
+                
+                Goldilocks::store_avx(aux0,  tmp3[args[i_args + 1]][0]);
+                Goldilocks::store_avx(aux1, tmp3[args[i_args + 2]][0]);
+                if(i<4){
+                    for(int ll=0; ll<1; ++ll){
+                    std::cout<< "arg114 = " << aux0[ll].fe << " "<<aux1[ll].fe<<std::endl;
+                    std::cout<< args[i_args +1 ] << " " << args[i_args + 2] << std::endl;
+                    }
+                }
                 // OPERATION WITH DEST: f - SRC0: tmp3 - SRC1: tmp3
                 Goldilocks3::op_avx(args[i_args], tmp3_, tmp3[args[i_args + 1]], tmp3[args[i_args + 2]]);
                 Goldilocks3::store_avx(&params.f_2ns[i*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3_);

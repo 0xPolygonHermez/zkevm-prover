@@ -228,6 +228,12 @@ template <typename ElementType>
 void Starks<ElementType>::calculateExpression(Goldilocks::Element* dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended)
 {
     TimerStartExpr(STARK_CALCULATE_EXPRESSION, id);
+    std::cout<<" SIZE: "<<chelpers.expressionsInfo[id].nOps<<std::endl;
+    
+    uint8_t *ops = &chelpers.cHelpersArgsExpressions.ops[chelpers.expressionsInfo[id].opsOffset];
+    for (uint64_t kk = 0; kk < chelpers.expressionsInfo[id].nOps; ++kk) {
+        std::cout<<"OPS: "<<uint64_t(ops[kk])<<std::endl;
+    }
     chelpersSteps->calculateExpressions(dest, starkInfo, params, chelpers.cHelpersArgsExpressions, chelpers.expressionsInfo[id], nrowsBatch, domainExtended);
     for(uint64_t i = 0; i < chelpers.expressionsInfo[id].nCmPolsCalculated; i++) {
         uint64_t cmPolCalculatedId = chelpers.cHelpersArgsExpressions.cmPolsCalculatedIds[chelpers.expressionsInfo[id].cmPolsCalculatedOffset + i];
@@ -265,7 +271,12 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams &params,
     while((nttOffsetHelper.second * nBlocks < buffHelperElements + 8) ||  (nCols > 256*nBlocks) ) {
         nBlocks++;
     }
-
+    std::cout<<"Extend and Merkelize "<<N<<std::endl;
+    std::cout<<"Print  pBuff"<<std::endl;
+    for(int i=0; i<2*nCols; ++i) {
+        std::cout<<pBuff[i].fe<<std::endl;
+    }
+    
     ntt.extendPol(pBuffExtended, pBuff, NExtended, N, nCols, pBuffHelper, 3, nBlocks);
     TimerStopAndLogExpr(STARK_LDE_STEP, step);
     TimerStartExpr(STARK_MERKLETREE_STEP, step);
@@ -491,6 +502,9 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params, CHel
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
 
     calculateExpression(nullptr, starkInfo.friExpId, params, chelpersSteps, true);
+    /*for(int kk=0; kk<12; ++kk){
+        std::cout<<"FRI_POL EXPRESSION "<<params.f_2ns[kk].fe<<std::endl;
+    }*/
 }
 
 template <typename ElementType>
@@ -592,7 +606,7 @@ template <typename ElementType>
 void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, CHelpersSteps *chelpersSteps)
 {
     Polinomial* polynomials = new Polinomial[starkInfo.cmPolsMap.size()];
-
+    Polinomial * numPol = new Polinomial(N, 3);
     Polinomial* polynomialsExps = new Polinomial[starkInfo.friExpId + 1];
 
     vector<bool> srcPolsExpsNames(starkInfo.friExpId + 1, false);
@@ -603,12 +617,17 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, CHe
     vector<uint64_t> hintsToCalculate;
     
     TimerStartExpr(STARK_PREPARE_HINTS_STEP, step);
+    std::cout<<"Hints size: "<<chelpers.hints.size()<<std::endl;
     for (uint64_t i = 0; i < chelpers.hints.size(); i++)
     {
         Hint hint = chelpers.hints[i];
+        std::cout<<"Hint: "<<hint.name<<std::endl;
         auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
+        std::cout<<"Hint Handler: "<<hintHandler<<std::endl;
         vector<string> srcFields = hintHandler->getSources();
+        std::cout<<"Src Fields: "<<srcFields.size()<<std::endl;
         vector<string> dstFields = hintHandler->getDestinations();
+        std::cout<<"Dst Fields: "<<dstFields.size()<<std::endl;
         if (!isHintResolved(hint, dstFields) && canHintBeResolved(hint, srcFields))
         {
             hintsToCalculate.push_back(i);
@@ -675,10 +694,23 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, CHe
     uint64_t maxThreads = omp_get_max_threads();
     uint64_t nThreads = hintsToCalculate.size() > maxThreads ? maxThreads : hintsToCalculate.size();
 
+    std::cout<<" Chelpers hings size: "<<chelpers.hints.size()<<std::endl;
+    std::cout<<" Hints to calculate size: "<<hintsToCalculate.size()<<std::endl;
+    std::cout<<" hints to calculate 0: "<<hintsToCalculate[0]<<std::endl;
+
 #pragma omp parallel for num_threads(nThreads)
     for (uint64_t i = 0; i < hintsToCalculate.size(); i++)
     {
         Hint hint = chelpers.hints[hintsToCalculate[i]];
+
+        std::cout<<"Hint: "<<hint.name<<std::endl;
+        for(auto it = hint.fields.begin(); it != hint.fields.end(); ++it) {
+            std::cout<<"Field: "<<it->first<<std::endl;
+            std::cout<<"Operand: "<<it->second.operand<<std::endl;
+            std::cout<<"Id: "<<it->second.id<<std::endl;
+            std::cout<<"Dim: "<<it->second.dim<<std::endl;
+            std::cout<<"Value "<<it->second.value<<std::endl;
+        }
         
         // Build the Hint object
         auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
@@ -690,22 +722,38 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, CHe
         vector<string> polsNames(srcPolsNames.size() + dstPolsNames.size());
         for(uint64_t i = 0; i < srcPolsNames.size(); ++i) {
             polsNames[i] = srcPolsNames[i];
+            std::cout<<"Src Pol Name: "<<srcPolsNames[i]<<std::endl;
         }
         for(uint64_t i = 0; i < dstPolsNames.size(); ++i) {
             polsNames[i + srcPolsNames.size()] = dstPolsNames[i];
+            std::cout<<"Dst Pol Name: "<<dstPolsNames[i]<<std::endl;
         }
+
+        std::cout<<" polNames size: "<<polsNames.size()<<std::endl;
 
         // Prepare polynomials map to be sent to the hint
         std::map<std::string, Polinomial *> polynomialsHint;
         for (const auto &polName : polsNames)
         {
             const auto &hintField = hint.fields[polName];
+            std::cout<<"Hint Field: "<<polName<<std::endl;
             if (hintField.operand == opType::cm) {
+                std::cout<<"cm"<<std::endl;
                 polynomialsHint[polName] = &polynomials[hintField.id];
+                std::cout<<" holaaaaaa: "<<polynomialsHint[polName]->degree()<<std::endl;
             } else if(hintField.operand == opType::tmp) {
+                std::cout<<"tmp"<<std::endl;
                 polynomialsHint[polName] = &polynomialsExps[hintField.id];
+            } else if(hintField.operand == opType::number) {
+                for(int i=0; i<N; ++i) {
+                    (*numPol)[i][0] = Goldilocks::fromU64(hintField.value);
+                }
+                polynomialsHint[polName] = numPol;
             }
+            std::cout<<"size: "<<polynomialsHint.size()<<std::endl;
         }
+
+        std::cout<<" polynomial hints size: "<<polynomialsHint.size()<<std::endl;
 
         hintHandler->resolveHint(N, params, hint, polynomialsHint);
     }
@@ -726,7 +774,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, CHe
     }
     delete[] dstTransposedPols;
     TimerStopAndLogExpr(STARK_CALCULATE_TRANSPOSE_2_STEP, step);
-
+    std::cout<<"hintsToCalculate Size: "<<hintsToCalculate.size()<<std::endl;
     for (uint64_t i = 0; i < hintsToCalculate.size(); i++)
     {
         Hint hint = chelpers.hints[hintsToCalculate[i]];

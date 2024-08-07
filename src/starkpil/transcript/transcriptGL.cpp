@@ -3,8 +3,10 @@
 
 void TranscriptGL::put(Goldilocks::Element *input, uint64_t size)
 {
+    std::cout<<" transcript dins put address"<<this<<std::endl;
     for (uint64_t i = 0; i < size; i++)
     {
+        std::cout<<" transcript dins put "<<input[i].fe<<std::endl;
         _add1(input[i]);
     }
 }
@@ -38,10 +40,12 @@ void TranscriptGL::_add1(Goldilocks::Element input)
 
 void TranscriptGL::getField(uint64_t* output)
 {
+    std::cout<<" transcript dins get address"<<this<<std::endl;
     for (int i = 0; i < 3; i++)
     {
         Goldilocks::Element val = getFields1();
         output[i] = val.fe;
+        std::cout<<" transcript dins get "<<val.fe<<std::endl;
     }
     zklog.info("Challenge: [ " + std::to_string(output[0]) + " " + std::to_string(output[1]) + " " + std::to_string(output[2]) + " ]");
 

@@ -21,6 +21,7 @@
 #include "hint_handler_builder.hpp"
 #include "hint/h1h2_hint_handler.hpp"
 #include "hint/gprod_hint_handler.hpp"
+#include "hint/gprod_col_hint_handler.hpp"
 #include "hint/gsum_hint_handler.hpp"
 #include "hint/subproof_value_hint_handler.hpp"
 
