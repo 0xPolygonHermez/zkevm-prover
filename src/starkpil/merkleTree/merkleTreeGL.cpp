@@ -64,7 +64,7 @@ uint64_t MerkleTreeGL::getMerkleProofSize() {
     return getMerkleProofLength() * nFieldElements;
 }
 
-uint64_t MerkleTreeGL::getNumNodes(uint64_t height) 
+uint64_t MerkleTreeGL::getNumNodes(uint64_t height)
 {
     return height * nFieldElements + (height - 1) * nFieldElements;
 }

@@ -27,4 +27,4 @@ public:
     }
 };
 
-#endif // CONSTANT_POLS_RECURSIVE_F_HPP
+#endif // CONSTANT_POLS_STARKS_HPP

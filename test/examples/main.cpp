@@ -10,11 +10,9 @@
 int main(int argc, char **argv)
 {
     Config config;
-    config.mapConstPolsFile = false;
-    config.mapConstantsTreeFile = false;
     
-    string constPols;
-    string constTree;
+    string constPolsFile;
+    string constTreeFile;
     string starkInfoFile;
     string commitPols;
     string cHelpersFile;
@@ -42,8 +40,8 @@ int main(int argc, char **argv)
     HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
 
     if(testName == "all") {
-        constPols = "test/examples/all/all.const";
-        constTree = "test/examples/all/all.consttree";
+        constPolsFile = "test/examples/all/all.const";
+        constTreeFile = "test/examples/all/all.consttree";
         starkInfoFile = "test/examples/all/all.starkinfo.json";
         commitPols = "test/examples/all/all.commit";
         verkey = "test/examples/all/all.verkey.json";
@@ -57,8 +55,8 @@ int main(int argc, char **argv)
             cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
         }
     } else if(testName == "compressor") {
-        constPols = "test/examples/compressor/all.c18.const";
-        constTree = "test/examples/compressor/all.c18.consttree";
+        constPolsFile = "test/examples/compressor/all.c18.const";
+        constTreeFile = "test/examples/compressor/all.c18.consttree";
         starkInfoFile = "test/examples/compressor/all.c18.starkinfo.json";
         commitPols = "test/examples/compressor/all.c18.commit";
         verkey = "test/examples/compressor/all.c18.verkey.json";
@@ -72,8 +70,8 @@ int main(int argc, char **argv)
             cHelpersFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers.bin";
         }
     } else if(testName == "fibonacci_pil2") {
-        constPols = "test/examples/fibonacci.pil2/fibonacci.pil2.const";
-        constTree = "test/examples/fibonacci.pil2/fibonacci.pil2.consttree";
+        constPolsFile = "test/examples/fibonacci.pil2/fibonacci.pil2.const";
+        constTreeFile = "test/examples/fibonacci.pil2/fibonacci.pil2.consttree";
         starkInfoFile = "test/examples/fibonacci.pil2/fibonacci.pil2.starkinfo.json";
         commitPols = "test/examples/fibonacci.pil2/fibonacci.pil2.commit";
         verkey = "test/examples/fibonacci.pil2/fibonacci.pil2.verkey.json";
@@ -122,7 +120,8 @@ int main(int argc, char **argv)
 
     if(testName == "all") {
         FRIProof<Goldilocks::Element> fproof(starkInfo);
-        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
+        ConstPols<Goldilocks::Element> constPols(starkInfo, constPolsFile);
+        Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
@@ -133,7 +132,8 @@ int main(int argc, char **argv)
         jProof = fproof.proofs.proof2json();
     } else if(testName == "compressor") {
         FRIProof<RawFr::Element> fproof(starkInfo);
-        Starks<RawFr::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
+        ConstPols<RawFr::Element> constPols(starkInfo, constPolsFile);
+        Starks<RawFr::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
@@ -144,7 +144,8 @@ int main(int argc, char **argv)
         jProof = fproof.proofs.proof2json();
     } else if(testName == "fibonacci_pil2") {
         FRIProof<Goldilocks::Element> fproof(starkInfo);
-        Starks<Goldilocks::Element> starks(config, {constPols, config.mapConstPolsFile, constTree}, pAddress, starkInfo, cHelpers, false);
+        ConstPols<Goldilocks::Element> constPols(starkInfo, constPolsFile);
+        Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, false);
         if(USE_GENERIC_PARSER) {
             CHelpersSteps cHelpersSteps;
             starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 

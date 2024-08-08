@@ -42,8 +42,6 @@ public:
 int main(int argc, char **argv)
 {
     Config config;
-    config.mapConstPolsFile = false;
-    config.mapConstantsTreeFile = false;
     
     string constFile = "";
     string starkInfoFile = "";
@@ -118,7 +116,7 @@ int main(int argc, char **argv)
 
         FRIProof<Goldilocks::Element> fproof(starkInfo);
 
-        Starks<Goldilocks::Element> starks(config, {constFile, config.mapConstPolsFile, ""}, pAddress, starkInfo, cHelpers, true);
+        Starks<Goldilocks::Element> starks(config, {constFile, ""}, pAddress, starkInfo, cHelpers, true);
 
         CHelpersSteps cHelpersSteps;
         starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
