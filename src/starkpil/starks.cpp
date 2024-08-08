@@ -24,18 +24,14 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     StepsParams params = {
         pols : mem,
-        pConstPols : pConstPols,
-        pConstPols2ns : pConstPols2ns,
+        pConstPols : constPols.pConstPols,
+        pConstPols2ns : constPols.pConstPols2ns,
         challenges : challenges,
         subproofValues : subproofValues,
         evals : evals,
-        x_n : x_n,
-        x_2ns : x_2ns,
         zi : zi,
         xDivXSubXi : xDivXSubXi,
         publicInputs : publicInputs,
-        q_2ns : q_2ns,
-        f_2ns : f_2ns,
     };
 
     for (uint64_t i = 0; i < starkInfo.mapSectionsN["cm1"]; ++i)
@@ -82,6 +78,11 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         }
 
         computeStageExpressions(step, params, proof, chelpersSteps);
+
+        if(step == starkInfo.nStages) {
+            calculateImPolsExpressions(params, chelpersSteps);
+        }
+
         commitStage(step, params, proof);
 
         if (debug)
@@ -115,7 +116,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         }
     }
     
-    calculateExpression(params.q_2ns, starkInfo.cExpId, params, chelpersSteps, true);
+    calculateExpression(&params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], starkInfo.cExpId, params, chelpersSteps, true);
     
     commitStage(starkInfo.nStages + 1, params, proof);
 
@@ -169,7 +170,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     TimerStart(STARK_STEP_FRI);
 
     Goldilocks::Element challenge[FIELD_EXTENSION];
-    Goldilocks::Element *friPol = &params.f_2ns[0];
+    Goldilocks::Element *friPol = &params.pols[starkInfo.mapOffsets[std::make_pair("f", true)]];
     
     for (uint64_t step = 0; step < starkInfo.starkStruct.steps.size(); step++)
     {
@@ -278,6 +279,10 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams &params,
 template <typename ElementType>
 void Starks<ElementType>::commitStage(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof)
 {   
+    if(step == starkInfo.nStages) {
+        proof.proofs.setSubproofValues(params.subproofValues);
+    }
+
     if(!debug) {
         if (step <= starkInfo.nStages)
         {
@@ -287,10 +292,6 @@ void Starks<ElementType>::commitStage(uint64_t step, StepsParams &params, FRIPro
         {
             computeQ(step, params, proof);
         }
-    }
-
-    if(step == starkInfo.nStages) {
-        proof.proofs.setSubproofValues(params.subproofValues);
     }
 }
 
@@ -312,10 +313,6 @@ void Starks<ElementType>::computeStageExpressions(uint64_t step, StepsParams &pa
         symbolsToBeCalculated = newSymbolsToBeCalculated;
     }
     TimerStopAndLogExpr(STARK_TRY_CALCULATE_EXPS_STEP, step);
-
-    if(step == starkInfo.nStages) {
-        calculateImPolsExpressions(params, chelpersSteps);
-    }
 }
 
 template <typename ElementType>
@@ -336,7 +333,7 @@ void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<
     }
 
     TimerStartExpr(STARK_CALCULATE_EXPS_2NS_INTT_STEP, step);
-    nttExtended.INTT(params.q_2ns, params.q_2ns, NExtended, starkInfo.qDim, pBuffHelper, 3, nBlocks);
+    nttExtended.INTT(&params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], &params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], NExtended, starkInfo.qDim, pBuffHelper, 3, nBlocks);
     TimerStopAndLogExpr(STARK_CALCULATE_EXPS_2NS_INTT_STEP, step);
 
     TimerStartExpr(STARK_CALCULATE_EXPS_2NS_MUL_STEP, step);
@@ -348,13 +345,13 @@ void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<
         for (uint64_t i = 0; i < N; i += nrowsBatch)
         {
             Goldilocks3::Element_avx tmp_; 
-            Goldilocks3::load_avx(tmp_, &params.q_2ns[(p * N + i) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
+            Goldilocks3::load_avx(tmp_, &params.pols[starkInfo.mapOffsets[std::make_pair("q", true)] + (p * N + i) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
             Goldilocks3::op_31_avx(2, tmp_, tmp_, sigma);
             Goldilocks3::store_avx(&cmQ[(i * starkInfo.qDeg + p) * FIELD_EXTENSION],starkInfo.qDeg * FIELD_EXTENSION, tmp_);
         }
         // for(uint64_t i = 0; i < N; i++)
         // { 
-        //     Goldilocks3::mul((Goldilocks3::Element &)cmQ[(i * starkInfo.qDeg + p) * FIELD_EXTENSION], (Goldilocks3::Element &)params.q_2ns[(p * N + i) * FIELD_EXTENSION], S[p]);
+        //     Goldilocks3::mul((Goldilocks3::Element &)cmQ[(i * starkInfo.qDeg + p) * FIELD_EXTENSION], (Goldilocks3::Element &)params.pols[starkInfo.mapOffsets[std::make_pair("q", true)] + (p * N + i) * FIELD_EXTENSION], S[p]);
         // }
     }
 
@@ -489,7 +486,7 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params, CHel
     }
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
 
-    calculateExpression(params.f_2ns, starkInfo.friExpId, params, chelpersSteps, true);
+    calculateExpression(&params.pols[starkInfo.mapOffsets[std::make_pair("f", true)]], starkInfo.friExpId, params, chelpersSteps, true);
 }
 
 template <typename ElementType>
@@ -1123,18 +1120,14 @@ void *Starks<ElementType>::ffi_create_steps_params(Goldilocks::Element *pChallen
 {
     StepsParams *params = new StepsParams{
         pols : mem,
-        pConstPols : pConstPols,
-        pConstPols2ns : pConstPols2ns,
+        pConstPols : constPols.pConstPols,
+        pConstPols2ns : constPols.pConstPols2ns,
         challenges : pChallenges,
         subproofValues : pSubproofValues,
         evals : pEvals,
-        x_n : x_n,
-        x_2ns : x_2ns,
         zi : zi,
         xDivXSubXi : xDivXSubXi,
         publicInputs : pPublicInputs,
-        q_2ns : q_2ns,
-        f_2ns : f_2ns,
     };
 
     return params;

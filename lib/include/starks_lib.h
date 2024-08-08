@@ -42,9 +42,9 @@
 
     // Starks
     // ========================================================================================
-    void *starks_new(void *pConfig, char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress);
+    void *starks_new(void *pConfig, void *starkInfo, void *cHelpers, void *constPols, void *pAddress);
 
-    void *starks_new_default(char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress);
+    void *starks_new_default(void *starkInfo, void *cHelpers, void *constPols, void *pAddress);
 
     void *get_stark_info(void *pStarks);
     void starks_free(void *pStarks);
@@ -88,6 +88,12 @@
     // ========================================================================================
     void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols);
     void commit_pols_starks_free(void *pCommitPolsStarks);
+
+    // ConstPols
+    // ========================================================================================
+    void *const_pols_new(void *pStarkInfo, char* constPolsFile);
+    void *const_pols_new(void *pStarkInfo, char* constPolsFile, char* constTreeFile);
+    void const_pols_free(void * pConstPols);
 
     // Circom
     // ========================================================================================

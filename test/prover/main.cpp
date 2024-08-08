@@ -9,7 +9,6 @@ int main()
     Config config;
     config.runFileGenBatchProof = true;
     config.zkevmConstPols = "config/zkevm/zkevm.const";
-    config.mapConstPolsFile = false;
     config.zkevmConstantsTree = "config/zkevm/zkevm.consttree";
     config.zkevmStarkInfo = "config/zkevm/zkevm.starkinfo.json";
 
@@ -22,7 +21,7 @@ int main()
     void *pCommit = copyFile("config/zkevm/zkevm.commit", starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN["cm1"] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
 
-        Starks starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo},pAddress);
+        Starks starks(config, {config.zkevmConstPols, config.zkevmConstantsTree, config.zkevmStarkInfo},pAddress);
 
 
     std::memcpy(pAddress, pCommit, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));

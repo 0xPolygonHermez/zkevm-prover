@@ -179,19 +179,19 @@ void starkinfo_free(void *pStarkInfo)
     delete starkInfo;
 }
 
-void *starks_new(void *pConfig, char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress)
+void *starks_new(void *pConfig, void *starkInfo, void *cHelpers, void *constPols, void *pAddress);
 {
-    return new Starks<Goldilocks::Element>(*(Config *)pConfig, {constPols, mapConstPolsFile, constantsTree}, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, false);
+    return new Starks<Goldilocks::Element>(*(Config *)pConfig, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, *(ConstPols<Goldilocks::Element> *) constPols, false);
 }
 
-void *starks_new_default(char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress)
+void *starks_new_default(void *starkInfo, void *cHelpers, void *constPols, void *pAddress)
 {
     Config configLocal;
     configLocal.runFileGenBatchProof = true; //to force function generateProof to return true
 
     Goldilocks::Element* addressElements = (Goldilocks::Element *)pAddress;
 
-    return new Starks<Goldilocks::Element>(configLocal, {constPols, mapConstPolsFile, constantsTree}, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, false);
+    return new Starks<Goldilocks::Element>(configLocal, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, *(ConstPols<Goldilocks::Element> *) constPols, false);
 }
 
 
@@ -239,18 +239,7 @@ void *get_steps_params_field(void *pStepsParams, char *name)
 {
     StepsParams *stepsParams = (StepsParams *)pStepsParams;
 
-    if (strcmp(name, "q_2ns") == 0)
-    {
-        return stepsParams->q_2ns;
-    }
-    else if (strcmp(name, "f_2ns") == 0)
-    {
-        return stepsParams->f_2ns;
-    }
-    else
-    {
-        return NULL;
-    }
+    return NULL;
 }
 
 void steps_params_free(void *pStepsParams)
@@ -391,6 +380,20 @@ void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElemen
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
     starks->calculateHash((Goldilocks::Element *)pHhash, (Goldilocks::Element *)pBuffer, nElements);
 }
+
+void *const_pols_new(void *pStarkInfo, char* constPolsFile) {
+    return new ConstPols<Goldilocks::Element>(*(StarkInfo *)pStarkInfo, constPolsFile);
+}
+
+void *const_pols_new(void *pStarkInfo, char* constPolsFile, char* constTreeFile) {
+    return new ConstPols<Goldilocks::Element>(*(StarkInfo *)pStarkInfo, constPolsFile, constTreeFile);
+}
+
+void const_pols_free(void *pConstPols) {
+    ConstPols<Goldilocks::Element> *constPols = (ConstPols<Goldilocks::Element> *)pConstPols;
+    delete constPols;
+}
+
 
 void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols)
 {
