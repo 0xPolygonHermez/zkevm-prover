@@ -135,7 +135,7 @@ Prover::Prover(Goldilocks &fr,
                 } else {
                     pAddress = calloc(polsSize, 1);
                     if (pAddress == NULL)
-                    {
+                     {
                         zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
                         exitProcess();
                     }
@@ -148,11 +148,11 @@ Prover::Prover(Goldilocks &fr,
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
             prover->setZkey(zkey.get());
 
-            starkZkevm = new Starks<Goldilocks::Element>(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree}, pAddress, *starkInfoZkevm, *cHelpersZkevm, false);
-            starksC12a = new Starks<Goldilocks::Element>(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree}, pAddress, *starkInfoC12a , *cHelpersC12a, false);
-            starksRecursive1 = new Starks<Goldilocks::Element>(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree}, pAddress, *starkInfoRecursive1, *cHelpersRecursive1, false);
-            starksRecursive2 = new Starks<Goldilocks::Element>(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree}, pAddress, *starkInfoRecursive2, *cHelpersRecursive2, false);
-            starksRecursiveF = new Starks<RawFr::Element>(config, {config.recursivefConstPols, config.mapConstPolsFile, config.recursivefConstantsTree}, pAddress, *starkInfoRecursiveF, *cHelpersRecursiveF, false);
+            starkZkevm = new Starks<Goldilocks::Element>(config, {config.zkevmConstPols, config.zkevmConstantsTree}, pAddress, *starkInfoZkevm, *cHelpersZkevm, false);
+            starksC12a = new Starks<Goldilocks::Element>(config, {config.c12aConstPols, config.c12aConstantsTree}, pAddress, *starkInfoC12a , *cHelpersC12a, false);
+            starksRecursive1 = new Starks<Goldilocks::Element>(config, {config.recursive1ConstPols, config.recursive1ConstantsTree}, pAddress, *starkInfoRecursive1, *cHelpersRecursive1, false);
+            starksRecursive2 = new Starks<Goldilocks::Element>(config, {config.recursive2ConstPols, config.recursive2ConstantsTree}, pAddress, *starkInfoRecursive2, *cHelpersRecursive2, false);
+            starksRecursiveF = new Starks<RawFr::Element>(config, {config.recursivefConstPols, config.recursivefConstantsTree}, pAddress, *starkInfoRecursiveF, *cHelpersRecursiveF, false);
 #endif
         }
     }
