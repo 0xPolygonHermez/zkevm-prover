@@ -282,6 +282,13 @@ void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams,
     starks->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps, domainExtended);
 }
 
+void calculate_expression_q(void* pStarks, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended)
+{
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    StepsParams *params = (StepsParams *)pParams;
+    starks->calculateExpression(params->q_2ns, id, *(StepsParams *)params, (CHelpersSteps *)pChelpersSteps, domainExtended);
+}
+
 void calculate_impols_expressions(void* pStarks, void *pParams, void *pChelpersSteps)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
