@@ -155,12 +155,6 @@ uint64_t get_mapTotalN(void *pStarkInfo)
     return ((StarkInfo *)pStarkInfo)->mapTotalN;
 }
 
-void set_mapOffsets(void *pStarkInfo, void *pChelpers)
-{
-    auto starkInfo = (StarkInfo *)pStarkInfo;
-    auto cHelpers = (CHelpers *)pChelpers;
-}
-
 uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag)
 {
     auto starkInfo = (StarkInfo *)pStarkInfo;
@@ -179,7 +173,7 @@ void starkinfo_free(void *pStarkInfo)
     delete starkInfo;
 }
 
-void *starks_new(void *pConfig, void *starkInfo, void *cHelpers, void *constPols, void *pAddress);
+void *starks_new(void *pConfig, void *starkInfo, void *cHelpers, void *constPols, void *pAddress)
 {
     return new Starks<Goldilocks::Element>(*(Config *)pConfig, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, *(ConstPols<Goldilocks::Element> *) constPols, false);
 }
@@ -188,8 +182,6 @@ void *starks_new_default(void *starkInfo, void *cHelpers, void *constPols, void 
 {
     Config configLocal;
     configLocal.runFileGenBatchProof = true; //to force function generateProof to return true
-
-    Goldilocks::Element* addressElements = (Goldilocks::Element *)pAddress;
 
     return new Starks<Goldilocks::Element>(configLocal, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, *(ConstPols<Goldilocks::Element> *) constPols, false);
 }
@@ -235,13 +227,6 @@ void *steps_params_new(void *pStarks, void *pChallenges, void *pSubproofValues, 
     return starks->ffi_create_steps_params(challenges, subproofValues, evals, publicInputs);
 }
 
-void *get_steps_params_field(void *pStepsParams, char *name)
-{
-    StepsParams *stepsParams = (StepsParams *)pStepsParams;
-
-    return NULL;
-}
-
 void steps_params_free(void *pStepsParams)
 {
     StepsParams *stepsParams = (StepsParams *)pStepsParams;
@@ -265,23 +250,16 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
     starks->ffi_treesGL_get_root(index, (Goldilocks::Element *)dst);
 }
 
-void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended)
+void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps, domainExtended);
+    starks->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps, domainExtended, imPol);
 }
 
-void calculate_expression_q(void* pStarks, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended)
+void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    StepsParams *params = (StepsParams *)pParams;
-    starks->calculateExpression(params->q_2ns, id, *(StepsParams *)params, (CHelpersSteps *)pChelpersSteps, domainExtended);
-}
-
-void calculate_impols_expressions(void* pStarks, void *pParams, void *pChelpersSteps)
-{
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateImPolsExpressions(*(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps);
+    starks->calculateImPolsExpressions(step, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps);
 }
 
 void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps)
@@ -369,10 +347,16 @@ void clean_symbols_calculated(void *pStarks)
     starks->cleanSymbolsCalculated();
 }
 
-void set_symbol_calculated(void *pStarks, uint32_t operand, uint64_t id)
+void set_commit_calculated(void *pStarks, uint64_t id)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->ffi_set_symbol_calculated(operand, id);
+    starks->ffi_set_commit_calculated(id);
+}
+
+void set_subproofvalue_calculated(void *pStarks, uint64_t id)
+{
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    starks->ffi_set_subproofvalue_calculated(id);
 }
 
 void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElements)

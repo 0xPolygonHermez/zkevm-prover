@@ -98,6 +98,18 @@ void StarkInfo::load(json j)
         cmPolsMap.push_back(map);
     }
 
+    for (uint64_t i = 0; i < j["constPolsMap"].size(); i++) 
+    {
+        PolMap map;
+        map.stage = j["constPolsMap"][i]["stage"];
+        map.name = j["constPolsMap"][i]["name"];
+        map.dim = j["constPolsMap"][i]["dim"];
+        map.imPol = false;
+        map.stagePos = j["constPolsMap"][i]["stageId"];
+        map.stageId = j["constPolsMap"][i]["stageId"];
+        constPolsMap.push_back(map);
+    }
+
     for (uint64_t i = 0; i < j["evMap"].size(); i++)
     {
         EvMap map;
@@ -130,6 +142,10 @@ void StarkInfo::load(json j)
 void StarkInfo::setMapOffsets() {
     uint64_t N = (1 << starkStruct.nBits);
     uint64_t NExtended = (1 << starkStruct.nBitsExt);
+
+    // Set offsets for constants
+    mapOffsets[std::make_pair("const", false)] = 0;
+    mapOffsets[std::make_pair("const", true)] = 0;
 
     mapTotalN = 0;
 
@@ -217,16 +233,16 @@ void StarkInfo::setMapOffsets() {
     }
 }
 
-Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg)
+void StarkInfo::getPolynomial(Polinomial& pol, Goldilocks::Element *pAddress, bool committed, uint64_t idPol, uint64_t deg)
 {
-    PolMap polInfo = cmPolsMap[idPol];
+    PolMap polInfo = committed ? cmPolsMap[idPol] : constPolsMap[idPol];
     uint64_t dim = polInfo.dim;
     uint64_t domainExtended = deg == uint64_t(1 << starkStruct.nBitsExt);
-    std::string stage = "cm" + to_string(polInfo.stage);
+    std::string stage = committed ? "cm" + to_string(polInfo.stage) : "const";
     uint64_t nCols = mapSectionsN[stage];
     uint64_t offset = mapOffsets[std::make_pair(stage, domainExtended)];
     offset += polInfo.stagePos;
-    return Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
+    pol = Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
 }
 
 opType string2opType(const string s) 

@@ -28,12 +28,9 @@ private:
 public:
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
 
-    void *pConstPolsAddress;
-    void *pConstPolsAddress2ns;
-    void *pConstTreeAddress;
-
-    ConstantPolsStarks *pConstPols;
-    ConstantPolsStarks *pConstPols2ns;
+    Goldilocks::Element *pConstPolsAddress;
+    Goldilocks::Element *pConstPolsAddressExtended;
+    Goldilocks::Element *pConstTreeAddress;
 
     ConstPols(StarkInfo& starkInfo_, std::string constPolsFile): starkInfo(starkInfo_), N(1 << starkInfo.starkStruct.nBits), NExtended(1 << starkInfo.starkStruct.nBitsExt) {
         
@@ -50,32 +47,28 @@ public:
         loadConstPols(starkInfo, constPolsFile);
 
         TimerStart(CALCULATE_CONST_TREE_TO_MEMORY);
-        pConstTreeAddress = malloc(getConstTreeSize());
+        pConstTreeAddress = (Goldilocks::Element *)malloc(getConstTreeSize());
         if(pConstTreeAddress == NULL)
         {
             zklog.error("Starks::Starks() failed to allocate pConstTreeAddress");
             exitProcess();
         }
-        pConstPolsAddress2ns = (uint8_t *)pConstTreeAddress + 2 * sizeof(uint64_t);
+        pConstPolsAddressExtended = &pConstTreeAddress[2];
 
         TimerStart(EXTEND_CONST_POLS);
         NTT_Goldilocks ntt(N);
-        ntt.extendPol((Goldilocks::Element *)pConstPolsAddress2ns, (Goldilocks::Element *)pConstPolsAddress, NExtended, N, starkInfo.nConstants);
+        ntt.extendPol((Goldilocks::Element *)pConstPolsAddressExtended, (Goldilocks::Element *)pConstPolsAddress, NExtended, N, starkInfo.nConstants);
         TimerStopAndLog(EXTEND_CONST_POLS);
         TimerStart(MERKELIZE_CONST_TREE);
-        MerkleTreeGL mt(merkleTreeArity, merkleTreeCustom, NExtended, starkInfo.nConstants, (Goldilocks::Element *)pConstPolsAddress2ns);
+        MerkleTreeGL mt(merkleTreeArity, merkleTreeCustom, NExtended, starkInfo.nConstants, (Goldilocks::Element *)pConstPolsAddressExtended);
         mt.merkelize();
         TimerStopAndLog(MERKELIZE_CONST_TREE);
 
-        uint64_t* constTreePtr = (uint64_t*)pConstTreeAddress;
-        constTreePtr[0] = starkInfo.nConstants;  
-        constTreePtr[1] = NExtended;
-        memcpy(constTreePtr + 2 + starkInfo.nConstants * NExtended, mt.nodes, mt.numNodes * sizeof(Goldilocks::Element));
+        pConstTreeAddress[0] = Goldilocks::fromU64(starkInfo.nConstants);  
+        pConstTreeAddress[1] = Goldilocks::fromU64(NExtended);
+        memcpy(&pConstTreeAddress[2 + starkInfo.nConstants * NExtended], mt.nodes, mt.numNodes * sizeof(Goldilocks::Element));
 
         TimerStopAndLog(CALCULATE_CONST_TREE_TO_MEMORY);
-
-        // Allocate ConstantPols2ns
-        pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, NExtended, starkInfo.nConstants);
     }
 
     ConstPols(StarkInfo& starkInfo_, std::string constPolsFile, std::string constTreeFile) : starkInfo(starkInfo_), N(1 << starkInfo.starkStruct.nBits), NExtended(1 << starkInfo.starkStruct.nBitsExt) {
@@ -96,14 +89,11 @@ public:
             
         uint64_t constTreeSizeBytes = getConstTreeSize();
 
-        pConstTreeAddress = loadFileParallel(constPolsFile, constTreeSizeBytes);
+        pConstTreeAddress = (Goldilocks::Element *)loadFileParallel(constPolsFile, constTreeSizeBytes);
         zklog.info("Starks::Starks() successfully copied " + to_string(constTreeSizeBytes) + " bytes from constant file " + constTreeFile);
         
-        pConstPolsAddress2ns = (uint8_t *)pConstTreeAddress + 2 * sizeof(uint64_t);
+        pConstPolsAddressExtended = &pConstTreeAddress[2];
         TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
-                
-        // Allocate ConstantPols2ns
-        pConstPols2ns = new ConstantPolsStarks(pConstPolsAddress2ns, NExtended, starkInfo.nConstants);
     }
 
     void loadConstPols(StarkInfo& starkInfo, std::string constPolsFile) {
@@ -113,11 +103,9 @@ public:
 
         uint64_t constPolsSize = starkInfo.nConstants * sizeof(Goldilocks::Element) * N;
         
-        pConstPolsAddress = loadFileParallel(constPolsFile, constPolsSize);
+        pConstPolsAddress = (Goldilocks::Element *)loadFileParallel(constPolsFile, constPolsSize);
         zklog.info("Starks::Starks() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + constPolsFile);
         
-        // Allocate ConstantPols
-        pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
     }
 
@@ -156,9 +144,6 @@ public:
     {
         free(pConstPolsAddress);
         free(pConstTreeAddress);
-
-        delete pConstPols;
-        delete pConstPols2ns;
     }
 };
 

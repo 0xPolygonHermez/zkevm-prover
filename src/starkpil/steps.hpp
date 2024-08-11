@@ -4,13 +4,12 @@
 struct StepsParams
 {
     Goldilocks::Element *pols;
-    ConstantPolsStarks * pConstPols;
-    ConstantPolsStarks * pConstPols2ns;
+    Goldilocks::Element *constPols;
+    Goldilocks::Element *constPolsExtended;
     Goldilocks::Element *challenges;
     Goldilocks::Element *subproofValues;
     Goldilocks::Element *evals;
     Goldilocks::Element *zi;
-    Goldilocks::Element *xDivXSubXi;
     Goldilocks::Element *publicInputs;
 };
 

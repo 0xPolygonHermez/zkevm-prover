@@ -61,7 +61,7 @@ public:
         }
     }
 
-    inline void loadPolinomials(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, __m256i *bufferT_, uint64_t row, bool domainExtended) {
+    inline void loadPolynomials(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, __m256i *bufferT_, uint64_t row, bool domainExtended) {
         uint64_t nOpenings = starkInfo.openingPoints.size();
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
 
@@ -73,7 +73,7 @@ public:
             nextStrides[i] = opening * extend;
         }
 
-        ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
+        Goldilocks::Element *constPols = domainExtended ? (Goldilocks::Element *)params.constPols : (Goldilocks::Element *)params.constPolsExtended;
 
         uint16_t* cmPolsUsed = &parserArgs.cmPolsIds[parserParams.cmPolsOffset];
         uint16_t* constPolsUsed = &parserArgs.constPolsIds[parserParams.constPolsOffset];
@@ -85,7 +85,7 @@ public:
             for(uint64_t o = 0; o < nOpenings; ++o) {
                 for(uint64_t j = 0; j < nrowsPack; ++j) {
                     uint64_t l = (row + j + nextStrides[o]) % domainSize;
-                    bufferT[nrowsPack*o + j] = ((Goldilocks::Element *)constPols->address())[l * nColsStages[0] + id];
+                    bufferT[nrowsPack*o + j] = constPols[l * nColsStages[0] + id];
                 }
                 Goldilocks::load_avx(bufferT_[nOpenings * id + o], &bufferT[nrowsPack*o]);
             }
@@ -106,9 +106,27 @@ public:
                 }
             }
         }
+
+        if(parserParams.expId == starkInfo.cExpId) {
+            for(uint64_t d = 0; d < starkInfo.boundaries.size(); ++d) {
+                for(uint64_t j = 0; j < nrowsPack; ++j) {
+                    bufferT[j] = params.zi[row + j + d*domainSize];
+                }
+                Goldilocks::load_avx(bufferT_[buffTOffsetsStages[starkInfo.nStages + 2] + d], &bufferT[0]);
+            }
+        } else if(parserParams.expId == starkInfo.friExpId) {
+            for(uint64_t d = 0; d < starkInfo.openingPoints.size(); ++d) {
+               for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+                   for(uint64_t j = 0; j < nrowsPack; ++j) {
+                       bufferT[j] = params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (row + j + d*domainSize)*FIELD_EXTENSION + k];
+                    }
+                    Goldilocks::load_avx(bufferT_[buffTOffsetsStages[starkInfo.nStages + 2] + d*FIELD_EXTENSION + k*starkInfo.openingPoints.size()], &bufferT[0]);
+                }
+            }
+        }
     }
 
-    inline void storePolinomial(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row, __m256i* tmp1, Goldilocks3::Element_avx* tmp3) {
+    inline void storePolynomial(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row, __m256i* tmp1, Goldilocks3::Element_avx* tmp3) {
         if(parserParams.destDim == 1) {
             Goldilocks::store_avx(&dest[row], uint64_t(1), tmp1[parserParams.destId]);
         } else {
@@ -118,7 +136,7 @@ public:
         }
     }
 
-    inline void storeImPolinomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint64_t row) {
+    inline void storeImPolynomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint64_t row) {
         auto openingPointIndex = std::find(starkInfo.openingPoints.begin(), starkInfo.openingPoints.end(), 0) - starkInfo.openingPoints.begin();
 
         auto firstImPol = std::find_if(starkInfo.cmPolsMap.begin(), starkInfo.cmPolsMap.end(), [](const PolMap& s) { return s.imPol; });
@@ -132,7 +150,7 @@ public:
         }
     }
 
-    void calculateExpressions(Goldilocks::Element *dest, StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended) {
+    void calculateExpressions(Goldilocks::Element *dest, StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool imPols) {
 
         uint8_t* ops = &parserArgs.ops[parserParams.opsOffset];
         uint16_t* args = &parserArgs.args[parserParams.argsOffset];
@@ -143,10 +161,10 @@ public:
 
         std::vector<bool> validConstraint(domainSize, true);
 
-        offsetsStages.resize(starkInfo.nStages + 2);
-        nColsStages.resize(starkInfo.nStages + 2);
-        nColsStagesAcc.resize(starkInfo.nStages + 2);
-        buffTOffsetsStages.resize(starkInfo.nStages + 2);
+        offsetsStages.resize(starkInfo.nStages + 3);
+        nColsStages.resize(starkInfo.nStages + 3);
+        nColsStagesAcc.resize(starkInfo.nStages + 3);
+        buffTOffsetsStages.resize(starkInfo.nStages + 3);
 
         nCols = starkInfo.nConstants;
         offsetsStages[0] = 0;
@@ -161,6 +179,16 @@ public:
             nColsStagesAcc[stage] = nColsStagesAcc[stage - 1] + nColsStages[stage - 1];
             buffTOffsetsStages[stage] = buffTOffsetsStages[stage - 1] + nOpenings*nColsStages[stage - 1];
             nCols += nColsStages[stage];
+        }
+
+        if(parserParams.expId == starkInfo.cExpId || parserParams.expId == starkInfo.friExpId) {
+            nColsStagesAcc[starkInfo.nStages + 2] = nColsStagesAcc[starkInfo.nStages + 1] + nColsStages[starkInfo.nStages + 1];
+            buffTOffsetsStages[starkInfo.nStages + 2] = buffTOffsetsStages[starkInfo.nStages + 1] + nOpenings*nColsStages[starkInfo.nStages + 1];
+            if(parserParams.expId == starkInfo.cExpId) {
+                nCols += starkInfo.boundaries.size();
+            } else {
+                nCols += nOpenings*FIELD_EXTENSION;
+            }
         }
         Goldilocks3::Element_avx challenges[starkInfo.challengesMap.size()];
         Goldilocks3::Element_avx challenges_ops[starkInfo.challengesMap.size()];
@@ -210,12 +238,9 @@ public:
             __m256i tmp1[parserParams.nTemp1];
             Goldilocks3::Element_avx tmp3[parserParams.nTemp3];
 
-            Goldilocks3::Element_avx tmp3_;
-            Goldilocks3::Element_avx tmp3_1;
-            __m256i tmp1_1;
     
 
-            loadPolinomials(starkInfo, params, parserArgs, parserParams, bufferT_, i, domainExtended);
+            loadPolynomials(starkInfo, params, parserArgs, parserParams, bufferT_, i, domainExtended);
 
     
 
@@ -342,31 +367,17 @@ public:
                 break;
             }
             case 18: {
-                // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: Zi
-                Goldilocks::load_avx(tmp1_1, &params.zi[i + args[i_args + 3] * domainSize], uint64_t(1));
-                Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp1_1);
-                i_args += 4;
-                break;
-            }
-            case 19: {
                 // OPERATION WITH DEST: tmp3 - SRC0: eval - SRC1: commit1
                 Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], evals[args[i_args + 2]], bufferT_[buffTOffsetsStages[args[i_args + 3]] + nOpenings * args[i_args + 4] + args[i_args + 5]]);
                 i_args += 6;
                 break;
             }
-            case 20: {
+            case 19: {
                 // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: eval
                 Goldilocks3::op_avx(args[i_args], &(tmp3[args[i_args + 1]][0]), 1, 
                         &bufferT_[buffTOffsetsStages[args[i_args + 2]] + nOpenings * args[i_args + 3] + args[i_args + 4]], nOpenings, 
                         &(evals[args[i_args + 5]][0]), 1);
                 i_args += 6;
-                break;
-            }
-            case 21: {
-                // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: xDivXSubXi
-                Goldilocks3::load_avx(tmp3_1, &params.xDivXSubXi[(i + args[i_args + 3]*domainSize)*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
-                Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3_1);
-                i_args += 4;
                 break;
             }
                     default: {
@@ -380,11 +391,11 @@ public:
             }
 
             if(dest != nullptr) {
-                storePolinomial(dest, parserParams, i, tmp1, tmp3);
+                storePolynomial(dest, parserParams, i, tmp1, tmp3);
             }
 
-            if(parserParams.nCmPolsCalculated > 0) {
-                storeImPolinomials(starkInfo, params, bufferT_, i);
+            if(imPols) {
+                storeImPolynomials(starkInfo, params, bufferT_, i);
             }
 
             if (i_args != parserParams.nArgs) std::cout << " " << i_args << " - " << parserParams.nArgs << std::endl;

@@ -79,7 +79,7 @@
 
 #define LOAD_CONST_TREE_FILES false
 
-#define NROWS_BATCH 4
+#define NROWS_PACK 4
 
 //#define MULTI_ROM_TEST
 

@@ -47,7 +47,7 @@ public:
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
         uint64_t extendBits = (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits);
         int64_t extend = domainExtended ? (1 << extendBits) : 1;
-        ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
+        Goldilocks::Element *constPols = domainExtended ? (Goldilocks::Element *)params.constPols : (Goldilocks::Element *)params.constPolsExtended;
         Goldilocks3::Element_avx challenges[starkInfo.challengesMap.size()];
         Goldilocks3::Element_avx challenges_ops[starkInfo.challengesMap.size()];
 
@@ -163,7 +163,7 @@ public:
                 for(uint64_t o = 0; o < nOpenings; ++o) {
                     for(uint64_t j = 0; j < nrowsBatch; ++j) {
                         uint64_t l = (i + j + nextStrides[o]) % domainSize;
-                        bufferT[nrowsBatch*o + j] = ((Goldilocks::Element *)constPols->address())[l * nColsSteps[0] + id];
+                        bufferT[nrowsBatch*o + j] = constPols[l * nColsSteps[0] + id];
                     }
                     Goldilocks::load_avx(bufferT_[nOpenings * id + o], &bufferT[nrowsBatch*o]);
                 }
@@ -367,7 +367,7 @@ public:
             }
             case 27: {
                 // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: xDivXSubXi
-                Goldilocks3::load_avx(tmp3_1, &params.xDivXSubXi[(i + args[i_args + 3]*domainSize)*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
+                Goldilocks3::load_avx(tmp3_1, &params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (i + args[i_args + 3]*domainSize)*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
                 Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3_1);
                 i_args += 4;
                 break;

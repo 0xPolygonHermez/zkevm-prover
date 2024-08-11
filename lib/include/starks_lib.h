@@ -55,15 +55,12 @@
     void init_hints();
 
     void *steps_params_new(void *pStarks, void * pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs);
-    void *get_steps_params_field(void *pStepsParams, char *name);
     void steps_params_free(void *pStepsParams);
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
-    void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended);
-    void calculate_expression_q(void* pStarks, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended);
-
-    void calculate_impols_expressions(void* pStarks, void *pParams, void *pChelpersSteps);
+    void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol);
+    void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps);
 
     void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
     void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof);
@@ -80,7 +77,8 @@
     void set_bool_vector_value(void *pVector, uint64_t index, bool value);
 
     void clean_symbols_calculated(void *pStarks);
-    void set_symbol_calculated(void *pStarks, uint32_t operand, uint64_t id);
+    void set_commit_calculated(void *pStarks, uint64_t id);
+    void set_subproofvalue_calculated(void *pStarks, uint64_t id);
 
     void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElements);
 

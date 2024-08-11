@@ -36,7 +36,7 @@ public:
     ConstPols<ElementType> &constPols;
 
     bool debug = false;
-    uint32_t nrowsBatch = NROWS_BATCH;
+    uint32_t nrowsPack = NROWS_PACK;
     
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
@@ -51,11 +51,8 @@ private:
     MerkleTreeType **treesGL;
     MerkleTreeType **treesFRI;
 
-    vector<bool> publicsCalculated;
-    vector<bool> constsCalculated;
     vector<bool> subProofValuesCalculated;
-    vector<bool> witnessCalculated;
-    vector<bool> challengesCalculated;
+    vector<bool> commitsCalculated;
 
     uint64_t nFieldElements;
     uint64_t merkleTreeArity;
@@ -69,8 +66,6 @@ private:
     Goldilocks::Element *x;
 
     Goldilocks::Element *zi;
-
-    Goldilocks::Element *xDivXSubXi;
 
 void merkelizeMemory(); // function for DBG purposes
 void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
@@ -125,7 +120,6 @@ public:
 
         TimerStart(COMPUTE_X);
         mem = (Goldilocks::Element *)pAddress;
-        xDivXSubXi = &mem[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]];
 
         uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
         x = new Goldilocks::Element[N << extendBits];
@@ -167,12 +161,8 @@ public:
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
 
-        constsCalculated.resize(starkInfo.nConstants, true);
-
-        publicsCalculated.resize(starkInfo.nPublics, false);
+        commitsCalculated.resize(starkInfo.cmPolsMap.size(), false);
         subProofValuesCalculated.resize(starkInfo.nSubProofValues, false);
-        challengesCalculated.resize(starkInfo.challengesMap.size(), false);
-        witnessCalculated.resize(starkInfo.cmPolsMap.size(), false);
     };
     ~Starks()
     {
@@ -277,9 +267,9 @@ public:
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
-    void calculateExpression(Goldilocks::Element* dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended);
+    void calculateExpression(Goldilocks::Element* dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol);
     void calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateImPolsExpressions(StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateImPolsExpressions(uint64_t step, StepsParams &params, CHelpersSteps *chelpersSteps);
 
     void commitStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
     void computeStageExpressions(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, CHelpersSteps *chelpersSteps);
@@ -306,9 +296,11 @@ private:
 
     void evmap(StepsParams &params, Goldilocks::Element *LEv);
 
+    void setCommitCalculated(uint64_t id);
+    void setSubproofValueCalculated(uint64_t id);
+
     uint64_t isStageCalculated(uint64_t step);
     bool isSymbolCalculated(opType operand, uint64_t id);
-    void setSymbolCalculated(opType operand, uint64_t id);
 
     void calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity);
 public:
@@ -320,7 +312,8 @@ public:
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 
     void *ffi_get_vector_pointer(char *name);
-    void ffi_set_symbol_calculated(uint32_t operand, uint64_t id);
+    void ffi_set_commit_calculated(uint64_t id);
+    void ffi_set_subproofvalue_calculated(uint64_t id);
 };
 
 template class Starks<Goldilocks::Element>;
