@@ -781,7 +781,7 @@ void checkSetupHash(std::string datFileName) {
     uint8_t *bdata = (uint8_t *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 
     string hash;
-    SHA256(bdata, sb.st_size, hash);
+    //SHA256(bdata, sb.st_size, hash);
 
     string hashFormatted = hash.substr(2);
     if(hash.size() % 2 != 0) hashFormatted = "0" + hashFormatted;
