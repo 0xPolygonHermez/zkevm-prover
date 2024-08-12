@@ -267,7 +267,9 @@ public:
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
-    void calculateExpression(Goldilocks::Element* dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol);
+    void calculateQuotientPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateFRIPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateExpression(Polinomial &dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol);
     void calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps);
     void calculateImPolsExpressions(uint64_t step, StepsParams &params, CHelpersSteps *chelpersSteps);
 

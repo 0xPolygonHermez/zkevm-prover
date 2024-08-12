@@ -109,8 +109,8 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         }
     }
     
-    calculateExpression(&params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], starkInfo.cExpId, params, chelpersSteps, true, false);
-    
+    calculateQuotientPolynomial(params, chelpersSteps);
+      
     commitStage(starkInfo.nStages + 1, params, proof);
 
     if (debug)
@@ -217,10 +217,29 @@ void Starks<ElementType>::calculateImPolsExpressions(uint64_t step, StepsParams 
 }
 
 template <typename ElementType>
-void Starks<ElementType>::calculateExpression(Goldilocks::Element* dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol)
+void Starks<ElementType>::calculateQuotientPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps)
+{
+    TimerStart(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
+    Polinomial quotientPolinomial(&params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], NExtended, starkInfo.qDim, starkInfo.qDim);
+    calculateExpression(quotientPolinomial, starkInfo.cExpId, params, chelpersSteps, true, false);
+    TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
+}
+
+template <typename ElementType>
+void Starks<ElementType>::calculateFRIPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps)
+{
+    TimerStart(STARK_CALCULATE_FRI_POLYNOMIAL);
+    Polinomial friPolinomial(&params.pols[starkInfo.mapOffsets[std::make_pair("f", true)]], NExtended, 3, 3);
+    calculateExpression(friPolinomial, starkInfo.friExpId, params, chelpersSteps, true, false);
+    TimerStopAndLog(STARK_CALCULATE_FRI_POLYNOMIAL);
+}
+
+
+template <typename ElementType>
+void Starks<ElementType>::calculateExpression(Polinomial& polinomial, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol)
 {
     TimerStartExpr(STARK_CALCULATE_EXPRESSION, id);
-    chelpersSteps->calculateExpressions(dest, starkInfo, params, chelpers.cHelpersArgsExpressions, chelpers.expressionsInfo[id], domainExtended, imPol);
+    chelpersSteps->calculateExpressions(polinomial.address(), starkInfo, params, chelpers.cHelpersArgsExpressions, chelpers.expressionsInfo[id], domainExtended, imPol);
     TimerStopAndLogExpr(STARK_CALCULATE_EXPRESSION, id);
 }
 
@@ -267,7 +286,24 @@ template <typename ElementType>
 void Starks<ElementType>::commitStage(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof)
 {   
     if(step == starkInfo.nStages) {
+        for(uint64_t i = 0; i < starkInfo.nSubProofValues; i++) {
+            if(!subProofValuesCalculated[i]) {
+                zklog.info("Subproofvalue " + to_string(i) + " is not calculated");
+                exitProcess();
+                exit(-1);
+            }
+        }
         proof.proofs.setSubproofValues(params.subproofValues);
+    }
+
+    if(step <= starkInfo.nStages) {
+        for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); i++) {
+            if(starkInfo.cmPolsMap[i].stage == step && !commitsCalculated[i]) {
+                zklog.info("Witness polynomial " + starkInfo.cmPolsMap[i].name + " is not calculated");
+                exitProcess();
+                exit(-1);
+            }
+        }
     }
 
     if(!debug) {
@@ -469,7 +505,7 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params, CHel
     }
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
 
-    calculateExpression(&params.pols[starkInfo.mapOffsets[std::make_pair("f", true)]], starkInfo.friExpId, params, chelpersSteps, true, false);
+    calculateFRIPolynomial(params, chelpersSteps);
 }
 
 template <typename ElementType>
@@ -642,8 +678,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, CHe
     
     for(uint64_t i = 0; i < srcPolsExpsNames.size(); i++) {
         if(srcPolsExpsNames[i]) {
-            Goldilocks::Element* dst = polynomialsExps[i].address();
-            calculateExpression(dst, i, params, chelpersSteps, false, false);
+            calculateExpression(polynomialsExps[i], i, params, chelpersSteps, false, false);
         }    
     }
 
