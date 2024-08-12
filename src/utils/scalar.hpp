@@ -527,7 +527,12 @@ void ba2scalar(const uint8_t *pData, uint64_t dataSize, mpz_class &s);
 
 inline void ba2fea (Goldilocks &fr, const uint8_t * pData, uint64_t len, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
 {
-    if (len == 1)
+    if (len > 32)
+    {
+        zklog.error("ba2fea() found scalar length > 32 : " + to_string(len));
+        exitProcess();        
+    }
+    else if (len == 1)
     {
         fr.fromU64(fe0, *pData);
         fe1 = fr.zero();
