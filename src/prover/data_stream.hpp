@@ -9,8 +9,6 @@
 
 using namespace std;
 
-#define USE_DATA_STREAM_PROTOBUF
-
 class DataStreamTx
 {
 public:
@@ -33,16 +31,10 @@ class DataStreamBlock
 {
 public:
     string coinbase; // 20 bytes = 40 characters
-#ifndef USE_DATA_STREAM_PROTOBUF
-    uint64_t forkId;
-    uint32_t chainId;
-#endif
     uint64_t blockNumber;
     uint64_t timestamp;
     uint32_t deltaTimestamp;
-#ifdef USE_DATA_STREAM_PROTOBUF
     uint32_t minTimestamp;
-#endif
     uint64_t l1InfoTreeIndex;
     string l1BlockHash; // 32 bytes = 64 characters
     string globalExitRoot; // 32 bytes = 64 characters
@@ -50,10 +42,6 @@ public:
     string stateRoot; // 32 bytes = 64 characters
     vector<DataStreamTx> txs;
     DataStreamBlock() :
-#ifndef USE_DATA_STREAM_PROTOBUF
-        forkId(0),
-        chainId(0),
-#endif
         blockNumber(0),
         timestamp(0),
         deltaTimestamp(0),
@@ -64,17 +52,10 @@ public:
             "blockNumber=" + to_string(blockNumber) +
             " timestamp=" + to_string(timestamp) +
             " deltaTimestamp=" + to_string(deltaTimestamp) +
-#ifdef USE_DATA_STREAM_PROTOBUF
             " minTimestamp=" + to_string(minTimestamp) +
-#endif
             " l1InfoTreeIndex=" + to_string(l1InfoTreeIndex) +
             " l1BlockHash=" + l1BlockHash +
             " globalExitRoot=" + globalExitRoot +
-#ifndef USE_DATA_STREAM_PROTOBUF
-            " coinbase=" + coinbase +
-            " forkId=" + to_string(forkId) +
-            " chainId=" + to_string(chainId) +
-#endif
             " l2BlockHash=" + l2BlockHash +
             " stateRoot=" + stateRoot +
             " txs.size=" + to_string(txs.size());
@@ -85,11 +66,9 @@ class DataStreamBatch
 {
 public:
     uint64_t batchNumber;
-#ifdef USE_DATA_STREAM_PROTOBUF
     string localExitRoot;
     string stateRoot;
     string globalExitRoot;
-#endif
     vector<DataStreamBlock> blocks; // In order of appearance, block numbers must be consecutive: N, N+1, N+2, etc.
     uint16_t forkId; // It comes from the blocks, and must be the same in all blocks
     uint32_t chainId; // I comes from the blocks, and must be the same in all blocks
@@ -107,13 +86,10 @@ public:
             "batchNumber=" + to_string(batchNumber) +
             " forkId=" + to_string(forkId) +
             " chainId=" + to_string(chainId) +
-            " blocks.size=" + to_string(blocks.size())
-#ifdef USE_DATA_STREAM_PROTOBUF
-            +
+            " blocks.size=" + to_string(blocks.size()) +
             " localExitRoot=" + localExitRoot +
             " stateRoot=" + stateRoot +
             " globalExitRoot=" + globalExitRoot 
-#endif
             ;
     }
 };
