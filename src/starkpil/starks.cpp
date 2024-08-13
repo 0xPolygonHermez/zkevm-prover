@@ -73,9 +73,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
         computeStageExpressions(step, params, proof, chelpersSteps);
 
-        if(step == starkInfo.nStages) {
-            calculateImPolsExpressions(step, params, chelpersSteps);
-        }
+        calculateImPolsExpressions(step, params, chelpersSteps);
 
         commitStage(step, params, proof);
 
