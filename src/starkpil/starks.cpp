@@ -916,7 +916,6 @@ void Starks<ElementType>::calculateHash(ElementType* hash, Goldilocks::Element* 
     TranscriptType transcriptHash(merkleTreeArity, merkleTreeCustom);
     transcriptHash.put(buffer, nElements);
     transcriptHash.getState(hash);
-
 };
 
 template <typename ElementType>

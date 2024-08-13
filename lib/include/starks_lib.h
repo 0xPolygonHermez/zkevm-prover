@@ -47,7 +47,7 @@
     void *starks_new_default(void *starkInfo, void *cHelpers, void *constPols, void *pAddress);
 
     void *get_stark_info(void *pStarks);
-    void *get_polynomial(void *pStarks, void *pPolinomial, void* dest, bool committed, uint64_t idPol, uint64_t deg);
+    void get_polynomial(void *pStarks, void *pPolinomial, void* dest, bool committed, uint64_t idPol, uint64_t deg);
     void starks_free(void *pStarks);
 
     void *chelpers_new(char* cHelpers);
@@ -61,7 +61,7 @@
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
     void calculate_quotient_polynomial(void *pStarks, void *pParams, void *pChelpersSteps);
-    void calculate_expression(void* pStarks, void *pPolinomial, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol);
+    void calculate_expression(void* pStarks, void* pPolinomial, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol)
     void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps);
 
     void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
