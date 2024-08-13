@@ -61,7 +61,7 @@
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
     void calculate_quotient_polynomial(void *pStarks, void *pParams, void *pChelpersSteps);
-    void calculate_expression(void* pStarks, void* pPolinomial, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol)
+    void calculate_expression(void* pStarks, void* pPolinomial, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol);
     void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps);
 
     void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
