@@ -316,6 +316,13 @@ void compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpers
     starks->computeFRIPol(step, *(StepsParams *)pParams, (CHelpersSteps *)cHelpersSteps);
 }
 
+void *get_fri_pol(void *pStarks, void *pParams)
+{
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    StepsParams *params = (StepsParams *)pParams;
+    return &params->pols[starks->starkInfo.mapOffsets[std::make_pair("f", true)]];
+}
+
 void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;

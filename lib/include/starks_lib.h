@@ -47,6 +47,7 @@
     void *starks_new_default(void *starkInfo, void *cHelpers, void *constPols, void *pAddress);
 
     void *get_stark_info(void *pStarks);
+    void *get_polynomial(void *pStarks, void *pPolinomial, void* dest, bool committed, uint64_t idPol, uint64_t deg);
     void starks_free(void *pStarks);
 
     void *chelpers_new(char* cHelpers);
@@ -59,7 +60,8 @@
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
-    void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol);
+    void calculate_quotient_polynomial(void *pStarks, void *pParams, void *pChelpersSteps);
+    void calculate_expression(void* pStarks, void *pPolinomial, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol);
     void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps);
 
     void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
@@ -67,6 +69,7 @@
     void compute_evals(void *pStarks, void *pParams, void *pProof);
 
     void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps);
+    void *get_fri_pol(void *pStarks, void *pParams);
     void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
 

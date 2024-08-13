@@ -69,6 +69,7 @@
     void compute_evals(void *pStarks, void *pParams, void *pProof);
 
     void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps);
+    void *get_fri_pol(void *pStarks, void *pParams);
     void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
 
