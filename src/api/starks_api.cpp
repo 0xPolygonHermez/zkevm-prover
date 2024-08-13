@@ -262,10 +262,10 @@ void calculate_quotient_polynomial(void *pStarks, void *pParams, void *pChelpers
      starks->calculateQuotientPolynomial(*(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps);
 }
 
-void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol)
+void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol, bool inverse)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps, domainExtended, imPol);
+    starks->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps, domainExtended, imPol, inverse);
 }
 
 void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps)
