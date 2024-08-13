@@ -245,6 +245,22 @@ void StarkInfo::getPolynomial(Polinomial& pol, Goldilocks::Element *pAddress, bo
     pol = Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
 }
 
+void StarkInfo::getPolynomial(Goldilocks::Element *dest, Goldilocks::Element *pAddress, bool committed, uint64_t idPol, uint64_t deg)
+{
+    PolMap polInfo = committed ? cmPolsMap[idPol] : constPolsMap[idPol];
+    uint64_t dim = polInfo.dim;
+    uint64_t domainExtended = deg == uint64_t(1 << starkStruct.nBitsExt);
+    std::string stage = committed ? "cm" + to_string(polInfo.stage) : "const";
+    uint64_t nCols = mapSectionsN[stage];
+    uint64_t offset = mapOffsets[std::make_pair(stage, domainExtended)];
+    offset += polInfo.stagePos;
+    Polinomial pol = Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
+
+    for(uint64_t j = 0; j < deg; ++j) {
+        std::memcpy(&dest[j], pol[j], dim * sizeof(Goldilocks::Element));
+    }
+}
+
 opType string2opType(const string s) 
 {
     if(s == "const") 

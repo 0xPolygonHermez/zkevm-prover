@@ -128,13 +128,23 @@ public:
         }
     }
 
-    inline virtual void storePolynomial(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row, __m256i* tmp1, Goldilocks3::Element_avx* tmp3) {
+    inline virtual void storePolynomial(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row, __m256i* tmp1, Goldilocks3::Element_avx* tmp3, bool inverse) {
         if(parserParams.destDim == 1) {
             Goldilocks::store_avx(&dest[row], uint64_t(1), tmp1[parserParams.destId]);
+            if(inverse) {
+                for(uint64_t i = 0; i < nrowsPack; ++i) {
+                    Goldilocks::inv(dest[row], dest[row]);
+                }
+            }
         } else {
             Goldilocks::store_avx(&dest[row*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][0]);
             Goldilocks::store_avx(&dest[row*FIELD_EXTENSION + 1], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][1]);
             Goldilocks::store_avx(&dest[row*FIELD_EXTENSION + 2], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][2]);
+            if(inverse) {
+                for(uint64_t i = 0; i < nrowsPack; ++i) {
+                    Goldilocks3::inv((Goldilocks3::Element *)&dest[row*FIELD_EXTENSION], (Goldilocks3::Element *)&dest[row*FIELD_EXTENSION]);
+                }
+            }
         }
     }
 
@@ -152,7 +162,7 @@ public:
         }
     }
 
-    virtual void calculateExpressions(Goldilocks::Element *dest, StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool imPols) {
+    virtual void calculateExpressions(Goldilocks::Element *dest, StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool imPols, bool inverse) {
 
         uint8_t* ops = &parserArgs.ops[parserParams.opsOffset];
         uint16_t* args = &parserArgs.args[parserParams.argsOffset];
@@ -844,12 +854,13 @@ public:
                     }
                 }
             }
+            
             if (dest == nullptr && parserParams.destDim != 0) {
                 isConstraintValid(validConstraint, parserParams, i, tmp1, tmp3);
             }
             
             if(dest != nullptr) {
-                storePolynomial(dest, parserParams, i, tmp1, tmp3);
+                storePolynomial(dest, parserParams, i, tmp1, tmp3, inverse);
             }
 
             if(imPols) {

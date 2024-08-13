@@ -204,7 +204,7 @@ void Starks<ElementType>::calculateImPolsExpressions(uint64_t step, StepsParams 
     TimerStart(STARK_CALCULATE_IMPOLS_EXPS);
     if (chelpers.imPolsInfo[step - 1].nOps > 0)
     {
-        chelpersSteps->calculateExpressions(nullptr, starkInfo, params, chelpers.cHelpersArgsImPols, chelpers.imPolsInfo[step - 1], false, true);
+        chelpersSteps->calculateExpressions(nullptr, starkInfo, params, chelpers.cHelpersArgsImPols, chelpers.imPolsInfo[step - 1], false, true, false);
         for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); i++) {
             if(starkInfo.cmPolsMap[i].imPol && starkInfo.cmPolsMap[i].stage == step) {
                 setCommitCalculated(i);
@@ -218,8 +218,7 @@ template <typename ElementType>
 void Starks<ElementType>::calculateQuotientPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps)
 {
     TimerStart(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
-    Polinomial quotientPolinomial(&params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], NExtended, starkInfo.qDim, starkInfo.qDim);
-    calculateExpression(quotientPolinomial, starkInfo.cExpId, params, chelpersSteps, true, false);
+    calculateExpression(&params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], starkInfo.cExpId, params, chelpersSteps, true, false, false);
     TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
 }
 
@@ -227,17 +226,16 @@ template <typename ElementType>
 void Starks<ElementType>::calculateFRIPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps)
 {
     TimerStart(STARK_CALCULATE_FRI_POLYNOMIAL);
-    Polinomial friPolinomial(&params.pols[starkInfo.mapOffsets[std::make_pair("f", true)]], NExtended, 3, 3);
-    calculateExpression(friPolinomial, starkInfo.friExpId, params, chelpersSteps, true, false);
+    calculateExpression(&params.pols[starkInfo.mapOffsets[std::make_pair("f", true)]], starkInfo.friExpId, params, chelpersSteps, true, false, false);
     TimerStopAndLog(STARK_CALCULATE_FRI_POLYNOMIAL);
 }
 
 
 template <typename ElementType>
-void Starks<ElementType>::calculateExpression(Polinomial& polinomial, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol)
+void Starks<ElementType>::calculateExpression(Goldilocks::Element* dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol, bool inverse)
 {
     TimerStartExpr(STARK_CALCULATE_EXPRESSION, id);
-    chelpersSteps->calculateExpressions(polinomial.address(), starkInfo, params, chelpers.cHelpersArgsExpressions, chelpers.expressionsInfo[id], domainExtended, imPol);
+    chelpersSteps->calculateExpressions(dest, starkInfo, params, chelpers.cHelpersArgsExpressions, chelpers.expressionsInfo[id], domainExtended, imPol, inverse);
     TimerStopAndLogExpr(STARK_CALCULATE_EXPRESSION, id);
 }
 
@@ -245,7 +243,7 @@ template <typename ElementType>
 void Starks<ElementType>::calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps)
 {
     TimerStartExpr(STARK_CALCULATE_CONSTRAINT, constraintId);
-    chelpersSteps->calculateExpressions(nullptr, starkInfo, params, chelpers.cHelpersArgsDebug, chelpers.constraintsInfoDebug[constraintId], false, false);
+    chelpersSteps->calculateExpressions(nullptr, starkInfo, params, chelpers.cHelpersArgsDebug, chelpers.constraintsInfoDebug[constraintId], false, false, false);
     TimerStopAndLogExpr(STARK_CALCULATE_CONSTRAINT, constraintId);
 }
 
@@ -659,15 +657,9 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, CHe
     
     TimerStartExpr(STARK_CALCULATE_TRANSPOSE_STEP, step);
     Polinomial *srcTransposedPols = new Polinomial[srcPolsNames.size()];
-    for(uint64_t i = 0; i < srcPolsNames.size(); i++) {
-        starkInfo.getPolynomial(srcTransposedPols[i], params.pols, true, srcPolsNames[i], N);
-    }
 #pragma omp parallel for
-    for(uint64_t j = 0; j < N; ++j) {
-        for (uint64_t i = 0; i < srcPolsNames.size(); ++i)
-        {
-            std::memcpy(polynomials[srcPolsNames[i]][j], srcTransposedPols[i][j], srcTransposedPols[i].dim() * sizeof(Goldilocks::Element));
-        }
+    for(uint64_t i = 0; i < srcPolsNames.size(); i++) {
+        starkInfo.getPolynomial(polynomials[srcPolsNames[i]].address(), params.pols, true, srcPolsNames[i], N);
     }
     delete[] srcTransposedPols;
     TimerStopAndLogExpr(STARK_CALCULATE_TRANSPOSE_STEP, step);
@@ -676,7 +668,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, CHe
     
     for(uint64_t i = 0; i < srcPolsExpsNames.size(); i++) {
         if(srcPolsExpsNames[i]) {
-            calculateExpression(polynomialsExps[i], i, params, chelpersSteps, false, false);
+            calculateExpression(polynomialsExps[i].address(), i, params, chelpersSteps, false, false, false);
         }    
     }
 

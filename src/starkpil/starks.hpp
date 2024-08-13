@@ -269,7 +269,7 @@ public:
 
     void calculateQuotientPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps);
     void calculateFRIPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateExpression(Polinomial &dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol);
+    void calculateExpression(Goldilocks::Element* dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol, bool inverse);
     void calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps);
     void calculateImPolsExpressions(uint64_t step, StepsParams &params, CHelpersSteps *chelpersSteps);
 
@@ -291,19 +291,16 @@ public:
     void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
 
 private:
-    bool canExpressionBeCalculated(ParserParams &parserParams);
-
-    bool isHintResolved(Hint &hint, std::vector<string> dstFields);
-    bool canHintBeResolved(Hint &hint, std::vector<string> srcFields);
-
     void evmap(StepsParams &params, Goldilocks::Element *LEv);
-
     void setCommitCalculated(uint64_t id);
     void setSubproofValueCalculated(uint64_t id);
-
+    
+    // ALL THIS FUNCTIONS CAN BE REMOVED WHEN WC IS READY
+    bool canExpressionBeCalculated(ParserParams &parserParams);
+    bool isHintResolved(Hint &hint, std::vector<string> dstFields);
+    bool canHintBeResolved(Hint &hint, std::vector<string> srcFields);
     uint64_t isStageCalculated(uint64_t step);
     bool isSymbolCalculated(opType operand, uint64_t id);
-
     void calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity);
 public:
     void cleanSymbolsCalculated();

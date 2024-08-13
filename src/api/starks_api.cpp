@@ -192,9 +192,9 @@ void *get_stark_info(void *pStarks)
     return &((Starks<Goldilocks::Element> *)pStarks)->starkInfo;
 }
 
-void get_polynomial(void *pStarks, void *pPolinomial, void* dest, bool committed, uint64_t idPol, uint64_t deg) {
+void get_polynomial(void *pStarks, void *dest, void* pAddress, bool committed, uint64_t idPol, uint64_t deg) {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->starkInfo.getPolynomial(*(Polinomial *)pPolinomial, (Goldilocks::Element *)dest, committed, idPol, deg);
+    starks->starkInfo.getPolynomial((Goldilocks::Element *)dest, (Goldilocks::Element *)pAddress, committed, idPol, deg);
 }
 
 
@@ -262,10 +262,10 @@ void calculate_quotient_polynomial(void *pStarks, void *pParams, void *pChelpers
      starks->calculateQuotientPolynomial(*(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps);
 }
 
-void calculate_expression(void* pStarks, void* pPolinomial, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol)
+void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateExpression(*(Polinomial *)pPolinomial, id, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps, domainExtended, imPol);
+    starks->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps, domainExtended, imPol);
 }
 
 void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps)
