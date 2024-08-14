@@ -95,6 +95,9 @@ void StarkInfo::load(json j)
         map.imPol = j["cmPolsMap"][i].contains("imPol") ? true : false;
         map.stagePos = j["cmPolsMap"][i]["stagePos"];
         map.stageId = j["cmPolsMap"][i]["stageId"];
+        if(j["cmPolsMap"][i].contains("expId")) {
+            map.expId = j["cmPolsMap"][i]["expId"];
+        }
         cmPolsMap.push_back(map);
     }
 

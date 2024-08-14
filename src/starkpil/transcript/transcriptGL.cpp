@@ -3,10 +3,13 @@
 
 void TranscriptGL::put(Goldilocks::Element *input, uint64_t size)
 {
+    cout << " PUT ";
     for (uint64_t i = 0; i < size; i++)
     {
+        cout << " " << Goldilocks::toString(input[i]);
         _add1(input[i]);
     }
+    cout << endl;
 }
 
 void TranscriptGL::_updateState() 

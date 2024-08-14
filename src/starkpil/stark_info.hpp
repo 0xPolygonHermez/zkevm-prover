@@ -57,6 +57,7 @@ public:
     bool imPol;
     uint64_t stagePos;
     uint64_t stageId;
+    uint64_t expId;
 };
 
 class EvMap

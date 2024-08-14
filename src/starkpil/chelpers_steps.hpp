@@ -133,7 +133,7 @@ public:
             Goldilocks::store_avx(&dest[row], uint64_t(1), tmp1[parserParams.destId]);
             if(inverse) {
                 for(uint64_t i = 0; i < nrowsPack; ++i) {
-                    Goldilocks::inv(dest[row], dest[row]);
+                    Goldilocks::inv(dest[row + i], dest[row + i]);
                 }
             }
         } else {
@@ -142,7 +142,7 @@ public:
             Goldilocks::store_avx(&dest[row*FIELD_EXTENSION + 2], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][2]);
             if(inverse) {
                 for(uint64_t i = 0; i < nrowsPack; ++i) {
-                    Goldilocks3::inv((Goldilocks3::Element *)&dest[row*FIELD_EXTENSION], (Goldilocks3::Element *)&dest[row*FIELD_EXTENSION]);
+                    Goldilocks3::inv((Goldilocks3::Element *)&dest[(row + i)*FIELD_EXTENSION], (Goldilocks3::Element *)&dest[(row + i)*FIELD_EXTENSION]);
                 }
             }
         }
@@ -250,7 +250,7 @@ public:
             __m256i tmp1[parserParams.nTemp1];
             Goldilocks3::Element_avx tmp3[parserParams.nTemp3];
 
-    
+            
 
             loadPolynomials(starkInfo, params, parserArgs, parserParams, bufferT_, i, domainExtended);
 
