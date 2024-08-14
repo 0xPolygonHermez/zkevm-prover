@@ -204,19 +204,22 @@ void Starks<ElementType>::calculateImPolsExpressions(uint64_t step, StepsParams 
     TimerStart(STARK_CALCULATE_IMPOLS_EXPS);
     if (chelpers.imPolsInfo[step - 1].nOps > 0)
     {   
-        // chelpersSteps->calculateExpressions(nullptr, starkInfo, params, chelpers.cHelpersArgsImPols, chelpers.imPolsInfo[step - 1], false, true, false);
-        Goldilocks::Element* pAddr = &params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]];
+        chelpersSteps->calculateExpressions(nullptr, starkInfo, params, chelpers.cHelpersArgsImPols, chelpers.imPolsInfo[step - 1], false, true, false);
         for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); i++) {
-            if(starkInfo.cmPolsMap[i].imPol && starkInfo.cmPolsMap[i].stage == step) {
-                calculateExpression(pAddr, starkInfo.cmPolsMap[i].expId, params, chelpersSteps, false, false, false);
-                Goldilocks::Element* imAddr = &params.pols[starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), false)] + starkInfo.cmPolsMap[i].stagePos];
-            #pragma omp parallel
-                for(uint64_t j = 0; j < N; ++j) {
-                    std::memcpy(&imAddr[j*starkInfo.mapSectionsN["cm" + to_string(step)]], &pAddr[j*starkInfo.cmPolsMap[i].dim], starkInfo.cmPolsMap[i].dim * sizeof(Goldilocks::Element));
-                }
-                setCommitCalculated(i);
-            }
+            setCommitCalculated(i);
         }
+        // Goldilocks::Element* pAddr = &params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]];
+        // for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); i++) {
+        //     if(starkInfo.cmPolsMap[i].imPol && starkInfo.cmPolsMap[i].stage == step) {
+        //         calculateExpression(pAddr, starkInfo.cmPolsMap[i].expId, params, chelpersSteps, false, false, false);
+        //         Goldilocks::Element* imAddr = &params.pols[starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), false)] + starkInfo.cmPolsMap[i].stagePos];
+        //     #pragma omp parallel
+        //         for(uint64_t j = 0; j < N; ++j) {
+        //             std::memcpy(&imAddr[j*starkInfo.mapSectionsN["cm" + to_string(step)]], &pAddr[j*starkInfo.cmPolsMap[i].dim], starkInfo.cmPolsMap[i].dim * sizeof(Goldilocks::Element));
+        //         }
+        //         setCommitCalculated(i);
+        //     }
+        // }
     }
     TimerStopAndLog(STARK_CALCULATE_IMPOLS_EXPS);
 }
