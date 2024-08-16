@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
-#include "AllSteps.hpp"
-#include "AllC18Steps.hpp"
-#include "FibonacciPil2Steps.hpp"
 #include "hint_handler.hpp"
 #include "hint_handler_builder.hpp"
 
@@ -48,12 +45,7 @@ int main(int argc, char **argv)
         publicsFile = "test/examples/all/all.publics.json";
         proofFile = "runtime/output/all_proof.json";
         zkinProofFile = "runtime/output/all_proof.zkin.json";
-
-        if(USE_GENERIC_PARSER) {
-            cHelpersFile = "test/examples/all/all.chelpers/all.chelpers_generic.bin";
-        } else {
-            cHelpersFile = "test/examples/all/all.chelpers/all.chelpers.bin";
-        }
+        cHelpersFile = "test/examples/all/all.chelpers/all.chelpers_generic.bin";
     } else if(testName == "compressor") {
         constPolsFile = "test/examples/compressor/all.c18.const";
         constTreeFile = "test/examples/compressor/all.c18.consttree";
@@ -63,12 +55,7 @@ int main(int argc, char **argv)
         publicsFile = "test/examples/compressor/all.c18.publics.json";
         proofFile = "runtime/output/compressor_proof.json";
         zkinProofFile = "runtime/output/compressor_proof.zkin.json";
-
-        if(USE_GENERIC_PARSER) {
-            cHelpersFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers_generic.bin";
-        } else {
-            cHelpersFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers.bin";
-        }
+        cHelpersFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers_generic.bin";
     } else if(testName == "fibonacci_pil2") {
         constPolsFile = "test/examples/fibonacci.pil2/fibonacci.pil2.const";
         constTreeFile = "test/examples/fibonacci.pil2/fibonacci.pil2.consttree";
@@ -78,12 +65,7 @@ int main(int argc, char **argv)
         publicsFile = "test/examples/fibonacci.pil2/fibonacci.pil2.publics.json";
         proofFile = "runtime/output/fibonacci_pil2_proof.json";
         zkinProofFile = "runtime/output/fibonacci_pil2_proof.zkin.json";
-
-        if(USE_GENERIC_PARSER) {
-            cHelpersFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin";
-        } else {
-            cHelpersFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers.bin";
-        }
+        cHelpersFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin";
     }
    
     StarkInfo starkInfo(starkInfoFile);
@@ -122,37 +104,19 @@ int main(int argc, char **argv)
         FRIProof<Goldilocks::Element> fproof(starkInfo);
         ConstPols<Goldilocks::Element> constPols(starkInfo, constPolsFile);
         Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, false);
-        if(USE_GENERIC_PARSER) {
-            CHelpersSteps cHelpersSteps;
-            starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
-        } else {
-            AllSteps allSteps;
-            starks.genProof(fproof, &publicInputs[0], &allSteps);
-        }
+        starks.genProof(fproof, &publicInputs[0]); 
         jProof = fproof.proofs.proof2json();
     } else if(testName == "compressor") {
         FRIProof<RawFr::Element> fproof(starkInfo);
         ConstPols<RawFr::Element> constPols(starkInfo, constPolsFile);
         Starks<RawFr::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, false);
-        if(USE_GENERIC_PARSER) {
-            CHelpersSteps cHelpersSteps;
-            starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
-        } else {
-            AllC18Steps allC18Steps;
-            starks.genProof(fproof, &publicInputs[0], &allC18Steps);
-        }
+        starks.genProof(fproof, &publicInputs[0]); 
         jProof = fproof.proofs.proof2json();
     } else if(testName == "fibonacci_pil2") {
         FRIProof<Goldilocks::Element> fproof(starkInfo);
         ConstPols<Goldilocks::Element> constPols(starkInfo, constPolsFile);
         Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, false);
-        if(USE_GENERIC_PARSER) {
-            CHelpersSteps cHelpersSteps;
-            starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
-        } else {
-            FibonacciPil2Steps fibonacciPil2Steps;
-            starks.genProof(fproof, &publicInputs[0], &fibonacciPil2Steps);
-        }
+        starks.genProof(fproof, &publicInputs[0]); 
         jProof = fproof.proofs.proof2json();
     }
 

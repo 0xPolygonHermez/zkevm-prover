@@ -7,7 +7,6 @@ void TranscriptGL::put(Goldilocks::Element *input, uint64_t size)
     {
         _add1(input[i]);
     }
-    cout << endl;
 }
 
 void TranscriptGL::_updateState() 

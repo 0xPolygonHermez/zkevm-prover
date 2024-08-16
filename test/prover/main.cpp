@@ -80,8 +80,7 @@ int main()
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
-    ZkevmSteps zkevmSteps;
-    starks.genProof(fproof, &publicInputs[0], &zkevmSteps);
+    starks.genProof(fproof, &publicInputs[0]);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof);

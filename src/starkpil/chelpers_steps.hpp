@@ -1,9 +1,8 @@
 #ifndef CHELPERS_STEPS_HPP
 #define CHELPERS_STEPS_HPP
-#include "chelpers.hpp"
-#include "steps.hpp"
+#include "expressions_builder.hpp"
 
-class CHelpersSteps {
+class CHelpersSteps : public ExpressionsBuilder {
 public:
     uint64_t nrowsPack = 4;
     uint64_t nCols;
@@ -12,58 +11,9 @@ public:
     vector<uint64_t> offsetsStages;
     vector<uint64_t> buffTOffsetsStages;
 
-    inline virtual void isConstraintValid(std::vector<bool> validConstraint, ParserParams& parserParams, uint64_t row, __m256i* tmp1, Goldilocks3::Element_avx* tmp3) {
-        if(parserParams.destDim == 1) {
-            Goldilocks::Element res[4];
-            Goldilocks::store_avx(res, tmp1[parserParams.destId]);
-            for(uint64_t j = 0; j < 4; ++j) {
-                if(row + j < parserParams.firstRow) continue;
-                if(row + j >= parserParams.lastRow) break;
-                if(!Goldilocks::isZero(res[j])) {
-                    validConstraint[row + j] = false;
-                }
-            }
-        } else if(parserParams.destDim == 3) {
-            Goldilocks::Element res[12];
-            Goldilocks::store_avx(&res[0], tmp3[parserParams.destId][0]);
-            Goldilocks::store_avx(&res[4], tmp3[parserParams.destId][1]);
-            Goldilocks::store_avx(&res[8], tmp3[parserParams.destId][2]);
-            for(uint64_t j = 0; j < 4; ++j) {
-                if(row + j < parserParams.firstRow) continue;
-                if(row + j >= parserParams.lastRow) break;
-                for(uint64_t k = 0; k < 3; ++k) {
-                    if(!Goldilocks::isZero(res[3*j + k])) {
-                        validConstraint[row + j] = false;
-                    }
-                }
-            }
-        }
-    }
+    CHelpersSteps(StarkInfo& _starkInfo, CHelpers& _cHelpers, StepsParams& _params) : ExpressionsBuilder(_starkInfo, _cHelpers, _params) {};
 
-    inline virtual void verifyConstraint(std::vector<bool> validConstraint, uint64_t domainSize) {
-        bool isValidConstraint = true;
-        uint64_t nInvalidRows = 0;
-        uint64_t maxInvalidRowsDisplay = 100;
-        for(uint64_t i = 0; i < domainSize; ++i) {
-            if(!validConstraint[i]) {
-                isValidConstraint = false;
-                if(nInvalidRows < maxInvalidRowsDisplay) {
-                    cout << "Constraint check failed at " << i << endl;
-                    nInvalidRows++;
-                } else {
-                    cout << "There are more than " << maxInvalidRowsDisplay << " invalid rows" << endl;
-                    break;
-                }
-            }
-        }
-        if(isValidConstraint) {
-            TimerLog(CONSTRAINT_CHECKS_PASSED);
-        } else {
-            TimerLog(CONSTRAINT_CHECKS_FAILED);
-        }
-    }
-
-    inline virtual void loadPolynomials(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, __m256i *bufferT_, uint64_t row, bool domainExtended) {
+    inline void loadPolynomials(ParserArgs &parserArgs, ParserParams &parserParams, __m256i *bufferT_, uint64_t row, bool domainExtended) {
         uint64_t nOpenings = starkInfo.openingPoints.size();
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
 
@@ -128,7 +78,7 @@ public:
         }
     }
 
-    inline virtual void storePolynomial(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row, __m256i* tmp1, Goldilocks3::Element_avx* tmp3, bool inverse) {
+    inline void storePolynomial(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row, __m256i* tmp1, Goldilocks3::Element_avx* tmp3, bool inverse) {
         if(parserParams.destDim == 1) {
             Goldilocks::store_avx(&dest[row], uint64_t(1), tmp1[parserParams.destId]);
             if(inverse) {
@@ -148,30 +98,14 @@ public:
         }
     }
 
-    inline virtual void storeImPolynomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint64_t row) {
-        auto openingPointIndex = std::find(starkInfo.openingPoints.begin(), starkInfo.openingPoints.end(), 0) - starkInfo.openingPoints.begin();
-
-        auto firstImPol = std::find_if(starkInfo.cmPolsMap.begin(), starkInfo.cmPolsMap.end(), [](const PolMap& s) { return s.imPol; });
-
-        if(firstImPol != starkInfo.cmPolsMap.end()) {
-            uint64_t firstImPolPos = firstImPol->stagePos;
-            uint64_t stage = starkInfo.nStages;
-            for(uint64_t k = firstImPolPos; k < nColsStages[stage]; ++k) {
-                Goldilocks::store_avx(&params.pols[offsetsStages[stage] + k + row * nColsStages[stage]], nColsStages[stage], bufferT_[buffTOffsetsStages[stage] + starkInfo.openingPoints.size() * k + openingPointIndex]);
-            }
-        }
-    }
-
-    virtual void calculateExpressions(Goldilocks::Element *dest, StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool imPols, bool inverse) {
-
+    inline void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse) override {
+        cout << "CHELPERS STEPS " << endl;
         uint8_t* ops = &parserArgs.ops[parserParams.opsOffset];
         uint16_t* args = &parserArgs.args[parserParams.argsOffset];
         uint64_t* numbers = &parserArgs.numbers[parserParams.numbersOffset];
 
         uint64_t nOpenings = starkInfo.openingPoints.size();
         uint64_t domainSize = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
-
-        std::vector<bool> validConstraint(domainSize, true);
 
         offsetsStages.resize(starkInfo.nStages + 3);
         nColsStages.resize(starkInfo.nStages + 3);
@@ -252,7 +186,7 @@ public:
 
             
 
-            loadPolynomials(starkInfo, params, parserArgs, parserParams, bufferT_, i, domainExtended);
+            loadPolynomials(parserArgs, parserParams, bufferT_, i, domainExtended);
 
     
 
@@ -855,24 +789,10 @@ public:
                 }
             }
             
-            if (dest == nullptr && parserParams.destDim != 0) {
-                isConstraintValid(validConstraint, parserParams, i, tmp1, tmp3);
-            }
-            
-            if(dest != nullptr) {
-                storePolynomial(dest, parserParams, i, tmp1, tmp3, inverse);
-            }
-
-            if(imPols) {
-                storeImPolynomials(starkInfo, params, bufferT_, i);
-            }
+            storePolynomial(dest, parserParams, i, tmp1, tmp3, inverse);
 
             if (i_args != parserParams.nArgs) std::cout << " " << i_args << " - " << parserParams.nArgs << std::endl;
             assert(i_args == parserParams.nArgs);
-        }
-
-        if(dest == nullptr && parserParams.destDim != 0) {
-            verifyConstraint(validConstraint, domainSize);
         }
     }
 };

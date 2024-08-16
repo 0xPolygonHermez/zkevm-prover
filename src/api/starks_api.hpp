@@ -6,19 +6,6 @@
     // ========================================================================================
     void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
 
-    // Steps
-    // ========================================================================================
-    void *zkevm_steps_new();
-    void zkevm_steps_free(void *pZkevmSteps);
-    void *c12a_steps_new();
-    void c12a_steps_free(void *pC12aSteps);
-    void *recursive1_steps_new();
-    void recursive1_steps_free(void *pRecursive1Steps);
-    void *recursive2_steps_new();
-    void recursive2_steps_free(void *Recursive2Steps);
-    void *generic_steps_new();
-    void generic_steps_free(void *pGenericSteps);
-
     // FRIProof
     // ========================================================================================
     void *fri_proof_new(void *pStarks);
@@ -47,7 +34,6 @@
     void *starks_new_default(void *starkInfo, void *cHelpers, void *constPols, void *pAddress);
 
     void *get_stark_info(void *pStarks);
-    void get_polynomial(void *pStarks, void *dest, void* pAddress, bool committed, uint64_t idPol, uint64_t deg);
     void starks_free(void *pStarks);
 
     void *chelpers_new(char* cHelpers);
@@ -61,12 +47,11 @@
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
     void calculate_quotient_polynomial(void *pStarks, void *pParams, void *pChelpersSteps);
-    void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended, bool imPol, bool inverse);
     void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps);
 
     void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
-    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof);
-    void compute_evals(void *pStarks, void *pParams, void *pProof);
+    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pChelpersSteps, void *pProof);
+    void compute_evals(void *pStarks, void *pParams, void *pChelpersSteps, void *pProof);
 
     void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps);
     void *get_fri_pol(void *pStarks, void *pParams);
@@ -75,16 +60,11 @@
 
     void *get_proof_root(void *pProof, uint64_t stage_id, uint64_t index);
 
-    void *get_vector_pointer(void *pStarks, char *name);
     void resize_vector(void *pVector, uint64_t newSize, bool value);
     void set_bool_vector_value(void *pVector, uint64_t index, bool value);
 
-    void clean_symbols_calculated(void *pStarks);
-    void set_commit_calculated(void *pStarks, uint64_t id);
-    void set_subproofvalue_calculated(void *pStarks, uint64_t id);
-
     void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElements);
-
+    
     // CommitPolsStarks
     // ========================================================================================
     void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols);
@@ -113,6 +93,10 @@
     void transcript_free(void *pTranscript, uint32_t elementType);
     void get_challenge(void *pStarks, void *pTranscript, void *pElement);
     void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits);
+
+    // CHelpersSteps
+    
+    // TODO!
 
     // Polinomial
     // =================================================================================

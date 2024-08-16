@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
-#include "chelpers_steps.hpp"
 
 class ArgumentParser {
 private:
@@ -84,6 +83,7 @@ int main(int argc, char **argv)
 
         StarkInfo starkInfo(starkInfoFile);
         CHelpers cHelpers(cHelpersFile);
+        ConstPols<Goldilocks::Element> constPols(starkInfo, constFile);
 
         void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
         void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
@@ -116,10 +116,9 @@ int main(int argc, char **argv)
 
         FRIProof<Goldilocks::Element> fproof(starkInfo);
 
-        Starks<Goldilocks::Element> starks(config, {constFile, ""}, pAddress, starkInfo, cHelpers, true);
+        Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, true);
 
-        CHelpersSteps cHelpersSteps;
-        starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
+        starks.genProof(fproof, &publicInputs[0]); 
 
         return EXIT_SUCCESS;
     } catch (const exception &e) {

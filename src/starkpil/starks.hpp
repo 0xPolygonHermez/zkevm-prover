@@ -51,9 +51,6 @@ private:
     MerkleTreeType **treesGL;
     MerkleTreeType **treesFRI;
 
-    vector<bool> subProofValuesCalculated;
-    vector<bool> commitsCalculated;
-
     uint64_t nFieldElements;
     uint64_t merkleTreeArity;
     bool merkleTreeCustom;
@@ -68,7 +65,7 @@ private:
     Goldilocks::Element *zi;
 
 void merkelizeMemory(); // function for DBG purposes
-void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
+void printPolRoot(uint64_t polId, StepsParams& params, CHelpersSteps& cHelpersSteps); // function for DBG purposes
 void printPol(Goldilocks::Element* pol, uint64_t dim);
 
 public:
@@ -160,9 +157,6 @@ public:
             }
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
-
-        commitsCalculated.resize(starkInfo.cmPolsMap.size(), false);
-        subProofValuesCalculated.resize(starkInfo.nSubProofValues, false);
     };
     ~Starks()
     {
@@ -261,25 +255,23 @@ public:
         }
     }
 
-    void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, CHelpersSteps *chelpersSteps);
+    void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs);
     
-    void calculateHints(uint64_t step, StepsParams& params, CHelpersSteps *chelpersSteps);
+    void calculateHints(uint64_t step, StepsParams& params, CHelpersSteps &cHelpersSteps);
 
     void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
 
-    void calculateQuotientPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateFRIPolynomial(StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateExpression(Goldilocks::Element* dest, uint64_t id, StepsParams &params, CHelpersSteps *chelpersSteps, bool domainExtended, bool imPol, bool inverse);
-    void calculateConstraint(uint64_t constraintId, StepsParams &params, CHelpersSteps *chelpersSteps);
-    void calculateImPolsExpressions(uint64_t step, StepsParams &params, CHelpersSteps *chelpersSteps);
+    void calculateQuotientPolynomial(StepsParams &params, CHelpersSteps &cHelpersSteps);
+    void calculateFRIPolynomial(StepsParams &params, CHelpersSteps &cHelpersSteps);
+    void calculateImPolsExpressions(uint64_t step, StepsParams &params, CHelpersSteps &cHelpersSteps);
 
-    void commitStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
-    void computeStageExpressions(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, CHelpersSteps *chelpersSteps);
+    void commitStage(uint64_t step, StepsParams& params,  CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof);
+    void computeStageExpressions(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, CHelpersSteps &cHelpersSteps);
     void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
     
-    void computeEvals(StepsParams& params, FRIProof<ElementType> &proof);
+    void computeEvals(StepsParams& params, CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof);
 
-    void computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps *chelpersSteps);
+    void computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps &cHelpersSteps);
     
     void computeFRIFolding(FRIProof<ElementType> &fproof, Goldilocks::Element* pol, uint64_t step, Goldilocks::Element *challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);
@@ -291,28 +283,23 @@ public:
     void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
 
 private:
-    void evmap(StepsParams &params, Goldilocks::Element *LEv);
-    void setCommitCalculated(uint64_t id);
-    void setSubproofValueCalculated(uint64_t id);
+    void evmap(StepsParams &params, Goldilocks::Element *LEv, CHelpersSteps &cHelpersSteps);
     
     // ALL THIS FUNCTIONS CAN BE REMOVED WHEN WC IS READY
-    bool canExpressionBeCalculated(ParserParams &parserParams);
-    bool isHintResolved(Hint &hint, std::vector<string> dstFields);
-    bool canHintBeResolved(Hint &hint, std::vector<string> srcFields);
-    uint64_t isStageCalculated(uint64_t step);
-    bool isSymbolCalculated(opType operand, uint64_t id);
+    bool canExpressionBeCalculated(ParserParams &parserParams, CHelpersSteps& cHelpersSteps);
+    bool isHintResolved(Hint &hint, std::vector<string> dstFields, CHelpersSteps& cHelpersSteps);
+    bool canHintBeResolved(Hint &hint, std::vector<string> srcFields, CHelpersSteps& cHelpersSteps);
+    uint64_t isStageCalculated(uint64_t step, CHelpersSteps &cHelpersSteps);
+    bool isSymbolCalculated(opType operand, uint64_t id, CHelpersSteps &cHelpersSteps);
+    void setCommitCalculated(uint64_t id, CHelpersSteps &cHelpersSteps);
+    void setSubproofValueCalculated(uint64_t id, CHelpersSteps &cHelpersSteps);
     void calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity);
+
 public:
-    void cleanSymbolsCalculated();
 
     // Following function are created to be used by the ffi interface
-    void *ffi_create_steps_params(Goldilocks::Element *pChallenges, Goldilocks::Element* pSubproofValues, Goldilocks::Element *pEvals, Goldilocks::Element *pPublicInputs);
     void ffi_extend_and_merkelize(uint64_t step, StepsParams *params, FRIProof<ElementType> *proof);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
-
-    void *ffi_get_vector_pointer(char *name);
-    void ffi_set_commit_calculated(uint64_t id);
-    void ffi_set_subproofvalue_calculated(uint64_t id);
 };
 
 template class Starks<Goldilocks::Element>;
