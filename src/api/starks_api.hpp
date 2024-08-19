@@ -1,7 +1,7 @@
 #ifndef LIB_API_H
 #define LIB_API_H
     #include <stdint.h>
-    
+
     // FRI Proof
     // ========================================================================================
     void save_proof(void* pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
@@ -99,7 +99,8 @@
     void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams);
     void set_commit_calculated(void *pCHelpersSteps, uint64_t id);
     void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step);
-    void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char* hintFieldName);
+    void can_impols_be_calculated(void *pCHelpersSteps, uint64_t step);
+    void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char* hintFieldName, bool dest);
     void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, char* hintFieldName);
     void chelpers_steps_free(void *pCHelpersSteps);
 

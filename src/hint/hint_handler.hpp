@@ -22,13 +22,6 @@ typedef enum
     number = 6,
 } opType;
 
-typedef enum
-{
-    Field = 0,
-    Extended_Field = 1,
-    Column = 2,
-    Extended_Column = 3,
-} hintFieldType;
 
 class HintField
 {

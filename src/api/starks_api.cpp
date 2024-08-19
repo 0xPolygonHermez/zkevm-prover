@@ -460,8 +460,8 @@ void goldilocks_linear_hash(void *pInput, void *pOutput)
 
 void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams)
 {
-    CHelpersSteps *genericSteps = new CHelpersSteps(*(StarkInfo *)pStarkInfo, *(CHelpers *)pChelpers, *(StepsParams *)pParams);
-    return genericSteps;
+    CHelpersSteps *cHelpersSteps = new CHelpersSteps(*(StarkInfo *)pStarkInfo, *(CHelpers *)pChelpers, *(StepsParams *)pParams);
+    return cHelpersSteps;
 }
 
 void set_commit_calculated(void *pCHelpersSteps, uint64_t id)
@@ -476,16 +476,17 @@ void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step)
     cHelpersSteps->canStageBeCalculated(step);
 }
 
-void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char * hintFieldName) 
+void can_impols_be_calculated(void *pCHelpersSteps, uint64_t step)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    cHelpersSteps->canImPolsBeCalculated(step);
+}
+
+void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char *hintFieldName, bool dest) 
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
-    auto [elementPtr, hintFieldTypeValue] = cHelpersSteps->getHintField(hintId, string(hintFieldName));
-
-    void** resultTuple = new void*[2];
-    resultTuple[0] = (void *)elementPtr;
-    resultTuple[1] = reinterpret_cast<void*>(static_cast<uintptr_t>(hintFieldTypeValue));
-
-    return resultTuple;
+    HintFieldInfo hintFieldInfo = cHelpersSteps->getHintField(hintId, string(hintFieldName), dest);
+    return new HintFieldInfo(hintFieldInfo);
 }
 
 void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, char * hintFieldName) 
