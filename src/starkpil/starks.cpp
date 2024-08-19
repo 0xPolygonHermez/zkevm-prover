@@ -27,7 +27,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         challenges : challenges,
         subproofValues : subproofValues,
         evals : evals,
-        zi : zi,
+        zi : nullptr,
         publicInputs : publicInputs,
     };
 
@@ -220,6 +220,7 @@ template <typename ElementType>
 void Starks<ElementType>::calculateQuotientPolynomial(StepsParams &params, CHelpersSteps &cHelpersSteps)
 {
     TimerStart(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
+    params.zi = zi;
     cHelpersSteps.calculateExpression(&params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], starkInfo.cExpId);
     TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
 }
@@ -241,7 +242,7 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams &params,
 
     std::string section = "cm" + to_string(step);  
     uint64_t nCols = starkInfo.mapSectionsN["cm" + to_string(step)];
-
+    
     Goldilocks::Element *pBuff = &params.pols[starkInfo.mapOffsets[make_pair(section, false)]];
     Goldilocks::Element *pBuffExtended = &params.pols[starkInfo.mapOffsets[make_pair(section, true)]];
 

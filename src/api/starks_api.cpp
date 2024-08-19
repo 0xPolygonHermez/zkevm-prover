@@ -156,21 +156,23 @@ void init_hints()
     HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
 }
 
-void *steps_params_new(void *pPols, void*pConstPols, void *pChallenges, void *pSubproofValues, void *pPublicInputs)
+void *steps_params_new(void *pPols, void* pConstPols, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs)
 {
     Goldilocks::Element *pols = (Goldilocks::Element *)pPols;
-    Goldilocks::Element *constPols = (Goldilocks::Element *)pConstPols;
     Goldilocks::Element *challenges = (Goldilocks::Element *)pChallenges;
     Goldilocks::Element *subproofValues = (Goldilocks::Element *)pSubproofValues;
     Goldilocks::Element *publicInputs = (Goldilocks::Element *)pPublicInputs;
+    Goldilocks::Element *evals = (Goldilocks::Element *)pEvals;
+
+    ConstPols<Goldilocks::Element> *constPols = (ConstPols<Goldilocks::Element> *)pConstPols;
 
     StepsParams *params = new StepsParams{
         pols : pols,
-        constPols : constPols,
-        constPolsExtended : nullptr,
+        constPols : constPols->pConstPolsAddress,
+        constPolsExtended : constPols->pConstPolsAddressExtended,
         challenges : challenges,
         subproofValues : subproofValues,
-        evals : nullptr,
+        evals : evals,
         zi : nullptr,
         publicInputs : publicInputs,
     };

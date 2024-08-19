@@ -41,7 +41,7 @@
 
     void init_hints();
 
-    void *steps_params_new(void *pStarks, void * pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs);
+    void *steps_params_new(void *pPols, void*pConstPols, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs);
     void steps_params_free(void *pStepsParams);
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
