@@ -97,6 +97,10 @@
     // CHelpersSteps
     
     void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams);
+    void set_commit_calculated(void *pCHelpersSteps, uint64_t id);
+    void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step);
+    void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char* hintFieldName);
+    void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, char* hintFieldName);
     void chelpers_steps_free(void *pCHelpersSteps);
 
     // Polinomial
