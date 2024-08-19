@@ -65,7 +65,7 @@ private:
     Goldilocks::Element *zi;
 
 void merkelizeMemory(); // function for DBG purposes
-void printPolRoot(uint64_t polId, StepsParams& params, CHelpersSteps& cHelpersSteps); // function for DBG purposes
+void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
 void printPol(Goldilocks::Element* pol, uint64_t dim);
 
 public:
@@ -265,11 +265,11 @@ public:
     void calculateFRIPolynomial(StepsParams &params, CHelpersSteps &cHelpersSteps);
     void calculateImPolsExpressions(uint64_t step, StepsParams &params, CHelpersSteps &cHelpersSteps);
 
-    void commitStage(uint64_t step, StepsParams& params,  CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof);
+    void commitStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
     void computeStageExpressions(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, CHelpersSteps &cHelpersSteps);
     void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
     
-    void computeEvals(StepsParams& params, CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof);
+    void computeEvals(StepsParams& params, FRIProof<ElementType> &proof);
 
     void computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps &cHelpersSteps);
     
@@ -283,7 +283,7 @@ public:
     void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
 
 private:
-    void evmap(StepsParams &params, Goldilocks::Element *LEv, CHelpersSteps &cHelpersSteps);
+    void evmap(StepsParams &params, Goldilocks::Element *LEv);
     
     // ALL THIS FUNCTIONS CAN BE REMOVED WHEN WC IS READY
     bool canExpressionBeCalculated(ParserParams &parserParams, CHelpersSteps& cHelpersSteps);
@@ -291,8 +291,6 @@ private:
     bool canHintBeResolved(Hint &hint, std::vector<string> srcFields, CHelpersSteps& cHelpersSteps);
     uint64_t isStageCalculated(uint64_t step, CHelpersSteps &cHelpersSteps);
     bool isSymbolCalculated(opType operand, uint64_t id, CHelpersSteps &cHelpersSteps);
-    void setCommitCalculated(uint64_t id, CHelpersSteps &cHelpersSteps);
-    void setSubproofValueCalculated(uint64_t id, CHelpersSteps &cHelpersSteps);
     void calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity);
 
 public:

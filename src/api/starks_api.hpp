@@ -50,8 +50,8 @@
     void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps);
 
     void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
-    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pChelpersSteps, void *pProof);
-    void compute_evals(void *pStarks, void *pParams, void *pChelpersSteps, void *pProof);
+    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof);
+    void compute_evals(void *pStarks, void *pParams, void *pProof);
 
     void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps);
     void *get_fri_pol(void *pStarks, void *pParams);
@@ -97,6 +97,10 @@
     // CHelpersSteps
     
     void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams);
+    void set_commit_calculated(void *pCHelpersSteps, uint64_t id);
+    void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step);
+    void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char* hintFieldName);
+    void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, char* hintFieldName);
     void chelpers_steps_free(void *pCHelpersSteps);
 
     // Polinomial

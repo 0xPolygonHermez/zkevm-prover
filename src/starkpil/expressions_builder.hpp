@@ -22,6 +22,36 @@ public:
 
     virtual ~ExpressionsBuilder() {};
 
+    void setCommitCalculated(uint64_t id) {
+        commitsCalculated[id] = true;
+    };
+
+    void setSubproofValueCalculated(uint64_t id) {
+        subProofValuesCalculated[id] = true;
+    };
+
+    void canStageBeCalculated(uint64_t step) {
+        if(step == starkInfo.nStages) {
+            for(uint64_t i = 0; i < starkInfo.nSubProofValues; i++) {
+                if(!subProofValuesCalculated[i]) {
+                    zklog.info("Subproofvalue " + to_string(i) + " is not calculated");
+                    exitProcess();
+                    exit(-1);
+                }
+            }
+        }
+
+        if(step <= starkInfo.nStages) {
+            for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); i++) {
+                if(starkInfo.cmPolsMap[i].stage == step && !commitsCalculated[i]) {
+                    zklog.info("Witness polynomial " + starkInfo.cmPolsMap[i].name + " is not calculated");
+                    exitProcess();
+                    exit(-1);
+                }
+            }
+        }
+    }
+
     std::tuple<Goldilocks::Element*, hintFieldType> getHintField(uint64_t hintId, std::string hintFieldName) {
         uint64_t deg = 1 << starkInfo.starkStruct.nBits;
         Hint hint = cHelpers.hints[hintId];
@@ -151,19 +181,7 @@ public:
             TimerLog(CONSTRAINT_CHECKS_FAILED);
         }
     }
-
-    void getPolynomial(Polinomial &pol, bool committed, uint64_t idPol, bool domainExtended) {
-        PolMap polInfo = committed ? starkInfo.cmPolsMap[idPol] : starkInfo.constPolsMap[idPol];
-        uint64_t deg = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;
-        uint64_t dim = polInfo.dim;
-        std::string stage = committed ? "cm" + to_string(polInfo.stage) : "const";
-        uint64_t nCols = starkInfo.mapSectionsN[stage];
-        uint64_t offset = starkInfo.mapOffsets[std::make_pair(stage, domainExtended)];
-        offset += polInfo.stagePos;
-        Goldilocks::Element *pols = committed ? params.pols : domainExtended ? params.constPolsExtended : params.constPols;
-        pol = Polinomial(&pols[offset], deg, dim, nCols, std::to_string(idPol));
-    }
-    
+ 
     void getPolynomial(Goldilocks::Element *dest, bool committed, uint64_t idPol, bool domainExtended) {
         PolMap polInfo = committed ? starkInfo.cmPolsMap[idPol] : starkInfo.constPolsMap[idPol];
         uint64_t deg = domainExtended ? 1 << starkInfo.starkStruct.nBitsExt : 1 << starkInfo.starkStruct.nBits;

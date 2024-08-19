@@ -164,7 +164,18 @@ void *steps_params_new(void *pPols, void*pConstPols, void *pChallenges, void *pS
     Goldilocks::Element *subproofValues = (Goldilocks::Element *)pSubproofValues;
     Goldilocks::Element *publicInputs = (Goldilocks::Element *)pPublicInputs;
 
-    return ffi_create_steps_params(pols, constPols, challenges, subproofValues, publicInputs);
+    StepsParams *params = new StepsParams{
+        pols : pols,
+        constPols : constPols,
+        constPolsExtended : nullptr,
+        challenges : challenges,
+        subproofValues : subproofValues,
+        evals : nullptr,
+        zi : nullptr,
+        publicInputs : publicInputs,
+    };
+
+    return params;
 }
 
 void steps_params_free(void *pStepsParams)
@@ -217,13 +228,13 @@ void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t ste
     }
 }
 
-void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pChelpersSteps, void *pProof) {
+void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof) {
     // type == 1 => Goldilocks
     // type == 2 => BN128
     switch (elementType)
     {
     case 1:
-        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, *(StepsParams *)pParams, *(CHelpersSteps *)pChelpersSteps, *(FRIProof<Goldilocks::Element> *)pProof);
+        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, *(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
         break;
     default:
         cerr << "Invalid elementType: " << elementType << endl;
@@ -232,10 +243,10 @@ void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pPar
 }
 
 
-void compute_evals(void *pStarks, void *pParams, void *pChelpersSteps, void *pProof)
+void compute_evals(void *pStarks, void *pParams, void *pProof)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeEvals(*(StepsParams *)pParams, *(CHelpersSteps *)pChelpersSteps, *(FRIProof<Goldilocks::Element> *)pProof);
+    starks->computeEvals(*(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
 void compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps)
@@ -451,16 +462,22 @@ void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams)
     return genericSteps;
 }
 
-void chelpers_steps_free(void *pCHelpersSteps)
+void set_commit_calculated(void *pCHelpersSteps, uint64_t id)
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
-    delete cHelpersSteps;
+    cHelpersSteps->setCommitCalculated(id);
 }
 
-void *get_hint_field(void *pChelpersSteps, uint64_t hintId, std::string hintFieldName) 
+void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    cHelpersSteps->canStageBeCalculated(step);
+}
+
+void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char * hintFieldName) 
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
-    auto [elementPtr, hintFieldTypeValue] = cHelpersSteps->getHintField(hintId, hintFieldName);
+    auto [elementPtr, hintFieldTypeValue] = cHelpersSteps->getHintField(hintId, string(hintFieldName));
 
     void** resultTuple = new void*[2];
     resultTuple[0] = (void *)elementPtr;
@@ -469,8 +486,14 @@ void *get_hint_field(void *pChelpersSteps, uint64_t hintId, std::string hintFiel
     return resultTuple;
 }
 
-void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, std::string hintFieldName) 
+void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, char * hintFieldName) 
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
-    cHelpersSteps->setHintField((Goldilocks::Element *)values, hintId, hintFieldName);
+    cHelpersSteps->setHintField((Goldilocks::Element *)values, hintId, string(hintFieldName));
+}
+
+void chelpers_steps_free(void *pCHelpersSteps)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    delete cHelpersSteps;
 }

@@ -130,6 +130,9 @@ public:
     void load (json j);
 
     void setMapOffsets();
+
+    /* Returns a polynomial specified by its ID */
+    void getPolynomial(Polinomial &pol, Goldilocks::Element *pAddress, bool committed, uint64_t idPol, bool domainExtended);
 };
 
 #endif
