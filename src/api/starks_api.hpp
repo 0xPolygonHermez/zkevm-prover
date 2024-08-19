@@ -96,7 +96,8 @@
 
     // CHelpersSteps
     
-    // TODO!
+    void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams);
+    void chelpers_steps_free(void *pCHelpersSteps);
 
     // Polinomial
     // =================================================================================

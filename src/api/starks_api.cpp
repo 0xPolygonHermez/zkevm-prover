@@ -451,6 +451,12 @@ void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams)
     return genericSteps;
 }
 
+void chelpers_steps_free(void *pCHelpersSteps)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    delete cHelpersSteps;
+}
+
 void *get_hint_field(void *pChelpersSteps, uint64_t hintId, std::string hintFieldName) 
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
@@ -467,10 +473,4 @@ void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, std::st
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
     cHelpersSteps->setHintField((Goldilocks::Element *)values, hintId, hintFieldName);
-}
-
-void chelpers_steps_free(void *pCHelpersSteps)
-{
-    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
-    delete cHelpersSteps;
 }
