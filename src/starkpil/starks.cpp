@@ -222,6 +222,11 @@ void Starks<ElementType>::calculateQuotientPolynomial(StepsParams &params, CHelp
     TimerStart(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
     params.zi = zi;
     cHelpersSteps.calculateExpression(&params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], starkInfo.cExpId);
+    for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); i++) {
+        if(starkInfo.cmPolsMap[i].stage == starkInfo.nStages + 1) {
+            cHelpersSteps.setCommitCalculated(i);
+        }
+    }
     TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
 }
 

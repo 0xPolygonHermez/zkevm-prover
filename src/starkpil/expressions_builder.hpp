@@ -5,10 +5,19 @@
 #include "steps.hpp"
 #include "hint_handler.hpp"
 
+typedef enum {
+    Field = 0,
+    FieldExtended = 1,
+    Column = 2,
+    ColumnExtended = 3,
+} HintFieldType;
+
 struct HintFieldInfo {
     uint64_t size; // Destination size (in Goldilocks elements)
+    HintFieldType type;
     Goldilocks::Element* dest;
 };
+
 
 class ExpressionsBuilder {
 public:
@@ -70,15 +79,13 @@ public:
 
     HintFieldInfo getHintField(uint64_t hintId, std::string hintFieldName, bool dest) {
         uint64_t deg = 1 << starkInfo.starkStruct.nBits;
+
         if(cHelpers.hints.size() == 0) {
-            HintFieldInfo hintFieldInfo;
-            hintFieldInfo.size = 24;
-            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
-            for(uint64_t i = 0; i < hintFieldInfo.size; ++i) {
-                hintFieldInfo.dest[i] = Goldilocks::fromU64(34 * (hintFieldInfo.size - i));
-            }
-            return hintFieldInfo;
+            zklog.error("No hints were found.");
+            exitProcess();
+            exit(-1);
         }
+
         Hint hint = cHelpers.hints[hintId];
         if(hint.fields.count(hintFieldName) == 0) {
             zklog.error("Hint field " + hintFieldName + " not found in hint " + hint.name + ".");
@@ -100,40 +107,46 @@ public:
             uint64_t dim = starkInfo.cmPolsMap[hintField.id].dim;
             hintFieldInfo.size = deg*dim;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.type = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             if(!dest) getPolynomial(hintFieldInfo.dest, true, hintField.id, false);
         } else if(hintField.operand == opType::const_) {
             uint64_t dim = starkInfo.constPolsMap[hintField.id].dim;
             hintFieldInfo.size = deg*dim;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.type = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             getPolynomial(hintFieldInfo.dest, false, hintField.id, false);
         } else if (hintField.operand == opType::tmp) {
             uint64_t dim = cHelpers.expressionsInfo[hintField.id].destDim;
             hintFieldInfo.size = deg*dim;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.type = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             calculateExpression(hintFieldInfo.dest, hintField.id);
         } else if (hintField.operand == opType::public_) {
             hintFieldInfo.size = 1;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.dest[0] = params.publicInputs[hintField.id];
+            hintFieldInfo.type = HintFieldType::Field;
         } else if (hintField.operand == opType::number) {
             hintFieldInfo.size = 1;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.dest[0] = Goldilocks::fromU64(hintField.value);
+            hintFieldInfo.type = HintFieldType::Field;
         } else if (hintField.operand == opType::subproofvalue) {
             hintFieldInfo.size = FIELD_EXTENSION;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.type = HintFieldType::FieldExtended;
             if(!dest) std::memcpy(hintFieldInfo.dest, &params.subproofValues[FIELD_EXTENSION*hintField.id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         } else if (hintField.operand == opType::challenge) {
             hintFieldInfo.size = FIELD_EXTENSION;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.type = HintFieldType::FieldExtended;
             std::memcpy(hintFieldInfo.dest, &params.challenges[FIELD_EXTENSION*hintField.id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         } else {
-            zklog.error("Unknown hintFieldType");
+            zklog.error("Unknown HintFieldType");
             exitProcess();
             exit(-1);
         }
 
-        cout << " SIZE " << hintFieldInfo.size << " FIRST VALUE " << Goldilocks::toString(hintFieldInfo.dest[0]) << endl;
         return hintFieldInfo;
     }
 
