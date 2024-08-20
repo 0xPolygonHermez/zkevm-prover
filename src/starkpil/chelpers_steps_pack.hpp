@@ -83,10 +83,8 @@ public:
                 for(uint64_t k = 0; k < nColsStages[s]; ++k) {
                     uint64_t dim = storePol[nColsStagesAcc[s] + k];
                     if(!TRANSPOSE_TMP_POLS) {
-                        for(uint64_t k = 0; k < nColsStages[s]; ++k) {
-                            Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k)* nrowsPack];
-                            Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT);
-                        }
+                        Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k)* nrowsPack];
+                        Goldilocks::copy_pack(nrowsPack, &params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT);
                     } else {
                         if(storePol[nColsStagesAcc[s] + k]) {
                             Goldilocks::Element *buffT = &bufferT_[(nColsStagesAcc[s] + k)* nrowsPack];
