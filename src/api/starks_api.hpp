@@ -43,18 +43,18 @@
 
     void *steps_params_new(void *pPols, void*pConstPols, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs);
     void steps_params_free(void *pStepsParams);
-    void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
+    void extend_and_merkelize(void *pStarks, uint64_t step, void *pChelpersSteps, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
-    void calculate_quotient_polynomial(void *pStarks, void *pParams, void *pChelpersSteps);
-    void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps);
+    void calculate_quotient_polynomial(void *pStarks, void *pChelpersSteps);
+    void calculate_impols_expressions(void* pStarks, uint64_t step, void *pChelpersSteps);
 
-    void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps);
-    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof);
-    void compute_evals(void *pStarks, void *pParams, void *pProof);
+    void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pChelpersSteps, void *pProof);
+    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pChelpersSteps, void *pProof);
+    void compute_evals(void *pStarks, void *pChelpersSteps, void *pProof);
 
-    void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps);
-    void *get_fri_pol(void *pStarks, void *pParams);
+    void *compute_fri_pol(void *pStarks, uint64_t step, void *cHelpersSteps);
+    void *get_fri_pol(void *pStarks, void *pChelpersSteps);
     void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
 

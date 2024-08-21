@@ -14,9 +14,9 @@ typedef enum {
 
 struct HintFieldInfo {
     uint64_t size; // Destination size (in Goldilocks elements)
-    uint64_t offset;
-    HintFieldType type;
-    Goldilocks::Element* dest;
+    uint8_t offset;
+    HintFieldType fieldType;
+    Goldilocks::Element* values;
 };
 
 
@@ -82,15 +82,6 @@ public:
         uint64_t deg = 1 << starkInfo.starkStruct.nBits;
 
         if(cHelpers.hints.size() == 0) {
-            HintFieldInfo hintFieldInfo;
-            hintFieldInfo.type = HintFieldType::Column;
-            hintFieldInfo.size = 24;
-            hintFieldInfo.offset = 1;
-            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
-            for(uint64_t i = 0; i < hintFieldInfo.size; ++i) {
-                hintFieldInfo.dest[i] = Goldilocks::fromU64(hintFieldInfo.size - i);
-            }
-            return hintFieldInfo;
             zklog.error("No hints were found.");
             exitProcess();
             exit(-1);
@@ -116,48 +107,49 @@ public:
         if(hintField.operand == opType::cm) {
             uint64_t dim = starkInfo.cmPolsMap[hintField.id].dim;
             hintFieldInfo.size = deg*dim;
-            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
-            hintFieldInfo.type = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
+            hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             hintFieldInfo.offset = dim;
-            if(!dest) getPolynomial(hintFieldInfo.dest, true, hintField.id, false);
+            if(!dest) getPolynomial(hintFieldInfo.values, true, hintField.id, false);
         } else if(hintField.operand == opType::const_) {
             uint64_t dim = starkInfo.constPolsMap[hintField.id].dim;
             hintFieldInfo.size = deg*dim;
-            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
-            hintFieldInfo.type = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
+            hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             hintFieldInfo.offset = dim;
-            getPolynomial(hintFieldInfo.dest, false, hintField.id, false);
+            getPolynomial(hintFieldInfo.values, false, hintField.id, false);
         } else if (hintField.operand == opType::tmp) {
             uint64_t dim = cHelpers.expressionsInfo[hintField.id].destDim;
             hintFieldInfo.size = deg*dim;
-            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
-            hintFieldInfo.type = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
+            hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             hintFieldInfo.offset = dim;
-            calculateExpression(hintFieldInfo.dest, hintField.id);
+            calculateExpression(hintFieldInfo.values, hintField.id);
         } else if (hintField.operand == opType::public_) {
             hintFieldInfo.size = 1;
-            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
-            hintFieldInfo.dest[0] = params.publicInputs[hintField.id];
-            hintFieldInfo.type = HintFieldType::Field;
+            hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.values[0] = params.publicInputs[hintField.id];
+            hintFieldInfo.fieldType = HintFieldType::Field;
             hintFieldInfo.offset = 1;
         } else if (hintField.operand == opType::number) {
             hintFieldInfo.size = 1;
-            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
-            hintFieldInfo.dest[0] = Goldilocks::fromU64(hintField.value);
-            hintFieldInfo.type = HintFieldType::Field;
+            hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.values[0] = Goldilocks::fromU64(hintField.value);
+            hintFieldInfo.fieldType = HintFieldType::Field;
             hintFieldInfo.offset = 1;
+            cout << Goldilocks::toString(hintFieldInfo.values[0]) << endl;
         } else if (hintField.operand == opType::subproofvalue) {
             hintFieldInfo.size = FIELD_EXTENSION;
-            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
-            hintFieldInfo.type = HintFieldType::FieldExtended;
+            hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.fieldType = HintFieldType::FieldExtended;
             hintFieldInfo.offset = FIELD_EXTENSION;
-            if(!dest) std::memcpy(hintFieldInfo.dest, &params.subproofValues[FIELD_EXTENSION*hintField.id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
+            if(!dest) std::memcpy(hintFieldInfo.values, &params.subproofValues[FIELD_EXTENSION*hintField.id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         } else if (hintField.operand == opType::challenge) {
             hintFieldInfo.size = FIELD_EXTENSION;
-            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
-            hintFieldInfo.type = HintFieldType::FieldExtended;
+            hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
+            hintFieldInfo.fieldType = HintFieldType::FieldExtended;
             hintFieldInfo.offset = FIELD_EXTENSION;
-            std::memcpy(hintFieldInfo.dest, &params.challenges[FIELD_EXTENSION*hintField.id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
+            std::memcpy(hintFieldInfo.values, &params.challenges[FIELD_EXTENSION*hintField.id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         } else {
             zklog.error("Unknown HintFieldType");
             exitProcess();
@@ -301,6 +293,61 @@ public:
     void calculateExpression(Goldilocks::Element* dest, uint64_t expressionId, bool inverse = false) {
         bool domainExtended = expressionId == starkInfo.cExpId || expressionId == starkInfo.friExpId;
         calculateExpressions(dest, cHelpers.cHelpersArgsExpressions, cHelpers.expressionsInfo[expressionId], domainExtended, inverse);
+    }
+
+    void printPol(Goldilocks::Element* pol, uint64_t deg, uint64_t dim) {
+        Polinomial p = Polinomial(pol, deg, dim, dim);
+        MerkleTreeGL *mt_ = new MerkleTreeGL(starkInfo.starkStruct.merkleTreeArity, true, deg, dim, pol);
+        mt_->merkelize();
+
+        Goldilocks::Element root[4];
+        cout << "--------------------" << endl;
+        cout << "HELLO: " << endl;
+        mt_->getRoot(&root[0]);
+        cout << "--------------------" << endl;
+
+        // for(uint64_t i = 0; i < deg; ++i) {
+        //     if(dim == 3) {
+        //         cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
+        //     } else {
+        //         cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
+        //     }
+        // }
+
+        delete mt_;
+    }
+
+    void printPolRoot(uint64_t polId, StepsParams &params)
+    {   
+        uint64_t N = 1 << starkInfo.starkStruct.nBits;
+        PolMap polInfo = starkInfo.cmPolsMap[polId];
+        Polinomial p;
+        starkInfo.getPolynomial(p, params.pols, true, polId, false);
+
+        Polinomial pCol;
+        Goldilocks::Element *pBuffCol = new Goldilocks::Element[polInfo.dim * N];
+        pCol.potConstruct(pBuffCol, N, polInfo.dim, polInfo.dim);
+        Polinomial::copy(pCol, p);
+
+        MerkleTreeGL *mt_ = new MerkleTreeGL(starkInfo.starkStruct.merkleTreeArity, true, N, polInfo.dim, pBuffCol);
+        mt_->merkelize();
+
+        Goldilocks::Element root[4];
+        cout << "--------------------" << endl;
+        cout << "NAME: " << polInfo.name << endl;
+        mt_->getRoot(&root[0]);
+        cout << "--------------------" << endl;
+
+        for(uint64_t i = 0; i < N; ++i) {
+            if(polInfo.dim == 3) {
+                cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
+            } else {
+                cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
+            }
+        }
+
+        delete mt_;
+        delete pBuffCol;
     }
 };
 

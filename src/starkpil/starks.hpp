@@ -65,8 +65,6 @@ private:
     Goldilocks::Element *zi;
 
 void merkelizeMemory(); // function for DBG purposes
-void printPolRoot(uint64_t polId, StepsParams& params); // function for DBG purposes
-void printPol(Goldilocks::Element* pol, uint64_t dim);
 
 public:
     Starks(const Config &config, void *_pAddress, StarkInfo &starkInfo_, CHelpers &chelpers_, ConstPols<ElementType> &constPols_, bool debug_) : config(config),
@@ -257,21 +255,21 @@ public:
 
     void genProof(FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs);
     
-    void calculateHints(uint64_t step, StepsParams& params, CHelpersSteps &cHelpersSteps);
+    void calculateHints(uint64_t step, CHelpersSteps &cHelpersSteps);
 
-    void extendAndMerkelize(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
+    void extendAndMerkelize(uint64_t step, CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof);
 
-    void calculateQuotientPolynomial(StepsParams &params, CHelpersSteps &cHelpersSteps);
-    void calculateFRIPolynomial(StepsParams &params, CHelpersSteps &cHelpersSteps);
-    void calculateImPolsExpressions(uint64_t step, StepsParams &params, CHelpersSteps &cHelpersSteps);
+    void calculateQuotientPolynomial(CHelpersSteps &cHelpersSteps);
+    void calculateFRIPolynomial(CHelpersSteps &cHelpersSteps);
+    void calculateImPolsExpressions(uint64_t step, CHelpersSteps &cHelpersSteps);
 
-    void commitStage(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
-    void computeStageExpressions(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof, CHelpersSteps &cHelpersSteps);
-    void computeQ(uint64_t step, StepsParams& params, FRIProof<ElementType> &proof);
+    void commitStage(uint64_t step, CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof);
+    void computeStageExpressions(uint64_t step,  CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof);
+    void computeQ(uint64_t step, CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof);
     
-    void computeEvals(StepsParams& params, FRIProof<ElementType> &proof);
+    void computeEvals(CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof);
 
-    void computeFRIPol(uint64_t step, StepsParams& params, CHelpersSteps &cHelpersSteps);
+    void computeFRIPol(uint64_t step, CHelpersSteps &cHelpersSteps);
     
     void computeFRIFolding(FRIProof<ElementType> &fproof, Goldilocks::Element* pol, uint64_t step, Goldilocks::Element *challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);
@@ -283,7 +281,7 @@ public:
     void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
 
 private:
-    void evmap(StepsParams &params, Goldilocks::Element *LEv);
+    void evmap(CHelpersSteps &cHelpersSteps, Goldilocks::Element *LEv);
     
     // ALL THIS FUNCTIONS CAN BE REMOVED WHEN WC IS READY
     bool canExpressionBeCalculated(ParserParams &parserParams, CHelpersSteps& cHelpersSteps);
@@ -296,7 +294,7 @@ private:
 public:
 
     // Following function are created to be used by the ffi interface
-    void ffi_extend_and_merkelize(uint64_t step, StepsParams *params, FRIProof<ElementType> *proof);
+    void ffi_extend_and_merkelize(uint64_t step,  CHelpersSteps &cHelpersSteps, FRIProof<ElementType> *proof);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 };
 

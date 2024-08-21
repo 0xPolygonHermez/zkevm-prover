@@ -187,13 +187,10 @@ void steps_params_free(void *pStepsParams)
     delete stepsParams;
 }
 
-void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *pProof)
+void extend_and_merkelize(void *pStarks, uint64_t step, void *pChelpersSteps, void *pProof)
 {
     auto starks = (Starks<Goldilocks::Element> *)pStarks;
-    auto params = (StepsParams *)pParams;
-    auto proof = (FRIProof<Goldilocks::Element> *)pProof;
-
-    starks->ffi_extend_and_merkelize(step, params, proof);
+    starks->ffi_extend_and_merkelize(step, *(CHelpersSteps *)pChelpersSteps, (FRIProof<Goldilocks::Element> *)pProof);
 }
 
 void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
@@ -203,26 +200,26 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
     starks->ffi_treesGL_get_root(index, (Goldilocks::Element *)dst);
 }
 
-void calculate_quotient_polynomial(void *pStarks, void *pParams, void *pChelpersSteps)
+void calculate_quotient_polynomial(void *pStarks, void *pChelpersSteps)
 {
      Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-     starks->calculateQuotientPolynomial(*(StepsParams *)pParams, *(CHelpersSteps *)pChelpersSteps);
+     starks->calculateQuotientPolynomial(*(CHelpersSteps *)pChelpersSteps);
 }
 
-void calculate_impols_expressions(void* pStarks, uint64_t step, void *pParams, void *pChelpersSteps)
+void calculate_impols_expressions(void* pStarks, uint64_t step, void *pChelpersSteps)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateImPolsExpressions(step, *(StepsParams *)pParams, *(CHelpersSteps *)pChelpersSteps);
+    starks->calculateImPolsExpressions(step, *(CHelpersSteps *)pChelpersSteps);
 }
 
-void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps)
+void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pChelpersSteps, void *pProof)
 {
     // type == 1 => Goldilocks
     // type == 2 => BN128
     switch (elementType)
     {
     case 1:
-        ((Starks<Goldilocks::Element> *)pStarks)->computeStageExpressions(step, *(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof, *(CHelpersSteps *)pChelpersSteps);
+        ((Starks<Goldilocks::Element> *)pStarks)->computeStageExpressions(step, *(CHelpersSteps *)pChelpersSteps, *(FRIProof<Goldilocks::Element> *)pProof);
         break;
     default:
         cerr << "Invalid elementType: " << elementType << endl;
@@ -230,13 +227,13 @@ void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t ste
     }
 }
 
-void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof) {
+void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pChelpersSteps, void *pProof) {
     // type == 1 => Goldilocks
     // type == 2 => BN128
     switch (elementType)
     {
     case 1:
-        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, *(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
+        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, *(CHelpersSteps *)pChelpersSteps, *(FRIProof<Goldilocks::Element> *)pProof);
         break;
     default:
         cerr << "Invalid elementType: " << elementType << endl;
@@ -245,23 +242,24 @@ void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pPar
 }
 
 
-void compute_evals(void *pStarks, void *pParams, void *pProof)
+void compute_evals(void *pStarks, void *pChelpersSteps, void *pProof)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeEvals(*(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
+    starks->computeEvals(*(CHelpersSteps *)pChelpersSteps, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
-void compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps)
+void compute_fri_pol(void *pStarks, uint64_t step, void *cHelpersSteps)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeFRIPol(step, *(StepsParams *)pParams, *(CHelpersSteps *)cHelpersSteps);
+    starks->computeFRIPol(step, *(CHelpersSteps *)cHelpersSteps);
 }
 
-void *get_fri_pol(void *pStarks, void *pParams)
+void *get_fri_pol(void *pStarks, void *cHelpersSteps)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    StepsParams *params = (StepsParams *)pParams;
-    return &params->pols[starks->starkInfo.mapOffsets[std::make_pair("f", true)]];
+    auto chelpersSteps = *(CHelpersSteps *)cHelpersSteps;
+    
+    return &chelpersSteps.params.pols[starks->starkInfo.mapOffsets[std::make_pair("f", true)]];
 }
 
 void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge)
