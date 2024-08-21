@@ -14,6 +14,7 @@ typedef enum {
 
 struct HintFieldInfo {
     uint64_t size; // Destination size (in Goldilocks elements)
+    uint64_t offset;
     HintFieldType type;
     Goldilocks::Element* dest;
 };
@@ -81,6 +82,15 @@ public:
         uint64_t deg = 1 << starkInfo.starkStruct.nBits;
 
         if(cHelpers.hints.size() == 0) {
+            HintFieldInfo hintFieldInfo;
+            hintFieldInfo.type = HintFieldType::Column;
+            hintFieldInfo.size = 24;
+            hintFieldInfo.offset = 1;
+            hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
+            for(uint64_t i = 0; i < hintFieldInfo.size; ++i) {
+                hintFieldInfo.dest[i] = Goldilocks::fromU64(hintFieldInfo.size - i);
+            }
+            return hintFieldInfo;
             zklog.error("No hints were found.");
             exitProcess();
             exit(-1);
@@ -108,38 +118,45 @@ public:
             hintFieldInfo.size = deg*dim;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.type = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
+            hintFieldInfo.offset = dim;
             if(!dest) getPolynomial(hintFieldInfo.dest, true, hintField.id, false);
         } else if(hintField.operand == opType::const_) {
             uint64_t dim = starkInfo.constPolsMap[hintField.id].dim;
             hintFieldInfo.size = deg*dim;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.type = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
+            hintFieldInfo.offset = dim;
             getPolynomial(hintFieldInfo.dest, false, hintField.id, false);
         } else if (hintField.operand == opType::tmp) {
             uint64_t dim = cHelpers.expressionsInfo[hintField.id].destDim;
             hintFieldInfo.size = deg*dim;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.type = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
+            hintFieldInfo.offset = dim;
             calculateExpression(hintFieldInfo.dest, hintField.id);
         } else if (hintField.operand == opType::public_) {
             hintFieldInfo.size = 1;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.dest[0] = params.publicInputs[hintField.id];
             hintFieldInfo.type = HintFieldType::Field;
+            hintFieldInfo.offset = 1;
         } else if (hintField.operand == opType::number) {
             hintFieldInfo.size = 1;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.dest[0] = Goldilocks::fromU64(hintField.value);
             hintFieldInfo.type = HintFieldType::Field;
+            hintFieldInfo.offset = 1;
         } else if (hintField.operand == opType::subproofvalue) {
             hintFieldInfo.size = FIELD_EXTENSION;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.type = HintFieldType::FieldExtended;
+            hintFieldInfo.offset = FIELD_EXTENSION;
             if(!dest) std::memcpy(hintFieldInfo.dest, &params.subproofValues[FIELD_EXTENSION*hintField.id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         } else if (hintField.operand == opType::challenge) {
             hintFieldInfo.size = FIELD_EXTENSION;
             hintFieldInfo.dest = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.type = HintFieldType::FieldExtended;
+            hintFieldInfo.offset = FIELD_EXTENSION;
             std::memcpy(hintFieldInfo.dest, &params.challenges[FIELD_EXTENSION*hintField.id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         } else {
             zklog.error("Unknown HintFieldType");
@@ -174,60 +191,73 @@ public:
 
     virtual void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse) {};
 
-    bool verifyConstraint(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row) {
+    bool checkConstraint(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row) {
         if(row < parserParams.firstRow || row > parserParams.lastRow) return true;
+        bool isValid = true;
         if(parserParams.destDim == 1) {
-            return Goldilocks::isZero(dest[row]);
-        } else if(parserParams.destDim == FIELD_EXTENSION) {
-            for(uint64_t i = 0; i < FIELD_EXTENSION; ++i) {
-                if(!Goldilocks::isZero(dest[FIELD_EXTENSION*row + i])) return false;
+            if(!Goldilocks::isZero(dest[row])) {
+                isValid = false;
+                cout << "Constraint check failed at row " << row << " with value: " << Goldilocks::toString(dest[row]) << endl;
             }
-            return true;
+            
+        } else if(parserParams.destDim == FIELD_EXTENSION) {
+            isValid = true;
+            for(uint64_t i = 0; i < FIELD_EXTENSION; ++i) {
+                if(!Goldilocks::isZero(dest[FIELD_EXTENSION*row + i])) {
+                    isValid = false;
+                    cout << "Constraint check failed at row " << row << " with value: [" << Goldilocks::toString(dest[FIELD_EXTENSION*row]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*row + 1]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*row + 2]) << "]" << endl;
+                    break;
+                }
+            }
         } else {
             exitProcess();
             exit(-1);
         }
+
+        return isValid;
     }
     
-    virtual void verifyConstraints(uint64_t stage) {
+    bool verifyConstraints(uint64_t stage) {
+        bool isValid = true;
         for (uint64_t i = 0; i < cHelpers.constraintsInfoDebug.size(); i++) {
             if(cHelpers.constraintsInfoDebug[i].stage == stage) {
                 Goldilocks::Element* pAddr = &params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]];
-                calculateConstraint(pAddr, i);
+                if(!verifyConstraint(pAddr, i)) {
+                    isValid = false;
+                };
             }
         }
+        return isValid;
     }
 
-    virtual void calculateConstraint(Goldilocks::Element* dest, uint64_t constraintId) {
-        uint64_t domainSize = 1 << starkInfo.starkStruct.nBits;
-        Goldilocks::Element* validConstraint = new Goldilocks::Element[domainSize];
-    #pragma omp parallel for
-        for(uint64_t i = 0; i < domainSize; ++i) {
-            validConstraint[i] = Goldilocks::one();
-        }  
+    bool verifyConstraint(Goldilocks::Element* dest, uint64_t constraintId) {
+        TimerLog(CHECKING_CONSTRAINT);
+        cout << "--------------------------------------------------------" << endl;
+        cout << cHelpers.constraintsInfoDebug[constraintId].line << endl;
+        cout << "--------------------------------------------------------" << endl;
         
         calculateExpressions(dest, cHelpers.cHelpersArgsDebug, cHelpers.constraintsInfoDebug[constraintId], false, false);
 
-
+        uint64_t N = (1 << starkInfo.starkStruct.nBits);
         bool isValidConstraint = true;
         uint64_t nInvalidRows = 0;
         uint64_t maxInvalidRowsDisplay = 100;
-        for(uint64_t i = 0; i < domainSize; ++i) {
-            if(!verifyConstraint(dest, cHelpers.constraintsInfoDebug[constraintId], i)) {
-                isValidConstraint = false;
-                if(nInvalidRows < maxInvalidRowsDisplay) {
-                    cout << "Constraint check failed at " << i << endl;
-                    nInvalidRows++;
-                } else {
-                    cout << "There are more than " << maxInvalidRowsDisplay << " invalid rows" << endl;
-                    break;
-                }
+        for(uint64_t i = 0; i < N; ++i) {
+            if(nInvalidRows >= maxInvalidRowsDisplay) {
+                cout << "There are more than " << maxInvalidRowsDisplay << " invalid rows for constraint " << i << endl;
+                break;
+            }
+            if(!checkConstraint(dest, cHelpers.constraintsInfoDebug[constraintId], i)) {
+                if(isValidConstraint) isValidConstraint = false;
+                nInvalidRows++;
             }
         }
         if(isValidConstraint) {
-            TimerLog(CONSTRAINT_CHECKS_PASSED);
+            TimerLog(VALID_CONSTRAINT);
+            return true;
         } else {
-            TimerLog(CONSTRAINT_CHECKS_FAILED);
+            TimerLog(INVALID_CONSTRAINT);
+            return false;
         }
     }
  
@@ -268,7 +298,7 @@ public:
         subProofValuesCalculated[subproofValueId] = true;
     }
 
-    virtual void calculateExpression(Goldilocks::Element* dest, uint64_t expressionId, bool inverse = false) {
+    void calculateExpression(Goldilocks::Element* dest, uint64_t expressionId, bool inverse = false) {
         bool domainExtended = expressionId == starkInfo.cExpId || expressionId == starkInfo.friExpId;
         calculateExpressions(dest, cHelpers.cHelpersArgsExpressions, cHelpers.expressionsInfo[expressionId], domainExtended, inverse);
     }

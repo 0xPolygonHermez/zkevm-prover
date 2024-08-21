@@ -6,7 +6,6 @@ CHelpers::CHelpers(string file) {
 }
 
 void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
- 
     cHelpersBin->startReadSection(CHELPERS_IMPOLS_SECTION);
 
     uint32_t nOpsImPols = cHelpersBin->readU32LE();
@@ -248,7 +247,9 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
 
         parserParamsConstraint.nSubproofValuesUsed = cHelpersBin->readU32LE();
         parserParamsConstraint.subproofValuesOffset = cHelpersBin->readU32LE();
-    
+
+        parserParamsConstraint.line = cHelpersBin->readString();
+
         constraintsInfoDebug.push_back(parserParamsConstraint);
     }
 

@@ -99,7 +99,7 @@ int main(int argc, char **argv)
     }
 
     nlohmann::ordered_json jProof;
-
+    
     if(testName == "all") {
         FRIProof<Goldilocks::Element> fproof(starkInfo);
         ConstPols<Goldilocks::Element> constPols(starkInfo, constPolsFile);

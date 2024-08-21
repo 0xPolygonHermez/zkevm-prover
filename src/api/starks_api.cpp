@@ -464,6 +464,12 @@ void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams)
     return cHelpersSteps;
 }
 
+bool verify_constraints(void *pCHelpersSteps, uint64_t step)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    return cHelpersSteps->verifyConstraints(step);
+}
+
 void set_commit_calculated(void *pCHelpersSteps, uint64_t id)
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;

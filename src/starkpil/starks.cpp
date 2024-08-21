@@ -61,6 +61,8 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
     TimerStopAndLog(STARK_STEP_0);
 
+    bool validConstraints = true;
+
     for (uint64_t step = 1; step <= starkInfo.nStages; step++)
     {
         TimerStartExpr(STARK_STEP, step);
@@ -81,7 +83,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
 
         if (debug)
         {
-            cHelpersSteps.verifyConstraints(step);
+            validConstraints = cHelpersSteps.verifyConstraints(step);
             Goldilocks::Element randomValues[4] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
             addTranscriptGL(transcript, randomValues, 4);
         }
@@ -93,7 +95,14 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
         TimerStopAndLogExpr(STARK_STEP, step);
     }
 
-    if (debug) return;
+    if (debug) {
+        if(validConstraints) {
+            TimerLog(ALL_CONSTRAINTS_ARE_VALID);
+        } else {
+            TimerLog(INVALID_CONSTRAINTS);
+        }
+        return;
+    }
 
     TimerStart(STARK_STEP_Q);
 
