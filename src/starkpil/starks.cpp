@@ -169,7 +169,7 @@ void Starks<ElementType>::genProof(FRIProof<ElementType> &proof, Goldilocks::Ele
     
     for (uint64_t step = 0; step < starkInfo.starkStruct.steps.size(); step++)
     {
-        computeFRIFolding(proof, friPol, step, challenge);
+        computeFRIFolding(step, cHelpersSteps, challenge, proof);
         if (step < starkInfo.starkStruct.steps.size() - 1)
         {
             addTranscript(transcript, &proof.proofs.fri.trees[step + 1].root[0], nFieldElements);
@@ -245,6 +245,7 @@ void Starks<ElementType>::calculateFRIPolynomial(CHelpersSteps &cHelpersSteps)
     TimerStart(STARK_CALCULATE_FRI_POLYNOMIAL);
     cHelpersSteps.calculateExpression(&cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("f", true)]], starkInfo.friExpId);
     TimerStopAndLog(STARK_CALCULATE_FRI_POLYNOMIAL);
+    cHelpersSteps.printExpression(&cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("f", true)]], NExtended, 3, true);
 }
 
 
@@ -452,7 +453,7 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, CHelpersSteps &cHelpersSt
         }
         // for (uint64_t k = 0; k < NExtended; k++)
         // {
-        //     Goldilocks3::sub((Goldilocks3::Element &)(&cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)  + (k + i * NExtended) * FIELD_EXTENSION]), x[k], (Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]));
+        //     Goldilocks3::sub((Goldilocks3::Element &)(cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]  + (k + i * NExtended) * FIELD_EXTENSION]), x[k], (Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]));
         // }
     }
 
@@ -473,7 +474,7 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, CHelpersSteps &cHelpersSt
         }
         // for (uint64_t k = 0; k < NExtended; k++)
         // {
-        //     Goldilocks3::mul((Goldilocks3::Element &)(cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true) + (k + i * NExtended) * FIELD_EXTENSION]), (Goldilocks3::Element &)(&params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), x[k]);
+        //     Goldilocks3::mul((Goldilocks3::Element &)(cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), (Goldilocks3::Element &)(cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), x[k]);
         // }
     }
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
@@ -482,8 +483,9 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, CHelpersSteps &cHelpersSt
 }
 
 template <typename ElementType>
-void Starks<ElementType>::computeFRIFolding(FRIProof<ElementType> &fproof, Goldilocks::Element* pol, uint64_t step, Goldilocks::Element *challenge)
+void Starks<ElementType>::computeFRIFolding(uint64_t step, CHelpersSteps& cHelpersSteps, Goldilocks::Element *challenge, FRIProof<ElementType> &fproof)
 {
+    Goldilocks::Element* pol = &cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("f", true)]];
     FRI<ElementType>::fold(step, fproof, pol, challenge, starkInfo, treesFRI);
 }
 

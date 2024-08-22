@@ -271,7 +271,7 @@ public:
 
     void computeFRIPol(uint64_t step, CHelpersSteps &cHelpersSteps);
     
-    void computeFRIFolding(FRIProof<ElementType> &fproof, Goldilocks::Element* pol, uint64_t step, Goldilocks::Element *challenge);
+    void computeFRIFolding(uint64_t step, CHelpersSteps& cHelpersSteps, Goldilocks::Element *challenge, FRIProof<ElementType> &fproof);
     void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);
 
     void calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements);

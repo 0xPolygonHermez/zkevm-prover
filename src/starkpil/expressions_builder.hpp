@@ -78,7 +78,7 @@ public:
         }
     }
 
-    HintFieldInfo getHintField(uint64_t hintId, std::string hintFieldName, bool dest) {
+    HintFieldInfo getHintField(uint64_t hintId, std::string hintFieldName, bool dest, bool firstStage) {
         uint64_t deg = 1 << starkInfo.starkStruct.nBits;
 
         if(cHelpers.hints.size() == 0) {
@@ -181,7 +181,7 @@ public:
         }
     }
 
-    virtual void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse) {};
+    virtual void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool firstStage = false, bool inverse = false) {};
 
     bool checkConstraint(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row) {
         if(row < parserParams.firstRow || row > parserParams.lastRow) return true;
@@ -228,7 +228,7 @@ public:
         cout << cHelpers.constraintsInfoDebug[constraintId].line << endl;
         cout << "--------------------------------------------------------" << endl;
         
-        calculateExpressions(dest, cHelpers.cHelpersArgsDebug, cHelpers.constraintsInfoDebug[constraintId], false, false);
+        calculateExpressions(dest, cHelpers.cHelpersArgsDebug, cHelpers.constraintsInfoDebug[constraintId], false, false, false);
 
         uint64_t N = (1 << starkInfo.starkStruct.nBits);
         bool isValidConstraint = true;
@@ -292,61 +292,48 @@ public:
 
     void calculateExpression(Goldilocks::Element* dest, uint64_t expressionId, bool inverse = false) {
         bool domainExtended = expressionId == starkInfo.cExpId || expressionId == starkInfo.friExpId;
-        calculateExpressions(dest, cHelpers.cHelpersArgsExpressions, cHelpers.expressionsInfo[expressionId], domainExtended, inverse);
+        calculateExpressions(dest, cHelpers.cHelpersArgsExpressions, cHelpers.expressionsInfo[expressionId], domainExtended, false, inverse);
     }
 
-    void printPol(Goldilocks::Element* pol, uint64_t deg, uint64_t dim) {
+    void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, bool printValues = false) {
         Polinomial p = Polinomial(pol, deg, dim, dim);
         MerkleTreeGL *mt_ = new MerkleTreeGL(starkInfo.starkStruct.merkleTreeArity, true, deg, dim, pol);
         mt_->merkelize();
 
         Goldilocks::Element root[4];
-        cout << "--------------------" << endl;
-        cout << "HELLO: " << endl;
         mt_->getRoot(&root[0]);
-        cout << "--------------------" << endl;
 
-        // for(uint64_t i = 0; i < deg; ++i) {
-        //     if(dim == 3) {
-        //         cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
-        //     } else {
-        //         cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
-        //     }
-        // }
+        if(printValues) {
+            cout << "PRINTING VALUES" << endl;
+            for(uint64_t i = 0; i < 100; ++i) {
+            if(dim == 3) {
+                    cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
+                } else {
+                    cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
+                }
+            }
+        }
+        
 
         delete mt_;
     }
 
-    void printPolRoot(uint64_t polId, StepsParams &params)
+    void printPolById(uint64_t polId, bool printValues = false)
     {   
         uint64_t N = 1 << starkInfo.starkStruct.nBits;
         PolMap polInfo = starkInfo.cmPolsMap[polId];
         Polinomial p;
         starkInfo.getPolynomial(p, params.pols, true, polId, false);
-
+    
         Polinomial pCol;
         Goldilocks::Element *pBuffCol = new Goldilocks::Element[polInfo.dim * N];
         pCol.potConstruct(pBuffCol, N, polInfo.dim, polInfo.dim);
         Polinomial::copy(pCol, p);
 
-        MerkleTreeGL *mt_ = new MerkleTreeGL(starkInfo.starkStruct.merkleTreeArity, true, N, polInfo.dim, pBuffCol);
-        mt_->merkelize();
-
-        Goldilocks::Element root[4];
         cout << "--------------------" << endl;
-        cout << "NAME: " << polInfo.name << endl;
-        mt_->getRoot(&root[0]);
-        cout << "--------------------" << endl;
+        cout << "Printing root of: " << polInfo.name << " (pol id " << polId << ")" << endl;
+        printExpression(pBuffCol, N, polInfo.dim, printValues);
 
-        for(uint64_t i = 0; i < N; ++i) {
-            if(polInfo.dim == 3) {
-                cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
-            } else {
-                cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
-            }
-        }
-
-        delete mt_;
         delete pBuffCol;
     }
 };

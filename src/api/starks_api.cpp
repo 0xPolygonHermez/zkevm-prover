@@ -262,10 +262,10 @@ void *get_fri_pol(void *pStarks, void *cHelpersSteps)
     return &chelpersSteps.params.pols[starks->starkInfo.mapOffsets[std::make_pair("f", true)]];
 }
 
-void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge)
+void compute_fri_folding(void *pStarks, uint64_t step, void *pChelpersSteps, void *pChallenge,  void *pProof)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeFRIFolding(*(FRIProof<Goldilocks::Element> *)pProof, (Goldilocks::Element *)pFriPol, step, (Goldilocks::Element *)pChallenge);
+    starks->computeFRIFolding(step, *(CHelpersSteps *)pChelpersSteps, (Goldilocks::Element *)pChallenge, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
 void compute_fri_queries(void *pStarks, void *pProof, uint64_t *friQueries)
@@ -486,10 +486,10 @@ void can_impols_be_calculated(void *pCHelpersSteps, uint64_t step)
     cHelpersSteps->canImPolsBeCalculated(step);
 }
 
-void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char *hintFieldName, bool dest) 
+void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char *hintFieldName, bool dest, bool firstStage) 
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
-    HintFieldInfo hintFieldInfo = cHelpersSteps->getHintField(hintId, string(hintFieldName), dest);
+    HintFieldInfo hintFieldInfo = cHelpersSteps->getHintField(hintId, string(hintFieldName), dest, firstStage);
     return new HintFieldInfo(hintFieldInfo);
 }
 
