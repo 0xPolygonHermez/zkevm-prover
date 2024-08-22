@@ -1494,15 +1494,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     Opcode singleInfo;
 
-    if (ctx.proverRequest.input.bNoCounters)
-    {
-        full_trace.emplace_back(singleInfo);
-#ifdef LOG_TIME_STATISTICS
-        tms.add("onOpcode", TimeDiff(t));
-#endif
-        return ZKR_SUCCESS;
-    }
-
     mpz_class auxScalar;
 
 #ifdef LOG_TIME_STATISTICS
@@ -1530,6 +1521,16 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getCodeID", TimeDiff(top));
 #endif
+
+    if (ctx.proverRequest.input.bNoCounters && (codeId != 0xa0 /* LOG0 */))
+    {
+        full_trace.emplace_back(singleInfo);
+#ifdef LOG_TIME_STATISTICS
+        tms.add("onOpcode", TimeDiff(t));
+#endif
+        return ZKR_SUCCESS;
+    }
+
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
