@@ -11,7 +11,7 @@ public:
     vector<uint64_t> offsetsStages;
     vector<uint64_t> buffTOffsetsStages;
 
-    CHelpersSteps(StarkInfo& _starkInfo, CHelpers& _cHelpers, StepsParams& _params) : ExpressionsBuilder(_starkInfo, _cHelpers, _params) {};
+    CHelpersSteps(StarkInfo& _starkInfo, CHelpers& _cHelpers, ConstPols& _constPols) : ExpressionsBuilder(_starkInfo, _cHelpers, _constPols) {};
 
     inline void loadPolynomials(ParserArgs &parserArgs, ParserParams &parserParams, __m256i *bufferT_, uint64_t row, bool domainExtended) {
         uint64_t nOpenings = starkInfo.openingPoints.size();

@@ -598,7 +598,7 @@ void Prover::genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t l
     
     FRIProof<Goldilocks::Element> fproof(starkZkevm->starkInfo);
 
-    starkZkevm->genProof(fproof, &publics[0]);
+    // starkZkevm->genProof(pAddress, fproof, &publics[0]);
 
     TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
     TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
@@ -629,7 +629,7 @@ void Prover::genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t l
     FRIProof<Goldilocks::Element> fproofC12a(starksC12a->starkInfo);
 
     // Generate the proof
-    starksC12a->genProof(fproofC12a, publics);
+    // starksC12a->genProof(pAddress, fproofC12a, publics);
 
     TimerStopAndLog(STARK_C12_A_PROOF_BATCH_PROOF);
     TimerStart(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
@@ -662,7 +662,7 @@ void Prover::genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t l
     TimerStart(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
     
     FRIProof<Goldilocks::Element> fproofRecursive1(starksRecursive1->starkInfo);
-    starksRecursive1->genProof(fproofRecursive1, publics);
+    // starksRecursive1->genProof(pAddress, fproofRecursive1, publics);
 
     TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
 
@@ -791,7 +791,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     TimerStart(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
     FRIProof<Goldilocks::Element> fproofRecursive2(starksRecursive2->starkInfo);
     
-    starksRecursive2->genProof(fproofRecursive2, publics);
+    // starksRecursive2->genProof(pAddress, fproofRecursive2, publics);
 
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
 
@@ -880,7 +880,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
     TimerStart(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
     FRIProof<RawFr::Element> fproofRecursiveF(starksRecursiveF->starkInfo);
-    starksRecursiveF->genProof(fproofRecursiveF, publics);
+    // starksRecursiveF->genProof(pAddress, fproofRecursiveF, publics);
 
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
 

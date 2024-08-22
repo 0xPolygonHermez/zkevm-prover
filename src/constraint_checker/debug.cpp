@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 
         StarkInfo starkInfo(starkInfoFile);
         CHelpers cHelpers(cHelpersFile);
-        ConstPols<Goldilocks::Element> constPols(starkInfo, constFile);
+        ConstPols constPols(starkInfo, constFile);
 
         void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
         void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
@@ -116,9 +116,11 @@ int main(int argc, char **argv)
 
         FRIProof<Goldilocks::Element> fproof(starkInfo);
 
-        Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, true);
+        Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, constPols, true);
 
-        starks.genProof(fproof, &publicInputs[0]); 
+        CHelpersSteps cHelpersSteps(starkInfo, chelpers, constPols);
+
+        starks.genProof(fproof, cHelpersSteps, &publicInputs[0]); 
 
         return EXIT_SUCCESS;
     } catch (const exception &e) {

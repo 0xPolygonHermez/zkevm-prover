@@ -102,21 +102,24 @@ int main(int argc, char **argv)
     
     if(testName == "all") {
         FRIProof<Goldilocks::Element> fproof(starkInfo);
-        ConstPols<Goldilocks::Element> constPols(starkInfo, constPolsFile);
-        Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, false);
-        starks.genProof(fproof, &publicInputs[0]); 
+        ConstPols constPols(starkInfo, constPolsFile);
+        Starks<Goldilocks::Element> starks(config, starkInfo, false);
+        CHelpersSteps cHelpersSteps(starkInfo, cHelpers, constPols);
+        starks.genProof((Goldilocks::Element *)pAddress, fproof, cHelpersSteps, &publicInputs[0]); 
         jProof = fproof.proofs.proof2json();
     } else if(testName == "compressor") {
         FRIProof<RawFr::Element> fproof(starkInfo);
-        ConstPols<RawFr::Element> constPols(starkInfo, constPolsFile);
-        Starks<RawFr::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, false);
-        starks.genProof(fproof, &publicInputs[0]); 
+        ConstPols constPols(starkInfo, constPolsFile);
+        Starks<RawFr::Element> starks(config, starkInfo, false);
+        CHelpersSteps cHelpersSteps(starkInfo, cHelpers, constPols);
+        starks.genProof((Goldilocks::Element *)pAddress, fproof, cHelpersSteps, &publicInputs[0]); 
         jProof = fproof.proofs.proof2json();
     } else if(testName == "fibonacci_pil2") {
         FRIProof<Goldilocks::Element> fproof(starkInfo);
-        ConstPols<Goldilocks::Element> constPols(starkInfo, constPolsFile);
-        Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, cHelpers, constPols, false);
-        starks.genProof(fproof, &publicInputs[0]); 
+        ConstPols constPols(starkInfo, constPolsFile);
+        Starks<Goldilocks::Element> starks(config, starkInfo, false);
+        CHelpersSteps cHelpersSteps(starkInfo, cHelpers, constPols);
+        starks.genProof((Goldilocks::Element *)pAddress, fproof, cHelpersSteps, &publicInputs[0]); 
         jProof = fproof.proofs.proof2json();
     }
 

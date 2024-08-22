@@ -113,17 +113,17 @@ void starkinfo_free(void *pStarkInfo)
     delete starkInfo;
 }
 
-void *starks_new(void *pConfig, void *starkInfo, void *cHelpers, void *constPols, void *pAddress)
+void *starks_new(void *pConfig, void *starkInfo)
 {
-    return new Starks<Goldilocks::Element>(*(Config *)pConfig, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, *(ConstPols<Goldilocks::Element> *) constPols, false);
+    return new Starks<Goldilocks::Element>(*(Config *)pConfig, *(StarkInfo *)starkInfo,  false);
 }
 
-void *starks_new_default(void *starkInfo, void *cHelpers, void *constPols, void *pAddress)
+void *starks_new_default(void *starkInfo)
 {
     Config configLocal;
     configLocal.runFileGenBatchProof = true; //to force function generateProof to return true
 
-    return new Starks<Goldilocks::Element>(configLocal, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, *(ConstPols<Goldilocks::Element> *) constPols, false);
+    return new Starks<Goldilocks::Element>(configLocal, *(StarkInfo *)starkInfo, false);
 }
 
 
@@ -149,12 +149,7 @@ void chelpers_free(void *pChelpers)
     delete cHelpers;
 }
 
-void init_hints()
-{
-    HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
-    HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
-    HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
-}
+
 
 void *steps_params_new(void* pConstPols, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs)
 {
@@ -163,7 +158,7 @@ void *steps_params_new(void* pConstPols, void *pChallenges, void *pSubproofValue
     Goldilocks::Element *publicInputs = (Goldilocks::Element *)pPublicInputs;
     Goldilocks::Element *evals = (Goldilocks::Element *)pEvals;
 
-    ConstPols<Goldilocks::Element> *constPols = (ConstPols<Goldilocks::Element> *)pConstPols;
+    ConstPols *constPols = (ConstPols *)pConstPols;
 
     StepsParams *params = new StepsParams{
         pols : nullptr,
@@ -199,16 +194,16 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
     starks->ffi_treesGL_get_root(index, (Goldilocks::Element *)dst);
 }
 
-void calculate_quotient_polynomial(void *pStarks, void *pChelpersSteps)
+void calculate_quotient_polynomial(void *pChelpersSteps)
 {
-     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-     starks->calculateQuotientPolynomial(*(CHelpersSteps *)pChelpersSteps);
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    cHelpersSteps->calculateQuotientPolynomial();
 }
 
-void calculate_impols_expressions(void* pStarks, uint64_t step, void *pChelpersSteps)
+void calculate_impols_expressions(void *pChelpersSteps, uint64_t step)
 {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateImPolsExpressions(step, *(CHelpersSteps *)pChelpersSteps);
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    cHelpersSteps->calculateImPolsExpressions(step);
 }
 
 void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pChelpersSteps, void *pProof)
@@ -299,15 +294,15 @@ void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElemen
 }
 
 void *const_pols_new(void *pStarkInfo, char* constPolsFile) {
-    return new ConstPols<Goldilocks::Element>(*(StarkInfo *)pStarkInfo, constPolsFile);
+    return new ConstPols(*(StarkInfo *)pStarkInfo, constPolsFile);
 }
 
 void *const_pols_new(void *pStarkInfo, char* constPolsFile, char* constTreeFile) {
-    return new ConstPols<Goldilocks::Element>(*(StarkInfo *)pStarkInfo, constPolsFile, constTreeFile);
+    return new ConstPols(*(StarkInfo *)pStarkInfo, constPolsFile, constTreeFile);
 }
 
 void const_pols_free(void *pConstPols) {
-    ConstPols<Goldilocks::Element> *constPols = (ConstPols<Goldilocks::Element> *)pConstPols;
+    ConstPols *constPols = (ConstPols *)pConstPols;
     delete constPols;
 }
 
@@ -455,9 +450,9 @@ void goldilocks_linear_hash(void *pInput, void *pOutput)
 
 // CHelpersSteps
 
-void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams)
+void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pConstPols)
 {
-    CHelpersSteps *cHelpersSteps = new CHelpersSteps(*(StarkInfo *)pStarkInfo, *(CHelpers *)pChelpers, *(StepsParams *)pParams);
+    CHelpersSteps *cHelpersSteps = new CHelpersSteps(*(StarkInfo *)pStarkInfo, *(CHelpers *)pChelpers, *(ConstPols *)pConstPols);
     return cHelpersSteps;
 }
 
@@ -490,6 +485,11 @@ void set_trace_pointer(void *pChelpersSteps, void *ptr)
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
     cHelpersSteps->params.pols = (Goldilocks::Element *)ptr;
 }
+
+ void *get_evals(void *pChelpersSteps) {
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    return cHelpersSteps->params.evals;
+ }
 
 void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char *hintFieldName, bool dest, bool firstStage) 
 {

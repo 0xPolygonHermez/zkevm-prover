@@ -1,6 +1,7 @@
 #ifndef EXPRESSIONS_BUILDER_HPP
 #define EXPRESSIONS_BUILDER_HPP
 #include "chelpers.hpp"
+#include "const_pols.hpp"
 #include "stark_info.hpp"
 #include "steps.hpp"
 #include "hint_handler.hpp"
@@ -19,23 +20,45 @@ struct HintFieldInfo {
     Goldilocks::Element* values;
 };
 
-
 class ExpressionsBuilder {
 public:
 
     StarkInfo& starkInfo;
     CHelpers& cHelpers;
-    StepsParams& params;
+    ConstPols& constPols;
+    StepsParams params;
 
     vector<bool> subProofValuesCalculated;
     vector<bool> commitsCalculated;
 
-    ExpressionsBuilder(StarkInfo& _starkInfo, CHelpers& _cHelpers, StepsParams& _params) : starkInfo(_starkInfo),  cHelpers(_cHelpers), params(_params) {
+    ExpressionsBuilder(StarkInfo& _starkInfo, CHelpers& _cHelpers, ConstPols& _constPols) : starkInfo(_starkInfo),  cHelpers(_cHelpers), constPols(_constPols) {
+        params = {
+            pols : nullptr,
+            constPols : constPols.pConstPolsAddress,
+            constPolsExtended : constPols.pConstPolsAddressExtended,
+            challenges : nullptr,
+            subproofValues : nullptr,
+            evals : nullptr,
+            zi : constPols.zi,
+            publicInputs : nullptr,
+        };
+
         commitsCalculated.resize(starkInfo.cmPolsMap.size(), false);
         subProofValuesCalculated.resize(starkInfo.nSubProofValues, false);
     };
 
     virtual ~ExpressionsBuilder() {};
+
+    void setTracePointer(Goldilocks::Element* ptr) {
+        params.pols = ptr;
+    }
+    
+    void initParams(Goldilocks::Element* challenges, Goldilocks::Element* subproofValues, Goldilocks::Element* evals, Goldilocks::Element* publicInputs) {
+        params.challenges = challenges;
+        params.subproofValues = subproofValues;
+        params.evals = evals;
+        params.publicInputs = publicInputs;
+    } 
 
     void setCommitCalculated(uint64_t id) {
         commitsCalculated[id] = true;
@@ -295,6 +318,39 @@ public:
         calculateExpressions(dest, cHelpers.cHelpersArgsExpressions, cHelpers.expressionsInfo[expressionId], domainExtended, false, inverse);
     }
 
+    void calculateImPolsExpressions(uint64_t step) {
+        TimerStart(STARK_CALCULATE_IMPOLS_EXPS);
+
+        uint64_t N = 1 << starkInfo.starkStruct.nBits;
+        
+        Goldilocks::Element* pAddr = &params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]];
+        for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); i++) {
+            if(starkInfo.cmPolsMap[i].imPol && starkInfo.cmPolsMap[i].stage == step) {
+                calculateExpression(pAddr, starkInfo.cmPolsMap[i].expId);
+                Goldilocks::Element* imAddr = &params.pols[starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), false)] + starkInfo.cmPolsMap[i].stagePos];
+            #pragma omp parallel
+                for(uint64_t j = 0; j < N; ++j) {
+                    std::memcpy(&imAddr[j*starkInfo.mapSectionsN["cm" + to_string(step)]], &pAddr[j*starkInfo.cmPolsMap[i].dim], starkInfo.cmPolsMap[i].dim * sizeof(Goldilocks::Element));
+                }
+                setCommitCalculated(i);
+            }
+        }
+        
+        TimerStopAndLog(STARK_CALCULATE_IMPOLS_EXPS);
+    }
+
+
+    void calculateQuotientPolynomial() {
+        TimerStart(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
+        calculateExpression(&params.pols[starkInfo.mapOffsets[std::make_pair("q", true)]], starkInfo.cExpId);
+        for(uint64_t i = 0; i < starkInfo.cmPolsMap.size(); i++) {
+            if(starkInfo.cmPolsMap[i].stage == starkInfo.nStages + 1) {
+                setCommitCalculated(i);
+            }
+        }
+        TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
+    }
+
     void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, bool printValues = false) {
         Polinomial p = Polinomial(pol, deg, dim, dim);
         MerkleTreeGL *mt_ = new MerkleTreeGL(starkInfo.starkStruct.merkleTreeArity, true, deg, dim, pol);
@@ -305,7 +361,7 @@ public:
 
         if(printValues) {
             cout << "PRINTING VALUES" << endl;
-            for(uint64_t i = 0; i < 100; ++i) {
+            for(uint64_t i = 0; i < deg; ++i) {
             if(dim == 3) {
                     cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
                 } else {

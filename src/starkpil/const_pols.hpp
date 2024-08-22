@@ -13,7 +13,6 @@
 #include "merkleTreeGL.hpp"
 
 
-template <typename ElementType>
 class ConstPols 
 {
 private:
@@ -26,11 +25,10 @@ private:
     uint64_t merkleTreeCustom;
 
 public:
-    using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
-
     Goldilocks::Element *pConstPolsAddress;
     Goldilocks::Element *pConstPolsAddressExtended;
     Goldilocks::Element *pConstTreeAddress;
+    Goldilocks::Element *zi;
 
     ConstPols(StarkInfo& starkInfo_, std::string constPolsFile): starkInfo(starkInfo_), N(1 << starkInfo.starkStruct.nBits), NExtended(1 << starkInfo.starkStruct.nBitsExt) {
         
@@ -69,6 +67,8 @@ public:
         memcpy(&pConstTreeAddress[2 + starkInfo.nConstants * NExtended], mt.nodes, mt.numNodes * sizeof(Goldilocks::Element));
 
         TimerStopAndLog(CALCULATE_CONST_TREE_TO_MEMORY);
+
+        computeZerofier();
     }
 
     ConstPols(StarkInfo& starkInfo_, std::string constPolsFile, std::string constTreeFile) : starkInfo(starkInfo_), N(1 << starkInfo.starkStruct.nBits), NExtended(1 << starkInfo.starkStruct.nBitsExt) {
@@ -94,6 +94,8 @@ public:
         
         pConstPolsAddressExtended = &pConstTreeAddress[2];
         TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
+
+        computeZerofier();
     }
 
     void loadConstPols(StarkInfo& starkInfo, std::string constPolsFile) {
@@ -129,21 +131,113 @@ public:
             }
         }
 
+        uint64_t elementSize = starkInfo.starkStruct.verificationHashType == std::string("BN128") ? sizeof(RawFr::Element) : sizeof(Goldilocks::Element);
         uint64_t numElements = (1 << starkInfo.starkStruct.nBitsExt) * starkInfo.nConstants * sizeof(Goldilocks::Element);
-        uint64_t total = numElements + acc * nFieldElements * sizeof(ElementType);
+        uint64_t total = numElements + acc * nFieldElements * elementSize;
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             total += 16; // HEADER
         } else {
-            total += merkleTreeArity * sizeof(ElementType);
+            total += merkleTreeArity * elementSize;
         }
         return total; 
         
     };
 
+    void computeZerofier() {
+        TimerStart(COMPUTE_ZHINV);
+        zi = new Goldilocks::Element[starkInfo.boundaries.size() * NExtended];
+
+        for(uint64_t i = 0; i < starkInfo.boundaries.size(); ++i) {
+            Boundary boundary = starkInfo.boundaries[i];
+            if(boundary.name == "everyRow") {
+                buildZHInv();
+            } else if(boundary.name == "firstRow") {
+                buildOneRowZerofierInv(i, 0);
+            } else if(boundary.name == "lastRow") {
+                buildOneRowZerofierInv(i, N);
+            } else if(boundary.name == "everyRow") {
+                buildFrameZerofierInv(i, boundary.offsetMin, boundary.offsetMax);
+            }
+        }
+        TimerStopAndLog(COMPUTE_ZHINV);
+    }
+
+    void buildZHInv()
+    {
+        uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
+        uint64_t extend = (1 << extendBits);
+        
+        Goldilocks::Element w = Goldilocks::one();
+        Goldilocks::Element sn = Goldilocks::shift();
+
+        for (uint64_t i = 0; i < starkInfo.starkStruct.nBits; i++) Goldilocks::square(sn, sn);
+
+        for (uint64_t i=0; i<extend; i++) {
+            Goldilocks::inv(zi[i], (sn * w) - Goldilocks::one());
+            Goldilocks::mul(w, w, Goldilocks::w(extendBits));
+        }
+
+        #pragma omp parallel for
+        for (uint64_t i=extend; i<NExtended; i++) {
+            zi[i] = zi[i % extend];
+        }
+    };
+
+    void buildOneRowZerofierInv(uint64_t offset, uint64_t rowIndex)
+    {
+        Goldilocks::Element root = Goldilocks::one();
+
+        for(uint64_t i = 0; i < rowIndex; ++i) {
+            root = root * Goldilocks::w(starkInfo.starkStruct.nBits);
+        }
+
+        Goldilocks::Element w = Goldilocks::one();
+        Goldilocks::Element sn = Goldilocks::shift();
+
+        for(uint64_t i = 0; i < NExtended; ++i) {
+            Goldilocks::Element x = sn * w;
+            Goldilocks::inv(zi[i + offset * NExtended], (x - root) * zi[i]);
+            w = w * Goldilocks::w(starkInfo.starkStruct.nBitsExt);
+        }
+    }
+
+    void buildFrameZerofierInv(uint64_t offset, uint64_t offsetMin, uint64_t offsetMax)
+    {
+        uint64_t nRoots = offsetMin + offsetMax;
+        Goldilocks::Element roots[nRoots];
+
+        for(uint64_t i = 0; i < offsetMin; ++i) {
+            roots[i] = Goldilocks::one();
+            for(uint64_t j = 0; j < i; ++j) {
+                roots[i] = roots[i] * Goldilocks::w(starkInfo.starkStruct.nBits);
+            }
+        }
+
+        for(uint64_t i = 0; i < offsetMax; ++i) {
+            roots[i + offsetMin] = Goldilocks::one();
+            for(uint64_t j = 0; j < (N - i - 1); ++j) {
+                roots[i + offsetMin] = roots[i + offsetMin] * Goldilocks::w(starkInfo.starkStruct.nBits);
+            }
+        }
+
+        Goldilocks::Element w = Goldilocks::one();
+        Goldilocks::Element sn = Goldilocks::shift();
+
+        for(uint64_t i = 0; i < NExtended; ++i) {
+            zi[i + offset*NExtended] = Goldilocks::one();
+            Goldilocks::Element x = sn * w;
+            for(uint64_t j = 0; j < nRoots; ++j) {
+                zi[i + offset*NExtended] = zi[i + offset*NExtended] * (x - roots[j]);
+            }
+            w = w * Goldilocks::w(starkInfo.starkStruct.nBitsExt);
+        }
+    }
+
     ~ConstPols()
     {
         free(pConstPolsAddress);
         free(pConstTreeAddress);
+        delete zi;
     }
 };
 

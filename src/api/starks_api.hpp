@@ -29,9 +29,9 @@
 
     // Starks
     // ========================================================================================
-    void *starks_new(void *pConfig, void *starkInfo, void *cHelpers, void *constPols, void *pAddress);
+    void *starks_new(void *pConfig, void *starkInfo);
 
-    void *starks_new_default(void *starkInfo, void *cHelpers, void *constPols, void *pAddress);
+    void *starks_new_default(void *starkInfo);
 
     void *get_stark_info(void *pStarks);
     void starks_free(void *pStarks);
@@ -39,15 +39,11 @@
     void *chelpers_new(char* cHelpers);
     void chelpers_free(void *pChelpers);
 
-    void init_hints();
-
-    void *steps_params_new(void *pPols, void*pConstPols, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs);
-    void steps_params_free(void *pStepsParams);
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pChelpersSteps, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
-    void calculate_quotient_polynomial(void *pStarks, void *pChelpersSteps);
-    void calculate_impols_expressions(void* pStarks, uint64_t step, void *pChelpersSteps);
+    void calculate_quotient_polynomial(void *pChelpersSteps);
+    void calculate_impols_expressions(void *pChelpersSteps, uint64_t step);
 
     void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pChelpersSteps, void *pProof);
     void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pChelpersSteps, void *pProof);
@@ -96,8 +92,9 @@
 
     // CHelpersSteps
     
-    void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams);
-    void set_trace_pointer(void *pCHelpersSteps, void * ptr);
+    void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pConstPols);
+    void set_trace_pointer(void *pCHelpersSteps, void *ptr);
+    void init_params(void *pCHelpersSteps, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs);
     bool verify_constraints(void *pCHelpersSteps, uint64_t step);
     void set_commit_calculated(void *pCHelpersSteps, uint64_t id);
     void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step);
