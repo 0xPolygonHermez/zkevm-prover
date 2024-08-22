@@ -97,6 +97,7 @@
     // CHelpersSteps
     
     void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pParams);
+    void set_trace_pointer(void *pCHelpersSteps, void * ptr);
     bool verify_constraints(void *pCHelpersSteps, uint64_t step);
     void set_commit_calculated(void *pCHelpersSteps, uint64_t id);
     void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step);

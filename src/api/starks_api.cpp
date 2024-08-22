@@ -156,9 +156,8 @@ void init_hints()
     HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
 }
 
-void *steps_params_new(void *pPols, void* pConstPols, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs)
+void *steps_params_new(void* pConstPols, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs)
 {
-    Goldilocks::Element *pols = (Goldilocks::Element *)pPols;
     Goldilocks::Element *challenges = (Goldilocks::Element *)pChallenges;
     Goldilocks::Element *subproofValues = (Goldilocks::Element *)pSubproofValues;
     Goldilocks::Element *publicInputs = (Goldilocks::Element *)pPublicInputs;
@@ -167,7 +166,7 @@ void *steps_params_new(void *pPols, void* pConstPols, void *pChallenges, void *p
     ConstPols<Goldilocks::Element> *constPols = (ConstPols<Goldilocks::Element> *)pConstPols;
 
     StepsParams *params = new StepsParams{
-        pols : pols,
+        pols : nullptr,
         constPols : constPols->pConstPolsAddress,
         constPolsExtended : constPols->pConstPolsAddressExtended,
         challenges : challenges,
@@ -484,6 +483,12 @@ void can_impols_be_calculated(void *pCHelpersSteps, uint64_t step)
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
     cHelpersSteps->canImPolsBeCalculated(step);
+}
+
+void set_trace_pointer(void *pChelpersSteps, void *ptr) 
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    cHelpersSteps->params.pols = (Goldilocks::Element *)ptr;
 }
 
 void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char *hintFieldName, bool dest, bool firstStage) 
