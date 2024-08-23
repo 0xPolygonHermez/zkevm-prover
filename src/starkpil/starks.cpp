@@ -11,30 +11,6 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
 {
     TimerStart(STARK_PROOF);
 
-    TimerStart(MERKLE_TREE_ALLOCATION);
-    for (uint64_t i = 0; i < starkInfo.nStages + 1; i++)
-    {
-        std::string section = "cm" + to_string(i + 1);
-        uint64_t nCols = starkInfo.mapSectionsN[section];
-        Goldilocks::Element *pBuffExtended = &pAddress[starkInfo.mapOffsets[std::make_pair(section, true)]];
-        treesGL[i] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom,  NExtended, nCols, pBuffExtended);
-    }
-
-    if(debug) {
-        treesGL[starkInfo.nStages + 1] = new MerkleTreeType();
-    } else {
-        treesGL[starkInfo.nStages + 1] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, (Goldilocks::Element *)cHelpersSteps.constPols.pConstTreeAddress);
-        
-        treesFRI = new MerkleTreeType*[starkInfo.starkStruct.steps.size() - 1];
-        for(uint64_t step = 0; step < starkInfo.starkStruct.steps.size() - 1; ++step) {
-            uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
-            uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
-
-            treesFRI[step] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
-        }
-    }
-    TimerStopAndLog(MERKLE_TREE_ALLOCATION);
-
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
@@ -252,6 +228,7 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, CHelpersSteps &cHelp
     ntt.extendPol(pBuffExtended, pBuff, NExtended, N, nCols, pBuffHelper, 3, nBlocks);
     TimerStopAndLogExpr(STARK_LDE_STEP, step);
     TimerStartExpr(STARK_MERKLETREE_STEP, step);
+    treesGL[step - 1]->setSource(pBuffExtended);
     treesGL[step - 1]->merkelize();
     treesGL[step - 1]->getRoot(&proof.proofs.roots[step - 1][0]);
     TimerStopAndLogExpr(STARK_MERKLETREE_STEP, step);
@@ -342,6 +319,7 @@ void Starks<ElementType>::computeQ(uint64_t step, CHelpersSteps &cHelpersSteps, 
     TimerStopAndLogExpr(STARK_CALCULATE_EXPS_2NS_NTT_STEP, step);
 
     TimerStartExpr(STARK_MERKLETREE_STEP, step);
+    treesGL[step - 1]->setSource(&cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), true)]]);
     treesGL[step - 1]->merkelize();
     treesGL[step - 1]->getRoot(&proof.proofs.roots[step - 1][0]);
 

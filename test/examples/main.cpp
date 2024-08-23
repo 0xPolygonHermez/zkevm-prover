@@ -103,22 +103,22 @@ int main(int argc, char **argv)
     if(testName == "all") {
         FRIProof<Goldilocks::Element> fproof(starkInfo);
         ConstPols constPols(starkInfo, constPolsFile);
-        Starks<Goldilocks::Element> starks(config, starkInfo, false);
         CHelpersSteps cHelpersSteps(starkInfo, cHelpers, constPols);
+        Starks<Goldilocks::Element> starks(config, starkInfo, cHelpersSteps, false);
         starks.genProof((Goldilocks::Element *)pAddress, fproof, cHelpersSteps, &publicInputs[0]); 
         jProof = fproof.proofs.proof2json();
     } else if(testName == "compressor") {
         FRIProof<RawFr::Element> fproof(starkInfo);
         ConstPols constPols(starkInfo, constPolsFile);
-        Starks<RawFr::Element> starks(config, starkInfo, false);
         CHelpersSteps cHelpersSteps(starkInfo, cHelpers, constPols);
+        Starks<RawFr::Element> starks(config, starkInfo, cHelpersSteps, false);
         starks.genProof((Goldilocks::Element *)pAddress, fproof, cHelpersSteps, &publicInputs[0]); 
         jProof = fproof.proofs.proof2json();
     } else if(testName == "fibonacci_pil2") {
         FRIProof<Goldilocks::Element> fproof(starkInfo);
         ConstPols constPols(starkInfo, constPolsFile);
-        Starks<Goldilocks::Element> starks(config, starkInfo, false);
         CHelpersSteps cHelpersSteps(starkInfo, cHelpers, constPols);
+        Starks<Goldilocks::Element> starks(config, starkInfo, cHelpersSteps, false);
         starks.genProof((Goldilocks::Element *)pAddress, fproof, cHelpersSteps, &publicInputs[0]); 
         jProof = fproof.proofs.proof2json();
     }

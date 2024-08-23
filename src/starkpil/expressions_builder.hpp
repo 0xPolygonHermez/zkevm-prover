@@ -28,6 +28,8 @@ public:
     ConstPols& constPols;
     StepsParams params;
 
+    bool params_initialized = false;
+
     vector<bool> subProofValuesCalculated;
     vector<bool> commitsCalculated;
 
@@ -58,7 +60,21 @@ public:
         params.subproofValues = subproofValues;
         params.evals = evals;
         params.publicInputs = publicInputs;
+        
+        params_initialized = true;
     } 
+
+    void resetParams() {
+        params_initialized = false;
+
+        params = {
+            pols : nullptr,
+            challenges : nullptr,
+            subproofValues : nullptr,
+            evals : nullptr,
+            publicInputs : nullptr,
+        };
+    }
 
     void setCommitCalculated(uint64_t id) {
         commitsCalculated[id] = true;
@@ -101,7 +117,7 @@ public:
         }
     }
 
-    HintFieldInfo getHintField(uint64_t hintId, std::string hintFieldName, bool dest, bool firstStage) {
+    HintFieldInfo getHintField(uint64_t hintId, std::string hintFieldName, bool dest) {
         uint64_t deg = 1 << starkInfo.starkStruct.nBits;
 
         if(cHelpers.hints.size() == 0) {
@@ -204,7 +220,7 @@ public:
         }
     }
 
-    virtual void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool firstStage = false, bool inverse = false) {};
+    virtual void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse = false) {};
 
     bool checkConstraint(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row) {
         if(row < parserParams.firstRow || row > parserParams.lastRow) return true;
@@ -251,7 +267,7 @@ public:
         cout << cHelpers.constraintsInfoDebug[constraintId].line << endl;
         cout << "--------------------------------------------------------" << endl;
         
-        calculateExpressions(dest, cHelpers.cHelpersArgsDebug, cHelpers.constraintsInfoDebug[constraintId], false, false, false);
+        calculateExpressions(dest, cHelpers.cHelpersArgsDebug, cHelpers.constraintsInfoDebug[constraintId], false, false);
 
         uint64_t N = (1 << starkInfo.starkStruct.nBits);
         bool isValidConstraint = true;
@@ -315,7 +331,7 @@ public:
 
     void calculateExpression(Goldilocks::Element* dest, uint64_t expressionId, bool inverse = false) {
         bool domainExtended = expressionId == starkInfo.cExpId || expressionId == starkInfo.friExpId;
-        calculateExpressions(dest, cHelpers.cHelpersArgsExpressions, cHelpers.expressionsInfo[expressionId], domainExtended, false, inverse);
+        calculateExpressions(dest, cHelpers.cHelpersArgsExpressions, cHelpers.expressionsInfo[expressionId], domainExtended, inverse);
     }
 
     void calculateImPolsExpressions(uint64_t step) {

@@ -3,10 +3,10 @@
 #include <algorithm> // std::max
 #include <cassert>
 
-MerkleTreeBN128::MerkleTreeBN128(uint64_t _arity, bool _custom, uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source(_source)
+MerkleTreeBN128::MerkleTreeBN128(uint64_t _arity, bool _custom, uint64_t _height, uint64_t _width, Goldilocks::Element *_source, bool allocate) : height(_height), width(_width), source(_source)
 {
 
-    if (source == NULL)
+    if (source == NULL && allocate)
     {
         source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
         isSourceAllocated = true;
@@ -98,6 +98,11 @@ void MerkleTreeBN128::getRoot(RawFr::Element *root)
 void MerkleTreeBN128::copySource(Goldilocks::Element *_source)
 {
     std::memcpy(source, _source, height * width * sizeof(Goldilocks::Element));
+}
+
+void MerkleTreeBN128::setSource(Goldilocks::Element *_source)
+{
+    source = _source;
 }
 
 Goldilocks::Element MerkleTreeBN128::getElement(uint64_t idx, uint64_t subIdx)

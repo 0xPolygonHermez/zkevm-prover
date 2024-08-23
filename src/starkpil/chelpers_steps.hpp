@@ -98,7 +98,7 @@ public:
         }
     }
 
-    inline void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool firstStage, bool inverse) override {
+    inline void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse) override {
         uint8_t* ops = &parserArgs.ops[parserParams.opsOffset];
         uint16_t* args = &parserArgs.args[parserParams.argsOffset];
         uint64_t* numbers = &parserArgs.numbers[parserParams.numbersOffset];
@@ -117,10 +117,10 @@ public:
         nColsStagesAcc[0] = 0;
         buffTOffsetsStages[0] = 0;
 
-        uint64_t ns = firstStage ? 1 : starkInfo.nStages + 1;
+        uint64_t ns = !params_initialized ? 1 : starkInfo.nStages + 1;
         for(uint64_t stage = 1; stage <= ns; ++stage) {
             std::string section = "cm" + to_string(stage);
-            offsetsStages[stage] = firstStage ? 0 : starkInfo.mapOffsets[std::make_pair(section, domainExtended)];
+            offsetsStages[stage] = !params_initialized ? 0 : starkInfo.mapOffsets[std::make_pair(section, domainExtended)];
             nColsStages[stage] = starkInfo.mapSectionsN[section];
             nColsStagesAcc[stage] = nColsStagesAcc[stage - 1] + nColsStages[stage - 1];
             buffTOffsetsStages[stage] = buffTOffsetsStages[stage - 1] + nOpenings*nColsStages[stage - 1];

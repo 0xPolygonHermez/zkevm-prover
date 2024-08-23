@@ -29,9 +29,9 @@
 
     // Starks
     // ========================================================================================
-    void *starks_new(void *pConfig, void *starkInfo);
+    void *starks_new(void *pConfig, void *starkInfo, void *pCHelpersSteps);
 
-    void *starks_new_default(void *starkInfo);
+    void *starks_new_default(void *starkInfo, void *pCHelpersSteps);
 
     void *get_stark_info(void *pStarks);
     void starks_free(void *pStarks);
@@ -95,11 +95,12 @@
     void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pConstPols);
     void set_trace_pointer(void *pCHelpersSteps, void *ptr);
     void init_params(void *pCHelpersSteps, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs);
+    void reset_params();
     bool verify_constraints(void *pCHelpersSteps, uint64_t step);
     void set_commit_calculated(void *pCHelpersSteps, uint64_t id);
     void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step);
     void can_impols_be_calculated(void *pCHelpersSteps, uint64_t step);
-    void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char* hintFieldName, bool dest, bool firstStage);
+    void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char* hintFieldName);
     void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, char* hintFieldName);
     void chelpers_steps_free(void *pCHelpersSteps);
 

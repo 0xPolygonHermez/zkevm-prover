@@ -60,7 +60,7 @@ private:
 void merkelizeMemory(Goldilocks::Element *pAddress); // function for DBG purposes
 
 public:
-    Starks(const Config &config, StarkInfo &starkInfo_, bool debug_) : config(config),
+    Starks(const Config &config, StarkInfo &starkInfo_, CHelpersSteps& cHelpersSteps, bool debug_) : config(config),
                                                                            starkInfo(starkInfo_),
                                                                            N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
@@ -103,6 +103,25 @@ public:
             S[i] = Goldilocks::mul(S[i - 1], shiftIn);
         }
         TimerStopAndLog(COMPUTE_X);
+
+        TimerStart(MERKLE_TREE_ALLOCATION);
+        treesGL[starkInfo.nStages + 1] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, (Goldilocks::Element *)cHelpersSteps.constPols.pConstTreeAddress);
+        for (uint64_t i = 0; i < starkInfo.nStages + 1; i++)
+        {
+            treesGL[i] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom,  NExtended, starkInfo.mapSectionsN["cm" + to_string(i + 1)], NULL, false);
+        }
+
+        if(!debug) {            
+            treesFRI = new MerkleTreeType*[starkInfo.starkStruct.steps.size() - 1];
+            for(uint64_t step = 0; step < starkInfo.starkStruct.steps.size() - 1; ++step) {
+                uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
+                uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
+
+                treesFRI[step] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
+            }
+        }
+        TimerStopAndLog(MERKLE_TREE_ALLOCATION);
+
     };
     ~Starks()
     {

@@ -113,17 +113,17 @@ void starkinfo_free(void *pStarkInfo)
     delete starkInfo;
 }
 
-void *starks_new(void *pConfig, void *starkInfo)
+void *starks_new(void *pConfig, void *starkInfo, void *pCHelpersSteps)
 {
-    return new Starks<Goldilocks::Element>(*(Config *)pConfig, *(StarkInfo *)starkInfo,  false);
+    return new Starks<Goldilocks::Element>(*(Config *)pConfig, *(StarkInfo *)starkInfo, *(CHelpersSteps*)pCHelpersSteps, false);
 }
 
-void *starks_new_default(void *starkInfo)
+void *starks_new_default(void *starkInfo, void *pCHelpersSteps)
 {
     Config configLocal;
     configLocal.runFileGenBatchProof = true; //to force function generateProof to return true
 
-    return new Starks<Goldilocks::Element>(configLocal, *(StarkInfo *)starkInfo, false);
+    return new Starks<Goldilocks::Element>(configLocal, *(StarkInfo *)starkInfo, *(CHelpersSteps*)pCHelpersSteps, false);
 }
 
 
@@ -480,6 +480,16 @@ void can_impols_be_calculated(void *pCHelpersSteps, uint64_t step)
     cHelpersSteps->canImPolsBeCalculated(step);
 }
 
+void init_params(void *pCHelpersSteps, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs) {
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    cHelpersSteps->initParams((Goldilocks::Element *)pChallenges, (Goldilocks::Element *)pSubproofValues, (Goldilocks::Element *)pEvals, (Goldilocks::Element *)pPublicInputs);
+}
+
+void reset_params(void *pCHelpersSteps) {
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    cHelpersSteps->resetParams();
+};
+
 void set_trace_pointer(void *pChelpersSteps, void *ptr) 
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
@@ -491,10 +501,10 @@ void set_trace_pointer(void *pChelpersSteps, void *ptr)
     return cHelpersSteps->params.evals;
  }
 
-void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char *hintFieldName, bool dest, bool firstStage) 
+void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char *hintFieldName, bool dest) 
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
-    HintFieldInfo hintFieldInfo = cHelpersSteps->getHintField(hintId, string(hintFieldName), dest, firstStage);
+    HintFieldInfo hintFieldInfo = cHelpersSteps->getHintField(hintId, string(hintFieldName), dest);
     return new HintFieldInfo(hintFieldInfo);
 }
 
