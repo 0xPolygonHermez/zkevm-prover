@@ -98,6 +98,47 @@ public:
         }
     }
 
+    inline void printTmp1(uint64_t row, __m256i tmp) {
+        Goldilocks::Element dest[nrowsPack];
+
+        Goldilocks::store_avx(dest, tmp);
+
+        for(uint64_t i = 0; i < nrowsPack; ++i) {
+            cout << "Value at row " << row + i << " is " << Goldilocks::toString(dest[i]) << endl;
+        }
+    }
+    
+    inline void printTmp3(uint64_t row, Goldilocks3::Element_avx tmp) {
+        Goldilocks::Element dest[FIELD_EXTENSION*nrowsPack];
+
+        Goldilocks::store_avx(&dest[0], uint64_t(FIELD_EXTENSION), tmp[0]);
+        Goldilocks::store_avx(&dest[1], uint64_t(FIELD_EXTENSION), tmp[1]);
+        Goldilocks::store_avx(&dest[2], uint64_t(FIELD_EXTENSION), tmp[2]);
+
+        for(uint64_t i = 0; i < nrowsPack; ++i) {
+            cout << "Value at row " << row + i << " is [" << Goldilocks::toString(dest[FIELD_EXTENSION*i]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*i + 1]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*i + 2]) << "]" << endl;
+        }   
+    }
+
+    inline void printCommit(uint64_t row, __m256i* bufferT, bool extended) {
+
+        if(extended) {
+            Goldilocks::Element dest[FIELD_EXTENSION*nrowsPack];
+            Goldilocks::store_avx(&dest[0], uint64_t(FIELD_EXTENSION), bufferT[0]);
+            Goldilocks::store_avx(&dest[1], uint64_t(FIELD_EXTENSION), bufferT[starkInfo.openingPoints.size()]);
+            Goldilocks::store_avx(&dest[2], uint64_t(FIELD_EXTENSION), bufferT[2*starkInfo.openingPoints.size()]);
+            for(uint64_t i = 0; i < nrowsPack; ++i) {
+                cout << "Value at row " << row + i << " is [" << Goldilocks::toString(dest[FIELD_EXTENSION*i]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*i + 1]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*i + 2]) << "]" << endl;
+            }
+        } else {
+            Goldilocks::Element dest[nrowsPack];
+            Goldilocks::store_avx(&dest[0], bufferT[0]);
+            for(uint64_t i = 0; i < nrowsPack; ++i) {
+                cout << "Value at row " << row + i << " is " << Goldilocks::toString(dest[i]) << endl;
+            }
+        }
+    }
+
     inline void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse) override {
         uint8_t* ops = &parserArgs.ops[parserParams.opsOffset];
         uint16_t* args = &parserArgs.args[parserParams.argsOffset];
