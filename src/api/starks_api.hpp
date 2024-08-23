@@ -95,12 +95,12 @@
     void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pConstPols);
     void set_trace_pointer(void *pCHelpersSteps, void *ptr);
     void init_params(void *pCHelpersSteps, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs);
-    void reset_params();
+    void reset_params(void *pCHelpersSteps);
     bool verify_constraints(void *pCHelpersSteps, uint64_t step);
     void set_commit_calculated(void *pCHelpersSteps, uint64_t id);
     void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step);
     void can_impols_be_calculated(void *pCHelpersSteps, uint64_t step);
-    void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char* hintFieldName);
+    void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char* hintFieldName, bool dest);
     void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, char* hintFieldName);
     void chelpers_steps_free(void *pCHelpersSteps);
 
