@@ -13,10 +13,6 @@
     void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t root_index);
     void fri_proof_free(void *pFriProof);
 
-    // Config
-    // ========================================================================================
-    void *config_new(char* filename);
-    void config_free(void *pConfig);
 
     // Stark Info
     // ========================================================================================
@@ -71,11 +67,6 @@
     void *const_pols_new(void *pStarkInfo, char* constPolsFile);
     void *const_pols_new(void *pStarkInfo, char* constPolsFile, char* constTreeFile);
     void const_pols_free(void * pConstPols);
-
-    // Circom
-    // ========================================================================================
-    void circom_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols);
-    void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols);
 
     // zkin
     // ========================================================================================

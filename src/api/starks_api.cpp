@@ -1,7 +1,5 @@
 #include "config.hpp"
-#include "circom.hpp"
 #include "main.hpp"
-#include "main.recursive1.hpp"
 #include "zkglobals.hpp"
 #include "proof2zkinStark.hpp"
 #include "starks.hpp"
@@ -65,22 +63,6 @@ void fri_proof_free(void *pFriProof)
 {
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
     delete friProof;
-}
-
-void *config_new(char *filename)
-{
-    Config *config = new Config();
-    json configJson;
-    file2json(filename, configJson);
-    config->load(configJson);
-
-    return config;
-}
-
-void config_free(void *pConfig)
-{
-    Config *config = (Config *)pConfig;
-    delete config;
 }
 
 void *starkinfo_new(char *filename)
@@ -316,18 +298,6 @@ void commit_pols_starks_free(void *pCommitPolsStarks)
 {
     CommitPolsStarks *commitPolsStarks = (CommitPolsStarks *)pCommitPolsStarks;
     delete commitPolsStarks;
-}
-
-void circom_get_commited_pols(void *pCommitPolsStarks, char *zkevmVerifier, char *execFile, void *zkin, uint64_t N, uint64_t nCols)
-{
-    nlohmann::json *zkinJson = (nlohmann::json *)zkin;
-    Circom::getCommitedPols((CommitPolsStarks *)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
-}
-
-void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char *zkevmVerifier, char *execFile, void *zkin, uint64_t N, uint64_t nCols)
-{
-    nlohmann::json *zkinJson = (nlohmann::json *)zkin;
-    CircomRecursive1::getCommitedPols((CommitPolsStarks *)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
 }
 
 void *zkin_new(void *pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC)
