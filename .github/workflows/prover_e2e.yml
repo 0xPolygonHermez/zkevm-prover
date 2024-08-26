@@ -22,7 +22,7 @@ jobs:
     - name: Install snarkjs
       run: npm list -g snarkjs || npm -g install snarkjs
     - name: make
-      run: cd src/grpc && make && cd ../.. && make generate && make -j
+      run: cd src/grpc && make && cd ../.. && make PROVER_FORK_ID=10 generate && make PROVER_FORK_ID=10 -j
     - name: remove all config 
       run: rm -rf config
     - name: remove old proofs
