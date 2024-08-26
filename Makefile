@@ -74,27 +74,7 @@ SRCS_ZKEVM_LIB := $(shell find $(SRC_DIRS) \
 OBJS_ZKEVM_LIB := $(SRCS_ZKEVM_LIB:%=$(BUILD_DIR)/%.o)
 DEPS_ZKEVM_LIB := $(OBJS_ZKEVM_LIB:.o=.d)
 
-SRCS_STARKS_LIB := $(shell find $(SRC_DIRS) \
-	! -path "./tools/*" \
-	! -path "./test/*" \
-	! -path "./src/api/zkevm_api.*" \
-	! -path "./src/constraint_checker/*" \
-	! -path "./src/ecrecover/*" \
-	! -path "./src/executor/*" \
-	! -path "./src/fflonk_setup/*" \
-	! -path "./src/goldilocks/benchs/*" \
-	! -path "./src/goldilocks/tests/*" \
-	! -path "./src/grpc/*" \
-	! -path "./src/hashdb/*" \
-	! -path "./src/hashdb64/*" \
-	! -path "./src/main_generator/*" \
-	! -path "./src/main_sm/*" \
-	! -path "./src/pols_diff/*" \
-	! -path "./src/pols_generator/*" \
-	! -path "./src/service/*" \
-	! -path "./src/sm/*" \
-	! -path "./src/main.cpp" \
-	-name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_STARKS_LIB := $(shell find ./src/hint ./src/XKCP ./src/goldilocks/src ./src/poseidon_opt/ ./src/starkpil/proof2zkinStark.* ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/chelpers.* ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/* ./src/starkpil/transcript/* ./src/starkpil/fri/* ./src/ffiasm ./src/utils -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_STARKS_LIB := $(SRCS_STARKS_LIB:%=$(BUILD_DIR)/%.o)
 DEPS_STARKS_LIB := $(OBJS_STARKS_LIB:.o=.d)
 
