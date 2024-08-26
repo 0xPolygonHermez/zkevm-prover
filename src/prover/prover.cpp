@@ -36,7 +36,6 @@
 #include "commit_pols_starks.hpp"
 #include "chelpers_steps.hpp"
 #include "chelpers_steps_pack.hpp"
-#include "chelpers_steps_gpu.hpp"
 #ifdef __AVX512__
 #include "chelpers_steps_avx512.hpp"
 #endif
@@ -54,6 +53,7 @@
 #include "cuda_utils.hpp"
 #include "ntt_goldilocks.hpp"
 #include <pthread.h>
+#include "chelpers_steps_pack.cuh"
 
 int asynctask(void* (*task)(void* args), void* arg)
 {
@@ -93,6 +93,10 @@ Prover::Prover(Goldilocks &fr,
     {
         if (config.generateProof())
         {
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
+            alloc_pinned_mem(uint64_t(1<<25) * 128);
+            warmup_gpu();
+#endif
             TimerStart(PROVER_INIT);
 
             //checkSetupHash(config.zkevmVerifier);
@@ -136,11 +140,6 @@ Prover::Prover(Goldilocks &fr,
                 }
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
-
-#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-            alloc_pinned_mem(uint64_t(1<<24) * _starkInfo.mapSectionsN.section[eSection::cm1_n]);
-            warmup_gpu();
-#endif
             
             json finalVerkeyJson;
             file2json(config.finalVerkey, finalVerkeyJson);
@@ -519,8 +518,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         json recursive2Verkey;
         file2json(config.recursive2Verkey, recursive2Verkey);
 
+#ifdef __USE_CUDA__
+        Goldilocks::Element *publics = (Goldilocks::Element *)malloc_zkevm(starksRecursive1->starkInfo.nPublics);
+#else
         Goldilocks::Element publics[starksRecursive1->starkInfo.nPublics];
-
+#endif
         // oldStateRoot
         publics[0] = cmPols.Main.B0[0];
         publics[1] = cmPols.Main.B1[0];
@@ -598,15 +600,17 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*************************************/
 
 #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-        CHelpersStepsGPU cHelpersSteps;
+        CHelpersStepsPackGPU cHelpersStepsZkevm;
 #elif defined(__AVX512__)
-        CHelpersStepsAvx512 cHelpersSteps;
-#elif defined(__PACK__) 
-        CHelpersStepsPack cHelpersSteps;
+        CHelpersStepsAvx512 cHelpersStepsZkevm;
+#elif defined(__PACK__)
+        CHelpersStepsPack cHelpersStepsZkevm;
         cHelpersSteps.nrowsPack = NROWS_PACK;
 #else
-        CHelpersSteps cHelpersSteps;
+        CHelpersSteps cHelpersStepsZkevm;
 #endif
+
+        CHelpersSteps cHelpersSteps;
 
         TimerStart(STARK_PROOF_BATCH_PROOF);
 
@@ -615,7 +619,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkZkevm->starkInfo.starkStruct.steps.size(), starkZkevm->starkInfo.evMap.size(), starkZkevm->starkInfo.nPublics);
         
         if(USE_GENERIC_PARSER) {
-            starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &cHelpersSteps);
+            starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &cHelpersStepsZkevm);
         } else {
             starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &zkevmChelpersSteps);
         }
@@ -727,10 +731,15 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
             jProofRecursive1["publics"] = publicStarkJson;
             json2file(jProofRecursive1, pProverRequest->filePrefix + "batch_proof.proof.json");
         }
+
+#ifdef __USE_CUDA__
+        free_zkevm(publics);
+#endif
         TimerStopAndLog(SAVE_PROOF);
     }
 
     TimerStopAndLog(PROVER_BATCH_PROOF);
+    assert(0);
 }
 
 void Prover::genAggregatedProof(ProverRequest *pProverRequest)
@@ -846,7 +855,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     
     if(USE_GENERIC_PARSER) {
 #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-        CHelpersStepsGPU cHelpersSteps;        
+        CHelpersStepsPackGPU cHelpersSteps;
 #elif defined(__AVX512__)
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
@@ -955,7 +964,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
     if(USE_GENERIC_PARSER) {
         #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-            CHelpersStepsGPU cHelpersSteps; 
+            CHelpersStepsPackGPU cHelpersSteps;
         #elif defined(__AVX512__)
             CHelpersStepsAvx512 cHelpersSteps;
         #elif defined(__PACK__) 

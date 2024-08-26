@@ -3,6 +3,7 @@
 #include "chelpers.hpp"
 #include "chelpers_steps.hpp"
 #include "steps.hpp"
+#include "definitions.hpp"
 
 class CHelpersStepsAvx512 : public CHelpersSteps {
 public:
@@ -75,14 +76,19 @@ public:
                 bool isTmpPol = !domainExtended && s == 4;
                 for(uint64_t k = 0; k < nColsStages[s]; ++k) {
                     uint64_t dim = storePol[nColsStagesAcc[s] + k];
-                    if(storePol[nColsStagesAcc[s] + k]) {
+                    if(!TRANSPOSE_TMP_POLS) {
                         __m512i *buffT = &bufferT_[(nColsStagesAcc[s] + k)];
-                        if(isTmpPol) {
-                            for(uint64_t i = 0; i < dim; ++i) {
-                                Goldilocks::store_avx512(&params.pols[offsetsStages[s] + k * domainSize + row * dim + i], uint64_t(dim), buffT[i]);
+                        Goldilocks::store_avx512(&params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT[0]);
+                    } else {
+                        if(storePol[nColsStagesAcc[s] + k]) {
+                            __m512i *buffT = &bufferT_[(nColsStagesAcc[s] + k)];
+                            if(isTmpPol) {
+                                for(uint64_t i = 0; i < dim; ++i) {
+                                    Goldilocks::store_avx512(&params.pols[offsetsStages[s] + k * domainSize + row * dim + i], uint64_t(dim), buffT[i]);
+                                }
+                            } else {
+                                Goldilocks::store_avx512(&params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT[0]);
                             }
-                        } else {
-                            Goldilocks::store_avx512(&params.pols[offsetsStages[s] + k + row * nColsStages[s]], nColsStages[s], buffT[0]);
                         }
                     }
                 }
@@ -701,6 +707,7 @@ public:
             assert(i_args == parserParams.nArgs);
         }
     }
+
 };
 
 #endif
