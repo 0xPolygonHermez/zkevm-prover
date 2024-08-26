@@ -22,11 +22,9 @@ typedef enum
     number = 6,
 } opType;
 
-
-class HintField
-{
     
-public:
+struct HintField {
+    string name;
     opType operand;
     uint64_t id;
     uint64_t dim;
@@ -34,11 +32,10 @@ public:
 };
 
 
-class Hint 
+struct Hint
 {
-public:
     std::string name;
-    std::map<string,HintField> fields;
+    std::vector<HintField> fields;
 };
 
 namespace Hints

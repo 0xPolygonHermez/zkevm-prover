@@ -300,6 +300,7 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
             HintField hintField;
             std::string name = cHelpersBin->readString();
             std::string operand = cHelpersBin->readString();
+            hintField.name = name;
             hintField.operand = string2opType(operand);
             if(hintField.operand == opType::number) {
                 hintField.value = cHelpersBin->readU64LE();
@@ -309,7 +310,7 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
             if(hintField.operand == opType::tmp) {
                 hintField.dim = cHelpersBin->readU32LE();
             }
-            hint.fields[name] = hintField;
+            hint.fields.push_back(hintField);
         }
 
         hints.push_back(hint);

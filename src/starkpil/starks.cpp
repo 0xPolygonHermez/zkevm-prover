@@ -475,7 +475,18 @@ bool Starks<ElementType>::isHintResolved(Hint &hint, vector<string> dstFields, C
 {
     for (uint64_t i = 0; i < dstFields.size(); i++)
     {
-        if (!isSymbolCalculated(hint.fields[dstFields[i]].operand, hint.fields[dstFields[i]].id, cHelpersSteps)) {
+        auto dstField = dstFields[i];
+        auto hintField = std::find_if(hint.fields.begin(), hint.fields.end(), [dstField](const HintField& hintField) {
+            return hintField.name == dstField;
+        });
+
+        if(hintField == hint.fields.end()) {
+            zklog.error("Hint field " + dstField + " not found in hint " + hint.name + ".");
+            exitProcess();
+            exit(-1);
+        }
+
+        if (!isSymbolCalculated(hintField->operand, hintField->id, cHelpersSteps)) {
             return false;
         }
     }
@@ -488,9 +499,19 @@ bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields
 {
     for (uint64_t i = 0; i < srcFields.size(); i++)
     {
-        HintField field = hint.fields[srcFields[i]];
-        if (field.operand == opType::number) continue;
-        if (!isSymbolCalculated(hint.fields[srcFields[i]].operand, hint.fields[srcFields[i]].id, cHelpersSteps)) {
+        auto srcField = srcFields[i];
+        auto hintField= std::find_if(hint.fields.begin(), hint.fields.end(), [srcField](const HintField& hintField) {
+            return hintField.name == srcField;
+        });
+
+        if(hintField == hint.fields.end()) {
+            zklog.error("Hint field " + srcField + " not found in hint " + hint.name + ".");
+            exitProcess();
+            exit(-1);
+        }
+
+        if (hintField->operand == opType::number) continue;
+        if (!isSymbolCalculated(hintField->operand, hintField->id, cHelpersSteps)) {
             return false;
         }
     }
@@ -525,26 +546,33 @@ void Starks<ElementType>::calculateHints(uint64_t step, CHelpersSteps &cHelpersS
 
             for (uint64_t i = 0; i < srcFields.size(); i++)
             {
-                HintField hintField = hint.fields[srcFields[i]];
-                if(hintField.operand != opType::tmp && hintField.operand != opType::cm) continue;
-                if (hintField.operand != opType::tmp) {
-                    PolMap polInfo = starkInfo.cmPolsMap[hintField.id];
-                    srcPolsNames.push_back(hintField.id);
-                    polynomials[hintField.id].potConstruct(N, polInfo.dim);
+                auto srcField = srcFields[i];
+                auto hintField= std::find_if(hint.fields.begin(), hint.fields.end(), [srcField](const HintField& hintField) {
+                    return hintField.name == srcField;
+                });
+
+                if(hintField->operand != opType::tmp && hintField->operand != opType::cm) continue;
+                if (hintField->operand != opType::tmp) {
+                    PolMap polInfo = starkInfo.cmPolsMap[hintField->id];
+                    srcPolsNames.push_back(hintField->id);
+                    polynomials[hintField->id].potConstruct(N, polInfo.dim);
                 } else {
-                    srcPolsExpsNames[hintField.id] = true;
-                    polynomialsExps[hintField.id].potConstruct(N, hintField.dim);                    
+                    srcPolsExpsNames[hintField->id] = true;
+                    polynomialsExps[hintField->id].potConstruct(N, hintField->dim);                    
                 }
             }
 
             for (uint64_t i = 0; i < dstFields.size(); i++)
             {
-                HintField hintField = hint.fields[dstFields[i]];
-                if(hintField.operand == opType::tmp) exitProcess();
-                if(hintField.operand != opType::cm) continue;
-                PolMap polInfo = starkInfo.cmPolsMap[hintField.id];
-                dstPolsNames.push_back(hintField.id);
-                polynomials[hintField.id].potConstruct(N, polInfo.dim);
+                auto dstField = dstFields[i];
+                auto hintField= std::find_if(hint.fields.begin(), hint.fields.end(), [dstField](const HintField& hintField) {
+                    return hintField.name == dstField;
+                });
+                if(hintField->operand == opType::tmp) exitProcess();
+                if(hintField->operand != opType::cm) continue;
+                PolMap polInfo = starkInfo.cmPolsMap[hintField->id];
+                dstPolsNames.push_back(hintField->id);
+                polynomials[hintField->id].potConstruct(N, polInfo.dim);
             }
         }
     }
@@ -601,20 +629,38 @@ void Starks<ElementType>::calculateHints(uint64_t step, CHelpersSteps &cHelpersS
         std::map<std::string, Polinomial *> polynomialsHint;
         for (const auto &polName : polsNames)
         {
-            const auto &hintField = hint.fields[polName];
-            if (hintField.operand == opType::cm) {
-                polynomialsHint[polName] = &polynomials[hintField.id];
-            } else if(hintField.operand == opType::tmp) {
-                polynomialsHint[polName] = &polynomialsExps[hintField.id];
+            auto hintField = std::find_if(hint.fields.begin(), hint.fields.end(), [polName](const HintField& hintField) {
+                return hintField.name == polName;
+            });
+            if (hintField->operand == opType::cm) {
+                polynomialsHint[polName] = &polynomials[hintField->id];
+            } else if(hintField->operand == opType::tmp) {
+                polynomialsHint[polName] = &polynomialsExps[hintField->id];
             }
         }
 
         if(hint.name == "gsum") {
-            calculateS(polynomials[hint.fields["reference"].id], polynomialsExps[hint.fields["denominator"].id], Goldilocks::fromU64(hint.fields["numerator"].value));
+            auto reference = std::find_if(hint.fields.begin(), hint.fields.end(), [](const HintField& hintField) {
+                return hintField.name == "reference";
+            });
+
+            auto numerator = std::find_if(hint.fields.begin(), hint.fields.end(), [](const HintField& hintField) {
+                return hintField.name == "numerator";
+            });
+
+            auto denominator = std::find_if(hint.fields.begin(), hint.fields.end(), [](const HintField& hintField) {
+                return hintField.name == "denominator";
+            });
+
+            auto result = std::find_if(hint.fields.begin(), hint.fields.end(), [](const HintField& hintField) {
+                return hintField.name == "result";
+            });
+
+            calculateS(polynomials[reference->id], polynomialsExps[denominator->id], Goldilocks::fromU64(numerator->value));
                 
-            cHelpersSteps.params.subproofValues[hint.fields["result"].id * FIELD_EXTENSION] = polynomials[hint.fields["reference"].id][N - 1][0];
-            cHelpersSteps.params.subproofValues[hint.fields["result"].id * FIELD_EXTENSION + 1] = polynomials[hint.fields["reference"].id][N - 1][1];
-            cHelpersSteps.params.subproofValues[hint.fields["result"].id * FIELD_EXTENSION + 2] = polynomials[hint.fields["reference"].id][N - 1][2];
+            cHelpersSteps.params.subproofValues[result->id * FIELD_EXTENSION] = polynomials[reference->id][N - 1][0];
+            cHelpersSteps.params.subproofValues[result->id * FIELD_EXTENSION + 1] = polynomials[reference->id][N - 1][1];
+            cHelpersSteps.params.subproofValues[result->id * FIELD_EXTENSION + 2] = polynomials[reference->id][N - 1][2];
         } else {
             hintHandler->resolveHint(N, cHelpersSteps.params, hint, polynomialsHint);
         }
@@ -647,11 +693,14 @@ void Starks<ElementType>::calculateHints(uint64_t step, CHelpersSteps &cHelpersS
 
         for (uint64_t i = 0; i < dstFields.size(); i++)
         {
-            HintField hintField = hint.fields[dstFields[i]];
-            if(hintField.operand == opType::cm) {
-                cHelpersSteps.setCommitCalculated(hintField.id);
-            } else if(hintField.operand == opType::subproofvalue) {
-                cHelpersSteps.setSubproofValueCalculated(hintField.id);
+            auto dstField = dstFields[i];
+            auto hintField= std::find_if(hint.fields.begin(), hint.fields.end(), [dstField](const HintField& hintField) {
+                return hintField.name == dstField;
+            });
+            if(hintField->operand == opType::cm) {
+                cHelpersSteps.setCommitCalculated(hintField->id);
+            } else if(hintField->operand == opType::subproofvalue) {
+                cHelpersSteps.setSubproofValueCalculated(hintField->id);
             }
         }
     }

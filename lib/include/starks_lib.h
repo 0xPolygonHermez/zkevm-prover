@@ -100,9 +100,11 @@
     void set_commit_calculated(void *pCHelpersSteps, uint64_t id);
     void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step);
     void can_impols_be_calculated(void *pCHelpersSteps, uint64_t step);
+    void chelpers_steps_free(void *pCHelpersSteps);
+
+    void* get_hint_ids_by_name(void *pChelpersSteps, char* hintName);
     void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char* hintFieldName, bool dest);
     void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, char* hintFieldName);
-    void chelpers_steps_free(void *pCHelpersSteps);
 
     // Polinomial
     // =================================================================================

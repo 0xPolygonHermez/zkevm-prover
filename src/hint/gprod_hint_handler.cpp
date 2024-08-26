@@ -39,7 +39,11 @@ namespace Hints
         // Calculate z
         calculateZ(zPol, numPol, denPol);
 
-        uint64_t subproofValueId = hint.fields["result"].id;
+        auto result = std::find_if(hint.fields.begin(), hint.fields.end(), [](const HintField& hintField) {
+            return hintField.name == "result";
+        });
+
+        uint64_t subproofValueId = result->id;
 
         params.subproofValues[subproofValueId * FIELD_EXTENSION] = zPol[N - 1][0];
         params.subproofValues[subproofValueId * FIELD_EXTENSION + 1] = zPol[N - 1][1];

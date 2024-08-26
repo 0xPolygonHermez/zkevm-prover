@@ -496,10 +496,13 @@ void set_trace_pointer(void *pChelpersSteps, void *ptr)
     cHelpersSteps->params.pols = (Goldilocks::Element *)ptr;
 }
 
- void *get_evals(void *pChelpersSteps) {
+void* get_hint_ids_by_name(void *pChelpersSteps, char* hintName)
+{
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
-    return cHelpersSteps->params.evals;
- }
+
+    HintIdsResult hintIds =  cHelpersSteps->getHintIdsByName(string(hintName));
+    return new HintIdsResult(hintIds);
+}
 
 void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char *hintFieldName, bool dest) 
 {
