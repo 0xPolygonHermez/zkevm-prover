@@ -139,9 +139,13 @@ zkresult HashDB::setProgram (const string &batchUUID, uint64_t block, uint64_t t
     {
         zkr = stateManager64.writeProgram(batchUUID, block, tx, keyString, data, persistence);
     }
-    else
+    else if (config.stateManager)
     {
         zkr = stateManager.writeProgram(batchUUID, block, tx, keyString, data, persistence);
+    }
+    else
+    {
+        zkr = db.setProgram(keyString, data, persistence == PERSISTENCE_DATABASE);
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -183,7 +187,10 @@ zkresult HashDB::getProgram (const string &batchUUID, const Goldilocks::Element 
     }
     else
     {
-        zkr = stateManager.readProgram(batchUUID, keyString, data, dbReadLog);
+        if (config.stateManager)
+        {
+            zkr = stateManager.readProgram(batchUUID, keyString, data, dbReadLog);
+        }
         if (zkr != ZKR_SUCCESS)
         {
             zkr = db.getProgram(keyString, data, dbReadLog);
