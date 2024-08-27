@@ -109,6 +109,5 @@
 
     // Global constraints
     // =================================================================================
-    bool verify_global_constraints(char *file, void* publics, void *proofs);
-
+    bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
 #endif
