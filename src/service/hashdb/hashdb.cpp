@@ -179,26 +179,23 @@ zkresult HashDB::getProgram (const string &batchUUID, const Goldilocks::Element 
         if (zkr != ZKR_SUCCESS)
         {
             zkr = db64.getProgram(keyString, data, dbReadLog);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("HashDB::getProgram() failed result=" + zkresult2string(zkr) + " key=" + keyString);
-            }
         }    
     }
-    else
+    else if (config.stateManager)
     {
-        if (config.stateManager)
-        {
-            zkr = stateManager.readProgram(batchUUID, keyString, data, dbReadLog);
-        }
+        zkr = stateManager.readProgram(batchUUID, keyString, data, dbReadLog);
         if (zkr != ZKR_SUCCESS)
         {
             zkr = db.getProgram(keyString, data, dbReadLog);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("HashDB::getProgram() failed result=" + zkresult2string(zkr) + " key=" + keyString);
-            }
         }
+    }
+    else
+    {
+        zkr = db.getProgram(keyString, data, dbReadLog);
+    }
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("HashDB::getProgram() failed result=" + zkresult2string(zkr) + " key=" + keyString);
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
