@@ -82,7 +82,7 @@ int main()
     }
     starks.genProof(fproof, &publicInputs[0]);
 
-    nlohmann::ordered_json jProof = fproof.proofs.proof2json();
+    nlohmann::ordered_json jProof = fproof.proof.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof);
     // Generate publics
     jProof["publics"] = publicStarkJson;

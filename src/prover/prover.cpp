@@ -604,7 +604,7 @@ void Prover::genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t l
     TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
     TimerStart(STARK_JSON_GENERATION_BATCH_PROOF);
 
-    nlohmann::ordered_json jProof = fproof.proofs.proof2json();
+    nlohmann::ordered_json jProof = fproof.proof.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof, starkZkevm->starkInfo);
     // Generate publics
     jProof["publics"] = publicStarkJson;
@@ -635,7 +635,7 @@ void Prover::genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t l
     TimerStart(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
     // Save the proof & zkinproof
-    nlohmann::ordered_json jProofc12a = fproofC12a.proofs.proof2json();
+    nlohmann::ordered_json jProofc12a = fproofC12a.proof.proof2json();
     nlohmann::json zkinC12a = proof2zkinStark(jProofc12a, starksC12a->starkInfo);
 
     // Add the recursive2 verification key
@@ -669,7 +669,7 @@ void Prover::genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t l
     // Save the proof & zkinproof
     TimerStart(SAVE_PROOF);
 
-    nlohmann::ordered_json jProofRecursive1 = fproofRecursive1.proofs.proof2json();
+    nlohmann::ordered_json jProofRecursive1 = fproofRecursive1.proof.proof2json();
     nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1, starksRecursive1->starkInfo);
     zkinRecursive1["publics"] = publicStarkJson;
 
@@ -796,7 +796,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
-    nlohmann::ordered_json jProofRecursive2 = fproofRecursive2.proofs.proof2json();
+    nlohmann::ordered_json jProofRecursive2 = fproofRecursive2.proof.proof2json();
     nlohmann::ordered_json zkinRecursive2 = proof2zkinStark(jProofRecursive2, starksRecursive2->starkInfo);
     zkinRecursive2["publics"] = zkinInputRecursive2["publics"];
 
@@ -885,7 +885,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
-    nlohmann::ordered_json jProofRecursiveF = fproofRecursiveF.proofs.proof2json();
+    nlohmann::ordered_json jProofRecursiveF = fproofRecursiveF.proof.proof2json();
     json zkinRecursiveF = proof2zkinStark(jProofRecursiveF, starksRecursiveF->starkInfo);
     zkinRecursiveF["publics"] = zkinFinal["publics"];
     zkinRecursiveF["aggregatorAddr"] = strAddress10;

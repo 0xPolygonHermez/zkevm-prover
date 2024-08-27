@@ -79,7 +79,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
         }
         else
         {
-            addTranscript(transcript, &proof.proofs.roots[step - 1][0], nFieldElements);
+            addTranscript(transcript, &proof.proof.roots[step - 1][0], nFieldElements);
         }
 
         TimerStopAndLogExpr(STARK_STEP, step);
@@ -114,7 +114,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     }
     else
     {
-        addTranscript(transcript, &proof.proofs.roots[starkInfo.nStages][0], nFieldElements);
+        addTranscript(transcript, &proof.proof.roots[starkInfo.nStages][0], nFieldElements);
     }
     TimerStopAndLog(STARK_STEP_Q);
 
@@ -162,7 +162,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
         computeFRIFolding(step, cHelpersSteps, challenge, proof);
         if (step < starkInfo.starkStruct.steps.size() - 1)
         {
-            addTranscript(transcript, &proof.proofs.fri.trees[step + 1].root[0], nFieldElements);
+            addTranscript(transcript, &proof.proof.fri.trees[step + 1].root[0], nFieldElements);
         }
         else
         {
@@ -230,7 +230,7 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, CHelpersSteps &cHelp
     TimerStartExpr(STARK_MERKLETREE_STEP, step);
     treesGL[step - 1]->setSource(pBuffExtended);
     treesGL[step - 1]->merkelize();
-    treesGL[step - 1]->getRoot(&proof.proofs.roots[step - 1][0]);
+    treesGL[step - 1]->getRoot(&proof.proof.roots[step - 1][0]);
     TimerStopAndLogExpr(STARK_MERKLETREE_STEP, step);
     TimerStopAndLogExpr(STARK_LDE_AND_MERKLETREE_STEP, step);
 }
@@ -239,7 +239,7 @@ template <typename ElementType>
 void Starks<ElementType>::commitStage(uint64_t step, CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof)
 {  
     if(step == starkInfo.nStages) {
-        proof.proofs.setSubproofValues(cHelpersSteps.params.subproofValues);
+        proof.proof.setSubproofValues(cHelpersSteps.params.subproofValues);
     }
 
     if(!debug) {
@@ -321,7 +321,7 @@ void Starks<ElementType>::computeQ(uint64_t step, CHelpersSteps &cHelpersSteps, 
     TimerStartExpr(STARK_MERKLETREE_STEP, step);
     treesGL[step - 1]->setSource(&cHelpersSteps.params.pols[starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), true)]]);
     treesGL[step - 1]->merkelize();
-    treesGL[step - 1]->getRoot(&proof.proofs.roots[step - 1][0]);
+    treesGL[step - 1]->getRoot(&proof.proof.roots[step - 1][0]);
 
     TimerStopAndLogExpr(STARK_MERKLETREE_STEP, step);
 }
@@ -382,7 +382,7 @@ void Starks<ElementType>::computeEvals(CHelpersSteps &cHelpersSteps, FRIProof<El
 
     TimerStart(STARK_CALCULATE_EVALS);
     evmap(cHelpersSteps, LEv);
-    proof.proofs.setEvals(cHelpersSteps.params.evals);
+    proof.proof.setEvals(cHelpersSteps.params.evals);
     TimerStopAndLog(STARK_CALCULATE_EVALS);
 }
 

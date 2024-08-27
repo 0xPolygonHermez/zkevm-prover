@@ -142,7 +142,7 @@ public:
     std::vector<std::vector<Goldilocks::Element>> pol;
     std::vector<ProofTree<ElementType>> trees;
 
-    Fri(StarkInfo starkInfo) : pol(1 << starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
+    Fri(StarkInfo &starkInfo) : pol(1 << starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
                                                              trees(starkInfo.starkStruct.steps.size(), starkInfo.starkStruct.verificationHashType == "GL" ? HASH_SIZE : 1) {}
 
     void setPol(Goldilocks::Element *pPol, uint64_t degree)
@@ -187,7 +187,7 @@ public:
     Fri<ElementType> fri;
     std::vector<std::vector<Goldilocks::Element>> evals;
     std::vector<std::vector<Goldilocks::Element>> subproofValues;
-    Proofs(StarkInfo starkInfo) :
+    Proofs(StarkInfo &starkInfo) :
         fri(starkInfo),
         evals(starkInfo.evMap.size(), std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
         subproofValues(starkInfo.nSubProofValues, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero()))
@@ -274,10 +274,16 @@ template <typename ElementType>
 class FRIProof
 {
 public:
-    Proofs<ElementType> proofs;
+    Proofs<ElementType> proof;
     std::vector<ElementType> publics;
+    
+    uint64_t airId;
+    uint64_t subproofId;
 
-    FRIProof(StarkInfo starkInfo) : proofs(starkInfo), publics(starkInfo.nPublics){};
+    FRIProof(StarkInfo &starkInfo) : proof(starkInfo), publics(starkInfo.nPublics) {
+        airId = starkInfo.airId;
+        subproofId = starkInfo.subproofId;
+    };
 };
 
 #endif

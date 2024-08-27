@@ -81,13 +81,13 @@ void FRI<ElementType>::fold(uint64_t step, FRIProof<ElementType> &proof, Goldilo
 
         treesFRI[step]->copySource(aux);
         treesFRI[step]->merkelize();
-        treesFRI[step]->getRoot(&proof.proofs.fri.trees[step + 1].root[0]);
+        treesFRI[step]->getRoot(&proof.proof.fri.trees[step + 1].root[0]);
 
         delete aux;
     }
     
     if(step == starkInfo.starkStruct.steps.size() - 1) {
-        proof.proofs.fri.setPol(pol, pol2N);
+        proof.proof.fri.setPol(pol, pol2N);
     }
 
 }
@@ -130,7 +130,7 @@ void FRI<ElementType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *t
         MerkleProof<ElementType> mkProof(trees[i]->getMerkleTreeWidth(), trees[i]->getMerkleProofLength(), trees[i]->getNumSiblings(), &buff[0]);
         vMkProof.push_back(mkProof);
     }
-    fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
+    fproof.proof.fri.trees[treeIdx].polQueries.push_back(vMkProof);
 
     return;
 }
@@ -147,7 +147,7 @@ void FRI<ElementType>::queryPol(FRIProof<ElementType> &fproof, MerkleTreeType *t
     MerkleProof<ElementType> mkProof(tree->getMerkleTreeWidth(), tree->getMerkleProofLength(), tree->getNumSiblings(), &buff[0]);
     vMkProof.push_back(mkProof);
 
-    fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
+    fproof.proof.fri.trees[treeIdx].polQueries.push_back(vMkProof);
 
     return;
 }

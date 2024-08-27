@@ -107,4 +107,8 @@
     // =================================================================================
     void goldilocks_linear_hash(void *pInput, void *pOutput);
 
+    // Global constraints
+    // =================================================================================
+    bool verify_global_constraints(char *file, void* publics, void *proofs);
+
 #endif

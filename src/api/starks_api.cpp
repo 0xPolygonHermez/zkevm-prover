@@ -3,6 +3,7 @@
 #include "zkglobals.hpp"
 #include "proof2zkinStark.hpp"
 #include "starks.hpp"
+#include "global_constraints.hpp"
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -19,7 +20,7 @@ void save_proof(void *pStarkInfo, void *pFriProof, unsigned long numPublicInputs
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
 
-    nlohmann::ordered_json jProofRecursive1 = friProof->proofs.proof2json();
+    nlohmann::ordered_json jProofRecursive1 = friProof->proof.proof2json();
     nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1, *(StarkInfo *)pStarkInfo);
     zkinRecursive1["publics"] = publicStarkJson;
 
@@ -50,13 +51,13 @@ void *fri_proof_new(void *pStarks)
 void *fri_proof_get_root(void *pFriProof, uint64_t root_index, uint64_t root_subindex)
 {
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
-    return &friProof->proofs.roots[root_index][root_subindex];
+    return &friProof->proof.roots[root_index][root_subindex];
 }
 
 void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t root_index)
 {
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
-    return &friProof->proofs.fri.trees[tree_index].root[root_index];
+    return &friProof->proof.fri.trees[tree_index].root[root_index];
 }
 
 void fri_proof_free(void *pFriProof)
@@ -254,7 +255,7 @@ void *get_proof_root(void *pProof, uint64_t stage_id, uint64_t index)
 {
     FRIProof<Goldilocks::Element> *proof = (FRIProof<Goldilocks::Element> *)pProof;
 
-    return &proof->proofs.roots[stage_id][index];
+    return &proof->proof.roots[stage_id][index];
 }
 
 void resize_vector(void *pVector, uint64_t newSize, bool value)
@@ -321,7 +322,7 @@ void *zkin_new(void *pStarkInfo, void *pFriProof, unsigned long numPublicInputs,
 
     nlohmann::ordered_json *jProof = new nlohmann::ordered_json();
     nlohmann::json *zkin = new nlohmann::json();
-    *jProof = friProof->proofs.proof2json();
+    *jProof = friProof->proof.proof2json();
 
     *zkin = proof2zkinStark(*jProof, *(StarkInfo *)pStarkInfo);
     (*zkin)["publics"] = publicStarkJson;
@@ -491,4 +492,11 @@ void chelpers_steps_free(void *pCHelpersSteps)
 {
     CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
     delete cHelpersSteps;
+}
+
+bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs) {
+    
+    FRIProof<Goldilocks::Element> **proofs = (FRIProof<Goldilocks::Element> **)pProofs;
+
+    return verifyGlobalConstraints(string(globalInfoFile), string(globalConstraintsBinFile), (Goldilocks::Element *)publics, proofs, nProofs);
 }
