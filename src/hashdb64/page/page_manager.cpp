@@ -28,14 +28,14 @@ PageManager::PageManager()
 
 PageManager::~PageManager(void)
 {
-    if(mappedFile){
+    /*if(mappedFile){
         for(uint64_t i=0; i< pages.size(); i++){
             munmap(pages[i], fileSize);
         }
     }else{
         if (pages[0] != NULL)
             free(pages[0]);
-    }
+    }*/
 }
 
 zkresult PageManager::init(PageContext &ctx)

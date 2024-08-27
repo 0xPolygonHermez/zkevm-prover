@@ -541,6 +541,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
 
     }
 
+    HashDBClientFactory::freeHashDBClient(pHashDB);
+
     TimerStopAndLog(EXECUTOR_CLIENT_PROCESS_BATCH);
 
     return true;
