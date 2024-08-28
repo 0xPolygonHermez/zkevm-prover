@@ -174,7 +174,7 @@ void CHelpersStepsPackGPU::cleanupGPU() {
 
 void CHelpersStepsPackGPU::calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams) {
 
-    if (parserParams.stage == 2) {
+    if (!starkInfo.reduceMemory || parserParams.stage == 2) { // in these cases, cpu version is faster
 #ifdef __AVX512__
         CHelpersStepsAvx512 cHelpersSteps;
 #else

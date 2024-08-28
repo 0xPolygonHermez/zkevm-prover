@@ -93,10 +93,6 @@ Prover::Prover(Goldilocks &fr,
     {
         if (config.generateProof())
         {
-#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-            alloc_pinned_mem(uint64_t(1<<25) * 128);
-            warmup_gpu();
-#endif
             TimerStart(PROVER_INIT);
 
             //checkSetupHash(config.zkevmVerifier);
@@ -116,6 +112,11 @@ Prover::Prover(Goldilocks &fr,
             bool reduceMemoryZkevm = REDUCE_ZKEVM_MEMORY ? true : false;
             
             StarkInfo _starkInfo(config.zkevmStarkInfo, reduceMemoryZkevm);
+
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
+            warmup_gpu();
+            alloc_pinned_mem_per_device((1 << _starkInfo.starkStruct.nBitsExt) * 32);
+#endif
 
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
             // and create them using the allocated address
@@ -600,17 +601,15 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*************************************/
 
 #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-        CHelpersStepsPackGPU cHelpersStepsZkevm;
+        CHelpersStepsPackGPU cHelpersSteps;
 #elif defined(__AVX512__)
-        CHelpersStepsAvx512 cHelpersStepsZkevm;
+        CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__)
-        CHelpersStepsPack cHelpersStepsZkevm;
+        CHelpersStepsPack cHelpersSteps;
         cHelpersSteps.nrowsPack = NROWS_PACK;
 #else
-        CHelpersSteps cHelpersStepsZkevm;
-#endif
-
         CHelpersSteps cHelpersSteps;
+#endif
 
         TimerStart(STARK_PROOF_BATCH_PROOF);
 
@@ -619,7 +618,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkZkevm->starkInfo.starkStruct.steps.size(), starkZkevm->starkInfo.evMap.size(), starkZkevm->starkInfo.nPublics);
         
         if(USE_GENERIC_PARSER) {
-            starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &cHelpersStepsZkevm);
+            starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &cHelpersSteps);
         } else {
             starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &zkevmChelpersSteps);
         }

@@ -4,10 +4,10 @@
 void *calloc_zkevm(uint64_t count, uint64_t size) {
     char *a;
     uint64_t total = count*size;
-    cudaMallocHost(&a, total);
-    if (total > (1<<20)) {
-        uint64_t nPieces = (1<<8);
-        uint64_t segment = total/nPieces;
+    cudaHostAlloc(&a, total, cudaHostAllocPortable);
+    uint64_t segment = 1<<20;
+    if (total > segment) {
+        uint64_t nPieces = (total + segment - 1) / segment;
         uint64_t last_segment = total - segment*(nPieces-1);
 #pragma omp parallel for
         for (int i = 0; i < nPieces; i++) {
@@ -21,7 +21,7 @@ void *calloc_zkevm(uint64_t count, uint64_t size) {
 
 void *malloc_zkevm(uint64_t size) {
     char *a;
-    cudaMallocHost(&a, size);
+    cudaHostAlloc(&a, size, cudaHostAllocPortable);
     return a;
 }
 
