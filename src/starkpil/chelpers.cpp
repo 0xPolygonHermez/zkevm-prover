@@ -6,7 +6,6 @@ CHelpers::CHelpers(string file) {
 }
 
 void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
- 
     cHelpersBin->startReadSection(CHELPERS_IMPOLS_SECTION);
 
     uint32_t nOpsImPols = cHelpersBin->readU32LE();
@@ -17,7 +16,6 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
     uint32_t nChallengesIdsImPols = cHelpersBin->readU32LE();
     uint32_t nPublicsIdsImPols = cHelpersBin->readU32LE();
     uint32_t nSubproofValuesIdsImPols = cHelpersBin->readU32LE();
-    uint32_t nCmPolsCalculatedIdsImPols = cHelpersBin->readU32LE();
 
     cHelpersArgsImPols.ops = new uint8_t[nOpsImPols];
     cHelpersArgsImPols.args = new uint16_t[nArgsImPols];
@@ -27,38 +25,41 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
     cHelpersArgsImPols.challengesIds = new uint16_t[nChallengesIdsImPols];
     cHelpersArgsImPols.publicsIds = new uint16_t[nPublicsIdsImPols];
     cHelpersArgsImPols.subproofValuesIds = new uint16_t[nSubproofValuesIdsImPols];
-    cHelpersArgsImPols.cmPolsCalculatedIds = new uint16_t[nCmPolsCalculatedIdsImPols];
            
-    imPolsInfo.destDim = 0;
-    imPolsInfo.nTemp1 = cHelpersBin->readU32LE();
-    imPolsInfo.nTemp3 = cHelpersBin->readU32LE();
+    uint32_t nStages = cHelpersBin->readU32LE();
 
-    imPolsInfo.nOps = cHelpersBin->readU32LE();
-    imPolsInfo.opsOffset = cHelpersBin->readU32LE();
+    for(uint64_t i = 0; i < nStages; ++i) {
+        ParserParams imPolsStageInfo;
+        imPolsStageInfo.destDim = 0;
+        imPolsStageInfo.nTemp1 = cHelpersBin->readU32LE();
+        imPolsStageInfo.nTemp3 = cHelpersBin->readU32LE();
 
-    imPolsInfo.nArgs = cHelpersBin->readU32LE();
-    imPolsInfo.argsOffset = cHelpersBin->readU32LE();
+        imPolsStageInfo.nOps = cHelpersBin->readU32LE();
+        imPolsStageInfo.opsOffset = cHelpersBin->readU32LE();
 
-    imPolsInfo.nNumbers = cHelpersBin->readU32LE();
-    imPolsInfo.numbersOffset = cHelpersBin->readU32LE();
-    
-    imPolsInfo.nConstPolsUsed = cHelpersBin->readU32LE();
-    imPolsInfo.constPolsOffset = cHelpersBin->readU32LE();
-    
-    imPolsInfo.nCmPolsUsed = cHelpersBin->readU32LE();
-    imPolsInfo.cmPolsOffset = cHelpersBin->readU32LE();
+        imPolsStageInfo.nArgs = cHelpersBin->readU32LE();
+        imPolsStageInfo.argsOffset = cHelpersBin->readU32LE();
 
-    imPolsInfo.nChallengesUsed = cHelpersBin->readU32LE();
-    imPolsInfo.challengesOffset = cHelpersBin->readU32LE();
+        imPolsStageInfo.nNumbers = cHelpersBin->readU32LE();
+        imPolsStageInfo.numbersOffset = cHelpersBin->readU32LE();
+        
+        imPolsStageInfo.nConstPolsUsed = cHelpersBin->readU32LE();
+        imPolsStageInfo.constPolsOffset = cHelpersBin->readU32LE();
+        
+        imPolsStageInfo.nCmPolsUsed = cHelpersBin->readU32LE();
+        imPolsStageInfo.cmPolsOffset = cHelpersBin->readU32LE();
 
-    imPolsInfo.nPublicsUsed = cHelpersBin->readU32LE();
-    imPolsInfo.publicsOffset = cHelpersBin->readU32LE();
+        imPolsStageInfo.nChallengesUsed = cHelpersBin->readU32LE();
+        imPolsStageInfo.challengesOffset = cHelpersBin->readU32LE();
 
-    imPolsInfo.nSubproofValuesUsed = cHelpersBin->readU32LE();
-    imPolsInfo.subproofValuesOffset = cHelpersBin->readU32LE();
+        imPolsStageInfo.nPublicsUsed = cHelpersBin->readU32LE();
+        imPolsStageInfo.publicsOffset = cHelpersBin->readU32LE();
 
-    imPolsInfo.nCmPolsCalculated = cHelpersBin->readU32LE();
-    imPolsInfo.cmPolsCalculatedOffset = cHelpersBin->readU32LE();
+        imPolsStageInfo.nSubproofValuesUsed = cHelpersBin->readU32LE();
+        imPolsStageInfo.subproofValuesOffset = cHelpersBin->readU32LE();
+
+        imPolsInfo.push_back(imPolsStageInfo);
+    }
 
     for(uint64_t j = 0; j < nOpsImPols; ++j) {
         cHelpersArgsImPols.ops[j] = cHelpersBin->readU8LE();
@@ -89,10 +90,6 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
     for(uint64_t j = 0; j < nSubproofValuesIdsImPols; ++j) {
         cHelpersArgsImPols.subproofValuesIds[j] = cHelpersBin->readU16LE();
     }
-
-    for(uint64_t j = 0; j < nCmPolsCalculatedIdsImPols; ++j) {
-        cHelpersArgsImPols.cmPolsCalculatedIds[j] = cHelpersBin->readU16LE();
-    }
     
     cHelpersBin->endReadSection();
 
@@ -106,7 +103,6 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
     uint32_t nChallengesIdsExpressions = cHelpersBin->readU32LE();
     uint32_t nPublicsIdsExpressions = cHelpersBin->readU32LE();
     uint32_t nSubproofValuesIdsExpressions = cHelpersBin->readU32LE();
-    uint32_t nCmPolsCalculatedIdsExpressions = cHelpersBin->readU32LE();
 
     cHelpersArgsExpressions.ops = new uint8_t[nOpsExpressions];
     cHelpersArgsExpressions.args = new uint16_t[nArgsExpressions];
@@ -116,7 +112,6 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
     cHelpersArgsExpressions.challengesIds = new uint16_t[nChallengesIdsExpressions];
     cHelpersArgsExpressions.publicsIds = new uint16_t[nPublicsIdsExpressions];
     cHelpersArgsExpressions.subproofValuesIds = new uint16_t[nSubproofValuesIdsExpressions];
-    cHelpersArgsExpressions.cmPolsCalculatedIds = new uint16_t[nCmPolsCalculatedIdsExpressions];
 
     uint64_t nExpressions = cHelpersBin->readU32LE();
 
@@ -157,9 +152,6 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
         parserParamsExpression.nSubproofValuesUsed = cHelpersBin->readU32LE();
         parserParamsExpression.subproofValuesOffset = cHelpersBin->readU32LE();
 
-        parserParamsExpression.nCmPolsCalculated = cHelpersBin->readU32LE();
-        parserParamsExpression.cmPolsCalculatedOffset = cHelpersBin->readU32LE();
-
         expressionsInfo[expId] = parserParamsExpression;
     }
 
@@ -191,10 +183,6 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
 
     for(uint64_t j = 0; j < nSubproofValuesIdsExpressions; ++j) {
         cHelpersArgsExpressions.subproofValuesIds[j] = cHelpersBin->readU16LE();
-    }
-
-    for(uint64_t j = 0; j < nCmPolsCalculatedIdsExpressions; ++j) {
-        cHelpersArgsExpressions.cmPolsCalculatedIds[j] = cHelpersBin->readU16LE();
     }
 
     cHelpersBin->endReadSection();
@@ -260,8 +248,8 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
         parserParamsConstraint.nSubproofValuesUsed = cHelpersBin->readU32LE();
         parserParamsConstraint.subproofValuesOffset = cHelpersBin->readU32LE();
 
-        parserParamsConstraint.nCmPolsCalculated = 0;
-    
+        parserParamsConstraint.line = cHelpersBin->readString();
+
         constraintsInfoDebug.push_back(parserParamsConstraint);
     }
 
@@ -312,6 +300,7 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
             HintField hintField;
             std::string name = cHelpersBin->readString();
             std::string operand = cHelpersBin->readString();
+            hintField.name = name;
             hintField.operand = string2opType(operand);
             if(hintField.operand == opType::number) {
                 hintField.value = cHelpersBin->readU64LE();
@@ -321,7 +310,7 @@ void CHelpers::loadCHelpers(BinFileUtils::BinFile *cHelpersBin) {
             if(hintField.operand == opType::tmp) {
                 hintField.dim = cHelpersBin->readU32LE();
             }
-            hint.fields[name] = hintField;
+            hint.fields.push_back(hintField);
         }
 
         hints.push_back(hint);

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
-#include "chelpers_steps.hpp"
 
 class ArgumentParser {
 private:
@@ -42,8 +41,6 @@ public:
 int main(int argc, char **argv)
 {
     Config config;
-    config.mapConstPolsFile = false;
-    config.mapConstantsTreeFile = false;
     
     string constFile = "";
     string starkInfoFile = "";
@@ -86,6 +83,7 @@ int main(int argc, char **argv)
 
         StarkInfo starkInfo(starkInfoFile);
         CHelpers cHelpers(cHelpersFile);
+        ConstPols constPols(starkInfo, constFile);
 
         void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
         void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
@@ -118,10 +116,11 @@ int main(int argc, char **argv)
 
         FRIProof<Goldilocks::Element> fproof(starkInfo);
 
-        Starks<Goldilocks::Element> starks(config, {constFile, config.mapConstPolsFile, ""}, pAddress, starkInfo, cHelpers, true);
+        Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, constPols, true);
 
-        CHelpersSteps cHelpersSteps;
-        starks.genProof(fproof, &publicInputs[0], &cHelpersSteps); 
+        CHelpersSteps cHelpersSteps(starkInfo, chelpers, constPols);
+
+        starks.genProof(fproof, cHelpersSteps, &publicInputs[0]); 
 
         return EXIT_SUCCESS;
     } catch (const exception &e) {

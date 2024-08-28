@@ -21,7 +21,6 @@ const int CHELPERS_HINTS_SECTION = 5;
 struct ParserParams
 {
     uint32_t stage;
-    uint32_t executeBefore;
     uint32_t expId;
     uint32_t nTemp1;
     uint32_t nTemp3;
@@ -41,12 +40,11 @@ struct ParserParams
     uint32_t publicsOffset;
     uint32_t nSubproofValuesUsed;
     uint32_t subproofValuesOffset;
-    uint32_t nCmPolsCalculated;
-    uint32_t cmPolsCalculatedOffset;
     uint32_t firstRow;
     uint32_t lastRow;
     uint32_t destDim;
     uint32_t destId;
+    string line;
 };
 
 struct ParserArgs 
@@ -59,7 +57,6 @@ struct ParserArgs
     uint16_t* challengesIds;
     uint16_t* publicsIds;
     uint16_t* subproofValuesIds;
-    uint16_t* cmPolsCalculatedIds;
 };
 
 class CHelpers
@@ -69,7 +66,7 @@ public:
 
     std::vector<ParserParams> constraintsInfoDebug;
 
-    ParserParams imPolsInfo;
+    std::vector<ParserParams> imPolsInfo;
 
     std::vector<Hint> hints;
 
@@ -88,7 +85,6 @@ public:
         if (cHelpersArgsImPols.challengesIds) delete[] cHelpersArgsImPols.challengesIds;
         if (cHelpersArgsImPols.publicsIds) delete[] cHelpersArgsImPols.publicsIds;
         if (cHelpersArgsImPols.subproofValuesIds) delete[] cHelpersArgsImPols.subproofValuesIds;
-        if (cHelpersArgsImPols.cmPolsCalculatedIds) delete[] cHelpersArgsImPols.cmPolsCalculatedIds;
 
         if (cHelpersArgsExpressions.ops) delete[] cHelpersArgsExpressions.ops;
         if (cHelpersArgsExpressions.args) delete[] cHelpersArgsExpressions.args;
@@ -98,7 +94,6 @@ public:
         if (cHelpersArgsExpressions.challengesIds) delete[] cHelpersArgsExpressions.challengesIds;
         if (cHelpersArgsExpressions.publicsIds) delete[] cHelpersArgsExpressions.publicsIds;
         if (cHelpersArgsExpressions.subproofValuesIds) delete[] cHelpersArgsExpressions.subproofValuesIds;
-        if (cHelpersArgsExpressions.cmPolsCalculatedIds) delete[] cHelpersArgsExpressions.cmPolsCalculatedIds;
 
         if (cHelpersArgsDebug.ops) delete[] cHelpersArgsDebug.ops;
         if (cHelpersArgsDebug.args) delete[] cHelpersArgsDebug.args;

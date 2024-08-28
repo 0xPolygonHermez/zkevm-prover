@@ -19,7 +19,7 @@ private:
 public:
     MerkleTreeBN128(){};
     MerkleTreeBN128(uint64_t arity, bool custom, Goldilocks::Element *tree);
-    MerkleTreeBN128(uint64_t arity, bool custom, uint64_t _height, uint64_t _width, Goldilocks::Element *source);
+    MerkleTreeBN128(uint64_t arity, bool custom, uint64_t _height, uint64_t _width, Goldilocks::Element *source, bool allocate = true);
     ~MerkleTreeBN128();
 
     uint64_t numNodes;
@@ -44,6 +44,7 @@ public:
     uint64_t getNumNodes(uint64_t height);
     void getRoot(RawFr::Element *root);
     void copySource(Goldilocks::Element *source);
+    void setSource(Goldilocks::Element *source);
 
     void getGroupProof(RawFr::Element *proof, uint64_t idx);
     

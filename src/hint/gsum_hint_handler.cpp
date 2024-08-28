@@ -33,11 +33,19 @@ namespace Hints
 
         assert(denPol.dim() == sPol.dim());
 
-        Goldilocks::Element numeratorValue = Goldilocks::fromU64(hint.fields["numerator"].value);
+        auto numerator = std::find_if(hint.fields.begin(), hint.fields.end(), [](const HintField& hintField) {
+            return hintField.name == "numerator";
+        });
+
+        Goldilocks::Element numeratorValue = Goldilocks::fromU64(numerator->value);
 
         calculateS(sPol, denPol, numeratorValue);
         
-        uint64_t subproofValueId = hint.fields["result"].id;
+        auto result = std::find_if(hint.fields.begin(), hint.fields.end(), [](const HintField& hintField) {
+            return hintField.name == "result";
+        });
+
+        uint64_t subproofValueId = result->id;
         
         params.subproofValues[subproofValueId * FIELD_EXTENSION] = sPol[N - 1][0];
         params.subproofValues[subproofValueId * FIELD_EXTENSION + 1] = sPol[N - 1][1];

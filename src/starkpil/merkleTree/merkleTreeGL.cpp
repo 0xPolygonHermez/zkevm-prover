@@ -3,10 +3,10 @@
 #include <algorithm> // std::max
 
 
-MerkleTreeGL::MerkleTreeGL(uint64_t _arity, bool _custom, uint64_t _height, uint64_t _width, Goldilocks::Element *_source) : height(_height), width(_width), source(_source)
+MerkleTreeGL::MerkleTreeGL(uint64_t _arity, bool _custom, uint64_t _height, uint64_t _width, Goldilocks::Element *_source, bool allocate) : height(_height), width(_width), source(_source)
 {
 
-    if (source == NULL)
+    if (source == NULL && allocate)
     {
         source = (Goldilocks::Element *)calloc(height * width, sizeof(Goldilocks::Element));
         isSourceAllocated = true;
@@ -64,7 +64,7 @@ uint64_t MerkleTreeGL::getMerkleProofSize() {
     return getMerkleProofLength() * nFieldElements;
 }
 
-uint64_t MerkleTreeGL::getNumNodes(uint64_t height) 
+uint64_t MerkleTreeGL::getNumNodes(uint64_t height)
 {
     return height * nFieldElements + (height - 1) * nFieldElements;
 }
@@ -80,6 +80,10 @@ void MerkleTreeGL::copySource(Goldilocks::Element *_source)
     std::memcpy(source, _source, height * width * sizeof(Goldilocks::Element));
 }
 
+void MerkleTreeGL::setSource(Goldilocks::Element *_source)
+{
+    source = _source;
+}
 
 Goldilocks::Element MerkleTreeGL::getElement(uint64_t idx, uint64_t subIdx)
 {

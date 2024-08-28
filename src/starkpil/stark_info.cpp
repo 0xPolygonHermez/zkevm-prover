@@ -31,6 +31,9 @@ void StarkInfo::load(json j)
         } else {
             starkStruct.merkleTreeCustom = false;
         }
+    } else {
+        starkStruct.merkleTreeArity = 2;
+        starkStruct.merkleTreeCustom = true;
     }
     if(j["starkStruct"].contains("hashCommits")) {
         starkStruct.hashCommits = j["starkStruct"]["hashCommits"];
@@ -44,6 +47,9 @@ void StarkInfo::load(json j)
         step.nBits = j["starkStruct"]["steps"][i]["nBits"];
         starkStruct.steps.push_back(step);
     }
+
+    airId = j["airId"];
+    subproofId = j["subproofId"];
 
     nPublics = j["nPublics"];
     nConstants = j["nConstants"];
@@ -95,7 +101,22 @@ void StarkInfo::load(json j)
         map.imPol = j["cmPolsMap"][i].contains("imPol") ? true : false;
         map.stagePos = j["cmPolsMap"][i]["stagePos"];
         map.stageId = j["cmPolsMap"][i]["stageId"];
+        if(j["cmPolsMap"][i].contains("expId")) {
+            map.expId = j["cmPolsMap"][i]["expId"];
+        }
         cmPolsMap.push_back(map);
+    }
+
+    for (uint64_t i = 0; i < j["constPolsMap"].size(); i++) 
+    {
+        PolMap map;
+        map.stage = j["constPolsMap"][i]["stage"];
+        map.name = j["constPolsMap"][i]["name"];
+        map.dim = j["constPolsMap"][i]["dim"];
+        map.imPol = false;
+        map.stagePos = j["constPolsMap"][i]["stageId"];
+        map.stageId = j["constPolsMap"][i]["stageId"];
+        constPolsMap.push_back(map);
     }
 
     for (uint64_t i = 0; i < j["evMap"].size(); i++)
@@ -131,6 +152,10 @@ void StarkInfo::setMapOffsets() {
     uint64_t N = (1 << starkStruct.nBits);
     uint64_t NExtended = (1 << starkStruct.nBitsExt);
 
+    // Set offsets for constants
+    mapOffsets[std::make_pair("const", false)] = 0;
+    mapOffsets[std::make_pair("const", true)] = 0;
+
     mapTotalN = 0;
 
     // Set offsets for all stages in the extended field (cm1, cm2, ..., cmN)
@@ -145,7 +170,7 @@ void StarkInfo::setMapOffsets() {
     uint64_t offsetPolsBasefield = mapOffsets[std::make_pair("cm" + to_string(nStages), true)];
 
     // Set offsets for all stages in the basefield field (cm1, cm2, ... )
-    for(uint64_t stage = 1; stage <= nStages + 1; stage++) {
+    for(uint64_t stage = 1; stage <= nStages; stage++) {
         string section;
         if(stage == 1) {
             section = "cm" + to_string(nStages);
@@ -217,17 +242,17 @@ void StarkInfo::setMapOffsets() {
     }
 }
 
-Polinomial StarkInfo::getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg)
-{
-    PolMap polInfo = cmPolsMap[idPol];
+void StarkInfo::getPolynomial(Polinomial &pol, Goldilocks::Element *pAddress, bool committed, uint64_t idPol, bool domainExtended) {
+    PolMap polInfo = committed ? cmPolsMap[idPol] : constPolsMap[idPol];
+    uint64_t deg = domainExtended ? 1 << starkStruct.nBitsExt : 1 << starkStruct.nBits;
     uint64_t dim = polInfo.dim;
-    uint64_t domainExtended = deg == uint64_t(1 << starkStruct.nBitsExt);
-    std::string stage = "cm" + to_string(polInfo.stage);
+    std::string stage = committed ? "cm" + to_string(polInfo.stage) : "const";
     uint64_t nCols = mapSectionsN[stage];
     uint64_t offset = mapOffsets[std::make_pair(stage, domainExtended)];
     offset += polInfo.stagePos;
-    return Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
+    pol = Polinomial(&pAddress[offset], deg, dim, nCols, std::to_string(idPol));
 }
+
 
 opType string2opType(const string s) 
 {

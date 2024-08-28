@@ -57,6 +57,7 @@ public:
     bool imPol;
     uint64_t stagePos;
     uint64_t stageId;
+    uint64_t expId;
 };
 
 class EvMap
@@ -101,6 +102,7 @@ public:
     uint64_t nStages;
 
     vector<PolMap> cmPolsMap;
+    vector<PolMap> constPolsMap;
     vector<PolMap> challengesMap;
     vector<EvMap> evMap;
     
@@ -130,7 +132,7 @@ public:
     void setMapOffsets();
 
     /* Returns a polynomial specified by its ID */
-    Polinomial getPolinomial(Goldilocks::Element *pAddress, uint64_t idPol, uint64_t deg);
+    void getPolynomial(Polinomial &pol, Goldilocks::Element *pAddress, bool committed, uint64_t idPol, bool domainExtended);
 };
 
 #endif

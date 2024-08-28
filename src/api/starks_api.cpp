@@ -1,15 +1,9 @@
 #include "config.hpp"
-#include "circom.hpp"
 #include "main.hpp"
-#include "main.recursive1.hpp"
 #include "zkglobals.hpp"
-#include "ZkevmSteps.hpp"
-#include "C12aSteps.hpp"
-#include "Recursive1Steps.hpp"
-#include "Recursive2Steps.hpp"
-#include "RecursiveFSteps.hpp"
 #include "proof2zkinStark.hpp"
 #include "starks.hpp"
+#include "global_constraints.hpp"
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -26,7 +20,7 @@ void save_proof(void *pStarkInfo, void *pFriProof, unsigned long numPublicInputs
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
 
-    nlohmann::ordered_json jProofRecursive1 = friProof->proofs.proof2json();
+    nlohmann::ordered_json jProofRecursive1 = friProof->proof.proof2json();
     nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1, *(StarkInfo *)pStarkInfo);
     zkinRecursive1["publics"] = publicStarkJson;
 
@@ -46,61 +40,6 @@ void save_proof(void *pStarkInfo, void *pFriProof, unsigned long numPublicInputs
     }
 }
 
-void *zkevm_steps_new()
-{
-    ZkevmSteps *zkevmSteps = new ZkevmSteps();
-    return zkevmSteps;
-}
-
-void zkevm_steps_free(void *pZkevmSteps)
-{
-    ZkevmSteps *zkevmSteps = (ZkevmSteps *)pZkevmSteps;
-    delete zkevmSteps;
-}
-
-void *c12a_steps_new()
-{
-    C12aSteps *c12aSteps = new C12aSteps();
-    return c12aSteps;
-}
-void c12a_steps_free(void *pC12aSteps)
-{
-    C12aSteps *c12aSteps = (C12aSteps *)pC12aSteps;
-    delete c12aSteps;
-}
-void *recursive1_steps_new()
-{
-    Recursive1Steps *recursive1Steps = new Recursive1Steps();
-    return recursive1Steps;
-}
-void recursive1_steps_free(void *pRecursive1Steps)
-{
-    Recursive1Steps *recursive1Steps = (Recursive1Steps *)pRecursive1Steps;
-    delete recursive1Steps;
-}
-void *recursive2_steps_new()
-{
-    Recursive2Steps *recursive2Steps = new Recursive2Steps();
-    return recursive2Steps;
-}
-
-void recursive2_steps_free(void *pRecursive2Steps)
-{
-    Recursive2Steps *recursive2Steps = (Recursive2Steps *)pRecursive2Steps;
-    delete recursive2Steps;
-}
-
-void *generic_steps_new()
-{
-    CHelpersSteps *genericSteps = new CHelpersSteps();
-    return genericSteps;
-}
-void generic_steps_free(void *pGenericSteps)
-{
-    CHelpersSteps *genericSteps = (CHelpersSteps *)pGenericSteps;
-    delete genericSteps;
-}
-
 void *fri_proof_new(void *pStarks)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
@@ -112,35 +51,26 @@ void *fri_proof_new(void *pStarks)
 void *fri_proof_get_root(void *pFriProof, uint64_t root_index, uint64_t root_subindex)
 {
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
-    return &friProof->proofs.roots[root_index][root_subindex];
+    return &friProof->proof.roots[root_index][root_subindex];
 }
 
 void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t root_index)
 {
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
-    return &friProof->proofs.fri.trees[tree_index].root[root_index];
+    return &friProof->proof.fri.trees[tree_index].root[root_index];
+}
+
+void fri_proof_set_subproofvalues(void *pFriProof, void *pChelpersSteps)
+{
+    FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    friProof->proof.setSubproofValues(cHelpersSteps->params.subproofValues);
 }
 
 void fri_proof_free(void *pFriProof)
 {
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
     delete friProof;
-}
-
-void *config_new(char *filename)
-{
-    Config *config = new Config();
-    json configJson;
-    file2json(filename, configJson);
-    config->load(configJson);
-
-    return config;
-}
-
-void config_free(void *pConfig)
-{
-    Config *config = (Config *)pConfig;
-    delete config;
 }
 
 void *starkinfo_new(char *filename)
@@ -153,12 +83,6 @@ void *starkinfo_new(char *filename)
 uint64_t get_mapTotalN(void *pStarkInfo)
 {
     return ((StarkInfo *)pStarkInfo)->mapTotalN;
-}
-
-void set_mapOffsets(void *pStarkInfo, void *pChelpers)
-{
-    auto starkInfo = (StarkInfo *)pStarkInfo;
-    auto cHelpers = (CHelpers *)pChelpers;
 }
 
 uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag)
@@ -179,19 +103,17 @@ void starkinfo_free(void *pStarkInfo)
     delete starkInfo;
 }
 
-void *starks_new(void *pConfig, char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress)
+void *starks_new(void *pConfig, void *starkInfo, void *pCHelpersSteps)
 {
-    return new Starks<Goldilocks::Element>(*(Config *)pConfig, {constPols, mapConstPolsFile, constantsTree}, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, false);
+    return new Starks<Goldilocks::Element>(*(Config *)pConfig, *(StarkInfo *)starkInfo, *(CHelpersSteps*)pCHelpersSteps, false);
 }
 
-void *starks_new_default(char *constPols, bool mapConstPolsFile, char *constantsTree, void *starkInfo, void *cHelpers, void *pAddress)
+void *starks_new_default(void *starkInfo, void *pCHelpersSteps)
 {
     Config configLocal;
     configLocal.runFileGenBatchProof = true; //to force function generateProof to return true
 
-    Goldilocks::Element* addressElements = (Goldilocks::Element *)pAddress;
-
-    return new Starks<Goldilocks::Element>(configLocal, {constPols, mapConstPolsFile, constantsTree}, pAddress, *(StarkInfo *)starkInfo, *(CHelpers *)cHelpers, false);
+    return new Starks<Goldilocks::Element>(configLocal, *(StarkInfo *)starkInfo, *(CHelpersSteps*)pCHelpersSteps, false);
 }
 
 
@@ -217,40 +139,29 @@ void chelpers_free(void *pChelpers)
     delete cHelpers;
 }
 
-void init_hints()
-{
-    HintHandlerBuilder::registerBuilder(H1H2HintHandler::getName(), std::make_unique<H1H2HintHandlerBuilder>());
-    HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
-    HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
-}
 
-void *steps_params_new(void *pStarks, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs)
+
+void *steps_params_new(void* pConstPols, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs)
 {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
     Goldilocks::Element *challenges = (Goldilocks::Element *)pChallenges;
     Goldilocks::Element *subproofValues = (Goldilocks::Element *)pSubproofValues;
-    Goldilocks::Element *evals = (Goldilocks::Element *)pEvals;
     Goldilocks::Element *publicInputs = (Goldilocks::Element *)pPublicInputs;
+    Goldilocks::Element *evals = (Goldilocks::Element *)pEvals;
 
-    return starks->ffi_create_steps_params(challenges, subproofValues, evals, publicInputs);
-}
+    ConstPols *constPols = (ConstPols *)pConstPols;
 
-void *get_steps_params_field(void *pStepsParams, char *name)
-{
-    StepsParams *stepsParams = (StepsParams *)pStepsParams;
+    StepsParams *params = new StepsParams{
+        pols : nullptr,
+        constPols : constPols->pConstPolsAddress,
+        constPolsExtended : constPols->pConstPolsAddressExtended,
+        challenges : challenges,
+        subproofValues : subproofValues,
+        evals : evals,
+        zi : nullptr,
+        publicInputs : publicInputs,
+    };
 
-    if (strcmp(name, "q_2ns") == 0)
-    {
-        return stepsParams->q_2ns;
-    }
-    else if (strcmp(name, "f_2ns") == 0)
-    {
-        return stepsParams->f_2ns;
-    }
-    else
-    {
-        return NULL;
-    }
+    return params;
 }
 
 void steps_params_free(void *pStepsParams)
@@ -260,13 +171,10 @@ void steps_params_free(void *pStepsParams)
     delete stepsParams;
 }
 
-void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *pProof)
+void extend_and_merkelize(void *pStarks, uint64_t step, void *pChelpersSteps, void *pProof)
 {
     auto starks = (Starks<Goldilocks::Element> *)pStarks;
-    auto params = (StepsParams *)pParams;
-    auto proof = (FRIProof<Goldilocks::Element> *)pProof;
-
-    starks->ffi_extend_and_merkelize(step, params, proof);
+    starks->ffi_extend_and_merkelize(step, *(CHelpersSteps *)pChelpersSteps, (FRIProof<Goldilocks::Element> *)pProof);
 }
 
 void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
@@ -276,33 +184,26 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
     starks->ffi_treesGL_get_root(index, (Goldilocks::Element *)dst);
 }
 
-void calculate_expression(void* pStarks, void* dest, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended)
+void calculate_quotient_polynomial(void *pChelpersSteps)
 {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateExpression((Goldilocks::Element *)dest, id, *(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps, domainExtended);
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    cHelpersSteps->calculateQuotientPolynomial();
 }
 
-void calculate_expression_q(void* pStarks, uint64_t id, void *pParams, void *pChelpersSteps, bool domainExtended)
+void calculate_impols_expressions(void *pChelpersSteps, uint64_t step)
 {
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    StepsParams *params = (StepsParams *)pParams;
-    starks->calculateExpression(params->q_2ns, id, *(StepsParams *)params, (CHelpersSteps *)pChelpersSteps, domainExtended);
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    cHelpersSteps->calculateImPolsExpressions(step);
 }
 
-void calculate_impols_expressions(void* pStarks, void *pParams, void *pChelpersSteps)
-{
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateImPolsExpressions(*(StepsParams *)pParams, (CHelpersSteps *)pChelpersSteps);
-}
-
-void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof, void *pChelpersSteps)
+void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t step, void *pChelpersSteps, void *pProof)
 {
     // type == 1 => Goldilocks
     // type == 2 => BN128
     switch (elementType)
     {
     case 1:
-        ((Starks<Goldilocks::Element> *)pStarks)->computeStageExpressions(step, *(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof, (CHelpersSteps *)pChelpersSteps);
+        ((Starks<Goldilocks::Element> *)pStarks)->computeStageExpressions(step, *(CHelpersSteps *)pChelpersSteps, *(FRIProof<Goldilocks::Element> *)pProof);
         break;
     default:
         cerr << "Invalid elementType: " << elementType << endl;
@@ -310,13 +211,13 @@ void compute_stage_expressions(void *pStarks, uint32_t elementType, uint64_t ste
     }
 }
 
-void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof) {
+void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pChelpersSteps, void *pProof) {
     // type == 1 => Goldilocks
     // type == 2 => BN128
     switch (elementType)
     {
     case 1:
-        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, *(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
+        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, *(CHelpersSteps *)pChelpersSteps, *(FRIProof<Goldilocks::Element> *)pProof);
         break;
     default:
         cerr << "Invalid elementType: " << elementType << endl;
@@ -325,22 +226,30 @@ void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pPar
 }
 
 
-void compute_evals(void *pStarks, void *pParams, void *pProof)
+void compute_evals(void *pStarks, void *pChelpersSteps, void *pProof)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeEvals(*(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
+    starks->computeEvals(*(CHelpersSteps *)pChelpersSteps, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
-void compute_fri_pol(void *pStarks, uint64_t step, void *pParams, void *cHelpersSteps)
+void compute_fri_pol(void *pStarks, uint64_t step, void *cHelpersSteps)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeFRIPol(step, *(StepsParams *)pParams, (CHelpersSteps *)cHelpersSteps);
+    starks->computeFRIPol(step, *(CHelpersSteps *)cHelpersSteps);
 }
 
-void compute_fri_folding(void *pStarks, void *pProof, void *pFriPol, uint64_t step, void *pChallenge)
+void *get_fri_pol(void *pStarks, void *cHelpersSteps)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeFRIFolding(*(FRIProof<Goldilocks::Element> *)pProof, (Goldilocks::Element *)pFriPol, step, (Goldilocks::Element *)pChallenge);
+    auto chelpersSteps = *(CHelpersSteps *)cHelpersSteps;
+    
+    return &chelpersSteps.params.pols[starks->starkInfo.mapOffsets[std::make_pair("f", true)]];
+}
+
+void compute_fri_folding(void *pStarks, uint64_t step, void *pChelpersSteps, void *pChallenge,  void *pProof)
+{
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    starks->computeFRIFolding(step, *(CHelpersSteps *)pChelpersSteps, (Goldilocks::Element *)pChallenge, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
 void compute_fri_queries(void *pStarks, void *pProof, uint64_t *friQueries)
@@ -353,13 +262,7 @@ void *get_proof_root(void *pProof, uint64_t stage_id, uint64_t index)
 {
     FRIProof<Goldilocks::Element> *proof = (FRIProof<Goldilocks::Element> *)pProof;
 
-    return &proof->proofs.roots[stage_id][index];
-}
-
-void *get_vector_pointer(void *pStarks, char *name)
-{
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    return starks->ffi_get_vector_pointer(name);
+    return &proof->proof.roots[stage_id][index];
 }
 
 void resize_vector(void *pVector, uint64_t newSize, bool value)
@@ -374,23 +277,25 @@ void set_bool_vector_value(void *pVector, uint64_t index, bool value)
     vector->at(index) = value;
 }
 
-void clean_symbols_calculated(void *pStarks)
-{
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->cleanSymbolsCalculated();
-}
-
-void set_symbol_calculated(void *pStarks, uint32_t operand, uint64_t id)
-{
-    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->ffi_set_symbol_calculated(operand, id);
-}
-
 void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElements)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
     starks->calculateHash((Goldilocks::Element *)pHhash, (Goldilocks::Element *)pBuffer, nElements);
 }
+
+void *const_pols_new(void *pStarkInfo, char* constPolsFile) {
+    return new ConstPols(*(StarkInfo *)pStarkInfo, constPolsFile);
+}
+
+void *const_pols_new(void *pStarkInfo, char* constPolsFile, char* constTreeFile) {
+    return new ConstPols(*(StarkInfo *)pStarkInfo, constPolsFile, constTreeFile);
+}
+
+void const_pols_free(void *pConstPols) {
+    ConstPols *constPols = (ConstPols *)pConstPols;
+    delete constPols;
+}
+
 
 void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols)
 {
@@ -401,18 +306,6 @@ void commit_pols_starks_free(void *pCommitPolsStarks)
 {
     CommitPolsStarks *commitPolsStarks = (CommitPolsStarks *)pCommitPolsStarks;
     delete commitPolsStarks;
-}
-
-void circom_get_commited_pols(void *pCommitPolsStarks, char *zkevmVerifier, char *execFile, void *zkin, uint64_t N, uint64_t nCols)
-{
-    nlohmann::json *zkinJson = (nlohmann::json *)zkin;
-    Circom::getCommitedPols((CommitPolsStarks *)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
-}
-
-void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char *zkevmVerifier, char *execFile, void *zkin, uint64_t N, uint64_t nCols)
-{
-    nlohmann::json *zkinJson = (nlohmann::json *)zkin;
-    CircomRecursive1::getCommitedPols((CommitPolsStarks *)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
 }
 
 void *zkin_new(void *pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC)
@@ -436,7 +329,7 @@ void *zkin_new(void *pStarkInfo, void *pFriProof, unsigned long numPublicInputs,
 
     nlohmann::ordered_json *jProof = new nlohmann::ordered_json();
     nlohmann::json *zkin = new nlohmann::json();
-    *jProof = friProof->proofs.proof2json();
+    *jProof = friProof->proof.proof2json();
 
     *zkin = proof2zkinStark(*jProof, *(StarkInfo *)pStarkInfo);
     (*zkin)["publics"] = publicStarkJson;
@@ -531,4 +424,86 @@ void goldilocks_linear_hash(void *pInput, void *pOutput)
     memset(&input[8], 0, 4 * sizeof(Goldilocks::Element));
 
     PoseidonGoldilocks::hash(*(Goldilocks::Element(*)[4])pOutput, input);
+}
+
+// CHelpersSteps
+
+void *chelpers_steps_new(void *pStarkInfo, void *pChelpers, void* pConstPols)
+{
+    CHelpersSteps *cHelpersSteps = new CHelpersSteps(*(StarkInfo *)pStarkInfo, *(CHelpers *)pChelpers, *(ConstPols *)pConstPols);
+    return cHelpersSteps;
+}
+
+bool verify_constraints(void *pCHelpersSteps, uint64_t step)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    return cHelpersSteps->verifyConstraints(step);
+}
+
+void set_commit_calculated(void *pCHelpersSteps, uint64_t id)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    cHelpersSteps->setCommitCalculated(id);
+}
+
+void can_stage_be_calculated(void *pCHelpersSteps, uint64_t step)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    cHelpersSteps->canStageBeCalculated(step);
+}
+
+void can_impols_be_calculated(void *pCHelpersSteps, uint64_t step)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    cHelpersSteps->canImPolsBeCalculated(step);
+}
+
+void init_params(void *pCHelpersSteps, void *pChallenges, void *pSubproofValues, void *pEvals, void *pPublicInputs) {
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    cHelpersSteps->initParams((Goldilocks::Element *)pChallenges, (Goldilocks::Element *)pSubproofValues, (Goldilocks::Element *)pEvals, (Goldilocks::Element *)pPublicInputs);
+}
+
+void reset_params(void *pCHelpersSteps) {
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    cHelpersSteps->resetParams();
+};
+
+void set_trace_pointer(void *pChelpersSteps, void *ptr) 
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    cHelpersSteps->params.pols = (Goldilocks::Element *)ptr;
+}
+
+void* get_hint_ids_by_name(void *pChelpersSteps, char* hintName)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+
+    HintIdsResult hintIds =  cHelpersSteps->getHintIdsByName(string(hintName));
+    return new HintIdsResult(hintIds);
+}
+
+void *get_hint_field(void *pChelpersSteps, uint64_t hintId, char *hintFieldName, bool dest) 
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    HintFieldInfo hintFieldInfo = cHelpersSteps->getHintField(hintId, string(hintFieldName), dest);
+    return new HintFieldInfo(hintFieldInfo);
+}
+
+void set_hint_field(void *pChelpersSteps, void *values, uint64_t hintId, char * hintFieldName) 
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    cHelpersSteps->setHintField((Goldilocks::Element *)values, hintId, string(hintFieldName));
+}
+
+void chelpers_steps_free(void *pCHelpersSteps)
+{
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pCHelpersSteps;
+    delete cHelpersSteps;
+}
+
+bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs) {
+    
+    FRIProof<Goldilocks::Element> **proofs = (FRIProof<Goldilocks::Element> **)pProofs;
+
+    return verifyGlobalConstraints(string(globalInfoFile), string(globalConstraintsBinFile), (Goldilocks::Element *)publics, proofs, nProofs);
 }
