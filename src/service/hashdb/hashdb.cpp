@@ -90,7 +90,15 @@ zkresult HashDB::setProgram (const string &batchUUID, uint64_t block, uint64_t t
     string keyString = fea2string(fr, key);
 
     // Call writeProgram()
-    zkresult zkr = stateManager.writeProgram(batchUUID, block, tx, keyString, data, persistence);
+    zkresult zkr;
+    if (config.stateManager)
+    {
+        zkr = stateManager.writeProgram(batchUUID, block, tx, keyString, data, persistence);
+    }
+    else
+    {
+        zkr = db.setProgram(keyString, data, persistence == PERSISTENCE_DATABASE);
+    }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
     tms.add("setProgram", TimeDiff(t));
@@ -116,14 +124,21 @@ zkresult HashDB::getProgram (const string &batchUUID, const Goldilocks::Element 
     data.clear();
 
     // Call readProgram
-    zkresult zkr = stateManager.readProgram(batchUUID, keyString, data, dbReadLog);
-    if (zkr != ZKR_SUCCESS)
+    zkresult zkr;
+    if (config.stateManager)
     {
-        zkr = db.getProgram(keyString, data, dbReadLog);
+        zkr = stateManager.readProgram(batchUUID, keyString, data, dbReadLog);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("HashDB::getProgram() failed result=" + zkresult2string(zkr) + " key=" + keyString);
+            zkr = db.getProgram(keyString, data, dbReadLog);
         }
+    } else
+    {
+        zkr = db.getProgram(keyString, data, dbReadLog);
+    }
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("HashDB::getProgram() failed result=" + zkresult2string(zkr) + " key=" + keyString);
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB

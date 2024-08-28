@@ -756,5 +756,11 @@ bool Config::check (void)
         bError = true;
     }
 
+    if (!hashDBSingleton && stateManager)
+    {
+        zklog.error("hashDBSingleton=false but stateManager=true");
+        bError = true;
+    }
+
     return bError;
 }
