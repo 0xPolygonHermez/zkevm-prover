@@ -50,8 +50,6 @@ private:
     MerkleTreeType **treesFRI;
 
     uint64_t nFieldElements;
-    uint64_t merkleTreeArity;
-    bool merkleTreeCustom;
 
     Goldilocks::Element *S;
     Goldilocks::Element *xis;
@@ -75,12 +73,8 @@ public:
 
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             nFieldElements = 1;
-            merkleTreeArity = starkInfo.starkStruct.merkleTreeArity;
-            merkleTreeCustom = starkInfo.starkStruct.merkleTreeCustom;
         } else {
             nFieldElements = HASH_SIZE;
-            merkleTreeArity = 2;
-            merkleTreeCustom = true;
         }
 
         treesGL = new MerkleTreeType*[starkInfo.nStages + 2];
@@ -105,10 +99,12 @@ public:
         TimerStopAndLog(COMPUTE_X);
 
         TimerStart(MERKLE_TREE_ALLOCATION);
-        treesGL[starkInfo.nStages + 1] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, (Goldilocks::Element *)cHelpersSteps.constPols.pConstTreeAddress);
+        treesGL[starkInfo.nStages + 1] = new MerkleTreeType(starkInfo.starkStruct.merkleTreeArity, starkInfo.starkStruct.merkleTreeCustom, (Goldilocks::Element *)cHelpersSteps.constPols.pConstTreeAddress);
         for (uint64_t i = 0; i < starkInfo.nStages + 1; i++)
         {
-            treesGL[i] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom,  NExtended, starkInfo.mapSectionsN["cm" + to_string(i + 1)], NULL, false);
+            std::string section = "cm" + to_string(i + 1);
+            uint64_t nCols = starkInfo.mapSectionsN[section];
+            treesGL[i] = new MerkleTreeType(starkInfo.starkStruct.merkleTreeArity, starkInfo.starkStruct.merkleTreeCustom, NExtended, nCols, NULL, false);
         }
 
         if(!debug) {            
@@ -117,7 +113,7 @@ public:
                 uint64_t nGroups = 1 << starkInfo.starkStruct.steps[step + 1].nBits;
                 uint64_t groupSize = (1 << starkInfo.starkStruct.steps[step].nBits) / nGroups;
 
-                treesFRI[step] = new MerkleTreeType(merkleTreeArity, merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
+                treesFRI[step] = new MerkleTreeType(starkInfo.starkStruct.merkleTreeArity, starkInfo.starkStruct.merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
             }
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);

@@ -69,10 +69,10 @@ public:
         } else if(parserParams.expId == starkInfo.friExpId) {
             for(uint64_t d = 0; d < starkInfo.openingPoints.size(); ++d) {
                for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
-                   for(uint64_t j = 0; j < nrowsPack; ++j) {
-                       bufferT[j] = params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (row + j + d*domainSize)*FIELD_EXTENSION + k];
+                    for(uint64_t j = 0; j < nrowsPack; ++j) {
+                        bufferT[j] = params.pols[starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (row + j + d*domainSize)*FIELD_EXTENSION + k];
                     }
-                    Goldilocks::load_avx(bufferT_[buffTOffsetsStages[starkInfo.nStages + 2] + d*FIELD_EXTENSION + k*starkInfo.openingPoints.size()], &bufferT[0]);
+                    Goldilocks::load_avx(bufferT_[buffTOffsetsStages[starkInfo.nStages + 2] + d + k*nOpenings], &bufferT[0]);
                 }
             }
         }
@@ -100,46 +100,42 @@ public:
 
     inline void printTmp1(uint64_t row, __m256i tmp) {
         Goldilocks::Element dest[nrowsPack];
-
         Goldilocks::store_avx(dest, tmp);
-
-        for(uint64_t i = 0; i < nrowsPack; ++i) {
+        for(uint64_t i = 0; i < 1; ++i) {
             cout << "Value at row " << row + i << " is " << Goldilocks::toString(dest[i]) << endl;
         }
     }
-    
+
     inline void printTmp3(uint64_t row, Goldilocks3::Element_avx tmp) {
         Goldilocks::Element dest[FIELD_EXTENSION*nrowsPack];
-
         Goldilocks::store_avx(&dest[0], uint64_t(FIELD_EXTENSION), tmp[0]);
         Goldilocks::store_avx(&dest[1], uint64_t(FIELD_EXTENSION), tmp[1]);
         Goldilocks::store_avx(&dest[2], uint64_t(FIELD_EXTENSION), tmp[2]);
-
-        for(uint64_t i = 0; i < nrowsPack; ++i) {
+        for(uint64_t i = 0; i < 1; ++i) {
             cout << "Value at row " << row + i << " is [" << Goldilocks::toString(dest[FIELD_EXTENSION*i]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*i + 1]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*i + 2]) << "]" << endl;
-        }   
+        }
     }
 
     inline void printCommit(uint64_t row, __m256i* bufferT, bool extended) {
-
         if(extended) {
             Goldilocks::Element dest[FIELD_EXTENSION*nrowsPack];
             Goldilocks::store_avx(&dest[0], uint64_t(FIELD_EXTENSION), bufferT[0]);
             Goldilocks::store_avx(&dest[1], uint64_t(FIELD_EXTENSION), bufferT[starkInfo.openingPoints.size()]);
             Goldilocks::store_avx(&dest[2], uint64_t(FIELD_EXTENSION), bufferT[2*starkInfo.openingPoints.size()]);
-            for(uint64_t i = 0; i < nrowsPack; ++i) {
+            for(uint64_t i = 0; i < 1; ++i) {
                 cout << "Value at row " << row + i << " is [" << Goldilocks::toString(dest[FIELD_EXTENSION*i]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*i + 1]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*i + 2]) << "]" << endl;
             }
         } else {
             Goldilocks::Element dest[nrowsPack];
             Goldilocks::store_avx(&dest[0], bufferT[0]);
-            for(uint64_t i = 0; i < nrowsPack; ++i) {
+            for(uint64_t i = 0; i < 1; ++i) {
                 cout << "Value at row " << row + i << " is " << Goldilocks::toString(dest[i]) << endl;
             }
         }
     }
 
-    inline void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse) override {
+    void calculateExpressions(Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse) override {
+
         uint8_t* ops = &parserArgs.ops[parserParams.opsOffset];
         uint16_t* args = &parserArgs.args[parserParams.argsOffset];
         uint64_t* numbers = &parserArgs.numbers[parserParams.numbersOffset];
@@ -225,11 +221,7 @@ public:
             __m256i tmp1[parserParams.nTemp1];
             Goldilocks3::Element_avx tmp3[parserParams.nTemp3];
 
-            
-
             loadPolynomials(parserArgs, parserParams, bufferT_, i, domainExtended);
-
-    
 
             for (uint64_t kk = 0; kk < parserParams.nOps; ++kk) {
                 switch (ops[kk]) {
@@ -829,12 +821,13 @@ public:
                     }
                 }
             }
-            
+
             storePolynomial(dest, parserParams, i, tmp1, tmp3, inverse);
 
             if (i_args != parserParams.nArgs) std::cout << " " << i_args << " - " << parserParams.nArgs << std::endl;
             assert(i_args == parserParams.nArgs);
         }
+
     }
 };
 

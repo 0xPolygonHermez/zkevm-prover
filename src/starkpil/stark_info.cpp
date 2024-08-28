@@ -31,6 +31,9 @@ void StarkInfo::load(json j)
         } else {
             starkStruct.merkleTreeCustom = false;
         }
+    } else {
+        starkStruct.merkleTreeArity = 2;
+        starkStruct.merkleTreeCustom = true;
     }
     if(j["starkStruct"].contains("hashCommits")) {
         starkStruct.hashCommits = j["starkStruct"]["hashCommits"];
@@ -44,6 +47,9 @@ void StarkInfo::load(json j)
         step.nBits = j["starkStruct"]["steps"][i]["nBits"];
         starkStruct.steps.push_back(step);
     }
+
+    airId = j["airId"];
+    subproofId = j["subproofId"];
 
     nPublics = j["nPublics"];
     nConstants = j["nConstants"];
@@ -164,7 +170,7 @@ void StarkInfo::setMapOffsets() {
     uint64_t offsetPolsBasefield = mapOffsets[std::make_pair("cm" + to_string(nStages), true)];
 
     // Set offsets for all stages in the basefield field (cm1, cm2, ... )
-    for(uint64_t stage = 1; stage <= nStages + 1; stage++) {
+    for(uint64_t stage = 1; stage <= nStages; stage++) {
         string section;
         if(stage == 1) {
             section = "cm" + to_string(nStages);

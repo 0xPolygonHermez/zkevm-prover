@@ -6,6 +6,8 @@
 
 using json = nlohmann::json;
 
+const int GLOBAL_CONSTRAINTS_SECTION = 2;
+
 void op(uint64_t op, Goldilocks::Element &c, const Goldilocks::Element &a, const Goldilocks::Element &b) {
     switch (op)
     {
@@ -32,24 +34,24 @@ void op(uint64_t op, Goldilocks::Element *c, const Goldilocks::Element *a, const
     switch (op)
     {
     case 0:
-        c[0] = a[0] + b;
-        c[1] = a[1];
-        c[2] = a[2];
+        Goldilocks::add(c[0], a[0], b);
+        Goldilocks::copy(c[1], a[1]);
+        Goldilocks::copy(c[2], a[2]);
         break;
     case 1:
-        c[0] = a[0] - b;
-        c[1] = a[1];
-        c[2] = a[2];
+        Goldilocks::sub(c[0], a[0], b);
+        Goldilocks::copy(c[1], a[1]);
+        Goldilocks::copy(c[2], a[2]);
         break;
     case 2:
-        c[0] = a[0] * b;
-        c[1] = a[1] * b;
-        c[2] = a[2] * b;
+        Goldilocks::mul(c[0], a[0], b);
+        Goldilocks::mul(c[1], a[1], b);
+        Goldilocks::mul(c[2], a[2], b);
         break;
     case 3:
-        c[0] = b - a[0];
-        c[1] = -a[1];
-        c[2] = -a[2];
+        Goldilocks::sub(c[0], b, a[0]);
+        Goldilocks::copy(c[1], Goldilocks::neg(a[1]));
+        Goldilocks::copy(c[2], Goldilocks::neg(a[2]));
         break;
     default:
         assert(0);
@@ -61,26 +63,28 @@ void op(uint64_t op, Goldilocks::Element *c, const Goldilocks::Element *a, const
 {
     switch (op)
     {
-    case 0:
-        c[0] = a[0] + b[0];
-        c[1] = a[1] + b[1];
-        c[2] = a[2] + b[2];
+    case 0: {
+        Goldilocks::add(c[0], a[0], b[0]);
+        Goldilocks::add(c[1], a[1], b[1]);
+        Goldilocks::add(c[2], a[2], b[2]);
         break;
-    case 1:
-        c[0] = a[0] - b[0];
-        c[1] = a[1] - b[1];
-        c[2] = a[2] - b[2];
+    }   
+    case 1: {
+        Goldilocks::sub(c[0], a[0], b[0]);
+        Goldilocks::sub(c[1], a[1], b[1]);
+        Goldilocks::sub(c[2], a[2], b[2]);
         break;
-    case 2:
-        c[0] = a[0]*b[0] + a[1]*b[2] + a[2]*b[1];
-        c[1] = a[0]*b[1] + a[1]*b[0] + a[1]*b[2] + a[2]*b[1] + a[2]*b[2];
-        c[2] = a[0]*b[2] + a[2]*b[2] + a[2]*b[0] + a[1]*b[1];
+    }   
+    case 2: {
+        Goldilocks3::mul((Goldilocks3::Element *)c, (Goldilocks3::Element *)a, (Goldilocks3::Element *)b);
         break;
-    case 3:
-        c[0] = b[0] - a[0];
-        c[1] = b[1] - a[1];
-        c[2] = b[2] - a[2];
+    }
+    case 3: {
+        Goldilocks::sub(c[0], b[0], a[0]);
+        Goldilocks::sub(c[1], b[1], a[1]);
+        Goldilocks::sub(c[2], b[2], a[2]);
         break;
+    }
     default:
         assert(0);
         break;
@@ -162,19 +166,19 @@ bool verifyGlobalConstraint(Goldilocks::Element* publics, Goldilocks::Element** 
             }
             case 9: {
                 // OPERATION WITH DEST: tmp3 - SRC0: subproofValue - SRC1: tmp1
-                op(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &subproofValues[args[i_args + 2]][args[i_args + 3]], tmp1[args[i_args + 4]]);
+                op(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &subproofValues[args[i_args + 2]][args[i_args + 3] * FIELD_EXTENSION], tmp1[args[i_args + 4]]);
                 i_args += 5;
                 break;
             }
             case 10: {
                 // OPERATION WITH DEST: tmp3 - SRC0: subproofValue - SRC1: public
-                op(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &subproofValues[args[i_args + 2]][args[i_args + 3]], publics[args[i_args + 4]]);
+                op(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &subproofValues[args[i_args + 2]][args[i_args + 3] * FIELD_EXTENSION], publics[args[i_args + 4]]);
                 i_args += 5;
                 break;
             }
             case 11: {
                 // OPERATION WITH DEST: tmp3 - SRC0: subproofValue - SRC1: number
-                op(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &subproofValues[args[i_args + 2]][args[i_args + 3]], numbers_[args[i_args + 4]]);
+                op(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &subproofValues[args[i_args + 2]][args[i_args + 3] * FIELD_EXTENSION], numbers_[args[i_args + 4]]);
                 i_args += 5;
                 break;
             }
@@ -186,8 +190,14 @@ bool verifyGlobalConstraint(Goldilocks::Element* publics, Goldilocks::Element** 
             }
             case 13: {
                 // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: subproofValue
-                op(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], &subproofValues[args[i_args + 3]][args[i_args + 4]]);
+                op(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &tmp3[args[i_args + 2] * FIELD_EXTENSION], &subproofValues[args[i_args + 3]][args[i_args + 4] * FIELD_EXTENSION]);
                 i_args += 5;
+                break;
+            }
+            case 14: {
+                // OPERATION WITH DEST: tmp3 - SRC0: subproofValue - SRC1: subproofValue
+                op(args[i_args], &tmp3[args[i_args + 1] * FIELD_EXTENSION], &subproofValues[args[i_args + 2]][args[i_args + 3] * FIELD_EXTENSION], &subproofValues[args[i_args + 4]][args[i_args + 5] * FIELD_EXTENSION]);
+                i_args += 6;
                 break;
             }
             default: {
@@ -196,7 +206,6 @@ bool verifyGlobalConstraint(Goldilocks::Element* publics, Goldilocks::Element** 
             }
         }
     }
-
 
     if (i_args != parserParams.nArgs) std::cout << " " << i_args << " - " << parserParams.nArgs << std::endl;
     assert(i_args == parserParams.nArgs);
@@ -231,7 +240,7 @@ bool verifyGlobalConstraints(string globalInfoFile, string globalConstraintsBin,
     std::unique_ptr<BinFileUtils::BinFile> globalConstraintsBinFile = BinFileUtils::openExisting(globalConstraintsBin, "chps", 1);
     BinFileUtils::BinFile *binFile = globalConstraintsBinFile.get();
 
-    binFile->startReadSection(CHELPERS_CONSTRAINTS_SECTION);
+    binFile->startReadSection(GLOBAL_CONSTRAINTS_SECTION);
 
     uint32_t nOpsDebug = binFile->readU32LE();
     uint32_t nArgsDebug = binFile->readU32LE();
@@ -291,7 +300,8 @@ bool verifyGlobalConstraints(string globalInfoFile, string globalConstraintsBin,
     for(uint64_t i = 0; i < nSubproofs; ++i) {
         subproofValues[i] = new Goldilocks::Element[globalInfo["aggTypes"][i].size() * FIELD_EXTENSION];
         for(uint64_t j = 0; j < globalInfo["aggTypes"][i].size(); ++j) {
-            subproofValues[i][j*FIELD_EXTENSION] = Goldilocks::fromU64(globalInfo["aggTypes"][i][j]["aggType"]);
+            uint64_t aggType = globalInfo["aggTypes"][i][j]["aggType"];
+            subproofValues[i][j*FIELD_EXTENSION] = aggType == 0 ? Goldilocks::zero() : Goldilocks::one();
             subproofValues[i][j*FIELD_EXTENSION + 1] = Goldilocks::zero();
             subproofValues[i][j*FIELD_EXTENSION + 2] = Goldilocks::zero();
         }
@@ -300,38 +310,17 @@ bool verifyGlobalConstraints(string globalInfoFile, string globalConstraintsBin,
     for(uint64_t i = 0; i < nProofs; ++i) {
         FRIProof<Goldilocks::Element> proof = *proofs[i];
         uint64_t subproofId = proof.subproofId;
-        for(uint64_t j = 0; proof.proof.subproofValues.size(); ++j) {
+        for(uint64_t j = 0; j < proof.proof.subproofValues.size(); ++j) {
             uint64_t aggType = globalInfo["aggTypes"][subproofId][j]["aggType"];
             if(aggType == 0) {
-                op(0, &subproofValues[i][j*FIELD_EXTENSION], &subproofValues[i][j*FIELD_EXTENSION], proof.proof.subproofValues[i].data());
+                op(0, &subproofValues[subproofId][j*FIELD_EXTENSION], &subproofValues[subproofId][j*FIELD_EXTENSION], &proof.proof.subproofValues[j][0]);
             } else if (aggType == 1) {
-                op(2, &subproofValues[i][j*FIELD_EXTENSION], &subproofValues[i][j*FIELD_EXTENSION], proof.proof.subproofValues[i].data());
+                op(2, &subproofValues[subproofId][j*FIELD_EXTENSION], &subproofValues[subproofId][j*FIELD_EXTENSION], &proof.proof.subproofValues[j][0]);
             } else {
                 assert(0);
                 break;
             }
         }
-    }
-
-    // for(let i = 0; i < this.proofCtx.airout.subproofs.length; i++) {
-    //                         const subproof = this.proofCtx.airout.subproofs[i];
-    //                         const subproofValues = subproof.subproofvalues;
-    //                         if(subproofValues === undefined) continue;
-    //                         const instances = this.proofCtx.getAirInstancesBySubproofId(i);
-    //                         for(let j = 0; j < subproofValues.length; j++) {
-    //                             const aggType = subproofValues[j].aggType;
-    //                             for(const instance of instances) {
-    //                                 const subproofValue = instance.ctx.subproofValues[j];
-    //                                 this.proofCtx.subproofValues[i][j] = aggType === 0 
-    //                                     ? this.proofCtx.F.add(this.proofCtx.subproofValues[i][j], subproofValue) 
-    //                                     : this.proofCtx.F.mul(this.proofCtx.subproofValues[i][j], subproofValue);
-    //                             }
-    //                         }
-    //                     }
-
-
-    for(uint64_t p = 0; p < globalInfo["subproofs"].size(); ++p) {
-                
     }
 
     bool validConstraints = true;

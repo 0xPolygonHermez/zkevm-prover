@@ -219,7 +219,7 @@ public:
     void setSubproofValues(Goldilocks::Element *_subproofValues) {
         for (uint64_t i = 0; i < subproofValues.size(); i++)
         {
-            std::memcpy(&subproofValues[i][0], &_subproofValues[i * subproofValues[i].size()], subproofValues[i].size() * sizeof(Goldilocks::Element));
+            std::memcpy(&subproofValues[i][0], &_subproofValues[i * FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         }
     }
 

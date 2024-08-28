@@ -14,7 +14,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
-    TranscriptType transcript(merkleTreeArity, merkleTreeCustom);
+    TranscriptType transcript(starkInfo.starkStruct.merkleTreeArity, starkInfo.starkStruct.merkleTreeCustom);
 
     Goldilocks::Element* evals = new Goldilocks::Element[starkInfo.evMap.size() * FIELD_EXTENSION];
     Goldilocks::Element* challenges = new Goldilocks::Element[starkInfo.challengesMap.size() * FIELD_EXTENSION];
@@ -85,6 +85,8 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
         TimerStopAndLogExpr(STARK_STEP, step);
     }
 
+    proof.proof.setSubproofValues(cHelpersSteps.params.subproofValues);
+    
     if (debug) {
         if(validConstraints) {
             TimerLog(ALL_CONSTRAINTS_ARE_VALID);
@@ -179,7 +181,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
 
     uint64_t friQueries[starkInfo.starkStruct.nQueries];
 
-    TranscriptType transcriptPermutation(merkleTreeArity, merkleTreeCustom);
+    TranscriptType transcriptPermutation(starkInfo.starkStruct.merkleTreeArity, starkInfo.starkStruct.merkleTreeCustom);
     addTranscriptGL(transcriptPermutation, challenge, FIELD_EXTENSION);
     transcriptPermutation.getPermutations(friQueries, starkInfo.starkStruct.nQueries, starkInfo.starkStruct.steps[0].nBits);
 
@@ -238,9 +240,6 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, CHelpersSteps &cHelp
 template <typename ElementType>
 void Starks<ElementType>::commitStage(uint64_t step, CHelpersSteps &cHelpersSteps, FRIProof<ElementType> &proof)
 {  
-    if(step == starkInfo.nStages) {
-        proof.proof.setSubproofValues(cHelpersSteps.params.subproofValues);
-    }
 
     if(!debug) {
         if (step <= starkInfo.nStages)
@@ -847,7 +846,7 @@ void Starks<ElementType>::getChallenge(TranscriptType &transcript, Goldilocks::E
 
 template <typename ElementType>
 void Starks<ElementType>::calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements) {
-    TranscriptType transcriptHash(merkleTreeArity, merkleTreeCustom);
+    TranscriptType transcriptHash(starkInfo.starkStruct.merkleTreeArity, starkInfo.starkStruct.merkleTreeCustom);
     transcriptHash.put(buffer, nElements);
     transcriptHash.getState(hash);
 };

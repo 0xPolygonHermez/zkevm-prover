@@ -399,30 +399,27 @@ public:
         TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
     }
 
-    void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, bool printValues = false) {
+    void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, uint64_t printValues = 0) {
         Polinomial p = Polinomial(pol, deg, dim, dim);
-        MerkleTreeGL *mt_ = new MerkleTreeGL(starkInfo.starkStruct.merkleTreeArity, true, deg, dim, pol);
+        MerkleTreeGL *mt_ = new MerkleTreeGL(starkInfo.starkStruct.merkleTreeArity, starkInfo.starkStruct.merkleTreeCustom, deg, dim, pol);
         mt_->merkelize();
 
         Goldilocks::Element root[4];
         mt_->getRoot(&root[0]);
 
-        if(printValues) {
-            cout << "PRINTING VALUES" << endl;
-            for(uint64_t i = 0; i < deg; ++i) {
-            if(dim == 3) {
-                    cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
-                } else {
-                    cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
-                }
+        if(printValues > 0) cout << "PRINTING VALUES" << endl;
+        for(uint64_t i = 0; i < printValues; ++i) {
+        if(dim == 3) {
+                cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
+            } else {
+                cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
             }
         }
-        
 
         delete mt_;
     }
 
-    void printPolById(uint64_t polId, bool printValues = false)
+    void printPolById(uint64_t polId, uint64_t printValues = 0)
     {   
         uint64_t N = 1 << starkInfo.starkStruct.nBits;
         PolMap polInfo = starkInfo.cmPolsMap[polId];

@@ -11,6 +11,7 @@
     void *fri_proof_new(void *pStarks);
     void *fri_proof_get_root(void *pFriProof, uint64_t root_index, uint64_t root_subindex);
     void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t root_index);
+    void fri_proof_set_subproofvalues(void *pFriProof, void *pChelpersSteps);
     void fri_proof_free(void *pFriProof);
 
 
@@ -110,5 +111,4 @@
     // Global constraints
     // =================================================================================
     bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
-
 #endif

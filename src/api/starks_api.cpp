@@ -60,6 +60,13 @@ void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t roo
     return &friProof->proof.fri.trees[tree_index].root[root_index];
 }
 
+void fri_proof_set_subproofvalues(void *pFriProof, void *pChelpersSteps)
+{
+    FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
+    CHelpersSteps *cHelpersSteps = (CHelpersSteps *)pChelpersSteps;
+    friProof->proof.setSubproofValues(cHelpersSteps->params.subproofValues);
+}
+
 void fri_proof_free(void *pFriProof)
 {
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
