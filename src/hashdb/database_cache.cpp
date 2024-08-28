@@ -161,9 +161,9 @@ void DatabaseCache::clear(void)
 
 DatabaseCache::~DatabaseCache()
 {
-    TimerStart(DATABASE_CACHE_DESTRUCTOR);
+    //TimerStart(DATABASE_CACHE_DESTRUCTOR);
     //clear();
-    TimerStopAndLog(DATABASE_CACHE_DESTRUCTOR);
+    //TimerStopAndLog(DATABASE_CACHE_DESTRUCTOR);
 }
 
 // DatabaseMTCache class implementation
@@ -171,9 +171,9 @@ DatabaseCache::~DatabaseCache()
 
 DatabaseMTCache::~DatabaseMTCache()
 {
-    TimerStart(DATABASE_MT_CACHE_DESTRUCTOR);
+    //TimerStart(DATABASE_MT_CACHE_DESTRUCTOR);
     clear();
-    TimerStopAndLog(DATABASE_MT_CACHE_DESTRUCTOR);
+    //TimerStopAndLog(DATABASE_MT_CACHE_DESTRUCTOR);
 }
 
 // Add a record in the head of the MT cache. Returns true if the cache is full (or no cache), false otherwise
@@ -345,9 +345,9 @@ uint32_t DatabaseMTCache::fillCacheCahotic(){
 
 DatabaseProgramCache::~DatabaseProgramCache()
 {
-    TimerStart(DATABASE_PROGRAM_CACHE_DESTRUCTOR);
+    //TimerStart(DATABASE_PROGRAM_CACHE_DESTRUCTOR);
     clear();
-    TimerStopAndLog(DATABASE_PROGRAM_CACHE_DESTRUCTOR);
+    //TimerStopAndLog(DATABASE_PROGRAM_CACHE_DESTRUCTOR);
 }
 
 // Add a record in the head of the Program cache. Returns true if the cache is full (or no cache), false otherwise
