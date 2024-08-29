@@ -3,6 +3,7 @@
 #include "scalar.hpp"
 #include "rlp.hpp"
 #include "grpc/gen/datastream.grpc.pb.h"
+#include "timer.hpp"
 
 //#define LOG_DATA_STREAM
 
@@ -673,9 +674,36 @@ zkresult dataStreamBatch2batchL2Data (const DataStreamBatch &batch, string &batc
         }
     }
 
-    zklog.info("dataStreamBatch2batchL2Data() generated data of size=" + to_string(batchL2Data.size()));
+    //zklog.info("dataStreamBatch2batchL2Data() generated data of size=" + to_string(batchL2Data.size()));
 
     return ZKR_SUCCESS;
+}
+
+zkresult dataStream2batchL2Data (const string &dataStream, DataStreamBatch &batch, string &batchL2Data)
+{
+    // Save start time
+    struct timeval t;
+    gettimeofday(&t, NULL);
+
+    // Call dataStream2batch
+    zkresult zkr = dataStream2batch(dataStream, batch);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("dataStream2batchL2Data() failed calling dataStream2batch() zkr=" + zkresult2string(zkr));
+        return zkr;
+    }
+
+    // Call dataStreamBatch2batchL2Data
+    zkr = dataStreamBatch2batchL2Data(batch, batchL2Data);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("dataStream2batchL2Data() failed calling dataStreamBatch2batchL2Data() zkr=" + zkresult2string(zkr));
+        return zkr;
+    }
+
+    zklog.info("dataStream2batchL2Data() done dataStream.size=" + to_string(dataStream.size()) + " batch=" + batch.toString() + " batchL2Data.size=" + to_string(batchL2Data.size()) + " in " + to_string(TimeDiff(t)) + "us");
+    
+    return zkr;
 }
 
 //#define LOG_TX_FIELDS

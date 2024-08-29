@@ -100,6 +100,9 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch);
 // Encodes a DataStreamBatch into a batch L2 data byte array
 zkresult dataStreamBatch2batchL2Data (const DataStreamBatch &batch, string &batchL2Data);
 
+// Decodes a data stream and encodes a batch L2 data
+zkresult dataStream2batchL2Data (const string &dataStream, DataStreamBatch &batch, string &batchL2Data);
+
 // Decodes tx from Ethereum RLP format, and encodes it into ROM RLP format
 zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcodedTx);
 

@@ -1799,14 +1799,16 @@ using grpc::Status;
 
     // Parse data stream and get a binary structure
     DataStreamBatch batch;
-    zkr = dataStream2batch(proverRequest.input.publicInputsExtended.publicInputs.dataStream, batch);
+    zkr = dataStream2batchL2Data(proverRequest.input.publicInputsExtended.publicInputs.dataStream, batch, proverRequest.input.publicInputsExtended.publicInputs.batchL2Data);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() failed calling dataStream2batch() result=" + zkresult2string(zkr), &proverRequest.tags);
+        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() failed calling dataStream2batchL2Data() result=" + zkresult2string(zkr), &proverRequest.tags);
         response->set_error(zkresult2error(zkr));
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
     }
+
+    // Check blocks
     if (batch.blocks.empty())
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() called dataStream2batch() but got zero blocks", &proverRequest.tags);
@@ -1815,15 +1817,7 @@ using grpc::Status;
         return Status::OK;
     }
 
-    // Get batchL2Data
-    zkr = dataStreamBatch2batchL2Data(batch, proverRequest.input.publicInputsExtended.publicInputs.batchL2Data);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() failed calling dataStreamBatch2batchL2Data() result=" + zkresult2string(zkr), &proverRequest.tags);
-        response->set_error(zkresult2error(zkr));
-        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::OK;
-    }
+    // Check batchL2Data
     if (proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatchV2() found batchL2Data.size()=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE), &proverRequest.tags);
