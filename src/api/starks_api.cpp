@@ -4,14 +4,72 @@
 #include "proof2zkinStark.hpp"
 #include "starks.hpp"
 #include "global_constraints.hpp"
+#include <filesystem>
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-void save_proof(void *pStarkInfo, void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char *publicsOutputFile, char *filePrefix)
-{
-    auto friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
-    Goldilocks::Element *publicInputs = (Goldilocks::Element *)pPublicInputs;
+void save_challenges(void *pChallenges, char* globalInfoFile, char *fileDir) {
+
+    json globalInfo;
+    file2json(globalInfoFile, globalInfo);
+
+    uint64_t nStages = globalInfo["numChallenges"].size();
+
+    Goldilocks::Element *challenges = (Goldilocks::Element *)pChallenges;
+    
+    uint64_t c = 0;
+
+    json challengesJson;
+    challengesJson["challenges"] = json::array();
+    for(uint64_t i = 0; i < nStages; ++i) {
+        challengesJson["challenges"][i] = json::array();
+        for(uint64_t j = 0; j < globalInfo["numChallenges"][i]; ++j) {
+            challengesJson["challenges"][i][j] = json::array();
+            for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+                challengesJson["challenges"][i][j][k] = Goldilocks::toString(challenges[c++]);
+            }
+        }
+    }
+
+    challengesJson["challenges"][nStages] = json::array();
+    challengesJson["challenges"][nStages][0] = json::array();
+    for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+        challengesJson["challenges"][nStages][0][k] = Goldilocks::toString(challenges[c++]);
+    }
+    
+    challengesJson["challenges"][nStages + 1] = json::array();
+    challengesJson["challenges"][nStages + 1][0] = json::array();
+    for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+        challengesJson["challenges"][nStages + 1][0][k] = Goldilocks::toString(challenges[c++]);
+    }
+
+    challengesJson["challenges"][nStages + 2] = json::array();
+    challengesJson["challenges"][nStages + 2][0] = json::array();
+    for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+        challengesJson["challenges"][nStages + 2][0][k] = Goldilocks::toString(challenges[c++]);
+    }
+    
+    challengesJson["challenges"][nStages + 2][1] = json::array();
+    for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+        challengesJson["challenges"][nStages + 2][1][k] = Goldilocks::toString(challenges[c++]);
+    }
+
+    challengesJson["challengesFRISteps"] = json::array();
+    for(uint64_t i = 0; i < globalInfo["stepsFRI"].size() + 1; ++i) {
+        challengesJson["challengesFRISteps"][i] = json::array();
+        for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+            challengesJson["challengesFRISteps"][i][k] = Goldilocks::toString(challenges[c++]);
+        }
+    }
+    
+    json2file(challengesJson, string(fileDir) + "/challenges.json");
+}
+
+
+void save_publics(unsigned long numPublicInputs, void *pPublicInputs, char *fileDir) {
+
+    Goldilocks::Element* publicInputs = (Goldilocks::Element *)pPublicInputs;
 
     // Generate publics
     json publicStarkJson;
@@ -20,25 +78,30 @@ void save_proof(void *pStarkInfo, void *pFriProof, unsigned long numPublicInputs
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
 
-    nlohmann::ordered_json jProofRecursive1 = friProof->proof.proof2json();
-    nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1, *(StarkInfo *)pStarkInfo);
-    zkinRecursive1["publics"] = publicStarkJson;
-
     // save publics to filestarks
-    json2file(publicStarkJson, publicsOutputFile);
+    json2file(publicStarkJson, string(fileDir) + "/publics.json");
+}
+
+
+
+void save_proof(uint64_t proof_id, void *pStarkInfo, void *pFriProof, char *fileDir)
+{
+    auto friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
+
+    nlohmann::ordered_json jProof = friProof->proof.proof2json();
+
+    nlohmann::ordered_json zkin = proof2zkinStark(jProof, *(StarkInfo *)pStarkInfo);
+
+    std::filesystem::create_directory(string(fileDir) + "/zkin");
+    std::filesystem::create_directory(string(fileDir) + "/proofs");
 
     // Save output to file
-    if (config.saveOutputToFile)
-    {
-        json2file(zkinRecursive1, string(filePrefix) + "batch_proof.output.json");
-    }
+    json2file(zkin, string(fileDir) + "/zkin/proof_" + to_string(proof_id) + "_zkin.json");
+    
     // Save proof to file
-    if (config.saveProofToFile)
-    {
-        jProofRecursive1["publics"] = publicStarkJson;
-        json2file(jProofRecursive1, string(filePrefix) + "batch_proof.proof.json");
-    }
+    json2file(jProof, string(fileDir) + "/proofs/proof_" + to_string(proof_id) + ".json");
 }
+
 
 void *fri_proof_new(void *pStarks)
 {

@@ -71,7 +71,7 @@ ordered_json proof2zkinStark(ordered_json &proof, StarkInfo &starkInfo)
     zkinOut["finalPol"] = friProof[friSteps];
 
     if (nSubProofValues > 0) {
-        // zkin.subProofValues = proof.subProofValues;
+        zkinOut["subproofValues"] = proof["subproofValues"];
     }
     
     return zkinOut;

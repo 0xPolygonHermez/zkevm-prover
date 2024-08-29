@@ -183,6 +183,8 @@ class Proofs
 public:
     uint64_t nStages;
     uint64_t nFieldElements;
+    uint64_t airId;
+    uint64_t subproofId;
     ElementType **roots;
     Fri<ElementType> fri;
     std::vector<std::vector<Goldilocks::Element>> evals;
@@ -195,6 +197,8 @@ public:
             nStages = starkInfo.nStages + 1;
             roots = new ElementType*[nStages];
             nFieldElements = starkInfo.starkStruct.verificationHashType == "GL" ? HASH_SIZE : 1;
+            airId = starkInfo.airId;
+            subproofId = starkInfo.subproofId;
             for(uint64_t i = 0; i < nStages; i++)
             {
                 roots[i] = new ElementType[nFieldElements];
@@ -227,6 +231,9 @@ public:
     {
         ordered_json j = ordered_json::object();
 
+        j["airId"] = airId;
+        j["subproofId"] = subproofId;
+        
         for(uint64_t i = 0; i < nStages; i++) {
             ordered_json json_root = ordered_json::array();
             if(nFieldElements == 1) {
