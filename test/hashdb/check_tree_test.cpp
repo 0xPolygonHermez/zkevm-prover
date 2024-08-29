@@ -15,48 +15,34 @@ uint64_t CheckTreeTest (const Config &config)
 
     string root = config.checkTreeRoot;
 
-    if (config.hashDB64)
+    Database &db = pHashDB->db;
+
+    if (root == "auto")
     {
-        zklog.info("CheckTreeTest() going to check tree of root=" + root);
-
-        Database64 &db = pHashDB->db64;
-        if (root == "auto")
+        vector<Goldilocks::Element> value;
+        zkr = db.read(db.dbStateRootKey, db.dbStateRootvKey, value, NULL, true);
+        if (zkr != ZKR_SUCCESS)
         {
-            root = "";
-        }
-        db.PrintTree(root);
+            zklog.error("CheckTreeTest() failed calling db.read(stateRootKey) zkr=" + zkresult2string(zkr));
+            exitProcess();
+        } 
+        root = fea2string(db.fr, value[0], value[1], value[2], value[3]);
     }
-    else
+    zklog.info("CheckTreeTest() going to check tree of root=" + root);
+
+    CheckTreeCounters checkTreeCounters;
+
+    zkresult result = CheckTree(db, root, 0, checkTreeCounters, "");
+    if (result != ZKR_SUCCESS)
     {
-        Database &db = pHashDB->db;
-
-        if (root == "auto")
-        {
-            vector<Goldilocks::Element> value;
-            zkr = db.read(db.dbStateRootKey, db.dbStateRootvKey, value, NULL, true);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("CheckTreeTest() failed calling db.read(stateRootKey) zkr=" + zkresult2string(zkr));
-                exitProcess();
-            } 
-            root = fea2string(db.fr, value[0], value[1], value[2], value[3]);
-        }
-        zklog.info("CheckTreeTest() going to check tree of root=" + root);
-
-        CheckTreeCounters checkTreeCounters;
-
-        zkresult result = CheckTree(db, root, 0, checkTreeCounters, "");
-        if (result != ZKR_SUCCESS)
-        {
-            zklog.error("CheckTreeTest() failed calling ClimbTree() result=" + zkresult2string(result));
-            return 1;
-        }
-
-        zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
-        zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
-        zklog.info("values=" + to_string(checkTreeCounters.values));
-        zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+        zklog.error("CheckTreeTest() failed calling ClimbTree() result=" + zkresult2string(result));
+        return 1;
     }
+
+    zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
+    zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
+    zklog.info("values=" + to_string(checkTreeCounters.values));
+    zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
 
     TimerStopAndLog(CHECK_TREE_TEST);
 

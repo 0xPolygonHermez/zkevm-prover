@@ -39,8 +39,6 @@ The configuration parameters can be of different uses:
 |`runCheckTreeTest`|test|boolean|Runs a check SMT tree test|false|RUN_CHECK_TREE_TEST|
 |`checkTreeRoot`|test|string|State root used to check the tree, or automatically detect the last written one if set to "auto"|"auto"|CHECK_TREE_ROOT|
 |`runDatabasePerformanceTest`|test|boolean|Runs a database performance test|false|RUN_DATABASE_PERFORMANCE_TEST|
-|`runPageManagerTest`|test|boolean|Runs a page manager test|false|RUN_PAGE_MANAGER_TEST|
-|`runSMT64Test`|test|boolean|Runs a SMT64 test|false|RUN_SMT64_TEST|
 |`runUnitTest`|test|boolean|Runs a unit test that includes several component tests|false|RUN_UNIT_TEST|
 |**`executeInParallel`**|production|boolean|Executes secondary state machines in parallel, when possible|true|EXECUTE_IN_PARALLEL|
 |**`useMainExecGenerated`**|production|boolean|Executes main state machines in generated code, which is faster than native code|true|USE_MAIN_EXEC_GENERATED|
@@ -70,12 +68,6 @@ The configuration parameters can be of different uses:
 |`executorClientResetDB`|test|bool|Executor client resets the database before processing a batch; it only works in debug mode|false|EXECUTOR_CLIENT_RESET_DB|
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
 |**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
-|`hashDB64`|test|boolean|Use HashDB64 new database (do not use in  production, under development)|false|HASHDB64|
-|`kvDBMaxVersions`|production|u64|Maximum number of KV versionn in Database|131072|HASHDB64_MAX_VERSIONS|
-|`dbCacheSynchURL`|test|string|URL of the HashDB service to synchronize the Database cache (experimental)|""|DB_CACHE_SYNCH_URL|
-|`hashDBFileName`|test|string|Core name used for the hashDB files (path,numbering and extension not included). If hashDBFileName is empty in-memory version of the hashDB is used (only for DEBUG purposes). |""|HASHDB_FILE_NAME|
-|`hashDBFileSize`|test|u64|HashDB files size in GB|128|HASHDB_FILE_SIZE|failures
-|`hashDBFolder`|test|string|Folder containing the hashDB files|hashdb|HASHDB_FOLDER|
 |`hashDBSingleton`|production|boolean|Use HashDB singleton.  Set to false when databaseURL=local to get one dedicated cache per thread.|true|HASHDB_SINGLETON|
 |`aggregatorServerPort`|test|u16|Aggregator server GRPC port|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientPort`**|production|u16|Aggregator client GRPC port to connect to|50081|AGGREGATOR_SERVER_PORT|

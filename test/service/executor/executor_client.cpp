@@ -4,7 +4,6 @@
 #include "hashdb_singleton.hpp"
 #include "zkmax.hpp"
 #include "check_tree.hpp"
-#include "state_manager_64.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -465,28 +464,6 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
 
     if (config.executorClientCheckNewStateRoot)
     {
-        if (config.hashDB64)
-        {            
-            //if (StateManager64::isVirtualStateRoot(newStateRoot))
-            {
-                TimerStart(CONSOLIDATE_STATE);
-
-                Goldilocks::Element virtualStateRoot[4];
-                string2fea(fr, newStateRoot, virtualStateRoot);
-                Goldilocks::Element consolidatedStateRoot[4];
-                uint64_t flushId, storedFlushId;
-                zkresult zkr = pHashDB->consolidateState(virtualStateRoot, update_merkle_tree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, consolidatedStateRoot, flushId, storedFlushId);
-                if (zkr != ZKR_SUCCESS)
-                {
-                    zklog.error("ExecutorClient::ProcessBatch() failed calling pHashDB->consolidateState() result=" + zkresult2string(zkr));
-                    return false;
-                }
-                newStateRoot = fea2string(fr, consolidatedStateRoot);
-
-                TimerStopAndLog(CONSOLIDATE_STATE);
-            }
-        }
-
         TimerStart(CHECK_NEW_STATE_ROOT);
 
         if (newStateRoot.size() == 0)
@@ -497,18 +474,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
 
         HashDB &hashDB = *hashDBSingleton.get();
 
-        if (config.hashDB64)
-        {
-            Database64 &db = hashDB.db64;
-            zkresult zkr = db.PrintTree(newStateRoot);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("ExecutorClient::ProcessBatch() failed calling db.PrintTree() result=" + zkresult2string(zkr));
-                return false;
-            }
-        }
-        else if (NormalizeToNFormat(input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64) !=
-                 NormalizeToNFormat(newStateRoot, 64))
+        if (NormalizeToNFormat(input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64) !=
+            NormalizeToNFormat(newStateRoot, 64))
         {
             blockStateRoots.emplace_back(newStateRoot);
             vector<string>::iterator it = unique(blockStateRoots.begin(), blockStateRoots.end());

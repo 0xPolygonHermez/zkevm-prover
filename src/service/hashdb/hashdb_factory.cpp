@@ -7,6 +7,7 @@
 #include "utils.hpp"
 #include "exit_process.hpp"
 #include "zklog.hpp"
+#include "zkglobals.hpp"
 
 HashDBInterface* HashDBClientFactory::createHashDBClient (Goldilocks &fr, const Config &config)
 {

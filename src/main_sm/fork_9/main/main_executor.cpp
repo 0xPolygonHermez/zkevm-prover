@@ -395,46 +395,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
-        // Consolidate the state and store it in SR, just before we save SR into SMT
-        if (config.hashDB64 && bProcessBatch && (zkPC == consolidateStateRootZKPC))
-        {
-            // Convert pols.SR to virtualStateRoot fea
-            Goldilocks::Element virtualStateRoot[4];
-            if (!fea2fea(virtualStateRoot, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i]))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, string("Failed calling fea2fea()"));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-            // Call purge()
-            zkresult zkr = pHashDB->purge(proverRequest.uuid, virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
-            if (zkr != ZKR_SUCCESS)
-            {
-                proverRequest.result = zkr;
-                logError(ctx, string("Failed calling pHashDB->purge() result=") + zkresult2string(zkr));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-            // Call consolidateState()
-            Goldilocks::Element consolidatedStateRoot[4];
-            uint64_t flushId, storedFlushId;
-            zkr = pHashDB->consolidateState(virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE , consolidatedStateRoot, flushId, storedFlushId);
-            if (zkr != ZKR_SUCCESS)
-            {
-                proverRequest.result = zkr;
-                logError(ctx, string("Failed calling pHashDB->consolidateState() result=") + zkresult2string(proverRequest.result));
-                pHashDB->cancelBatch(proverRequest.uuid);
-                return;
-            }
-
-            // Convert consolidatedState fea to pols.SR
-            fea2fea(pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], consolidatedStateRoot);
-            //zklog.info("SR=" + fea2string(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i]));
-        }
-
 #ifdef LOG_FILENAME
         // Store fileName and line
         ctx.fileName = rom.line[zkPC].fileName;

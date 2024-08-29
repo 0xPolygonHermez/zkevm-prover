@@ -14,7 +14,6 @@
 #include "zkresult.hpp"
 #include "utils/time_metric.hpp"
 #include "timer.hpp"
-#include "database_64.hpp"
 
 class HashDBRemote : public HashDBInterface
 {
@@ -48,8 +47,6 @@ public:
     zkresult getFlushStatus     (uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId);
     zkresult getFlushData       (uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);
     void     clearCache         (void) {};
-    zkresult readTree           (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> &hashValues);
-    zkresult writeTree          (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent);
     zkresult cancelBatch        (const string &batchUUID);
     zkresult resetDB            (void);
 };

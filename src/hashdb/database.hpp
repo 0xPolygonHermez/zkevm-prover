@@ -127,7 +127,4 @@ public:
 // Thread to send data to database
 void *dbSenderThread(void *arg);
 
-// Thread to synchronize cache from master hash DB server
-void *dbCacheSynchThread(void *arg);
-
 #endif
