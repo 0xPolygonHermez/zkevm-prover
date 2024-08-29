@@ -8,6 +8,7 @@
 #include "cbor.hpp"
 #include "utils.hpp"
 #include "keccak.hpp"
+#include "timer.hpp"
 
 #define WITNESS_CHECK_BITS
 //#define WITNESS_CHECK_SMT
@@ -505,6 +506,9 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
 
 zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap::ProgramMap &programs, mpz_class &stateRoot)
 {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+
     db.clear();
     programs.clear();
     
@@ -541,7 +545,7 @@ zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap:
     // Convert state root
     fea2scalar(fr, stateRoot, hash);
 
-    zklog.info("witness2db() calculated stateRoot=" + stateRoot.get_str(16) + " from size=" + to_string(witness.size()));
+    zklog.info("witness2db() calculated stateRoot=" + stateRoot.get_str(16) + " from size=" + to_string(witness.size()) + "B generating db.size=" + to_string(db.size()) + " and programs.size=" + to_string(programs.size()) + " in " + to_string(TimeDiff(t)) + "us");
 
 #ifdef WITNESS_CHECK_SMT
     zklog.info("witness2db() calculated SMT root=" + fea2string(fr, ctx.root));
