@@ -19,10 +19,15 @@
     // ========================================================================================
     void *setup_ctx_new(char* stark_info_file, char* expressions_bin_file, char* const_pols_file);
     void *setup_ctx_new(char* stark_info_file, char* expressions_bin_file, char* const_pols_file, char* const_tree_file);
-    uint64_t setup_get_map_total_n(void *pSetupCtx);
-    uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag);
     void *get_fri_pol(void *pSetupCtx, void *pParams);
     void setup_ctx_free(void *pSetupCtx);
+
+    // Stark Info
+    // ========================================================================================
+    void *starkinfo_new(char* filename);
+    uint64_t get_map_total_N(void *pStarkInfo);
+    uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag);
+    void starkinfo_free(void *pStarkInfo);
 
     // ExpressionsCtx
     // ========================================================================================

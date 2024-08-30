@@ -144,19 +144,6 @@ void *setup_ctx_new(char* stark_info_file, char* expressions_bin_file, char* con
     return setupCtx;
 }
 
-
-uint64_t setup_get_map_total_n(void *pSetupCtx)
-{
-    auto setupCtx = (SetupCtx *)pSetupCtx;
-    return setupCtx->starkInfo->mapTotalN;
-}
-
-uint64_t get_map_offsets(void *pSetupCtx, char *stage, bool flag)
-{
-    auto setupCtx = (SetupCtx *)pSetupCtx;
-    return setupCtx->starkInfo->mapOffsets[std::make_pair(stage, flag)];
-}
-
 void *get_fri_pol(void *pSetupCtx, void *pParams)
 {
     SetupCtx setupCtx = *(SetupCtx *)pSetupCtx;
@@ -168,6 +155,32 @@ void *get_fri_pol(void *pSetupCtx, void *pParams)
 void setup_ctx_free(void *pSetupCtx) {
     SetupCtx *setupCtx = (SetupCtx *)pSetupCtx;
     delete setupCtx;
+}
+
+// StarkInfo
+// ========================================================================================
+void *stark_info_new(char *filename)
+{
+    auto starkInfo = new StarkInfo(filename);
+
+    return starkInfo;
+}
+
+uint64_t get_map_total_n(void *pStarkInfo)
+{
+    return ((StarkInfo *)pStarkInfo)->mapTotalN;
+}
+
+uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag)
+{
+    auto starkInfo = (StarkInfo *)pStarkInfo;
+    return starkInfo->mapOffsets[std::make_pair(stage, flag)];
+}
+
+void stark_info_free(void *pStarkInfo)
+{
+    auto starkInfo = (StarkInfo *)pStarkInfo;
+    delete starkInfo;
 }
 
 // StepsParams
