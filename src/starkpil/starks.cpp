@@ -14,11 +14,11 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
-    TranscriptType transcript(setupCtx.starkInfo->starkStruct.merkleTreeArity, setupCtx.starkInfo->starkStruct.merkleTreeCustom);
+    TranscriptType transcript(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom);
 
-    Goldilocks::Element* evals = new Goldilocks::Element[setupCtx.starkInfo->evMap.size() * FIELD_EXTENSION];
-    Goldilocks::Element* challenges = new Goldilocks::Element[setupCtx.starkInfo->challengesMap.size() * FIELD_EXTENSION];
-    Goldilocks::Element* subproofValues = new Goldilocks::Element[setupCtx.starkInfo->nSubProofValues * FIELD_EXTENSION];
+    Goldilocks::Element* evals = new Goldilocks::Element[setupCtx.starkInfo.evMap.size() * FIELD_EXTENSION];
+    Goldilocks::Element* challenges = new Goldilocks::Element[setupCtx.starkInfo.challengesMap.size() * FIELD_EXTENSION];
+    Goldilocks::Element* subproofValues = new Goldilocks::Element[setupCtx.starkInfo.nSubProofValues * FIELD_EXTENSION];
     
     StepsParams params = {
         pols : pAddress,
@@ -29,7 +29,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
         prover_initialized : true,
     };
 
-    for (uint64_t i = 0; i < setupCtx.starkInfo->mapSectionsN["cm1"]; ++i)
+    for (uint64_t i = 0; i < setupCtx.starkInfo.mapSectionsN["cm1"]; ++i)
     {
         expressionsCtx.setCommitCalculated(i);
     }
@@ -43,28 +43,28 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     TimerStart(STARK_STEP_0);
     if(!debug) {
         ElementType verkey[nFieldElements];
-        treesGL[setupCtx.starkInfo->nStages + 1]->getRoot(verkey);
+        treesGL[setupCtx.starkInfo.nStages + 1]->getRoot(verkey);
         addTranscript(transcript, &verkey[0], nFieldElements);
     }
     
-    if(setupCtx.starkInfo->starkStruct.hashCommits) {
+    if(setupCtx.starkInfo.starkStruct.hashCommits) {
         ElementType hash[nFieldElements];
-        calculateHash(hash, &publicInputs[0], setupCtx.starkInfo->nPublics);
+        calculateHash(hash, &publicInputs[0], setupCtx.starkInfo.nPublics);
         addTranscript(transcript, hash, nFieldElements);
     } else {
-        addTranscriptGL(transcript, &publicInputs[0], setupCtx.starkInfo->nPublics);
+        addTranscriptGL(transcript, &publicInputs[0], setupCtx.starkInfo.nPublics);
     }
 
     TimerStopAndLog(STARK_STEP_0);
 
     bool validConstraints = true;
 
-    for (uint64_t step = 1; step <= setupCtx.starkInfo->nStages; step++)
+    for (uint64_t step = 1; step <= setupCtx.starkInfo.nStages; step++)
     {
         TimerStartExpr(STARK_STEP, step);
-        for (uint64_t i = 0; i < setupCtx.starkInfo->challengesMap.size(); i++)
+        for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++)
         {
-            if(setupCtx.starkInfo->challengesMap[i].stage == step) {
+            if(setupCtx.starkInfo.challengesMap[i].stage == step) {
                 getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
             }
         }
@@ -104,16 +104,16 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
 
     TimerStart(STARK_STEP_Q);
 
-    for (uint64_t i = 0; i < setupCtx.starkInfo->challengesMap.size(); i++)
+    for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++)
     {
-        if(setupCtx.starkInfo->challengesMap[i].stage == setupCtx.starkInfo->nStages + 1) {
+        if(setupCtx.starkInfo.challengesMap[i].stage == setupCtx.starkInfo.nStages + 1) {
             getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
         }
     }
     
     expressionsCtx.calculateQuotientPolynomial(params);
       
-    commitStage(setupCtx.starkInfo->nStages + 1, params, proof);
+    commitStage(setupCtx.starkInfo.nStages + 1, params, proof);
 
     if (debug)
     {
@@ -122,38 +122,38 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     }
     else
     {
-        addTranscript(transcript, &proof.proof.roots[setupCtx.starkInfo->nStages][0], nFieldElements);
+        addTranscript(transcript, &proof.proof.roots[setupCtx.starkInfo.nStages][0], nFieldElements);
     }
     TimerStopAndLog(STARK_STEP_Q);
 
     TimerStart(STARK_STEP_EVALS);
 
-    for (uint64_t i = 0; i < setupCtx.starkInfo->challengesMap.size(); i++)
+    for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++)
     {
-        if(setupCtx.starkInfo->challengesMap[i].stage == setupCtx.starkInfo->nStages + 2) {
+        if(setupCtx.starkInfo.challengesMap[i].stage == setupCtx.starkInfo.nStages + 2) {
             getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
         }
     }
 
     computeEvals(params, proof);
 
-    if(setupCtx.starkInfo->starkStruct.hashCommits) {
+    if(setupCtx.starkInfo.starkStruct.hashCommits) {
         ElementType hash[nFieldElements];
-        calculateHash(hash, params.evals, setupCtx.starkInfo->evMap.size() * FIELD_EXTENSION);
+        calculateHash(hash, params.evals, setupCtx.starkInfo.evMap.size() * FIELD_EXTENSION);
         addTranscript(transcript, hash, nFieldElements);
     } else {
-        addTranscriptGL(transcript, params.evals, setupCtx.starkInfo->evMap.size() * FIELD_EXTENSION);
+        addTranscriptGL(transcript, params.evals, setupCtx.starkInfo.evMap.size() * FIELD_EXTENSION);
     }    
 
     // Challenges for FRI polynomial
-    for (uint64_t i = 0; i < setupCtx.starkInfo->challengesMap.size(); i++)
+    for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++)
     {
-        if(setupCtx.starkInfo->challengesMap[i].stage == setupCtx.starkInfo->nStages + 3) {
+        if(setupCtx.starkInfo.challengesMap[i].stage == setupCtx.starkInfo.nStages + 3) {
             getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
         }
     }
 
-    computeFRIPol(setupCtx.starkInfo->nStages + 2, params);
+    computeFRIPol(setupCtx.starkInfo.nStages + 2, params);
 
     TimerStopAndLog(STARK_STEP_EVALS);
 
@@ -163,33 +163,33 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     TimerStart(STARK_STEP_FRI);
 
     Goldilocks::Element challenge[FIELD_EXTENSION];
-    Goldilocks::Element *friPol = &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("f", true)]];
+    Goldilocks::Element *friPol = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
     
-    for (uint64_t step = 0; step < setupCtx.starkInfo->starkStruct.steps.size(); step++)
+    for (uint64_t step = 0; step < setupCtx.starkInfo.starkStruct.steps.size(); step++)
     {
         computeFRIFolding(step, params, challenge, proof);
-        if (step < setupCtx.starkInfo->starkStruct.steps.size() - 1)
+        if (step < setupCtx.starkInfo.starkStruct.steps.size() - 1)
         {
             addTranscript(transcript, &proof.proof.fri.trees[step + 1].root[0], nFieldElements);
         }
         else
         {
-            if(setupCtx.starkInfo->starkStruct.hashCommits) {
+            if(setupCtx.starkInfo.starkStruct.hashCommits) {
                 ElementType hash[nFieldElements];
-                calculateHash(hash, friPol, (1 << setupCtx.starkInfo->starkStruct.steps[step].nBits) * FIELD_EXTENSION);
+                calculateHash(hash, friPol, (1 << setupCtx.starkInfo.starkStruct.steps[step].nBits) * FIELD_EXTENSION);
                 addTranscript(transcript, hash, nFieldElements);
             } else {
-                addTranscriptGL(transcript, friPol, (1 << setupCtx.starkInfo->starkStruct.steps[step].nBits) * FIELD_EXTENSION);
+                addTranscriptGL(transcript, friPol, (1 << setupCtx.starkInfo.starkStruct.steps[step].nBits) * FIELD_EXTENSION);
             }
         }
         getChallenge(transcript, *challenge);
     }
 
-    uint64_t friQueries[setupCtx.starkInfo->starkStruct.nQueries];
+    uint64_t friQueries[setupCtx.starkInfo.starkStruct.nQueries];
 
-    TranscriptType transcriptPermutation(setupCtx.starkInfo->starkStruct.merkleTreeArity, setupCtx.starkInfo->starkStruct.merkleTreeCustom);
+    TranscriptType transcriptPermutation(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom);
     addTranscriptGL(transcriptPermutation, challenge, FIELD_EXTENSION);
-    transcriptPermutation.getPermutations(friQueries, setupCtx.starkInfo->starkStruct.nQueries, setupCtx.starkInfo->starkStruct.steps[0].nBits);
+    transcriptPermutation.getPermutations(friQueries, setupCtx.starkInfo.starkStruct.nQueries, setupCtx.starkInfo.starkStruct.steps[0].nBits);
 
     computeFRIQueries(proof, friQueries);
 
@@ -206,7 +206,7 @@ template <typename ElementType>
 void Starks<ElementType>::calculateFRIPolynomial(StepsParams &params)
 {
     TimerStart(STARK_CALCULATE_FRI_POLYNOMIAL);
-    expressionsCtx.calculateExpression(params, &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("f", true)]], setupCtx.starkInfo->friExpId);
+    expressionsCtx.calculateExpression(params, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]], setupCtx.starkInfo.friExpId);
     TimerStopAndLog(STARK_CALCULATE_FRI_POLYNOMIAL);
 }
 
@@ -218,12 +218,12 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams &params,
     TimerStartExpr(STARK_LDE_STEP, step);
 
     std::string section = "cm" + to_string(step);  
-    uint64_t nCols = setupCtx.starkInfo->mapSectionsN["cm" + to_string(step)];
+    uint64_t nCols = setupCtx.starkInfo.mapSectionsN["cm" + to_string(step)];
     
-    Goldilocks::Element *pBuff = &params.pols[setupCtx.starkInfo->mapOffsets[make_pair(section, false)]];
-    Goldilocks::Element *pBuffExtended = &params.pols[setupCtx.starkInfo->mapOffsets[make_pair(section, true)]];
+    Goldilocks::Element *pBuff = &params.pols[setupCtx.starkInfo.mapOffsets[make_pair(section, false)]];
+    Goldilocks::Element *pBuffExtended = &params.pols[setupCtx.starkInfo.mapOffsets[make_pair(section, true)]];
 
-    std::pair<uint64_t, uint64_t> nttOffsetHelper = setupCtx.starkInfo->mapNTTOffsetsHelpers[section];
+    std::pair<uint64_t, uint64_t> nttOffsetHelper = setupCtx.starkInfo.mapNTTOffsetsHelpers[section];
     Goldilocks::Element *pBuffHelper = &params.pols[nttOffsetHelper.first];
 
     uint64_t buffHelperElements = NExtended * nCols;
@@ -248,7 +248,7 @@ void Starks<ElementType>::commitStage(uint64_t step, StepsParams &params, FRIPro
 {  
 
     if(!debug) {
-        if (step <= setupCtx.starkInfo->nStages)
+        if (step <= setupCtx.starkInfo.nStages)
         {
             extendAndMerkelize(step, params, proof);
         }
@@ -282,11 +282,11 @@ void Starks<ElementType>::computeStageExpressions(uint64_t step, StepsParams &pa
 template <typename ElementType>
 void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof)
 {
-    std::string section = "cm" + to_string(setupCtx.starkInfo->nStages + 1);
-    uint64_t nCols = setupCtx.starkInfo->mapSectionsN["cm" + to_string(setupCtx.starkInfo->nStages + 1)];
-    Goldilocks::Element *cmQ = &params.pols[setupCtx.starkInfo->mapOffsets[make_pair(section, true)]];
+    std::string section = "cm" + to_string(setupCtx.starkInfo.nStages + 1);
+    uint64_t nCols = setupCtx.starkInfo.mapSectionsN["cm" + to_string(setupCtx.starkInfo.nStages + 1)];
+    Goldilocks::Element *cmQ = &params.pols[setupCtx.starkInfo.mapOffsets[make_pair(section, true)]];
 
-    std::pair<uint64_t, uint64_t> nttOffsetHelper = setupCtx.starkInfo->mapNTTOffsetsHelpers[section];
+    std::pair<uint64_t, uint64_t> nttOffsetHelper = setupCtx.starkInfo.mapNTTOffsetsHelpers[section];
     Goldilocks::Element *pBuffHelper = &params.pols[nttOffsetHelper.first];
 
     uint64_t buffHelperElements = NExtended * nCols;
@@ -297,25 +297,25 @@ void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<
     }
 
     TimerStartExpr(STARK_CALCULATE_EXPS_2NS_INTT_STEP, step);
-    nttExtended.INTT(&params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("q", true)]], &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("q", true)]], NExtended, setupCtx.starkInfo->qDim, pBuffHelper, 3, nBlocks);
+    nttExtended.INTT(&params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], NExtended, setupCtx.starkInfo.qDim, pBuffHelper, 3, nBlocks);
     TimerStopAndLogExpr(STARK_CALCULATE_EXPS_2NS_INTT_STEP, step);
 
     TimerStartExpr(STARK_CALCULATE_EXPS_2NS_MUL_STEP, step);
 
-    for (uint64_t p = 0; p < setupCtx.starkInfo->qDeg; p++)
+    for (uint64_t p = 0; p < setupCtx.starkInfo.qDeg; p++)
     {   
         __m256i sigma = _mm256_set1_epi64x(S[p].fe);
         #pragma omp parallel for
         for (uint64_t i = 0; i < N; i += nrowsPack)
         {
             Goldilocks3::Element_avx tmp_; 
-            Goldilocks3::load_avx(tmp_, &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("q", true)] + (p * N + i) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
+            Goldilocks3::load_avx(tmp_, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)] + (p * N + i) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
             Goldilocks3::op_31_avx(2, tmp_, tmp_, sigma);
-            Goldilocks3::store_avx(&cmQ[(i * setupCtx.starkInfo->qDeg + p) * FIELD_EXTENSION],setupCtx.starkInfo->qDeg * FIELD_EXTENSION, tmp_);
+            Goldilocks3::store_avx(&cmQ[(i * setupCtx.starkInfo.qDeg + p) * FIELD_EXTENSION],setupCtx.starkInfo.qDeg * FIELD_EXTENSION, tmp_);
         }
     }
 
-    memset(&cmQ[N * setupCtx.starkInfo->qDeg * setupCtx.starkInfo->qDim], 0, (NExtended - N) * setupCtx.starkInfo->qDeg * setupCtx.starkInfo->qDim * sizeof(Goldilocks::Element));
+    memset(&cmQ[N * setupCtx.starkInfo.qDeg * setupCtx.starkInfo.qDim], 0, (NExtended - N) * setupCtx.starkInfo.qDeg * setupCtx.starkInfo.qDim * sizeof(Goldilocks::Element));
 
     TimerStopAndLogExpr(STARK_CALCULATE_EXPS_2NS_MUL_STEP, step);
 
@@ -324,7 +324,7 @@ void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<
     TimerStopAndLogExpr(STARK_CALCULATE_EXPS_2NS_NTT_STEP, step);
 
     TimerStartExpr(STARK_MERKLETREE_STEP, step);
-    treesGL[step - 1]->setSource(&params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("cm" + to_string(step), true)]]);
+    treesGL[step - 1]->setSource(&params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), true)]]);
     treesGL[step - 1]->merkelize();
     treesGL[step - 1]->getRoot(&proof.proof.roots[step - 1][0]);
 
@@ -334,30 +334,30 @@ void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<
 template <typename ElementType>
 void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType> &proof)
 {
-    auto evalsStage = setupCtx.starkInfo->nStages + 2;
-    auto xiChallenge = std::find_if(setupCtx.starkInfo->challengesMap.begin(), setupCtx.starkInfo->challengesMap.end(), [evalsStage](const PolMap& c) {
+    auto evalsStage = setupCtx.starkInfo.nStages + 2;
+    auto xiChallenge = std::find_if(setupCtx.starkInfo.challengesMap.begin(), setupCtx.starkInfo.challengesMap.end(), [evalsStage](const PolMap& c) {
         return c.stage == evalsStage && c.stageId == 0;
     });
 
-    uint64_t xiChallengeIndex = std::distance(setupCtx.starkInfo->challengesMap.begin(), xiChallenge);
+    uint64_t xiChallengeIndex = std::distance(setupCtx.starkInfo.challengesMap.begin(), xiChallenge);
 
     TimerStart(STARK_CALCULATE_LEv);
     
-    Goldilocks::Element* LEv = &params.pols[setupCtx.starkInfo->mapOffsets[make_pair("LEv", true)]];
+    Goldilocks::Element* LEv = &params.pols[setupCtx.starkInfo.mapOffsets[make_pair("LEv", true)]];
     
-    Goldilocks::Element xisShifted[setupCtx.starkInfo->openingPoints.size() * FIELD_EXTENSION];
+    Goldilocks::Element xisShifted[setupCtx.starkInfo.openingPoints.size() * FIELD_EXTENSION];
 
     Goldilocks::Element shift_inv = Goldilocks::inv(Goldilocks::shift());
-    for (uint64_t i = 0; i < setupCtx.starkInfo->openingPoints.size(); ++i)
+    for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
     {
         Goldilocks::Element w = Goldilocks::one();
-        uint64_t openingAbs = setupCtx.starkInfo->openingPoints[i] < 0 ? -setupCtx.starkInfo->openingPoints[i] : setupCtx.starkInfo->openingPoints[i];
+        uint64_t openingAbs = setupCtx.starkInfo.openingPoints[i] < 0 ? -setupCtx.starkInfo.openingPoints[i] : setupCtx.starkInfo.openingPoints[i];
         for (uint64_t j = 0; j < openingAbs; ++j)
         {
-            w = w * Goldilocks::w(setupCtx.starkInfo->starkStruct.nBits);
+            w = w * Goldilocks::w(setupCtx.starkInfo.starkStruct.nBits);
         }
 
-        if (setupCtx.starkInfo->openingPoints[i] < 0)
+        if (setupCtx.starkInfo.openingPoints[i] < 0)
         {
             w = Goldilocks::inv(w);
         }
@@ -370,18 +370,18 @@ void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType
 
 
 #pragma omp parallel for
-    for (uint64_t i = 0; i < setupCtx.starkInfo->openingPoints.size(); ++i)
+    for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
     {
         for (uint64_t k = 1; k < N; k++)
         {
-            Goldilocks3::mul((Goldilocks3::Element &)(LEv[(k*setupCtx.starkInfo->openingPoints.size() + i)*FIELD_EXTENSION]), (Goldilocks3::Element &)(LEv[((k-1)*setupCtx.starkInfo->openingPoints.size() + i)*FIELD_EXTENSION]), (Goldilocks3::Element &)(xisShifted[i * FIELD_EXTENSION]));
+            Goldilocks3::mul((Goldilocks3::Element &)(LEv[(k*setupCtx.starkInfo.openingPoints.size() + i)*FIELD_EXTENSION]), (Goldilocks3::Element &)(LEv[((k-1)*setupCtx.starkInfo.openingPoints.size() + i)*FIELD_EXTENSION]), (Goldilocks3::Element &)(xisShifted[i * FIELD_EXTENSION]));
         }
     }
 
-    std::pair<uint64_t, uint64_t> nttOffsetHelper = setupCtx.starkInfo->mapNTTOffsetsHelpers["LEv"];
+    std::pair<uint64_t, uint64_t> nttOffsetHelper = setupCtx.starkInfo.mapNTTOffsetsHelpers["LEv"];
     Goldilocks::Element *pBuffHelper = &params.pols[nttOffsetHelper.first];
     
-    ntt.INTT(&LEv[0], &LEv[0], N, FIELD_EXTENSION * setupCtx.starkInfo->openingPoints.size(), pBuffHelper);
+    ntt.INTT(&LEv[0], &LEv[0], N, FIELD_EXTENSION * setupCtx.starkInfo.openingPoints.size(), pBuffHelper);
 
     TimerStopAndLog(STARK_CALCULATE_LEv);
 
@@ -397,7 +397,7 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params)
 
     TimerStart(STARK_CALCULATE_XDIVXSUB);
 
-    for (uint64_t i = 0; i < setupCtx.starkInfo->openingPoints.size(); ++i)
+    for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
     {
         Goldilocks3::Element_avx xis_;
         xis_[0] = _mm256_set1_epi64x(xis[i * FIELD_EXTENSION].fe);
@@ -410,18 +410,18 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params)
             Goldilocks::load_avx(x_k, &x[k], uint64_t(1));
             Goldilocks3::Element_avx tmp_; 
             Goldilocks3::op_31_avx(3, tmp_, xis_, x_k);
-            Goldilocks3::store_avx(&params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION], FIELD_EXTENSION, tmp_);
+            Goldilocks3::store_avx(&params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION], FIELD_EXTENSION, tmp_);
         }
         // for (uint64_t k = 0; k < NExtended; k++)
         // {
-        //     Goldilocks3::sub((Goldilocks3::Element &)(params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("xDivXSubXi", true)]  + (k + i * NExtended) * FIELD_EXTENSION]), x[k], (Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]));
+        //     Goldilocks3::sub((Goldilocks3::Element &)(params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]  + (k + i * NExtended) * FIELD_EXTENSION]), x[k], (Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]));
         // }
     }
 
-    Polinomial xDivXSubXi_(&params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("xDivXSubXi", true)]], NExtended * setupCtx.starkInfo->openingPoints.size(), FIELD_EXTENSION, FIELD_EXTENSION);
+    Polinomial xDivXSubXi_(&params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]], NExtended * setupCtx.starkInfo.openingPoints.size(), FIELD_EXTENSION, FIELD_EXTENSION);
     Polinomial::batchInverseParallel(xDivXSubXi_, xDivXSubXi_);
 
-    for (uint64_t i = 0; i < setupCtx.starkInfo->openingPoints.size(); ++i)
+    for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
     {
 #pragma omp parallel for
         for (uint64_t k = 0; k < NExtended; k += nrowsPack)
@@ -429,13 +429,13 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params)
             __m256i x_k;
             Goldilocks::load_avx(x_k, &x[k], uint64_t(1));
             Goldilocks3::Element_avx tmp_; 
-            Goldilocks3::load_avx(tmp_, &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
+            Goldilocks3::load_avx(tmp_, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
             Goldilocks3::op_31_avx(2, tmp_, tmp_, x_k);
-            Goldilocks3::store_avx(&params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION], FIELD_EXTENSION, tmp_);
+            Goldilocks3::store_avx(&params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION], FIELD_EXTENSION, tmp_);
         }
         // for (uint64_t k = 0; k < NExtended; k++)
         // {
-        //     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), (Goldilocks3::Element &)(params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), x[k]);
+        //     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), (Goldilocks3::Element &)(params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), x[k]);
         // }
     }
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
@@ -446,28 +446,28 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params)
 template <typename ElementType>
 void Starks<ElementType>::computeFRIFolding(uint64_t step, StepsParams& params, Goldilocks::Element *challenge, FRIProof<ElementType> &fproof)
 {
-    Goldilocks::Element* pol = &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("f", true)]];
-    FRI<ElementType>::fold(step, fproof, pol, challenge, *setupCtx.starkInfo, treesFRI);
+    Goldilocks::Element* pol = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
+    FRI<ElementType>::fold(step, fproof, pol, challenge, setupCtx.starkInfo, treesFRI);
 }
 
 template <typename ElementType>
 void Starks<ElementType>::computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t *friQueries)
 {
-    FRI<ElementType>::proveQueries(friQueries, fproof, treesGL, treesFRI, *setupCtx.starkInfo);
+    FRI<ElementType>::proveQueries(friQueries, fproof, treesGL, treesFRI, setupCtx.starkInfo);
 }
 
 
 template <typename ElementType>
 bool Starks<ElementType>::canExpressionBeCalculated(ParserParams &parserParams, StepsParams &params) {
     for(uint64_t i = 0; i < parserParams.nCmPolsUsed; i++) {
-        uint64_t cmPolUsedId = setupCtx.expressionsBin->expressionsBinArgsExpressions.cmPolsIds[parserParams.cmPolsOffset + i];
+        uint64_t cmPolUsedId = setupCtx.expressionsBin.expressionsBinArgsExpressions.cmPolsIds[parserParams.cmPolsOffset + i];
         if (!isSymbolCalculated(opType::cm, cmPolUsedId, params)) {
             return false;
         }
     }
 
     for(uint64_t i = 0; i < parserParams.nSubproofValuesUsed; i++) {
-        uint64_t subproofValueUsedId = setupCtx.expressionsBin->expressionsBinArgsExpressions.subproofValuesIds[parserParams.subproofValuesOffset + i];
+        uint64_t subproofValueUsedId = setupCtx.expressionsBin.expressionsBinArgsExpressions.subproofValuesIds[parserParams.subproofValuesOffset + i];
         if (!isSymbolCalculated(opType::subproofvalue, subproofValueUsedId, params)) {
             return false;
         }
@@ -527,11 +527,11 @@ bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields
 template <typename ElementType>
 void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
 {
-    Polinomial* polynomials = new Polinomial[setupCtx.starkInfo->cmPolsMap.size()];
+    Polinomial* polynomials = new Polinomial[setupCtx.starkInfo.cmPolsMap.size()];
 
-    Polinomial* polynomialsExps = new Polinomial[setupCtx.starkInfo->friExpId + 1];
+    Polinomial* polynomialsExps = new Polinomial[setupCtx.starkInfo.friExpId + 1];
 
-    vector<bool> srcPolsExpsNames(setupCtx.starkInfo->friExpId + 1, false);
+    vector<bool> srcPolsExpsNames(setupCtx.starkInfo.friExpId + 1, false);
 
     vector<uint64_t> srcPolsNames;
     vector<uint64_t> dstPolsNames;    
@@ -539,9 +539,9 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
     vector<uint64_t> hintsToCalculate;
     
     TimerStartExpr(STARK_PREPARE_HINTS_STEP, step);
-    for (uint64_t i = 0; i < setupCtx.expressionsBin->hints.size(); i++)
+    for (uint64_t i = 0; i < setupCtx.expressionsBin.hints.size(); i++)
     {
-        Hint hint = setupCtx.expressionsBin->hints[i];
+        Hint hint = setupCtx.expressionsBin.hints[i];
         auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
         vector<string> srcFields = hintHandler->getSources();
         vector<string> dstFields = hintHandler->getDestinations();
@@ -558,7 +558,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
 
                 if(hintField->operand != opType::tmp && hintField->operand != opType::cm) continue;
                 if (hintField->operand != opType::tmp) {
-                    PolMap polInfo = setupCtx.starkInfo->cmPolsMap[hintField->id];
+                    PolMap polInfo = setupCtx.starkInfo.cmPolsMap[hintField->id];
                     srcPolsNames.push_back(hintField->id);
                     polynomials[hintField->id].potConstruct(N, polInfo.dim);
                 } else {
@@ -575,7 +575,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
                 });
                 if(hintField->operand == opType::tmp) exitProcess();
                 if(hintField->operand != opType::cm) continue;
-                PolMap polInfo = setupCtx.starkInfo->cmPolsMap[hintField->id];
+                PolMap polInfo = setupCtx.starkInfo.cmPolsMap[hintField->id];
                 dstPolsNames.push_back(hintField->id);
                 polynomials[hintField->id].potConstruct(N, polInfo.dim);
             }
@@ -591,7 +591,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
     Polinomial *srcTransposedPols = new Polinomial[srcPolsNames.size()];
 #pragma omp parallel for
     for(uint64_t i = 0; i < srcPolsNames.size(); i++) {
-        setupCtx.starkInfo->getPolynomial(polynomials[srcPolsNames[i]], params.pols, true, srcPolsNames[i], false);
+        setupCtx.starkInfo.getPolynomial(polynomials[srcPolsNames[i]], params.pols, true, srcPolsNames[i], false);
     }
     delete[] srcTransposedPols;
     TimerStopAndLogExpr(STARK_CALCULATE_TRANSPOSE_STEP, step);
@@ -613,7 +613,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
 #pragma omp parallel for num_threads(nThreads)
     for (uint64_t i = 0; i < hintsToCalculate.size(); i++)
     {
-        Hint hint = setupCtx.expressionsBin->hints[hintsToCalculate[i]];
+        Hint hint = setupCtx.expressionsBin.hints[hintsToCalculate[i]];
         
         // Build the Hint object
         auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
@@ -676,7 +676,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
     TimerStartExpr(STARK_CALCULATE_TRANSPOSE_2_STEP, step);
     Polinomial *dstTransposedPols = new Polinomial[dstPolsNames.size()];
     for(uint64_t i = 0; i < dstPolsNames.size(); i++) {
-        setupCtx.starkInfo->getPolynomial(dstTransposedPols[i], params.pols, true, dstPolsNames[i], false);
+        setupCtx.starkInfo.getPolynomial(dstTransposedPols[i], params.pols, true, dstPolsNames[i], false);
     }
 #pragma omp parallel for
     for(uint64_t j = 0; j < N; ++j) {
@@ -690,7 +690,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
     
     for (uint64_t i = 0; i < hintsToCalculate.size(); i++)
     {
-        Hint hint = setupCtx.expressionsBin->hints[hintsToCalculate[i]];
+        Hint hint = setupCtx.expressionsBin.hints[hintsToCalculate[i]];
 
         // Build the Hint object
         auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
@@ -714,23 +714,23 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
 template <typename ElementType>
 void Starks<ElementType>::evmap(StepsParams &params, Goldilocks::Element *LEv)
 {
-    uint64_t extendBits = setupCtx.starkInfo->starkStruct.nBitsExt - setupCtx.starkInfo->starkStruct.nBits;
-    u_int64_t size_eval = setupCtx.starkInfo->evMap.size();
+    uint64_t extendBits = setupCtx.starkInfo.starkStruct.nBitsExt - setupCtx.starkInfo.starkStruct.nBits;
+    u_int64_t size_eval = setupCtx.starkInfo.evMap.size();
 
 
     int num_threads = omp_get_max_threads();
     int size_thread = size_eval * FIELD_EXTENSION;
-    Goldilocks::Element *evals_acc = &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("evals", true)]];
+    Goldilocks::Element *evals_acc = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("evals", true)]];
     memset(&evals_acc[0], 0, num_threads * size_thread * sizeof(Goldilocks::Element));
     
     Polinomial *ordPols = new Polinomial[size_eval];
 
     for (uint64_t i = 0; i < size_eval; i++)
     {
-        EvMap ev = setupCtx.starkInfo->evMap[i];
+        EvMap ev = setupCtx.starkInfo.evMap[i];
         bool committed = ev.type == EvMap::eType::cm ? true : false;
-        Goldilocks::Element *pols = committed ? params.pols : setupCtx.constPols->pConstPolsAddressExtended;
-        setupCtx.starkInfo->getPolynomial(ordPols[i], pols, committed, ev.id, true);
+        Goldilocks::Element *pols = committed ? params.pols : setupCtx.constPols.pConstPolsAddressExtended;
+        setupCtx.starkInfo.getPolynomial(ordPols[i], pols, committed, ev.id, true);
     }
 
 #pragma omp parallel
@@ -740,9 +740,9 @@ void Starks<ElementType>::evmap(StepsParams &params, Goldilocks::Element *LEv)
 #pragma omp for
         for (uint64_t k = 0; k < N; k++)
         {
-            Goldilocks3::Element LEv_[setupCtx.starkInfo->openingPoints.size()];
-            for(uint64_t o = 0; o < setupCtx.starkInfo->openingPoints.size(); o++) {
-                uint64_t pos = (o + k*setupCtx.starkInfo->openingPoints.size()) * FIELD_EXTENSION;
+            Goldilocks3::Element LEv_[setupCtx.starkInfo.openingPoints.size()];
+            for(uint64_t o = 0; o < setupCtx.starkInfo.openingPoints.size(); o++) {
+                uint64_t pos = (o + k*setupCtx.starkInfo.openingPoints.size()) * FIELD_EXTENSION;
                 LEv_[o][0] = LEv[pos];
                 LEv_[o][1] = LEv[pos + 1];
                 LEv_[o][2] = LEv[pos + 2];
@@ -750,7 +750,7 @@ void Starks<ElementType>::evmap(StepsParams &params, Goldilocks::Element *LEv)
             uint64_t row = (k << extendBits);
             for (uint64_t i = 0; i < size_eval; i++)
             {
-                EvMap ev = setupCtx.starkInfo->evMap[i];
+                EvMap ev = setupCtx.starkInfo.evMap[i];
                 Goldilocks3::Element res;
                 if (ordPols[i].dim() == 1) {
                     Goldilocks3::mul(res, LEv_[ev.openingPos], *ordPols[i][row]);
@@ -782,7 +782,7 @@ void Starks<ElementType>::getChallenge(TranscriptType &transcript, Goldilocks::E
 
 template <typename ElementType>
 void Starks<ElementType>::calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements) {
-    TranscriptType transcriptHash(setupCtx.starkInfo->starkStruct.merkleTreeArity, setupCtx.starkInfo->starkStruct.merkleTreeCustom);
+    TranscriptType transcriptHash(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom);
     transcriptHash.put(buffer, nElements);
     transcriptHash.getState(hash);
 };
@@ -803,13 +803,13 @@ template <typename ElementType>
 uint64_t Starks<ElementType>::isStageCalculated(uint64_t step, StepsParams &params) {
 
     uint64_t symbolsToBeCalculated = 0;
-    for(uint64_t i = 0; i < setupCtx.starkInfo->cmPolsMap.size(); i++) {
-        if(setupCtx.starkInfo->cmPolsMap[i].stage != step || setupCtx.starkInfo->cmPolsMap[i].imPol) continue;
+    for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
+        if(setupCtx.starkInfo.cmPolsMap[i].stage != step || setupCtx.starkInfo.cmPolsMap[i].imPol) continue;
         if(!isSymbolCalculated(opType::cm, i, params)) symbolsToBeCalculated++;
     }
 
-    if(step == setupCtx.starkInfo->nStages) {
-        for(uint64_t i = 0; i < setupCtx.starkInfo->nSubProofValues; i++) {
+    if(step == setupCtx.starkInfo.nStages) {
+        for(uint64_t i = 0; i < setupCtx.starkInfo.nSubProofValues; i++) {
             if(!isSymbolCalculated(opType::subproofvalue, i, params)) symbolsToBeCalculated++;
         }
     }
@@ -842,7 +842,7 @@ bool Starks<ElementType>::isSymbolCalculated(opType operand, uint64_t id, StepsP
 template <typename ElementType>
 void Starks<ElementType>::merkelizeMemory(Goldilocks::Element *pAddress)
 {
-    uint64_t polsSize = setupCtx.starkInfo->mapTotalN + setupCtx.starkInfo->mapSectionsN["cm3"] * NExtended;
+    uint64_t polsSize = setupCtx.starkInfo.mapTotalN + setupCtx.starkInfo.mapSectionsN["cm3"] * NExtended;
     uint64_t nrowsDGB = 2;
     for (uint64_t k = 0; k < polsSize; ++k)
     {

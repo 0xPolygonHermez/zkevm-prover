@@ -92,6 +92,7 @@ void StarkInfo::load(json j)
         challengesMap.push_back(map);
     }
 
+    cout << j["cmPolsMap"][0]["stage"] << endl;
     for (uint64_t i = 0; i < j["cmPolsMap"].size(); i++) 
     {
         PolMap map;

@@ -8,27 +8,13 @@
 class SetupCtx {
 public:
 
-    StarkInfo *starkInfo;
-    ExpressionsBin *expressionsBin;
-    ConstPols *constPols;
+    StarkInfo &starkInfo;
+    ExpressionsBin &expressionsBin;
+    ConstPols &constPols;
 
-    SetupCtx(string starkInfoFile, string expressionsBinFile, string constPolsFile) {
-        starkInfo = new StarkInfo(starkInfoFile);
-        expressionsBin = new ExpressionsBin(expressionsBinFile);
-        constPols = new ConstPols(*starkInfo, constPolsFile);
-    }
+    SetupCtx(StarkInfo &_starkInfo, ExpressionsBin& _expressionsBin, ConstPols& _constPols) : starkInfo(_starkInfo), expressionsBin(_expressionsBin), constPols(_constPols)  {};
 
-    SetupCtx(string starkInfoFile, string expressionsBinFile, string constPolsFile, string constTreeFile) {
-        starkInfo = new StarkInfo(starkInfoFile);
-        expressionsBin = new ExpressionsBin(expressionsBinFile);
-        constPols = new ConstPols(*starkInfo, constPolsFile, constTreeFile);
-    }
-
-    ~SetupCtx() {
-        delete starkInfo;
-        delete expressionsBin;
-        delete constPols;
-    };
+    ~SetupCtx() {};
 };
 
 #endif

@@ -29,14 +29,14 @@ struct HintIdsResult {
 class ExpressionsCtx {
 public:
 
-    SetupCtx& setupCtx;
+    SetupCtx setupCtx;
 
     vector<bool> subProofValuesCalculated;
     vector<bool> commitsCalculated;
 
     ExpressionsCtx(SetupCtx& _setupCtx) : setupCtx(_setupCtx) {
-        commitsCalculated.resize(setupCtx.starkInfo->cmPolsMap.size(), false);
-        subProofValuesCalculated.resize(setupCtx.starkInfo->nSubProofValues, false);
+        commitsCalculated.resize(setupCtx.starkInfo.cmPolsMap.size(), false);
+        subProofValuesCalculated.resize(setupCtx.starkInfo.nSubProofValues, false);
     };
 
     virtual ~ExpressionsCtx() {};
@@ -50,19 +50,20 @@ public:
     };
 
     void canImPolsBeCalculated(uint64_t step) {
-        for(uint64_t i = 0; i < setupCtx.starkInfo->cmPolsMap.size(); ++i) {
-            PolMap cmPol = setupCtx.starkInfo->cmPolsMap[i];
+        for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); ++i) {
+            PolMap cmPol = setupCtx.starkInfo.cmPolsMap[i];
             if((cmPol.stage < step || (cmPol.stage == step && !cmPol.imPol)) && !commitsCalculated[i]) {
-                zklog.info("Witness polynomial " + setupCtx.starkInfo->cmPolsMap[i].name + " is not calculated");
+                zklog.info("Witness polynomial " + setupCtx.starkInfo.cmPolsMap[i].name + " is not calculated");
                 exitProcess();
                 exit(-1);
             }
         }
+        
     }
 
     void canStageBeCalculated(uint64_t step) {
-        if(step == setupCtx.starkInfo->nStages) {
-            for(uint64_t i = 0; i < setupCtx.starkInfo->nSubProofValues; i++) {
+        if(step == setupCtx.starkInfo.nStages) {
+            for(uint64_t i = 0; i < setupCtx.starkInfo.nSubProofValues; i++) {
                 if(!subProofValuesCalculated[i]) {
                     zklog.info("Subproofvalue " + to_string(i) + " is not calculated");
                     exitProcess();
@@ -71,10 +72,10 @@ public:
             }
         }
 
-        if(step <= setupCtx.starkInfo->nStages) {
-            for(uint64_t i = 0; i < setupCtx.starkInfo->cmPolsMap.size(); i++) {
-                if(setupCtx.starkInfo->cmPolsMap[i].stage == step && !commitsCalculated[i]) {
-                    zklog.info("Witness polynomial " + setupCtx.starkInfo->cmPolsMap[i].name + " is not calculated");
+        if(step <= setupCtx.starkInfo.nStages) {
+            for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
+                if(setupCtx.starkInfo.cmPolsMap[i].stage == step && !commitsCalculated[i]) {
+                    zklog.info("Witness polynomial " + setupCtx.starkInfo.cmPolsMap[i].name + " is not calculated");
                     exitProcess();
                     exit(-1);
                 }
@@ -86,16 +87,16 @@ public:
         HintIdsResult hintIds;
 
         hintIds.nHints = 0;
-        for (uint64_t i = 0; i < setupCtx.expressionsBin->hints.size(); ++i) {
-            if (setupCtx.expressionsBin->hints[i].name == name) {
+        for (uint64_t i = 0; i < setupCtx.expressionsBin.hints.size(); ++i) {
+            if (setupCtx.expressionsBin.hints[i].name == name) {
                 hintIds.nHints++;
             }
         }
 
         uint64_t c = 0;
         hintIds.ids = new uint64_t[hintIds.nHints];
-        for (uint64_t i = 0; i < setupCtx.expressionsBin->hints.size(); ++i) {
-            if (setupCtx.expressionsBin->hints[i].name == name) {
+        for (uint64_t i = 0; i < setupCtx.expressionsBin.hints.size(); ++i) {
+            if (setupCtx.expressionsBin.hints[i].name == name) {
                hintIds.ids[c++] = i;
             }
         }
@@ -104,15 +105,15 @@ public:
     }
     
     HintFieldInfo getHintField(StepsParams& params, uint64_t hintId, std::string hintFieldName, bool dest) {
-        uint64_t deg = 1 << setupCtx.starkInfo->starkStruct.nBits;
+        uint64_t deg = 1 << setupCtx.starkInfo.starkStruct.nBits;
 
-        if(setupCtx.expressionsBin->hints.size() == 0) {
+        if(setupCtx.expressionsBin.hints.size() == 0) {
             zklog.error("No hints were found.");
             exitProcess();
             exit(-1);
         }
 
-        Hint hint = setupCtx.expressionsBin->hints[hintId];
+        Hint hint = setupCtx.expressionsBin.hints[hintId];
         
         auto hintField = std::find_if(hint.fields.begin(), hint.fields.end(), [hintFieldName](const HintField& hintField) {
             return hintField.name == hintFieldName;
@@ -133,21 +134,21 @@ public:
         HintFieldInfo hintFieldInfo;
 
         if(hintField->operand == opType::cm) {
-            uint64_t dim = setupCtx.starkInfo->cmPolsMap[hintField->id].dim;
+            uint64_t dim = setupCtx.starkInfo.cmPolsMap[hintField->id].dim;
             hintFieldInfo.size = deg*dim;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             hintFieldInfo.offset = dim;
             if(!dest) getPolynomial(params, hintFieldInfo.values, true, hintField->id, false);
         } else if(hintField->operand == opType::const_) {
-            uint64_t dim = setupCtx.starkInfo->constPolsMap[hintField->id].dim;
+            uint64_t dim = setupCtx.starkInfo.constPolsMap[hintField->id].dim;
             hintFieldInfo.size = deg*dim;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             hintFieldInfo.offset = dim;
             getPolynomial(params, hintFieldInfo.values, false, hintField->id, false);
         } else if (hintField->operand == opType::tmp) {
-            uint64_t dim = setupCtx.expressionsBin->expressionsInfo[hintField->id].destDim;
+            uint64_t dim = setupCtx.expressionsBin.expressionsInfo[hintField->id].destDim;
             hintFieldInfo.size = deg*dim;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
@@ -189,7 +190,7 @@ public:
 
     void setHintField(StepsParams& params, Goldilocks::Element* values, uint64_t hintId, std::string hintFieldName) {
         
-        Hint hint = setupCtx.expressionsBin->hints[hintId];
+        Hint hint = setupCtx.expressionsBin.hints[hintId];
 
         auto hintField = std::find_if(hint.fields.begin(), hint.fields.end(), [hintFieldName](const HintField& hintField) {
             return hintField.name == hintFieldName;
@@ -242,9 +243,9 @@ public:
     
     bool verifyConstraints(uint64_t stage, StepsParams& params) {
         bool isValid = true;
-        for (uint64_t i = 0; i < setupCtx.expressionsBin->constraintsInfoDebug.size(); i++) {
-            if(setupCtx.expressionsBin->constraintsInfoDebug[i].stage == stage) {
-                Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("q", true)]];
+        for (uint64_t i = 0; i < setupCtx.expressionsBin.constraintsInfoDebug.size(); i++) {
+            if(setupCtx.expressionsBin.constraintsInfoDebug[i].stage == stage) {
+                Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
                 if(!verifyConstraint(params, pAddr, i)) {
                     isValid = false;
                 };
@@ -256,12 +257,12 @@ public:
     bool verifyConstraint(StepsParams& params, Goldilocks::Element* dest, uint64_t constraintId) {
         TimerLog(CHECKING_CONSTRAINT);
         cout << "--------------------------------------------------------" << endl;
-        cout << setupCtx.expressionsBin->constraintsInfoDebug[constraintId].line << endl;
+        cout << setupCtx.expressionsBin.constraintsInfoDebug[constraintId].line << endl;
         cout << "--------------------------------------------------------" << endl;
         
-        calculateExpressions(params, dest, setupCtx.expressionsBin->expressionsBinArgsConstraints, setupCtx.expressionsBin->constraintsInfoDebug[constraintId], false, false);
+        calculateExpressions(params, dest, setupCtx.expressionsBin.expressionsBinArgsConstraints, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], false, false);
 
-        uint64_t N = (1 << setupCtx.starkInfo->starkStruct.nBits);
+        uint64_t N = (1 << setupCtx.starkInfo.starkStruct.nBits);
         bool isValidConstraint = true;
         uint64_t nInvalidRows = 0;
         uint64_t maxInvalidRowsDisplay = 100;
@@ -270,7 +271,7 @@ public:
                 cout << "There are more than " << maxInvalidRowsDisplay << " invalid rows for constraint " << i << endl;
                 break;
             }
-            if(!checkConstraint(dest, setupCtx.expressionsBin->constraintsInfoDebug[constraintId], i)) {
+            if(!checkConstraint(dest, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], i)) {
                 if(isValidConstraint) isValidConstraint = false;
                 nInvalidRows++;
             }
@@ -285,14 +286,14 @@ public:
     }
  
     void getPolynomial(StepsParams& params, Goldilocks::Element *dest, bool committed, uint64_t idPol, bool domainExtended) {
-        PolMap polInfo = committed ? setupCtx.starkInfo->cmPolsMap[idPol] : setupCtx.starkInfo->constPolsMap[idPol];
-        uint64_t deg = domainExtended ? 1 << setupCtx.starkInfo->starkStruct.nBitsExt : 1 << setupCtx.starkInfo->starkStruct.nBits;
+        PolMap polInfo = committed ? setupCtx.starkInfo.cmPolsMap[idPol] : setupCtx.starkInfo.constPolsMap[idPol];
+        uint64_t deg = domainExtended ? 1 << setupCtx.starkInfo.starkStruct.nBitsExt : 1 << setupCtx.starkInfo.starkStruct.nBits;
         uint64_t dim = polInfo.dim;
         std::string stage = committed ? "cm" + to_string(polInfo.stage) : "const";
-        uint64_t nCols = setupCtx.starkInfo->mapSectionsN[stage];
-        uint64_t offset = setupCtx.starkInfo->mapOffsets[std::make_pair(stage, domainExtended)];
+        uint64_t nCols = setupCtx.starkInfo.mapSectionsN[stage];
+        uint64_t offset = setupCtx.starkInfo.mapOffsets[std::make_pair(stage, domainExtended)];
         offset += polInfo.stagePos;
-        Goldilocks::Element *pols = committed ? params.pols : domainExtended ? setupCtx.constPols->pConstPolsAddressExtended : setupCtx.constPols->pConstPolsAddress;
+        Goldilocks::Element *pols = committed ? params.pols : domainExtended ? setupCtx.constPols.pConstPolsAddressExtended : setupCtx.constPols.pConstPolsAddress;
         Polinomial pol = Polinomial(&pols[offset], deg, dim, nCols, std::to_string(idPol));
 
         for(uint64_t j = 0; j < deg; ++j) {
@@ -301,12 +302,12 @@ public:
     }
 
     void setPolynomial(StepsParams& params, Goldilocks::Element *values, uint64_t idPol, bool domainExtended) {
-        PolMap polInfo = setupCtx.starkInfo->cmPolsMap[idPol];
-        uint64_t deg = domainExtended ? 1 << setupCtx.starkInfo->starkStruct.nBitsExt : 1 << setupCtx.starkInfo->starkStruct.nBits;
+        PolMap polInfo = setupCtx.starkInfo.cmPolsMap[idPol];
+        uint64_t deg = domainExtended ? 1 << setupCtx.starkInfo.starkStruct.nBitsExt : 1 << setupCtx.starkInfo.starkStruct.nBits;
         uint64_t dim = polInfo.dim;
         std::string stage = "cm" + to_string(polInfo.stage);
-        uint64_t nCols = setupCtx.starkInfo->mapSectionsN[stage];
-        uint64_t offset = setupCtx.starkInfo->mapOffsets[std::make_pair(stage, domainExtended)];
+        uint64_t nCols = setupCtx.starkInfo.mapSectionsN[stage];
+        uint64_t offset = setupCtx.starkInfo.mapOffsets[std::make_pair(stage, domainExtended)];
         offset += polInfo.stagePos;
         Polinomial pol = Polinomial(&params.pols[offset], deg, dim, nCols, std::to_string(idPol));
 
@@ -322,23 +323,23 @@ public:
     }
 
     void calculateExpression(StepsParams& params, Goldilocks::Element* dest, uint64_t expressionId, bool inverse = false) {
-        bool domainExtended = expressionId == setupCtx.starkInfo->cExpId || expressionId == setupCtx.starkInfo->friExpId;
-        calculateExpressions(params, dest, setupCtx.expressionsBin->expressionsBinArgsExpressions, setupCtx.expressionsBin->expressionsInfo[expressionId], domainExtended, inverse);
+        bool domainExtended = expressionId == setupCtx.starkInfo.cExpId || expressionId == setupCtx.starkInfo.friExpId;
+        calculateExpressions(params, dest, setupCtx.expressionsBin.expressionsBinArgsExpressions, setupCtx.expressionsBin.expressionsInfo[expressionId], domainExtended, inverse);
     }
 
     void calculateImPolsExpressions(uint64_t step, StepsParams& params) {
         TimerStart(STARK_CALCULATE_IMPOLS_EXPS);
 
-        uint64_t N = 1 << setupCtx.starkInfo->starkStruct.nBits;
+        uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
         
-        Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("q", true)]];
-        for(uint64_t i = 0; i < setupCtx.starkInfo->cmPolsMap.size(); i++) {
-            if(setupCtx.starkInfo->cmPolsMap[i].imPol && setupCtx.starkInfo->cmPolsMap[i].stage == step) {
-                calculateExpression(params, pAddr, setupCtx.starkInfo->cmPolsMap[i].expId);
-                Goldilocks::Element* imAddr = &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("cm" + to_string(step), false)] + setupCtx.starkInfo->cmPolsMap[i].stagePos];
+        Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
+        for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
+            if(setupCtx.starkInfo.cmPolsMap[i].imPol && setupCtx.starkInfo.cmPolsMap[i].stage == step) {
+                calculateExpression(params, pAddr, setupCtx.starkInfo.cmPolsMap[i].expId);
+                Goldilocks::Element* imAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), false)] + setupCtx.starkInfo.cmPolsMap[i].stagePos];
             #pragma omp parallel
                 for(uint64_t j = 0; j < N; ++j) {
-                    std::memcpy(&imAddr[j*setupCtx.starkInfo->mapSectionsN["cm" + to_string(step)]], &pAddr[j*setupCtx.starkInfo->cmPolsMap[i].dim], setupCtx.starkInfo->cmPolsMap[i].dim * sizeof(Goldilocks::Element));
+                    std::memcpy(&imAddr[j*setupCtx.starkInfo.mapSectionsN["cm" + to_string(step)]], &pAddr[j*setupCtx.starkInfo.cmPolsMap[i].dim], setupCtx.starkInfo.cmPolsMap[i].dim * sizeof(Goldilocks::Element));
                 }
                 setCommitCalculated(i);
             }
@@ -350,9 +351,9 @@ public:
 
     void calculateQuotientPolynomial(StepsParams& params) {
         TimerStart(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
-        calculateExpression(params, &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("q", true)]], setupCtx.starkInfo->cExpId);
-        for(uint64_t i = 0; i < setupCtx.starkInfo->cmPolsMap.size(); i++) {
-            if(setupCtx.starkInfo->cmPolsMap[i].stage == setupCtx.starkInfo->nStages + 1) {
+        calculateExpression(params, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], setupCtx.starkInfo.cExpId);
+        for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
+            if(setupCtx.starkInfo.cmPolsMap[i].stage == setupCtx.starkInfo.nStages + 1) {
                 setCommitCalculated(i);
             }
         }
@@ -361,7 +362,7 @@ public:
 
     void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, uint64_t printValues = 0) {
         Polinomial p = Polinomial(pol, deg, dim, dim);
-        MerkleTreeGL *mt_ = new MerkleTreeGL(setupCtx.starkInfo->starkStruct.merkleTreeArity, setupCtx.starkInfo->starkStruct.merkleTreeCustom, deg, dim, pol);
+        MerkleTreeGL *mt_ = new MerkleTreeGL(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, deg, dim, pol);
         mt_->merkelize();
 
         Goldilocks::Element root[4];
@@ -381,10 +382,10 @@ public:
 
     void printPolById(StepsParams& params, uint64_t polId, uint64_t printValues = 0)
     {   
-        uint64_t N = 1 << setupCtx.starkInfo->starkStruct.nBits;
-        PolMap polInfo = setupCtx.starkInfo->cmPolsMap[polId];
+        uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
+        PolMap polInfo = setupCtx.starkInfo.cmPolsMap[polId];
         Polinomial p;
-        setupCtx.starkInfo->getPolynomial(p, params.pols, true, polId, false);
+        setupCtx.starkInfo.getPolynomial(p, params.pols, true, polId, false);
     
         Polinomial pCol;
         Goldilocks::Element *pBuffCol = new Goldilocks::Element[polInfo.dim * N];

@@ -63,10 +63,10 @@ public:
     Starks(const Config &config, SetupCtx& setupCtx_, ExpressionsCtx& expressionsCtx_, bool debug_) : config(config),
                                                                            setupCtx(setupCtx_),
                                                                            expressionsCtx(expressionsCtx_),
-                                                                           N(config.generateProof() ? 1 << setupCtx.starkInfo->starkStruct.nBits : 0),
-                                                                           NExtended(config.generateProof() ? 1 << setupCtx.starkInfo->starkStruct.nBitsExt : 0),
-                                                                           ntt(config.generateProof() ? 1 << setupCtx.starkInfo->starkStruct.nBits : 0),
-                                                                           nttExtended(config.generateProof() ? 1 << setupCtx.starkInfo->starkStruct.nBitsExt : 0)
+                                                                           N(config.generateProof() ? 1 << setupCtx.starkInfo.starkStruct.nBits : 0),
+                                                                           NExtended(config.generateProof() ? 1 << setupCtx.starkInfo.starkStruct.nBitsExt : 0),
+                                                                           ntt(config.generateProof() ? 1 << setupCtx.starkInfo.starkStruct.nBits : 0),
+                                                                           nttExtended(config.generateProof() ? 1 << setupCtx.starkInfo.starkStruct.nBitsExt : 0)
     {
         debug = debug_;
 
@@ -74,49 +74,49 @@ public:
         if (!config.generateProof())
             return;
 
-        if(setupCtx.starkInfo->starkStruct.verificationHashType == std::string("BN128")) {
+        if(setupCtx.starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             nFieldElements = 1;
         } else {
             nFieldElements = HASH_SIZE;
         }
 
-        treesGL = new MerkleTreeType*[setupCtx.starkInfo->nStages + 2];
+        treesGL = new MerkleTreeType*[setupCtx.starkInfo.nStages + 2];
 
         TimerStart(COMPUTE_X);
 
-        uint64_t extendBits = setupCtx.starkInfo->starkStruct.nBitsExt - setupCtx.starkInfo->starkStruct.nBits;
+        uint64_t extendBits = setupCtx.starkInfo.starkStruct.nBitsExt - setupCtx.starkInfo.starkStruct.nBits;
         x = new Goldilocks::Element[N << extendBits];
         x[0] = Goldilocks::shift();
         for (uint64_t k = 1; k < (N << extendBits); k++)
         {
-            x[k] = x[k - 1] * Goldilocks::w(setupCtx.starkInfo->starkStruct.nBits + extendBits);
+            x[k] = x[k - 1] * Goldilocks::w(setupCtx.starkInfo.starkStruct.nBits + extendBits);
         }
 
-        S = new Goldilocks::Element[setupCtx.starkInfo->qDeg];
-        xis = new Goldilocks::Element[setupCtx.starkInfo->openingPoints.size() * FIELD_EXTENSION];
+        S = new Goldilocks::Element[setupCtx.starkInfo.qDeg];
+        xis = new Goldilocks::Element[setupCtx.starkInfo.openingPoints.size() * FIELD_EXTENSION];
         Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
         S[0] = Goldilocks::one();
-        for(uint64_t i = 1; i < setupCtx.starkInfo->qDeg; i++) {
+        for(uint64_t i = 1; i < setupCtx.starkInfo.qDeg; i++) {
             S[i] = Goldilocks::mul(S[i - 1], shiftIn);
         }
         TimerStopAndLog(COMPUTE_X);
 
         TimerStart(MERKLE_TREE_ALLOCATION);
-        treesGL[setupCtx.starkInfo->nStages + 1] = new MerkleTreeType(setupCtx.starkInfo->starkStruct.merkleTreeArity, setupCtx.starkInfo->starkStruct.merkleTreeCustom, (Goldilocks::Element *)setupCtx.constPols->pConstTreeAddress);
-        for (uint64_t i = 0; i < setupCtx.starkInfo->nStages + 1; i++)
+        treesGL[setupCtx.starkInfo.nStages + 1] = new MerkleTreeType(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, (Goldilocks::Element *)setupCtx.constPols.pConstTreeAddress);
+        for (uint64_t i = 0; i < setupCtx.starkInfo.nStages + 1; i++)
         {
             std::string section = "cm" + to_string(i + 1);
-            uint64_t nCols = setupCtx.starkInfo->mapSectionsN[section];
-            treesGL[i] = new MerkleTreeType(setupCtx.starkInfo->starkStruct.merkleTreeArity, setupCtx.starkInfo->starkStruct.merkleTreeCustom, NExtended, nCols, NULL, false);
+            uint64_t nCols = setupCtx.starkInfo.mapSectionsN[section];
+            treesGL[i] = new MerkleTreeType(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, NExtended, nCols, NULL, false);
         }
 
         if(!debug) {            
-            treesFRI = new MerkleTreeType*[setupCtx.starkInfo->starkStruct.steps.size() - 1];
-            for(uint64_t step = 0; step < setupCtx.starkInfo->starkStruct.steps.size() - 1; ++step) {
-                uint64_t nGroups = 1 << setupCtx.starkInfo->starkStruct.steps[step + 1].nBits;
-                uint64_t groupSize = (1 << setupCtx.starkInfo->starkStruct.steps[step].nBits) / nGroups;
+            treesFRI = new MerkleTreeType*[setupCtx.starkInfo.starkStruct.steps.size() - 1];
+            for(uint64_t step = 0; step < setupCtx.starkInfo.starkStruct.steps.size() - 1; ++step) {
+                uint64_t nGroups = 1 << setupCtx.starkInfo.starkStruct.steps[step + 1].nBits;
+                uint64_t groupSize = (1 << setupCtx.starkInfo.starkStruct.steps[step].nBits) / nGroups;
 
-                treesFRI[step] = new MerkleTreeType(setupCtx.starkInfo->starkStruct.merkleTreeArity, setupCtx.starkInfo->starkStruct.merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
+                treesFRI[step] = new MerkleTreeType(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
             }
         }
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
@@ -131,14 +131,14 @@ public:
         delete xis;
         delete x;
 
-        for (uint i = 0; i < setupCtx.starkInfo->nStages + 2; i++)
+        for (uint i = 0; i < setupCtx.starkInfo.nStages + 2; i++)
         {
             delete treesGL[i];
         }
         delete[] treesGL;
 
         if(!debug) {
-            for (uint64_t i = 0; i < setupCtx.starkInfo->starkStruct.steps.size() - 1; i++)
+            for (uint64_t i = 0; i < setupCtx.starkInfo.starkStruct.steps.size() - 1; i++)
             {
                 delete treesFRI[i];
             }

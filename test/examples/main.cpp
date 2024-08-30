@@ -68,31 +68,35 @@ int main(int argc, char **argv)
         expressionsBinFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin";
     }
    
-    SetupCtx setupCtx(starkInfoFile, expressionsBinFile, constPolsFile);
+    StarkInfo starkInfo(starkInfoFile);
+    ConstPols constPols(starkInfo, constPolsFile);
+    ExpressionsBin expressionsBin(expressionsBinFile);
 
-    void *pCommit = copyFile(commitPols, setupCtx.starkInfo->mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << setupCtx.starkInfo->starkStruct.nBits));
-    void *pAddress = (void *)malloc((setupCtx.starkInfo->mapTotalN) * sizeof(Goldilocks::Element));
+    SetupCtx setupCtx(starkInfo, expressionsBin, constPols);
 
-    uint64_t N = (1 << setupCtx.starkInfo->starkStruct.nBits);
+    void *pCommit = copyFile(commitPols, setupCtx.starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << setupCtx.starkInfo.starkStruct.nBits));
+    void *pAddress = (void *)malloc((setupCtx.starkInfo.mapTotalN) * sizeof(Goldilocks::Element));
+
+    uint64_t N = (1 << setupCtx.starkInfo.starkStruct.nBits);
     #pragma omp parallel for
     for (uint64_t i = 0; i < N; i += 1)
     {
-        std::memcpy((uint8_t*)pAddress + setupCtx.starkInfo->mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-            (uint8_t*)pCommit + i*setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-            setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
+        std::memcpy((uint8_t*)pAddress + setupCtx.starkInfo.mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*setupCtx.starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
+            (uint8_t*)pCommit + i*setupCtx.starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
+            setupCtx.starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
     }
 
     json publics;
     file2json(publicsFile, publics);
 
-    Goldilocks::Element publicInputs[setupCtx.starkInfo->nPublics];
+    Goldilocks::Element publicInputs[setupCtx.starkInfo.nPublics];
 
-    for(uint64_t i = 0; i < setupCtx.starkInfo->nPublics; i++) {
+    for(uint64_t i = 0; i < setupCtx.starkInfo.nPublics; i++) {
         publicInputs[i] = Goldilocks::fromU64(publics[i]);
     }
     
     json publicStarkJson;
-    for (uint64_t i = 0; i < setupCtx.starkInfo->nPublics; i++)
+    for (uint64_t i = 0; i < setupCtx.starkInfo.nPublics; i++)
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
@@ -100,26 +104,26 @@ int main(int argc, char **argv)
     nlohmann::ordered_json jProof;
     
     if(testName == "all") {
-        FRIProof<Goldilocks::Element> fproof(*setupCtx.starkInfo);
+        FRIProof<Goldilocks::Element> fproof(setupCtx.starkInfo);
         ExpressionsAvx expressionsAvx(setupCtx);
         Starks<Goldilocks::Element> starks(config, setupCtx, expressionsAvx, false);
         starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0]); 
         jProof = fproof.proof.proof2json();
     } else if(testName == "compressor") {
-        FRIProof<RawFr::Element> fproof(*setupCtx.starkInfo);
+        FRIProof<RawFr::Element> fproof(setupCtx.starkInfo);
         ExpressionsAvx expressionsAvx(setupCtx);
         Starks<RawFr::Element> starks(config, setupCtx, expressionsAvx, false);
         starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0]); 
         jProof = fproof.proof.proof2json();
     } else if(testName == "fibonacci_pil2") {
-        FRIProof<Goldilocks::Element> fproof(*setupCtx.starkInfo);
+        FRIProof<Goldilocks::Element> fproof(setupCtx.starkInfo);
         ExpressionsAvx expressionsAvx(setupCtx);
         Starks<Goldilocks::Element> starks(config, setupCtx, expressionsAvx, false);
         starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0]); 
         jProof = fproof.proof.proof2json();
     }
 
-    nlohmann::json zkin = proof2zkinStark(jProof, *setupCtx.starkInfo);
+    nlohmann::json zkin = proof2zkinStark(jProof, setupCtx.starkInfo);
 
     // Generate publics
     jProof["publics"] = publics;

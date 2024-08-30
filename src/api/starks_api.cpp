@@ -106,7 +106,7 @@ void save_proof(uint64_t proof_id, void *pStarkInfo, void *pFriProof, char *file
 void *fri_proof_new(void *pSetupCtx)
 {
     SetupCtx setupCtx = *(SetupCtx *)pSetupCtx;
-    FRIProof<Goldilocks::Element> *friProof = new FRIProof<Goldilocks::Element>(*setupCtx.starkInfo);
+    FRIProof<Goldilocks::Element> *friProof = new FRIProof<Goldilocks::Element>(setupCtx.starkInfo);
 
     return friProof;
 }
@@ -134,22 +134,9 @@ void fri_proof_free(void *pFriProof)
 // SetupCtx
 // ========================================================================================
 
-void *setup_ctx_new(char* stark_info_file, char* expressions_bin_file, char* const_pols_file) {
-    SetupCtx *setupCtx = new SetupCtx(string(stark_info_file), string(expressions_bin_file), string(const_pols_file));
+void *setup_ctx_new(void* p_stark_info, void* p_expression_bin, void* p_const_pols) {
+    SetupCtx *setupCtx = new SetupCtx(*(StarkInfo*)p_stark_info, *(ExpressionsBin*)p_expression_bin, *(ConstPols *)p_const_pols);
     return setupCtx;
-}
-
-void *setup_ctx_new(char* stark_info_file, char* expressions_bin_file, char* const_pols_file, char* const_tree_file) {
-    SetupCtx *setupCtx = new SetupCtx(string(stark_info_file), string(expressions_bin_file), string(const_pols_file), string(const_tree_file));
-    return setupCtx;
-}
-
-void *get_fri_pol(void *pSetupCtx, void *pParams)
-{
-    SetupCtx setupCtx = *(SetupCtx *)pSetupCtx;
-    auto params = *(StepsParams *)pParams;
-    
-    return &params.pols[setupCtx.starkInfo->mapOffsets[std::make_pair("f", true)]];
 }
 
 void setup_ctx_free(void *pSetupCtx) {
@@ -183,6 +170,35 @@ void stark_info_free(void *pStarkInfo)
     delete starkInfo;
 }
 
+// Const Pols
+// ========================================================================================
+void *const_pols_new(char* filename, void *pStarkInfo) 
+{
+    auto const_pols = new ConstPols(*(StarkInfo *)pStarkInfo, filename);
+
+    return const_pols;
+}
+
+void const_pols_free(void *pConstPols)
+{
+    auto constPols = (ConstPols *)pConstPols;
+    delete constPols;
+}
+
+// Expressions Bin
+// ========================================================================================
+void *expressions_bin_new(char* filename)
+{
+    auto expressionsBin = new ExpressionsBin(filename);
+
+    return expressionsBin;
+};
+void expressions_bin_free(void *pExpressionsBin)
+{
+    auto expressionsBin = (ExpressionsBin *)pExpressionsBin;
+    delete expressionsBin;
+};
+
 // StepsParams
 // ========================================================================================
 void *init_params(void* ptr, void* public_inputs, void* challenges, void* evals, void* subproofValues) {
@@ -209,6 +225,14 @@ void *expressions_ctx_new(void *pSetupCtx)
 {
     ExpressionsAvx *expressionsAvx = new ExpressionsAvx(*(SetupCtx *)pSetupCtx);
     return expressionsAvx;
+}
+
+void *get_fri_pol(void *pExpressionsCtx, void *pParams)
+{
+    ExpressionsAvx expressionsAvx = *(ExpressionsAvx *)pExpressionsCtx;
+    auto params = *(StepsParams *)pParams;
+    
+    return &params.pols[expressionsAvx.setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
 }
 
 bool verify_constraints(void *pExpressionsCtx, void* pParams, uint64_t step)

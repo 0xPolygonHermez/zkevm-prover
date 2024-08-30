@@ -81,38 +81,42 @@ int main(int argc, char **argv)
             if (publicsFile=="") throw runtime_error("constraint_checker: pubics file not specified");
         } else throw runtime_error("constraint_checker: publics file argument not specified <-p/--publics> <public_file>");
 
-        SetupCtx setupCtx(starkInfoFile, expressionsBinFile, constFile);
+        StarkInfo starkInfo(starkInfoFile);
+        ConstPols constPols(starkInfo, constFile);
+        ExpressionsBin expressionsBin(expressionsBinFile);
 
-        void *pCommit = copyFile(commitPols, setupCtx.starkInfo->mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << setupCtx.starkInfo->starkStruct.nBits));
-        void *pAddress = (void *)malloc(setupCtx.starkInfo->mapTotalN * sizeof(Goldilocks::Element));
+        SetupCtx setupCtx(starkInfo, expressionsBin, constPols);
 
-        uint64_t N = (1 << setupCtx.starkInfo->starkStruct.nBits);
+        void *pCommit = copyFile(commitPols, setupCtx.starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << setupCtx.starkInfo.starkStruct.nBits));
+        void *pAddress = (void *)malloc(setupCtx.starkInfo.mapTotalN * sizeof(Goldilocks::Element));
+
+        uint64_t N = (1 << setupCtx.starkInfo.starkStruct.nBits);
         #pragma omp parallel for
         for (uint64_t i = 0; i < N; i += 1)
         {
-            std::memcpy((uint8_t*)pAddress + setupCtx.starkInfo->mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-                (uint8_t*)pCommit + i*setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-                setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
+            std::memcpy((uint8_t*)pAddress + setupCtx.starkInfo.mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*setupCtx.starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
+                (uint8_t*)pCommit + i*setupCtx.starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
+                setupCtx.starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
         }
 
         json publics;
         file2json(publicsFile, publics);
 
-        Goldilocks::Element publicInputs[setupCtx.starkInfo->nPublics];
+        Goldilocks::Element publicInputs[setupCtx.starkInfo.nPublics];
 
-        for(uint64_t i = 0; i < setupCtx.starkInfo->nPublics; i++) {
+        for(uint64_t i = 0; i < setupCtx.starkInfo.nPublics; i++) {
             publicInputs[i] = Goldilocks::fromU64(publics[i]);
         }
 
         json publicStarkJson;
-        for (uint64_t i = 0; i < setupCtx.starkInfo->nPublics; i++)
+        for (uint64_t i = 0; i < setupCtx.starkInfo.nPublics; i++)
         {
             publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
         }
 
         nlohmann::ordered_json jProof;
 
-        FRIProof<Goldilocks::Element> fproof(*setupCtx.starkInfo);
+        FRIProof<Goldilocks::Element> fproof(setupCtx.starkInfo);
         
         ExpressionsAvx expressionsAvx(setupCtx);
 

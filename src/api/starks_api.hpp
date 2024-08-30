@@ -17,9 +17,7 @@
 
     // SetupCtx
     // ========================================================================================
-    void *setup_ctx_new(char* stark_info_file, char* expressions_bin_file, char* const_pols_file);
-    void *setup_ctx_new(char* stark_info_file, char* expressions_bin_file, char* const_pols_file, char* const_tree_file);
-    void *get_fri_pol(void *pSetupCtx, void *pParams);
+    void *setup_ctx_new(void* p_stark_info, void* p_expression_bin, void* p_const_pols);
     void setup_ctx_free(void *pSetupCtx);
 
     // Stark Info
@@ -29,10 +27,21 @@
     uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag);
     void stark_info_free(void *pStarkInfo);
 
+    // Const Pols
+    // ========================================================================================
+    void *const_pols_new(char* filename, void *pStarkInfo) 
+    void const_pols_free(void *pConstPols);
+
+    // Expressions Bin
+    // ========================================================================================
+    void *expressions_bin_new(char* filename);
+    void expressions_bin_free(void *pExpressionsBin);
+
     // ExpressionsCtx
     // ========================================================================================
     void *expressions_ctx_new(void *pSetupCtx);
     bool verify_constraints(void *pExpressionsCtx, void*pParams, uint64_t step);
+    void *get_fri_pol(void *pExpressionsCtx, void *pParams);
     void* get_hint_ids_by_name(void *pExpressionsCtx, char* hintName);
     void *get_hint_field(void *pExpressionsCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest);
     void set_hint_field(void *pExpressionsCtx,  void*pParams, void *values, uint64_t hintId, char* hintFieldName);
