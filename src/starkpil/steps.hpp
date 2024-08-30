@@ -1,16 +1,16 @@
 #ifndef STEPS_HPP
 #define STEPS_HPP
 
+#pragma once 
+
 struct StepsParams
 {
     Goldilocks::Element *pols;
-    Goldilocks::Element *constPols;
-    Goldilocks::Element *constPolsExtended;
+    Goldilocks::Element *publicInputs;
     Goldilocks::Element *challenges;
     Goldilocks::Element *subproofValues;
     Goldilocks::Element *evals;
-    Goldilocks::Element *zi;
-    Goldilocks::Element *publicInputs;
+    bool prover_initialized;
 };
 
 #endif

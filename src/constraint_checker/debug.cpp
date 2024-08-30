@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     
     string constFile = "";
     string starkInfoFile = "";
-    string cHelpersFile = "";
+    string expressionsBinFile = "";
     string commitPols = "";
     string publicsFile = "";
 
@@ -66,10 +66,10 @@ int main(int argc, char **argv)
             if (!fileExists(starkInfoFile)) throw runtime_error("constraint_checker: starkinfo file doesn't exist ("+starkInfoFile+")");
         } else throw runtime_error("constraint_checker: starkinfo file argument not specified <-s/--stark> <starkinfo_file>");
     
-        if (aParser.argumentExists("-h","--chelpers")) {
-            cHelpersFile = aParser.getArgumentValue("-h","--chelpers");
-            if (cHelpersFile =="") throw runtime_error("constraint_checker: chelpers file not specified");
-        } else throw runtime_error("constraint_checker: chelpers file argument not specified <-h/--chelpers> <chelpers_file>");
+        if (aParser.argumentExists("-b","--binfile")) {
+            expressionsBinFile = aParser.getArgumentValue("-b","--binfile");
+            if (expressionsBinFile =="") throw runtime_error("constraint_checker: bin file not specified");
+        } else throw runtime_error("constraint_checker: bin file argument not specified <-b/--binfile> <chelpers_file>");
 
         if (aParser.argumentExists("-t","--commit")) {
             commitPols = aParser.getArgumentValue("-t","--commit");
@@ -81,52 +81,50 @@ int main(int argc, char **argv)
             if (publicsFile=="") throw runtime_error("constraint_checker: pubics file not specified");
         } else throw runtime_error("constraint_checker: publics file argument not specified <-p/--publics> <public_file>");
 
-        StarkInfo starkInfo(starkInfoFile);
-        CHelpers cHelpers(cHelpersFile);
-        ConstPols constPols(starkInfo, constFile);
+        SetupCtx setupCtx(starkInfoFile, expressionsBinFile, constFile);
 
-        void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
-        void *pAddress = (void *)malloc(starkInfo.mapTotalN * sizeof(Goldilocks::Element));
+        void *pCommit = copyFile(commitPols, setupCtx.starkInfo->mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << setupCtx.starkInfo->starkStruct.nBits));
+        void *pAddress = (void *)malloc(setupCtx.starkInfo->mapTotalN * sizeof(Goldilocks::Element));
 
-        uint64_t N = (1 << starkInfo.starkStruct.nBits);
+        uint64_t N = (1 << setupCtx.starkInfo->starkStruct.nBits);
         #pragma omp parallel for
         for (uint64_t i = 0; i < N; i += 1)
         {
-            std::memcpy((uint8_t*)pAddress + starkInfo.mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-                (uint8_t*)pCommit + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-                starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
+            std::memcpy((uint8_t*)pAddress + setupCtx.starkInfo->mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
+                (uint8_t*)pCommit + i*setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
+                setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
         }
 
         json publics;
         file2json(publicsFile, publics);
 
-        Goldilocks::Element publicInputs[starkInfo.nPublics];
+        Goldilocks::Element publicInputs[setupCtx.starkInfo->nPublics];
 
-        for(uint64_t i = 0; i < starkInfo.nPublics; i++) {
+        for(uint64_t i = 0; i < setupCtx.starkInfo->nPublics; i++) {
             publicInputs[i] = Goldilocks::fromU64(publics[i]);
         }
 
         json publicStarkJson;
-        for (uint64_t i = 0; i < starkInfo.nPublics; i++)
+        for (uint64_t i = 0; i < setupCtx.starkInfo->nPublics; i++)
         {
             publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
         }
 
         nlohmann::ordered_json jProof;
 
-        FRIProof<Goldilocks::Element> fproof(starkInfo);
+        FRIProof<Goldilocks::Element> fproof(*setupCtx.starkInfo);
+        
+        ExpressionsAvx expressionsAvx(setupCtx);
 
-        Starks<Goldilocks::Element> starks(config, pAddress, starkInfo, constPols, true);
+        Starks<Goldilocks::Element> starks(config, setupCtx, expressionsAvx, true);
 
-        CHelpersSteps cHelpersSteps(starkInfo, chelpers, constPols);
-
-        starks.genProof(fproof, cHelpersSteps, &publicInputs[0]); 
+        starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0]); 
 
         return EXIT_SUCCESS;
     } catch (const exception &e) {
         cerr << e.what() << endl;
-        cerr << "usage: constraint_checker <-c|--const> <const_file> <-s|--starkinfo> <starkinfo_file> <-h|--chelpers> <chelpers_file> <-t|--commit> <commit_file> <-p|--publics> <public_file>" << endl;
-        cerr << "example: constraint_checker -c zkevm.const -s zkevm.starkinfo.json -h zkevm.chelpers.bin -t zkevm.commit -p zkevm.publics.json" << endl;
+        cerr << "usage: constraint_checker <-c|--const> <const_file> <-s|--starkinfo> <starkinfo_file> <-b|--binfile> <expressions_bin_file> <-t|--commit> <commit_file> <-p|--publics> <public_file>" << endl;
+        cerr << "example: constraint_checker -c zkevm.const -s zkevm.starkinfo.json -b zkevm.chelpers.bin -t zkevm.commit -p zkevm.publics.json" << endl;
         return EXIT_FAILURE;        
     }        
 }

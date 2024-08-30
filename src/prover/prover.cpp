@@ -105,11 +105,11 @@ Prover::Prover(Goldilocks &fr,
                 string recursive2CHelpers = config.recursive2GenericCHelpers;
                 string recursivefCHelpers = config.recursivefGenericCHelpers;
 
-                cHelpersZkevm = new CHelpers(zkevmCHelpers);
-                cHelpersC12a = new CHelpers(c12aCHelpers);
-                cHelpersRecursive1 = new CHelpers(recursive1CHelpers);
-                cHelpersRecursive2 = new CHelpers(recursive2CHelpers);
-                cHelpersRecursiveF = new CHelpers(recursivefCHelpers);
+                cHelpersZkevm = new BinFile(zkevmCHelpers);
+                cHelpersC12a = new BinFile(c12aCHelpers);
+                cHelpersRecursive1 = new BinFile(recursive1CHelpers);
+                cHelpersRecursive2 = new BinFile(recursive2CHelpers);
+                cHelpersRecursiveF = new BinFile(recursivefCHelpers);
 
                 polsSize = starkInfoZkevm->mapTotalN * sizeof(Goldilocks::Element);
 

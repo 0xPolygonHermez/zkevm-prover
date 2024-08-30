@@ -15,7 +15,7 @@
 # Constraint checker Fibonacci Pil2 test
 
 ```bash
-./build/constraintChecker -c test/examples/fibonacci.pil2/fibonacci.pil2.const -s test/examples/fibonacci.pil2/fibonacci.pil2.starkinfo.json -h test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin -t test/examples/fibonacci.pil2/fibonacci.pil2.commit -p test/examples/fibonacci.pil2/fibonacci.pil2.publics.json
+./build/constraintChecker -c test/examples/fibonacci.pil2/fibonacci.pil2.const -s test/examples/fibonacci.pil2/fibonacci.pil2.starkinfo.json -b test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin -t test/examples/fibonacci.pil2/fibonacci.pil2.commit -p test/examples/fibonacci.pil2/fibonacci.pil2.publics.json
 ```
 
 ## Verify

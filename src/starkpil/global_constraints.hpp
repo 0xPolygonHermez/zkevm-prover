@@ -1,5 +1,5 @@
-#ifndef GLOBAL_CONSTRAINTS_CHELPERS_STEPS_HPP
-#define GLOBAL_CONSTRAINTS_CHELPERS_STEPS_HPP
+#ifndef GLOBAL_CONSTRAINTS_HPP
+#define GLOBAL_CONSTRAINTS_HPP
 #include "timer.hpp"
 #include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>

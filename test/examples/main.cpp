@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     string constTreeFile;
     string starkInfoFile;
     string commitPols;
-    string cHelpersFile;
+    string expressionsBinFile;
     string verkey;
     string publicsFile;
     string proofFile;
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
         publicsFile = "test/examples/all/all.publics.json";
         proofFile = "runtime/output/all_proof.json";
         zkinProofFile = "runtime/output/all_proof.zkin.json";
-        cHelpersFile = "test/examples/all/all.chelpers/all.chelpers_generic.bin";
+        expressionsBinFile = "test/examples/all/all.chelpers/all.chelpers_generic.bin";
     } else if(testName == "compressor") {
         constPolsFile = "test/examples/compressor/all.c18.const";
         constTreeFile = "test/examples/compressor/all.c18.consttree";
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
         publicsFile = "test/examples/compressor/all.c18.publics.json";
         proofFile = "runtime/output/compressor_proof.json";
         zkinProofFile = "runtime/output/compressor_proof.zkin.json";
-        cHelpersFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers_generic.bin";
+        expressionsBinFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers_generic.bin";
     } else if(testName == "fibonacci_pil2") {
         constPolsFile = "test/examples/fibonacci.pil2/fibonacci.pil2.const";
         constTreeFile = "test/examples/fibonacci.pil2/fibonacci.pil2.consttree";
@@ -65,35 +65,34 @@ int main(int argc, char **argv)
         publicsFile = "test/examples/fibonacci.pil2/fibonacci.pil2.publics.json";
         proofFile = "runtime/output/fibonacci_pil2_proof.json";
         zkinProofFile = "runtime/output/fibonacci_pil2_proof.zkin.json";
-        cHelpersFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin";
+        expressionsBinFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin";
     }
    
-    StarkInfo starkInfo(starkInfoFile);
-    CHelpers cHelpers(cHelpersFile);
+    SetupCtx setupCtx(starkInfoFile, expressionsBinFile, constPolsFile);
 
-    void *pCommit = copyFile(commitPols, starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
-    void *pAddress = (void *)malloc((starkInfo.mapTotalN) * sizeof(Goldilocks::Element));
+    void *pCommit = copyFile(commitPols, setupCtx.starkInfo->mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << setupCtx.starkInfo->starkStruct.nBits));
+    void *pAddress = (void *)malloc((setupCtx.starkInfo->mapTotalN) * sizeof(Goldilocks::Element));
 
-    uint64_t N = (1 << starkInfo.starkStruct.nBits);
+    uint64_t N = (1 << setupCtx.starkInfo->starkStruct.nBits);
     #pragma omp parallel for
     for (uint64_t i = 0; i < N; i += 1)
     {
-        std::memcpy((uint8_t*)pAddress + starkInfo.mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-            (uint8_t*)pCommit + i*starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-            starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
+        std::memcpy((uint8_t*)pAddress + setupCtx.starkInfo->mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
+            (uint8_t*)pCommit + i*setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
+            setupCtx.starkInfo->mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
     }
 
     json publics;
     file2json(publicsFile, publics);
 
-    Goldilocks::Element publicInputs[starkInfo.nPublics];
+    Goldilocks::Element publicInputs[setupCtx.starkInfo->nPublics];
 
-    for(uint64_t i = 0; i < starkInfo.nPublics; i++) {
+    for(uint64_t i = 0; i < setupCtx.starkInfo->nPublics; i++) {
         publicInputs[i] = Goldilocks::fromU64(publics[i]);
     }
     
     json publicStarkJson;
-    for (uint64_t i = 0; i < starkInfo.nPublics; i++)
+    for (uint64_t i = 0; i < setupCtx.starkInfo->nPublics; i++)
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
@@ -101,29 +100,26 @@ int main(int argc, char **argv)
     nlohmann::ordered_json jProof;
     
     if(testName == "all") {
-        FRIProof<Goldilocks::Element> fproof(starkInfo);
-        ConstPols constPols(starkInfo, constPolsFile);
-        CHelpersSteps cHelpersSteps(starkInfo, cHelpers, constPols);
-        Starks<Goldilocks::Element> starks(config, starkInfo, cHelpersSteps, false);
-        starks.genProof((Goldilocks::Element *)pAddress, fproof, cHelpersSteps, &publicInputs[0]); 
+        FRIProof<Goldilocks::Element> fproof(*setupCtx.starkInfo);
+        ExpressionsAvx expressionsAvx(setupCtx);
+        Starks<Goldilocks::Element> starks(config, setupCtx, expressionsAvx, false);
+        starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0]); 
         jProof = fproof.proof.proof2json();
     } else if(testName == "compressor") {
-        FRIProof<RawFr::Element> fproof(starkInfo);
-        ConstPols constPols(starkInfo, constPolsFile);
-        CHelpersSteps cHelpersSteps(starkInfo, cHelpers, constPols);
-        Starks<RawFr::Element> starks(config, starkInfo, cHelpersSteps, false);
-        starks.genProof((Goldilocks::Element *)pAddress, fproof, cHelpersSteps, &publicInputs[0]); 
+        FRIProof<RawFr::Element> fproof(*setupCtx.starkInfo);
+        ExpressionsAvx expressionsAvx(setupCtx);
+        Starks<RawFr::Element> starks(config, setupCtx, expressionsAvx, false);
+        starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0]); 
         jProof = fproof.proof.proof2json();
     } else if(testName == "fibonacci_pil2") {
-        FRIProof<Goldilocks::Element> fproof(starkInfo);
-        ConstPols constPols(starkInfo, constPolsFile);
-        CHelpersSteps cHelpersSteps(starkInfo, cHelpers, constPols);
-        Starks<Goldilocks::Element> starks(config, starkInfo, cHelpersSteps, false);
-        starks.genProof((Goldilocks::Element *)pAddress, fproof, cHelpersSteps, &publicInputs[0]); 
+        FRIProof<Goldilocks::Element> fproof(*setupCtx.starkInfo);
+        ExpressionsAvx expressionsAvx(setupCtx);
+        Starks<Goldilocks::Element> starks(config, setupCtx, expressionsAvx, false);
+        starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0]); 
         jProof = fproof.proof.proof2json();
     }
 
-    nlohmann::json zkin = proof2zkinStark(jProof, starkInfo);
+    nlohmann::json zkin = proof2zkinStark(jProof, *setupCtx.starkInfo);
 
     // Generate publics
     jProof["publics"] = publics;

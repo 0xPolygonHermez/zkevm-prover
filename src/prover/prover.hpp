@@ -36,11 +36,11 @@ class Prover
     StarkInfo *starkInfoRecursive2;
     StarkInfo *starkInfoRecursiveF;
 
-    CHelpers *cHelpersZkevm;
-    CHelpers *cHelpersC12a;
-    CHelpers *cHelpersRecursive1;
-    CHelpers *cHelpersRecursive2;
-    CHelpers *cHelpersRecursiveF;
+    BinFile *cHelpersZkevm;
+    BinFile *cHelpersC12a;
+    BinFile *cHelpersRecursive1;
+    BinFile *cHelpersRecursive2;
+    BinFile *cHelpersRecursiveF;
 
     Starks<Goldilocks::Element> *starkZkevm;
     Starks<Goldilocks::Element> *starksC12a;
