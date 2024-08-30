@@ -29,7 +29,7 @@
 
     // Const Pols
     // ========================================================================================
-    void *const_pols_new(char* filename, void *pStarkInfo) 
+    void *const_pols_new(char* filename, void *pStarkInfo);
     void const_pols_free(void *pConstPols);
 
     // Expressions Bin
