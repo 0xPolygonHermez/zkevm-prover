@@ -25,7 +25,7 @@
     // Stark Info
     // ========================================================================================
     void *stark_info_new(char* filename);
-    uint64_t get_map_total_N(void *pStarkInfo);
+    uint64_t get_map_total_n(void *pStarkInfo);
     uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag);
     void stark_info_free(void *pStarkInfo);
 
