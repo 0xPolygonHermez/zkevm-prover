@@ -24,10 +24,10 @@
 
     // Stark Info
     // ========================================================================================
-    void *starkinfo_new(char* filename);
+    void *stark_info_new(char* filename);
     uint64_t get_map_total_N(void *pStarkInfo);
     uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag);
-    void starkinfo_free(void *pStarkInfo);
+    void stark_info_free(void *pStarkInfo);
 
     // ExpressionsCtx
     // ========================================================================================
