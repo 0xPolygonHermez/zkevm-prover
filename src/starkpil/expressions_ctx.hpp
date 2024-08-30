@@ -30,7 +30,6 @@ class ExpressionsCtx {
 public:
 
     SetupCtx& setupCtx;
-    StepsParams params;
 
     vector<bool> subProofValuesCalculated;
     vector<bool> commitsCalculated;
@@ -38,15 +37,6 @@ public:
     ExpressionsCtx(SetupCtx& _setupCtx) : setupCtx(_setupCtx) {
         commitsCalculated.resize(setupCtx.starkInfo->cmPolsMap.size(), false);
         subProofValuesCalculated.resize(setupCtx.starkInfo->nSubProofValues, false);
-
-        params = {
-            pols : nullptr,
-            publicInputs : nullptr,
-            challenges : nullptr,
-            subproofValues : nullptr,
-            evals : nullptr,
-            prover_initialized: false,
-        };
     };
 
     virtual ~ExpressionsCtx() {};

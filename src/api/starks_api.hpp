@@ -42,6 +42,9 @@
     void can_stage_be_calculated(void *pExpressionsCtx, uint64_t step);
     void can_impols_be_calculated(void *pExpressionsCtx, uint64_t step);
 
+    // StepsParams
+    // ========================================================================================
+    void *init_params(void* ptr, void* public_inputs, void* challenges, void* evals, void* subproofValues);
 
     // Starks
     // ========================================================================================

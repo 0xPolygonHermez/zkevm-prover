@@ -184,7 +184,23 @@ void stark_info_free(void *pStarkInfo)
 }
 
 // StepsParams
+// ========================================================================================
+void *init_params(void* ptr, void* public_inputs, void* challenges, void* evals, void* subproofValues) {
+    StepsParams *params = new StepsParams {
+        pols : (Goldilocks::Element *)ptr,
+        publicInputs : (Goldilocks::Element *)public_inputs,
+        challenges : (Goldilocks::Element *)challenges,
+        subproofValues : (Goldilocks::Element *)subproofValues,
+        evals : (Goldilocks::Element *)evals,
+        prover_initialized : true,
+    };
+    return params;
+}
 
+void params_free(void* pParams) {
+    StepsParams *params = (StepsParams *)pParams;
+    delete params;
+}
 
 // ExpressionsCtx
 // ========================================================================================
