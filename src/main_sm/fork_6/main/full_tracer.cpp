@@ -1671,7 +1671,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // If is an ether transfer, don't add stop opcode to trace
     bool bAddOpcode = true;
     if ( (singleInfo.op == 0x00 /*STOP*/) &&
-         ( (prevStep==NULL) || ( (opCreate.find(prevStep->opcode) != opCreate.end()) && (prevStep->gas_cost <= 32000))))
+         ( (prevStep==NULL) || ( (opCreate.find(prevStep->opcode) != opCreate.end()) && (prevStep->gas_cost <= 32000) && (prevStep->error == ""))))
     {
         zkr = getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
         if (zkr != ZKR_SUCCESS)
