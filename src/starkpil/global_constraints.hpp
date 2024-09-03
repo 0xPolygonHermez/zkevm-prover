@@ -241,6 +241,7 @@ VecU64Result verifyGlobalConstraints(string globalInfoFile, string globalConstra
 
     std::vector<uint64_t> invalid;
     VecU64Result invalidConstraints;
+    invalidConstraints.nElements = 0;
     for(uint64_t i = 0; i < nGlobalConstraints; ++i) {
         TimerLog(CHECKING_CONSTRAINT);
         cout << "--------------------------------------------------------" << endl;

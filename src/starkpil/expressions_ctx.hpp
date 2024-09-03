@@ -245,6 +245,7 @@ public:
         std::vector<uint64_t> invalid;
 
         VecU64Result invalidConstraints;
+        invalidConstraints.nElements = 0;
         for (uint64_t i = 0; i < setupCtx.expressionsBin.constraintsInfoDebug.size(); i++) {
             if(setupCtx.expressionsBin.constraintsInfoDebug[i].stage == stage) {
                 Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
