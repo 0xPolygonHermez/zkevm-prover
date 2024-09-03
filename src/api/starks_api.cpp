@@ -451,3 +451,15 @@ void *verify_global_constraints(char *globalInfoFile, char *globalConstraintsBin
     VecU64Result invalidConstraints = verifyGlobalConstraints(string(globalInfoFile), string(globalConstraintsBinFile), (Goldilocks::Element *)publics, proofs, nProofs);
     return new VecU64Result(invalidConstraints);
 }
+
+// Debug functions
+// =================================================================================  
+void print_pol_by_id(void *pExpressionsCtx, void *pParams, uint64_t pol_id, uint64_t first_value, uint64_t last_value) {
+    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
+    expressionsAvx->printPolById(*(StepsParams *)pParams, pol_id, first_value, last_value);
+}
+
+void print_expression(void *pExpressionsCtx, void* pol, uint64_t deg, uint64_t dim, uint64_t first_value, uint64_t last_value) {
+    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
+    expressionsAvx->printExpression((Goldilocks::Element *)pol, deg, dim, first_value, last_value);
+}

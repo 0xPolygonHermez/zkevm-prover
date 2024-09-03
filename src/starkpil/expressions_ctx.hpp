@@ -336,6 +336,13 @@ public:
 
     void calculateExpression(StepsParams& params, Goldilocks::Element* dest, uint64_t expressionId, bool inverse = false) {
         bool domainExtended = expressionId == setupCtx.starkInfo.cExpId || expressionId == setupCtx.starkInfo.friExpId;
+        if(setupCtx.expressionsBin.expressionsInfo[expressionId].line != "") {
+            
+            cout << "--------------------------------------------------------" << endl;
+            cout << "Calculating expressions with id: " << expressionId << " " << setupCtx.expressionsBin.expressionsInfo[expressionId].line << endl;
+            cout << "--------------------------------------------------------" << endl;
+        }
+        
         calculateExpressions(params, dest, setupCtx.expressionsBin.expressionsBinArgsExpressions, setupCtx.expressionsBin.expressionsInfo[expressionId], domainExtended, inverse);
     }
 
@@ -372,7 +379,7 @@ public:
         TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
     }
 
-    void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, uint64_t printValues = 0) {
+    void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0) {
         Polinomial p = Polinomial(pol, deg, dim, dim);
         MerkleTreeGL *mt_ = new MerkleTreeGL(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, deg, dim, pol);
         mt_->merkelize();
@@ -380,9 +387,9 @@ public:
         Goldilocks::Element root[4];
         mt_->getRoot(&root[0]);
 
-        if(printValues > 0) cout << "PRINTING VALUES" << endl;
-        for(uint64_t i = 0; i < printValues; ++i) {
-        if(dim == 3) {
+        if(lastPrintValue - firstPrintValue > 0) cout << "PRINTING VALUES" << endl;
+        for(uint64_t i = firstPrintValue; i < lastPrintValue; ++i) {
+            if(dim == 3) {
                 cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
             } else {
                 cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
@@ -392,7 +399,7 @@ public:
         delete mt_;
     }
 
-    void printPolById(StepsParams& params, uint64_t polId, uint64_t printValues = 0)
+    void printPolById(StepsParams& params, uint64_t polId, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0)
     {   
         uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
         PolMap polInfo = setupCtx.starkInfo.cmPolsMap[polId];
@@ -406,7 +413,7 @@ public:
 
         cout << "--------------------" << endl;
         cout << "Printing root of: " << polInfo.name << " (pol id " << polId << ")" << endl;
-        printExpression(pBuffCol, N, polInfo.dim, printValues);
+        printExpression(pBuffCol, N, polInfo.dim, firstPrintValue, lastPrintValue);
 
         delete pBuffCol;
     }

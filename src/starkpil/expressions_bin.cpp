@@ -152,6 +152,8 @@ void ExpressionsBin::loadExpressionsBin(BinFileUtils::BinFile *expressionsBin) {
         parserParamsExpression.nSubproofValuesUsed = expressionsBin->readU32LE();
         parserParamsExpression.subproofValuesOffset = expressionsBin->readU32LE();
 
+        parserParamsExpression.line = expressionsBin->readString();
+
         expressionsInfo[expId] = parserParamsExpression;
     }
 
