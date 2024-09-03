@@ -21,8 +21,8 @@ struct HintFieldInfo {
     Goldilocks::Element* values;
 };
 
-struct HintIdsResult {
-    uint64_t nHints;
+struct VecU64Result {
+    uint64_t nElements;
     uint64_t* ids;
 };
 
@@ -83,18 +83,18 @@ public:
         }
     }
 
-    HintIdsResult getHintIdsByName(std::string name) {
-        HintIdsResult hintIds;
+    VecU64Result getHintIdsByName(std::string name) {
+        VecU64Result hintIds;
 
-        hintIds.nHints = 0;
+        hintIds.nElements = 0;
         for (uint64_t i = 0; i < setupCtx.expressionsBin.hints.size(); ++i) {
             if (setupCtx.expressionsBin.hints[i].name == name) {
-                hintIds.nHints++;
+                hintIds.nElements++;
             }
         }
 
         uint64_t c = 0;
-        hintIds.ids = new uint64_t[hintIds.nHints];
+        hintIds.ids = new uint64_t[hintIds.nElements];
         for (uint64_t i = 0; i < setupCtx.expressionsBin.hints.size(); ++i) {
             if (setupCtx.expressionsBin.hints[i].name == name) {
                hintIds.ids[c++] = i;
@@ -241,17 +241,28 @@ public:
         return isValid;
     }
     
-    bool verifyConstraints(uint64_t stage, StepsParams& params) {
-        bool isValid = true;
+    VecU64Result verifyConstraints(uint64_t stage, StepsParams& params) {
+        std::vector<uint64_t> invalid;
+
+        VecU64Result invalidConstraints;
         for (uint64_t i = 0; i < setupCtx.expressionsBin.constraintsInfoDebug.size(); i++) {
             if(setupCtx.expressionsBin.constraintsInfoDebug[i].stage == stage) {
                 Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
                 if(!verifyConstraint(params, pAddr, i)) {
-                    isValid = false;
+                    invalid.push_back(i);
+                    invalidConstraints.nElements++;
                 };
             }
         }
-        return isValid;
+        
+        if(invalidConstraints.nElements > 0) {
+            invalidConstraints.ids = new uint64_t[invalidConstraints.nElements];
+            std::copy(invalid.begin(), invalid.end(), invalidConstraints.ids);
+        } else {
+            invalidConstraints.ids = nullptr;
+        }
+
+        return invalidConstraints;
     }
 
     bool verifyConstraint(StepsParams& params, Goldilocks::Element* dest, uint64_t constraintId) {

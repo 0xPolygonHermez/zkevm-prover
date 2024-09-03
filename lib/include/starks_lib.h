@@ -40,9 +40,9 @@
     // ExpressionsCtx
     // ========================================================================================
     void *expressions_ctx_new(void *pSetupCtx);
-    bool verify_constraints(void *pExpressionsCtx, void*pParams, uint64_t step);
+    void *verify_constraints(void *pExpressionsCtx, void*pParams, uint64_t step);
     void *get_fri_pol(void *pExpressionsCtx, void *pParams);
-    void* get_hint_ids_by_name(void *pExpressionsCtx, char* hintName);
+    void *get_hint_ids_by_name(void *pExpressionsCtx, char* hintName);
     void *get_hint_field(void *pExpressionsCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest);
     void set_hint_field(void *pExpressionsCtx,  void*pParams, void *values, uint64_t hintId, char* hintFieldName);
     void expressions_ctx_free(void *pExpressionsCtx);
@@ -87,5 +87,5 @@
 
     // Global constraints
     // =================================================================================
-    bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
+    void* verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
 #endif

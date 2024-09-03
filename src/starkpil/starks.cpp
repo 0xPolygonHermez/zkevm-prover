@@ -79,7 +79,8 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
 
         if (debug)
         {
-            validConstraints = expressionsCtx.verifyConstraints(step, params);
+            VecU64Result invalidConstraints = expressionsCtx.verifyConstraints(step, params);
+            if(invalidConstraints.nElements > 0) validConstraints = false;
             Goldilocks::Element randomValues[4] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
             addTranscriptGL(transcript, randomValues, 4);
         }
@@ -304,14 +305,10 @@ void Starks<ElementType>::computeQ(uint64_t step, StepsParams &params, FRIProof<
 
     for (uint64_t p = 0; p < setupCtx.starkInfo.qDeg; p++)
     {   
-        __m256i sigma = _mm256_set1_epi64x(S[p].fe);
         #pragma omp parallel for
-        for (uint64_t i = 0; i < N; i += nrowsPack)
-        {
-            Goldilocks3::Element_avx tmp_; 
-            Goldilocks3::load_avx(tmp_, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)] + (p * N + i) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
-            Goldilocks3::op_31_avx(2, tmp_, tmp_, sigma);
-            Goldilocks3::store_avx(&cmQ[(i * setupCtx.starkInfo.qDeg + p) * FIELD_EXTENSION],setupCtx.starkInfo.qDeg * FIELD_EXTENSION, tmp_);
+        for(uint64_t i = 0; i < N; i++)
+        { 
+            Goldilocks3::mul((Goldilocks3::Element &)cmQ[(i * setupCtx.starkInfo.qDeg + p) * FIELD_EXTENSION], (Goldilocks3::Element &)params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)] + (p * N + i) * FIELD_EXTENSION], S[p]);
         }
     }
 
@@ -399,23 +396,11 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params)
 
     for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
     {
-        Goldilocks3::Element_avx xis_;
-        xis_[0] = _mm256_set1_epi64x(xis[i * FIELD_EXTENSION].fe);
-        xis_[1] = _mm256_set1_epi64x(xis[i * FIELD_EXTENSION + 1].fe);
-        xis_[2] = _mm256_set1_epi64x(xis[i * FIELD_EXTENSION + 2].fe);
 #pragma omp parallel for
-        for (uint64_t k = 0; k < NExtended; k += nrowsPack)
+        for (uint64_t k = 0; k < NExtended; k++)
         {
-            __m256i x_k;
-            Goldilocks::load_avx(x_k, &x[k], uint64_t(1));
-            Goldilocks3::Element_avx tmp_; 
-            Goldilocks3::op_31_avx(3, tmp_, xis_, x_k);
-            Goldilocks3::store_avx(&params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION], FIELD_EXTENSION, tmp_);
+            Goldilocks3::sub((Goldilocks3::Element &)(params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]  + (k + i * NExtended) * FIELD_EXTENSION]), x[k], (Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]));
         }
-        // for (uint64_t k = 0; k < NExtended; k++)
-        // {
-        //     Goldilocks3::sub((Goldilocks3::Element &)(params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]  + (k + i * NExtended) * FIELD_EXTENSION]), x[k], (Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]));
-        // }
     }
 
     Polinomial xDivXSubXi_(&params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]], NExtended * setupCtx.starkInfo.openingPoints.size(), FIELD_EXTENSION, FIELD_EXTENSION);
@@ -424,19 +409,10 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params)
     for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
     {
 #pragma omp parallel for
-        for (uint64_t k = 0; k < NExtended; k += nrowsPack)
+        for (uint64_t k = 0; k < NExtended; k++)
         {
-            __m256i x_k;
-            Goldilocks::load_avx(x_k, &x[k], uint64_t(1));
-            Goldilocks3::Element_avx tmp_; 
-            Goldilocks3::load_avx(tmp_, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION], uint64_t(FIELD_EXTENSION));
-            Goldilocks3::op_31_avx(2, tmp_, tmp_, x_k);
-            Goldilocks3::store_avx(&params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION], FIELD_EXTENSION, tmp_);
+            Goldilocks3::mul((Goldilocks3::Element &)(params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), (Goldilocks3::Element &)(params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), x[k]);
         }
-        // for (uint64_t k = 0; k < NExtended; k++)
-        // {
-        //     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), (Goldilocks3::Element &)(params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), x[k]);
-        // }
     }
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
 

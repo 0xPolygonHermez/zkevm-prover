@@ -235,18 +235,19 @@ void *get_fri_pol(void *pExpressionsCtx, void *pParams)
     return &params.pols[expressionsAvx.setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
 }
 
-bool verify_constraints(void *pExpressionsCtx, void* pParams, uint64_t step)
+void *verify_constraints(void *pExpressionsCtx, void* pParams, uint64_t step)
 {
     ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    return expressionsAvx->verifyConstraints(step, *(StepsParams *)pParams);
+    VecU64Result invalidConstraints = expressionsAvx->verifyConstraints(step, *(StepsParams *)pParams);
+    return new VecU64Result(invalidConstraints);
 }
 
 void* get_hint_ids_by_name(void *pExpressionsCtx, char* hintName)
 {
     ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
 
-    HintIdsResult hintIds =  expressionsAvx->getHintIdsByName(string(hintName));
-    return new HintIdsResult(hintIds);
+    VecU64Result hintIds =  expressionsAvx->getHintIdsByName(string(hintName));
+    return new VecU64Result(hintIds);
 }
 
 void *get_hint_field(void *pExpressionsCtx, void* pParams, uint64_t hintId, char *hintFieldName, bool dest) 
@@ -443,9 +444,10 @@ void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBi
 
 // Global constraints
 // =================================================================================
-bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs) {
+void *verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs) {
     
     FRIProof<Goldilocks::Element> **proofs = (FRIProof<Goldilocks::Element> **)pProofs;
 
-    return verifyGlobalConstraints(string(globalInfoFile), string(globalConstraintsBinFile), (Goldilocks::Element *)publics, proofs, nProofs);
+    VecU64Result invalidConstraints = verifyGlobalConstraints(string(globalInfoFile), string(globalConstraintsBinFile), (Goldilocks::Element *)publics, proofs, nProofs);
+    return new VecU64Result(invalidConstraints);
 }
