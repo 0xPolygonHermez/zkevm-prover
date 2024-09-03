@@ -53,7 +53,7 @@
 #include "cuda_utils.hpp"
 #include "ntt_goldilocks.hpp"
 #include <pthread.h>
-#include "chelpers_steps_pack.cuh"
+#include "chelpers_steps_gpu.cuh"
 
 int asynctask(void* (*task)(void* args), void* arg)
 {
@@ -601,7 +601,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*************************************/
 
 #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-        CHelpersStepsPackGPU cHelpersSteps;
+        CHelpersStepsGPU cHelpersSteps;
 #elif defined(__AVX512__)
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__)
@@ -854,7 +854,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     
     if(USE_GENERIC_PARSER) {
 #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-        CHelpersStepsPackGPU cHelpersSteps;
+        CHelpersStepsGPU cHelpersSteps;
 #elif defined(__AVX512__)
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
@@ -963,7 +963,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
     if(USE_GENERIC_PARSER) {
         #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-            CHelpersStepsPackGPU cHelpersSteps;
+            CHelpersStepsGPU cHelpersSteps;
         #elif defined(__AVX512__)
             CHelpersStepsAvx512 cHelpersSteps;
         #elif defined(__PACK__) 

@@ -7,7 +7,7 @@
 const int nStreams = 2; // streams per device
 const int MAX_GPUS = 8;
 class gl64_t;
-class CHelpersStepsPackGPU: public CHelpersStepsPack {
+class CHelpersStepsGPU: public CHelpersStepsPack {
 public:
 
     int nDevices;
@@ -58,9 +58,9 @@ public:
     void storeData(StarkInfo &starkInfo, StepsParams &params, uint64_t row, uint32_t streamIdx);
 };
 
-__global__ void loadPolinomialsGPU(CHelpersStepsPackGPU *cHelpersSteps, uint64_t *sharedStorage, uint64_t *exclusiveStorage, uint64_t nConstants, uint64_t stage);
-__global__ void storePolinomialsGPU(CHelpersStepsPackGPU *cHelpersSteps, uint64_t *sharedStorage, uint64_t *exclusiveStorage);
-__global__ void pack_kernel(CHelpersStepsPackGPU *cHelpersSteps, uint64_t *sharedStorage, uint64_t *exclusiveStorage);
+__global__ void loadPolinomialsGPU(CHelpersStepsGPU *cHelpersSteps, uint64_t *sharedStorage, uint64_t *exclusiveStorage, uint64_t nConstants, uint64_t stage);
+__global__ void storePolinomialsGPU(CHelpersStepsGPU *cHelpersSteps, uint64_t *sharedStorage, uint64_t *exclusiveStorage);
+__global__ void pack_kernel(CHelpersStepsGPU *cHelpersSteps, uint64_t *sharedStorage, uint64_t *exclusiveStorage);
 
 #endif
 #endif

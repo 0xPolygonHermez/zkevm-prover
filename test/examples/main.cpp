@@ -6,10 +6,11 @@
     #include "chelpers_steps_avx512.hpp"
 #endif
 #include "chelpers_steps_pack.hpp"
-#include "chelpers_steps_gpu.hpp"
+#include "chelpers_steps_gpu.cuh"
 #include "AllSteps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "cuda_utils.hpp"
 
 int main()
 {
@@ -36,6 +37,10 @@ int main()
     bool reduceMemory = true;
 
     StarkInfo starkInfo(starkInfoFile, reduceMemory);
+
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
+    alloc_pinned_mem_per_device((1 << starkInfo.starkStruct.nBitsExt) * 32);
+#endif
 
     uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
