@@ -95,7 +95,8 @@ set<string> oocErrors = {
     "OOCM",
     "OOCA",
     "OOCPA",
-    "OOCPO" };
+    "OOCPO",
+    "OOCSH" };
 
 //////////
 // UTILS
@@ -348,7 +349,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     {
         if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
         {
-            zklog.error("FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
+            zklog.error("FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10) + " lastError=" + lastError);
             return ZKR_SM_MAIN_BALANCE_MISMATCH;
         }
         return onFinishTx(ctx, cmd);
@@ -361,7 +362,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     {
         if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
         {
-            zklog.error("FullTracer::handleEvent(onFinishBlock) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
+            zklog.error("FullTracer::handleEvent(onFinishBlock) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10) + " lastError=" + lastError);
             return ZKR_SM_MAIN_BALANCE_MISMATCH;
         }
         return onFinishBlock(ctx);
@@ -374,7 +375,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     {
         if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
         {
-            zklog.error("FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
+            zklog.error("FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10) + " lastError=" + lastError);
             return ZKR_SM_MAIN_BALANCE_MISMATCH;
         }
         return onFinishBatch(ctx, cmd);
