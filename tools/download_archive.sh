@@ -5,7 +5,7 @@ echo "Please ensure that you run this script from the root of the zkevm-prover r
 echo "Press Enter to continue..."
 read
 
-ARCHIVE_NAME="v7.0.0-rc.30-fork.10"
+ARCHIVE_NAME="v7.0.0-rc.30-fork.11"
 ARCHIVE_EXTENSION=".tgz"
 ARCHIVE_URL="https://storage.googleapis.com/zkevm/zkproverc/${ARCHIVE_NAME}${ARCHIVE_EXTENSION}"
 
