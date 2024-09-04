@@ -456,7 +456,8 @@ void *verify_global_constraints(char *globalInfoFile, char *globalConstraintsBin
 // =================================================================================  
 void *print_by_name(void *pExpressionsCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values) {
     ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    return expressionsAvx->printByName(*(StepsParams *)pParams, string(name), lengths, first_value, last_value, return_values);
+    HintFieldInfo hintFieldInfo = expressionsAvx->printByName(*(StepsParams *)pParams, string(name), lengths, first_value, last_value, return_values);
+    return new HintFieldInfo(hintFieldInfo);
 }
 
 void print_expression(void *pExpressionsCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value) {
