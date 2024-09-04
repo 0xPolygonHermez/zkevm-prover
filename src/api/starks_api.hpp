@@ -90,7 +90,7 @@
     void* verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
 
     // Debug functions
-    void print_pol_by_id(void *pExpressionsCtx, void *pParams, uint64_t pol_id, uint64_t first_value, uint64_t last_value);
+    void *print_by_name(void *pExpressionsCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values);
     void print_expression(void *pExpressionCtx, void* pol, uint64_t deg, uint64_t dim, uint64_t first_value, uint64_t last_value);
 
 #endif

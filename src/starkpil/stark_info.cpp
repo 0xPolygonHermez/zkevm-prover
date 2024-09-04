@@ -92,6 +92,20 @@ void StarkInfo::load(json j)
         challengesMap.push_back(map);
     }
 
+    for (uint64_t i = 0; i < j["publicsMap"].size(); i++) 
+    {
+        PolMap map;
+        map.name = j["publicsMap"][i]["name"];
+        publicsMap.push_back(map);
+    }
+
+    for (uint64_t i = 0; i < j["subproofValuesMap"].size(); i++) 
+    {
+        PolMap map;
+        map.name = j["subproofValuesMap"][i]["name"];
+        subproofValuesMap.push_back(map);
+    }
+
     cout << j["cmPolsMap"][0]["stage"] << endl;
     for (uint64_t i = 0; i < j["cmPolsMap"].size(); i++) 
     {
@@ -105,6 +119,12 @@ void StarkInfo::load(json j)
         if(j["cmPolsMap"][i].contains("expId")) {
             map.expId = j["cmPolsMap"][i]["expId"];
         }
+        if(j["cmPolsMap"][i].contains("lengths")) {
+            for (uint64_t k = 0; k < j["cmPolsMap"][i]["lengths"].size(); k++) {
+                map.lengths.push_back(j["cmPolsMap"][i]["lengths"][k]);
+            } 
+        }
+        map.polsMapId = j["cmPolsMap"][i]["polsMapId"];
         cmPolsMap.push_back(map);
     }
 
@@ -117,6 +137,12 @@ void StarkInfo::load(json j)
         map.imPol = false;
         map.stagePos = j["constPolsMap"][i]["stageId"];
         map.stageId = j["constPolsMap"][i]["stageId"];
+        if(j["constPolsMap"][i].contains("lengths")) {
+            for (uint64_t k = 0; k < j["constPolsMap"][i]["lengths"].size(); k++) {
+                map.lengths.push_back(j["constPolsMap"][i]["lengths"][k]);
+            } 
+        }
+        map.polsMapId = j["cmPolsMap"][i]["polsMapId"];
         constPolsMap.push_back(map);
     }
 

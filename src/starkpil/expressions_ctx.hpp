@@ -379,27 +379,33 @@ public:
         TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
     }
 
-    void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0) {
+    void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0, bool printRoot = false) {
         Polinomial p = Polinomial(pol, deg, dim, dim);
-        MerkleTreeGL *mt_ = new MerkleTreeGL(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, deg, dim, pol);
-        mt_->merkelize();
+        if(printRoot) {
+            MerkleTreeGL *mt_ = new MerkleTreeGL(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, deg, dim, pol);
+            mt_->merkelize();
 
-        Goldilocks::Element root[4];
-        mt_->getRoot(&root[0]);
+            Goldilocks::Element root[4];
+            mt_->getRoot(&root[0]);
 
-        if(lastPrintValue - firstPrintValue > 0) cout << "PRINTING VALUES" << endl;
-        for(uint64_t i = firstPrintValue; i < lastPrintValue; ++i) {
-            if(dim == 3) {
-                cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
-            } else {
-                cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
+            delete mt_;
+        }
+       
+
+        if(lastPrintValue - firstPrintValue > 0) {
+            cout << "PRINTING VALUES" << endl;
+            for(uint64_t i = firstPrintValue; i < lastPrintValue; ++i) {
+                if(dim == 3) {
+                    cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
+                } else {
+                    cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
+                }
             }
         }
 
-        delete mt_;
     }
 
-    void printPolById(StepsParams& params, uint64_t polId, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0)
+    void printColById(StepsParams& params, bool committed, uint64_t polId, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0, bool printRoot = false)
     {   
         uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
         PolMap polInfo = setupCtx.starkInfo.cmPolsMap[polId];
@@ -412,10 +418,112 @@ public:
         Polinomial::copy(pCol, p);
 
         cout << "--------------------" << endl;
-        cout << "Printing root of: " << polInfo.name << " (pol id " << polId << ")" << endl;
-        printExpression(pBuffCol, N, polInfo.dim, firstPrintValue, lastPrintValue);
+        string type = committed ? "witness" : "fixed";
+        cout << "Printing " << type << " column: " << polInfo.name << " (pol id " << polId << ")" << endl;
+        printExpression(pBuffCol, N, polInfo.dim, firstPrintValue, lastPrintValue, printRoot);
 
         delete pBuffCol;
+    }
+
+    Goldilocks::Element *printByName(StepsParams& params, string name, uint64_t *lengths, uint64_t firstPrintValue, uint64_t lastPrintValue, bool returnValues) {
+        uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
+
+        for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); ++i) {
+            PolMap cmPol = setupCtx.starkInfo.cmPolsMap[i];
+            if(cmPol.name != name) continue;
+            if(cmPol.lengths.size() > 0) {
+                bool lengths_match = true;
+                for(uint64_t j = 0; j < cmPol.lengths.size(); ++j) {
+                    if(cmPol.lengths[j] != lengths[j]) {
+                        lengths_match = false;
+                        break;
+                    }
+                }
+                if(!lengths_match) continue;
+            }
+            if(cmPol.name == name) {
+                printColById(params, true, i, firstPrintValue, lastPrintValue, returnValues);
+                if(returnValues) {
+                    Goldilocks::Element *values = new Goldilocks::Element[cmPol.dim * N];
+                    getPolynomial(params, values, true, i, false);
+                    return values;
+                }
+                return nullptr;
+            } 
+        }
+
+        for(uint64_t i = 0; i < setupCtx.starkInfo.constPolsMap.size(); ++i) {
+            PolMap constPol = setupCtx.starkInfo.constPolsMap[i];
+            if(constPol.name != name) continue;
+            if(constPol.lengths.size() > 0) {
+                bool lengths_match = true;
+                for(uint64_t j = 0; j < constPol.lengths.size(); ++j) {
+                    if(constPol.lengths[j] != lengths[j]) {
+                        lengths_match = false;
+                        break;
+                    }
+                }
+                if(!lengths_match) continue;
+            }
+            if(constPol.name == name) {
+                printColById(params, false, i, firstPrintValue, lastPrintValue, returnValues);
+                if(returnValues) {
+                    Goldilocks::Element *values = new Goldilocks::Element[constPol.dim * N];
+                    getPolynomial(params, values, false, i, false);
+                    return values;
+                }
+                return nullptr;
+            } 
+        }
+
+        for(uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); ++i) {
+            PolMap challenge = setupCtx.starkInfo.challengesMap[i];
+            if(challenge.name == name) {
+                cout << "Printing challenge: " << name << " (stage " << challenge.stage << " and id " << challenge.stageId << "): ";
+                cout << "[" << Goldilocks::toString(params.challenges[i*FIELD_EXTENSION]) << " , " << Goldilocks::toString(params.challenges[i*FIELD_EXTENSION + 1]) << " , " << Goldilocks::toString(params.challenges[i*FIELD_EXTENSION + 2]) << "]" << endl;
+                if(returnValues) {
+                    Goldilocks::Element *values = new Goldilocks::Element[3];
+                    values[0] = params.challenges[i*FIELD_EXTENSION];
+                    values[1] = params.challenges[i*FIELD_EXTENSION + 1];
+                    values[2] = params.challenges[i*FIELD_EXTENSION + 2];
+                    return values;
+                }
+                return nullptr;
+            }
+        }
+
+        for(uint64_t i = 0; i < setupCtx.starkInfo.publicsMap.size(); ++i) {
+            PolMap publicInput = setupCtx.starkInfo.publicsMap[i];
+            if(publicInput.name == name) {
+                cout << "Printing public: " << name << ": " << Goldilocks::toString(params.publicInputs[i]) << endl;
+                if(returnValues) {
+                    Goldilocks::Element *values = new Goldilocks::Element[1];
+                    values[0] = params.publicInputs[i];
+                    return values;
+                }
+                return nullptr;
+            }
+        }
+
+        for(uint64_t i = 0; i < setupCtx.starkInfo.subproofValuesMap.size(); ++i) {
+            PolMap subproofValue = setupCtx.starkInfo.subproofValuesMap[i];
+            if(subproofValue.name == name) {
+                cout << "Printing subproofValue: " << name << ": ";
+                cout << "[" << Goldilocks::toString(params.subproofValues[i*FIELD_EXTENSION]) << " , " << Goldilocks::toString(params.subproofValues[i*FIELD_EXTENSION + 1]) << " , " << Goldilocks::toString(params.subproofValues[i*FIELD_EXTENSION + 2]) << "]" << endl;
+                if(returnValues) {
+                    Goldilocks::Element *values = new Goldilocks::Element[3];
+                    values[0] = params.subproofValues[i*FIELD_EXTENSION];
+                    values[1] = params.subproofValues[i*FIELD_EXTENSION + 1];
+                    values[2] = params.subproofValues[i*FIELD_EXTENSION + 2];
+                    return values;
+                }
+                return nullptr;
+            }
+        }
+
+        zklog.info("Unknown name " + name);
+        exitProcess();
+        exit(-1);
     }
 };
 

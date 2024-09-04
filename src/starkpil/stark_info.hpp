@@ -53,11 +53,13 @@ class PolMap
 public:
     uint64_t stage;
     std::string name;
+    vector<uint64_t> lengths;
     uint64_t dim;
     bool imPol;
     uint64_t stagePos;
     uint64_t stageId;
     uint64_t expId;
+    uint64_t polsMapId;
 };
 
 class EvMap
@@ -104,6 +106,9 @@ public:
     vector<PolMap> cmPolsMap;
     vector<PolMap> constPolsMap;
     vector<PolMap> challengesMap;
+    vector<PolMap> subproofValuesMap;
+    vector<PolMap> publicsMap;
+
     vector<EvMap> evMap;
     
     vector<int64_t> openingPoints;
