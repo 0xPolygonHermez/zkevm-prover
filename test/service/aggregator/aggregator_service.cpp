@@ -10,7 +10,7 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-#define AGGREGATOR_SERVER_NUMBER_OF_LOOPS 2
+#define AGGREGATOR_SERVER_NUMBER_OF_LOOPS 1
 
 #define AGGREGATOR_SERVER_RETRY_SLEEP 10
 #define AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES 600  // 600 retries every 10 seconds = 6000 seconds = 100 minutes
