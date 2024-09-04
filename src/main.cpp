@@ -109,6 +109,7 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
 
     // Call the prover
     prover.genBatchProof(&proverRequest);
+    exit(0);
 }
 
 void runFileGenAggregatedProof(Goldilocks fr, Prover &prover, Config &config)

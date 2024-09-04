@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#ifdef __USE_CUDA__
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
 void *calloc_zkevm(uint64_t count, uint64_t size) {
     char *a;
     uint64_t total = count*size;

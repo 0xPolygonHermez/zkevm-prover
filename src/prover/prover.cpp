@@ -519,7 +519,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         json recursive2Verkey;
         file2json(config.recursive2Verkey, recursive2Verkey);
 
-#ifdef __USE_CUDA__
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
         Goldilocks::Element *publics = (Goldilocks::Element *)malloc_zkevm(starksRecursive1->starkInfo.nPublics);
 #else
         Goldilocks::Element publics[starksRecursive1->starkInfo.nPublics];
@@ -731,14 +731,13 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
             json2file(jProofRecursive1, pProverRequest->filePrefix + "batch_proof.proof.json");
         }
 
-#ifdef __USE_CUDA__
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
         free_zkevm(publics);
 #endif
         TimerStopAndLog(SAVE_PROOF);
     }
 
     TimerStopAndLog(PROVER_BATCH_PROOF);
-    assert(0);
 }
 
 void Prover::genAggregatedProof(ProverRequest *pProverRequest)
