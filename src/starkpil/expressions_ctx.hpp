@@ -104,7 +104,7 @@ public:
         return hintIds;
     }
     
-    HintFieldInfo getHintField(StepsParams& params, uint64_t hintId, std::string hintFieldName, bool dest, bool printExpression) {
+    HintFieldInfo getHintField(StepsParams& params, uint64_t hintId, std::string hintFieldName, bool dest, bool print_expression) {
         uint64_t deg = 1 << setupCtx.starkInfo.starkStruct.nBits;
 
         if(setupCtx.expressionsBin.hints.size() == 0) {
@@ -133,7 +133,7 @@ public:
 
         HintFieldInfo hintFieldInfo;
 
-        if(printExpression) {
+        if(print_expression) {
             cout << "--------------------------------------------------------" << endl;
             cout << "Hint name " << hintFieldName << " for hint id " << hintId << " is ";
         }
@@ -143,16 +143,18 @@ public:
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             hintFieldInfo.offset = dim;
-            if(printExpression) cout << "witness col " << setupCtx.starkInfo.cmPolsMap[hintField->id].name;
-            if(setupCtx.starkInfo.cmPolsMap[hintField->id].lengths.size() > 0) {
-                cout << "[";
-                for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap[hintField->id].lengths.size(); ++i) {
-                    cout << setupCtx.starkInfo.cmPolsMap[hintField->id].lengths[i];
-                    if(i != setupCtx.starkInfo.cmPolsMap[hintField->id].lengths.size() - 1) cout << ", ";
+            if(print_expression) {
+                cout << "witness col " << setupCtx.starkInfo.cmPolsMap[hintField->id].name;
+                if(setupCtx.starkInfo.cmPolsMap[hintField->id].lengths.size() > 0) {
+                    cout << "[";
+                    for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap[hintField->id].lengths.size(); ++i) {
+                        cout << setupCtx.starkInfo.cmPolsMap[hintField->id].lengths[i];
+                        if(i != setupCtx.starkInfo.cmPolsMap[hintField->id].lengths.size() - 1) cout << ", ";
+                    }
+                    cout << "]";
                 }
-                cout << "]";
+                cout << endl;
             }
-            cout << endl;
             if(!dest) getPolynomial(params, hintFieldInfo.values, true, hintField->id, false);
         } else if(hintField->operand == opType::const_) {
             uint64_t dim = setupCtx.starkInfo.constPolsMap[hintField->id].dim;
@@ -160,7 +162,7 @@ public:
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             hintFieldInfo.offset = dim;
-            if(printExpression) cout << "fixed col" << setupCtx.starkInfo.constPolsMap[hintField->id].name;
+            if(print_expression) cout << "fixed col" << setupCtx.starkInfo.constPolsMap[hintField->id].name;
             if(setupCtx.starkInfo.constPolsMap[hintField->id].lengths.size() > 0) {
                 cout << "[";
                 for(uint64_t i = 0; i < setupCtx.starkInfo.constPolsMap[hintField->id].lengths.size(); ++i) {
@@ -177,7 +179,7 @@ public:
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             hintFieldInfo.offset = dim;
-            if(printExpression && setupCtx.expressionsBin.expressionsInfo[hintField->id].line != "") {
+            if(print_expression && setupCtx.expressionsBin.expressionsInfo[hintField->id].line != "") {
                 cout << "the expression with id: " << hintField->id << " " << setupCtx.expressionsBin.expressionsInfo[hintField->id].line << endl;
             }
             calculateExpression(params, hintFieldInfo.values, hintField->id);
@@ -187,27 +189,27 @@ public:
             hintFieldInfo.values[0] = params.publicInputs[hintField->id];
             hintFieldInfo.fieldType = HintFieldType::Field;
             hintFieldInfo.offset = 1;
-            if(printExpression) cout << "public input " << setupCtx.starkInfo.publicsMap[hintField->id].name << endl;
+            if(print_expression) cout << "public input " << setupCtx.starkInfo.publicsMap[hintField->id].name << endl;
         } else if (hintField->operand == opType::number) {
             hintFieldInfo.size = 1;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.values[0] = Goldilocks::fromU64(hintField->value);
             hintFieldInfo.fieldType = HintFieldType::Field;
             hintFieldInfo.offset = 1;
-            if(printExpression) cout << "number " << hintField->value << endl;
+            if(print_expression) cout << "number " << hintField->value << endl;
         } else if (hintField->operand == opType::subproofvalue) {
             hintFieldInfo.size = FIELD_EXTENSION;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = HintFieldType::FieldExtended;
             hintFieldInfo.offset = FIELD_EXTENSION;
-            if(printExpression) cout << "subproofValue " << setupCtx.starkInfo.subproofValuesMap[hintField->id].name << endl;
+            if(print_expression) cout << "subproofValue " << setupCtx.starkInfo.subproofValuesMap[hintField->id].name << endl;
             if(!dest) std::memcpy(hintFieldInfo.values, &params.subproofValues[FIELD_EXTENSION*hintField->id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         } else if (hintField->operand == opType::challenge) {
             hintFieldInfo.size = FIELD_EXTENSION;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = HintFieldType::FieldExtended;
             hintFieldInfo.offset = FIELD_EXTENSION;
-            if(printExpression) cout << "challenge " << setupCtx.starkInfo.challengesMap[hintField->id].name << endl;
+            if(print_expression) cout << "challenge " << setupCtx.starkInfo.challengesMap[hintField->id].name << endl;
             std::memcpy(hintFieldInfo.values, &params.challenges[FIELD_EXTENSION*hintField->id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         } else {
             zklog.error("Unknown HintFieldType");
@@ -215,7 +217,7 @@ public:
             exit(-1);
         }
 
-        if(printExpression) cout << "--------------------------------------------------------" << endl;
+        if(print_expression) cout << "--------------------------------------------------------" << endl;
 
         return hintFieldInfo;
     }
@@ -341,7 +343,7 @@ public:
         Polinomial pol = Polinomial(&pols[offset], deg, dim, nCols, std::to_string(idPol));
 
         for(uint64_t j = 0; j < deg; ++j) {
-            std::memcpy(&dest[j*FIELD_EXTENSION], pol[j], dim * sizeof(Goldilocks::Element));
+            std::memcpy(&dest[j*dim], pol[j], dim * sizeof(Goldilocks::Element));
         }
     }
 
@@ -356,7 +358,7 @@ public:
         Polinomial pol = Polinomial(&params.pols[offset], deg, dim, nCols, std::to_string(idPol));
 
         for(uint64_t j = 0; j < deg; ++j) {
-            std::memcpy(pol[j], &values[j*FIELD_EXTENSION], dim * sizeof(Goldilocks::Element));
+            std::memcpy(pol[j], &values[j*dim], dim * sizeof(Goldilocks::Element));
         }
         commitsCalculated[idPol] = true;
     }
