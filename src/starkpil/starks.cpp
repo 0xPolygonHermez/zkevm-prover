@@ -13,9 +13,9 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
 
     uint64_t numCommited = starkInfo.nCm1;
     Transcript transcript;
-    Polinomial evals(starkInfo.evMap.size(), FIELD_EXTENSION);
+    Polinomial evals(starkInfo.evMap.size(), FIELD_EXTENSION, true);
     Polinomial xDivXSubXi(&mem[starkInfo.mapOffsets.section[eSection::xDivXSubXi_2ns]], 2 * NExtended, FIELD_EXTENSION, FIELD_EXTENSION);
-    Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
+    Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION, true);
 
     CommitPols cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
@@ -51,17 +51,6 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     //--------------------------------
     TimerStart(STARK_STEP_1);
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
-#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-    uint64_t ncols = starkInfo.mapSectionsN.section[eSection::cm1_n];
-    if (ncols > 0)
-    {
-        ntt.LDE_MerkleTree_Auto(treesGL[0]->get_nodes_ptr(), p_cm1_n, N, NExtended, ncols, p_cm1_2ns);
-    }
-    else
-    {
-        treesGL[0]->merkelize();
-    }
-#else
     TimerStart(STARK_STEP_1_LDE);
     string nttHelperStage1 = reduceMemory ? "cm1_tmp" : "cm1";
     std::pair<uint64_t, uint64_t> nttOffsetHelperStage1 = starkInfo.mapNTTOffsetsHelpers[nttHelperStage1];
@@ -74,16 +63,12 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
         nBlocksStage1++;
     }
 
-    if(reduceMemory) {
-        ntt.extendPol(p_cm1_2ns_tmp, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], pBuffHelperStage1, 3, nBlocksStage1);
-    } else {
-        ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], pBuffHelperStage1, 3, nBlocksStage1);
-    }
+    ntt.extendPol(reduceMemory?p_cm1_2ns_tmp:p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], pBuffHelperStage1, 3, nBlocksStage1);
     TimerStopAndLog(STARK_STEP_1_LDE);
+
     TimerStart(STARK_STEP_1_MERKLETREE);
     treesGL[0]->merkelize();
     TimerStopAndLog(STARK_STEP_1_MERKLETREE);
-#endif
 
     treesGL[0]->getRoot(root0.address());
     zklog.info("MerkleTree rootGL 0: [ " + root0.toString(4) + " ]");
@@ -138,17 +123,6 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
 
     TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
-#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-    ncols = starkInfo.mapSectionsN.section[eSection::cm2_n];
-    if (ncols > 0)
-    {
-        ntt.LDE_MerkleTree_Auto(treesGL[1]->get_nodes_ptr(), p_cm2_n, N, NExtended, ncols, p_cm2_2ns);
-    }
-    else
-    {
-        treesGL[1]->merkelize();
-    }
-#else
     TimerStart(STARK_STEP_2_LDE);
     string nttHelperStage2 = reduceMemory ? "cm2_tmp" : "cm2";
     std::pair<uint64_t, uint64_t> nttOffsetHelperStage2 = starkInfo.mapNTTOffsetsHelpers[nttHelperStage2];
@@ -160,16 +134,13 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     while((nttOffsetHelperStage2.second * nBlocksStage2 < buffHelperElementsStage2) || (starkInfo.mapSectionsN.section[cm2_n] > 256*nBlocksStage2) ) {
         nBlocksStage2++;
     }
-    if(reduceMemory) {
-        ntt.extendPol(p_cm2_2ns_tmp, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffHelperStage2, 3, nBlocksStage2);
-    } else {
-        ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffHelperStage2, 3, nBlocksStage2);
-    }
+
+    ntt.extendPol(reduceMemory?p_cm2_2ns_tmp:p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffHelperStage2, 3, nBlocksStage2);
     TimerStopAndLog(STARK_STEP_2_LDE);
+
     TimerStart(STARK_STEP_2_MERKLETREE);
     treesGL[1]->merkelize();
     TimerStopAndLog(STARK_STEP_2_MERKLETREE);
-#endif
 
     treesGL[1]->getRoot(root1.address());
     zklog.info("MerkleTree rootGL 1: [ " + root1.toString(4) + " ]");
@@ -204,17 +175,6 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     transposeZRows(pAddress, numCommited, newpols_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
-#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-    ncols = starkInfo.mapSectionsN.section[eSection::cm3_n];
-    if (ncols > 0)
-    {
-        ntt.LDE_MerkleTree_Auto(treesGL[2]->get_nodes_ptr(), p_cm3_n, N, NExtended, ncols, p_cm3_2ns);
-    }
-    else
-    {
-        treesGL[2]->merkelize();
-    }
-#else
     TimerStart(STARK_STEP_3_LDE);
     std::pair<uint64_t, uint64_t> nttOffsetHelperStage3 = starkInfo.mapNTTOffsetsHelpers["cm3"];
     Goldilocks::Element *pBuffHelperStage3 = &params.pols[nttOffsetHelperStage3.first];
@@ -225,12 +185,13 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     while((nttOffsetHelperStage3.second * nBlocksStage3 < buffHelperElementsStage3) || (starkInfo.mapSectionsN.section[cm3_n] > 256*nBlocksStage3) ) {
         nBlocksStage3++;
     }
+
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffHelperStage3, 3, nBlocksStage3);
     TimerStopAndLog(STARK_STEP_3_LDE);
+
     TimerStart(STARK_STEP_3_MERKLETREE);
     treesGL[2]->merkelize();
     TimerStopAndLog(STARK_STEP_3_MERKLETREE);
-#endif
 
     treesGL[2]->getRoot(root2.address());
     zklog.info("MerkleTree rootGL 2: [ " + root2.toString(4) + " ]");
@@ -263,6 +224,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
         while((nttOffsetHelperStage2_.second * nBlocksStage2_ < buffHelperElementsStage2_) || (starkInfo.mapSectionsN.section[cm2_n] > 256*nBlocksStage2_) ) {
             nBlocksStage2_++;
         }
+
         ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffHelperStage2_, 3, nBlocksStage2_);
         TimerStopAndLog(STARK_STEP_2_RECALCULATING_LDE);
 

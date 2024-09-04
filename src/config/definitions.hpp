@@ -95,15 +95,15 @@
 
 #define NROWS_PACK 4
 
-#ifdef __USE_CUDA__
+//#define MULTI_ROM_TEST
+
+//#define ENABLE_EXPERIMENTAL_CODE
+
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
 #define TRANSPOSE_TMP_POLS false
 #else
 #define TRANSPOSE_TMP_POLS true
 #endif
-
-//#define MULTI_ROM_TEST
-
-//#define ENABLE_EXPERIMENTAL_CODE
 
 
 #endif

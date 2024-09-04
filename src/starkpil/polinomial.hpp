@@ -8,6 +8,7 @@
 #include "zklog.hpp"
 #include "zkassert.hpp"
 #include "exit_process.hpp"
+#include "memory.cuh"
 
 class Polinomial
 {
@@ -17,6 +18,7 @@ private:
     uint64_t _dim = 0;
     uint64_t _offset = 0;
     bool _allocated = false;
+    bool _pinned = false;
     std::string _name = "";
 
 public:
@@ -27,6 +29,7 @@ public:
         _dim = 0;
         _offset = 0;
         _allocated = false;
+        _pinned = false;
     }
     Polinomial(void *pAddress,
                uint64_t degree,
@@ -55,10 +58,38 @@ public:
         _allocated = true;
     };
 
+    Polinomial(uint64_t degree,
+               uint64_t dim,
+               bool pinned,
+               std::string name = "") : _degree(degree),
+                                        _dim(dim),
+                                        _pinned(pinned),
+                                        _name(name)
+    {
+        if (degree == 0 || dim == 0)
+            return;
+        if (_pinned) {
+            _pAddress = (Goldilocks::Element *)calloc_zkevm(_degree * _dim, sizeof(Goldilocks::Element));
+        } else {
+            _pAddress = (Goldilocks::Element *)calloc(_degree * _dim, sizeof(Goldilocks::Element));
+        }
+
+        if (_pAddress == NULL)
+        {
+            zklog.error("Polinomial::Polinomial() failed allocating polinomial with size: " + to_string(_degree * _dim * sizeof(Goldilocks::Element)));
+            exitProcess();
+        }
+        _offset = _dim;
+        _allocated = true;
+    };
+
     ~Polinomial()
     {
-        if (_allocated)
-            free(_pAddress);
+        if (_allocated) {
+            if (_pinned) { free_zkevm(_pAddress); }
+            else { free(_pAddress); }
+        }
+
     };
 
     void potConstruct(Goldilocks::Element *pAddress,

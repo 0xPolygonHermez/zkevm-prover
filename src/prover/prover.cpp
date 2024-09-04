@@ -36,7 +36,6 @@
 #include "commit_pols_starks.hpp"
 #include "chelpers_steps.hpp"
 #include "chelpers_steps_pack.hpp"
-#include "chelpers_steps_gpu.hpp"
 #ifdef __AVX512__
 #include "chelpers_steps_avx512.hpp"
 #endif
@@ -54,6 +53,7 @@
 #include "cuda_utils.hpp"
 #include "ntt_goldilocks.hpp"
 #include <pthread.h>
+#include "chelpers_steps_gpu.cuh"
 
 int asynctask(void* (*task)(void* args), void* arg)
 {
@@ -113,6 +113,11 @@ Prover::Prover(Goldilocks &fr,
             
             StarkInfo _starkInfo(config.zkevmStarkInfo, reduceMemoryZkevm);
 
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
+            warmup_gpu();
+            alloc_pinned_mem_per_device((1 << _starkInfo.starkStruct.nBitsExt) * 32);
+#endif
+
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
             // and create them using the allocated address
 
@@ -136,11 +141,6 @@ Prover::Prover(Goldilocks &fr,
                 }
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
-
-#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-            alloc_pinned_mem(uint64_t(1<<24) * _starkInfo.mapSectionsN.section[eSection::cm1_n]);
-            warmup_gpu();
-#endif
             
             json finalVerkeyJson;
             file2json(config.finalVerkey, finalVerkeyJson);
@@ -519,8 +519,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         json recursive2Verkey;
         file2json(config.recursive2Verkey, recursive2Verkey);
 
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
+        Goldilocks::Element *publics = (Goldilocks::Element *)malloc_zkevm(starksRecursive1->starkInfo.nPublics);
+#else
         Goldilocks::Element publics[starksRecursive1->starkInfo.nPublics];
-
+#endif
         // oldStateRoot
         publics[0] = cmPols.Main.B0[0];
         publics[1] = cmPols.Main.B1[0];
@@ -601,7 +604,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         CHelpersStepsGPU cHelpersSteps;
 #elif defined(__AVX512__)
         CHelpersStepsAvx512 cHelpersSteps;
-#elif defined(__PACK__) 
+#elif defined(__PACK__)
         CHelpersStepsPack cHelpersSteps;
         cHelpersSteps.nrowsPack = NROWS_PACK;
 #else
@@ -727,6 +730,10 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
             jProofRecursive1["publics"] = publicStarkJson;
             json2file(jProofRecursive1, pProverRequest->filePrefix + "batch_proof.proof.json");
         }
+
+#if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
+        free_zkevm(publics);
+#endif
         TimerStopAndLog(SAVE_PROOF);
     }
 
@@ -846,7 +853,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     
     if(USE_GENERIC_PARSER) {
 #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-        CHelpersStepsGPU cHelpersSteps;        
+        CHelpersStepsGPU cHelpersSteps;
 #elif defined(__AVX512__)
         CHelpersStepsAvx512 cHelpersSteps;
 #elif defined(__PACK__) 
@@ -955,7 +962,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
     if(USE_GENERIC_PARSER) {
         #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
-            CHelpersStepsGPU cHelpersSteps; 
+            CHelpersStepsGPU cHelpersSteps;
         #elif defined(__AVX512__)
             CHelpersStepsAvx512 cHelpersSteps;
         #elif defined(__PACK__) 

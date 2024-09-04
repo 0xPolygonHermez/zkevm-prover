@@ -88,9 +88,9 @@ public:
                                                                            NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                                            ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                                            nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                                           x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
-                                                                           x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
-                                                                           zi(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                                                           x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0, true),
+                                                                           x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0, true),
+                                                                           zi(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0, true),
                                                                            pAddress(_pAddress),
                                                                            x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
     {
@@ -132,7 +132,7 @@ public:
         if (!LOAD_CONST_FILES)
         {
             TimerStart(CALCULATE_CONST_TREE_TO_MEMORY);
-            pConstPolsAddress2ns = (void *)malloc(NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element));
+            pConstPolsAddress2ns = (void *)malloc_zkevm(NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element));
             if(pConstPolsAddress2ns == NULL)
             {
                 zklog.error("Starks::Starks() failed to allocate pConstPolsAddress2ns");
@@ -257,7 +257,7 @@ public:
         {
             unmapFile(pConstPolsAddress, constPolsSize);
         } else {
-            free(pConstPolsAddress);
+            free_zkevm(pConstPolsAddress);
         }
 
         if(LOAD_CONST_FILES) {
@@ -267,7 +267,7 @@ public:
                 free(pConstTreeAddress);
             }
         } else {
-            free(pConstPolsAddress2ns);
+            free_zkevm(pConstPolsAddress2ns);
         }
 
         for (uint i = 0; i < 5; i++)
@@ -279,7 +279,7 @@ public:
         assert(cHelpersBinFile.get() == nullptr);
         assert(cHelpersBinFile == nullptr);
         delete pCHelpers;
-        
+
     };
 
     void genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], CHelpersSteps *chelpersSteps);

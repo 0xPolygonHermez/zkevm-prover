@@ -1,3 +1,4 @@
 [submodule "src/goldilocks"]
 	path = src/goldilocks
 	url = https://github.com/0xPolygonHermez/goldilocks.git
+	branch = "develop"
