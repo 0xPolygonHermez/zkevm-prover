@@ -43,7 +43,7 @@
     void *verify_constraints(void *pExpressionsCtx, void*pParams, uint64_t step);
     void *get_fri_pol(void *pExpressionsCtx, void *pParams);
     void *get_hint_ids_by_name(void *pExpressionsCtx, char* hintName);
-    void *get_hint_field(void *pExpressionsCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest);
+    void *get_hint_field(void *pExpressionsCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest, bool print_expression);
     void set_hint_field(void *pExpressionsCtx,  void*pParams, void *values, uint64_t hintId, char* hintFieldName);
     void expressions_ctx_free(void *pExpressionsCtx);
 
@@ -91,6 +91,6 @@
 
     // Debug functions
     void *print_by_name(void *pExpressionsCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values);
-    void print_expression(void *pExpressionCtx, void* pol, uint64_t deg, uint64_t dim, uint64_t first_value, uint64_t last_value);
+    void print_expression(void *pExpressionCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value);
 
 #endif

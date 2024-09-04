@@ -250,10 +250,10 @@ void* get_hint_ids_by_name(void *pExpressionsCtx, char* hintName)
     return new VecU64Result(hintIds);
 }
 
-void *get_hint_field(void *pExpressionsCtx, void* pParams, uint64_t hintId, char *hintFieldName, bool dest) 
+void *get_hint_field(void *pExpressionsCtx, void* pParams, uint64_t hintId, char *hintFieldName, bool dest, bool printExpression) 
 {
     ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    HintFieldInfo hintFieldInfo = expressionsAvx->getHintField(*(StepsParams *)pParams, hintId, string(hintFieldName), dest);
+    HintFieldInfo hintFieldInfo = expressionsAvx->getHintField(*(StepsParams *)pParams, hintId, string(hintFieldName), dest, printExpression);
     return new HintFieldInfo(hintFieldInfo);
 }
 
@@ -459,7 +459,7 @@ void *print_by_name(void *pExpressionsCtx, void *pParams, char* name, uint64_t *
     return expressionsAvx->printByName(*(StepsParams *)pParams, string(name), lengths, first_value, last_value, return_values);
 }
 
-void print_expression(void *pExpressionsCtx, void* pol, uint64_t deg, uint64_t dim, uint64_t first_value, uint64_t last_value) {
+void print_expression(void *pExpressionsCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value) {
     ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    expressionsAvx->printExpression((Goldilocks::Element *)pol, deg, dim, first_value, last_value);
+    expressionsAvx->printExpression((Goldilocks::Element *)pol, dim, first_value, last_value);
 }

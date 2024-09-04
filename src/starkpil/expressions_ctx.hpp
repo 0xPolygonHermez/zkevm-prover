@@ -104,7 +104,7 @@ public:
         return hintIds;
     }
     
-    HintFieldInfo getHintField(StepsParams& params, uint64_t hintId, std::string hintFieldName, bool dest) {
+    HintFieldInfo getHintField(StepsParams& params, uint64_t hintId, std::string hintFieldName, bool dest, bool printExpression) {
         uint64_t deg = 1 << setupCtx.starkInfo.starkStruct.nBits;
 
         if(setupCtx.expressionsBin.hints.size() == 0) {
@@ -153,7 +153,7 @@ public:
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = dim == 1 ? HintFieldType::Column : HintFieldType::ColumnExtended;
             hintFieldInfo.offset = dim;
-            calculateExpression(params, hintFieldInfo.values, hintField->id);
+            calculateExpression(params, hintFieldInfo.values, hintField->id, printExpression);
         } else if (hintField->operand == opType::public_) {
             hintFieldInfo.size = 1;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
@@ -334,12 +334,11 @@ public:
         subProofValuesCalculated[subproofValueId] = true;
     }
 
-    void calculateExpression(StepsParams& params, Goldilocks::Element* dest, uint64_t expressionId, bool inverse = false) {
+    void calculateExpression(StepsParams& params, Goldilocks::Element* dest, uint64_t expressionId, bool printExpression = false, bool inverse = false) {
         bool domainExtended = expressionId == setupCtx.starkInfo.cExpId || expressionId == setupCtx.starkInfo.friExpId;
-        if(setupCtx.expressionsBin.expressionsInfo[expressionId].line != "") {
-            
+        if(printExpression && setupCtx.expressionsBin.expressionsInfo[expressionId].line != "") {
             cout << "--------------------------------------------------------" << endl;
-            cout << "Calculating expressions with id: " << expressionId << " " << setupCtx.expressionsBin.expressionsInfo[expressionId].line << endl;
+            cout << "Calculating expression with id: " << expressionId << " " << setupCtx.expressionsBin.expressionsInfo[expressionId].line << endl;
             cout << "--------------------------------------------------------" << endl;
         }
         
@@ -379,33 +378,19 @@ public:
         TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
     }
 
-    void printExpression(Goldilocks::Element* pol, uint64_t deg, uint64_t dim, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0, bool printRoot = false) {
-        Polinomial p = Polinomial(pol, deg, dim, dim);
-        if(printRoot) {
-            MerkleTreeGL *mt_ = new MerkleTreeGL(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, deg, dim, pol);
-            mt_->merkelize();
-
-            Goldilocks::Element root[4];
-            mt_->getRoot(&root[0]);
-
-            delete mt_;
-        }
-       
-
-        if(lastPrintValue - firstPrintValue > 0) {
-            cout << "PRINTING VALUES" << endl;
-            for(uint64_t i = firstPrintValue; i < lastPrintValue; ++i) {
-                if(dim == 3) {
-                    cout << i << " [" << Goldilocks::toString(p[i][0]) << ", " << Goldilocks::toString(p[i][1]) << ", " << Goldilocks::toString(p[i][2]) << " ]" << endl; 
-                } else {
-                    cout << i << " " << Goldilocks::toString(p[i][0]) << endl;
-                }
+    void printExpression(Goldilocks::Element* pol, uint64_t dim, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0) {        
+        cout << "-------------------------------------------------" << endl;
+        for(uint64_t i = firstPrintValue; i < lastPrintValue; ++i) {
+            if(dim == 3) {
+                cout << "Value at " << i << " is: " << " [" << Goldilocks::toString(pol[i*FIELD_EXTENSION]) << ", " << Goldilocks::toString(pol[i*FIELD_EXTENSION + 1]) << ", " << Goldilocks::toString(pol[i*FIELD_EXTENSION + 2]) << " ]" << endl; 
+            } else {
+                cout << "Value at " << i << " is: " << Goldilocks::toString(pol[i]) << endl;
             }
         }
-
+        cout << "-------------------------------------------------" << endl;
     }
 
-    void printColById(StepsParams& params, bool committed, uint64_t polId, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0, bool printRoot = false)
+    void printColById(StepsParams& params, bool committed, uint64_t polId, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0)
     {   
         uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
         PolMap polInfo = setupCtx.starkInfo.cmPolsMap[polId];
@@ -420,7 +405,7 @@ public:
         cout << "--------------------" << endl;
         string type = committed ? "witness" : "fixed";
         cout << "Printing " << type << " column: " << polInfo.name << " (pol id " << polId << ")" << endl;
-        printExpression(pBuffCol, N, polInfo.dim, firstPrintValue, lastPrintValue, printRoot);
+        printExpression(pBuffCol, polInfo.dim, firstPrintValue, lastPrintValue);
 
         delete pBuffCol;
     }
@@ -442,7 +427,7 @@ public:
                 if(!lengths_match) continue;
             }
             if(cmPol.name == name) {
-                printColById(params, true, i, firstPrintValue, lastPrintValue, returnValues);
+                printColById(params, true, i, firstPrintValue, lastPrintValue);
                 if(returnValues) {
                     Goldilocks::Element *values = new Goldilocks::Element[cmPol.dim * N];
                     getPolynomial(params, values, true, i, false);
@@ -466,7 +451,7 @@ public:
                 if(!lengths_match) continue;
             }
             if(constPol.name == name) {
-                printColById(params, false, i, firstPrintValue, lastPrintValue, returnValues);
+                printColById(params, false, i, firstPrintValue, lastPrintValue);
                 if(returnValues) {
                     Goldilocks::Element *values = new Goldilocks::Element[constPol.dim * N];
                     getPolynomial(params, values, false, i, false);
