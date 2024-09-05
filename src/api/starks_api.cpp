@@ -235,15 +235,12 @@ void *get_fri_pol(void *pExpressionsCtx, void *pParams)
     return &params.pols[expressionsAvx.setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
 }
 
-void *verify_constraints(void *pExpressionsCtx, void* pParams, uint64_t step)
+void *verify_constraints(void *pExpressionsCtx, void* pParams)
 {
     ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    ConstraintsResults invalidConstraints = expressionsAvx->verifyConstraints(step, *(StepsParams *)pParams);
+    ConstraintsResults *constraintsInfo = expressionsAvx->verifyConstraints(*(StepsParams *)pParams);
 
-    auto invalid = new ConstraintsResults(invalidConstraints);
-        cout << "HEY BRO" << endl;
-
-    return invalid;
+    return constraintsInfo;
 
 }
 

@@ -79,8 +79,8 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
 
         if (debug)
         {
-            ConstraintsResults invalidConstraints = expressionsCtx.verifyConstraints(step, params);
-            if(invalidConstraints.nConstraints > 0) validConstraints = false;
+            // ConstraintsResults invalidConstraints = expressionsCtx.verifyConstraints(step, params);
+            // if(invalidConstraints.nInvalidConstraints > 0) validConstraints = false;
             Goldilocks::Element randomValues[4] = {Goldilocks::fromU64(0), Goldilocks::fromU64(1), Goldilocks::fromU64(2), Goldilocks::fromU64(3)};
             addTranscriptGL(transcript, randomValues, 4);
         }

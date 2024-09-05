@@ -250,6 +250,7 @@ void ExpressionsBin::loadExpressionsBin(BinFileUtils::BinFile *expressionsBin) {
         parserParamsConstraint.nSubproofValuesUsed = expressionsBin->readU32LE();
         parserParamsConstraint.subproofValuesOffset = expressionsBin->readU32LE();
 
+        parserParamsConstraint.imPol = bool(expressionsBin->readU32LE());
         parserParamsConstraint.line = expressionsBin->readString();
 
         constraintsInfoDebug.push_back(parserParamsConstraint);

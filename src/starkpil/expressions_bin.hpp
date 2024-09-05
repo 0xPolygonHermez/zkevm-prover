@@ -49,6 +49,7 @@ struct ParserParams
     uint32_t lastRow;
     uint32_t destDim;
     uint32_t destId;
+    bool imPol;
     string line;
 };
 

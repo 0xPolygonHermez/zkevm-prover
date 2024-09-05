@@ -29,19 +29,21 @@ struct VecU64Result {
 struct ConstraintRowInfo {
     uint64_t row;
     uint64_t dim;
-    uint64_t* value;
+    uint64_t value[3];
 };
 
-struct ConstraintInvalidInfo {
+struct ConstraintInfo {
     uint64_t id;
+    uint64_t stage;
+    bool imPol;
     const char* line;
     uint64_t nrows;
-    ConstraintRowInfo* rows;
+    ConstraintRowInfo rows[10];
 };
 
 struct ConstraintsResults {
     uint64_t nConstraints;
-    ConstraintInvalidInfo* constraintInvalidInfo;
+    ConstraintInfo* constraintInfo;
 };
 
 class ExpressionsCtx {
@@ -267,97 +269,82 @@ public:
 
     virtual void calculateExpressions(StepsParams& params, Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse = false) {};
 
-    ConstraintRowInfo* checkConstraint(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row) {
-        ConstraintRowInfo *rowInfo = new ConstraintRowInfo();
-        rowInfo->row = row;
-        rowInfo->dim = parserParams.destDim;
-        rowInfo->value = new uint64_t[rowInfo->dim];
-        if(row < parserParams.firstRow || row > parserParams.lastRow) return nullptr;
+    std::tuple<bool, ConstraintRowInfo> checkConstraint(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row) {
         bool isValid = true;
-        if(parserParams.destDim == 1) {
-            if(!Goldilocks::isZero(dest[row])) {
-                isValid = false;
-                cout << "Constraint check failed at row " << row << " with value: " << Goldilocks::toString(dest[row]) << endl;
-                rowInfo->value[0] = Goldilocks::toU64(dest[row]);
-            }
-            
-        } else if(parserParams.destDim == FIELD_EXTENSION) {
-            isValid = true;
-            for(uint64_t i = 0; i < FIELD_EXTENSION; ++i) {
-                if(!Goldilocks::isZero(dest[FIELD_EXTENSION*row + i])) {
-                    isValid = false;
-                    cout << "Constraint check failed at row " << row << " with value: [" << Goldilocks::toString(dest[FIELD_EXTENSION*row]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*row + 1]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*row + 2]) << "]" << endl;
-                    rowInfo->value[0] = Goldilocks::toU64(dest[FIELD_EXTENSION*row]);
-                    rowInfo->value[1] = Goldilocks::toU64(dest[FIELD_EXTENSION*row + 1]);
-                    rowInfo->value[2] = Goldilocks::toU64(dest[FIELD_EXTENSION*row + 2]);
-                    break;
-                }
-            }
+        ConstraintRowInfo rowInfo;
+        rowInfo.row = row;
+        rowInfo.dim = parserParams.destDim;
+        if(row < parserParams.firstRow || row > parserParams.lastRow) {
+                rowInfo.value[0] = 0;
+                rowInfo.value[1] = 0;
+                rowInfo.value[2] = 0;
         } else {
-            exitProcess();
-            exit(-1);
+             if(parserParams.destDim == 1) {
+                rowInfo.value[0] = Goldilocks::toU64(dest[row]);
+                rowInfo.value[1] = 0;
+                rowInfo.value[2] = 0;
+                if(rowInfo.value[0] != 0) isValid = false;
+            } else if(parserParams.destDim == FIELD_EXTENSION) {
+                rowInfo.value[0] = Goldilocks::toU64(dest[FIELD_EXTENSION*row]);
+                rowInfo.value[1] = Goldilocks::toU64(dest[FIELD_EXTENSION*row + 1]);
+                rowInfo.value[2] = Goldilocks::toU64(dest[FIELD_EXTENSION*row + 2]);
+                if(rowInfo.value[0] != 0 || rowInfo.value[1] != 0 || rowInfo.value[2] != 0) isValid = false;
+            } else {
+                exitProcess();
+                exit(-1);
+            }
         }
+       
 
-        if(isValid) {
-            return nullptr;
-        } else {
-            return rowInfo;
-        };
+        return std::make_tuple(isValid, rowInfo);
     }
     
-    ConstraintsResults verifyConstraints(uint64_t stage, StepsParams& params) {
-        uint64_t num_constraints = 0;
+    ConstraintsResults *verifyConstraints(StepsParams& params) {
+        ConstraintsResults *constraintsInfo = new ConstraintsResults();
+        constraintsInfo->nConstraints = setupCtx.expressionsBin.constraintsInfoDebug.size();
+        
+        constraintsInfo->constraintInfo = new ConstraintInfo[constraintsInfo->nConstraints];
         for (uint64_t i = 0; i < setupCtx.expressionsBin.constraintsInfoDebug.size(); i++) {
-            if(setupCtx.expressionsBin.constraintsInfoDebug[i].stage == stage) num_constraints++;
-        }
-
-        ConstraintsResults invalidConstraints;
-        invalidConstraints.nConstraints = 0;
-        invalidConstraints.constraintInvalidInfo = new ConstraintInvalidInfo[num_constraints];
-        for (uint64_t i = 0; i < setupCtx.expressionsBin.constraintsInfoDebug.size(); i++) {
-            if(setupCtx.expressionsBin.constraintsInfoDebug[i].stage == stage) {
-                Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
-                auto constraintInfo = verifyConstraint(params, pAddr, i);
-                if(constraintInfo.nrows > 0) {
-                    invalidConstraints.constraintInvalidInfo[invalidConstraints.nConstraints++] = constraintInfo;
-                };
-            }
+            Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
+            auto constraintInfo = verifyConstraint(params, pAddr, i);
+            constraintsInfo->constraintInfo[i] = constraintInfo;
         }
         
-        return invalidConstraints;
+        return constraintsInfo;
     }
 
-    ConstraintInvalidInfo verifyConstraint(StepsParams& params, Goldilocks::Element* dest, uint64_t constraintId) {
-        TimerLog(CHECKING_CONSTRAINT);
-        cout << "--------------------------------------------------------" << endl;
-        cout << setupCtx.expressionsBin.constraintsInfoDebug[constraintId].line << endl;
-        cout << "--------------------------------------------------------" << endl;
-        
-        uint64_t maxInvalidRowsDisplay = 100;
-
-        ConstraintInvalidInfo constraintInfo;
+    ConstraintInfo verifyConstraint(StepsParams& params, Goldilocks::Element* dest, uint64_t constraintId) {        
+        ConstraintInfo constraintInfo;
         constraintInfo.id = constraintId;
+        constraintInfo.stage = setupCtx.expressionsBin.constraintsInfoDebug[constraintId].stage;
+        constraintInfo.imPol = setupCtx.expressionsBin.constraintsInfoDebug[constraintId].imPol;
         constraintInfo.line = setupCtx.expressionsBin.constraintsInfoDebug[constraintId].line.c_str();
-        constraintInfo.rows = new ConstraintRowInfo[maxInvalidRowsDisplay];
         constraintInfo.nrows = 0;
         calculateExpressions(params, dest, setupCtx.expressionsBin.expressionsBinArgsConstraints, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], false, false);
 
         uint64_t N = (1 << setupCtx.starkInfo.starkStruct.nBits);
 
+        std::vector<ConstraintRowInfo> constraintInvalidRows;
         for(uint64_t i = 0; i < N; ++i) {
-            if(constraintInfo.nrows >= maxInvalidRowsDisplay) {
-                cout << "There are more than " << maxInvalidRowsDisplay << " invalid rows for constraint " << i << endl;
-                break;
-            }
-            auto invalidRowInfo = checkConstraint(dest, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], i);
-            if(invalidRowInfo != nullptr) {
-                constraintInfo.rows[constraintInfo.nrows++] = *invalidRowInfo;
+            auto [isValid, rowInfo] = checkConstraint(dest, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], i);
+            if(!isValid) {
+                constraintInvalidRows.push_back(rowInfo);
+                constraintInfo.nrows++;
             }
         }
-        if(constraintInfo.nrows == 0) {
-            TimerLog(VALID_CONSTRAINT);
-        } else {
-            TimerLog(INVALID_CONSTRAINT);
+
+        uint64_t num_rows = std::min(constraintInfo.nrows, uint64_t(10));
+        uint64_t h = num_rows / 2;
+        for(uint64_t i = 0; i < h; ++i) {
+            constraintInfo.rows[i] = constraintInvalidRows[i];
+        }
+
+        for(uint64_t i = h; i < num_rows; ++i) {
+            if(constraintInfo.nrows > num_rows) {
+                constraintInfo.rows[i] = constraintInvalidRows[constraintInvalidRows.size() - num_rows + i];
+            } else {
+                constraintInfo.rows[i] = constraintInvalidRows[i];
+            }
         }
 
         return constraintInfo;

@@ -40,7 +40,7 @@
     // ExpressionsCtx
     // ========================================================================================
     void *expressions_ctx_new(void *pSetupCtx);
-    void *verify_constraints(void *pExpressionsCtx, void*pParams, uint64_t step);
+    void *verify_constraints(void *pExpressionsCtx, void*pParams);
     void *get_fri_pol(void *pExpressionsCtx, void *pParams);
     void *get_hint_ids_by_name(void *pExpressionsCtx, char* hintName);
     void *get_hint_field(void *pExpressionsCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest, bool print_expression);
