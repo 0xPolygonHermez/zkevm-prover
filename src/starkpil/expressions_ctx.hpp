@@ -26,6 +26,24 @@ struct VecU64Result {
     uint64_t* ids;
 };
 
+struct ConstraintRowInfo {
+    uint64_t row;
+    uint64_t dim;
+    uint64_t* value;
+};
+
+struct ConstraintInvalidInfo {
+    uint64_t id;
+    const char* line;
+    uint64_t nrows;
+    ConstraintRowInfo* rows;
+};
+
+struct ConstraintsResults {
+    uint64_t nConstraints;
+    ConstraintInvalidInfo* constraintInvalidInfo;
+};
+
 class ExpressionsCtx {
 public:
 
@@ -249,13 +267,18 @@ public:
 
     virtual void calculateExpressions(StepsParams& params, Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse = false) {};
 
-    bool checkConstraint(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row) {
-        if(row < parserParams.firstRow || row > parserParams.lastRow) return true;
+    ConstraintRowInfo* checkConstraint(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row) {
+        ConstraintRowInfo *rowInfo = new ConstraintRowInfo();
+        rowInfo->row = row;
+        rowInfo->dim = parserParams.destDim;
+        rowInfo->value = new uint64_t[rowInfo->dim];
+        if(row < parserParams.firstRow || row > parserParams.lastRow) return nullptr;
         bool isValid = true;
         if(parserParams.destDim == 1) {
             if(!Goldilocks::isZero(dest[row])) {
                 isValid = false;
                 cout << "Constraint check failed at row " << row << " with value: " << Goldilocks::toString(dest[row]) << endl;
+                rowInfo->value[0] = Goldilocks::toU64(dest[row]);
             }
             
         } else if(parserParams.destDim == FIELD_EXTENSION) {
@@ -264,6 +287,9 @@ public:
                 if(!Goldilocks::isZero(dest[FIELD_EXTENSION*row + i])) {
                     isValid = false;
                     cout << "Constraint check failed at row " << row << " with value: [" << Goldilocks::toString(dest[FIELD_EXTENSION*row]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*row + 1]) << ", " << Goldilocks::toString(dest[FIELD_EXTENSION*row + 2]) << "]" << endl;
+                    rowInfo->value[0] = Goldilocks::toU64(dest[FIELD_EXTENSION*row]);
+                    rowInfo->value[1] = Goldilocks::toU64(dest[FIELD_EXTENSION*row + 1]);
+                    rowInfo->value[2] = Goldilocks::toU64(dest[FIELD_EXTENSION*row + 2]);
                     break;
                 }
             }
@@ -272,63 +298,69 @@ public:
             exit(-1);
         }
 
-        return isValid;
+        if(isValid) {
+            return nullptr;
+        } else {
+            return rowInfo;
+        };
     }
     
-    VecU64Result verifyConstraints(uint64_t stage, StepsParams& params) {
-        std::vector<uint64_t> invalid;
+    ConstraintsResults verifyConstraints(uint64_t stage, StepsParams& params) {
+        uint64_t num_constraints = 0;
+        for (uint64_t i = 0; i < setupCtx.expressionsBin.constraintsInfoDebug.size(); i++) {
+            if(setupCtx.expressionsBin.constraintsInfoDebug[i].stage == stage) num_constraints++;
+        }
 
-        VecU64Result invalidConstraints;
-        invalidConstraints.nElements = 0;
+        ConstraintsResults invalidConstraints;
+        invalidConstraints.nConstraints = 0;
+        invalidConstraints.constraintInvalidInfo = new ConstraintInvalidInfo[num_constraints];
         for (uint64_t i = 0; i < setupCtx.expressionsBin.constraintsInfoDebug.size(); i++) {
             if(setupCtx.expressionsBin.constraintsInfoDebug[i].stage == stage) {
                 Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
-                if(!verifyConstraint(params, pAddr, i)) {
-                    invalid.push_back(i);
-                    invalidConstraints.nElements++;
+                auto constraintInfo = verifyConstraint(params, pAddr, i);
+                if(constraintInfo.nrows > 0) {
+                    invalidConstraints.constraintInvalidInfo[invalidConstraints.nConstraints++] = constraintInfo;
                 };
             }
         }
         
-        if(invalidConstraints.nElements > 0) {
-            invalidConstraints.ids = new uint64_t[invalidConstraints.nElements];
-            std::copy(invalid.begin(), invalid.end(), invalidConstraints.ids);
-        } else {
-            invalidConstraints.ids = nullptr;
-        }
-
         return invalidConstraints;
     }
 
-    bool verifyConstraint(StepsParams& params, Goldilocks::Element* dest, uint64_t constraintId) {
+    ConstraintInvalidInfo verifyConstraint(StepsParams& params, Goldilocks::Element* dest, uint64_t constraintId) {
         TimerLog(CHECKING_CONSTRAINT);
         cout << "--------------------------------------------------------" << endl;
         cout << setupCtx.expressionsBin.constraintsInfoDebug[constraintId].line << endl;
         cout << "--------------------------------------------------------" << endl;
         
+        uint64_t maxInvalidRowsDisplay = 100;
+
+        ConstraintInvalidInfo constraintInfo;
+        constraintInfo.id = constraintId;
+        constraintInfo.line = setupCtx.expressionsBin.constraintsInfoDebug[constraintId].line.c_str();
+        constraintInfo.rows = new ConstraintRowInfo[maxInvalidRowsDisplay];
+        constraintInfo.nrows = 0;
         calculateExpressions(params, dest, setupCtx.expressionsBin.expressionsBinArgsConstraints, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], false, false);
 
         uint64_t N = (1 << setupCtx.starkInfo.starkStruct.nBits);
-        bool isValidConstraint = true;
-        uint64_t nInvalidRows = 0;
-        uint64_t maxInvalidRowsDisplay = 100;
+
         for(uint64_t i = 0; i < N; ++i) {
-            if(nInvalidRows >= maxInvalidRowsDisplay) {
+            if(constraintInfo.nrows >= maxInvalidRowsDisplay) {
                 cout << "There are more than " << maxInvalidRowsDisplay << " invalid rows for constraint " << i << endl;
                 break;
             }
-            if(!checkConstraint(dest, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], i)) {
-                if(isValidConstraint) isValidConstraint = false;
-                nInvalidRows++;
+            auto invalidRowInfo = checkConstraint(dest, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], i);
+            if(invalidRowInfo != nullptr) {
+                constraintInfo.rows[constraintInfo.nrows++] = *invalidRowInfo;
             }
         }
-        if(isValidConstraint) {
+        if(constraintInfo.nrows == 0) {
             TimerLog(VALID_CONSTRAINT);
-            return true;
         } else {
             TimerLog(INVALID_CONSTRAINT);
-            return false;
         }
+
+        return constraintInfo;
     }
  
     void getPolynomial(StepsParams& params, Goldilocks::Element *dest, bool committed, uint64_t idPol, bool domainExtended) {
@@ -433,7 +465,16 @@ public:
 
         cout << "--------------------" << endl;
         string type = committed ? "witness" : "fixed";
-        cout << "Printing " << type << " column: " << polInfo.name << " (pol id " << polId << ")" << endl;
+        cout << "Printing " << type << " column: " << polInfo.name;
+        if(polInfo.lengths.size() > 0) {
+            cout << "[";
+            for(uint64_t i = 0; i < polInfo.lengths.size(); ++i) {
+                cout << polInfo.lengths[i];
+                if(i != polInfo.lengths.size() - 1) cout << ", ";
+            }
+            cout << "]";
+        }
+        cout << " (pol id " << polId << ")" << endl;
         printExpression(pBuffCol, polInfo.dim, firstPrintValue, lastPrintValue);
         delete pBuffCol;
     }
@@ -490,9 +531,7 @@ public:
                     hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
                     hintFieldInfo.fieldType = HintFieldType::Column;
                     hintFieldInfo.offset = 1;
-                    cout << "HOLI" << endl;
                     getPolynomial(params, hintFieldInfo.values, false, i, false);
-                    cout << "HOLI" << endl;
                 }
                 return hintFieldInfo;
             } 

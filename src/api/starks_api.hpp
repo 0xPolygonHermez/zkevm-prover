@@ -87,7 +87,7 @@
 
     // Global constraints
     // =================================================================================
-    void* verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
+    bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
 
     // Debug functions
     void *print_by_name(void *pExpressionsCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values);

@@ -107,21 +107,21 @@ public:
 
     inline void storePolynomial(Goldilocks::Element* dest, ParserParams& parserParams, uint64_t row, __m256i* tmp1, Goldilocks3::Element_avx* tmp3, bool inverse) {
         if(parserParams.destDim == 1) {
-            Goldilocks::store_avx(&dest[row], tmp1[parserParams.destId]);
             if(inverse) {
                 for(uint64_t i = 0; i < nrowsPack; ++i) {
                     Goldilocks::inv(dest[row + i], dest[row + i]);
                 }
             }
+            Goldilocks::store_avx(&dest[row], tmp1[parserParams.destId]);
         } else {
-            Goldilocks::store_avx(&dest[row*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][0]);
-            Goldilocks::store_avx(&dest[row*FIELD_EXTENSION + 1], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][1]);
-            Goldilocks::store_avx(&dest[row*FIELD_EXTENSION + 2], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][2]);
             if(inverse) {
                 for(uint64_t i = 0; i < nrowsPack; ++i) {
                     Goldilocks3::inv((Goldilocks3::Element *)&dest[(row + i)*FIELD_EXTENSION], (Goldilocks3::Element *)&dest[(row + i)*FIELD_EXTENSION]);
                 }
             }
+            Goldilocks::store_avx(&dest[row*FIELD_EXTENSION], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][0]);
+            Goldilocks::store_avx(&dest[row*FIELD_EXTENSION + 1], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][1]);
+            Goldilocks::store_avx(&dest[row*FIELD_EXTENSION + 2], uint64_t(FIELD_EXTENSION), tmp3[parserParams.destId][2]);
         }
     }
 

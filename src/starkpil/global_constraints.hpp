@@ -130,6 +130,7 @@ bool verifyGlobalConstraint(Goldilocks::Element* publics, Goldilocks::Element** 
     if(parserParams.destDim == 1) {
         if(!Goldilocks::isZero(tmp1[parserParams.destId])) {
             cout << "Global constraint check failed with value: " << Goldilocks::toString(tmp1[parserParams.destId]) << endl;
+            isValidConstraint = false;
         }
     } else {
         for(uint64_t i = 0; i < FIELD_EXTENSION; ++i) {
@@ -151,7 +152,7 @@ bool verifyGlobalConstraint(Goldilocks::Element* publics, Goldilocks::Element** 
 }
 
   
-VecU64Result verifyGlobalConstraints(string globalInfoFile, string globalConstraintsBin, Goldilocks::Element* publicInputs, FRIProof<Goldilocks::Element>** proofs, uint64_t nProofs) 
+bool verifyGlobalConstraints(string globalInfoFile, string globalConstraintsBin, Goldilocks::Element* publicInputs, FRIProof<Goldilocks::Element>** proofs, uint64_t nProofs) 
 {
     std::unique_ptr<BinFileUtils::BinFile> globalConstraintsBinFile = BinFileUtils::openExisting(globalConstraintsBin, "chps", 1);
     BinFileUtils::BinFile *binFile = globalConstraintsBinFile.get();
@@ -239,28 +240,18 @@ VecU64Result verifyGlobalConstraints(string globalInfoFile, string globalConstra
         }
     }
 
-    std::vector<uint64_t> invalid;
-    VecU64Result invalidConstraints;
-    invalidConstraints.nElements = 0;
+    bool validGlobalConstraints = true;
     for(uint64_t i = 0; i < nGlobalConstraints; ++i) {
         TimerLog(CHECKING_CONSTRAINT);
         cout << "--------------------------------------------------------" << endl;
         cout << globalConstraintsInfo[i].line << endl;
         cout << "--------------------------------------------------------" << endl;
         if(!verifyGlobalConstraint(publicInputs, subproofValues, globalConstraintsArgs, globalConstraintsInfo[i])) {
-            invalid.push_back(i);
-            invalidConstraints.nElements++;
+            validGlobalConstraints = false;
         };
     }
 
-    if(invalidConstraints.nElements > 0) {
-        invalidConstraints.ids = new uint64_t[invalidConstraints.nElements];
-        std::copy(invalid.begin(), invalid.end(), invalidConstraints.ids);
-    } else {
-        invalidConstraints.ids = nullptr;
-    }
-
-    return invalidConstraints;
+    return validGlobalConstraints;
 }
 
 #endif

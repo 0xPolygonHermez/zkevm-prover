@@ -238,8 +238,13 @@ void *get_fri_pol(void *pExpressionsCtx, void *pParams)
 void *verify_constraints(void *pExpressionsCtx, void* pParams, uint64_t step)
 {
     ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    VecU64Result invalidConstraints = expressionsAvx->verifyConstraints(step, *(StepsParams *)pParams);
-    return new VecU64Result(invalidConstraints);
+    ConstraintsResults invalidConstraints = expressionsAvx->verifyConstraints(step, *(StepsParams *)pParams);
+
+    auto invalid = new ConstraintsResults(invalidConstraints);
+        cout << "HEY BRO" << endl;
+
+    return invalid;
+
 }
 
 void* get_hint_ids_by_name(void *pExpressionsCtx, char* hintName)
@@ -444,12 +449,11 @@ void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBi
 
 // Global constraints
 // =================================================================================
-void *verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs) {
+bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs) {
     
     FRIProof<Goldilocks::Element> **proofs = (FRIProof<Goldilocks::Element> **)pProofs;
 
-    VecU64Result invalidConstraints = verifyGlobalConstraints(string(globalInfoFile), string(globalConstraintsBinFile), (Goldilocks::Element *)publics, proofs, nProofs);
-    return new VecU64Result(invalidConstraints);
+    return verifyGlobalConstraints(string(globalInfoFile), string(globalConstraintsBinFile), (Goldilocks::Element *)publics, proofs, nProofs);
 }
 
 // Debug functions
