@@ -223,7 +223,7 @@ void json2file(const json &j, const string &fileName)
 
 void file2json(const string &fileName, json &j)
 {
-    zklog.info("file2json() loading JSON file " + fileName);
+    // zklog.info("file2json() loading JSON file " + fileName);
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
@@ -244,7 +244,7 @@ void file2json(const string &fileName, json &j)
 
 void file2json(const string &fileName, ordered_json &j)
 {
-    zklog.info("file2json() (ordered) loading JSON file " + fileName);
+    // zklog.info("file2json() (ordered) loading JSON file " + fileName);
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
