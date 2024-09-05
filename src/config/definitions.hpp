@@ -6,13 +6,13 @@
 
 /* Only one fork can generate proofs */
 #ifndef PROVER_FORK_ID
-#define PROVER_FORK_ID 11
+#define PROVER_FORK_ID 9
 #endif
 
 /* Regardless of the PROVER_FORK_ID, proof generation code uses the same namespace from the parent fork ID */
-#define PROVER_FORK_NAMESPACE fork_10
-#define PROVER_FORK_NAMESPACE_STRING "fork_10"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_10 // Same pols definition for all proof generation files
+#define PROVER_FORK_NAMESPACE fork_9
+#define PROVER_FORK_NAMESPACE_STRING "fork_9"
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_9 // Same pols definition for all proof generation files
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
@@ -82,8 +82,8 @@
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
 #define USE_NEW_KVTREE
 
-#define MAIN_SM_EXECUTOR_GENERATED_CODE
-#define MAIN_SM_PROVER_GENERATED_CODE
+// #define MAIN_SM_EXECUTOR_GENERATED_CODE
+// #define MAIN_SM_PROVER_GENERATED_CODE
 
 #define LOAD_CONST_FILES false
 

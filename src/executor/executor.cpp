@@ -7,7 +7,9 @@
 #include "main_sm/fork_7/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_8/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_9/main_exec_generated/main_exec_generated_fast.hpp"
+#if PROVER_FORK_ID == 10
 #include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_fast.hpp"
+#endif
 #if PROVER_FORK_ID >= 11
 #include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_fast.hpp"
 #endif
@@ -574,14 +576,20 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
             {
 #if (PROVER_FORK_ID == 10)
                 PROVER_FORK_NAMESPACE::main_exec_generated_10(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
-#else
+#elif (PROVER_FORK_ID == 11)
                 PROVER_FORK_NAMESPACE::main_exec_generated_11(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+#else
+                PROVER_FORK_NAMESPACE::main_exec_generated_9(mainExecutor_fork_9, proverRequest, commitPols.Main, required);
 #endif
             }
             else
 #endif
             {
+#if (PROVER_FORK_ID == 10 || PROVER_FORK_ID == 11)
                 mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);
+#else
+                mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+#endif
             }
 
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -700,14 +708,20 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
         {
 #if (PROVER_FORK_ID == 10)
             PROVER_FORK_NAMESPACE::main_exec_generated_10(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
-#else
+#elif (PROVER_FORK_ID == 11)
             PROVER_FORK_NAMESPACE::main_exec_generated_11(mainExecutor_fork_10, proverRequest, commitPols.Main, required);
+#else 
+            PROVER_FORK_NAMESPACE::main_exec_generated_9(mainExecutor_fork_9, proverRequest, commitPols.Main, required);
 #endif
         }
         else
 #endif
         {
+#if (PROVER_FORK_ID == 10 || PROVER_FORK_ID == 11)
             mainExecutor_fork_10.execute(proverRequest, commitPols.Main, required);
+#else
+            mainExecutor_fork_9.execute(proverRequest, commitPols.Main, required);
+#endif
         }
 
         // Save input to <timestamp>.input.json after execution including dbReadLog

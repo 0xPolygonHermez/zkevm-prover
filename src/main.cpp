@@ -13,9 +13,12 @@
 #if (PROVER_FORK_ID == 10)
     #include "fork_10/calcwit.hpp"
     #include "fork_10/circom.hpp"
-#else
+#elif (PROVER_FORK_ID == 11)
     #include "fork_11/calcwit.hpp"
     #include "fork_11/circom.hpp"
+#else
+    #include "fork_9/calcwit.hpp"
+    #include "fork_9/circom.hpp"
 #endif
 #include "main.hpp"
 #include "prover.hpp"

@@ -109,6 +109,6 @@ extern string emptyString;
 // Calculates the Poseidon linear hash of a buffer
 void poseidonLinearHash (const vector<uint8_t> &_data, Goldilocks::Element (&result)[4]);
 
-void checkSetupHash (std::string datFilename);
+// void checkSetupHash (std::string datFilename);
 
 #endif

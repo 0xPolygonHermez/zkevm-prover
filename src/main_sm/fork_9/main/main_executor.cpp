@@ -62,8 +62,8 @@ namespace fork_9
 
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
     fr(fr),
-    N(MainCommitPols::pilDegree()),
-    N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
+    N(8388608),
+    N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*8388608),
     poseidon(poseidon),
     rom(config),
 #ifdef MULTI_ROM_TEST

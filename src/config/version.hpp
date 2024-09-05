@@ -15,6 +15,12 @@
 #else
 #define ZKEVM_PROVER_VERSION "v7.0.0-RC24-fork.11"
 #endif
+#elif (PROVER_FORK_ID==9)
+#ifdef __AVX512__
+#define ZKEVM_PROVER_VERSION "v7.0.0-RC24-fork.9.avx512"
+#else
+#define ZKEVM_PROVER_VERSION "v7.0.0-RC24-fork.9"
+#endif
 #else
 #error "Invalid PROVER_FORK_ID"
 #endif
