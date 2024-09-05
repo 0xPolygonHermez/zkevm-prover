@@ -50,9 +50,9 @@ jobs:
     - name: remove old proofs 11
       run: rm -rf runtime/output/*
     - name: list gha config files 11
-      run: ls /home/gha/v7.0.0-rc.14-fork.11/config/
+      run: ls /home/gha/v7.0.0-rc.30-fork.11/config/
     - name: link files 11
-      run: ln -s /home/gha/v7.0.0-rc.14-fork.11/config/ config
+      run: ln -s /home/gha/v7.0.0-rc.30-fork.11/config/ config
     - name: list local config files 11
       run: ls config
     - name: run collection native tests 11
