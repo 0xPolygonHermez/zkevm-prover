@@ -51,57 +51,9 @@ public:
 
     SetupCtx setupCtx;
 
-    vector<bool> subProofValuesCalculated;
-    vector<bool> commitsCalculated;
-
-    ExpressionsCtx(SetupCtx& _setupCtx) : setupCtx(_setupCtx) {
-        commitsCalculated.resize(setupCtx.starkInfo.cmPolsMap.size(), false);
-        subProofValuesCalculated.resize(setupCtx.starkInfo.nSubProofValues, false);
-    };
+    ExpressionsCtx(SetupCtx& _setupCtx) : setupCtx(_setupCtx) {};
 
     virtual ~ExpressionsCtx() {};
-
-    void setCommitCalculated(uint64_t id) {
-        commitsCalculated[id] = true;
-    };
-
-    void setSubproofValueCalculated(uint64_t id) {
-        subProofValuesCalculated[id] = true;
-    };
-
-    void canImPolsBeCalculated(uint64_t step) {
-        for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); ++i) {
-            PolMap cmPol = setupCtx.starkInfo.cmPolsMap[i];
-            if((cmPol.stage < step || (cmPol.stage == step && !cmPol.imPol)) && !commitsCalculated[i]) {
-                zklog.info("Witness polynomial " + setupCtx.starkInfo.cmPolsMap[i].name + " is not calculated");
-                exitProcess();
-                exit(-1);
-            }
-        }
-        
-    }
-
-    void canStageBeCalculated(uint64_t step) {
-        if(step == setupCtx.starkInfo.nStages) {
-            for(uint64_t i = 0; i < setupCtx.starkInfo.nSubProofValues; i++) {
-                if(!subProofValuesCalculated[i]) {
-                    zklog.info("Subproofvalue " + to_string(i) + " is not calculated");
-                    exitProcess();
-                    exit(-1);
-                }
-            }
-        }
-
-        if(step <= setupCtx.starkInfo.nStages) {
-            for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
-                if(setupCtx.starkInfo.cmPolsMap[i].stage == step && !commitsCalculated[i]) {
-                    zklog.info("Witness polynomial " + setupCtx.starkInfo.cmPolsMap[i].name + " is not calculated");
-                    exitProcess();
-                    exit(-1);
-                }
-            }
-        }
-    }
 
     VecU64Result getHintIdsByName(std::string name) {
         VecU64Result hintIds;
@@ -124,7 +76,7 @@ public:
         return hintIds;
     }
     
-    HintFieldInfo getHintField(StepsParams& params, uint64_t hintId, std::string hintFieldName, bool dest, bool print_expression) {
+    HintFieldInfo getHintField(StepsParams& params, uint64_t hintId, std::string hintFieldName, bool dest, bool inverse, bool print_expression) {
         uint64_t deg = 1 << setupCtx.starkInfo.starkStruct.nBits;
 
         if(setupCtx.expressionsBin.hints.size() == 0) {
@@ -175,7 +127,13 @@ public:
                 }
                 cout << endl;
             }
-            if(!dest) getPolynomial(params, hintFieldInfo.values, true, hintField->id, false);
+            if(!dest) {
+                getPolynomial(params, hintFieldInfo.values, true, hintField->id, false);
+                if(inverse) {
+                    zklog.error("Inverse not supported still for polynomials");
+                    exitProcess();
+                }
+            }
         } else if(hintField->operand == opType::const_) {
             uint64_t dim = setupCtx.starkInfo.constPolsMap[hintField->id].dim;
             hintFieldInfo.size = deg*dim;
@@ -193,6 +151,10 @@ public:
             }
             cout << endl;
             getPolynomial(params, hintFieldInfo.values, false, hintField->id, false);
+            if(inverse) {
+                zklog.error("Inverse not supported still for polynomials");
+                exitProcess();
+            }
         } else if (hintField->operand == opType::tmp) {
             uint64_t dim = setupCtx.expressionsBin.expressionsInfo[hintField->id].destDim;
             hintFieldInfo.size = deg*dim;
@@ -202,18 +164,18 @@ public:
             if(print_expression && setupCtx.expressionsBin.expressionsInfo[hintField->id].line != "") {
                 cout << "the expression with id: " << hintField->id << " " << setupCtx.expressionsBin.expressionsInfo[hintField->id].line << endl;
             }
-            calculateExpression(params, hintFieldInfo.values, hintField->id);
+            calculateExpression(params, hintFieldInfo.values, hintField->id, inverse);
         } else if (hintField->operand == opType::public_) {
             hintFieldInfo.size = 1;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
-            hintFieldInfo.values[0] = params.publicInputs[hintField->id];
+            hintFieldInfo.values[0] = inverse ? Goldilocks::inv(params.publicInputs[hintField->id]) : params.publicInputs[hintField->id];
             hintFieldInfo.fieldType = HintFieldType::Field;
             hintFieldInfo.offset = 1;
             if(print_expression) cout << "public input " << setupCtx.starkInfo.publicsMap[hintField->id].name << endl;
         } else if (hintField->operand == opType::number) {
             hintFieldInfo.size = 1;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
-            hintFieldInfo.values[0] = Goldilocks::fromU64(hintField->value);
+            hintFieldInfo.values[0] = inverse ? Goldilocks::inv(Goldilocks::fromU64(hintField->value)) : Goldilocks::fromU64(hintField->value);
             hintFieldInfo.fieldType = HintFieldType::Field;
             hintFieldInfo.offset = 1;
             if(print_expression) cout << "number " << hintField->value << endl;
@@ -223,14 +185,24 @@ public:
             hintFieldInfo.fieldType = HintFieldType::FieldExtended;
             hintFieldInfo.offset = FIELD_EXTENSION;
             if(print_expression) cout << "subproofValue " << setupCtx.starkInfo.subproofValuesMap[hintField->id].name << endl;
-            if(!dest) std::memcpy(hintFieldInfo.values, &params.subproofValues[FIELD_EXTENSION*hintField->id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
+            if(!dest) {
+                if(inverse)  {
+                    Goldilocks3::inv((Goldilocks3::Element *)hintFieldInfo.values, (Goldilocks3::Element *)&params.subproofValues[FIELD_EXTENSION*hintField->id]);
+                } else {
+                    std::memcpy(hintFieldInfo.values, &params.subproofValues[FIELD_EXTENSION*hintField->id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
+                }
+            }
         } else if (hintField->operand == opType::challenge) {
             hintFieldInfo.size = FIELD_EXTENSION;
             hintFieldInfo.values = new Goldilocks::Element[hintFieldInfo.size];
             hintFieldInfo.fieldType = HintFieldType::FieldExtended;
             hintFieldInfo.offset = FIELD_EXTENSION;
             if(print_expression) cout << "challenge " << setupCtx.starkInfo.challengesMap[hintField->id].name << endl;
-            std::memcpy(hintFieldInfo.values, &params.challenges[FIELD_EXTENSION*hintField->id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
+            if(inverse) {
+                Goldilocks3::inv((Goldilocks3::Element *)hintFieldInfo.values, (Goldilocks3::Element *)&params.challenges[FIELD_EXTENSION*hintField->id]);
+            } else {
+                std::memcpy(hintFieldInfo.values, &params.challenges[FIELD_EXTENSION*hintField->id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
+            }
         } else {
             zklog.error("Unknown HintFieldType");
             exitProcess();
@@ -242,7 +214,7 @@ public:
         return hintFieldInfo;
     }
 
-    void setHintField(StepsParams& params, Goldilocks::Element* values, uint64_t hintId, std::string hintFieldName) {
+    uint64_t setHintField(StepsParams& params, Goldilocks::Element* values, uint64_t hintId, std::string hintFieldName) {
         
         Hint hint = setupCtx.expressionsBin.hints[hintId];
 
@@ -265,6 +237,8 @@ public:
             exitProcess();
             exit(-1);  
         }
+
+        return hintField->id;
     }
 
     virtual void calculateExpressions(StepsParams& params, Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse = false) {};
@@ -379,12 +353,10 @@ public:
         for(uint64_t j = 0; j < deg; ++j) {
             std::memcpy(pol[j], &values[j*dim], dim * sizeof(Goldilocks::Element));
         }
-        commitsCalculated[idPol] = true;
     }
 
     void setSubproofValue(StepsParams& params, Goldilocks::Element *value, uint64_t subproofValueId) {
         std::memcpy(&params.subproofValues[FIELD_EXTENSION*subproofValueId], value, FIELD_EXTENSION * sizeof(Goldilocks::Element));
-        subProofValuesCalculated[subproofValueId] = true;
     }
 
     void calculateExpression(StepsParams& params, Goldilocks::Element* dest, uint64_t expressionId, bool inverse = false) {
@@ -406,7 +378,6 @@ public:
                 for(uint64_t j = 0; j < N; ++j) {
                     std::memcpy(&imAddr[j*setupCtx.starkInfo.mapSectionsN["cm" + to_string(step)]], &pAddr[j*setupCtx.starkInfo.cmPolsMap[i].dim], setupCtx.starkInfo.cmPolsMap[i].dim * sizeof(Goldilocks::Element));
                 }
-                setCommitCalculated(i);
             }
         }
         
@@ -417,11 +388,6 @@ public:
     void calculateQuotientPolynomial(StepsParams& params) {
         TimerStart(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
         calculateExpression(params, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], setupCtx.starkInfo.cExpId);
-        for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
-            if(setupCtx.starkInfo.cmPolsMap[i].stage == setupCtx.starkInfo.nStages + 1) {
-                setCommitCalculated(i);
-            }
-        }
         TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
     }
 

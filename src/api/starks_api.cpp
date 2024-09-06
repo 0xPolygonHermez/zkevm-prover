@@ -252,38 +252,18 @@ void* get_hint_ids_by_name(void *pExpressionsCtx, char* hintName)
     return new VecU64Result(hintIds);
 }
 
-void *get_hint_field(void *pExpressionsCtx, void* pParams, uint64_t hintId, char *hintFieldName, bool dest, bool printExpression) 
+void *get_hint_field(void *pExpressionsCtx, void* pParams, uint64_t hintId, char *hintFieldName, bool dest, bool inverse, bool printExpression) 
 {
     ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    HintFieldInfo hintFieldInfo = expressionsAvx->getHintField(*(StepsParams *)pParams, hintId, string(hintFieldName), dest, printExpression);
+    HintFieldInfo hintFieldInfo = expressionsAvx->getHintField(*(StepsParams *)pParams, hintId, string(hintFieldName), dest, inverse, printExpression);
     return new HintFieldInfo(hintFieldInfo);
 }
 
-void set_hint_field(void *pExpressionsCtx, void* pParams, void *values, uint64_t hintId, char * hintFieldName) 
+uint64_t set_hint_field(void *pExpressionsCtx, void* pParams, void *values, uint64_t hintId, char * hintFieldName) 
 {
     ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    expressionsAvx->setHintField(*(StepsParams *)pParams, (Goldilocks::Element *)values, hintId, string(hintFieldName));
+    return expressionsAvx->setHintField(*(StepsParams *)pParams, (Goldilocks::Element *)values, hintId, string(hintFieldName));
 }
-
-
-void set_commit_calculated(void *pExpressionsCtx, uint64_t id)
-{
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    expressionsAvx->setCommitCalculated(id);
-}
-
-void can_stage_be_calculated(void *pExpressionsCtx, uint64_t step)
-{
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    expressionsAvx->canStageBeCalculated(step);
-}
-
-void can_impols_be_calculated(void *pExpressionsCtx, uint64_t step)
-{
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    expressionsAvx->canImPolsBeCalculated(step);
-}
-
 
 void expressions_ctx_free(void *pExpressionsCtx)
 {

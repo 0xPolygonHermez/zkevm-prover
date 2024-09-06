@@ -43,13 +43,9 @@
     void *verify_constraints(void *pExpressionsCtx, void*pParams);
     void *get_fri_pol(void *pExpressionsCtx, void *pParams);
     void *get_hint_ids_by_name(void *pExpressionsCtx, char* hintName);
-    void *get_hint_field(void *pExpressionsCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest, bool print_expression);
-    void set_hint_field(void *pExpressionsCtx,  void*pParams, void *values, uint64_t hintId, char* hintFieldName);
+    void *get_hint_field(void *pExpressionsCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest, bool inverse, bool print_expression);
+    uint64_t set_hint_field(void *pExpressionsCtx,  void*pParams, void *values, uint64_t hintId, char* hintFieldName);
     void expressions_ctx_free(void *pExpressionsCtx);
-
-    void set_commit_calculated(void *pExpressionsCtx, uint64_t id);
-    void can_stage_be_calculated(void *pExpressionsCtx, uint64_t step);
-    void can_impols_be_calculated(void *pExpressionsCtx, uint64_t step);
 
     // StepsParams
     // ========================================================================================

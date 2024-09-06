@@ -148,14 +148,11 @@ public:
 
     void genProof(Goldilocks::Element *pAddress, FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs);
     
-    void calculateHints(uint64_t step, StepsParams &params);
-
     void extendAndMerkelize(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof);
 
     void calculateFRIPolynomial(StepsParams &params);
 
     void commitStage(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof);
-    void computeStageExpressions(uint64_t step,  StepsParams &params, FRIProof<ElementType> &proof);
     void computeQ(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof);
     
     void computeEvals(StepsParams &params, FRIProof<ElementType> &proof);
@@ -174,11 +171,13 @@ private:
     void evmap(StepsParams &params, Goldilocks::Element *LEv);
     
     // ALL THIS FUNCTIONS CAN BE REMOVED WHEN WC IS READY
-    bool canExpressionBeCalculated(ParserParams &parserParams, StepsParams &params);
-    bool isHintResolved(Hint &hint, std::vector<string> dstFields, StepsParams &params);
-    bool canHintBeResolved(Hint &hint, std::vector<string> srcFields, StepsParams &params);
-    uint64_t isStageCalculated(uint64_t step, StepsParams &params);
-    bool isSymbolCalculated(opType operand, uint64_t id, StepsParams &params);
+    void computeStageExpressions(uint64_t step,  StepsParams &params, FRIProof<ElementType> &proof,  vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
+    void calculateHints(uint64_t step, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
+    bool canExpressionBeCalculated(ParserParams &parserParams, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
+    bool isHintResolved(Hint &hint, std::vector<string> dstFields, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
+    bool canHintBeResolved(Hint &hint, std::vector<string> srcFields, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
+    uint64_t isStageCalculated(uint64_t step, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
+    bool isSymbolCalculated(opType operand, uint64_t id, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
     void calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity);
 
 public:

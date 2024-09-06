@@ -20,6 +20,9 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     Goldilocks::Element* challenges = new Goldilocks::Element[setupCtx.starkInfo.challengesMap.size() * FIELD_EXTENSION];
     Goldilocks::Element* subproofValues = new Goldilocks::Element[setupCtx.starkInfo.nSubProofValues * FIELD_EXTENSION];
     
+    vector<bool> subProofValuesCalculated(setupCtx.starkInfo.nSubProofValues, false);
+    vector<bool> commitsCalculated(setupCtx.starkInfo.cmPolsMap.size(), false);
+
     StepsParams params = {
         pols : pAddress,
         publicInputs : publicInputs,
@@ -31,7 +34,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
 
     for (uint64_t i = 0; i < setupCtx.starkInfo.mapSectionsN["cm1"]; ++i)
     {
-        expressionsCtx.setCommitCalculated(i);
+        commitsCalculated[i] = true;
     }
 
     TimerStopAndLog(STARK_INITIALIZATION);
@@ -69,11 +72,35 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
             }
         }
 
-        computeStageExpressions(step, params, proof);
+        computeStageExpressions(step, params, proof, commitsCalculated, subProofValuesCalculated);
 
         expressionsCtx.calculateImPolsExpressions(step, params);
 
-        expressionsCtx.canStageBeCalculated(step);
+        for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
+            if(setupCtx.starkInfo.cmPolsMap[i].imPol && setupCtx.starkInfo.cmPolsMap[i].stage == step) {
+               commitsCalculated[i] = true;
+            }
+        }
+
+        if(step == setupCtx.starkInfo.nStages) {
+            for(uint64_t i = 0; i < setupCtx.starkInfo.nSubProofValues; i++) {
+                if(!subProofValuesCalculated[i]) {
+                    zklog.info("Subproofvalue " + to_string(i) + " is not calculated");
+                    exitProcess();
+                    exit(-1);
+                }
+            }
+        }
+
+        if(step <= setupCtx.starkInfo.nStages) {
+            for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
+                if(setupCtx.starkInfo.cmPolsMap[i].stage == step && !commitsCalculated[i]) {
+                    zklog.info("Witness polynomial " + setupCtx.starkInfo.cmPolsMap[i].name + " is not calculated");
+                    exitProcess();
+                    exit(-1);
+                }
+            }
+        }
 
         commitStage(step, params, proof);
 
@@ -113,7 +140,11 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     }
     
     expressionsCtx.calculateQuotientPolynomial(params);
-      
+    for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
+        if(setupCtx.starkInfo.cmPolsMap[i].stage == setupCtx.starkInfo.nStages + 1) {
+            commitsCalculated[i] = true;
+        }
+    }
     commitStage(setupCtx.starkInfo.nStages + 1, params, proof);
 
     if (debug)
@@ -261,14 +292,14 @@ void Starks<ElementType>::commitStage(uint64_t step, StepsParams &params, FRIPro
 }
 
 template <typename ElementType>
-void Starks<ElementType>::computeStageExpressions(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof)
+void Starks<ElementType>::computeStageExpressions(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated)
 {
     TimerStartExpr(STARK_TRY_CALCULATE_EXPS_STEP, step);
-    uint64_t symbolsToBeCalculated = isStageCalculated(step, params);
+    uint64_t symbolsToBeCalculated = isStageCalculated(step, params, commitsCalculated, subProofValuesCalculated);
     while (symbolsToBeCalculated > 0)
     {
-        calculateHints(step, params);
-        uint64_t newSymbolsToBeCalculated = isStageCalculated(step, params);
+        calculateHints(step, params, commitsCalculated, subProofValuesCalculated);
+        uint64_t newSymbolsToBeCalculated = isStageCalculated(step, params, commitsCalculated, subProofValuesCalculated);
         if (newSymbolsToBeCalculated == symbolsToBeCalculated)
         {
             zklog.info("Something went wrong when calculating stage " + to_string(step));
@@ -434,17 +465,17 @@ void Starks<ElementType>::computeFRIQueries(FRIProof<ElementType> &fproof, uint6
 
 
 template <typename ElementType>
-bool Starks<ElementType>::canExpressionBeCalculated(ParserParams &parserParams, StepsParams &params) {
+bool Starks<ElementType>::canExpressionBeCalculated(ParserParams &parserParams, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated) {
     for(uint64_t i = 0; i < parserParams.nCmPolsUsed; i++) {
         uint64_t cmPolUsedId = setupCtx.expressionsBin.expressionsBinArgsExpressions.cmPolsIds[parserParams.cmPolsOffset + i];
-        if (!isSymbolCalculated(opType::cm, cmPolUsedId, params)) {
+        if (!isSymbolCalculated(opType::cm, cmPolUsedId, params, commitsCalculated, subProofValuesCalculated)) {
             return false;
         }
     }
 
     for(uint64_t i = 0; i < parserParams.nSubproofValuesUsed; i++) {
         uint64_t subproofValueUsedId = setupCtx.expressionsBin.expressionsBinArgsExpressions.subproofValuesIds[parserParams.subproofValuesOffset + i];
-        if (!isSymbolCalculated(opType::subproofvalue, subproofValueUsedId, params)) {
+        if (!isSymbolCalculated(opType::subproofvalue, subproofValueUsedId, params, commitsCalculated, subProofValuesCalculated)) {
             return false;
         }
     }
@@ -452,7 +483,7 @@ bool Starks<ElementType>::canExpressionBeCalculated(ParserParams &parserParams, 
 }
 
 template <typename ElementType>
-bool Starks<ElementType>::isHintResolved(Hint &hint, vector<string> dstFields, StepsParams &params)
+bool Starks<ElementType>::isHintResolved(Hint &hint, vector<string> dstFields, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated)
 {
     for (uint64_t i = 0; i < dstFields.size(); i++)
     {
@@ -467,7 +498,7 @@ bool Starks<ElementType>::isHintResolved(Hint &hint, vector<string> dstFields, S
             exit(-1);
         }
 
-        if (!isSymbolCalculated(hintField->operand, hintField->id, params)) {
+        if (!isSymbolCalculated(hintField->operand, hintField->id, params, commitsCalculated, subProofValuesCalculated)) {
             return false;
         }
     }
@@ -476,7 +507,7 @@ bool Starks<ElementType>::isHintResolved(Hint &hint, vector<string> dstFields, S
 }
 
 template <typename ElementType>
-bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields, StepsParams &params)
+bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated)
 {
     for (uint64_t i = 0; i < srcFields.size(); i++)
     {
@@ -492,7 +523,7 @@ bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields
         }
 
         if (hintField->operand == opType::number) continue;
-        if (!isSymbolCalculated(hintField->operand, hintField->id, params)) {
+        if (!isSymbolCalculated(hintField->operand, hintField->id, params, commitsCalculated, subProofValuesCalculated)) {
             return false;
         }
     }
@@ -501,7 +532,7 @@ bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields
 }
 
 template <typename ElementType>
-void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
+void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated)
 {
     Polinomial* polynomials = new Polinomial[setupCtx.starkInfo.cmPolsMap.size()];
 
@@ -521,7 +552,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
         auto hintHandler = HintHandlerBuilder::create(hint.name)->build();
         vector<string> srcFields = hintHandler->getSources();
         vector<string> dstFields = hintHandler->getDestinations();
-        if (!isHintResolved(hint, dstFields, params) && canHintBeResolved(hint, srcFields, params))
+        if (!isHintResolved(hint, dstFields, params, commitsCalculated, subProofValuesCalculated) && canHintBeResolved(hint, srcFields, params, commitsCalculated, subProofValuesCalculated))
         {
             hintsToCalculate.push_back(i);
 
@@ -679,9 +710,9 @@ void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params)
                 return hintField.name == dstField;
             });
             if(hintField->operand == opType::cm) {
-                expressionsCtx.setCommitCalculated(hintField->id);
+                commitsCalculated[hintField->id] = true;
             } else if(hintField->operand == opType::subproofvalue) {
-                expressionsCtx.setSubproofValueCalculated(hintField->id);
+                subProofValuesCalculated[hintField->id] = true;
             }
         }
     }
@@ -776,17 +807,17 @@ void Starks<ElementType>::addTranscript(TranscriptType &transcript, ElementType 
 };
 
 template <typename ElementType>
-uint64_t Starks<ElementType>::isStageCalculated(uint64_t step, StepsParams &params) {
+uint64_t Starks<ElementType>::isStageCalculated(uint64_t step, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated) {
 
     uint64_t symbolsToBeCalculated = 0;
     for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
         if(setupCtx.starkInfo.cmPolsMap[i].stage != step || setupCtx.starkInfo.cmPolsMap[i].imPol) continue;
-        if(!isSymbolCalculated(opType::cm, i, params)) symbolsToBeCalculated++;
+        if(!isSymbolCalculated(opType::cm, i, params, commitsCalculated, subProofValuesCalculated)) symbolsToBeCalculated++;
     }
 
     if(step == setupCtx.starkInfo.nStages) {
         for(uint64_t i = 0; i < setupCtx.starkInfo.nSubProofValues; i++) {
-            if(!isSymbolCalculated(opType::subproofvalue, i, params)) symbolsToBeCalculated++;
+            if(!isSymbolCalculated(opType::subproofvalue, i, params, commitsCalculated, subProofValuesCalculated)) symbolsToBeCalculated++;
         }
     }
 
@@ -794,17 +825,17 @@ uint64_t Starks<ElementType>::isStageCalculated(uint64_t step, StepsParams &para
 }
 
 template <typename ElementType>
-bool Starks<ElementType>::isSymbolCalculated(opType operand, uint64_t id, StepsParams &params)
+bool Starks<ElementType>::isSymbolCalculated(opType operand, uint64_t id, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated)
 {
     bool isCalculated = false;
     if (operand == opType::cm)
     {
-        if (expressionsCtx.commitsCalculated[id])
+        if (commitsCalculated[id])
             isCalculated = true;
     }
     else if (operand == opType::subproofvalue)
     {
-        if (expressionsCtx.subProofValuesCalculated[id])
+        if (subProofValuesCalculated[id])
             isCalculated = true;
     }
     else
