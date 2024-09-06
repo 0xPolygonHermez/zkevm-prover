@@ -53,8 +53,7 @@
 
     // Starks
     // ========================================================================================
-    void *starks_new(void *pConfig, void *pSetupCtx, void *pExpressionsCtx);
-    void *starks_new_default(void *pSetupCtx, void *pExpressionsCtx);
+    void *starks_new(void *pSetupCtx, void *pExpressionsCtx);
     void starks_free(void *pStarks);
 
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);

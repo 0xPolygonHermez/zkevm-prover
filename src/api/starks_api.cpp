@@ -274,17 +274,9 @@ void expressions_ctx_free(void *pExpressionsCtx)
 // Starks
 // ========================================================================================
 
-void *starks_new(void *pConfig, void *pSetupCtx, void *pExpressionsCtx)
+void *starks_new(void *pSetupCtx, void *pExpressionsCtx)
 {
-    return new Starks<Goldilocks::Element>(*(Config *)pConfig, *(SetupCtx *)pSetupCtx, *(ExpressionsAvx*)pExpressionsCtx, false);
-}
-
-void *starks_new_default(void *pSetupCtx, void *pExpressionsCtx)
-{
-    Config configLocal;
-    configLocal.runFileGenBatchProof = true; //to force function generateProof to return true
-
-    return new Starks<Goldilocks::Element>(configLocal, *(SetupCtx *)pSetupCtx, *(ExpressionsAvx*)pExpressionsCtx, false);
+    return new Starks<Goldilocks::Element>(*(SetupCtx *)pSetupCtx, *(ExpressionsAvx*)pExpressionsCtx);
 }
 
 void starks_free(void *pStarks)

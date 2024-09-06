@@ -29,6 +29,8 @@ public:
     Goldilocks::Element *pConstPolsAddressExtended;
     Goldilocks::Element *pConstTreeAddress;
     Goldilocks::Element *zi;
+    Goldilocks::Element *S;
+    Goldilocks::Element *x;
 
     ConstPols(StarkInfo& starkInfo_, std::string constPolsFile): starkInfo(starkInfo_), N(1 << starkInfo.starkStruct.nBits), NExtended(1 << starkInfo.starkStruct.nBitsExt) {
         
@@ -69,6 +71,8 @@ public:
         TimerStopAndLog(CALCULATE_CONST_TREE_TO_MEMORY);
 
         computeZerofier();
+
+        computeX();
     }
 
     ConstPols(StarkInfo& starkInfo_, std::string constPolsFile, std::string constTreeFile) : starkInfo(starkInfo_), N(1 << starkInfo.starkStruct.nBits), NExtended(1 << starkInfo.starkStruct.nBitsExt) {
@@ -96,6 +100,8 @@ public:
         TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
 
         computeZerofier();
+
+        computeX();
     }
 
     void loadConstPols(StarkInfo& starkInfo, std::string constPolsFile) {
@@ -160,6 +166,26 @@ public:
             }
         }
         TimerStopAndLog(COMPUTE_ZHINV);
+    }
+
+    void computeX() {
+        TimerStart(COMPUTE_X);
+
+        uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
+        x = new Goldilocks::Element[N << extendBits];
+        x[0] = Goldilocks::shift();
+        for (uint64_t k = 1; k < (N << extendBits); k++)
+        {
+            x[k] = x[k - 1] * Goldilocks::w(starkInfo.starkStruct.nBits + extendBits);
+        }
+
+        S = new Goldilocks::Element[starkInfo.qDeg];
+        Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
+        S[0] = Goldilocks::one();
+        for(uint64_t i = 1; i < starkInfo.qDeg; i++) {
+            S[i] = Goldilocks::mul(S[i - 1], shiftIn);
+        }
+        TimerStopAndLog(COMPUTE_X);
     }
 
     void buildZHInv()
@@ -238,6 +264,8 @@ public:
         free(pConstPolsAddress);
         free(pConstTreeAddress);
         delete zi;
+        delete S;
+        delete x;
     }
 };
 
