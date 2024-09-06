@@ -121,7 +121,7 @@ Prover::Prover(Goldilocks &fr,
 
 #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
             warmup_gpu();
-            alloc_pinned_mem_per_device((1 << _starkInfo.starkStruct.nBitsExt) * 32);
+            alloc_pinned_mem_per_device((uint64_t(1) << _starkInfo.starkStruct.nBitsExt) * 32);
 #endif
 
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
