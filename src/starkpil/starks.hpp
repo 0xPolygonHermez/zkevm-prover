@@ -29,9 +29,7 @@ template <typename ElementType>
 class Starks
 {
 public:
-    SetupCtx& setupCtx;
-    ExpressionsCtx &expressionsCtx;
-    
+    SetupCtx& setupCtx;    
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
 
@@ -42,7 +40,7 @@ private:
 void merkelizeMemory(Goldilocks::Element *pAddress); // function for DBG purposes
 
 public:
-    Starks(SetupCtx& setupCtx_, ExpressionsCtx& expressionsCtx_) : setupCtx(setupCtx_), expressionsCtx(expressionsCtx_)                                                         
+    Starks(SetupCtx& setupCtx_) : setupCtx(setupCtx_)                                                    
     {
         treesGL = new MerkleTreeType*[setupCtx.starkInfo.nStages + 2];
         treesGL[setupCtx.starkInfo.nStages + 1] = new MerkleTreeType(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, (Goldilocks::Element *)setupCtx.constPols.pConstTreeAddress);
@@ -81,14 +79,16 @@ public:
     
     void extendAndMerkelize(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof);
 
-    void calculateFRIPolynomial(StepsParams &params);
-
     void commitStage(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof);
     void computeQ(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof);
     
+    void calculateImPolsExpressions(uint64_t step, StepsParams& params);
+    void calculateQuotientPolynomial(StepsParams& params);
+    void calculateFRIPolynomial(StepsParams& params);
+
     void computeEvals(StepsParams &params, FRIProof<ElementType> &proof);
 
-    void computeFRIPol(uint64_t step, StepsParams &params);
+    void prepareFRIPolynomial(StepsParams &params);
     
     void computeFRIFolding(uint64_t step, StepsParams &params, Goldilocks::Element *challenge, FRIProof<ElementType> &fproof);
     void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);
@@ -102,8 +102,8 @@ private:
     void evmap(StepsParams &params, Goldilocks::Element *LEv);
     
     // ALL THIS FUNCTIONS CAN BE REMOVED WHEN WC IS READY
-    void computeStageExpressions(uint64_t step,  StepsParams &params, FRIProof<ElementType> &proof,  vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
-    void calculateHints(uint64_t step, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
+    void computeStageExpressions(uint64_t step, ExpressionsCtx& expressionsCtx, StepsParams &params, FRIProof<ElementType> &proof,  vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
+    void calculateHints(uint64_t step, ExpressionsCtx& expressionsCtx, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
     bool canExpressionBeCalculated(ParserParams &parserParams, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
     bool isHintResolved(Hint &hint, std::vector<string> dstFields, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
     bool canHintBeResolved(Hint &hint, std::vector<string> srcFields, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);

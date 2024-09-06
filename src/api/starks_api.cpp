@@ -3,6 +3,8 @@
 #include "zkglobals.hpp"
 #include "proof2zkinStark.hpp"
 #include "starks.hpp"
+#include "verify_constraints.hpp"
+#include "hints.hpp"
 #include "global_constraints.hpp"
 #include <filesystem>
 
@@ -139,6 +141,14 @@ void *setup_ctx_new(void* p_stark_info, void* p_expression_bin, void* p_const_po
     return setupCtx;
 }
 
+void* get_hint_ids_by_name(void *pSetupCtx, char* hintName)
+{
+    SetupCtx *setupCtx = (SetupCtx *)pSetupCtx;
+
+    VecU64Result hintIds =  setupCtx->expressionsBin.getHintIdsByName(string(hintName));
+    return new VecU64Result(hintIds);
+}
+
 void setup_ctx_free(void *pSetupCtx) {
     SetupCtx *setupCtx = (SetupCtx *)pSetupCtx;
     delete setupCtx;
@@ -213,70 +223,43 @@ void *init_params(void* ptr, void* public_inputs, void* challenges, void* evals,
     return params;
 }
 
+void *get_fri_pol(void *pSetupCtx, void *pParams)
+{
+    SetupCtx setupCtx = *(SetupCtx *)pSetupCtx;
+    auto params = *(StepsParams *)pParams;
+    
+    return &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
+}
+
+void *get_hint_field(void *pSetupCtx, void* pParams, uint64_t hintId, char *hintFieldName, bool dest, bool inverse, bool printExpression) 
+{
+    HintFieldInfo hintFieldInfo = getHintField(*(SetupCtx *)pSetupCtx, *(StepsParams *)pParams, hintId, string(hintFieldName), dest, inverse, printExpression);
+    return new HintFieldInfo(hintFieldInfo);
+}
+
+uint64_t set_hint_field(void *pSetupCtx, void* pParams, void *values, uint64_t hintId, char * hintFieldName) 
+{
+    return setHintField(*(SetupCtx *)pSetupCtx, *(StepsParams *)pParams, (Goldilocks::Element *)values, hintId, string(hintFieldName));
+}
+
+void *verify_constraints(void *pSetupCtx, void* pParams)
+{
+    ConstraintsResults *constraintsInfo = verifyConstraints(*(SetupCtx *)pSetupCtx, *(StepsParams *)pParams);
+    return constraintsInfo;
+}
+
 void params_free(void* pParams) {
     StepsParams *params = (StepsParams *)pParams;
     delete params;
 }
 
-// ExpressionsCtx
-// ========================================================================================
-
-void *expressions_ctx_new(void *pSetupCtx)
-{
-    ExpressionsAvx *expressionsAvx = new ExpressionsAvx(*(SetupCtx *)pSetupCtx);
-    return expressionsAvx;
-}
-
-void *get_fri_pol(void *pExpressionsCtx, void *pParams)
-{
-    ExpressionsAvx expressionsAvx = *(ExpressionsAvx *)pExpressionsCtx;
-    auto params = *(StepsParams *)pParams;
-    
-    return &params.pols[expressionsAvx.setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
-}
-
-void *verify_constraints(void *pExpressionsCtx, void* pParams)
-{
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    ConstraintsResults *constraintsInfo = expressionsAvx->verifyConstraints(*(StepsParams *)pParams);
-
-    return constraintsInfo;
-
-}
-
-void* get_hint_ids_by_name(void *pExpressionsCtx, char* hintName)
-{
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-
-    VecU64Result hintIds =  expressionsAvx->getHintIdsByName(string(hintName));
-    return new VecU64Result(hintIds);
-}
-
-void *get_hint_field(void *pExpressionsCtx, void* pParams, uint64_t hintId, char *hintFieldName, bool dest, bool inverse, bool printExpression) 
-{
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    HintFieldInfo hintFieldInfo = expressionsAvx->getHintField(*(StepsParams *)pParams, hintId, string(hintFieldName), dest, inverse, printExpression);
-    return new HintFieldInfo(hintFieldInfo);
-}
-
-uint64_t set_hint_field(void *pExpressionsCtx, void* pParams, void *values, uint64_t hintId, char * hintFieldName) 
-{
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    return expressionsAvx->setHintField(*(StepsParams *)pParams, (Goldilocks::Element *)values, hintId, string(hintFieldName));
-}
-
-void expressions_ctx_free(void *pExpressionsCtx)
-{
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    delete expressionsAvx;
-}
 
 // Starks
 // ========================================================================================
 
-void *starks_new(void *pSetupCtx, void *pExpressionsCtx)
+void *starks_new(void *pSetupCtx)
 {
-    return new Starks<Goldilocks::Element>(*(SetupCtx *)pSetupCtx, *(ExpressionsAvx*)pExpressionsCtx);
+    return new Starks<Goldilocks::Element>(*(SetupCtx *)pSetupCtx);
 }
 
 void starks_free(void *pStarks)
@@ -298,16 +281,23 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
     starks->ffi_treesGL_get_root(index, (Goldilocks::Element *)dst);
 }
 
-void calculate_quotient_polynomial(void *pExpressionsCtx, void* pParams)
+void calculate_fri_polynomial(void *pStarks, void* pParams)
 {
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    expressionsAvx->calculateQuotientPolynomial(*(StepsParams *)pParams);
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    starks->calculateFRIPolynomial(*(StepsParams *)pParams);
 }
 
-void calculate_impols_expressions(void *pExpressionsCtx, void* pParams, uint64_t step)
+
+void calculate_quotient_polynomial(void *pStarks, void* pParams)
 {
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    expressionsAvx->calculateImPolsExpressions(step, *(StepsParams *)pParams);
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    starks->calculateQuotientPolynomial(*(StepsParams *)pParams);
+}
+
+void calculate_impols_expressions(void *pStarks, void* pParams, uint64_t step)
+{
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    starks->calculateImPolsExpressions(step, *(StepsParams *)pParams);
 }
 
 void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof) {
@@ -331,10 +321,10 @@ void compute_evals(void *pStarks, void *pParams, void *pProof)
     starks->computeEvals(*(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
-void compute_fri_pol(void *pStarks, uint64_t step, void *pParams)
+void prepare_fri_pol(void *pStarks, void *pParams)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeFRIPol(step, *(StepsParams *)pParams);
+    starks->prepareFRIPolynomial(*(StepsParams *)pParams);
 }
 
 void compute_fri_folding(void *pStarks, uint64_t step, void *pParams, void *pChallenge,  void *pProof)
@@ -427,13 +417,11 @@ bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinF
 
 // Debug functions
 // =================================================================================  
-void *print_by_name(void *pExpressionsCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values) {
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    HintFieldInfo hintFieldInfo = expressionsAvx->printByName(*(StepsParams *)pParams, string(name), lengths, first_value, last_value, return_values);
+void *print_by_name(void *pSetupCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values) {
+    HintFieldInfo hintFieldInfo = printByName(*(SetupCtx *)pSetupCtx, *(StepsParams *)pParams, string(name), lengths, first_value, last_value, return_values);
     return new HintFieldInfo(hintFieldInfo);
 }
 
-void print_expression(void *pExpressionsCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value) {
-    ExpressionsAvx *expressionsAvx = (ExpressionsAvx *)pExpressionsCtx;
-    expressionsAvx->printExpression((Goldilocks::Element *)pol, dim, first_value, last_value);
+void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value) {
+    printExpression((Goldilocks::Element *)pol, dim, first_value, last_value);
 }

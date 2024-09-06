@@ -14,6 +14,8 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
+    ExpressionsAvx expressionsAvx(setupCtx);
+
     uint64_t nFieldElements = setupCtx.starkInfo.starkStruct.verificationHashType == std::string("BN128") ? 1 : HASH_SIZE;
 
     TranscriptType transcript(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom);
@@ -74,9 +76,9 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
             }
         }
 
-        computeStageExpressions(step, params, proof, commitsCalculated, subProofValuesCalculated);
+        computeStageExpressions(step, expressionsAvx, params, proof, commitsCalculated, subProofValuesCalculated);
 
-        expressionsCtx.calculateImPolsExpressions(step, params);
+        calculateImPolsExpressions(step, params);
 
         for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
             if(setupCtx.starkInfo.cmPolsMap[i].imPol && setupCtx.starkInfo.cmPolsMap[i].stage == step) {
@@ -143,7 +145,8 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
         }
     }
     
-    expressionsCtx.calculateQuotientPolynomial(params);
+    calculateQuotientPolynomial(params);
+
     for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
         if(setupCtx.starkInfo.cmPolsMap[i].stage == setupCtx.starkInfo.nStages + 1) {
             commitsCalculated[i] = true;
@@ -189,14 +192,15 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
         }
     }
 
-    computeFRIPol(setupCtx.starkInfo.nStages + 2, params);
-
     TimerStopAndLog(STARK_STEP_EVALS);
 
     //--------------------------------
     // 6. Compute FRI
     //--------------------------------
     TimerStart(STARK_STEP_FRI);
+
+    prepareFRIPolynomial(params);
+    calculateFRIPolynomial(params);
 
     Goldilocks::Element challenge[FIELD_EXTENSION];
     Goldilocks::Element *friPol = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
@@ -237,15 +241,6 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
         
     TimerStopAndLog(STARK_PROOF);
 }
-
-template <typename ElementType>
-void Starks<ElementType>::calculateFRIPolynomial(StepsParams &params)
-{
-    TimerStart(STARK_CALCULATE_FRI_POLYNOMIAL);
-    expressionsCtx.calculateExpression(params, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]], setupCtx.starkInfo.friExpId);
-    TimerStopAndLog(STARK_CALCULATE_FRI_POLYNOMIAL);
-}
-
 
 template <typename ElementType>
 void Starks<ElementType>::extendAndMerkelize(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof)
@@ -298,13 +293,13 @@ void Starks<ElementType>::commitStage(uint64_t step, StepsParams &params, FRIPro
 }
 
 template <typename ElementType>
-void Starks<ElementType>::computeStageExpressions(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated)
+void Starks<ElementType>::computeStageExpressions(uint64_t step, ExpressionsCtx& expressionsCtx, StepsParams &params, FRIProof<ElementType> &proof, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated)
 {
     TimerStartExpr(STARK_TRY_CALCULATE_EXPS_STEP, step);
     uint64_t symbolsToBeCalculated = isStageCalculated(step, params, commitsCalculated, subProofValuesCalculated);
     while (symbolsToBeCalculated > 0)
     {
-        calculateHints(step, params, commitsCalculated, subProofValuesCalculated);
+        calculateHints(step, expressionsCtx, params, commitsCalculated, subProofValuesCalculated);
         uint64_t newSymbolsToBeCalculated = isStageCalculated(step, params, commitsCalculated, subProofValuesCalculated);
         if (newSymbolsToBeCalculated == symbolsToBeCalculated)
         {
@@ -434,7 +429,7 @@ void Starks<ElementType>::computeEvals(StepsParams &params, FRIProof<ElementType
 }
 
 template <typename ElementType>
-void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params)
+void Starks<ElementType>::prepareFRIPolynomial(StepsParams &params)
 {
     uint64_t NExtended = 1 << setupCtx.starkInfo.starkStruct.nBitsExt;
 
@@ -486,8 +481,6 @@ void Starks<ElementType>::computeFRIPol(uint64_t step, StepsParams &params)
         }
     }
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
-
-    calculateFRIPolynomial(params);
 }
 
 template <typename ElementType>
@@ -572,7 +565,7 @@ bool Starks<ElementType>::canHintBeResolved(Hint &hint, vector<string> srcFields
 }
 
 template <typename ElementType>
-void Starks<ElementType>::calculateHints(uint64_t step, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated)
+void Starks<ElementType>::calculateHints(uint64_t step, ExpressionsCtx& expressionsCtx, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated)
 {
     uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
 
@@ -935,27 +928,66 @@ void Starks<ElementType>::ffi_treesGL_get_root(uint64_t index, ElementType *dst)
 }
 
 template <typename ElementType>
-void Starks<ElementType>::calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity)
-    {
-        uint64_t size = den.degree();
+void Starks<ElementType>::calculateImPolsExpressions(uint64_t step, StepsParams& params) {
+    TimerStart(STARK_CALCULATE_IMPOLS_EXPS);
 
-        Polinomial denI(size, 3);
-        Polinomial checkVal(1, 3);
-
-        Polinomial::batchInverse(denI, den);
-        
-        Polinomial::mulElement(s, 0, denI, 0, multiplicity);
-        
-        for (uint64_t i = 1; i < size; i++)
-        {
-            Polinomial tmp(1, 3);
-            Polinomial::mulElement(tmp, 0, denI, i, multiplicity);
-            Polinomial::addElement(s, i, s, i - 1, tmp, 0);
+    uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
+    
+    Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
+    for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
+        if(setupCtx.starkInfo.cmPolsMap[i].imPol && setupCtx.starkInfo.cmPolsMap[i].stage == step) {
+            ExpressionsAvx expressionsAvx(setupCtx);
+            expressionsAvx.calculateExpression(params, pAddr, setupCtx.starkInfo.cmPolsMap[i].expId);
+            Goldilocks::Element* imAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), false)] + setupCtx.starkInfo.cmPolsMap[i].stagePos];
+        #pragma omp parallel
+            for(uint64_t j = 0; j < N; ++j) {
+                std::memcpy(&imAddr[j*setupCtx.starkInfo.mapSectionsN["cm" + to_string(step)]], &pAddr[j*setupCtx.starkInfo.cmPolsMap[i].dim], setupCtx.starkInfo.cmPolsMap[i].dim * sizeof(Goldilocks::Element));
+            }
         }
-
-        Polinomial tmp(1, 3);
-        Polinomial::mulElement(tmp, 0, denI, size - 1, multiplicity);
-        Polinomial::addElement(checkVal, 0, s, size - 1, tmp, 0);
-        
-        zkassert(Goldilocks3::isZero((Goldilocks3::Element &)*checkVal[0]));
     }
+    
+    TimerStopAndLog(STARK_CALCULATE_IMPOLS_EXPS);
+}
+
+template <typename ElementType>
+void Starks<ElementType>::calculateQuotientPolynomial(StepsParams& params) {
+    TimerStart(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
+    ExpressionsAvx expressionsAvx(setupCtx);
+    expressionsAvx.calculateExpression(params, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], setupCtx.starkInfo.cExpId);
+    TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
+}
+
+template <typename ElementType>
+void Starks<ElementType>::calculateFRIPolynomial(StepsParams& params) {
+    TimerStart(STARK_CALCULATE_FRI_POLYNOMIAL);
+    ExpressionsAvx expressionsAvx(setupCtx);
+    expressionsAvx.calculateExpression(params, &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]], setupCtx.starkInfo.friExpId);
+    TimerStopAndLog(STARK_CALCULATE_FRI_POLYNOMIAL);
+}
+
+
+template <typename ElementType>
+void Starks<ElementType>::calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity)
+{
+    uint64_t size = den.degree();
+
+    Polinomial denI(size, 3);
+    Polinomial checkVal(1, 3);
+
+    Polinomial::batchInverse(denI, den);
+    
+    Polinomial::mulElement(s, 0, denI, 0, multiplicity);
+    
+    for (uint64_t i = 1; i < size; i++)
+    {
+        Polinomial tmp(1, 3);
+        Polinomial::mulElement(tmp, 0, denI, i, multiplicity);
+        Polinomial::addElement(s, i, s, i - 1, tmp, 0);
+    }
+
+    Polinomial tmp(1, 3);
+    Polinomial::mulElement(tmp, 0, denI, size - 1, multiplicity);
+    Polinomial::addElement(checkVal, 0, s, size - 1, tmp, 0);
+    
+    zkassert(Goldilocks3::isZero((Goldilocks3::Element &)*checkVal[0]));
+}

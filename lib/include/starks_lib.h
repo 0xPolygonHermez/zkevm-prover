@@ -18,6 +18,7 @@
     // SetupCtx
     // ========================================================================================
     void *setup_ctx_new(void* p_stark_info, void* p_expression_bin, void* p_const_pols);
+    void *get_hint_ids_by_name(void *pSetupCtx, char* hintName);
     void setup_ctx_free(void *pSetupCtx);
 
     // Stark Info
@@ -37,35 +38,31 @@
     void *expressions_bin_new(char* filename);
     void expressions_bin_free(void *pExpressionsBin);
 
-    // ExpressionsCtx
-    // ========================================================================================
-    void *expressions_ctx_new(void *pSetupCtx);
-    void *verify_constraints(void *pExpressionsCtx, void*pParams);
-    void *get_fri_pol(void *pExpressionsCtx, void *pParams);
-    void *get_hint_ids_by_name(void *pExpressionsCtx, char* hintName);
-    void *get_hint_field(void *pExpressionsCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest, bool inverse, bool print_expression);
-    uint64_t set_hint_field(void *pExpressionsCtx,  void*pParams, void *values, uint64_t hintId, char* hintFieldName);
-    void expressions_ctx_free(void *pExpressionsCtx);
-
     // StepsParams
     // ========================================================================================
     void *init_params(void* ptr, void* public_inputs, void* challenges, void* evals, void* subproofValues);
+    void *get_hint_field(void *pSetupCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest, bool inverse, bool print_expression);
+    uint64_t set_hint_field(void *pSetupCtx, void* pParams, void *values, uint64_t hintId, char* hintFieldName);
+    void *get_fri_pol(void *pSetupCtx, void *pParams);
+    void *verify_constraints(void *pSetupCtx, void*pParams);
+    void *params_free(void* pParams);
 
     // Starks
     // ========================================================================================
-    void *starks_new(void *pSetupCtx, void *pExpressionsCtx);
+    void *starks_new(void *pSetupCtx);
     void starks_free(void *pStarks);
 
     void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
-    void calculate_quotient_polynomial(void *pExpressionsCtx, void* pParams);
-    void calculate_impols_expressions(void *pExpressionsCtx, void* pParams, uint64_t step);
+    void *prepare_fri_pol(void *pStarks, void *pParams);
+    void calculate_fri_polynomial(void *pStarks, void* pParams);
+    void calculate_quotient_polynomial(void *pStarks, void* pParams);
+    void calculate_impols_expressions(void *pStarks, void* pParams, uint64_t step);
 
     void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof);
     void compute_evals(void *pStarks, void *pParams, void *pProof);
 
-    void *compute_fri_pol(void *pStarks, uint64_t step, void *pParams);
     void compute_fri_folding(void *pStarks, uint64_t step, void *pParams, void *pChallenge,  void *pProof);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
 
@@ -85,7 +82,7 @@
     bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
 
     // Debug functions
-    void *print_by_name(void *pExpressionsCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values);
-    void print_expression(void *pExpressionCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value);
+    void *print_by_name(void *pSetupCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values);
+    void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value);
 
 #endif

@@ -23,6 +23,11 @@ const int BINARY_EXPRESSIONS_SECTION = 3;
 const int BINARY_CONSTRAINTS_SECTION = 4;
 const int BINARY_HINTS_SECTION = 5;
 
+struct VecU64Result {
+    uint64_t nElements;
+    uint64_t* ids;
+};
+
 struct ParserParams
 {
     uint32_t stage;
@@ -115,6 +120,8 @@ public:
     ExpressionsBin(string file);
 
     void loadExpressionsBin(BinFileUtils::BinFile *expressionsBin);
+
+    VecU64Result getHintIdsByName(std::string name);
 };
 
 

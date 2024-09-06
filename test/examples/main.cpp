@@ -104,20 +104,17 @@ int main(int argc, char **argv)
     
     if(testName == "all") {
         FRIProof<Goldilocks::Element> fproof(setupCtx.starkInfo);
-        ExpressionsAvx expressionsAvx(setupCtx);
-        Starks<Goldilocks::Element> starks(setupCtx, expressionsAvx);
+        Starks<Goldilocks::Element> starks(setupCtx);
         starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0], false); 
         jProof = fproof.proof.proof2json();
     } else if(testName == "compressor") {
         FRIProof<RawFr::Element> fproof(setupCtx.starkInfo);
-        ExpressionsAvx expressionsAvx(setupCtx);
-        Starks<RawFr::Element> starks(setupCtx, expressionsAvx);
+        Starks<RawFr::Element> starks(setupCtx);
         starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0], false); 
         jProof = fproof.proof.proof2json();
     } else if(testName == "fibonacci_pil2") {
         FRIProof<Goldilocks::Element> fproof(setupCtx.starkInfo);
-        ExpressionsAvx expressionsAvx(setupCtx);
-        Starks<Goldilocks::Element> starks(setupCtx, expressionsAvx);
+        Starks<Goldilocks::Element> starks(setupCtx);
         starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0], false); 
         jProof = fproof.proof.proof2json();
     }

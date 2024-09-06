@@ -321,3 +321,24 @@ void ExpressionsBin::loadExpressionsBin(BinFileUtils::BinFile *expressionsBin) {
 
     expressionsBin->endReadSection();
 }
+
+VecU64Result ExpressionsBin::getHintIdsByName(std::string name) {
+    VecU64Result hintIds;
+
+    hintIds.nElements = 0;
+    for (uint64_t i = 0; i < hints.size(); ++i) {
+        if (hints[i].name == name) {
+            hintIds.nElements++;
+        }
+    }
+
+    uint64_t c = 0;
+    hintIds.ids = new uint64_t[hintIds.nElements];
+    for (uint64_t i = 0; i < hints.size(); ++i) {
+        if (hints[i].name == name) {
+            hintIds.ids[c++] = i;
+        }
+    }
+
+    return hintIds;
+}
