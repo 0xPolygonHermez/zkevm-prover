@@ -53,14 +53,12 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
         TimerStart(GENERATING_FILES);
 
         if (verKeyFile != "") {
-            json jsonVerKey;
             json value;
             value[0] = Goldilocks::toU64(root[0]);
             value[1] = Goldilocks::toU64(root[1]);
             value[2] = Goldilocks::toU64(root[2]);
             value[3] = Goldilocks::toU64(root[3]);
-            jsonVerKey["constRoot"] = value;
-            json2file(jsonVerKey, verKeyFile);
+            json2file(value, verKeyFile);
         }
 
         // ConstTree
@@ -87,10 +85,10 @@ void buildConstTree(const string constFile, const string starkInfoFile, const st
         TimerStopAndLog(MERKELIZE_CONST_TREE);
 
         if (verKeyFile != "") {
-            json jsonVerKey;
+            json value;
             RawFr rawfr;
-            jsonVerKey["constRoot"] = rawfr.toString(rootC);
-            json2file(jsonVerKey, verKeyFile);
+            value = rawfr.toString(rootC);
+            json2file(value, verKeyFile);
         }
 
         TimerStart(GENERATING_FILES);
