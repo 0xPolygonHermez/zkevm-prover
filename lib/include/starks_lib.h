@@ -82,7 +82,12 @@
     bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
 
     // Debug functions
+    // =================================================================================
     void *print_by_name(void *pSetupCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values);
     void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value);
+
+    // Recursive proof
+    // =================================================================================
+    void gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pFriProof, void* pPublicInputs);
 
 #endif

@@ -1,10 +1,5 @@
 ## Constraint checker 
 
-# Constraint checker ALL test
-
-```bash
-./build/constraintChecker -c test/examples/all/all.const -s test/examples/all/all.starkinfo.json -h test/examples/all/all.chelpers/all.chelpers_generic.bin -t test/examples/all/all.commit -p test/examples/all/all.publics.json
-```
 
 # Constraint checker ALL C18 test
 
@@ -20,11 +15,6 @@
 
 ## Verify
 
-# Verify ALL test
-
-```bash
-node ../pil2-stark-js/src/main_verifier.js -v test/examples/all/all.verkey.json -s test/examples/all/all.starkinfo.json -i test/examples/all/all.verifierinfo.json -o runtime/output/all_proof.json -b test/examples/all/all.publics.json
-```
 
 # Verify ALL C18 test
 

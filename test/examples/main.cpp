@@ -3,6 +3,7 @@
 #include "proof2zkinStark.hpp"
 #include "hint_handler.hpp"
 #include "hint_handler_builder.hpp"
+#include "gen_recursive_proof.hpp"
 
 int main(int argc, char **argv)
 {
@@ -26,7 +27,7 @@ int main(int argc, char **argv)
 
     string testName = argv[1];
 
-    if(testName != "all" && testName != "compressor" && testName != "fibonacci_pil2") {
+    if(testName != "compressor" && testName != "fibonacci_pil2") {
         cout << "Error: unknown test name " << testName << endl;
         return -1;
     }
@@ -35,17 +36,7 @@ int main(int argc, char **argv)
     HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
     HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
 
-    if(testName == "all") {
-        constPolsFile = "test/examples/all/all.const";
-        constTreeFile = "test/examples/all/all.consttree";
-        starkInfoFile = "test/examples/all/all.starkinfo.json";
-        commitPols = "test/examples/all/all.commit";
-        verkey = "test/examples/all/all.verkey.json";
-        publicsFile = "test/examples/all/all.publics.json";
-        proofFile = "runtime/output/all_proof.json";
-        zkinProofFile = "runtime/output/all_proof.zkin.json";
-        expressionsBinFile = "test/examples/all/all.chelpers/all.chelpers_generic.bin";
-    } else if(testName == "compressor") {
+    if(testName == "compressor") {
         constPolsFile = "test/examples/compressor/all.c18.const";
         constTreeFile = "test/examples/compressor/all.c18.consttree";
         starkInfoFile = "test/examples/compressor/all.c18.starkinfo.json";
@@ -54,7 +45,7 @@ int main(int argc, char **argv)
         publicsFile = "test/examples/compressor/all.c18.publics.json";
         proofFile = "runtime/output/compressor_proof.json";
         zkinProofFile = "runtime/output/compressor_proof.zkin.json";
-        expressionsBinFile = "test/examples/compressor/all.c18.chelpers/all.c18.chelpers_generic.bin";
+        expressionsBinFile = "test/examples/compressor/all.c18.chelpers.bin";
     } else if(testName == "fibonacci_pil2") {
         constPolsFile = "test/examples/fibonacci.pil2/fibonacci.pil2.const";
         constTreeFile = "test/examples/fibonacci.pil2/fibonacci.pil2.consttree";
@@ -64,7 +55,7 @@ int main(int argc, char **argv)
         publicsFile = "test/examples/fibonacci.pil2/fibonacci.pil2.publics.json";
         proofFile = "runtime/output/fibonacci_pil2_proof.json";
         zkinProofFile = "runtime/output/fibonacci_pil2_proof.zkin.json";
-        expressionsBinFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers/fibonacci.pil2.chelpers_generic.bin";
+        expressionsBinFile = "test/examples/fibonacci.pil2/fibonacci.pil2.chelpers.bin";
     }
    
     StarkInfo starkInfo(starkInfoFile);
@@ -102,15 +93,9 @@ int main(int argc, char **argv)
 
     nlohmann::ordered_json jProof;
     
-    if(testName == "all") {
+    if(testName == "compressor") {
         FRIProof<Goldilocks::Element> fproof(setupCtx.starkInfo);
-        Starks<Goldilocks::Element> starks(setupCtx);
-        starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0], false); 
-        jProof = fproof.proof.proof2json();
-    } else if(testName == "compressor") {
-        FRIProof<RawFr::Element> fproof(setupCtx.starkInfo);
-        Starks<RawFr::Element> starks(setupCtx);
-        starks.genProof((Goldilocks::Element *)pAddress, fproof, &publicInputs[0], false); 
+        genRecursiveProof(setupCtx, (Goldilocks::Element *)pAddress, fproof, &publicInputs[0]);
         jProof = fproof.proof.proof2json();
     } else if(testName == "fibonacci_pil2") {
         FRIProof<Goldilocks::Element> fproof(setupCtx.starkInfo);

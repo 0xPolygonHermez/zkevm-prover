@@ -6,6 +6,7 @@
 #include "verify_constraints.hpp"
 #include "hints.hpp"
 #include "global_constraints.hpp"
+#include "gen_recursive_proof.hpp"
 #include <filesystem>
 
 #include <nlohmann/json.hpp>
@@ -424,4 +425,10 @@ void *print_by_name(void *pSetupCtx, void *pParams, char* name, uint64_t *length
 
 void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value) {
     printExpression((Goldilocks::Element *)pol, dim, first_value, last_value);
+}
+
+// Recursive proof
+// ================================================================================= 
+void gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pFriProof, void* pPublicInputs) {
+    genRecursiveProof(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)pAddress, *(FRIProof<Goldilocks::Element> *)pFriProof,  (Goldilocks::Element *)pPublicInputs);
 }

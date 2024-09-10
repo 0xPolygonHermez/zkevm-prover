@@ -746,7 +746,7 @@ void Starks<ElementType>::calculateHints(uint64_t step, ExpressionsCtx& expressi
             });
             if(hintField->operand == opType::cm) {
                 commitsCalculated[hintField->id] = true;
-            } else if(hintField->operand == opType::subproofvalue) {
+            } else if(setupCtx.starkInfo.nSubProofValues > 0 && hintField->operand == opType::subproofvalue) {
                 subProofValuesCalculated[hintField->id] = true;
             }
         }

@@ -31,6 +31,8 @@ public:
     Goldilocks::Element *zi;
     Goldilocks::Element *S;
     Goldilocks::Element *x;
+    Goldilocks::Element *x_n; // Needed for PIL1 compatibility
+    Goldilocks::Element *x_2ns; // Needed for PIL1 compatibility
 
     ConstPols(StarkInfo& starkInfo_, std::string constPolsFile): starkInfo(starkInfo_), N(1 << starkInfo.starkStruct.nBits), NExtended(1 << starkInfo.starkStruct.nBitsExt) {
         
@@ -73,6 +75,8 @@ public:
         computeZerofier();
 
         computeX();
+
+        computeConnectionsX(); // Needed for PIL1 compatibility
     }
 
     ConstPols(StarkInfo& starkInfo_, std::string constPolsFile, std::string constTreeFile) : starkInfo(starkInfo_), N(1 << starkInfo.starkStruct.nBits), NExtended(1 << starkInfo.starkStruct.nBitsExt) {
@@ -102,6 +106,10 @@ public:
         computeZerofier();
 
         computeX();
+
+        computeConnectionsX(); // Needed for PIL1 compatibility
+
+        cout << "HOLI " << endl;
     }
 
     void loadConstPols(StarkInfo& starkInfo, std::string constPolsFile) {
@@ -166,6 +174,28 @@ public:
             }
         }
         TimerStopAndLog(COMPUTE_ZHINV);
+    }
+
+    void computeConnectionsX() {
+        uint64_t N = 1 << starkInfo.starkStruct.nBits;
+        uint64_t NExtended = 1 << starkInfo.starkStruct.nBitsExt;
+        TimerStart(COMPUTE_X_N_AND_X_2NS);
+        x_n = new Goldilocks::Element[N];
+        Goldilocks::Element xx = Goldilocks::one();
+        for (uint64_t i = 0; i < N; i++)
+        {
+            x_n[i] = xx;
+            Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBits));
+        }
+        xx = Goldilocks::shift();
+        x_2ns = new Goldilocks::Element[NExtended];
+        for (uint64_t i = 0; i < NExtended; i++)
+        {
+            x_2ns[i] = xx;
+            Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
+        }
+        TimerStopAndLog(COMPUTE_X_N_AND_X_2NS);
+                cout << "HOLI " << endl;
     }
 
     void computeX() {
@@ -266,6 +296,8 @@ public:
         delete zi;
         delete S;
         delete x;
+        delete x_n; // Needed for PIL1 compatibility
+        delete x_2ns; // Needed for PIL1 compatibility
     }
 };
 
