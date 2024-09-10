@@ -4,6 +4,7 @@
 #include "hint_handler.hpp"
 #include "hint_handler_builder.hpp"
 #include "gen_recursive_proof.hpp"
+#include "commit_pols_starks.hpp"
 
 int main(int argc, char **argv)
 {
@@ -17,6 +18,10 @@ int main(int argc, char **argv)
     string publicsFile;
     string proofFile;
     string zkinProofFile;
+
+    string zkinAllFile;
+    string execFile;
+    string datFile;
 
     // Check arguments list
     if (argc != 2)
@@ -36,7 +41,12 @@ int main(int argc, char **argv)
     HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
     HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
 
+    bool circomLib = false;
+
     if(testName == "compressor") {
+        zkinAllFile = "test/examples/compressor/circom/all.proof.zkin.json";
+        execFile = "test/examples/compressor/circom/all.c18.exec";
+        datFile = "test/examples/compressor/circom/all.c18.exec";
         constPolsFile = "test/examples/compressor/all.c18.const";
         constTreeFile = "test/examples/compressor/all.c18.consttree";
         starkInfoFile = "test/examples/compressor/all.c18.starkinfo.json";
@@ -64,17 +74,27 @@ int main(int argc, char **argv)
 
     SetupCtx setupCtx(starkInfo, expressionsBin, constPols);
 
-    void *pCommit = copyFile(commitPols, setupCtx.starkInfo.mapSectionsN["cm1"] * sizeof(Goldilocks::Element) * (1 << setupCtx.starkInfo.starkStruct.nBits));
     void *pAddress = (void *)malloc((setupCtx.starkInfo.mapTotalN) * sizeof(Goldilocks::Element));
-
     uint64_t N = (1 << setupCtx.starkInfo.starkStruct.nBits);
-    #pragma omp parallel for
-    for (uint64_t i = 0; i < N; i += 1)
-    {
-        std::memcpy((uint8_t*)pAddress + setupCtx.starkInfo.mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*setupCtx.starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-            (uint8_t*)pCommit + i*setupCtx.starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element), 
-            setupCtx.starkInfo.mapSectionsN["cm1"]*sizeof(Goldilocks::Element));
+    uint64_t nCm1 = setupCtx.starkInfo.mapSectionsN["cm1"];
+
+    if(testName == "fibonacci_pil2" || !circomLib) {
+        void *pCommit = copyFile(commitPols, nCm1 * sizeof(Goldilocks::Element) * (1 << setupCtx.starkInfo.starkStruct.nBits));
+
+        #pragma omp parallel for
+        for (uint64_t i = 0; i < N; i += 1)
+        {
+            std::memcpy((uint8_t*)pAddress + setupCtx.starkInfo.mapOffsets[std::make_pair("cm1", false)]*sizeof(Goldilocks::Element) + i*nCm1*sizeof(Goldilocks::Element), 
+                (uint8_t*)pCommit + i*nCm1*sizeof(Goldilocks::Element), 
+                nCm1*sizeof(Goldilocks::Element));
+        }
+    } else {
+        json zkin;
+        file2json(zkinAllFile, zkin);
+        
+        // TODO!
     }
+    
 
     json publics;
     file2json(publicsFile, publics);
