@@ -14,11 +14,13 @@ TARGET_TEST_GPU := zkProverTestGpu
 TARGET_W2DB := witness2db
 TARGET_EXPRESSIONS := zkProverExpressions
 TARGET_SETUP := fflonkSetup
+TARGET_WITNESS := witness.so
 
 BUILD_DIR := ./build
 BUILD_DIR_GPU := ./build-gpu
 SRC_DIRS := ./src ./test ./tools
 SETUP_DIRS := ./src/rapidsnark
+WITNESS_LIB := ./witness_lib
 
 GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
 GRPCPP_LIBS := $(shell pkg-config grpc++ --libs) -lgrpc++_reflection
@@ -28,7 +30,7 @@ endif
 
 CXX := g++
 AS := nasm
-CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-Wfatal-errors
+CXXFLAGS := -fPIC -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-Wfatal-errors
 
 LDFLAGS_GPU := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -liomp5 $(GRPCPP_LIBS)
 LDFLAGS := $(LDFLAGS_GPU) -fopenmp
@@ -107,15 +109,27 @@ OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main.cpp.o, $(OBJS_SETUP)) # Exclude
 OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main_test.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
 DEPS_SETUP := $(OBJS_SETUP:.o=.d)
 
+SRCS_WITNESS_LIB := $(shell find ./src/starkpil/zkevm/witness/fork_10/ -name *.cpp)
+OBJS_WITNESS_LIB := $(SRCS_WITNESS_LIB:%=$(BUILD_DIR)/%.o)
+DEPS_WITNESS_LIB := $(OBJS_WITNESS_LIB:.o=.d)
+
+
 cpu: $(BUILD_DIR)/$(TARGET_ZKP)
 gpu: $(BUILD_DIR_GPU)/$(TARGET_ZKP_GPU)
+
+witness: $(WITNESS_LIB)/$(TARGET_WITNESS)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
 
 test: $(BUILD_DIR)/$(TARGET_TEST)
 test_gpu:  $(BUILD_DIR_GPU)/$(TARGET_TEST_GPU)
 
-expressions: ${BUILD_DIR}/$(TARGET_EXPRESSIONS)
+expressions: $(BUILD_DIR)/$(TARGET_EXPRESSIONS)
+
+$(WITNESS_LIB)/$(TARGET_WITNESS): $(OBJS_WITNESS_LIB)
+	$(MKDIR_P) $(WITNESS_LIB)
+	$(MKDIR_P) $(WITNESS_LIB)/include
+	$(CXX) -shared -o $@ $^
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
 	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
