@@ -10,14 +10,24 @@
 #include "merklehash_goldilocks.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
-#include "hint_handler.hpp"
-#include "hint_handler_builder.hpp"
 
 using json = nlohmann::json;
 using namespace std;
 
 /* StarkInfo class contains the contents of the file zkevm.starkinfo.json,
    which is parsed during the constructor */
+
+typedef enum
+{
+    const_ = 0,
+    cm = 1,
+    tmp = 2,
+    public_ = 3,
+    subproofvalue = 4,
+    challenge = 5,
+    number = 6,
+} opType;
+
 
 class Boundary
 {

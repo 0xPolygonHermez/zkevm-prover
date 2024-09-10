@@ -8,35 +8,9 @@
 #include <memory>
 #include "polinomial.hpp"
 #include "constant_pols_starks.hpp"
+#include "stark_info.hpp"
+#include "expressions_bin.hpp"
 #include "steps.hpp"
-
-
-typedef enum
-{
-    const_ = 0,
-    cm = 1,
-    tmp = 2,
-    public_ = 3,
-    subproofvalue = 4,
-    challenge = 5,
-    number = 6,
-} opType;
-
-    
-struct HintField {
-    string name;
-    opType operand;
-    uint64_t id;
-    uint64_t dim;
-    uint64_t value;
-};
-
-
-struct Hint
-{
-    std::string name;
-    std::vector<HintField> fields;
-};
 
 namespace Hints
 {

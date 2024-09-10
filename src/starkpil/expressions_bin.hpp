@@ -23,6 +23,21 @@ const int BINARY_EXPRESSIONS_SECTION = 3;
 const int BINARY_CONSTRAINTS_SECTION = 4;
 const int BINARY_HINTS_SECTION = 5;
 
+struct HintField {
+    string name;
+    opType operand;
+    uint64_t id;
+    uint64_t dim;
+    uint64_t value;
+};
+
+
+struct Hint
+{
+    std::string name;
+    std::vector<HintField> fields;
+};
+
 struct VecU64Result {
     uint64_t nElements;
     uint64_t* ids;

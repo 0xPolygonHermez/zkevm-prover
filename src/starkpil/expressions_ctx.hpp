@@ -4,7 +4,6 @@
 #include "const_pols.hpp"
 #include "stark_info.hpp"
 #include "steps.hpp"
-#include "hint_handler.hpp"
 #include "setup_ctx.hpp"
 
 class ExpressionsCtx {
