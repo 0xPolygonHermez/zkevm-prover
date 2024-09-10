@@ -59,7 +59,7 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/collection/fork_10/input_executor_3.json",
+    "inputFile": "testvectors/e2e/fork_11/input_executor_0.json",
     "inputFile2": "testvectors/collection/fork_10/input_executor_1.json",
 
     "outputPath": "runtime/output",

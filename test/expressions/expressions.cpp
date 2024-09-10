@@ -18,16 +18,16 @@
 #include "ZkevmSteps.hpp"
 #include "exit_process.hpp"
 
-#define NUM_ITERATIONS 3
+#define NUM_ITERATIONS 1
 
 int main()
 {
     CHelpers cHelpers;
     CHelpers cHelpersGeneric;
 
-    string starkInfoFile = "test/expressions/zkevm.starkinfo.json";
+    string starkInfoFile = /*"test/examples/all/all.starkinfo.json"; /*/"config/zkevm/zkevm.starkinfo.json";
 
-    string cHelpersGenericFile = "config/zkevm/zkevm.chelpers_generic.bin";
+    string cHelpersGenericFile = /*"test/examples/all/all.chelpers/all.chelpers_generic.bin";/*/ "config/zkevm/zkevm.chelpers_generic.bin";
     string cHelpersFile = "config/zkevm/zkevm.chelpers.bin";
 
 
@@ -36,8 +36,8 @@ int main()
     std::unique_ptr<BinFileUtils::BinFile> cHelpersGenericBinFile = BinFileUtils::openExisting(cHelpersGenericFile, "chps", 1);
     cHelpersGeneric.loadCHelpers(cHelpersGenericBinFile.get());
 
-    std::unique_ptr<BinFileUtils::BinFile> cHelpersBinFile = BinFileUtils::openExisting(cHelpersFile, "chps", 1);
-    cHelpers.loadCHelpers(cHelpersBinFile.get());
+    //std::unique_ptr<BinFileUtils::BinFile> cHelpersBinFile = BinFileUtils::openExisting(cHelpersFile, "chps", 1);
+    //cHelpers.loadCHelpers(cHelpersBinFile.get());
 
     TimerStopAndLog(CHELPERS_ALLOCATION);
 
@@ -76,7 +76,7 @@ int main()
     Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     Goldilocks::Element *p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
 
-
+#if 0
     TimerStart(INITIALIZE_MEMORY_RANDOM);
 #pragma omp parallel for
     for(uint64_t i = 0; i < starkInfo.mapTotalN; ++i) {
@@ -142,7 +142,7 @@ int main()
         publicInputs[i] = Goldilocks::fromU64(rand());
     }
     TimerStopAndLog(INITIALIZE_PUBLICS_RANDOM);
-
+#endif
     StepsParams params = {
         pols : mem,
         pConstPols : pConstPols,
@@ -165,19 +165,20 @@ int main()
 #endif
 
     ZkevmSteps zkevmSteps;
-
+#if 0
    for(uint64_t i = 0; i < NUM_ITERATIONS; ++i) {
         TimerStart(CALCULATING_EXPRESSIONS_ZKEVM);
         zkevmSteps.calculateExpressions(starkInfo, params, cHelpers.cHelpersArgs, cHelpers.stagesInfo["step4"]);
         TimerStopAndLog(CALCULATING_EXPRESSIONS_ZKEVM);
     }
-
+#endif
     for(uint64_t i = 0; i < NUM_ITERATIONS; ++i) {
         TimerStart(CALCULATING_EXPRESSIONS_ZKEVM_GENERIC);
         cHelpersStepsGeneric.calculateExpressions(starkInfo, params, cHelpersGeneric.cHelpersArgs, cHelpersGeneric.stagesInfo["step4"]);
         TimerStopAndLog(CALCULATING_EXPRESSIONS_ZKEVM_GENERIC);
     }
 
+#if 0
 #ifdef __AVX512__
     for(uint64_t i = 0; i < NUM_ITERATIONS; ++i) {
         TimerStart(CALCULATING_EXPRESSIONS_ZKEVM_AVX512_GENERIC);
@@ -198,4 +199,5 @@ int main()
 
     delete pConstPols;
     delete pConstPols2ns;
+#endif
 }

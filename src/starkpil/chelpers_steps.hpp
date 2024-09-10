@@ -38,8 +38,7 @@ enum DEST_TYPE
 {
     tmp1,
     tmp3,
-    dest1,
-    dest3
+        expression
 };
 
 enum TMP_TYPE
@@ -58,7 +57,7 @@ public:
     bool genAST = false;
     string fileAST = "ast.json";
 
-    inline void initGlobalVars()
+    inline void addGlobalVars()
     {
         node = 0;
         dcol = 0;
@@ -84,10 +83,12 @@ public:
         // clean outputJSON
         outputJSON.clear();
         outputJSON["nodes"] = json::array();
+        outputJSON["expressions"] = json::array();
     }
 
-    inline void printSizes(StarkInfo &starkInfo, StepsParams &params, ParserParams &parserParams)
+    inline void addMetadata(StarkInfo &starkInfo, StepsParams &params, ParserParams &parserParams)
     {
+
         std::cout << "   " << std::endl;
         std::cout << "   nNodes: " << node << std::endl;
         std::cout << "   nStages: " << 7 << std::endl;
@@ -95,62 +96,81 @@ public:
         std::cout << "   nEvals: " << dcol << std::endl;
         std::cout << std::endl;
 
-        outputJSON["nNodes"] = node;
-        outputJSON["nStages"] = 7;
-        outputJSON["nVariables"] = 4;
-        outputJSON["nEvals"] = dcol;
-
-        outputJSON["stagesCols"] = json::array();
+        // Create the trace_widths array
+        json traceWidths = json::array();
         for (int i = 0; i < 5; i++)
         {
-            outputJSON["stagesCols"].push_back(nColsStages[i] * used_sections[i]);
+            traceWidths.push_back(nColsStages[i] * used_sections[i]);
         }
-        outputJSON["stagesCols"].push_back(nColsStages[10] * used_sections[5]);
-        outputJSON["stagesCols"].push_back(6 * used_sections[6]);
+        traceWidths.push_back(nColsStages[10] * used_sections[5]);
+        traceWidths.push_back(6 * used_sections[6]);
 
-        outputJSON["variablesSize"] = json::array();
-        outputJSON["variablesSize"].push_back({params.challenges.degree() * used_variables[0], 3});
-        outputJSON["variablesSize"].push_back({starkInfo.nPublics * used_variables[1], 1});
-        outputJSON["variablesSize"].push_back({parserParams.nNumbers * used_variables[2], 1});
-        outputJSON["variablesSize"].push_back({params.evals.degree() * used_variables[3], 3});
+        // Num variables
+        json numVariables = json::array();
+        numVariables.push_back(params.challenges.degree() * used_variables[0] * 3);
+        numVariables.push_back(starkInfo.nPublics * used_variables[1]);
+        numVariables.push_back(params.evals.degree() * used_variables[2] * 3);
 
-        outputJSON["max_nodes_base"] = parserParams.nTemp1;
-        outputJSON["max_nodes_extension"] = parserParams.nTemp3;
+        outputJSON["metadata"] = {
+            {"field",
+             {{"name", "Goldilocks"},
+              {"modulus", "18446744069414584321"},
+              {"root_of_unity", "7277203076849721926"},
+              {"coset_offset", "7"},
+              {"extension",
+               {{"degree", 3},
+                {"polynom", "x^3 - x + 2"}}}}},
+            {"trace_widths", traceWidths},
+            {"num_variables", numVariables},
+        };
+
+        json zerofiers = json::array();
+        outputJSON["zerofiers"] = zerofiers;
+
+        json periodic = json::array();
+        outputJSON["periodic"] = periodic;
+
+        ///// old stuff
+        // outputJSON["nNodes"] = node;
+        // outputJSON["nStages"] = 7;
+        // outputJSON["nVariables"] = 4;
+        // outputJSON["nEvals"] = dcol;
+        // outputJSON["max_nodes_base"] = parserParams.nTemp1;
+        // outputJSON["max_nodes_extension"] = parserParams.nTemp3;
     }
 
-    inline int printOP(int op, int node1, int node2, string mode, int irow)
+    inline int addOP(int op, int node1, int node2, string mode, int irow)
     {
         if (irow == 0)
         {
             json valueNode;
-            valueNode["type"] = "OP";
             assert(mode == "" || mode == "33" || mode == "31");
             if (mode == "33" || mode == "31")
-                valueNode["resultType"] = "extension";
+                valueNode["value"] = "ext";
             else
-                valueNode["resultType"] = "base";
+                valueNode["value"] = "base";
 
             switch (op)
             {
             case 0:
-                std::cout << "   " << node << ": ADD" + mode + " " << node1 << " " << node2 << std::endl;
-                valueNode["name"] = "ADD" + mode;
-                valueNode["args"] = {{"node1", node1}, {"node2", node2}};
+                std::cout << "   " << node << ": add " << node1 << " " << node2 << std::endl;
+                valueNode["type"] = "add";
+                valueNode["args"] = {{"lhs", node1}, {"rhs", node2}};
                 break;
             case 1:
-                std::cout << "   " << node << ": SUB" + mode + " " << node1 << " " << node2 << std::endl;
-                valueNode["name"] = "SUB" + mode;
-                valueNode["args"] = {{"node1", node1}, {"node2", node2}};
+                std::cout << "   " << node << ": sub " << node1 << " " << node2 << std::endl;
+                valueNode["type"] = "sub";
+                valueNode["args"] = {{"lhs", node1}, {"rhs", node2}};
                 break;
             case 2:
-                std::cout << "   " << node << ": MULT" + mode + " " << node1 << " " << node2 << std::endl;
-                valueNode["name"] = "MULT" + mode;
-                valueNode["args"] = {{"node1", node1}, {"node2", node2}};
+                std::cout << "   " << node << ": mul " << node1 << " " << node2 << std::endl;
+                valueNode["type"] = "mul";
+                valueNode["args"] = {{"lhs", node1}, {"rhs", node2}};
                 break;
             case 3:
-                std::cout << "   " << node << ": SUB" + mode + " " << node2 << " " << node1 << std::endl;
-                valueNode["name"] = "SUB" + mode;
-                valueNode["args"] = {{"node1", node2}, {"node2", node1}};
+                std::cout << "   " << node << ": sub " << node2 << " " << node1 << std::endl;
+                valueNode["type"] = "sub";
+                valueNode["args"] = {{"lhs", node2}, {"rhs", node1}};
                 break;
             default:
                 assert(0);
@@ -166,21 +186,19 @@ public:
         }
     }
 
-    inline int printTraceValue(int section, int col, string dim, int irow)
+    inline int addTrace(int section, int col, string dim, int irow)
     {
         if (irow == 0)
         {
             json valueNode;
-            valueNode["type"] = "VALUE";
+            valueNode["type"] = "trace";
             if (dim == "3")
             {
-                valueNode["name"] = "TRACE" + dim;
-                valueNode["resultType"] = "extension";
+                valueNode["value"] = "ext";
             }
             else
             {
-                valueNode["name"] = "TRACE";
-                valueNode["resultType"] = "base";
+                valueNode["value"] = "base";
             }
             assert(dim == "1" || dim == "3");
             int accum = nColsStagesAcc[section] + col;
@@ -190,39 +208,21 @@ public:
                 if (section < 5)
                 {
                     used_sections[section] = 1;
-                    if (dim == "1")
-                    {
-                        std::cout << "   " << node << ": VALUE TRACE " << section << " " << col << " 0" << std::endl;
-                    }
-                    else
-                    {
-                        std::cout << "   " << node << ": VALUE TRACE" << dim << " " << section << " " << col << " 0" << std::endl;
-                    }
-                    valueNode["args"] = {{"stage_idx", section}, {"column_idx", col}, {"row_offset", 0}};
+                    std::cout << "   " << node << ": trace " << section << " " << col << " 0" << std::endl;
+                    valueNode["args"] = {{"segment", section}, {"col_offset", col}, {"row_offset", 0}};
                 }
                 else if (section < 10)
                 {
                     used_sections[section - 5] = 1;
-                    if (dim == "1")
-                        std::cout << "   " << node << ": VALUE TRACE " << section - 5 << " " << col << " 1" << std::endl;
-                    else
-                    {
-                        std::cout << "   " << node << ": VALUE TRACE" << dim << " " << section - 5 << " " << col << " 1" << std::endl;
-                    }
-
-                    valueNode["args"] = {{"stage_idx", section - 5}, {"column_idx", col}, {"row_offset", 1}};
+                    std::cout << "   " << node << ": trace " << section - 5 << " " << col << " 1" << std::endl;
+                    valueNode["args"] = {{"segment", section - 5}, {"col_offset", col}, {"row_offset", 1}};
                 }
                 else
                 {
                     assert(section < 12);
                     used_sections[section - 5] = 1;
-                    if (dim == "1")
-                        std::cout << "   " << node << ": VALUE TRACE " << section - 5 << " " << col << " 0" << std::endl;
-                    else
-                    {
-                        std::cout << "   " << node << ": VALUE TRACE" << dim << " " << section - 5 << " " << col << " 0" << std::endl;
-                    }
-                    valueNode["args"] = {{"stage_idx", section - 5}, {"column_idx", col}, {"row_offset", 0}};
+                    std::cout << "   " << node << ": trace " << section - 5 << " " << col << " 0" << std::endl;
+                    valueNode["args"] = {{"segment", section - 5}, {"col_offset", col}, {"row_offset", 0}};
                 }
             }
             else
@@ -244,25 +244,24 @@ public:
         }
     }
 
-    inline int printVariableValue(VAR_TYPE type, int row, string dim, int irow)
+    inline int addVariable(VAR_TYPE type, int row, string dim, int irow)
     {
+        int offset;
         if (irow == 0)
         {
             int section;
             int node_out = -1;
 
             json valueNode;
-            valueNode["type"] = "VALUE";
+            valueNode["type"] = "var";
             assert(dim == "1" || dim == "3");
             if (dim == "3")
             {
-                valueNode["name"] = "VARIABLE" + dim;
-                valueNode["resultType"] = "extension";
+                valueNode["value"] = "ext";
             }
             else
             {
-                valueNode["name"] = "VARIABLE";
-                valueNode["resultType"] = "base";
+                valueNode["value"] = "base";
             }
 
             switch (type)
@@ -270,6 +269,7 @@ public:
             case VAR_TYPE::challenge:
             {
                 assert(dim == "3");
+                offset = row * 3;
                 if (read_challenges[row] != -1)
                 {
                     node_out = read_challenges[row];
@@ -284,6 +284,7 @@ public:
             case VAR_TYPE::publicInput:
             {
                 assert(dim == "1");
+                offset = row;
                 if (read_publics[row] != -1)
                 {
                     node_out = read_publics[row];
@@ -295,23 +296,10 @@ public:
                 section = 1;
                 break;
             }
-            case VAR_TYPE::number:
-            {
-                assert(dim == "1");
-                if (read_numbers[row] != -1)
-                {
-                    node_out = read_numbers[row];
-                }
-                else
-                {
-                    read_numbers[row] = node;
-                }
-                section = 2;
-                break;
-            }
             case VAR_TYPE::eval:
             {
                 assert(dim == "3");
+                offset = row * 3;
                 if (read_evals[row] != -1)
                 {
                     node_out = read_evals[row];
@@ -320,7 +308,7 @@ public:
                 {
                     read_evals[row] = node;
                 }
-                section = 3;
+                section = 2;
                 break;
             }
             default:
@@ -332,8 +320,8 @@ public:
             used_variables[section] = 1;
             if (node_out == -1)
             {
-                std::cout << "   " << node << ": VALUE VARIABLE" << dim << " " << section << " " << row << std::endl;
-                valueNode["args"] = {{"group_idx", section}, {"var_idx", row}};
+                std::cout << "   " << node << ": var " << section << " " << row << std::endl;
+                valueNode["args"] = {{"group", section}, {"offset", offset}};
                 outputJSON["nodes"].push_back(valueNode);
                 node_out = node;
                 ++node;
@@ -346,14 +334,40 @@ public:
         }
     }
 
-    inline void printDst(DEST_TYPE type, int pos, int node_out, int irow)
+    inline int addConstant(int offset, uint64_t value, int irow)
+    {
+        if (irow == 0)
+        {
+            int node_out = -1;
+            json constNode;
+            if (read_numbers[offset] != -1)
+            {
+                node_out = read_numbers[offset];
+            }
+            else
+            {
+                // uint64_t val = 2 * 67 + offset * 11;
+                read_numbers[offset] = node;
+                constNode["type"] = "const";
+                constNode["value"] = "base";
+                constNode["args"] = {{"value", value}}; /*val*/
+                outputJSON["nodes"].push_back(constNode);
+                node_out = node;
+                ++node;
+            }
+            return node_out;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    inline void addDst(DEST_TYPE type, int pos, int node_out, int irow)
     {
 
         if (irow == 0)
         {
-
-            json valueNode;
-            valueNode["type"] = "VALUE";
 
             switch (type)
             {
@@ -367,30 +381,14 @@ public:
                 tmp3_node[pos] = node_out;
                 break;
             }
-            case DEST_TYPE::dest1:
+            case DEST_TYPE::expression:
             {
+                json expression;
                 assert(dest_column[pos] == -1);
                 dest_column[pos] = dcol;
-                std::cout << "   " << node << ": VALUE EVAL " << node_out << " " << dcol << std::endl;
-                valueNode["name"] = "EVAL";
-                valueNode["args"] = {{"node_out", node_out}, {"dest_col", dcol}};
-                valueNode["resultType"] = "base";
-                outputJSON["nodes"].push_back(valueNode);
+                expression["node_id"] = node_out;
+                outputJSON["expressions"].push_back(expression);
                 ++dcol;
-                ++node;
-                break;
-            }
-            case DEST_TYPE::dest3:
-            {
-                assert(dest_column[pos] == -1);
-                dest_column[pos] = dcol;
-                std::cout << "   " << node << ": VALUE EVAL3 " << node_out << " " << dcol << std::endl;
-                valueNode["name"] = "EVAL3";
-                valueNode["args"] = {{"node_out", node_out}, {"dest_col", dcol}};
-                valueNode["resultType"] = "extension";
-                outputJSON["nodes"].push_back(valueNode);
-                dcol += 3;
-                ++node;
                 break;
             }
             default:
@@ -506,10 +504,22 @@ public:
         if (domainExtended)
         {
             // Store either polinomial f or polinomial q
+            if (row < 10)
+            {
+                std::cout << "Q " << row << " ";
+            }
             for (uint64_t k = 0; k < nColsStages[10]; ++k)
             {
                 __m256i *buffT = &bufferT_[(nColsStagesAcc[10] + k)];
                 Goldilocks::store_avx(&params.pols[offsetsStages[10] + k + row * nColsStages[10]], nColsStages[10], buffT[0]);
+                if (row < 10)
+                {
+                    std::cout << " " << params.pols[offsetsStages[10] + k + row * nColsStages[10]].fe;
+                }
+            }
+            if (row < 10)
+            {
+                std::cout << std::endl;
             }
         }
         else
@@ -524,6 +534,7 @@ public:
                     uint64_t dim = storePol[nColsStagesAcc[s] + k];
                     if (storePol[nColsStagesAcc[s] + k])
                     {
+
                         __m256i *buffT = &bufferT_[(nColsStagesAcc[s] + k)];
                         if (isTmpPol)
                         {
@@ -544,6 +555,7 @@ public:
 
     inline virtual void loadPolinomials(StarkInfo &starkInfo, StepsParams &params, __m256i *bufferT_, uint64_t row, uint64_t stage, uint64_t nrowsPack, uint64_t domainExtended)
     {
+
         Goldilocks::Element bufferT[2 * nrowsPack];
         ConstantPolsStarks *constPols = domainExtended ? params.pConstPols2ns : params.pConstPols;
         Polinomial &x = domainExtended ? params.x_2ns : params.x_n;
@@ -558,7 +570,8 @@ public:
                 for (uint64_t j = 0; j < nrowsPack; ++j)
                 {
                     uint64_t l = (row + j + nextStrides[o]) % domainSize;
-                    bufferT[nrowsPack * o + j] = ((Goldilocks::Element *)constPols->address())[l * starkInfo.nConstants + k];
+                    //Goldilocks::Element val = Goldilocks::fromU64(0 * uint64_t(11) + l * uint64_t(7) + k * uint64_t(21));
+                    bufferT[nrowsPack * o + j] = /*val; */((Goldilocks::Element *)constPols->address())[l * starkInfo.nConstants + k];
                 }
                 Goldilocks::load_avx(bufferT_[nColsStagesAcc[5 * o] + k], &bufferT[nrowsPack * o]);
             }
@@ -567,12 +580,16 @@ public:
         // Load x and Zi
         for (uint64_t j = 0; j < nrowsPack; ++j)
         {
-            bufferT[j] = x[row + j][0];
+            uint64_t l = row + j;
+            Goldilocks::Element val = Goldilocks::fromU64(0 * uint64_t(11) + l * uint64_t(7) + starkInfo.nConstants * uint64_t(21));
+            bufferT[j] = /*val; */ x[row + j][0];
         }
         Goldilocks::load_avx(bufferT_[starkInfo.nConstants], &bufferT[0]);
         for (uint64_t j = 0; j < nrowsPack; ++j)
         {
-            bufferT[j] = params.zi[row + j][0];
+            uint64_t l = row + j;
+            Goldilocks::Element val = Goldilocks::fromU64(0 * uint64_t(11) + l * uint64_t(7) + (starkInfo.nConstants + 1) * uint64_t(21));
+            bufferT[j] = /*val; */ params.zi[row + j][0];
         }
 
         Goldilocks::load_avx(bufferT_[starkInfo.nConstants + 1], &bufferT[0]);
@@ -581,14 +598,21 @@ public:
         {
             if (stage < s)
                 break;
+            if (row == 0)
+            {
+                std::cout << "nColsStage " << s << " " << nColsStages[s] << std::endl;
+            }
             for (uint64_t k = 0; k < nColsStages[s]; ++k)
             {
+
                 for (uint64_t o = 0; o < 2; ++o)
                 {
                     for (uint64_t j = 0; j < nrowsPack; ++j)
                     {
+
                         uint64_t l = (row + j + nextStrides[o]) % domainSize;
-                        bufferT[nrowsPack * o + j] = params.pols[offsetsStages[s] + l * nColsStages[s] + k];
+                        Goldilocks::Element val = Goldilocks::fromU64(s * uint64_t(11) + l * uint64_t(7) + k * uint64_t(21));
+                        bufferT[nrowsPack * o + j] = /*val; */ params.pols[offsetsStages[s] + l * nColsStages[s] + k];
                     }
                     Goldilocks::load_avx(bufferT_[nColsStagesAcc[5 * o + s] + k], &bufferT[nrowsPack * o]);
                 }
@@ -628,7 +652,7 @@ public:
     virtual void calculateExpressions(StarkInfo &starkInfo, StepsParams &params, ParserArgs &parserArgs, ParserParams &parserParams)
     {
 
-        initGlobalVars();
+        addGlobalVars();
 
         assert(nrowsPack == 4);
         bool domainExtended = parserParams.stage > 3 ? true : false;
@@ -643,6 +667,9 @@ public:
         Goldilocks3::Element_avx challenges_ops[params.challenges.degree()];
         for (uint64_t i = 0; i < params.challenges.degree(); ++i)
         {
+            /*params.challenges[i][0] = Goldilocks::fromU64(0 * uint64_t(31) + (i * 3) * uint64_t(101));
+            params.challenges[i][1] = Goldilocks::fromU64(0 * uint64_t(31) + (i * 3 + 1) * uint64_t(101));
+            params.challenges[i][2] = Goldilocks::fromU64(0 * uint64_t(31) + (i * 3 + 2) * uint64_t(101));*/
             challenges[i][0] = _mm256_set1_epi64x(params.challenges[i][0].fe);
             challenges[i][1] = _mm256_set1_epi64x(params.challenges[i][1].fe);
             challenges[i][2] = _mm256_set1_epi64x(params.challenges[i][2].fe);
@@ -659,12 +686,14 @@ public:
         __m256i numbers_[parserParams.nNumbers];
         for (uint64_t i = 0; i < parserParams.nNumbers; ++i)
         {
+            //numbers[i] = 2 * 31 + i * 101;
             numbers_[i] = _mm256_set1_epi64x(numbers[i]);
         }
 
         __m256i publics[starkInfo.nPublics];
         for (uint64_t i = 0; i < starkInfo.nPublics; ++i)
         {
+            /*params.publicInputs[i] = Goldilocks::fromU64(1 * uint64_t(31) + i * uint64_t(101));*/
             publics[i] = _mm256_set1_epi64x(params.publicInputs[i].fe);
         }
 
@@ -679,7 +708,7 @@ public:
                   << "   EXPRESSIONS: " << parserParams.nOps << std::endl
                   << std::endl;
 
-#pragma omp parallel for
+        #pragma omp parallel for
         for (uint64_t i = 0; i < domainSize; i += nrowsPack)
         {
             uint64_t i_args = 0;
@@ -711,10 +740,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "1", i);
-                    int node2 = printTraceValue(args[i_args + 5], args[i_args + 6], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "1", i);
+                    int node2 = addTrace(args[i_args + 5], args[i_args + 6], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: commit1
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], bufferT_[nColsStagesAcc[args[i_args + 5]] + args[i_args + 6]]);
@@ -725,10 +754,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "1", i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "1", i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 5], i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: tmp1
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], tmp1[args[i_args + 5]]);
@@ -739,10 +768,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 5], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "1", i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 5], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: public
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], publics[args[i_args + 5]]);
@@ -753,10 +782,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 5], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "1", i);
+                    int node2 = addConstant(args[i_args + 5], numbers[args[i_args + 5]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: commit1 - SRC1: number
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], numbers_[args[i_args + 5]]);
@@ -768,7 +797,7 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim1, args[i_args + 2], i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args]] + args[i_args + 1], node1, i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args]] + args[i_args + 1], node1, i);
 
                     // COPY tmp1 to commit1
                     Goldilocks::copy_avx(bufferT_[nColsStagesAcc[args[i_args]] + args[i_args + 1]], tmp1[args[i_args + 2]]);
@@ -782,8 +811,8 @@ public:
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim1, args[i_args + 3], i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 4], i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: tmp1
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp1[args[i_args + 3]], tmp1[args[i_args + 4]]);
@@ -795,9 +824,9 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim1, args[i_args + 3], i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: public
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp1[args[i_args + 3]], publics[args[i_args + 4]]);
@@ -809,9 +838,9 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim1, args[i_args + 3], i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node2 = addConstant(args[i_args + 4], numbers[args[i_args + 4]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: tmp1 - SRC1: number
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp1[args[i_args + 3]], numbers_[args[i_args + 4]]);
@@ -822,8 +851,8 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 2], "1", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args]] + args[i_args + 1], node1, i);
+                    int node1 = addVariable(VAR_TYPE::publicInput, args[i_args + 2], "1", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args]] + args[i_args + 1], node1, i);
 
                     // COPY public to commit1
                     Goldilocks::copy_avx(bufferT_[nColsStagesAcc[args[i_args]] + args[i_args + 1]], publics[args[i_args + 2]]);
@@ -834,10 +863,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addVariable(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: public - SRC1: public
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], publics[args[i_args + 3]], publics[args[i_args + 4]]);
@@ -848,10 +877,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addVariable(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
+                    int node2 = addConstant(args[i_args + 4], numbers[args[i_args + 4]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: public - SRC1: number
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], publics[args[i_args + 3]], numbers_[args[i_args + 4]]);
@@ -862,8 +891,8 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::number, args[i_args + 2], "1", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args]] + args[i_args + 1], node1, i);
+                    int node1 = addConstant(args[i_args + 2], numbers[args[i_args + 2]], i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args]] + args[i_args + 1], node1, i);
 
                     // COPY number to commit1
                     Goldilocks::copy_avx(bufferT_[nColsStagesAcc[args[i_args]] + args[i_args + 1]], numbers_[args[i_args + 2]]);
@@ -874,10 +903,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::number, args[i_args + 3], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::dest1, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addConstant(args[i_args + 3], numbers[args[i_args + 3]], i);
+                    int node2 = addConstant(args[i_args + 4], numbers[args[i_args + 4]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit1 - SRC0: number - SRC1: number
                     Goldilocks::op_avx(args[i_args], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], numbers_[args[i_args + 3]], numbers_[args[i_args + 4]]);
@@ -888,11 +917,22 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 1], args[i_args + 2], "1", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args], node1, i);
+                    int node1 = addTrace(args[i_args + 1], args[i_args + 2], "1", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args], node1, i);
 
                     // COPY commit1 to tmp1
+                    // print fisrt value of argument
+                    // 1) store from avx
+                    Goldilocks::Element arg[4];
+                    Goldilocks::store_avx(arg, 1, bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]]);
+                    if (i == 0)
+                        std::cout << " _op14: " << arg[0].fe << std::endl;
                     Goldilocks::copy_avx(tmp1[args[i_args]], bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]]);
+                    //print first value of the result
+                    Goldilocks::Element res[4];
+                    Goldilocks::store_avx(res, 1, tmp1[args[i_args]]);
+                    if (i == 0)
+                        std::cout << " _op14: " << res[0].fe << std::endl; 
                     i_args += 3;
                     break;
                 }
@@ -900,13 +940,29 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "1", i);
-                    int node2 = printTraceValue(args[i_args + 4], args[i_args + 5], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "1", i);
+                    int node2 = addTrace(args[i_args + 4], args[i_args + 5], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: commit1
+                    // print fisrt value of two arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]]);
+                    Goldilocks::store_avx(arg2, 1, bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5]]);
+                    if (i == 0)
+                        std::cout << " _op15: " << arg1[0].fe << " " << arg2[0].fe << std::endl;
+
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5]]);
+
+                    // print first value of the result
+                    Goldilocks::Element res[4];
+                    Goldilocks::store_avx(res, 1, tmp1[args[i_args + 1]]);
+                    if (i == 0)
+                        std::cout << " _op15: " << res[0].fe << std::endl;
+
                     i_args += 6;
                     break;
                 }
@@ -914,13 +970,30 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "1", i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "1", i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 4], i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: tmp1
+
+                    //print fisrt value of two arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]]);
+                    Goldilocks::store_avx(arg2, 1, tmp1[args[i_args + 4]]);
+                    if (i == 0)
+                        std::cout << " _op16: " << arg1[0].fe << " " << arg2[0].fe << std::endl;
+
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], tmp1[args[i_args + 4]]);
+
+                    //print first value of the result
+                    Goldilocks::Element res[4];
+                    Goldilocks::store_avx(res, 1, tmp1[args[i_args + 1]]);
+                    if (i == 0)
+                        std::cout << " _op16: " << res[0].fe << std::endl;
+
                     i_args += 5;
                     break;
                 }
@@ -928,13 +1001,29 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "1", i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: public
+                    //print fisrt value of two arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]]);
+                    Goldilocks::store_avx(arg2, 1, publics[args[i_args + 4]]);
+                    if (i == 0)
+                        std::cout << " _op17: " << arg1[0].fe << " " << arg2[0].fe << std::endl;
+                    
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], publics[args[i_args + 4]]);
+
+                    //print first value of the result
+                    Goldilocks::Element res[4];
+                    Goldilocks::store_avx(res, 1, tmp1[args[i_args + 1]]);
+                    if (i == 0)
+                        std::cout << " _op17: " << res[0].fe << std::endl;
+
                     i_args += 5;
                     break;
                 }
@@ -942,13 +1031,29 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "1", i);
+                    int node2 = addConstant(args[i_args + 4], numbers[args[i_args + 4]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+
+                    // print fisrt value of two arguments
+                    //  1) store from avx
+                    Goldilocks::Element arg1[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]]);
+                    Goldilocks::store_avx(arg2, 1, numbers_[args[i_args + 4]]);
+                    if (i == 0)
+                        std::cout << " _op18: " << arg1[0].fe << " " << arg2[0].fe << std::endl;
 
                     // OPERATION WITH DEST: tmp1 - SRC0: commit1 - SRC1: number
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], numbers_[args[i_args + 4]]);
+
+                    // print first value of the result
+                    Goldilocks::Element res[4];
+                    Goldilocks::store_avx(res, 1, tmp1[args[i_args + 1]]);
+                    if (i == 0)
+                        std::cout << " _op18: " << res[0].fe << std::endl;
+
                     i_args += 5;
                     break;
                 }
@@ -957,7 +1062,7 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim1, args[i_args + 1], i);
-                    printDst(DEST_TYPE::tmp1, args[i_args], node1, i);
+                    addDst(DEST_TYPE::tmp1, args[i_args], node1, i);
 
                     // COPY tmp1 to tmp1
                     Goldilocks::copy_avx(tmp1[args[i_args]], tmp1[args[i_args + 1]]);
@@ -970,12 +1075,28 @@ public:
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim1, args[i_args + 2], i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 3], i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: tmp1
+                    // print fisrt value of two arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1, 1, tmp1[args[i_args + 2]]);
+                    Goldilocks::store_avx(arg2, 1, tmp1[args[i_args + 3]]);
+                    if (i == 0)
+                        std::cout << " _op20: " << arg1[0].fe << " " << arg2[0].fe << std::endl;
+
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], tmp1[args[i_args + 3]]);
+
+                    // print first value of the result
+                    Goldilocks::Element res[4];
+                    Goldilocks::store_avx(res, 1, tmp1[args[i_args + 1]]);
+                    if (i == 0)
+                        std::cout << " _op20: " << res[0].fe << std::endl;
                     i_args += 4;
+
                     break;
                 }
                 case 21:
@@ -983,9 +1104,9 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim1, args[i_args + 2], i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: public
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], publics[args[i_args + 3]]);
@@ -997,12 +1118,27 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim1, args[i_args + 2], i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 3], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node2 = addConstant(args[i_args + 3], numbers[args[i_args + 3]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp1 - SRC0: tmp1 - SRC1: number
+                    // print fisrt value of two arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1, 1, tmp1[args[i_args + 2]]);
+                    Goldilocks::store_avx(arg2, 1, numbers_[args[i_args + 3]]);
+                    if (i == 0)
+                        std::cout << " _op22: " << arg1[0].fe << " " << arg2[0].fe << std::endl;
+
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], tmp1[args[i_args + 2]], numbers_[args[i_args + 3]]);
+
+                    // print first value of the result
+                    Goldilocks::Element res[4];
+                    Goldilocks::store_avx(res, 1, tmp1[args[i_args + 1]]);
+                    if (i == 0)
+                        std::cout << " _op22: " << res[0].fe << std::endl;
                     i_args += 4;
                     break;
                 }
@@ -1010,8 +1146,8 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 1], "1", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args], node1, i);
+                    int node1 = addVariable(VAR_TYPE::publicInput, args[i_args + 1], "1", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args], node1, i);
 
                     // COPY public to tmp1
                     Goldilocks::copy_avx(tmp1[args[i_args]], publics[args[i_args + 1]]);
@@ -1022,10 +1158,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 2], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::publicInput, args[i_args + 2], "1", i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp1 - SRC0: public - SRC1: public
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], publics[args[i_args + 2]], publics[args[i_args + 3]]);
@@ -1036,10 +1172,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 2], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 3], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::publicInput, args[i_args + 2], "1", i);
+                    int node2 = addConstant(args[i_args + 3], numbers[args[i_args + 3]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp1 - SRC0: public - SRC1: number
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], publics[args[i_args + 2]], numbers_[args[i_args + 3]]);
@@ -1050,8 +1186,8 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::number, args[i_args + 1], "1", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args], node1, i);
+                    int node1 = addConstant(args[i_args + 1], numbers[args[i_args + 1]], i);
+                    addDst(DEST_TYPE::tmp1, args[i_args], node1, i);
 
                     // COPY number to tmp1
                     Goldilocks::copy_avx(tmp1[args[i_args]], numbers_[args[i_args + 1]]);
@@ -1062,10 +1198,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::number, args[i_args + 2], "1", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 3], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "", i);
-                    printDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
+                    int node1 = addConstant(args[i_args + 2], numbers[args[i_args + 2]], i);
+                    int node2 = addConstant(args[i_args + 3], numbers[args[i_args + 3]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "", i);
+                    addDst(DEST_TYPE::tmp1, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp1 - SRC0: number - SRC1: number
                     Goldilocks::op_avx(args[i_args], tmp1[args[i_args + 1]], numbers_[args[i_args + 2]], numbers_[args[i_args + 3]]);
@@ -1076,10 +1212,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "3", i);
-                    int node2 = printTraceValue(args[i_args + 5], args[i_args + 6], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "3", i);
+                    int node2 = addTrace(args[i_args + 5], args[i_args + 6], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: commit1
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], bufferT_[nColsStagesAcc[args[i_args + 5]] + args[i_args + 6]]);
@@ -1090,10 +1226,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "3", i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "3", i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 5], i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: tmp1
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], tmp1[args[i_args + 5]]);
@@ -1104,10 +1240,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 5], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "3", i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 5], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: public
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], publics[args[i_args + 5]]);
@@ -1118,10 +1254,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 5], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "3", i);
+                    int node2 = addConstant(args[i_args + 5], numbers[args[i_args + 5]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: number
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], numbers_[args[i_args + 5]]);
@@ -1132,13 +1268,36 @@ public:
                 {
 
                     // AST format
-                    int node1 = getNode(TMP_TYPE::dim1, args[i_args + 3], i);
-                    int node2 = printTraceValue(args[i_args + 4], args[i_args + 5], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = getNode(TMP_TYPE::dim3, args[i_args + 3], i);
+                    int node2 = addTrace(args[i_args + 4], args[i_args + 5], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: commit1
+                    // print fisrt value of two arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1_1, 1, tmp3[args[i_args + 3]][0]);
+                    Goldilocks::store_avx(arg1_2, 1, tmp3[args[i_args + 3]][1]);
+                    Goldilocks::store_avx(arg1_3, 1, tmp3[args[i_args + 3]][2]);
+                    Goldilocks::store_avx(arg2, 1, bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5]]);
+                    if (i == 0)
+                        std::cout << " _op32: " << arg1_1[0].fe << " " << arg1_2[0].fe << " " << arg1_3[0].fe << " " << arg2[0].fe << std::endl;
+                                        
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp3[args[i_args + 3]], bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5]]);
+                    //print result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]]);
+                    Goldilocks::store_avx(res_2, 1, bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]+1]);
+                    Goldilocks::store_avx(res_3, 1, bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]+2]);
+                    if (i == 0)
+                        std::cout << " _op32: " << res_1[0].fe << " " << res_2[0].fe << " " << res_3[0].fe << std::endl;
+
                     i_args += 6;
                     break;
                 }
@@ -1148,8 +1307,8 @@ public:
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 3], i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 4], i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: tmp1
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp3[args[i_args + 3]], tmp1[args[i_args + 4]]);
@@ -1161,9 +1320,9 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 3], i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: public
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp3[args[i_args + 3]], publics[args[i_args + 4]]);
@@ -1175,9 +1334,9 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 3], i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node2 = addConstant(args[i_args + 4], numbers[args[i_args + 4]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: number
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp3[args[i_args + 3]], numbers_[args[i_args + 4]]);
@@ -1188,10 +1347,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node2 = printTraceValue(args[i_args + 4], args[i_args + 5], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node2 = addTrace(args[i_args + 4], args[i_args + 5], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: commit1
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], challenges[args[i_args + 3]], bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5]]);
@@ -1202,10 +1361,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 4], i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: tmp1
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], challenges[args[i_args + 3]], tmp1[args[i_args + 4]]);
@@ -1216,10 +1375,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: public
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], challenges[args[i_args + 3]], publics[args[i_args + 4]]);
@@ -1230,10 +1389,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node2 = addConstant(args[i_args + 4], numbers[args[i_args + 4]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: number
                     Goldilocks3::op_31_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], challenges[args[i_args + 3]], numbers_[args[i_args + 4]]);
@@ -1255,10 +1414,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "3", i);
-                    int node2 = printTraceValue(args[i_args + 5], args[i_args + 6], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "3", i);
+                    int node2 = addTrace(args[i_args + 5], args[i_args + 6], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: commit3
                     Goldilocks3::op_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 5]] + args[i_args + 6]]);
@@ -1269,10 +1428,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "3", i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "3", i);
                     int node2 = getNode(TMP_TYPE::dim3, args[i_args + 5], i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: tmp3
                     Goldilocks3::op_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], tmp3[args[i_args + 5]]);
@@ -1283,10 +1442,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 5], "3", i);
-                    int node3 = printOP(2, node1, node2, "33", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "3", i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 5], "3", i);
+                    int node3 = addOP(2, node1, node2, "33", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // MULTIPLICATION WITH DEST: commit3 - SRC0: commit3 - SRC1: challenge
                     Goldilocks3::mul_avx((Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], challenges[args[i_args + 5]], challenges_ops[args[i_args + 5]]);
@@ -1297,10 +1456,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 3], args[i_args + 4], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 5], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addTrace(args[i_args + 3], args[i_args + 4], "3", i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 5], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: commit3 - SRC1: challenge
                     Goldilocks3::op_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]], challenges[args[i_args + 5]]);
@@ -1312,7 +1471,7 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 2], i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args]] + args[i_args + 1], node1, i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args]] + args[i_args + 1], node1, i);
 
                     // COPY tmp3 to commit3
                     Goldilocks3::copy_avx((Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args]] + args[i_args + 1]], tmp3[args[i_args + 2]]);
@@ -1325,8 +1484,8 @@ public:
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 3], i);
                     int node2 = getNode(TMP_TYPE::dim3, args[i_args + 4], i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: tmp3
                     Goldilocks3::op_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp3[args[i_args + 3]], tmp3[args[i_args + 4]]);
@@ -1338,9 +1497,9 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 3], i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 4], "3", i);
-                    int node3 = printOP(2, node1, node2, "33", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 4], "3", i);
+                    int node3 = addOP(2, node1, node2, "33", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // MULTIPLICATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: challenge
                     Goldilocks3::mul_avx((Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp3[args[i_args + 3]], challenges[args[i_args + 4]], challenges_ops[args[i_args + 4]]);
@@ -1351,10 +1510,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = tmp3_node[args[i_args + 3]];
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 4], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = getNode(TMP_TYPE::dim3, args[i_args + 3], i); 
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 4], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: tmp3 - SRC1: challenge
                     Goldilocks3::op_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], tmp3[args[i_args + 3]], challenges[args[i_args + 4]]);
@@ -1365,10 +1524,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 4], "3", i);
-                    int node3 = printOP(2, node1, node2, "33", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 4], "3", i);
+                    int node3 = addOP(2, node1, node2, "33", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // MULTIPLICATION WITH DEST: commit3 - SRC0: challenge - SRC1: challenge
                     Goldilocks3::mul_avx((Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], challenges[args[i_args + 3]], challenges[args[i_args + 4]], challenges_ops[args[i_args + 4]]);
@@ -1379,10 +1538,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 4], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::dest3, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 4], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::expression, nColsStagesAcc[args[i_args + 1]] + args[i_args + 2], node3, i);
 
                     // OPERATION WITH DEST: commit3 - SRC0: challenge - SRC1: challenge
                     Goldilocks3::op_avx(args[i_args], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]], challenges[args[i_args + 3]], challenges[args[i_args + 4]]);
@@ -1393,10 +1552,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "3", i);
-                    int node2 = printTraceValue(args[i_args + 4], args[i_args + 5], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "3", i);
+                    int node2 = addTrace(args[i_args + 4], args[i_args + 5], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: commit1
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5]]);
@@ -1407,10 +1566,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "3", i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "3", i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 4], i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: tmp1
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], tmp1[args[i_args + 4]]);
@@ -1421,10 +1580,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "3", i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 4], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: public
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], publics[args[i_args + 4]]);
@@ -1435,13 +1594,39 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "3", i);
+                    int node2 = addConstant(args[i_args + 4], numbers[args[i_args + 4]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: number
+                    //print arguments
+
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1_1, 1,bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]]);
+                    Goldilocks::store_avx(arg1_2, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 1]);
+                    Goldilocks::store_avx(arg1_3, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 2]);
+                    Goldilocks::store_avx(arg2, 1, numbers_[args[i_args + 4]]);
+                    if (i == 0)
+                        std::cout << " _op54: (" << arg1_1[0].fe << ", " << arg1_2[0].fe<<", "<<arg1_3[0].fe <<") " << arg2[0].fe << std::endl;
+
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], numbers_[args[i_args + 4]]);
+
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op54: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
+                    
                     i_args += 5;
                     break;
                 }
@@ -1450,12 +1635,38 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 2], i);
-                    int node2 = printTraceValue(args[i_args + 3], args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node2 = addTrace(args[i_args + 3], args[i_args + 4], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: commit1
+
+                    //print arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1_1, 1, tmp3[args[i_args + 2]][0]);
+                    Goldilocks::store_avx(arg1_2, 1, tmp3[args[i_args + 2]][1]);
+                    Goldilocks::store_avx(arg1_3, 1, tmp3[args[i_args + 2]][2]);
+                    Goldilocks::store_avx(arg2, 1, bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]]);
+                    if (i == 0)
+                        std::cout << " _op55: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") " << arg2[0].fe << std::endl;
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]]);
+
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    
+                    if (i == 0)
+                        std::cout << " _op54: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
+                    
+
                     i_args += 5;
                     break;
                 }
@@ -1465,11 +1676,32 @@ public:
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 2], i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 3], i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: tmp1
+                    //print arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1_1, 1, tmp3[args[i_args + 2]][0]);
+                    Goldilocks::store_avx(arg1_2, 1, tmp3[args[i_args + 2]][1]);
+                    Goldilocks::store_avx(arg1_3, 1, tmp3[args[i_args + 2]][2]);
+                    Goldilocks::store_avx(arg2, 1, tmp1[args[i_args + 3]]);
+                    if (i == 0)
+                        std::cout << " _op56: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") " << arg2[0].fe << std::endl;
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp1[args[i_args + 3]]);
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op56: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
                     i_args += 4;
                     break;
                 }
@@ -1478,9 +1710,9 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 2], i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: public
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], publics[args[i_args + 3]]);
@@ -1492,9 +1724,9 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 2], i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 3], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node2 = addConstant(args[i_args + 3], numbers[args[i_args + 3]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: number
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], numbers_[args[i_args + 3]]);
@@ -1505,10 +1737,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 2], "3", i);
-                    int node2 = printTraceValue(args[i_args + 3], args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 2], "3", i);
+                    int node2 = addTrace(args[i_args + 3], args[i_args + 4], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: commit1
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]]);
@@ -1519,13 +1751,34 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 2], "3", i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 2], "3", i);
                     int node2 = getNode(TMP_TYPE::dim1, args[i_args + 3], i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: tmp1
+                    //print arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1_1, 1, challenges[args[i_args + 2]][0]);
+                    Goldilocks::store_avx(arg1_2, 1, challenges[args[i_args + 2]][1]);
+                    Goldilocks::store_avx(arg1_3, 1, challenges[args[i_args + 2]][2]);
+                    Goldilocks::store_avx(arg2, 1, tmp1[args[i_args + 3]]);
+                    if (i == 0)
+                        std::cout << " _op60: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") " << arg2[0].fe << std::endl;
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], tmp1[args[i_args + 3]]);
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op60: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
                     i_args += 4;
                     break;
                 }
@@ -1533,10 +1786,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 2], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 2], "3", i);
+                    int node2 = addVariable(VAR_TYPE::publicInput, args[i_args + 3], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: public
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], publics[args[i_args + 3]]);
@@ -1547,13 +1800,34 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 2], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::number, args[i_args + 3], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 2], "3", i);
+                    int node2 = addConstant(args[i_args + 3], numbers[args[i_args + 3]], i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: number
+                    //print arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2[4];
+                    Goldilocks::store_avx(arg1_1, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]]);
+                    Goldilocks::store_avx(arg1_2, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 1]);
+                    Goldilocks::store_avx(arg1_3, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 2]);
+                    Goldilocks::store_avx(arg2, 1, numbers_[args[i_args + 3]]);
+                    if (i == 0)
+                        std::cout << " _op62: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") " << arg2[0].fe << std::endl;
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], numbers_[args[i_args + 3]]);
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op62: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
                     i_args += 4;
                     break;
                 }
@@ -1561,8 +1835,8 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 1], args[i_args + 2], "3", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args], node1, i);
+                    int node1 = addTrace(args[i_args + 1], args[i_args + 2], "3", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args], node1, i);
 
                     // COPY commit3 to tmp3
                     Goldilocks3::copy_avx(tmp3[args[i_args]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 1]] + args[i_args + 2]]);
@@ -1573,13 +1847,38 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "3", i);
-                    int node2 = printTraceValue(args[i_args + 4], args[i_args + 5], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "3", i);
+                    int node2 = addTrace(args[i_args + 4], args[i_args + 5], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: commit3
+                    //print arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2_1[4];
+                    Goldilocks::Element arg2_2[4];
+                    Goldilocks::Element arg2_3[4];
+                    Goldilocks::store_avx(arg1_1, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]]);
+                    Goldilocks::store_avx(arg1_2, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 1]);
+                    Goldilocks::store_avx(arg1_3, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 2]);
+                    Goldilocks::store_avx(arg2_1, 1, bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5]]);
+                    Goldilocks::store_avx(arg2_2, 1, bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5] + 1]);
+                    Goldilocks::store_avx(arg2_3, 1, bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5] + 2]);
+                    if (i == 0)
+                        std::cout << " _op64: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") (" << arg2_1[0].fe << ", " << arg2_2[0].fe << ", " << arg2_3[0].fe << ") " << std::endl;
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 4]] + args[i_args + 5]]);
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op64: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
                     i_args += 6;
                     break;
                 }
@@ -1587,13 +1886,38 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "3", i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "3", i);
                     int node2 = getNode(TMP_TYPE::dim3, args[i_args + 4], i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: tmp3
+                    //print arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2_1[4];
+                    Goldilocks::Element arg2_2[4];
+                    Goldilocks::Element arg2_3[4];
+                    Goldilocks::store_avx(arg1_1, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]]);
+                    Goldilocks::store_avx(arg1_2, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 1]);
+                    Goldilocks::store_avx(arg1_3, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 2]);
+                    Goldilocks::store_avx(arg2_1, 1, tmp3[args[i_args + 4]][0]);
+                    Goldilocks::store_avx(arg2_2, 1, tmp3[args[i_args + 4]][1]);
+                    Goldilocks::store_avx(arg2_3, 1, tmp3[args[i_args + 4]][2]);
+                    if (i == 0)
+                        std::cout << " _op65: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") (" << arg2_1[0].fe << ", " << arg2_2[0].fe << ", " << arg2_3[0].fe << ") " << std::endl;
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], tmp3[args[i_args + 4]]);
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op65: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
                     i_args += 5;
                     break;
                 }
@@ -1601,13 +1925,38 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 4], "3", i);
-                    int node3 = printOP(2, node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "3", i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 4], "3", i);
+                    int node3 = addOP(2, node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: challenge
+                    //ptint arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2_1[4];
+                    Goldilocks::Element arg2_2[4];
+                    Goldilocks::Element arg2_3[4];
+                    Goldilocks::store_avx(arg1_1, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]]);
+                    Goldilocks::store_avx(arg1_2, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 1]);
+                    Goldilocks::store_avx(arg1_3, 1, bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3] + 2]);
+                    Goldilocks::store_avx(arg2_1, 1, challenges[args[i_args + 4]][0]);
+                    Goldilocks::store_avx(arg2_2, 1, challenges[args[i_args + 4]][1]);
+                    Goldilocks::store_avx(arg2_3, 1, challenges[args[i_args + 4]][2]);
+                    if (i == 0)
+                        std::cout << " _op66: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") (" << arg2_1[0].fe << ", " << arg2_2[0].fe << ", " << arg2_3[0].fe << ") " << std::endl;
                     Goldilocks3::mul_avx(tmp3[args[i_args + 1]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], challenges[args[i_args + 4]], challenges_ops[args[i_args + 4]]);
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op66: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
                     i_args += 5;
                     break;
                 }
@@ -1615,10 +1964,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 4], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "3", i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 4], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: challenge
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], challenges[args[i_args + 4]]);
@@ -1629,7 +1978,7 @@ public:
                 {
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 1], i);
-                    printDst(DEST_TYPE::tmp3, args[i_args], node1, i);
+                    addDst(DEST_TYPE::tmp3, args[i_args], node1, i);
 
                     // COPY tmp3 to tmp3
                     Goldilocks3::copy_avx(tmp3[args[i_args]], tmp3[args[i_args + 1]]);
@@ -1642,11 +1991,36 @@ public:
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 2], i);
                     int node2 = getNode(TMP_TYPE::dim3, args[i_args + 3], i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: tmp3
+                    //print arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2_1[4];
+                    Goldilocks::Element arg2_2[4];
+                    Goldilocks::Element arg2_3[4];
+                    Goldilocks::store_avx(arg1_1, 1, tmp3[args[i_args + 2]][0]);
+                    Goldilocks::store_avx(arg1_2, 1, tmp3[args[i_args + 2]][1]);
+                    Goldilocks::store_avx(arg1_3, 1, tmp3[args[i_args + 2]][2]);
+                    Goldilocks::store_avx(arg2_1, 1, tmp3[args[i_args + 3]][0]);
+                    Goldilocks::store_avx(arg2_2, 1, tmp3[args[i_args + 3]][1]);
+                    Goldilocks::store_avx(arg2_3, 1, tmp3[args[i_args + 3]][2]);
+                    if (i == 0)
+                        std::cout << " _op69: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") (" << arg2_1[0].fe << ", " << arg2_2[0].fe << ", " << arg2_3[0].fe << ") " << std::endl;
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], tmp3[args[i_args + 3]]);
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op69: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
                     i_args += 4;
                     break;
                 }
@@ -1655,12 +2029,38 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 2], i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node3 = printOP(2, node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node3 = addOP(2, node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: challenge
+                    //print arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2_1[4];
+                    Goldilocks::Element arg2_2[4];
+                    Goldilocks::Element arg2_3[4];
+                    Goldilocks::store_avx(arg1_1, 1, tmp3[args[i_args + 2]][0]);
+                    Goldilocks::store_avx(arg1_2, 1, tmp3[args[i_args + 2]][1]);
+                    Goldilocks::store_avx(arg1_3, 1, tmp3[args[i_args + 2]][2]);
+                    Goldilocks::store_avx(arg2_1, 1, challenges[args[i_args + 3]][0]);
+                    Goldilocks::store_avx(arg2_2, 1, challenges[args[i_args + 3]][1]);
+                    Goldilocks::store_avx(arg2_3, 1, challenges[args[i_args + 3]][2]);
+                    if (i == 0)
+                        std::cout << " _op70: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") (" << arg2_1[0].fe << ", " << arg2_2[0].fe << ", " << arg2_3[0].fe << ") " << std::endl;
+
                     Goldilocks3::mul_avx(tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op70: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
                     i_args += 4;
                     break;
                 }
@@ -1669,12 +2069,37 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 2], i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: challenge
+                    //print arguments
+                    // 1) store from avx
+                    Goldilocks::Element arg1_1[4];
+                    Goldilocks::Element arg1_2[4];
+                    Goldilocks::Element arg1_3[4];
+                    Goldilocks::Element arg2_1[4];
+                    Goldilocks::Element arg2_2[4];
+                    Goldilocks::Element arg2_3[4];
+                    Goldilocks::store_avx(arg1_1, 1, tmp3[args[i_args + 2]][0]);
+                    Goldilocks::store_avx(arg1_2, 1, tmp3[args[i_args + 2]][1]);
+                    Goldilocks::store_avx(arg1_3, 1, tmp3[args[i_args + 2]][2]);
+                    Goldilocks::store_avx(arg2_1, 1, challenges[args[i_args + 3]][0]);
+                    Goldilocks::store_avx(arg2_2, 1, challenges[args[i_args + 3]][1]);
+                    Goldilocks::store_avx(arg2_3, 1, challenges[args[i_args + 3]][2]);
+                    if (i == 0)
+                        std::cout << " _op71: (" << arg1_1[0].fe << ", " << arg1_2[0].fe << ", " << arg1_3[0].fe << ") (" << arg2_1[0].fe << ", " << arg2_2[0].fe << ", " << arg2_3[0].fe << ") " << std::endl;
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], challenges[args[i_args + 3]]);
+                    //print the result
+                    Goldilocks::Element res_1[4];
+                    Goldilocks::Element res_2[4];
+                    Goldilocks::Element res_3[4];
+                    Goldilocks::store_avx(res_1, 1, tmp3[args[i_args + 1]][0]);
+                    Goldilocks::store_avx(res_2, 1, tmp3[args[i_args + 1]][1]);
+                    Goldilocks::store_avx(res_3, 1, tmp3[args[i_args + 1]][2]);
+                    if (i == 0)
+                        std::cout << " _op71: (" << res_1[0].fe << ", " << res_2[0].fe << ", " << res_3[0].fe << ") " << std::endl;
                     i_args += 4;
                     break;
                 }
@@ -1682,10 +2107,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 2], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node3 = printOP(2, node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 2], "3", i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node3 = addOP(2, node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: challenge - SRC1: challenge
                     Goldilocks3::mul_avx(tmp3[args[i_args + 1]], challenges[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
@@ -1696,10 +2121,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 2], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 2], "3", i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: challenge
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], challenges[args[i_args + 3]]);
@@ -1710,8 +2135,8 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::eval, args[i_args + 1], "3", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args], node1, i);
+                    int node1 = addVariable(VAR_TYPE::eval, args[i_args + 1], "3", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args], node1, i);
 
                     // COPY eval to tmp3
                     Goldilocks3::copy_avx(tmp3[args[i_args]], evals[args[i_args + 1]]);
@@ -1722,10 +2147,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::eval, args[i_args + 2], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::challenge, args[i_args + 3], "3", i);
-                    int node3 = printOP(2, node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::eval, args[i_args + 2], "3", i);
+                    int node2 = addVariable(VAR_TYPE::challenge, args[i_args + 3], "3", i);
+                    int node3 = addOP(2, node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // MULTIPLICATION WITH DEST: tmp3 - SRC0: eval - SRC1: challenge
                     Goldilocks3::mul_avx(tmp3[args[i_args + 1]], evals[args[i_args + 2]], challenges[args[i_args + 3]], challenges_ops[args[i_args + 3]]);
@@ -1736,10 +2161,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::challenge, args[i_args + 2], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::eval, args[i_args + 3], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::challenge, args[i_args + 2], "3", i);
+                    int node2 = addVariable(VAR_TYPE::eval, args[i_args + 3], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: challenge - SRC1: eval
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], challenges[args[i_args + 2]], evals[args[i_args + 3]]);
@@ -1751,9 +2176,9 @@ public:
 
                     // AST format
                     int node1 = getNode(TMP_TYPE::dim3, args[i_args + 2], i);
-                    int node2 = printVariableValue(VAR_TYPE::eval, args[i_args + 3], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node2 = addVariable(VAR_TYPE::eval, args[i_args + 3], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: tmp3 - SRC1: eval
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], tmp3[args[i_args + 2]], evals[args[i_args + 3]]);
@@ -1764,10 +2189,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printVariableValue(VAR_TYPE::eval, args[i_args + 2], "3", i);
-                    int node2 = printTraceValue(args[i_args + 3], args[i_args + 4], "1", i);
-                    int node3 = printOP(args[i_args], node1, node2, "31", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addVariable(VAR_TYPE::eval, args[i_args + 2], "3", i);
+                    int node2 = addTrace(args[i_args + 3], args[i_args + 4], "1", i);
+                    int node3 = addOP(args[i_args], node1, node2, "31", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: eval - SRC1: commit1
                     Goldilocks3::op_31_avx(args[i_args], tmp3[args[i_args + 1]], evals[args[i_args + 2]], bufferT_[nColsStagesAcc[args[i_args + 3]] + args[i_args + 4]]);
@@ -1778,10 +2203,10 @@ public:
                 {
 
                     // AST format
-                    int node1 = printTraceValue(args[i_args + 2], args[i_args + 3], "3", i);
-                    int node2 = printVariableValue(VAR_TYPE::eval, args[i_args + 4], "3", i);
-                    int node3 = printOP(args[i_args], node1, node2, "33", i);
-                    printDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
+                    int node1 = addTrace(args[i_args + 2], args[i_args + 3], "3", i);
+                    int node2 = addVariable(VAR_TYPE::eval, args[i_args + 4], "3", i);
+                    int node3 = addOP(args[i_args], node1, node2, "33", i);
+                    addDst(DEST_TYPE::tmp3, args[i_args + 1], node3, i);
 
                     // OPERATION WITH DEST: tmp3 - SRC0: commit3 - SRC1: eval
                     Goldilocks3::op_avx(args[i_args], tmp3[args[i_args + 1]], (Goldilocks3::Element_avx &)bufferT_[nColsStagesAcc[args[i_args + 2]] + args[i_args + 3]], evals[args[i_args + 4]]);
@@ -1800,7 +2225,7 @@ public:
                 std::cout << " " << i_args << " - " << parserParams.nArgs << std::endl;
             assert(i_args == parserParams.nArgs);
         }
-        printSizes(starkInfo, params, parserParams);
+        addMetadata(starkInfo, params, parserParams);
         std::ofstream file(fileAST);
         file << outputJSON.dump(2);
         file.close();
