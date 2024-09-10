@@ -38,22 +38,22 @@
     "logRemoteDbReads": false,
     "logExecutorServerResponses": false,
 
-    "proverServerPort": 50051,
+    "proverServerPort": 50059,
     "proverServerMockPort": 50052,
     "proverServerMockTimeout": 10000000,
-    "proverClientPort": 50051,
+    "proverClientPort": 50059,
     "proverClientHost": "127.0.0.1",
 
-    "executorServerPort": 50071,
+    "executorServerPort": 50079,
     "executorROMLineTraces": false,
-    "executorClientPort": 50071,
+    "executorClientPort": 50079,
     "executorClientHost": "127.0.0.1",
 
-    "stateDBServerPort": 50061,
+    "stateDBServerPort": 50069,
     "stateDBURL": "local",
 
-    "aggregatorServerPort": 50081,
-    "aggregatorClientPort": 50081,
+    "aggregatorServerPort": 50089,
+    "aggregatorClientPort": 50089,
     "aggregatorClientHost": "127.0.0.1",
 
     "mapConstPolsFile": false,
