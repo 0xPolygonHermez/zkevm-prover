@@ -8,12 +8,14 @@ TARGET_PLD += polsDiff
 TARGET_TEST := zkProverTest
 TARGET_SETUP := fflonkSetup
 TARGET_CONSTRAINT := constraintChecker
+TARGET_WITNESS := witness.so
 
 BUILD_DIR := ./build
 LIB_DIR := ./lib
 SRC_DIRS := ./src ./test ./tools
 SETUP_DIRS := ./src/rapidsnark
 SETUP_DPNDS_DIR := src/ffiasm
+WITNESS_LIB := ./witness_lib
 
 GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
 GRPCPP_LIBS := $(shell pkg-config grpc++ --libs) -lgrpc++_reflection
@@ -100,12 +102,22 @@ OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main.cpp.o, $(OBJS_SETUP)) # Exclude
 OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main_test.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
 DEPS_SETUP := $(OBJS_SETUP:.o=.d)
 
+SRCS_WITNESS_LIB := $(shell find ./circom ./src/goldilocks/src/goldilocks_base_field.cpp -name *.cpp)
+OBJS_WITNESS_LIB := $(SRCS_WITNESS_LIB:%=$(BUILD_DIR)/%.o)
+DEPS_WITNESS_LIB := $(OBJS_WITNESS_LIB:.o=.d)
+
+
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
 zkevm_lib: CXXFLAGS_EXT := -D__ZKEVM_LIB__
 zkevm_lib: LDFLAGS_EXT  := -L../zkevm-prover-rust/target/release -lzkevm_sm
 zkevm_lib: INC_FLAGS_EXT := -I./../zkevm-prover-rust/include
 zkevm_lib: $(LIB_DIR)/$(TARGET_ZKEVM_LIB)
+
+witness: CXXFLAGS_EXT := -fPIC
+witness: INC_FLAGS := -I src/goldilocks/src -I circom/utils
+witness: CPPFLAGS := $(INC_FLAGS)
+witness: $(WITNESS_LIB)/$(TARGET_WITNESS)
 
 starks_lib: CXXFLAGS_EXT := -D__ZKEVM_LIB__ -fPIC#we decided to use the same flags for both libraries
 starks_lib: $(LIB_DIR)/$(TARGET_STARKS_LIB)
@@ -129,6 +141,10 @@ $(LIB_DIR)/$(TARGET_STARKS_LIB): $(OBJS_STARKS_LIB)
 	mkdir -p $(LIB_DIR)/include
 	$(AR) rcs $@ $^
 	cp src/api/starks_api.hpp $(LIB_DIR)/include/starks_lib.h
+
+$(WITNESS_LIB)/$(TARGET_WITNESS): $(OBJS_WITNESS_LIB)
+	$(MKDIR_P) $(WITNESS_LIB)
+	$(CXX) -shared -o $@ $^
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
 	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) $(CXXFLAGS_EXT) -o $@ $(LDFLAGS) $(LDFLAGS_EXT) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGS_EXT)

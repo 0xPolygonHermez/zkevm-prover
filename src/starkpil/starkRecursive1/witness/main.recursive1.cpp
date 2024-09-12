@@ -9,12 +9,12 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <chrono>
-#include "main.recursive1.hpp"
 
 using json = nlohmann::json;
 
-#include "calcwit.recursive1.hpp"
-#include "circom.recursive1.hpp"
+#include "main.hpp"
+#include "calcwit.hpp"
+#include "circom.hpp"
 
 #include "utils.hpp"
 #include "timer.hpp"

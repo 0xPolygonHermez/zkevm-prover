@@ -132,6 +132,20 @@ public:
         }
     }
 
+    inline void storeImPolynomials(StepsParams &params, __m256i *bufferT_, uint64_t row) {
+        auto openingPointIndex = std::find(setupCtx.starkInfo.openingPoints.begin(), setupCtx.starkInfo.openingPoints.end(), 0) - setupCtx.starkInfo.openingPoints.begin();
+
+        auto firstImPol = std::find_if(setupCtx.starkInfo.cmPolsMap.begin(), setupCtx.starkInfo.cmPolsMap.end(), [](const PolMap& s) { return s.imPol; });
+
+        if(firstImPol != setupCtx.starkInfo.cmPolsMap.end()) {
+            uint64_t firstImPolPos = firstImPol->stagePos;
+            uint64_t stage = setupCtx.starkInfo.nStages;
+            for(uint64_t k = firstImPolPos; k < nColsStages[stage]; ++k) {
+                Goldilocks::store_avx(&params.pols[offsetsStages[stage] + k + row * nColsStages[stage]], nColsStages[stage], bufferT_[nColsStagesAcc[(setupCtx.starkInfo.nStages + 2)*openingPointIndex + stage] + k]);
+            }
+        }
+    }
+
     inline void printTmp1(uint64_t row, __m256i tmp) {
         Goldilocks::Element dest[nrowsPack];
         Goldilocks::store_avx(dest, tmp);
@@ -168,8 +182,7 @@ public:
         }
     }
 
-    void calculateExpressions(StepsParams& params, Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse) override {
-
+    void calculateExpressions(StepsParams& params, Goldilocks::Element *dest, ParserArgs &parserArgs, ParserParams &parserParams, bool domainExtended, bool inverse, bool imPols) override {
         uint8_t* ops = &parserArgs.ops[parserParams.opsOffset];
         uint16_t* args = &parserArgs.args[parserParams.argsOffset];
         uint64_t* numbers = &parserArgs.numbers[parserParams.numbersOffset];
@@ -826,7 +839,11 @@ public:
                 }
             }
 
-            storePolynomial(dest, parserParams, i, tmp1, tmp3, inverse);
+            if(imPols) {
+                storeImPolynomials(params, bufferT_, i);
+            } else {
+                storePolynomial(dest, parserParams, i, tmp1, tmp3, inverse);
+            }
 
             if (i_args != parserParams.nArgs) std::cout << " " << i_args << " - " << parserParams.nArgs << std::endl;
             assert(i_args == parserParams.nArgs);

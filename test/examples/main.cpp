@@ -4,7 +4,9 @@
 #include "hint_handler.hpp"
 #include "hint_handler_builder.hpp"
 #include "gen_recursive_proof.hpp"
-#include "commit_pols_starks.hpp"
+
+#include <dlfcn.h> // Required for dlopen, dlsym, dlclose
+typedef void (*FunctionType)(void*, uint64_t, uint64_t, const std::string, const std::string,  nlohmann::json);
 
 int main(int argc, char **argv)
 {
@@ -41,12 +43,12 @@ int main(int argc, char **argv)
     HintHandlerBuilder::registerBuilder(GProdHintHandler::getName(), std::make_unique<GProdHintHandlerBuilder>());
     HintHandlerBuilder::registerBuilder(GSumHintHandler::getName(), std::make_unique<GSumHintHandlerBuilder>());
 
-    bool circomLib = false;
+    bool circomLib = true;
 
     if(testName == "compressor") {
         zkinAllFile = "test/examples/compressor/circom/all.proof.zkin.json";
         execFile = "test/examples/compressor/circom/all.c18.exec";
-        datFile = "test/examples/compressor/circom/all.c18.exec";
+        datFile = "test/examples/compressor/circom/all.verifier.dat";
         constPolsFile = "test/examples/compressor/all.c18.const";
         constTreeFile = "test/examples/compressor/all.c18.consttree";
         starkInfoFile = "test/examples/compressor/all.c18.starkinfo.json";
@@ -92,10 +94,34 @@ int main(int argc, char **argv)
         json zkin;
         file2json(zkinAllFile, zkin);
         
-        // TODO!
-    }
-    
+        void* pAddressCm1 = (uint8_t *)pAddress + setupCtx.starkInfo.mapOffsets[std::make_pair("cm1", false)] * sizeof(Goldilocks::Element);
 
+        // Load the dynamic library
+        void* handle = dlopen("./witness_lib/witness.so", RTLD_LAZY);
+        if (!handle) {
+            cout << "Cannot load library: " << dlerror() << std::endl;
+            return 1;
+        }
+        
+        // Clear any existing errors
+        dlerror();
+        
+        // Load the symbol (function)
+        FunctionType function = (FunctionType)dlsym(handle, "getCommitedPols");
+        const char* dlsym_error = dlerror();
+        if (dlsym_error) {
+            cout << "Something went wrong" << endl;
+            dlclose(handle);
+            return 1;
+        }
+        // Use the function
+        function(pAddressCm1, N, setupCtx.starkInfo.mapSectionsN["cm1"], datFile, execFile, zkin);
+        
+        // Close the library
+        dlclose(handle);
+    }
+
+    cout << "FINISH" << endl;
     json publics;
     file2json(publicsFile, publics);
 

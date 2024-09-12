@@ -931,20 +931,22 @@ template <typename ElementType>
 void Starks<ElementType>::calculateImPolsExpressions(uint64_t step, StepsParams& params) {
     TimerStart(STARK_CALCULATE_IMPOLS_EXPS);
 
-    uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
-    
-    Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
-    for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
-        if(setupCtx.starkInfo.cmPolsMap[i].imPol && setupCtx.starkInfo.cmPolsMap[i].stage == step) {
-            ExpressionsAvx expressionsAvx(setupCtx);
-            expressionsAvx.calculateExpression(params, pAddr, setupCtx.starkInfo.cmPolsMap[i].expId);
-            Goldilocks::Element* imAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), false)] + setupCtx.starkInfo.cmPolsMap[i].stagePos];
-        #pragma omp parallel
-            for(uint64_t j = 0; j < N; ++j) {
-                std::memcpy(&imAddr[j*setupCtx.starkInfo.mapSectionsN["cm" + to_string(step)]], &pAddr[j*setupCtx.starkInfo.cmPolsMap[i].dim], setupCtx.starkInfo.cmPolsMap[i].dim * sizeof(Goldilocks::Element));
-            }
-        }
-    }
+    ExpressionsAvx expressionsAvx(setupCtx);
+
+    expressionsAvx.calculateExpressions(params, nullptr, setupCtx.expressionsBin.expressionsBinArgsImPols, setupCtx.expressionsBin.imPolsInfo[step - 1], false, false, true);
+
+    // uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
+    // Goldilocks::Element* pAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
+    // for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
+    //     if(setupCtx.starkInfo.cmPolsMap[i].imPol && setupCtx.starkInfo.cmPolsMap[i].stage == step) {
+    //         expressionsAvx.calculateExpression(params, pAddr, setupCtx.starkInfo.cmPolsMap[i].expId);
+    //         Goldilocks::Element* imAddr = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), false)] + setupCtx.starkInfo.cmPolsMap[i].stagePos];
+    //     #pragma omp parallel
+    //         for(uint64_t j = 0; j < N; ++j) {
+    //             std::memcpy(&imAddr[j*setupCtx.starkInfo.mapSectionsN["cm" + to_string(step)]], &pAddr[j*setupCtx.starkInfo.cmPolsMap[i].dim], setupCtx.starkInfo.cmPolsMap[i].dim * sizeof(Goldilocks::Element));
+    //         }
+    //     }
+    // }
     
     TimerStopAndLog(STARK_CALCULATE_IMPOLS_EXPS);
 }

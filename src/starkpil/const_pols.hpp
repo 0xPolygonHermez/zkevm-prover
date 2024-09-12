@@ -108,8 +108,6 @@ public:
         computeX();
 
         computeConnectionsX(); // Needed for PIL1 compatibility
-
-        cout << "HOLI " << endl;
     }
 
     void loadConstPols(StarkInfo& starkInfo, std::string constPolsFile) {
@@ -195,7 +193,6 @@ public:
             Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
         }
         TimerStopAndLog(COMPUTE_X_N_AND_X_2NS);
-                cout << "HOLI " << endl;
     }
 
     void computeX() {
