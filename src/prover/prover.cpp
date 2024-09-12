@@ -6,6 +6,12 @@
 #include "scalar.hpp"
 #include "proof2zkin.hpp"
 #include "main.hpp"
+#include <iostream>
+#include <dlfcn.h> 
+
+typedef void (*FunctionType)(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin, uint64_t N, uint64_t nCols);
+
+
 #if (PROVER_FORK_ID == 10)
     #include "fork_10/main.hpp"
     #include "fork_10/main.recursive1.hpp"
@@ -635,7 +641,30 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
         CommitPolsStarks cmPols12a((uint8_t *)pAddress + starksC12a->starkInfo.mapOffsets.section[cm1_n] * sizeof(Goldilocks::Element), (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
     #if (PROVER_FORK_ID == 10)
-        CircomFork10::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
+        //CircomFork10::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
+        // Load the dynamic library
+        std::cout << "Loading witness library" << std::endl;
+        void* handle = dlopen("./witness_lib/witness.so", RTLD_LAZY);
+        if (!handle) {
+            std::cout << "Cannot load library: " << dlerror() << std::endl;
+            exit(1);
+        }
+        // Clear any existing errors
+        dlerror();
+
+        // Load the symbol (function)
+        FunctionType function = (FunctionType)dlsym(handle, "getCommitedPols");
+        const char* dlsym_error = dlerror();
+        if (dlsym_error) {
+            std::cout << "Cannot load symbol 'getCommitedPols' : " << dlsym_error << std::endl;
+            dlclose(handle);
+            exit(1);
+        }
+        // Use function
+        function(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
+
+        // Close the library
+        dlclose(handle);
     #else
         CircomFork11::getCommitedPols(&cmPols12a, config.zkevmVerifier, config.c12aExec, zkin, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
     #endif
