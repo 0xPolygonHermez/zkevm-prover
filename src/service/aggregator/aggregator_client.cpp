@@ -634,8 +634,17 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
 #endif
 
     // Set the input
-    pProverRequest->finalProofInput = json::parse(genFinalProofRequest.recursive_proof());
-
+    try
+    {
+        pProverRequest->finalProofInput = json::parse(genFinalProofRequest.recursive_proof());
+    }
+    catch (json::parse_error& ex)
+    {
+        zklog.error("AggregatorClient::GenFinalProof() failed parsing genFinalProofRequest.recursive_proof at byte=" + to_string(ex.byte) + " error=" + ex.what());
+        zklog.error("input=" + genFinalProofRequest.recursive_proof());
+        genFinalProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
     // Set the aggregator address
     string auxString = Remove0xIfPresent(genFinalProofRequest.aggregator_addr());
     if (auxString.size() > 40)

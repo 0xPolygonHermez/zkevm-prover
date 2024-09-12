@@ -121,17 +121,17 @@ Prover::Prover(Goldilocks &fr,
             if (config.zkevmCmPols.size() > 0)
             {
                 pAddress = mapFile(config.zkevmCmPols, polsSize, true);
-                zklog.info("Prover::genBatchProof() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
+                zklog.info("Prover::Prover() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
             }
             else
             {
                 pAddress = calloc_zkevm(polsSize, 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
+                    zklog.error("Prover::Prover() failed calling malloc() of size " + to_string(polsSize));
                     exitProcess();
                 }
-                zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
+                zklog.info("Prover::Prover() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
 #if defined(__USE_CUDA__) && defined(ENABLE_EXPERIMENTAL_CODE)
@@ -999,7 +999,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
         CircomFinalFork12::loadJsonImpl(ctxFinal, zkinRecursiveF);
         if (ctxFinal->getRemaingInputsToBeSet() != 0)
         {
-            zklog.error("Prover::genProof() Not all inputs have been set. Only " + to_string(CircomFinalFork12::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet()) + " out of " + to_string(CircomFinalFork12::get_main_input_signal_no()));
+            zklog.error("Prover::genFinalProof() Not all inputs have been set. Only " + to_string(CircomFinalFork12::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet()) + " out of " + to_string(CircomFinalFork12::get_main_input_signal_no()));
             exitProcess();
         }
         TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
@@ -1035,7 +1035,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     zkey = BinFileUtils::openExisting(config.finalStarkZkey, "zkey", 1, binPointer, polsSize - lengthPrecomputedBuffer);
     protocolId = Zkey::getProtocolIdFromZkey(zkey.get());
     if(protocolId != Zkey::FFLONK_PROTOCOL_ID) {
-        zklog.error("Prover::genBatchProof() zkey protocolId has to be Fflonk");
+        zklog.error("Prover::genFinalProof() zkey protocolId has to be Fflonk");
         exitProcess();
     }
     
@@ -1068,7 +1068,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     }
     catch (std::exception &e)
     {
-        zklog.error("Prover::genProof() got exception in rapid SNARK:" + string(e.what()));
+        zklog.error("Prover::genFinalProof() got exception in rapid SNARK:" + string(e.what()));
         exitProcess();
     }
 
