@@ -61,7 +61,7 @@ ConstraintInfo verifyConstraint(SetupCtx& setupCtx, StepsParams& params, Goldilo
 
     ExpressionsAvx expressionsAvx(setupCtx);
 
-    expressionsAvx.calculateExpressions(params, dest, setupCtx.expressionsBin.expressionsBinArgsConstraints, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], false, false);
+    expressionsAvx.calculateExpressions(params, dest, setupCtx.expressionsBin.expressionsBinArgsConstraints, setupCtx.expressionsBin.constraintsInfoDebug[constraintId], false, false, false);
 
     uint64_t N = (1 << setupCtx.starkInfo.starkStruct.nBits);
 
