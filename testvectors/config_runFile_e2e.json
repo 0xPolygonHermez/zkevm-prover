@@ -49,8 +49,8 @@
     "executorClientPort": 50079,
     "executorClientHost": "127.0.0.1",
 
-    "stateDBServerPort": 50069,
-    "stateDBURL": "local",
+    "hashDBServerPort": 50069,
+    "hashDBURL": "local",
 
     "aggregatorServerPort": 50089,
     "aggregatorClientPort": 50089,
