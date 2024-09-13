@@ -102,7 +102,7 @@ OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main.cpp.o, $(OBJS_SETUP)) # Exclude
 OBJS_SETUP := $(filter-out $(BUILD_DIR)/src/main_test.cpp.o, $(OBJS_SETUP)) # Exclude main.cpp from test build
 DEPS_SETUP := $(OBJS_SETUP:.o=.d)
 
-SRCS_WITNESS_LIB := $(shell find ./circom ./src/goldilocks/src/goldilocks_base_field.cpp -name *.cpp)
+SRCS_WITNESS_LIB := $(shell find ./src/goldilocks/src/goldilocks_base_field.cpp -name *.cpp)
 OBJS_WITNESS_LIB := $(SRCS_WITNESS_LIB:%=$(BUILD_DIR)/%.o)
 DEPS_WITNESS_LIB := $(OBJS_WITNESS_LIB:.o=.d)
 
@@ -115,7 +115,7 @@ zkevm_lib: INC_FLAGS_EXT := -I./../zkevm-prover-rust/include
 zkevm_lib: $(LIB_DIR)/$(TARGET_ZKEVM_LIB)
 
 witness: CXXFLAGS_EXT := -fPIC
-witness: INC_FLAGS := -I src/goldilocks/src -I circom/utils
+witness: INC_FLAGS := -I src/goldilocks/src
 witness: CPPFLAGS := $(INC_FLAGS)
 witness: $(WITNESS_LIB)/$(TARGET_WITNESS)
 

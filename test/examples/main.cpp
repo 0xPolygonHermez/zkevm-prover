@@ -6,7 +6,7 @@
 #include "gen_recursive_proof.hpp"
 
 #include <dlfcn.h> // Required for dlopen, dlsym, dlclose
-typedef void (*FunctionType)(void*, uint64_t, uint64_t, const std::string, const std::string,  nlohmann::json);
+typedef void (*FunctionType)(void*, uint64_t, uint64_t, const std::string, const std::string, const std::string);
 
 int main(int argc, char **argv)
 {
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
         void* pAddressCm1 = (uint8_t *)pAddress + setupCtx.starkInfo.mapOffsets[std::make_pair("cm1", false)] * sizeof(Goldilocks::Element);
 
         // Load the dynamic library
-        void* handle = dlopen("test/examples/compressor/circom/witness.so", RTLD_LAZY);
+        void* handle = dlopen("../pil2-proofman-js/libwitness.so", RTLD_LAZY);
         if (!handle) {
             cout << "Cannot load library: " << dlerror() << std::endl;
             return 1;
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
             return 1;
         }
         // Use the function
-        function(pAddressCm1, N, setupCtx.starkInfo.mapSectionsN["cm1"], datFile, execFile, zkin);
+        function(pAddressCm1, N, setupCtx.starkInfo.mapSectionsN["cm1"], datFile, execFile, zkinAllFile);
         
         // Close the library
         dlclose(handle);

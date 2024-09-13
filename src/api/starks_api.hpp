@@ -12,7 +12,7 @@
     // ========================================================================================
     void *fri_proof_new(void *pSetupCtx);
     void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t root_index);
-    void fri_proof_set_subproofvalues(void *pFriProof, void *pParams);
+    void fri_proof_set_subproofvalues(void *pFriProof, void *subproofValues);
     void fri_proof_free(void *pFriProof);
 
     // SetupCtx
@@ -38,32 +38,30 @@
     void *expressions_bin_new(char* filename);
     void expressions_bin_free(void *pExpressionsBin);
 
-    // StepsParams
+    // Hints
     // ========================================================================================
-    void *init_params(void* ptr, void* public_inputs, void* challenges, void* evals, void* subproofValues);
-    void *get_hint_field(void *pSetupCtx, void*pParams, uint64_t hintId, char* hintFieldName, bool dest, bool inverse, bool print_expression);
-    uint64_t set_hint_field(void *pSetupCtx, void* pParams, void *values, uint64_t hintId, char* hintFieldName);
-    void *get_fri_pol(void *pSetupCtx, void *pParams);
-    void *verify_constraints(void *pSetupCtx, void*pParams);
-    void *params_free(void* pParams);
+    void *get_hint_field(void *pSetupCtx, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals, uint64_t hintId, char* hintFieldName, bool dest, bool inverse, bool print_expression);
+    uint64_t set_hint_field(void *pSetupCtx, void* buffer, void* subproofValues, void *values, uint64_t hintId, char* hintFieldName);
 
     // Starks
     // ========================================================================================
     void *starks_new(void *pSetupCtx);
     void starks_free(void *pStarks);
 
-    void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *proof);
+    void extend_and_merkelize(void *pStarks, uint64_t step, void *buffer, void *proof);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
-    void *prepare_fri_pol(void *pStarks, void *pParams);
-    void calculate_fri_polynomial(void *pStarks, void* pParams);
-    void calculate_quotient_polynomial(void *pStarks, void* pParams);
-    void calculate_impols_expressions(void *pStarks, void* pParams, uint64_t step);
+    void *prepare_fri_pol(void *pStarks, void *buffer, void* challenges);
+    void *get_fri_pol(void *pSetupCtx, void *buffer);
 
-    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof);
-    void compute_evals(void *pStarks, void *pParams, void *pProof);
+    void calculate_fri_polynomial(void *pStarks, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
+    void calculate_quotient_polynomial(void *pStarks, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
+    void calculate_impols_expressions(void *pStarks, uint64_t step, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
 
-    void compute_fri_folding(void *pStarks, uint64_t step, void *pParams, void *pChallenge,  void *pProof);
+    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buffer, void *pProof);
+    void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof);
+
+    void compute_fri_folding(void *pStarks, uint64_t step, void *buffer, void *pChallenge,  void *pProof);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
 
     void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElements);
@@ -77,13 +75,14 @@
     void get_challenge(void *pStarks, void *pTranscript, void *pElement);
     void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBits);
 
-    // Global constraints
+    // Verify constraints
     // =================================================================================
+    void *verify_constraints(void *pSetupCtx, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
     bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
 
     // Debug functions
     // =================================================================================
-    void *print_by_name(void *pSetupCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values);
+    void *print_by_name(void *pSetupCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values); // TODO!
     void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value);
 
     // Recursive proof

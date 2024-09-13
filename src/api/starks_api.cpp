@@ -121,11 +121,10 @@ void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t roo
     return &friProof->proof.fri.trees[tree_index].root[root_index];
 }
 
-void fri_proof_set_subproofvalues(void *pFriProof, void *pParams)
+void fri_proof_set_subproofvalues(void *pFriProof, void *subproofValues)
 {
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
-    auto params = *(StepsParams *)pParams;
-    friProof->proof.setSubproofValues(params.subproofValues);
+    friProof->proof.setSubproofValues((Goldilocks::Element *)subproofValues);
 }
 
 void fri_proof_free(void *pFriProof)
@@ -210,50 +209,18 @@ void expressions_bin_free(void *pExpressionsBin)
     delete expressionsBin;
 };
 
-// StepsParams
+// Hints
 // ========================================================================================
-void *init_params(void* ptr, void* public_inputs, void* challenges, void* evals, void* subproofValues) {
-    StepsParams *params = new StepsParams {
-        pols : (Goldilocks::Element *)ptr,
-        publicInputs : (Goldilocks::Element *)public_inputs,
-        challenges : (Goldilocks::Element *)challenges,
-        subproofValues : (Goldilocks::Element *)subproofValues,
-        evals : (Goldilocks::Element *)evals,
-        prover_initialized : true,
-    };
-    return params;
-}
-
-void *get_fri_pol(void *pSetupCtx, void *pParams)
+void *get_hint_field(void *pSetupCtx, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals, uint64_t hintId, char *hintFieldName, bool dest, bool inverse, bool printExpression) 
 {
-    SetupCtx setupCtx = *(SetupCtx *)pSetupCtx;
-    auto params = *(StepsParams *)pParams;
-    
-    return &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
-}
-
-void *get_hint_field(void *pSetupCtx, void* pParams, uint64_t hintId, char *hintFieldName, bool dest, bool inverse, bool printExpression) 
-{
-    HintFieldInfo hintFieldInfo = getHintField(*(SetupCtx *)pSetupCtx, *(StepsParams *)pParams, hintId, string(hintFieldName), dest, inverse, printExpression);
+    HintFieldInfo hintFieldInfo = getHintField(*(SetupCtx *)pSetupCtx,  (Goldilocks::Element *)buffer, (Goldilocks::Element *)public_inputs, (Goldilocks::Element *)challenges, (Goldilocks::Element *)subproofValues, (Goldilocks::Element *)evals, hintId, string(hintFieldName), dest, inverse, printExpression);
     return new HintFieldInfo(hintFieldInfo);
 }
 
-uint64_t set_hint_field(void *pSetupCtx, void* pParams, void *values, uint64_t hintId, char * hintFieldName) 
+uint64_t set_hint_field(void *pSetupCtx, void* buffer, void* subproofValues, void *values, uint64_t hintId, char * hintFieldName) 
 {
-    return setHintField(*(SetupCtx *)pSetupCtx, *(StepsParams *)pParams, (Goldilocks::Element *)values, hintId, string(hintFieldName));
+    return setHintField(*(SetupCtx *)pSetupCtx,  (Goldilocks::Element *)buffer, (Goldilocks::Element *)subproofValues, (Goldilocks::Element *)values, hintId, string(hintFieldName));
 }
-
-void *verify_constraints(void *pSetupCtx, void* pParams)
-{
-    ConstraintsResults *constraintsInfo = verifyConstraints(*(SetupCtx *)pSetupCtx, *(StepsParams *)pParams);
-    return constraintsInfo;
-}
-
-void params_free(void* pParams) {
-    StepsParams *params = (StepsParams *)pParams;
-    delete params;
-}
-
 
 // Starks
 // ========================================================================================
@@ -269,10 +236,10 @@ void starks_free(void *pStarks)
     delete starks;
 }
 
-void extend_and_merkelize(void *pStarks, uint64_t step, void *pParams, void *pProof)
+void extend_and_merkelize(void *pStarks, uint64_t step, void *buffer, void *pProof)
 {
     auto starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->ffi_extend_and_merkelize(step, *(StepsParams *)pParams, (FRIProof<Goldilocks::Element> *)pProof);
+    starks->ffi_extend_and_merkelize(step, (Goldilocks::Element *)buffer, (FRIProof<Goldilocks::Element> *)pProof);
 }
 
 void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
@@ -282,32 +249,32 @@ void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
     starks->ffi_treesGL_get_root(index, (Goldilocks::Element *)dst);
 }
 
-void calculate_fri_polynomial(void *pStarks, void* pParams)
+void calculate_fri_polynomial(void *pStarks, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateFRIPolynomial(*(StepsParams *)pParams);
+    starks->calculateFRIPolynomial((Goldilocks::Element *)buffer, (Goldilocks::Element *)public_inputs, (Goldilocks::Element *)challenges, (Goldilocks::Element *)subproofValues, (Goldilocks::Element *)evals);
 }
 
 
-void calculate_quotient_polynomial(void *pStarks, void* pParams)
+void calculate_quotient_polynomial(void *pStarks,  void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateQuotientPolynomial(*(StepsParams *)pParams);
+    starks->calculateQuotientPolynomial((Goldilocks::Element *)buffer, (Goldilocks::Element *)public_inputs, (Goldilocks::Element *)challenges, (Goldilocks::Element *)subproofValues, (Goldilocks::Element *)evals);
 }
 
-void calculate_impols_expressions(void *pStarks, void* pParams, uint64_t step)
+void calculate_impols_expressions(void *pStarks, uint64_t step, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateImPolsExpressions(step, *(StepsParams *)pParams);
+    starks->calculateImPolsExpressions(step, (Goldilocks::Element *)buffer, (Goldilocks::Element *)public_inputs, (Goldilocks::Element *)challenges, (Goldilocks::Element *)subproofValues, (Goldilocks::Element *)evals);
 }
 
-void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pParams, void *pProof) {
+void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buffer, void *pProof) {
     // type == 1 => Goldilocks
     // type == 2 => BN128
     switch (elementType)
     {
     case 1:
-        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, *(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
+        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, (Goldilocks::Element *)buffer, *(FRIProof<Goldilocks::Element> *)pProof);
         break;
     default:
         cerr << "Invalid elementType: " << elementType << endl;
@@ -316,22 +283,30 @@ void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *pPar
 }
 
 
-void compute_evals(void *pStarks, void *pParams, void *pProof)
+void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeEvals(*(StepsParams *)pParams, *(FRIProof<Goldilocks::Element> *)pProof);
+    starks->computeEvals((Goldilocks::Element *)buffer, (Goldilocks::Element *)challenges, (Goldilocks::Element *)evals, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
-void prepare_fri_pol(void *pStarks, void *pParams)
+void prepare_fri_pol(void *pStarks, void *buffer, void *challenges)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->prepareFRIPolynomial(*(StepsParams *)pParams);
+    starks->prepareFRIPolynomial((Goldilocks::Element *)buffer, (Goldilocks::Element *)challenges);
 }
 
-void compute_fri_folding(void *pStarks, uint64_t step, void *pParams, void *pChallenge,  void *pProof)
+void *get_fri_pol(void *pSetupCtx, void *buffer)
+{
+    SetupCtx setupCtx = *(SetupCtx *)pSetupCtx;
+    auto pols = (Goldilocks::Element *)buffer;
+    
+    return &pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
+}
+
+void compute_fri_folding(void *pStarks, uint64_t step, void *buffer, void *pChallenge,  void *pProof)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeFRIFolding(step, *(StepsParams *)pParams, (Goldilocks::Element *)pChallenge, *(FRIProof<Goldilocks::Element> *)pProof);
+    starks->computeFRIFolding(step, (Goldilocks::Element *)buffer, (Goldilocks::Element *)pChallenge, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
 void compute_fri_queries(void *pStarks, void *pProof, uint64_t *friQueries)
@@ -407,8 +382,14 @@ void get_permutations(void *pTranscript, uint64_t *res, uint64_t n, uint64_t nBi
     transcript->getPermutations(res, n, nBits);
 }
 
-// Global constraints
+// Verify constraints
 // =================================================================================
+void *verify_constraints(void *pSetupCtx, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals)
+{
+    ConstraintsResults *constraintsInfo = verifyConstraints(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)buffer, (Goldilocks::Element *)public_inputs, (Goldilocks::Element *)challenges, (Goldilocks::Element *)subproofValues, (Goldilocks::Element *)evals);
+    return constraintsInfo;
+}
+
 bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs) {
     
     FRIProof<Goldilocks::Element> **proofs = (FRIProof<Goldilocks::Element> **)pProofs;

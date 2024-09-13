@@ -77,20 +77,20 @@ public:
 
     void genProof(Goldilocks::Element *pAddress, FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, bool debug);
     
-    void extendAndMerkelize(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof);
+    void extendAndMerkelize(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof);
 
-    void commitStage(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof);
-    void computeQ(uint64_t step, StepsParams &params, FRIProof<ElementType> &proof);
+    void commitStage(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof);
+    void computeQ(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof);
     
-    void calculateImPolsExpressions(uint64_t step, StepsParams& params);
-    void calculateQuotientPolynomial(StepsParams& params);
-    void calculateFRIPolynomial(StepsParams& params);
+    void calculateImPolsExpressions(uint64_t step, Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
+    void calculateQuotientPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
+    void calculateFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
 
-    void computeEvals(StepsParams &params, FRIProof<ElementType> &proof);
+    void computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *challenges, Goldilocks::Element *evals, FRIProof<ElementType> &proof);
 
-    void prepareFRIPolynomial(StepsParams &params);
+    void prepareFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *challenges);
     
-    void computeFRIFolding(uint64_t step, StepsParams &params, Goldilocks::Element *challenge, FRIProof<ElementType> &fproof);
+    void computeFRIFolding(uint64_t step, Goldilocks::Element *buffer, Goldilocks::Element *challenge, FRIProof<ElementType> &fproof);
     void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);
 
     void calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements);
@@ -98,8 +98,14 @@ public:
     void addTranscriptGL(TranscriptType &transcript, Goldilocks::Element* buffer, uint64_t nElements);
     void addTranscript(TranscriptType &transcript, ElementType* buffer, uint64_t nElements);
     void getChallenge(TranscriptType &transcript, Goldilocks::Element& challenge);
+
+
+    // Following function are created to be used by the ffi interface
+    void ffi_extend_and_merkelize(uint64_t step,  Goldilocks::Element *buffer, FRIProof<ElementType> *proof);
+    void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
+
+    void evmap(Goldilocks::Element *buffer, Goldilocks::Element *evals, Goldilocks::Element *LEv);
 private:
-    void evmap(StepsParams &params, Goldilocks::Element *LEv);
     
     // ALL THIS FUNCTIONS CAN BE REMOVED WHEN WC IS READY
     void computeStageExpressions(uint64_t step, ExpressionsCtx& expressionsCtx, StepsParams &params, FRIProof<ElementType> &proof,  vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
@@ -111,11 +117,6 @@ private:
     bool isSymbolCalculated(opType operand, uint64_t id, StepsParams &params, vector<bool> &commitsCalculated, vector<bool> &subProofValuesCalculated);
     void calculateS(Polinomial &s, Polinomial &den, Goldilocks::Element multiplicity);
 
-public:
-
-    // Following function are created to be used by the ffi interface
-    void ffi_extend_and_merkelize(uint64_t step,  StepsParams &params, FRIProof<ElementType> *proof);
-    void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 };
 
 template class Starks<Goldilocks::Element>;

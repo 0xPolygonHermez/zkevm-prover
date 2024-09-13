@@ -75,16 +75,16 @@ void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIPro
     // STAGE 1
     for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++) {
         if(setupCtx.starkInfo.challengesMap[i].stage == 1) {
-            starks.getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
+            starks.getChallenge(transcript, challenges[i * FIELD_EXTENSION]);
         }
     }
-    starks.commitStage(1, params, proof);
+    starks.commitStage(1, pAddress, proof);
     starks.addTranscript(transcript, &proof.proof.roots[0][0], nFieldElements);
     
     // STAGE 2
     for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++) {
         if(setupCtx.starkInfo.challengesMap[i].stage == 2) {
-            starks.getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
+            starks.getChallenge(transcript, challenges[i * FIELD_EXTENSION]);
         }
     }
 
@@ -116,7 +116,7 @@ void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIPro
     }
 
     Polinomial gprodTransposedPol;
-    setupCtx.starkInfo.getPolynomial(gprodTransposedPol, params.pols, true, gprodField->id, false);
+    setupCtx.starkInfo.getPolynomial(gprodTransposedPol, pAddress, true, gprodField->id, false);
 #pragma omp parallel for
     for(uint64_t j = 0; j < N; ++j) {
         std::memcpy(gprodTransposedPol[j], &gprod[j*FIELD_EXTENSION], FIELD_EXTENSION * sizeof(Goldilocks::Element));
@@ -135,7 +135,7 @@ void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIPro
             exit(-1);
         }
     }
-    starks.calculateImPolsExpressions(2, params);
+    starks.calculateImPolsExpressions(2, pAddress, publicInputs, challenges, subproofValues, evals);
     for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
         if(setupCtx.starkInfo.cmPolsMap[i].imPol && setupCtx.starkInfo.cmPolsMap[i].stage == 2) {
             commitsCalculated[i] = true;
@@ -150,7 +150,7 @@ void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIPro
         }
     }
 
-    starks.commitStage(2, params, proof);
+    starks.commitStage(2, pAddress, proof);
     starks.addTranscript(transcript, &proof.proof.roots[1][0], nFieldElements);
 
     TimerStart(STARK_STEP_Q);
@@ -158,18 +158,18 @@ void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIPro
     for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++)
     {
         if(setupCtx.starkInfo.challengesMap[i].stage == setupCtx.starkInfo.nStages + 1) {
-            starks.getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
+            starks.getChallenge(transcript, challenges[i * FIELD_EXTENSION]);
         }
     }
     
-    starks.calculateQuotientPolynomial(params);
+    starks.calculateQuotientPolynomial(pAddress, publicInputs, challenges, subproofValues, evals);
 
     for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); i++) {
         if(setupCtx.starkInfo.cmPolsMap[i].stage == setupCtx.starkInfo.nStages + 1) {
             commitsCalculated[i] = true;
         }
     }
-    starks.commitStage(setupCtx.starkInfo.nStages + 1, params, proof);
+    starks.commitStage(setupCtx.starkInfo.nStages + 1, pAddress, proof);
     starks.addTranscript(transcript, &proof.proof.roots[setupCtx.starkInfo.nStages][0], nFieldElements);
     TimerStopAndLog(STARK_STEP_Q);
 
@@ -178,18 +178,18 @@ void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIPro
     for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++)
     {
         if(setupCtx.starkInfo.challengesMap[i].stage == setupCtx.starkInfo.nStages + 2) {
-            starks.getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
+            starks.getChallenge(transcript, challenges[i * FIELD_EXTENSION]);
         }
     }
 
-    starks.computeEvals(params, proof);
-    starks.addTranscriptGL(transcript, params.evals, setupCtx.starkInfo.evMap.size() * FIELD_EXTENSION);
+    starks.computeEvals(pAddress, challenges, evals, proof);
+    starks.addTranscriptGL(transcript, evals, setupCtx.starkInfo.evMap.size() * FIELD_EXTENSION);
 
     // Challenges for FRI polynomial
     for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++)
     {
         if(setupCtx.starkInfo.challengesMap[i].stage == setupCtx.starkInfo.nStages + 3) {
-            starks.getChallenge(transcript, params.challenges[i * FIELD_EXTENSION]);
+            starks.getChallenge(transcript, challenges[i * FIELD_EXTENSION]);
         }
     }
 
@@ -200,15 +200,15 @@ void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIPro
     //--------------------------------
     TimerStart(STARK_STEP_FRI);
 
-    starks.prepareFRIPolynomial(params);
-    starks.calculateFRIPolynomial(params);
+    starks.prepareFRIPolynomial(pAddress, challenges);
+    starks.calculateFRIPolynomial(pAddress, publicInputs, challenges, subproofValues, evals);
 
     Goldilocks::Element challenge[FIELD_EXTENSION];
-    Goldilocks::Element *friPol = &params.pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
+    Goldilocks::Element *friPol = &pAddress[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
     
     for (uint64_t step = 0; step < setupCtx.starkInfo.starkStruct.steps.size(); step++)
     {
-        starks.computeFRIFolding(step, params, challenge, proof);
+        starks.computeFRIFolding(step, pAddress, challenge, proof);
         if (step < setupCtx.starkInfo.starkStruct.steps.size() - 1)
         {
             starks.addTranscript(transcript, &proof.proof.fri.trees[step + 1].root[0], nFieldElements);
