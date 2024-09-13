@@ -97,7 +97,7 @@ int main(int argc, char **argv)
         void* pAddressCm1 = (uint8_t *)pAddress + setupCtx.starkInfo.mapOffsets[std::make_pair("cm1", false)] * sizeof(Goldilocks::Element);
 
         // Load the dynamic library
-        void* handle = dlopen("./witness_lib/witness.so", RTLD_LAZY);
+        void* handle = dlopen("test/examples/compressor/circom/witness.so", RTLD_LAZY);
         if (!handle) {
             cout << "Cannot load library: " << dlerror() << std::endl;
             return 1;
