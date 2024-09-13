@@ -205,7 +205,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     
     for (uint64_t step = 0; step < setupCtx.starkInfo.starkStruct.steps.size(); step++)
     {
-        computeFRIFolding(step, pAddress, challenge, proof);
+        computeFRIFolding(step,proof, pAddress, challenge);
         if (step < setupCtx.starkInfo.starkStruct.steps.size() - 1)
         {
             addTranscript(transcript, &proof.proof.fri.trees[step + 1].root[0], nFieldElements);
@@ -462,10 +462,9 @@ void Starks<ElementType>::prepareFRIPolynomial(Goldilocks::Element *buffer, Gold
 }
 
 template <typename ElementType>
-void Starks<ElementType>::computeFRIFolding(uint64_t step, Goldilocks::Element *buffer, Goldilocks::Element *challenge, FRIProof<ElementType> &fproof)
+void Starks<ElementType>::computeFRIFolding(uint64_t step, FRIProof<ElementType> &fproof, Goldilocks::Element *buffer, Goldilocks::Element *challenge)
 {
-    Goldilocks::Element* pol = &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
-    FRI<ElementType>::fold(step, fproof, pol, challenge, setupCtx.starkInfo, treesFRI);
+    FRI<ElementType>::fold(step, fproof, &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]], challenge, setupCtx.starkInfo, treesFRI);
 }
 
 template <typename ElementType>

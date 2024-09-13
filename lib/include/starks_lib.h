@@ -61,7 +61,7 @@
     void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buffer, void *pProof);
     void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof);
 
-    void compute_fri_folding(void *pStarks, uint64_t step, void *buffer, void *pChallenge,  void *pProof);
+    void compute_fri_folding(void *pStarks, void *pProof, uint64_t step, void *buffer, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
 
     void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElements);
@@ -82,7 +82,7 @@
 
     // Debug functions
     // =================================================================================
-    void *print_by_name(void *pSetupCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values);
+    void *print_by_name(void *pSetupCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values); // TODO!
     void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value);
 
     // Recursive proof

@@ -303,10 +303,10 @@ void *get_fri_pol(void *pSetupCtx, void *buffer)
     return &pols[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
 }
 
-void compute_fri_folding(void *pStarks, uint64_t step, void *buffer, void *pChallenge,  void *pProof)
+void compute_fri_folding(void *pStarks, void *pProof, uint64_t step, void *buffer, void *pChallenge)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeFRIFolding(step, (Goldilocks::Element *)buffer, (Goldilocks::Element *)pChallenge, *(FRIProof<Goldilocks::Element> *)pProof);
+    starks->computeFRIFolding(step, *(FRIProof<Goldilocks::Element> *)pProof, (Goldilocks::Element *)buffer, (Goldilocks::Element *)pChallenge);
 }
 
 void compute_fri_queries(void *pStarks, void *pProof, uint64_t *friQueries)

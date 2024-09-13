@@ -208,7 +208,7 @@ void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIPro
     
     for (uint64_t step = 0; step < setupCtx.starkInfo.starkStruct.steps.size(); step++)
     {
-        starks.computeFRIFolding(step, pAddress, challenge, proof);
+        starks.computeFRIFolding(step, proof, pAddress, challenge);
         if (step < setupCtx.starkInfo.starkStruct.steps.size() - 1)
         {
             starks.addTranscript(transcript, &proof.proof.fri.trees[step + 1].root[0], nFieldElements);

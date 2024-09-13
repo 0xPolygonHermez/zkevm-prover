@@ -61,7 +61,7 @@
     void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buffer, void *pProof);
     void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof);
 
-    void compute_fri_folding(void *pStarks, uint64_t step, void *buffer, void *pChallenge,  void *pProof);
+    void compute_fri_folding(void *pStarks, void *pProof, uint64_t step, void *buffer, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
 
     void calculate_hash(void *pStarks, void *pHhash, void *pBuffer, uint64_t nElements);

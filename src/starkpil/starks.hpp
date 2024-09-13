@@ -90,7 +90,7 @@ public:
 
     void prepareFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *challenges);
     
-    void computeFRIFolding(uint64_t step, Goldilocks::Element *buffer, Goldilocks::Element *challenge, FRIProof<ElementType> &fproof);
+    void computeFRIFolding(uint64_t step, FRIProof<ElementType> &fproof, Goldilocks::Element *buffer, Goldilocks::Element *challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);
 
     void calculateHash(ElementType* hash, Goldilocks::Element* buffer, uint64_t nElements);
