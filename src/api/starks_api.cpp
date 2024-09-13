@@ -399,8 +399,9 @@ bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinF
 
 // Debug functions
 // =================================================================================  
-void *print_by_name(void *pSetupCtx, void *pParams, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values) {
-    HintFieldInfo hintFieldInfo = printByName(*(SetupCtx *)pSetupCtx, *(StepsParams *)pParams, string(name), lengths, first_value, last_value, return_values);
+
+void *print_by_name(void *pSetupCtx, void* buffer, void* public_inputs, void* challenges, void* subproofValues, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values) {
+    HintFieldInfo hintFieldInfo = printByName(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)buffer, (Goldilocks::Element *)public_inputs, (Goldilocks::Element *)challenges, (Goldilocks::Element *)subproofValues, string(name), lengths, first_value, last_value, return_values);
     return new HintFieldInfo(hintFieldInfo);
 }
 
