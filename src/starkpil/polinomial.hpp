@@ -262,6 +262,10 @@ public:
         uint64_t nThreads = (1 << (int)pow2thread) / 4;
         uint64_t partitionSize = size / nThreads;
 
+        if(partitionSize < 2) {
+            batchInverse(res, src);
+            return;
+        }
         // initalize tmp with src
         // | s_0 0 0 .. 0 | s_partitionSize 0 0 .. 0 | s_partitionSize+1 0 0 .. 0 | s_partitionSize*(nThreads-1) ... 0 |
 
