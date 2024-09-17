@@ -268,6 +268,8 @@ HintFieldInfo getHintField(SetupCtx& setupCtx, Goldilocks::Element *buffer, Gold
                 zklog.error("Inverse not supported still for polynomials");
                 exitProcess();
             }
+        } else {
+            memset((uint8_t *)hintFieldInfo.values, 0, hintFieldInfo.size * sizeof(Goldilocks::Element));
         }
     } else if(hintField->operand == opType::const_) {
         uint64_t dim = setupCtx.starkInfo.constPolsMap[hintField->id].dim;
@@ -327,6 +329,8 @@ HintFieldInfo getHintField(SetupCtx& setupCtx, Goldilocks::Element *buffer, Gold
             } else {
                 std::memcpy(hintFieldInfo.values, &subproofValues[FIELD_EXTENSION*hintField->id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
             }
+        } else {
+            memset((uint8_t *)hintFieldInfo.values, 0, hintFieldInfo.size * sizeof(Goldilocks::Element));
         }
     } else if (hintField->operand == opType::challenge) {
         hintFieldInfo.size = FIELD_EXTENSION;
