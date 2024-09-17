@@ -13,13 +13,13 @@ The configuration parameters can be of different uses:
 |---------|---|----|------------|-------|--------------------|
 |**`runExecutorServer`**|production|boolean|Enables Executor GRPC service, which provides a service to process transaction batches; used by the Sequencer, Synchronizer and RPC; in case of RPC, use together with dbReadOnly=true to prevent writing to database|true|RUN_EXECUTOR_SERVER|
 |`runExecutorClient`|test|boolean|Runs an executor GRPC client to test the executor GRPC service submitting a request based on the 'inputFile' parameter|false|RUN_EXECUTOR_CLIENT|
-|`runExecutorClientMultithread`|test|boolean|Runs an multithread Executor GRPC client to test the Executor GRPC service; it performs the same test as 'runExecutorClient' but it spawns several threads to run the test in parallel|false|RUN_EXECUTOR_CLIENT_MULTITHREAD|
+|`runExecutorClientMultithread`|test|boolean|Runs a multithread Executor GRPC client to test the Executor GRPC service; it performs the same test as 'runExecutorClient' but it spawns several threads to run the test in parallel|false|RUN_EXECUTOR_CLIENT_MULTITHREAD|
 |**`runHashDBServer`**|production|boolean|Enables HashDB GRPC service, provides SMT (Sparse Merkle Tree) and Database access; used by the Synchronizer to create the genesis|true|RUN_HASHDB_SERVER|
 |`runHashDBTest`|test|boolean|Runs a HashDB test to validate the HashDB service|false|RUN_HASHDB_TEST|
 |**`runAggregatorClient`**|production|boolean|Enables Aggregator GRPC client, connects to the Aggregator and processes its proof generation requests; requires 512GB of RAM|false|RUN_AGGREGATOR_CLIENT|
 |`runAggregatorServer`|test|boolean|Runs an Aggregator GRPC service to test the Aggregator GRPC client|false|RUN_AGGREGATOR_SERVER|
 |`runAggregatorClientMock`|test|boolean|Runs an Aggregator client mock that generates fake proofs|false|RUN_AGGREGATOR_CLIENT_MOCK|
-|`runFileGenBatchProof`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to generate a regursive proof; it does not use GRPC|false|RUN_FILE_GEN_BATCH_PROOF|
+|`runFileGenBatchProof`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to generate a recursive proof; it does not use GRPC|false|RUN_FILE_GEN_BATCH_PROOF|
 |`runFileGenAggregatedProof`|test|boolean|Submits two recursive proof files, defined in the `inputFile` and `inputFile2` parameters, to generate a recursive proof; it does not use GRPC|false|RUN_FILE_GEN_AGGREGATED_PROOF|
 |`runFileGenFinalProof`|test|boolean|Submits a recursive proof file, defined in the `inputFile` parameter, to generate a final proof; it does not use GRPC|false|RUN_FILE_GEN_FINAL_PROOF|
 |`runFileProcessBatch`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to process a batch; it does not use GRPC|false|RUN_FILE_PROCESS_BATCH|
@@ -74,14 +74,14 @@ The configuration parameters can be of different uses:
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
 |**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
 |`hashDB64`|test|boolean|Use HashDB64 new database (do not use in  production, under development)|false|HASHDB64|
-|`kvDBMaxVersions`|production|u64|Maximum number of KV versionn in Database|131072|HASHDB64_MAX_VERSIONS|
+|`kvDBMaxVersions`|production|u64|Maximum number of KV version in Database|131072|HASHDB64_MAX_VERSIONS|
 |`dbCacheSynchURL`|test|string|URL of the HashDB service to synchronize the Database cache (experimental)|""|DB_CACHE_SYNCH_URL|
-|`hashDBFileName`|test|string|Core name used for the hashDB files (path,numbering and extension not included). If hashDBFileName is empty in-memory version of the hashDB is used (only for DEBUG purposes). |""|HASHDB_FILE_NAME|
+|`hashDBFileName`|test|string|Core name used for the hashDB files (path, numbering and extension not included). If hashDBFileName is empty in-memory version of the hashDB is used (only for DEBUG purposes). |""|HASHDB_FILE_NAME|
 |`hashDBFileSize`|test|u64|HashDB files size in GB|128|HASHDB_FILE_SIZE|failures
 |`hashDBFolder`|test|string|Folder containing the hashDB files|hashdb|HASHDB_FOLDER|
 |`aggregatorServerPort`|test|u16|Aggregator server GRPC port|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientPort`**|production|u16|Aggregator client GRPC port to connect to|50081|AGGREGATOR_SERVER_PORT|
-|**`aggregatorClientHost`**|production|string|Aggregator client GRPC host name to connect to, i.e. Aggregator server host name|"127.0.0.1"|AGGREGATOR_CLIENT_HOST|
+|**`aggregatorClientHost`**|production|string|Aggregator client GRPC hostname to connect to, i.e. Aggregator server host name|"127.0.0.1"|AGGREGATOR_CLIENT_HOST|
 |`aggregatorClientMockTimeout`|test|u64|Aggregator client mock timeout, in microseconds|60000000 (60 seconds)|AGGREGATOR_CLIENT_MOCK_TIMEOUT|
 |**`aggregatorClientWatchdogTimeout`**|production|u64|Aggregator client watchdog timeout, in microseconds|60000000 (60 seconds)|AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT|
 |`aggregatorClientMaxStreams`|test|u64|Max number of aggregator client streams, used to limit E2E test execution; if 0 then there is no limit|0|AGGREGATOR_CLIENT_MAX_STREAMS|
@@ -94,7 +94,7 @@ The configuration parameters can be of different uses:
 |`logExecutorServerInputJson`|test|boolean|Log main state machine executor input data, in JSON format|false|LOG_EXECUTOR_SERVER_INPUT_JSON|
 |`logExecutorServerInputGasThreshold`|test|u64|Log main state machine executor input if gas/s < this value; active if this value is > 0|0|LOG_EXECUTOR_SERVER_INPUT_GAS_THRESHOLD|
 |`logExecutorServerResponses`|test|bool|Log executor server resonses|false|LOG_EXECUTOR_SERVER_RESPONSES|
-|`logExecutorServerTxs`|test|bool|Log executor server transactins details|true|LOG_EXECUTOR_SERVER_TXS|
+|`logExecutorServerTxs`|test|bool|Log executor server transactions details|true|LOG_EXECUTOR_SERVER_TXS|
 |`dontLoadRomOffsets`|test|bool|Avoid loading ROM offsets; used with experimental or testing ROM.json files|false|DONT_LOAD_ROM_OFFSETS|
 |`inputFile`|test|string|Input file in some tests|"testvectors/batchProof/input_executor_0.json"|INPUT_FILE|
 |`inputFile2`|test|string|Second input file, used as the second input in genAggregatedProof|""|INPUT_FILE_2|
@@ -168,7 +168,7 @@ The configuration parameters can be of different uses:
 |`maxProverThreads`|test|u64|Maximum number of GRPC Prover service threads|8|MAX_PROVER_THREADS|
 |`maxHashDBThreads`|production|u64|Maximum number of GRPC HashDB service threads|8|MAX_HASHDB_THREADS|
 |`fullTracerTraceReserveSize`|production|u64|Full tracer number of reserved traces|256*1024|FULL_TRACER_TRACE_RESERVE_SIZE|
-|`proverName`|production|string|Prover name, used to identy the prover when connecting to the Aggregator service|"UNSPECIFIED"|PROVER_NAME|
+|`proverName`|production|string|Prover name, used to identify the prover when connecting to the Aggregator service|"UNSPECIFIED"|PROVER_NAME|
 |`ECRecoverPrecalc`|production|boolean|Use ECRecover precalculation to improve main state machine executor performance (do not use in production, under development)|false|ECRECOVER_PRECALC|
 |`ECRecoverPrecalcNThreads`|production|u64|Number of threads used to perform the ECRecover precalculation|16|ECRECOVER_PRECALC_N_THREADS|
-|`jsonLogs`|production|boolean|Generate logs in JSON format, compatible with Datadog service; if you do not use Datadog or you do not have to process the log traces, we recommend to set this parameter to 'false' to improve the clarity of the logs|true|JSON_LOGS|
+|`jsonLogs`|production|boolean|Generate logs in JSON format, compatible with Datadog service; if you do not use Datadog or you do not have to process the log traces, we recommend setting this parameter to 'false' to improve the clarity of the logs|true|JSON_LOGS|
