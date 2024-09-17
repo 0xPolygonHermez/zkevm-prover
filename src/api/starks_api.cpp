@@ -126,6 +126,17 @@ void fri_proof_set_subproofvalues(void *pFriProof, void *subproofValues)
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
     friProof->proof.setSubproofValues((Goldilocks::Element *)subproofValues);
 }
+void *fri_proof_get_zkinproof(void *pFriProof, void *pStarkInfo)
+{
+    FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
+    nlohmann::ordered_json jProof = friProof->proof.proof2json();
+    nlohmann::json* zkin = new nlohmann::json(proof2zkinStark(jProof, *((StarkInfo *)pStarkInfo)));
+    return (void *) zkin;    
+}
+void fri_proof_free_zkinproof(void *pZkinProof){
+    nlohmann::json* zkin = (nlohmann::json*) pZkinProof;
+    delete zkin;
+}
 
 void fri_proof_free(void *pFriProof)
 {

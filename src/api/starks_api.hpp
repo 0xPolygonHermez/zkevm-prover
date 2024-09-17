@@ -13,6 +13,8 @@
     void *fri_proof_new(void *pSetupCtx);
     void *fri_proof_get_tree_root(void *pFriProof, uint64_t tree_index, uint64_t root_index);
     void fri_proof_set_subproofvalues(void *pFriProof, void *subproofValues);
+    void *fri_proof_get_zkinproof(void *pFriProof);
+    void fri_proof_free_zkinproof(void *pZkinProof);
     void fri_proof_free(void *pFriProof);
 
     // SetupCtx
