@@ -141,7 +141,7 @@ void StarkInfo::load(json j)
                 map.lengths.push_back(j["constPolsMap"][i]["lengths"][k]);
             } 
         }
-        map.polsMapId = j["cmPolsMap"][i]["polsMapId"];
+        map.polsMapId = j["constPolsMap"][i]["polsMapId"];
         constPolsMap.push_back(map);
     }
 

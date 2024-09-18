@@ -179,6 +179,11 @@ uint64_t get_map_total_n(void *pStarkInfo)
     return ((StarkInfo *)pStarkInfo)->mapTotalN;
 }
 
+uint64_t get_stark_info_n(void *pStarkInfo) {
+    uint64_t N =  1 << ((StarkInfo *)pStarkInfo)->starkStruct.nBits;
+    return N;
+}
+
 uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag)
 {
     auto starkInfo = (StarkInfo *)pStarkInfo;
