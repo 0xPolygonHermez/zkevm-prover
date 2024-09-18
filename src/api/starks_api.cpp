@@ -126,12 +126,70 @@ void fri_proof_set_subproofvalues(void *pFriProof, void *subproofValues)
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
     friProof->proof.setSubproofValues((Goldilocks::Element *)subproofValues);
 }
-void *fri_proof_get_zkinproof(void *pFriProof, void *pStarkInfo)
+void *fri_proof_get_zkinproof(void *pFriProof, void* pPublics, void* pChallenges, void *pStarkInfo, char* globalInfoFile)
 {
+    json globalInfo;
+    file2json(globalInfoFile, globalInfo);
+    
+    auto starkInfo = *((StarkInfo *)pStarkInfo);
     FRIProof<Goldilocks::Element> *friProof = (FRIProof<Goldilocks::Element> *)pFriProof;
     nlohmann::ordered_json jProof = friProof->proof.proof2json();
-    nlohmann::json* zkin = new nlohmann::json(proof2zkinStark(jProof, *((StarkInfo *)pStarkInfo)));
-    return (void *) zkin;    
+    nlohmann::ordered_json zkin = proof2zkinStark(jProof, starkInfo);
+
+    Goldilocks::Element *publics = (Goldilocks::Element *)pPublics;
+    Goldilocks::Element *challenges = (Goldilocks::Element *)pChallenges;
+
+    for (uint64_t i = 0; i < starkInfo.nPublics; i++)
+    {
+        zkin["publics"][i] = Goldilocks::toString(publics[i]);
+    }
+
+    uint64_t nStages = globalInfo["numChallenges"].size();
+    uint64_t c = 0;
+
+    zkin["challenges"] = json::array();
+    for(uint64_t i = 0; i < nStages; ++i) {
+        zkin["challenges"][i] = json::array();
+        for(uint64_t j = 0; j < globalInfo["numChallenges"][i]; ++j) {
+            zkin["challenges"][i][j] = json::array();
+            for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+                zkin["challenges"][i][j][k] = Goldilocks::toString(challenges[c++]);
+            }
+        }
+    }
+
+    zkin["challenges"][nStages] = json::array();
+    zkin["challenges"][nStages][0] = json::array();
+    for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+        zkin["challenges"][nStages][0][k] = Goldilocks::toString(challenges[c++]);
+    }
+    
+    zkin["challenges"][nStages + 1] = json::array();
+    zkin["challenges"][nStages + 1][0] = json::array();
+    for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+        zkin["challenges"][nStages + 1][0][k] = Goldilocks::toString(challenges[c++]);
+    }
+
+    zkin["challenges"][nStages + 2] = json::array();
+    zkin["challenges"][nStages + 2][0] = json::array();
+    for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+        zkin["challenges"][nStages + 2][0][k] = Goldilocks::toString(challenges[c++]);
+    }
+    
+    zkin["challenges"][nStages + 2][1] = json::array();
+    for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+        zkin["challenges"][nStages + 2][1][k] = Goldilocks::toString(challenges[c++]);
+    }
+
+    zkin["challengesFRISteps"] = json::array();
+    for(uint64_t i = 0; i < globalInfo["stepsFRI"].size() + 1; ++i) {
+        zkin["challengesFRISteps"][i] = json::array();
+        for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+            zkin["challengesFRISteps"][i][k] = Goldilocks::toString(challenges[c++]);
+        }
+    }
+
+    return (void *) new nlohmann::json(zkin);    
 }
 void fri_proof_free_zkinproof(void *pZkinProof){
     nlohmann::json* zkin = (nlohmann::json*) pZkinProof;
