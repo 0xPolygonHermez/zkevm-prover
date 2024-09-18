@@ -271,7 +271,7 @@ ordered_json challenges2zkin(json& globalInfo, Goldilocks::Element* challenges) 
     return challengesJson;
 }
 
-void publics2zkin(ordered_json &zkin, Goldilocks::Element* publics, json& globalInfo, uint64_t airgroupId, bool isAggregated) {
+void *publics2zkin(ordered_json &zkin, Goldilocks::Element* publics, json& globalInfo, uint64_t airgroupId, bool isAggregated) {
     uint64_t p = 0;
     zkin["sv_aggregationTypes"] = ordered_json::array();
     for(uint64_t i = 0; i < globalInfo["aggTypes"][airgroupId].size(); ++i) {
@@ -346,11 +346,15 @@ void publics2zkin(ordered_json &zkin, Goldilocks::Element* publics, json& global
             }
         }
     }
+
+    return (void *)new ordered_json(zkin);
 }
 
-void addRecursive2VerKey(ordered_json &zkin, Goldilocks::Element* recursive2VerKey) {
+void *addRecursive2VerKey(ordered_json &zkin, Goldilocks::Element* recursive2VerKey) {
     zkin["rootCAgg"] = ordered_json::array();
     for(uint64_t i = 0; i < 4; ++i) {
         zkin["rootCAgg"][i] = Goldilocks::toString(recursive2VerKey[i]);
     }
+
+    return (void *)new ordered_json(zkin);
 }

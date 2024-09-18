@@ -13,7 +13,7 @@ ordered_json challenges2proof(json& globalInfo, Goldilocks::Element* challenges)
 ordered_json challenges2zkin(json& globalInfo, Goldilocks::Element* challenges);
 ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &verKey, StarkInfo &starkInfo);
 
-void publics2zkin(ordered_json &zkin, Goldilocks::Element* publics, json& globalInfo, uint64_t airgroupId, bool isAggregated);
-void addRecursive2VerKey(ordered_json &zkin, Goldilocks::Element* recursive2VerKey);
+void *publics2zkin(ordered_json &zkin, Goldilocks::Element* publics, json& globalInfo, uint64_t airgroupId, bool isAggregated);
+void *addRecursive2VerKey(ordered_json &zkin, Goldilocks::Element* recursive2VerKey);
 
 #endif

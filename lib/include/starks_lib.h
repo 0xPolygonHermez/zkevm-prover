@@ -92,7 +92,7 @@
     // Recursive proof
     // =================================================================================
     void *gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pPublicInputs);
-    void public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t airgroupId, bool isAggregated);
-    void add_recursive2_verkey(void *pZkin, void* recursive2VerKey);
+    void *public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t airgroupId, bool isAggregated);
+    void *add_recursive2_verkey(void *pZkin, void* recursive2VerKey);
 
 #endif

@@ -407,16 +407,16 @@ void *gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pPublicInputs) 
     return genRecursiveProof<Goldilocks::Element>(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)pAddress,  (Goldilocks::Element *)pPublicInputs);
 }
 
-void public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t airgroupId, bool isAggregated) {
+void *public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t airgroupId, bool isAggregated) {
     json globalInfo;
     file2json(globalInfoFile, globalInfo);
 
     nlohmann::ordered_json zkin = *(nlohmann::ordered_json*) pZkin;
-    publics2zkin(zkin, (Goldilocks::Element *)pPublics, globalInfo, airgroupId, isAggregated);
+    return publics2zkin(zkin, (Goldilocks::Element *)pPublics, globalInfo, airgroupId, isAggregated);
 }
 
-void add_recursive2_verkey(void *pZkin, void* recursive2VerKey) {
+void *add_recursive2_verkey(void *pZkin, void* recursive2VerKey) {
     nlohmann::ordered_json zkin = *(nlohmann::ordered_json*) pZkin;
-    addRecursive2VerKey(zkin, (Goldilocks::Element *)recursive2VerKey);
+    return addRecursive2VerKey(zkin, (Goldilocks::Element *)recursive2VerKey);
 }
 
