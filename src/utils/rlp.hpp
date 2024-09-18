@@ -133,7 +133,7 @@ inline bool encodeHexData(string &data, const string &hex)
         string edata;
 
         bool res = encodeHexValue(edata, hex);
-        if (edata.length() != 1 || edata[0] >= 0x80) {
+        if (edata.length() != 1 || uint8_t(edata[0]) >= 0x80) {
             encodeLen(data, len);
         }
         data += edata;
