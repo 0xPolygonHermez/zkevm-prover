@@ -97,7 +97,7 @@ public:
             
         uint64_t constTreeSizeBytes = getConstTreeSize();
 
-        pConstTreeAddress = (Goldilocks::Element *)loadFileParallel(constPolsFile, constTreeSizeBytes);
+        pConstTreeAddress = (Goldilocks::Element *)loadFileParallel(constTreeFile, constTreeSizeBytes);
         zklog.info("Starks::Starks() successfully copied " + to_string(constTreeSizeBytes) + " bytes from constant file " + constTreeFile);
         
         pConstPolsAddressExtended = &pConstTreeAddress[2];
@@ -144,7 +144,7 @@ public:
         }
 
         uint64_t elementSize = starkInfo.starkStruct.verificationHashType == std::string("BN128") ? sizeof(RawFr::Element) : sizeof(Goldilocks::Element);
-        uint64_t numElements = (1 << starkInfo.starkStruct.nBitsExt) * starkInfo.nConstants * sizeof(Goldilocks::Element);
+        uint64_t numElements = NExtended * starkInfo.nConstants * sizeof(Goldilocks::Element);
         uint64_t total = numElements + acc * nFieldElements * elementSize;
         if(starkInfo.starkStruct.verificationHashType == std::string("BN128")) {
             total += 16; // HEADER
