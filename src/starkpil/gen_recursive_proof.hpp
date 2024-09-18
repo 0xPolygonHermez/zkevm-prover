@@ -70,7 +70,14 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
     ElementType verkey[nFieldElements];
     treesGL[setupCtx.starkInfo.nStages + 1]->getRoot(verkey);
     starks.addTranscript(transcript, &verkey[0], nFieldElements);
-    starks.addTranscriptGL(transcript, &publicInputs[0], setupCtx.starkInfo.nPublics);
+
+    if(!setupCtx.starkInfo.starkStruct.hashCommits) {
+        starks.addTranscriptGL(transcript, &publicInputs[0], setupCtx.starkInfo.nPublics);
+    } else {
+        ElementType hash[nFieldElements];
+        starks.calculateHash(hash, &publicInputs[0], setupCtx.starkInfo.nPublics);
+        starks.addTranscript(transcript, hash, nFieldElements);
+    }
 
     TimerStopAndLog(STARK_STEP_0);
 
@@ -185,7 +192,14 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
     }
 
     starks.computeEvals(pAddress, challenges, evals, proof);
-    starks.addTranscriptGL(transcript, evals, setupCtx.starkInfo.evMap.size() * FIELD_EXTENSION);
+
+    if(!setupCtx.starkInfo.starkStruct.hashCommits) {
+        starks.addTranscriptGL(transcript, evals, setupCtx.starkInfo.evMap.size() * FIELD_EXTENSION);
+    } else {
+        ElementType hash[nFieldElements];
+        starks.calculateHash(hash, evals, setupCtx.starkInfo.evMap.size() * FIELD_EXTENSION);
+        starks.addTranscript(transcript, hash, nFieldElements);
+    }
 
     // Challenges for FRI polynomial
     for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++)
@@ -217,7 +231,14 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
         }
         else
         {
-            starks.addTranscriptGL(transcript, friPol, (1 << setupCtx.starkInfo.starkStruct.steps[step].nBits) * FIELD_EXTENSION);
+            if(!setupCtx.starkInfo.starkStruct.hashCommits) {
+                starks.addTranscriptGL(transcript, friPol, (1 << setupCtx.starkInfo.starkStruct.steps[step].nBits) * FIELD_EXTENSION);
+            } else {
+                ElementType hash[nFieldElements];
+                starks.calculateHash(hash, friPol, (1 << setupCtx.starkInfo.starkStruct.steps[step].nBits) * FIELD_EXTENSION);
+                starks.addTranscript(transcript, hash, nFieldElements);
+            } 
+            
         }
         starks.getChallenge(transcript, *challenge);
     }

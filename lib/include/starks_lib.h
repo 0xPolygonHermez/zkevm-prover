@@ -35,6 +35,7 @@
     // Const Pols
     // ========================================================================================
     void *const_pols_new(char* filename, void *pStarkInfo);
+    void *const_pols_with_tree_new(char* filename, char* treeFilename, void *pStarkInfo);
     void const_pols_free(void *pConstPols);
 
     // Expressions Bin

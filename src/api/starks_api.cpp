@@ -181,6 +181,13 @@ void *const_pols_new(char* filename, void *pStarkInfo)
     return const_pols;
 }
 
+void *const_pols_with_tree_new(char* filename, char* treeFilename, void *pStarkInfo) 
+{
+    auto const_pols = new ConstPols(*(StarkInfo *)pStarkInfo, filename, treeFilename);
+
+    return const_pols;
+}
+
 void const_pols_free(void *pConstPols)
 {
     auto constPols = (ConstPols *)pConstPols;
