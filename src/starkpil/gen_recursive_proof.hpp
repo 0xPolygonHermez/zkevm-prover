@@ -251,6 +251,7 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
     TimerStopAndLog(STARK_PROOF);
 
     nlohmann::ordered_json jProof = proof.proof.proof2json();
-    nlohmann::json* zkin = new nlohmann::json(proof2zkinStark(jProof, setupCtx.starkInfo));
-    return (void *) zkin;
+    nlohmann::ordered_json zkin = proof2zkinStark(jProof, setupCtx.starkInfo);
+
+    return (void *) new nlohmann::ordered_json(zkin);
 }
