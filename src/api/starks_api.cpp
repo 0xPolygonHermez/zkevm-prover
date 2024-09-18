@@ -415,8 +415,17 @@ void *public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t ai
     return publics2zkin(zkin, (Goldilocks::Element *)pPublics, globalInfo, airgroupId, isAggregated);
 }
 
-void *add_recursive2_verkey(void *pZkin, void* recursive2VerKey) {
+void *add_recursive2_verkey(void *pZkin, char* recursive2VerKeyFilename) {
+    json recursive2VerkeyJson;
+    file2json(recursive2VerKeyFilename, recursive2VerkeyJson);
+
+    Goldilocks::Element recursive2Verkey[4];
+    for (uint64_t i = 0; i < 4; i++)
+    {
+        recursive2Verkey[i] = Goldilocks::fromU64(recursive2VerkeyJson[i]);
+    }
+
     nlohmann::ordered_json zkin = *(nlohmann::ordered_json*) pZkin;
-    return addRecursive2VerKey(zkin, (Goldilocks::Element *)recursive2VerKey);
+    return addRecursive2VerKey(zkin, recursive2Verkey);
 }
 

@@ -305,7 +305,7 @@ void *publics2zkin(ordered_json &zkin, Goldilocks::Element* publics, json& globa
         zkin["sv_evalsHash"][j] = Goldilocks::toString(publics[p++]);
     }
 
-    for(uint64_t i = 0; i < globalInfo["stepsFRI"].size() + 1; ++i) {
+    for(uint64_t i = 0; i < globalInfo["stepsFRI"].size() - 1; ++i) {
         std::string sv_si_root = "sv_s" + to_string(i + 1) + "_root"; 
         zkin[sv_si_root] = ordered_json::array();
         for(uint64_t j = 0; j < 4; ++j) {
