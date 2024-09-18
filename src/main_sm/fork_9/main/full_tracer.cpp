@@ -113,7 +113,7 @@ inline zkresult getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length
     // If length is too high this is due to an OOG that will stop processing; just pretend to have read nothing
     if (length > ctx.rom.constants.MAX_MEM_EXPANSION_BYTES)
     {
-        zklog.error("getFromMemory() got length=" + length.get_str(10) + " > rom.constants.MAX_MEM_EXPANSION_BYTES=" + to_string(ctx.rom.constants.MAX_MEM_EXPANSION_BYTES));
+        zklog.warning("getFromMemory() got length=" + length.get_str(10) + " > rom.constants.MAX_MEM_EXPANSION_BYTES=" + to_string(ctx.rom.constants.MAX_MEM_EXPANSION_BYTES));
         return ZKR_SUCCESS;
     }
 
