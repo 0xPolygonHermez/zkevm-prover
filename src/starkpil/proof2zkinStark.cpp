@@ -187,7 +187,7 @@ ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &ve
     return zkinOut;
 }
 
-ordered_json challenges2zkin(json& globalInfo, Goldilocks::Element* challenges) {
+ordered_json challenges2proof(json& globalInfo, Goldilocks::Element* challenges) {
     
     ordered_json challengesJson;
 
@@ -234,6 +234,37 @@ ordered_json challenges2zkin(json& globalInfo, Goldilocks::Element* challenges) 
         challengesJson["challengesFRISteps"][i] = ordered_json::array();
         for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
             challengesJson["challengesFRISteps"][i][k] = Goldilocks::toString(challenges[c++]);
+        }
+    }
+
+    return challengesJson;
+}
+
+ordered_json challenges2zkin(json& globalInfo, Goldilocks::Element* challenges) {
+    
+    ordered_json challengesJson;
+
+    uint64_t nStages = globalInfo["numChallenges"].size();
+
+    uint64_t nChallenges = 0;
+    for(uint64_t i = 0; i < nStages; ++i) {
+        nChallenges += uint64_t(globalInfo["numChallenges"][i]);
+    }
+    nChallenges += 4;
+
+    challengesJson["challenges"] = ordered_json::array();
+    for(uint64_t i = 0; i < nChallenges; ++i) {
+        challengesJson["challenges"][i] = ordered_json::array();
+        for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+            challengesJson["challenges"][i][k] = Goldilocks::toString(challenges[i*FIELD_EXTENSION + k]);
+        }
+    }
+    
+    challengesJson["challengesFRISteps"] = ordered_json::array();
+    for(uint64_t i = 0; i < globalInfo["stepsFRI"].size() + 1; ++i) {
+        challengesJson["challengesFRISteps"][i] = ordered_json::array();
+        for(uint64_t k = 0; k < FIELD_EXTENSION; ++k) {
+            challengesJson["challengesFRISteps"][i][k] = Goldilocks::toString(challenges[nChallenges*FIELD_EXTENSION + i*FIELD_EXTENSION + k]);
         }
     }
 

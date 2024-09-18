@@ -20,7 +20,7 @@ void save_challenges(void *pChallenges, char* globalInfoFile, char *fileDir) {
 
     Goldilocks::Element *challenges = (Goldilocks::Element *)pChallenges;
     
-    ordered_json challengesJson = challenges2zkin(globalInfo, challenges);
+    ordered_json challengesJson = challenges2proof(globalInfo, challenges);
 
     json2file(challengesJson, string(fileDir) + "/challenges.json");
 }
@@ -154,6 +154,10 @@ uint64_t get_map_total_n(void *pStarkInfo)
 uint64_t get_stark_info_n(void *pStarkInfo) {
     uint64_t N =  1 << ((StarkInfo *)pStarkInfo)->starkStruct.nBits;
     return N;
+}
+
+uint64_t get_stark_info_n_publics(void *pStarkInfo) {
+    return ((StarkInfo *)pStarkInfo)->nPublics;
 }
 
 uint64_t get_map_offsets(void *pStarkInfo, char *stage, bool flag)

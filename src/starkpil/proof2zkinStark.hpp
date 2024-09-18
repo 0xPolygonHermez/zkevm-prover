@@ -9,6 +9,7 @@ using json = nlohmann::json;
 
 
 ordered_json proof2zkinStark(ordered_json &proof, StarkInfo &starkInfo);
+ordered_json challenges2proof(json& globalInfo, Goldilocks::Element* challenges);
 ordered_json challenges2zkin(json& globalInfo, Goldilocks::Element* challenges);
 ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &verKey, StarkInfo &starkInfo);
 
