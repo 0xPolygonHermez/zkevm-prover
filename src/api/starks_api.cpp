@@ -427,6 +427,6 @@ void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_v
 
 // Recursive proof
 // ================================================================================= 
-void gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pFriProof, void* pPublicInputs) {
-    genRecursiveProof(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)pAddress, *(FRIProof<Goldilocks::Element> *)pFriProof,  (Goldilocks::Element *)pPublicInputs);
+void *gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pPublicInputs) {
+    return genRecursiveProof<Goldilocks::Element>(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)pAddress,  (Goldilocks::Element *)pPublicInputs);
 }

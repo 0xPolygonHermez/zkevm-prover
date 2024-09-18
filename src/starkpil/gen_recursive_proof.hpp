@@ -1,8 +1,10 @@
 #include "starks.hpp"
 
 template <typename ElementType>
-void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs) {
+void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldilocks::Element *publicInputs) {
     TimerStart(STARK_PROOF);
+
+    FRIProof<Goldilocks::Element> proof(setupCtx.starkInfo);
 
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
@@ -247,4 +249,8 @@ void genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, FRIPro
     delete[] treesFRI;
         
     TimerStopAndLog(STARK_PROOF);
+
+    nlohmann::ordered_json jProof = proof.proof.proof2json();
+    nlohmann::json* zkin = new nlohmann::json(proof2zkinStark(jProof, setupCtx.starkInfo));
+    return (void *) zkin;
 }

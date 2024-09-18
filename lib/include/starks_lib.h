@@ -90,6 +90,6 @@
 
     // Recursive proof
     // =================================================================================
-    void gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pFriProof, void* pPublicInputs);
+    void *gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pPublicInputs);
 
 #endif
