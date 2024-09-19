@@ -414,6 +414,13 @@ void *gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pPublicInputs, 
     return genRecursiveProof<Goldilocks::Element>(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)pAddress,  (Goldilocks::Element *)pPublicInputs, string(proof_file));
 }
 
+void *get_zkin_ptr(char *zkin_file) {
+    json zkin;
+    file2json(zkin_file, zkin);
+
+    return (void *) new nlohmann::ordered_json(zkin);
+}
+
 void *public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t airgroupId, bool isAggregated) {
     json globalInfo;
     file2json(globalInfoFile, globalInfo);
