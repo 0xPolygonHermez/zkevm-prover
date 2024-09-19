@@ -410,8 +410,8 @@ void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_v
 
 // Recursive proof
 // ================================================================================= 
-void *gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pPublicInputs) {
-    return genRecursiveProof<Goldilocks::Element>(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)pAddress,  (Goldilocks::Element *)pPublicInputs);
+void *gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pPublicInputs, char* proof_file) {
+    return genRecursiveProof<Goldilocks::Element>(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)pAddress,  (Goldilocks::Element *)pPublicInputs, string(proof_file));
 }
 
 void *public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t airgroupId, bool isAggregated) {
@@ -436,14 +436,14 @@ void *add_recursive2_verkey(void *pZkin, char* recursive2VerKeyFilename) {
     return addRecursive2VerKey(zkin, recursive2Verkey);
 }
 
-void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, void *zkinRecursive2, void* starkInfoRecursive2) {
+void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, void **zkinRecursive2, void **starkInfoRecursive2) {
     json globalInfo;
     file2json(globalInfoFile, globalInfo);
 
     Goldilocks::Element *publics = (Goldilocks::Element *)pPublics;
     Goldilocks::Element *challenges = (Goldilocks::Element *)pChallenges;
 
-    ordered_json zkinFinal = joinzkinfinal(globalInfo, publics, challenges, (ordered_json **)zkinRecursive2, (StarkInfo **)starkInfoRecursive2);
+    ordered_json zkinFinal = joinzkinfinal(globalInfo, publics, challenges, zkinRecursive2, starkInfoRecursive2);
 
     return (void *) new nlohmann::ordered_json(zkinFinal);    
 }

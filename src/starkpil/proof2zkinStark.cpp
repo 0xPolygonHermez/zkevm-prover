@@ -359,7 +359,7 @@ void *addRecursive2VerKey(ordered_json &zkin, Goldilocks::Element* recursive2Ver
     return (void *)new ordered_json(zkin);
 }
 
-ordered_json joinzkinfinal(json& globalInfo, Goldilocks::Element* publics, Goldilocks::Element* challenges, ordered_json **zkin_vec, StarkInfo **starkInfo_vec) {
+ordered_json joinzkinfinal(json& globalInfo, Goldilocks::Element* publics, Goldilocks::Element* challenges, void **zkin_vec, void **starkInfo_vec) {
     ordered_json zkinFinal = ordered_json::object();
     
     for (uint64_t i = 0; i < globalInfo["nPublics"]; i++)
@@ -372,8 +372,8 @@ ordered_json joinzkinfinal(json& globalInfo, Goldilocks::Element* publics, Goldi
     zkinFinal["challengesFRISteps"] = challengesJson["challengesFRISteps"];
 
     for(uint64_t i = 0; i < globalInfo["subproofs"].size(); ++i) {
-        ordered_json zkin = (*zkin_vec)[i];
-        StarkInfo &starkInfo = (*starkInfo_vec)[i];
+        ordered_json zkin = *(ordered_json *)zkin_vec[i];
+        StarkInfo &starkInfo = *(StarkInfo *)starkInfo_vec[i];
 
         uint64_t nStages = starkInfo.nStages + 1;
 
@@ -399,10 +399,14 @@ ordered_json joinzkinfinal(json& globalInfo, Goldilocks::Element* publics, Goldi
             zkinFinal["s" + to_string(i) + "_s" + to_string(s) + "_siblings"] = zkin["s" + to_string(s) + "_siblings"];
         }
 
+        cout << zkin["subproofId"] << endl;
+        
         zkinFinal["s" + to_string(i) + "_finalPol"] = zkin["finalPol"];
 
         zkinFinal["s" + to_string(i) + "_sv_circuitType"] = zkin["sv_circuitType"];
-        zkinFinal["s" + to_string(i) + "_sv_aggregationTypes"] = zkin["_sv_aggregationTypes"];
+
+        zkinFinal["s" + to_string(i) + "_sv_aggregationTypes"] = zkin["sv_aggregationTypes"];
+
         zkinFinal["s" + to_string(i) + "_sv_subproofValues"] = zkin["sv_subproofValues"];
 
         zkinFinal["s" + to_string(i) + "_sv_rootC"] = zkin["sv_rootC"];

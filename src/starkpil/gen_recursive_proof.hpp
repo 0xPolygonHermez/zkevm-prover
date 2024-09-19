@@ -1,7 +1,7 @@
 #include "starks.hpp"
 
 template <typename ElementType>
-void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldilocks::Element *publicInputs) {
+void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldilocks::Element *publicInputs, std::string proofFile) {
     TimerStart(STARK_PROOF);
 
     FRIProof<Goldilocks::Element> proof(setupCtx.starkInfo);
@@ -273,6 +273,10 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
 
     nlohmann::ordered_json jProof = proof.proof.proof2json();
     nlohmann::ordered_json zkin = proof2zkinStark(jProof, setupCtx.starkInfo);
+
+    if(!proofFile.empty()) {
+        json2file(jProof, proofFile);
+    }
 
     return (void *) new nlohmann::ordered_json(zkin);
 }
