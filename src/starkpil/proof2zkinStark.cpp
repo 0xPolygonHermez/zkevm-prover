@@ -358,3 +358,67 @@ void *addRecursive2VerKey(ordered_json &zkin, Goldilocks::Element* recursive2Ver
 
     return (void *)new ordered_json(zkin);
 }
+
+ordered_json joinzkinfinal(json& globalInfo, Goldilocks::Element* publics, Goldilocks::Element* challenges, ordered_json **zkin_vec, StarkInfo **starkInfo_vec) {
+    ordered_json zkinFinal = ordered_json::object();
+    
+    for (uint64_t i = 0; i < globalInfo["nPublics"]; i++)
+    {
+        zkinFinal["publics"][i] = Goldilocks::toString(publics[i]);
+    }
+
+    ordered_json challengesJson = challenges2zkin(globalInfo, challenges);
+    zkinFinal["challenges"] = challengesJson["challenges"];
+    zkinFinal["challengesFRISteps"] = challengesJson["challengesFRISteps"];
+
+    for(uint64_t i = 0; i < globalInfo["subproofs"].size(); ++i) {
+        ordered_json zkin = (*zkin_vec)[i];
+        StarkInfo &starkInfo = (*starkInfo_vec)[i];
+
+        uint64_t nStages = starkInfo.nStages + 1;
+
+        for(uint64_t stage = 1; stage <= nStages; stage++) {
+            zkinFinal["s" + to_string(i) + "_root" + to_string(stage)] = zkin["root" + to_string(stage)];
+        }
+
+        for(uint64_t stage = 1; stage <= nStages; stage++) {
+            if(starkInfo.mapSectionsN["cm" + to_string(stage)] > 0) {
+                zkinFinal["s" + to_string(i) + "_s0_vals" + to_string(stage)] = zkin["s0_vals" + to_string(stage)];
+                zkinFinal["s" + to_string(i) + "_s0_siblings" + to_string(stage)] = zkin["s0_siblings" + to_string(stage)];
+            }
+        }
+        
+        zkinFinal["s" + to_string(i) + "_s0_valsC"] = zkin["s0_valsC"];
+        zkinFinal["s" + to_string(i) + "_s0_siblingsC"] = zkin["s0_siblingsC"];
+
+        zkinFinal["s" + to_string(i) + "_evals"] = zkin["evals"];
+
+        for(uint64_t s = 1; s < starkInfo.starkStruct.steps.size(); ++s) {
+            zkinFinal["s" + to_string(i) + "_s" + to_string(s) + "_root"] = zkin["s" + to_string(s) + "_root"];
+            zkinFinal["s" + to_string(i) + "_s" + to_string(s) + "_vals"] = zkin["s" + to_string(s) + "_vals"];
+            zkinFinal["s" + to_string(i) + "_s" + to_string(s) + "_siblings"] = zkin["s" + to_string(s) + "_siblings"];
+        }
+
+        zkinFinal["s" + to_string(i) + "_finalPol"] = zkin["finalPol"];
+
+        zkinFinal["s" + to_string(i) + "_sv_circuitType"] = zkin["sv_circuitType"];
+        zkinFinal["s" + to_string(i) + "_sv_aggregationTypes"] = zkin["_sv_aggregationTypes"];
+        zkinFinal["s" + to_string(i) + "_sv_subproofValues"] = zkin["sv_subproofValues"];
+
+        zkinFinal["s" + to_string(i) + "_sv_rootC"] = zkin["sv_rootC"];
+
+        for(uint64_t j = 0; j < globalInfo["numChallenges"].size() + 1; ++j) {
+            zkinFinal["s" + to_string(i) + "_sv_root" + to_string(j + 1)] = zkin["sv_root" + to_string(j + 1)];
+        }
+
+        zkinFinal["s" + to_string(i) + "_sv_evalsHash"] = zkin["sv_evalsHash"];
+
+        for(uint64_t j = 0; j < globalInfo["stepsFRI"].size() - 1; ++j) {
+            zkinFinal["s" + to_string(i) + "_sv_s" + to_string(j + 1) + "_root"] = zkin["sv_s" + to_string(j + 1) + "_root"];
+        }
+
+        zkinFinal["s" + to_string(i) + "_sv_finalPolHash"] = zkin["sv_finalPolHash"];
+    }
+
+    return zkinFinal;
+}

@@ -436,3 +436,14 @@ void *add_recursive2_verkey(void *pZkin, char* recursive2VerKeyFilename) {
     return addRecursive2VerKey(zkin, recursive2Verkey);
 }
 
+void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, void *zkinRecursive2, void* starkInfoRecursive2) {
+    json globalInfo;
+    file2json(globalInfoFile, globalInfo);
+
+    Goldilocks::Element *publics = (Goldilocks::Element *)pPublics;
+    Goldilocks::Element *challenges = (Goldilocks::Element *)pChallenges;
+
+    ordered_json zkinFinal = joinzkinfinal(globalInfo, publics, challenges, (ordered_json **)zkinRecursive2, (StarkInfo **)starkInfoRecursive2);
+
+    return (void *) new nlohmann::ordered_json(zkinFinal);    
+}

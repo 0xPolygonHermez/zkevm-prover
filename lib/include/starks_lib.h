@@ -95,5 +95,6 @@
     void *gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pPublicInputs);
     void *public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t airgroupId, bool isAggregated);
     void *add_recursive2_verkey(void *pZkin, char* recursive2VerKeyFilename);
+    void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, void *zkinRecursive2, void* starkInfoRecursive2);
 
 #endif
