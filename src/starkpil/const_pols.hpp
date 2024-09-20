@@ -57,14 +57,10 @@ public:
         }
         pConstPolsAddressExtended = &pConstTreeAddress[2];
 
-        TimerStart(EXTEND_CONST_POLS);
         NTT_Goldilocks ntt(N);
         ntt.extendPol((Goldilocks::Element *)pConstPolsAddressExtended, (Goldilocks::Element *)pConstPolsAddress, NExtended, N, starkInfo.nConstants);
-        TimerStopAndLog(EXTEND_CONST_POLS);
-        TimerStart(MERKELIZE_CONST_TREE);
         MerkleTreeGL mt(merkleTreeArity, merkleTreeCustom, NExtended, starkInfo.nConstants, (Goldilocks::Element *)pConstPolsAddressExtended);
         mt.merkelize();
-        TimerStopAndLog(MERKELIZE_CONST_TREE);
 
         pConstTreeAddress[0] = Goldilocks::fromU64(starkInfo.nConstants);  
         pConstTreeAddress[1] = Goldilocks::fromU64(NExtended);
@@ -156,7 +152,6 @@ public:
     };
 
     void computeZerofier() {
-        TimerStart(COMPUTE_ZHINV);
         zi = new Goldilocks::Element[starkInfo.boundaries.size() * NExtended];
 
         for(uint64_t i = 0; i < starkInfo.boundaries.size(); ++i) {
@@ -171,13 +166,11 @@ public:
                 buildFrameZerofierInv(i, boundary.offsetMin, boundary.offsetMax);
             }
         }
-        TimerStopAndLog(COMPUTE_ZHINV);
     }
 
     void computeConnectionsX() {
         uint64_t N = 1 << starkInfo.starkStruct.nBits;
         uint64_t NExtended = 1 << starkInfo.starkStruct.nBitsExt;
-        TimerStart(COMPUTE_X_N_AND_X_2NS);
         x_n = new Goldilocks::Element[N];
         Goldilocks::Element xx = Goldilocks::one();
         for (uint64_t i = 0; i < N; i++)
@@ -192,12 +185,9 @@ public:
             x_2ns[i] = xx;
             Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
         }
-        TimerStopAndLog(COMPUTE_X_N_AND_X_2NS);
     }
 
     void computeX() {
-        TimerStart(COMPUTE_X);
-
         uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
         x = new Goldilocks::Element[N << extendBits];
         x[0] = Goldilocks::shift();
@@ -212,7 +202,6 @@ public:
         for(uint64_t i = 1; i < starkInfo.qDeg; i++) {
             S[i] = Goldilocks::mul(S[i - 1], shiftIn);
         }
-        TimerStopAndLog(COMPUTE_X);
     }
 
     void buildZHInv()

@@ -6,9 +6,6 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
 
     FRIProof<Goldilocks::Element> proof(setupCtx.starkInfo);
 
-    // Initialize vars
-    TimerStart(STARK_INITIALIZATION);
-    
     using TranscriptType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, TranscriptGL, TranscriptBN128>;
     
     using MerkleTreeType = std::conditional_t<std::is_same<ElementType, Goldilocks::Element>::value, MerkleTreeGL, MerkleTreeBN128>;
@@ -59,8 +56,6 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
 
         treesFRI[step] = new MerkleTreeType(setupCtx.starkInfo.starkStruct.merkleTreeArity, setupCtx.starkInfo.starkStruct.merkleTreeCustom, nGroups, groupSize * FIELD_EXTENSION, NULL);
     }
-
-    TimerStopAndLog(STARK_INITIALIZATION);
 
     //--------------------------------
     // 0.- Add const root and publics to transcript

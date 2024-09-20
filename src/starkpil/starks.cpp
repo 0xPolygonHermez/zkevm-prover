@@ -11,9 +11,6 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
 {
     TimerStart(STARK_PROOF);
 
-    // Initialize vars
-    TimerStart(STARK_INITIALIZATION);
-
     ExpressionsAvx expressionsAvx(setupCtx);
 
     uint64_t nFieldElements = setupCtx.starkInfo.starkStruct.verificationHashType == std::string("BN128") ? 1 : HASH_SIZE;
@@ -40,8 +37,6 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     {
         commitsCalculated[i] = true;
     }
-
-    TimerStopAndLog(STARK_INITIALIZATION);
 
     //--------------------------------
     // 0.- Add const root and publics to transcript
@@ -293,6 +288,7 @@ void Starks<ElementType>::commitStage(uint64_t step, Goldilocks::Element *buffer
 template <typename ElementType>
 void Starks<ElementType>::computeQ(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof)
 {
+    TimerStart(STARK_COMPUTE_Q);
     uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
     uint64_t NExtended = 1 << setupCtx.starkInfo.starkStruct.nBitsExt;
 
@@ -312,11 +308,8 @@ void Starks<ElementType>::computeQ(uint64_t step, Goldilocks::Element *buffer, F
 
     NTT_Goldilocks nttExtended(NExtended);
 
-    TimerStartExpr(STARK_CALCULATE_EXPS_2NS_INTT_STEP, step);
+    TimerStartExpr(STARK_LDE_STEP, step);
     nttExtended.INTT(&buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], NExtended, setupCtx.starkInfo.qDim, pBuffHelper, 3, nBlocks);
-    TimerStopAndLogExpr(STARK_CALCULATE_EXPS_2NS_INTT_STEP, step);
-
-    TimerStartExpr(STARK_CALCULATE_EXPS_2NS_MUL_STEP, step);
 
     for (uint64_t p = 0; p < setupCtx.starkInfo.qDeg; p++)
     {   
@@ -329,11 +322,8 @@ void Starks<ElementType>::computeQ(uint64_t step, Goldilocks::Element *buffer, F
 
     memset(&cmQ[N * setupCtx.starkInfo.qDeg * setupCtx.starkInfo.qDim], 0, (NExtended - N) * setupCtx.starkInfo.qDeg * setupCtx.starkInfo.qDim * sizeof(Goldilocks::Element));
 
-    TimerStopAndLogExpr(STARK_CALCULATE_EXPS_2NS_MUL_STEP, step);
-
-    TimerStartExpr(STARK_CALCULATE_EXPS_2NS_NTT_STEP, step);
     nttExtended.NTT(cmQ, cmQ, NExtended, nCols, pBuffHelper, 3, nBlocks);
-    TimerStopAndLogExpr(STARK_CALCULATE_EXPS_2NS_NTT_STEP, step);
+    TimerStopAndLogExpr(STARK_LDE_STEP, step);
 
     TimerStartExpr(STARK_MERKLETREE_STEP, step);
     treesGL[step - 1]->setSource(&buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("cm" + to_string(step), true)]]);
@@ -341,11 +331,14 @@ void Starks<ElementType>::computeQ(uint64_t step, Goldilocks::Element *buffer, F
     treesGL[step - 1]->getRoot(&proof.proof.roots[step - 1][0]);
 
     TimerStopAndLogExpr(STARK_MERKLETREE_STEP, step);
+    TimerStopAndLog(STARK_COMPUTE_Q);
 }
 
 template <typename ElementType>
 void Starks<ElementType>::computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *challenges, Goldilocks::Element *evals, FRIProof<ElementType> &proof)
 {
+    TimerStart(STARK_CALCULATE_EVALS);
+
     uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
     auto evalsStage = setupCtx.starkInfo.nStages + 2;
     auto xiChallenge = std::find_if(setupCtx.starkInfo.challengesMap.begin(), setupCtx.starkInfo.challengesMap.end(), [evalsStage](const PolMap& c) {
@@ -353,8 +346,6 @@ void Starks<ElementType>::computeEvals(Goldilocks::Element *buffer, Goldilocks::
     });
 
     uint64_t xiChallengeIndex = std::distance(setupCtx.starkInfo.challengesMap.begin(), xiChallenge);
-
-    TimerStart(STARK_CALCULATE_LEv);
     
     Goldilocks::Element* LEv = &buffer[setupCtx.starkInfo.mapOffsets[make_pair("LEv", true)]];
     
@@ -398,9 +389,6 @@ void Starks<ElementType>::computeEvals(Goldilocks::Element *buffer, Goldilocks::
     NTT_Goldilocks ntt(N);
     ntt.INTT(&LEv[0], &LEv[0], N, FIELD_EXTENSION * setupCtx.starkInfo.openingPoints.size(), pBuffHelper);
 
-    TimerStopAndLog(STARK_CALCULATE_LEv);
-
-    TimerStart(STARK_CALCULATE_EVALS);
     evmap(buffer, evals, LEv);
     proof.proof.setEvals(evals);
     TimerStopAndLog(STARK_CALCULATE_EVALS);
@@ -409,6 +397,8 @@ void Starks<ElementType>::computeEvals(Goldilocks::Element *buffer, Goldilocks::
 template <typename ElementType>
 void Starks<ElementType>::prepareFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *challenges)
 {
+    TimerStart(STARK_CALCULATE_XDIVXSUB);
+
     uint64_t NExtended = 1 << setupCtx.starkInfo.starkStruct.nBitsExt;
 
     auto evalsStage = setupCtx.starkInfo.nStages + 2;
@@ -435,8 +425,6 @@ void Starks<ElementType>::prepareFRIPolynomial(Goldilocks::Element *buffer, Gold
 
         Goldilocks3::mul((Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]), (Goldilocks3::Element &)(challenges[xiChallengeIndex * FIELD_EXTENSION]), w);
     }
-
-    TimerStart(STARK_CALCULATE_XDIVXSUB);
 
     for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
     {
@@ -578,6 +566,8 @@ void Starks<ElementType>::ffi_treesGL_get_root(uint64_t index, ElementType *dst)
 
 template <typename ElementType>
 void Starks<ElementType>::calculateImPolsExpressions(uint64_t step, Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals) {
+    if(!setupCtx.expressionsBin.imPolsInfo[step - 1].nOps) return;
+
     TimerStart(STARK_CALCULATE_IMPOLS_EXPS);
 
     ExpressionsAvx expressionsAvx(setupCtx);
