@@ -262,7 +262,7 @@ public:
         uint64_t nThreads = (1 << (int)pow2thread) / 4;
         uint64_t partitionSize = size / nThreads;
 
-        if(partitionSize < 2) {
+        if(partitionSize < 10) {
             batchInverse(res, src);
             return;
         }
