@@ -301,6 +301,8 @@ opType string2opType(const string s)
         return challenge;
     if(s == "number")
         return number;
+    if(s == "string") 
+        return string_;
     zklog.error("string2opType() found invalid string=" + s);
     exitProcess();
     exit(-1);

@@ -29,6 +29,7 @@ struct HintField {
     uint64_t id;
     uint64_t dim;
     uint64_t value;
+    string stringValue;
 };
 
 

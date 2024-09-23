@@ -307,6 +307,8 @@ void ExpressionsBin::loadExpressionsBin(BinFileUtils::BinFile *expressionsBin) {
             hintField.operand = string2opType(operand);
             if(hintField.operand == opType::number) {
                 hintField.value = expressionsBin->readU64LE();
+            } else if(hintField.operand == opType::string_) {
+                hintField.stringValue = expressionsBin->readString();
             } else {
                 hintField.id = expressionsBin->readU32LE();
             }

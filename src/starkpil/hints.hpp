@@ -5,6 +5,7 @@ typedef enum {
     FieldExtended = 1,
     Column = 2,
     ColumnExtended = 3,
+    String = 4,
 } HintFieldType;
 
 struct HintFieldInfo {
@@ -12,6 +13,7 @@ struct HintFieldInfo {
     uint8_t offset;
     HintFieldType fieldType;
     Goldilocks::Element* values;
+    const char* stringValue;
 };
 
 
@@ -376,6 +378,13 @@ HintFieldInfo getHintField(SetupCtx& setupCtx, Goldilocks::Element *buffer, Gold
         } else {
             std::memcpy(hintFieldInfo.values, &challenges[FIELD_EXTENSION*hintField->id], FIELD_EXTENSION * sizeof(Goldilocks::Element));
         }
+    } else if (hintField->operand == opType::string_) {
+        hintFieldInfo.size = 0;
+        hintFieldInfo.values = nullptr;
+        hintFieldInfo.fieldType = HintFieldType::String;
+        hintFieldInfo.stringValue = hintField->stringValue.c_str();
+        hintFieldInfo.offset = 0;
+        if(print_expression) cout << "string " << hintField->stringValue << endl;
     } else {
         zklog.error("Unknown HintFieldType");
         exitProcess();

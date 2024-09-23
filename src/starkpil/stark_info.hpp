@@ -26,6 +26,7 @@ typedef enum
     subproofvalue = 4,
     challenge = 5,
     number = 6,
+    string_ = 7,
 } opType;
 
 
