@@ -106,8 +106,8 @@ ConstraintsResults *verifyConstraints(SetupCtx& setupCtx, Goldilocks::Element *b
     
     constraintsInfo->constraintInfo = new ConstraintInfo[constraintsInfo->nConstraints];
     for (uint64_t i = 0; i < setupCtx.expressionsBin.constraintsInfoDebug.size(); i++) {
-        Goldilocks::Element* pAddr = &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]];
-        auto constraintInfo = verifyConstraint(setupCtx, params, pAddr, i);
+        Goldilocks::Element* pBuffer = &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("constraints", false)]];
+        auto constraintInfo = verifyConstraint(setupCtx, params, pBuffer, i);
         constraintsInfo->constraintInfo[i] = constraintInfo;
     }
     

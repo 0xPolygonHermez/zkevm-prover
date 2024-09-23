@@ -205,9 +205,14 @@ void StarkInfo::setMapOffsets() {
         }
         mapOffsets[std::make_pair(section, false)] = offsetPolsBasefield;
         offsetPolsBasefield += N * mapSectionsN[section];
-    }
-
+    }    
     if(offsetPolsBasefield > mapTotalN) mapTotalN = offsetPolsBasefield;
+
+    // Verify constraints
+    mapOffsets[std::make_pair("constraints", false)] = offsetPolsBasefield;
+    if(offsetPolsBasefield + N * FIELD_EXTENSION > mapTotalN) {
+        mapTotalN = offsetPolsBasefield + N * FIELD_EXTENSION;
+    }
 
     // Stage FRIPolynomial
     uint64_t offsetPolsFRI = mapOffsets[std::make_pair("q", true)];
