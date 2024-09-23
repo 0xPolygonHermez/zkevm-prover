@@ -408,6 +408,10 @@ void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_v
     printExpression((Goldilocks::Element *)pol, dim, first_value, last_value);
 }
 
+void print_row(void *pSetupCtx, void *buffer, uint64_t stage, uint64_t row) {
+    printRow(*(SetupCtx *)pSetupCtx, (Goldilocks::Element *)buffer, stage, row);
+}
+
 // Recursive proof
 // ================================================================================= 
 void *gen_recursive_proof(void *pSetupCtx, void* pAddress, void* pPublicInputs, char* proof_file) {

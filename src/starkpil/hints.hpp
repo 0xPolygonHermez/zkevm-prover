@@ -58,6 +58,39 @@ void printExpression(Goldilocks::Element* pol, uint64_t dim, uint64_t firstPrint
     cout << "-------------------------------------------------" << endl;
 }
 
+void printRow(SetupCtx& setupCtx, Goldilocks::Element* buffer, uint64_t stage, uint64_t row) {
+    Goldilocks::Element *pol = &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("cm" + to_string(stage), false)] + setupCtx.starkInfo.mapSectionsN["cm" + to_string(stage)] * row];
+    cout << "Values at row " << row << " = {" << endl;
+    bool first = true;
+    for(uint64_t i = 0; i < setupCtx.starkInfo.cmPolsMap.size(); ++i) {
+        PolMap cmPol = setupCtx.starkInfo.cmPolsMap[i];
+        if(cmPol.stage == stage) {
+            if(first) {
+                first = false;
+            } else {
+                cout << endl;
+            }
+            cout << "    " << cmPol.name;
+            if(cmPol.lengths.size() > 0) {
+                cout << "[";
+                for(uint64_t i = 0; i < cmPol.lengths.size(); ++i) {
+                    cout << cmPol.lengths[i];
+                    if(i != cmPol.lengths.size() - 1) cout << ", ";
+                }
+                cout << "]";
+            }
+            cout << ": ";
+            if(cmPol.dim == 1) {
+                cout << Goldilocks::toString(pol[cmPol.stagePos]) << ",";
+            } else {
+                cout << "[" << Goldilocks::toString(pol[cmPol.stagePos]) << ", " << Goldilocks::toString(pol[cmPol.stagePos + 1]) << ", " << Goldilocks::toString(pol[cmPol.stagePos + 2]) << "],";
+            }
+        }
+    }
+    cout << endl;
+    cout << "}" << endl;
+}
+
 void printColById(SetupCtx& setupCtx, Goldilocks::Element* buffer, bool committed, uint64_t polId, uint64_t firstPrintValue = 0, uint64_t lastPrintValue = 0)
 {   
     uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;

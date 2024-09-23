@@ -88,6 +88,7 @@
     // Debug functions
     // =================================================================================
     void *print_by_name(void *pSetupCtx, void* buffer, void* public_inputs, void* challenges, void* subproofValues, char* name, uint64_t *lengths, uint64_t first_value, uint64_t last_value, bool return_values);
+    void print_row(void *pSetupCtx, void *buffer, uint64_t stage, uint64_t row);
     void print_expression(void *pSetupCtx, void* pol, uint64_t dim, uint64_t first_value, uint64_t last_value);
 
     // Recursive proof
