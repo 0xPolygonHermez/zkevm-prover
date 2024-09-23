@@ -235,10 +235,10 @@ void starks_free(void *pStarks)
     delete starks;
 }
 
-void extend_and_merkelize(void *pStarks, uint64_t step, void *buffer, void *pProof)
+void extend_and_merkelize(void *pStarks, uint64_t step, void *buffer, void *pProof, void *pBuffHelper)
 {
     auto starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->ffi_extend_and_merkelize(step, (Goldilocks::Element *)buffer, (FRIProof<Goldilocks::Element> *)pProof);
+    starks->ffi_extend_and_merkelize(step, (Goldilocks::Element *)buffer, (FRIProof<Goldilocks::Element> *)pProof, (Goldilocks::Element *)pBuffHelper);
 }
 
 void treesGL_get_root(void *pStarks, uint64_t index, void *dst)
@@ -267,13 +267,13 @@ void calculate_impols_expressions(void *pStarks, uint64_t step, void* buffer, vo
     starks->calculateImPolsExpressions(step, (Goldilocks::Element *)buffer, (Goldilocks::Element *)public_inputs, (Goldilocks::Element *)challenges, (Goldilocks::Element *)subproofValues, (Goldilocks::Element *)evals);
 }
 
-void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buffer, void *pProof) {
+void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buffer, void *pProof, void *pBuffHelper) {
     // type == 1 => Goldilocks
     // type == 2 => BN128
     switch (elementType)
     {
     case 1:
-        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, (Goldilocks::Element *)buffer, *(FRIProof<Goldilocks::Element> *)pProof);
+        ((Starks<Goldilocks::Element> *)pStarks)->commitStage(step, (Goldilocks::Element *)buffer, *(FRIProof<Goldilocks::Element> *)pProof, (Goldilocks::Element *)pBuffHelper);
         break;
     default:
         cerr << "Invalid elementType: " << elementType << endl;
@@ -282,10 +282,10 @@ void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buff
 }
 
 
-void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof)
+void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof, void *pBuffHelper)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeEvals((Goldilocks::Element *)buffer, (Goldilocks::Element *)challenges, (Goldilocks::Element *)evals, *(FRIProof<Goldilocks::Element> *)pProof);
+    starks->computeEvals((Goldilocks::Element *)buffer, (Goldilocks::Element *)challenges, (Goldilocks::Element *)evals, *(FRIProof<Goldilocks::Element> *)pProof, (Goldilocks::Element *)pBuffHelper);
 }
 
 void prepare_fri_pol(void *pStarks, void *buffer, void *challenges)

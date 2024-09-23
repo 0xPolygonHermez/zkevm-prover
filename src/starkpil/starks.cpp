@@ -236,7 +236,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
 }
 
 template <typename ElementType>
-void Starks<ElementType>::extendAndMerkelize(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof)
+void Starks<ElementType>::extendAndMerkelize(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof, Goldilocks::Element *pBuffHelper)
 {    
     TimerStartExpr(STARK_LDE_AND_MERKLETREE_STEP, step);
     TimerStartExpr(STARK_LDE_STEP, step);
@@ -250,18 +250,13 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, Goldilocks::Element 
     Goldilocks::Element *pBuff = &buffer[setupCtx.starkInfo.mapOffsets[make_pair(section, false)]];
     Goldilocks::Element *pBuffExtended = &buffer[setupCtx.starkInfo.mapOffsets[make_pair(section, true)]];
 
-    std::pair<uint64_t, uint64_t> nttOffsetHelper = setupCtx.starkInfo.mapNTTOffsetsHelpers[section];
-    Goldilocks::Element *pBuffHelper = &buffer[nttOffsetHelper.first];
-
-    uint64_t buffHelperElements = NExtended * nCols;
-
-    uint64_t nBlocks = 1;
-    while((nttOffsetHelper.second * nBlocks < buffHelperElements + 8) ||  (nCols > 256*nBlocks) ) {
-        nBlocks++;
-    }
-
     NTT_Goldilocks ntt(N);
-    ntt.extendPol(pBuffExtended, pBuff, NExtended, N, nCols, pBuffHelper, 3, nBlocks);
+    if(pBuffHelper != nullptr) {
+        ntt.extendPol(pBuffExtended, pBuff, NExtended, N, nCols, pBuffHelper);
+    } else {
+        ntt.extendPol(pBuffExtended, pBuff, NExtended, N, nCols);
+    }
+    
     TimerStopAndLogExpr(STARK_LDE_STEP, step);
     TimerStartExpr(STARK_MERKLETREE_STEP, step);
     treesGL[step - 1]->setSource(pBuffExtended);
@@ -272,21 +267,21 @@ void Starks<ElementType>::extendAndMerkelize(uint64_t step, Goldilocks::Element 
 }
 
 template <typename ElementType>
-void Starks<ElementType>::commitStage(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof)
+void Starks<ElementType>::commitStage(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof, Goldilocks::Element* pBuffHelper)
 {  
 
     if (step <= setupCtx.starkInfo.nStages)
     {
-        extendAndMerkelize(step, buffer, proof);
+        extendAndMerkelize(step, buffer, proof, pBuffHelper);
     }
     else
     {
-        computeQ(step, buffer, proof);
+        computeQ(step, buffer, proof, pBuffHelper);
     }
 }
 
 template <typename ElementType>
-void Starks<ElementType>::computeQ(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof)
+void Starks<ElementType>::computeQ(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof, Goldilocks::Element* pBuffHelper)
 {
     TimerStart(STARK_COMPUTE_Q);
     uint64_t N = 1 << setupCtx.starkInfo.starkStruct.nBits;
@@ -296,20 +291,15 @@ void Starks<ElementType>::computeQ(uint64_t step, Goldilocks::Element *buffer, F
     uint64_t nCols = setupCtx.starkInfo.mapSectionsN["cm" + to_string(setupCtx.starkInfo.nStages + 1)];
     Goldilocks::Element *cmQ = &buffer[setupCtx.starkInfo.mapOffsets[make_pair(section, true)]];
 
-    std::pair<uint64_t, uint64_t> nttOffsetHelper = setupCtx.starkInfo.mapNTTOffsetsHelpers[section];
-    Goldilocks::Element *pBuffHelper = &buffer[nttOffsetHelper.first];
-
-    uint64_t buffHelperElements = NExtended * nCols;
-    
-    uint64_t nBlocks = 1;
-    while((nttOffsetHelper.second * nBlocks < buffHelperElements) || (nCols > 256*nBlocks) ) {
-        nBlocks++;
-    }
 
     NTT_Goldilocks nttExtended(NExtended);
 
     TimerStartExpr(STARK_LDE_STEP, step);
-    nttExtended.INTT(&buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], NExtended, setupCtx.starkInfo.qDim, pBuffHelper, 3, nBlocks);
+    if(pBuffHelper != nullptr) {
+        nttExtended.INTT(&buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], NExtended, setupCtx.starkInfo.qDim, pBuffHelper);
+    } else {
+        nttExtended.INTT(&buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], NExtended, setupCtx.starkInfo.qDim);
+    }
 
     for (uint64_t p = 0; p < setupCtx.starkInfo.qDeg; p++)
     {   
@@ -322,7 +312,13 @@ void Starks<ElementType>::computeQ(uint64_t step, Goldilocks::Element *buffer, F
 
     memset(&cmQ[N * setupCtx.starkInfo.qDeg * setupCtx.starkInfo.qDim], 0, (NExtended - N) * setupCtx.starkInfo.qDeg * setupCtx.starkInfo.qDim * sizeof(Goldilocks::Element));
 
-    nttExtended.NTT(cmQ, cmQ, NExtended, nCols, pBuffHelper, 3, nBlocks);
+    if(pBuffHelper != nullptr) {
+        nttExtended.NTT(cmQ, cmQ, NExtended, nCols, pBuffHelper);
+    } else {
+        nttExtended.NTT(cmQ, cmQ, NExtended, nCols);
+    }
+
+   
     TimerStopAndLogExpr(STARK_LDE_STEP, step);
 
     TimerStartExpr(STARK_MERKLETREE_STEP, step);
@@ -335,7 +331,7 @@ void Starks<ElementType>::computeQ(uint64_t step, Goldilocks::Element *buffer, F
 }
 
 template <typename ElementType>
-void Starks<ElementType>::computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *challenges, Goldilocks::Element *evals, FRIProof<ElementType> &proof)
+void Starks<ElementType>::computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *challenges, Goldilocks::Element *evals, FRIProof<ElementType> &proof, Goldilocks::Element* pBuffHelper)
 {
     TimerStart(STARK_CALCULATE_EVALS);
 
@@ -382,12 +378,14 @@ void Starks<ElementType>::computeEvals(Goldilocks::Element *buffer, Goldilocks::
             Goldilocks3::mul((Goldilocks3::Element &)(LEv[(k*setupCtx.starkInfo.openingPoints.size() + i)*FIELD_EXTENSION]), (Goldilocks3::Element &)(LEv[((k-1)*setupCtx.starkInfo.openingPoints.size() + i)*FIELD_EXTENSION]), (Goldilocks3::Element &)(xisShifted[i * FIELD_EXTENSION]));
         }
     }
-
-    std::pair<uint64_t, uint64_t> nttOffsetHelper = setupCtx.starkInfo.mapNTTOffsetsHelpers["LEv"];
-    Goldilocks::Element *pBuffHelper = &buffer[nttOffsetHelper.first];
     
     NTT_Goldilocks ntt(N);
-    ntt.INTT(&LEv[0], &LEv[0], N, FIELD_EXTENSION * setupCtx.starkInfo.openingPoints.size(), pBuffHelper);
+
+    if(pBuffHelper != nullptr) {
+        ntt.INTT(&LEv[0], &LEv[0], N, FIELD_EXTENSION * setupCtx.starkInfo.openingPoints.size(), pBuffHelper);
+    } else {
+        ntt.INTT(&LEv[0], &LEv[0], N, FIELD_EXTENSION * setupCtx.starkInfo.openingPoints.size());
+    }
 
     evmap(buffer, evals, LEv);
     proof.proof.setEvals(evals);
@@ -553,9 +551,9 @@ void Starks<ElementType>::addTranscript(TranscriptType &transcript, ElementType 
 
 
 template <typename ElementType>
-void Starks<ElementType>::ffi_extend_and_merkelize(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> *proof)
+void Starks<ElementType>::ffi_extend_and_merkelize(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> *proof, Goldilocks::Element *pBuffHelper)
 {
-    extendAndMerkelize(step, buffer, *proof);
+    extendAndMerkelize(step, buffer, *proof, pBuffHelper);
 }
 
 template <typename ElementType>

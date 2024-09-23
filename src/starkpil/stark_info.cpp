@@ -230,47 +230,7 @@ void StarkInfo::setMapOffsets() {
     
     mapOffsets[std::make_pair("evals", true)] = offsetPolsEvals;
     offsetPolsEvals += evMap.size() * omp_get_max_threads() * FIELD_EXTENSION;
-
-    mapNTTOffsetsHelpers["LEv"] = std::make_pair(offsetPolsEvals, N * FIELD_EXTENSION * openingPoints.size());
-    offsetPolsEvals += N * FIELD_EXTENSION * openingPoints.size();
     if(offsetPolsEvals > mapTotalN) mapTotalN = offsetPolsEvals;
-
-    for(uint64_t stage = 1; stage <= nStages + 1; stage++) {
-        uint64_t startBuffer;
-        uint64_t memoryAvailable;
-        if(stage == nStages + 1) {
-            startBuffer = mapOffsets[std::make_pair("q", true)] + NExtended * qDim;
-            memoryAvailable = mapTotalN - startBuffer;
-        } else if(stage == nStages) {
-            startBuffer = mapOffsets[std::make_pair("cm" + to_string(nStages + 1), true)];
-            memoryAvailable = mapTotalN - startBuffer;
-        } else {
-            uint64_t startBufferEnd = offsetPolsBasefield;
-            uint64_t startBufferExtended = mapOffsets[std::make_pair("cm" + to_string(stage + 1), true)];
-            uint64_t memoryAvailableEnd = mapTotalN - startBufferEnd;
-            uint64_t memoryAvailableExtended =  mapOffsets[std::make_pair("cm" + to_string(nStages), false)] - startBufferExtended;
-            uint64_t nttMemoryHelper = NExtended * mapSectionsN["cm" + to_string(stage)];
-            if(memoryAvailableExtended > memoryAvailableEnd && memoryAvailableExtended * 8 > nttMemoryHelper) {
-                memoryAvailable = memoryAvailableExtended;
-                startBuffer = startBufferExtended;
-            } else {
-                memoryAvailable = memoryAvailableEnd;
-                startBuffer = startBufferEnd;
-            }
-        }
-        
-        uint64_t minBlocks = 4;
-
-        uint64_t memoryNTTHelper = NExtended * mapSectionsN["cm" + to_string(stage)];
-        if(startBuffer >= offsetPolsBasefield && memoryAvailable * minBlocks < memoryNTTHelper) {
-            memoryAvailable = memoryNTTHelper / minBlocks;
-            if(startBuffer + memoryAvailable > mapTotalN) {
-                mapTotalN = startBuffer + memoryAvailable;
-            }   
-        }
-        
-        mapNTTOffsetsHelpers["cm" + to_string(stage)] = std::make_pair(startBuffer, memoryAvailable);
-    }
 }
 
 void StarkInfo::getPolynomial(Polinomial &pol, Goldilocks::Element *pAddress, bool committed, uint64_t idPol, bool domainExtended) {

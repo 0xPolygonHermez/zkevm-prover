@@ -53,7 +53,7 @@
     void *starks_new(void *pSetupCtx);
     void starks_free(void *pStarks);
 
-    void extend_and_merkelize(void *pStarks, uint64_t step, void *buffer, void *proof);
+    void extend_and_merkelize(void *pStarks, uint64_t step, void *buffer, void *proof, void *pBuffHelper);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
     void *prepare_fri_pol(void *pStarks, void *buffer, void* challenges);
@@ -63,8 +63,8 @@
     void calculate_quotient_polynomial(void *pStarks, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
     void calculate_impols_expressions(void *pStarks, uint64_t step, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
 
-    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buffer, void *pProof);
-    void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof);
+    void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buffer, void *pProof, void *pBuffHelper);
+    void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof, void *pBuffHelper);
 
     void compute_fri_folding(void *pStarks, void *pProof, uint64_t step, void *buffer, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);

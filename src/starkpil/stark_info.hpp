@@ -134,7 +134,6 @@ public:
 
     // Precomputed
     std::map<std::pair<std::string, bool>, uint64_t> mapOffsets;
-    std::map<std::string, std::pair<uint64_t, uint64_t>> mapNTTOffsetsHelpers; // <stage, <offset, size>>
     
     uint64_t mapTotalN;
  

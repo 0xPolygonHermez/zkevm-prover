@@ -77,16 +77,16 @@ public:
 
     void genProof(Goldilocks::Element *pAddress, FRIProof<ElementType> &proof, Goldilocks::Element *publicInputs, bool debug);
     
-    void extendAndMerkelize(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof);
+    void extendAndMerkelize(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof, Goldilocks::Element* pBuffHelper = nullptr);
 
-    void commitStage(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof);
-    void computeQ(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof);
+    void commitStage(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof, Goldilocks::Element* pBuffHelper = nullptr);
+    void computeQ(uint64_t step, Goldilocks::Element *buffer, FRIProof<ElementType> &proof, Goldilocks::Element* pBuffHelper = nullptr);
     
     void calculateImPolsExpressions(uint64_t step, Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
     void calculateQuotientPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
     void calculateFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
 
-    void computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *challenges, Goldilocks::Element *evals, FRIProof<ElementType> &proof);
+    void computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *challenges, Goldilocks::Element *evals, FRIProof<ElementType> &proof, Goldilocks::Element* pBuffHelper = nullptr);
 
     void prepareFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *challenges);
     
@@ -101,7 +101,7 @@ public:
 
 
     // Following function are created to be used by the ffi interface
-    void ffi_extend_and_merkelize(uint64_t step,  Goldilocks::Element *buffer, FRIProof<ElementType> *proof);
+    void ffi_extend_and_merkelize(uint64_t step,  Goldilocks::Element *buffer, FRIProof<ElementType> *proof, Goldilocks::Element *pBuffHelper = nullptr);
     void ffi_treesGL_get_root(uint64_t index, ElementType *dst);
 
     void evmap(Goldilocks::Element *buffer, Goldilocks::Element *evals, Goldilocks::Element *LEv);
