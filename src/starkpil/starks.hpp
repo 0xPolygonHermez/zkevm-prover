@@ -86,7 +86,8 @@ public:
     void calculateQuotientPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
     void calculateFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals, Goldilocks::Element *xDivXSub);
 
-    void computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *challenges, Goldilocks::Element *evals, FRIProof<ElementType> &proof, Goldilocks::Element* pBuffHelper = nullptr);
+    void computeLEv(Goldilocks::Element *xiChallenge, Goldilocks::Element *LEv);
+    void computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *LEv, Goldilocks::Element *evals, FRIProof<ElementType> &proof);
 
     void calculateXDivXSub(Goldilocks::Element *xDivXSub, Goldilocks::Element *challenges);
     

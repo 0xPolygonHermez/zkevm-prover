@@ -179,14 +179,20 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
 
     TimerStart(STARK_STEP_EVALS);
 
+    uint64_t xiChallengeIndex = 0;
     for (uint64_t i = 0; i < setupCtx.starkInfo.challengesMap.size(); i++)
     {
         if(setupCtx.starkInfo.challengesMap[i].stage == setupCtx.starkInfo.nStages + 2) {
+            if(setupCtx.starkInfo.challengesMap[i].stageId == 0) xiChallengeIndex = i;
             starks.getChallenge(transcript, challenges[i * FIELD_EXTENSION]);
         }
     }
 
-    starks.computeEvals(pAddress, challenges, evals, proof);
+    Goldilocks::Element *xiChallenge = &challenges[xiChallengeIndex * FIELD_EXTENSION];
+    Goldilocks::Element* LEv = &pAddress[setupCtx.starkInfo.mapOffsets[make_pair("LEv", true)]];
+
+    starks.computeLEv(xiChallenge, LEv);
+    starks.computeEvals(pAddress,LEv, evals, proof);
 
     if(!setupCtx.starkInfo.starkStruct.hashCommits) {
         starks.addTranscriptGL(transcript, evals, setupCtx.starkInfo.evMap.size() * FIELD_EXTENSION);

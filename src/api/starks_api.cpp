@@ -281,11 +281,15 @@ void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buff
     }
 }
 
+void compute_lev(void *pStarks, void *xiChallenge, void* LEv) {
+    Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
+    starks->computeLEv((Goldilocks::Element *)xiChallenge, (Goldilocks::Element *)LEv);
+}
 
-void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof, void *pBuffHelper)
+void compute_evals(void *pStarks, void *buffer, void *LEv, void *evals, void *pProof)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->computeEvals((Goldilocks::Element *)buffer, (Goldilocks::Element *)challenges, (Goldilocks::Element *)evals, *(FRIProof<Goldilocks::Element> *)pProof, (Goldilocks::Element *)pBuffHelper);
+    starks->computeEvals((Goldilocks::Element *)buffer, (Goldilocks::Element *)LEv, (Goldilocks::Element *)evals, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
 void calculate_xdivxsub(void *pStarks, void *xDivXSub, void *challenges)

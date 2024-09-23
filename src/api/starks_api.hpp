@@ -64,7 +64,9 @@
     void calculate_impols_expressions(void *pStarks, uint64_t step, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
 
     void commit_stage(void *pStarks, uint32_t elementType, uint64_t step, void *buffer, void *pProof, void *pBuffHelper);
-    void compute_evals(void *pStarks, void *buffer, void *challenges, void *evals, void *pProof, void *pBuffHelper);
+    
+    void compute_lev(void *pStarks, void *xiChallenge, void* LEv);
+    void compute_evals(void *pStarks, void *buffer, void *LEv, void *evals, void *pProof);
 
     void compute_fri_folding(void *pStarks, void *pProof, uint64_t step, void *buffer, void *pChallenge);
     void compute_fri_queries(void *pStarks, void *pProof, uint64_t* friQueries);
