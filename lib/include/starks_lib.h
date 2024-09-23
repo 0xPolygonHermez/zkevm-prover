@@ -56,10 +56,10 @@
     void extend_and_merkelize(void *pStarks, uint64_t step, void *buffer, void *proof, void *pBuffHelper);
     void treesGL_get_root(void *pStarks, uint64_t index, void *root);
 
-    void *prepare_fri_pol(void *pStarks, void *buffer, void* challenges);
+    void *calculate_xdivxsub(void *pStarks, void *xDivXSub, void* challenges);
     void *get_fri_pol(void *pSetupCtx, void *buffer);
 
-    void calculate_fri_polynomial(void *pStarks, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
+    void calculate_fri_polynomial(void *pStarks, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals, void *xDivXSub);
     void calculate_quotient_polynomial(void *pStarks, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
     void calculate_impols_expressions(void *pStarks, uint64_t step, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
 
@@ -97,6 +97,7 @@
     void *get_zkin_ptr(char *zkin_file);
     void *public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t airgroupId, bool isAggregated);
     void *add_recursive2_verkey(void *pZkin, char* recursive2VerKeyFilename);
+    // void *join_zkin_recursive2(char* globalInfoFile, void *zkin1, void *zkin2, void *starkInfoRecursive2);
     void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, void **zkinRecursive2, void **starkInfoRecursive2);
 
 #endif

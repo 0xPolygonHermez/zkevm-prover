@@ -10,6 +10,7 @@ struct StepsParams
     Goldilocks::Element *challenges;
     Goldilocks::Element *subproofValues;
     Goldilocks::Element *evals;
+    Goldilocks::Element *xDivXSub;
     bool prover_initialized;
 };
 

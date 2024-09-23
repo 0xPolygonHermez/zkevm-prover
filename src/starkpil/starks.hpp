@@ -84,11 +84,11 @@ public:
     
     void calculateImPolsExpressions(uint64_t step, Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
     void calculateQuotientPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
-    void calculateFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals);
+    void calculateFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals, Goldilocks::Element *xDivXSub);
 
     void computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *challenges, Goldilocks::Element *evals, FRIProof<ElementType> &proof, Goldilocks::Element* pBuffHelper = nullptr);
 
-    void prepareFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *challenges);
+    void calculateXDivXSub(Goldilocks::Element *xDivXSub, Goldilocks::Element *challenges);
     
     void computeFRIFolding(uint64_t step, FRIProof<ElementType> &fproof, Goldilocks::Element *buffer, Goldilocks::Element *challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);

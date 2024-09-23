@@ -30,6 +30,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
         challenges : challenges,
         subproofValues : subproofValues,
         evals : evals,
+        xDivXSub : nullptr,
         prover_initialized : true,
     };
 
@@ -192,8 +193,9 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     //--------------------------------
     TimerStart(STARK_STEP_FRI);
 
-    prepareFRIPolynomial(pAddress, challenges);
-    calculateFRIPolynomial(pAddress, publicInputs, challenges, subproofValues, evals);
+    Goldilocks::Element *xDivXSub = &pAddress[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]];
+    calculateXDivXSub(xDivXSub, challenges);
+    calculateFRIPolynomial(pAddress, publicInputs, challenges, subproofValues, evals, xDivXSub);
 
     Goldilocks::Element challenge[FIELD_EXTENSION];
     Goldilocks::Element *friPol = &pAddress[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]];
@@ -393,7 +395,7 @@ void Starks<ElementType>::computeEvals(Goldilocks::Element *buffer, Goldilocks::
 }
 
 template <typename ElementType>
-void Starks<ElementType>::prepareFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *challenges)
+void Starks<ElementType>::calculateXDivXSub(Goldilocks::Element *xDivXSub, Goldilocks::Element *challenges)
 {
     TimerStart(STARK_CALCULATE_XDIVXSUB);
 
@@ -429,11 +431,11 @@ void Starks<ElementType>::prepareFRIPolynomial(Goldilocks::Element *buffer, Gold
 #pragma omp parallel for
         for (uint64_t k = 0; k < NExtended; k++)
         {
-            Goldilocks3::sub((Goldilocks3::Element &)(buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]  + (k + i * NExtended) * FIELD_EXTENSION]), setupCtx.constPols.x[k], (Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]));
+            Goldilocks3::sub((Goldilocks3::Element &)(xDivXSub[(k + i * NExtended) * FIELD_EXTENSION]), setupCtx.constPols.x[k], (Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]));
         }
     }
 
-    Polinomial xDivXSubXi_(&buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]], NExtended * setupCtx.starkInfo.openingPoints.size(), FIELD_EXTENSION, FIELD_EXTENSION);
+    Polinomial xDivXSubXi_(xDivXSub, NExtended * setupCtx.starkInfo.openingPoints.size(), FIELD_EXTENSION, FIELD_EXTENSION);
     Polinomial::batchInverseParallel(xDivXSubXi_, xDivXSubXi_);
 
     for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
@@ -441,7 +443,7 @@ void Starks<ElementType>::prepareFRIPolynomial(Goldilocks::Element *buffer, Gold
 #pragma omp parallel for
         for (uint64_t k = 0; k < NExtended; k++)
         {
-            Goldilocks3::mul((Goldilocks3::Element &)(buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), (Goldilocks3::Element &)(buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)] + (k + i * NExtended) * FIELD_EXTENSION]), setupCtx.constPols.x[k]);
+            Goldilocks3::mul((Goldilocks3::Element &)(xDivXSub[(k + i * NExtended) * FIELD_EXTENSION]), (Goldilocks3::Element &)(xDivXSub[(k + i * NExtended) * FIELD_EXTENSION]), setupCtx.constPols.x[k]);
         }
     }
     TimerStopAndLog(STARK_CALCULATE_XDIVXSUB);
@@ -576,6 +578,7 @@ void Starks<ElementType>::calculateImPolsExpressions(uint64_t step, Goldilocks::
         challenges,
         subproofValues,
         evals,
+        xDivXSub: nullptr,
         prover_initialized: true,
     };
 
@@ -607,6 +610,7 @@ void Starks<ElementType>::calculateQuotientPolynomial(Goldilocks::Element *buffe
         challenges,
         subproofValues,
         evals,
+        xDivXSub: nullptr,
         prover_initialized: true,
     };
     expressionsAvx.calculateExpression(params, &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], setupCtx.starkInfo.cExpId);
@@ -614,7 +618,7 @@ void Starks<ElementType>::calculateQuotientPolynomial(Goldilocks::Element *buffe
 }
 
 template <typename ElementType>
-void Starks<ElementType>::calculateFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals) {
+void Starks<ElementType>::calculateFRIPolynomial(Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals, Goldilocks::Element *xDivXSub) {
     TimerStart(STARK_CALCULATE_FRI_POLYNOMIAL);
     ExpressionsAvx expressionsAvx(setupCtx);
     StepsParams params {
@@ -623,6 +627,7 @@ void Starks<ElementType>::calculateFRIPolynomial(Goldilocks::Element *buffer, Go
         challenges,
         subproofValues,
         evals,
+        xDivXSub,
         prover_initialized: true,
     };
     expressionsAvx.calculateExpression(params, &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]], setupCtx.starkInfo.friExpId);
