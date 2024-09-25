@@ -31,7 +31,7 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
         challenges : challenges,
         subproofValues : subproofValues,
         evals : evals,
-        prover_initialized : true,
+        xDivXSub : nullptr,
     };
 
     for (uint64_t i = 0; i < setupCtx.starkInfo.mapSectionsN["cm1"]; ++i)
@@ -218,7 +218,7 @@ void *genRecursiveProof(SetupCtx& setupCtx, Goldilocks::Element *pAddress, Goldi
     TimerStart(STARK_STEP_FRI);
 
     Goldilocks::Element *xDivXSub = &pAddress[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]];
-    starks.calculateXDivXSub(xDivXSub, challenges);
+    starks.calculateXDivXSub(xiChallenge, xDivXSub);
     starks.calculateFRIPolynomial(pAddress, publicInputs, challenges, subproofValues, evals, xDivXSub);
 
     Goldilocks::Element challenge[FIELD_EXTENSION];

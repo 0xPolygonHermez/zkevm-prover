@@ -216,7 +216,8 @@ void ExpressionsBin::loadExpressionsBin(BinFileUtils::BinFile *expressionsBin) {
 
         uint32_t stage = expressionsBin->readU32LE();
         parserParamsConstraint.stage = stage;
-
+        parserParamsConstraint.expId = 0;
+        
         parserParamsConstraint.destDim = expressionsBin->readU32LE();
         parserParamsConstraint.destId = expressionsBin->readU32LE();
 

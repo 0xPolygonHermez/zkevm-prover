@@ -93,17 +93,16 @@ ConstraintInfo verifyConstraint(SetupCtx& setupCtx, StepsParams& params, Goldilo
 
 ConstraintsResults *verifyConstraints(SetupCtx& setupCtx, Goldilocks::Element *buffer, Goldilocks::Element *publicInputs, Goldilocks::Element *challenges, Goldilocks::Element *subproofValues, Goldilocks::Element *evals) {
     StepsParams params {
-        pols : buffer,
+        pols: buffer,
         publicInputs,
         challenges,
         subproofValues,
         evals,
-        prover_initialized: true,
+        xDivXSub: nullptr,
     };
-    
+
     ConstraintsResults *constraintsInfo = new ConstraintsResults();
     constraintsInfo->nConstraints = setupCtx.expressionsBin.constraintsInfoDebug.size();
-    
     constraintsInfo->constraintInfo = new ConstraintInfo[constraintsInfo->nConstraints];
     for (uint64_t i = 0; i < setupCtx.expressionsBin.constraintsInfoDebug.size(); i++) {
         Goldilocks::Element* pBuffer = &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("constraints", false)]];

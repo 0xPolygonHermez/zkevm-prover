@@ -244,7 +244,7 @@ HintFieldInfo getHintField(SetupCtx& setupCtx, Goldilocks::Element *buffer, Gold
         challenges,
         subproofValues,
         evals,
-        prover_initialized: true,
+        xDivXSub : nullptr,
     };
 
     uint64_t deg = 1 << setupCtx.starkInfo.starkStruct.nBits;

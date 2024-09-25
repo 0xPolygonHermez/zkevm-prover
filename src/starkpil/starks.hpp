@@ -89,7 +89,7 @@ public:
     void computeLEv(Goldilocks::Element *xiChallenge, Goldilocks::Element *LEv);
     void computeEvals(Goldilocks::Element *buffer, Goldilocks::Element *LEv, Goldilocks::Element *evals, FRIProof<ElementType> &proof);
 
-    void calculateXDivXSub(Goldilocks::Element *xDivXSub, Goldilocks::Element *challenges);
+    void calculateXDivXSub(Goldilocks::Element *xiChallenge, Goldilocks::Element *xDivXSub);
     
     void computeFRIFolding(uint64_t step, FRIProof<ElementType> &fproof, Goldilocks::Element *buffer, Goldilocks::Element *challenge);
     void computeFRIQueries(FRIProof<ElementType> &fproof, uint64_t* friQueries);

@@ -31,7 +31,6 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
         subproofValues : subproofValues,
         evals : evals,
         xDivXSub : nullptr,
-        prover_initialized : true,
     };
 
     for (uint64_t i = 0; i < setupCtx.starkInfo.mapSectionsN["cm1"]; ++i)
@@ -200,7 +199,7 @@ void Starks<ElementType>::genProof(Goldilocks::Element *pAddress, FRIProof<Eleme
     TimerStart(STARK_STEP_FRI);
 
     Goldilocks::Element *xDivXSub = &pAddress[setupCtx.starkInfo.mapOffsets[std::make_pair("xDivXSubXi", true)]];
-    calculateXDivXSub(xDivXSub, challenges);
+    calculateXDivXSub(xiChallenge, xDivXSub);
     calculateFRIPolynomial(pAddress, publicInputs, challenges, subproofValues, evals, xDivXSub);
 
     Goldilocks::Element challenge[FIELD_EXTENSION];
@@ -360,7 +359,7 @@ void Starks<ElementType>::computeLEv(Goldilocks::Element *xiChallenge, Goldilock
             w = Goldilocks::inv(w);
         }
 
-        Goldilocks3::mul((Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]), (Goldilocks3::Element &)xiChallenge, w);
+        Goldilocks3::mul((Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]), (Goldilocks3::Element &)xiChallenge[0], w);
         Goldilocks3::mul((Goldilocks3::Element &)(xisShifted[i * FIELD_EXTENSION]), (Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]), shift_inv);
 
         Goldilocks3::one((Goldilocks3::Element &)LEv[i * FIELD_EXTENSION]);
@@ -392,18 +391,11 @@ void Starks<ElementType>::computeEvals(Goldilocks::Element *buffer, Goldilocks::
 }
 
 template <typename ElementType>
-void Starks<ElementType>::calculateXDivXSub(Goldilocks::Element *xDivXSub, Goldilocks::Element *challenges)
+void Starks<ElementType>::calculateXDivXSub(Goldilocks::Element *xiChallenge, Goldilocks::Element *xDivXSub)
 {
     TimerStart(STARK_CALCULATE_XDIVXSUB);
 
     uint64_t NExtended = 1 << setupCtx.starkInfo.starkStruct.nBitsExt;
-
-    auto evalsStage = setupCtx.starkInfo.nStages + 2;
-    auto xiChallenge = std::find_if(setupCtx.starkInfo.challengesMap.begin(), setupCtx.starkInfo.challengesMap.end(), [evalsStage](const PolMap& c) {
-        return c.stage == evalsStage && c.stageId == 0;
-    });
-
-    uint64_t xiChallengeIndex = std::distance(setupCtx.starkInfo.challengesMap.begin(), xiChallenge);
 
     Goldilocks::Element xis[setupCtx.starkInfo.openingPoints.size() * FIELD_EXTENSION];
     for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
@@ -420,7 +412,7 @@ void Starks<ElementType>::calculateXDivXSub(Goldilocks::Element *xDivXSub, Goldi
             w = Goldilocks::inv(w);
         }
 
-        Goldilocks3::mul((Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]), (Goldilocks3::Element &)(challenges[xiChallengeIndex * FIELD_EXTENSION]), w);
+        Goldilocks3::mul((Goldilocks3::Element &)(xis[i * FIELD_EXTENSION]), (Goldilocks3::Element &)xiChallenge[0], w);
     }
 
     for (uint64_t i = 0; i < setupCtx.starkInfo.openingPoints.size(); ++i)
@@ -576,7 +568,6 @@ void Starks<ElementType>::calculateImPolsExpressions(uint64_t step, Goldilocks::
         subproofValues,
         evals,
         xDivXSub: nullptr,
-        prover_initialized: true,
     };
 
     expressionsAvx.calculateExpressions(params, nullptr, setupCtx.expressionsBin.expressionsBinArgsImPols, setupCtx.expressionsBin.imPolsInfo[step - 1], false, false, true);
@@ -608,7 +599,6 @@ void Starks<ElementType>::calculateQuotientPolynomial(Goldilocks::Element *buffe
         subproofValues,
         evals,
         xDivXSub: nullptr,
-        prover_initialized: true,
     };
     expressionsAvx.calculateExpression(params, &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("q", true)]], setupCtx.starkInfo.cExpId);
     TimerStopAndLog(STARK_CALCULATE_QUOTIENT_POLYNOMIAL);
@@ -625,7 +615,6 @@ void Starks<ElementType>::calculateFRIPolynomial(Goldilocks::Element *buffer, Go
         subproofValues,
         evals,
         xDivXSub,
-        prover_initialized: true,
     };
     expressionsAvx.calculateExpression(params, &buffer[setupCtx.starkInfo.mapOffsets[std::make_pair("f", true)]], setupCtx.starkInfo.friExpId);
     TimerStopAndLog(STARK_CALCULATE_FRI_POLYNOMIAL);

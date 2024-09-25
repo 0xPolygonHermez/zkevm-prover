@@ -11,18 +11,18 @@ public:
     vector<uint64_t> offsetsStages;
     ExpressionsAvx(SetupCtx& setupCtx) : ExpressionsCtx(setupCtx) {};
 
-    void setBufferTInfo(uint64_t stage, bool domainExtended, uint64_t expId, bool prover_initialized) {
+    void setBufferTInfo(uint64_t stage, bool domainExtended, uint64_t expId) {
         uint64_t nOpenings = setupCtx.starkInfo.openingPoints.size();
         offsetsStages.resize((setupCtx.starkInfo.nStages + 2)*nOpenings + 1);
         nColsStages.resize((setupCtx.starkInfo.nStages + 2)*nOpenings + 1);
         nColsStagesAcc.resize((setupCtx.starkInfo.nStages + 2)*nOpenings + 1);
 
         nCols = setupCtx.starkInfo.nConstants;
-        uint64_t ns = !prover_initialized ? 1 : setupCtx.starkInfo.nStages + 2;
+        uint64_t ns = setupCtx.starkInfo.nStages + 2;
         for(uint64_t o = 0; o < nOpenings; ++o) {
             for(uint64_t stage = 0; stage <= ns; ++stage) {
                 std::string section = stage == 0 ? "const" : "cm" + to_string(stage);
-                offsetsStages[(setupCtx.starkInfo.nStages + 2)*o + stage] = !prover_initialized ? 0 : setupCtx.starkInfo.mapOffsets[std::make_pair(section, domainExtended)];
+                offsetsStages[(setupCtx.starkInfo.nStages + 2)*o + stage] = setupCtx.starkInfo.mapOffsets[std::make_pair(section, domainExtended)];
                 nColsStages[(setupCtx.starkInfo.nStages + 2)*o + stage] = setupCtx.starkInfo.mapSectionsN[section];
                 nColsStagesAcc[(setupCtx.starkInfo.nStages + 2)*o + stage] = stage == 0 && o == 0 ? 0 : nColsStagesAcc[(setupCtx.starkInfo.nStages + 2)*o + stage - 1] + nColsStages[stage - 1];
             }
@@ -190,7 +190,7 @@ public:
         uint64_t nOpenings = setupCtx.starkInfo.openingPoints.size();
         uint64_t domainSize = domainExtended ? 1 << setupCtx.starkInfo.starkStruct.nBitsExt : 1 << setupCtx.starkInfo.starkStruct.nBits;
 
-        setBufferTInfo(parserParams.stage, domainExtended, parserParams.expId, params.prover_initialized);
+        setBufferTInfo(parserParams.stage, domainExtended, parserParams.expId);
 
         Goldilocks3::Element_avx challenges[setupCtx.starkInfo.challengesMap.size()];
         Goldilocks3::Element_avx challenges_ops[setupCtx.starkInfo.challengesMap.size()];
@@ -232,7 +232,7 @@ public:
             evals[i][2] = _mm256_set1_epi64x(params.evals[i * FIELD_EXTENSION + 2].fe);
         }
 
-    #pragma omp parallel for
+    // #pragma omp parallel for
         for (uint64_t i = 0; i < domainSize; i+= nrowsPack) {
             uint64_t i_args = 0;
 

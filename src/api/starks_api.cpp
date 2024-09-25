@@ -292,10 +292,10 @@ void compute_evals(void *pStarks, void *buffer, void *LEv, void *evals, void *pP
     starks->computeEvals((Goldilocks::Element *)buffer, (Goldilocks::Element *)LEv, (Goldilocks::Element *)evals, *(FRIProof<Goldilocks::Element> *)pProof);
 }
 
-void calculate_xdivxsub(void *pStarks, void *xDivXSub, void *challenges)
+void calculate_xdivxsub(void *pStarks, void* xiChallenge, void *xDivXSub)
 {
     Starks<Goldilocks::Element> *starks = (Starks<Goldilocks::Element> *)pStarks;
-    starks->calculateXDivXSub((Goldilocks::Element *)xDivXSub, (Goldilocks::Element *)challenges);
+    starks->calculateXDivXSub((Goldilocks::Element *)xiChallenge, (Goldilocks::Element *)xDivXSub);
 }
 
 void *get_fri_pol(void *pSetupCtx, void *buffer)
@@ -451,14 +451,14 @@ void *add_recursive2_verkey(void *pZkin, char* recursive2VerKeyFilename) {
     return addRecursive2VerKey(zkin, recursive2Verkey);
 }
 
-// void *join_zkin_recursive2(char* globalInfoFile, void *zkin1, void *zkin2, void *starkInfoRecursive2) {
-//     json globalInfo;
-//     file2json(globalInfoFile, globalInfo);
+void *join_zkin_recursive2(char* globalInfoFile, void *zkin1, void *zkin2, void *starkInfoRecursive2) {
+    json globalInfo;
+    file2json(globalInfoFile, globalInfo);
 
-//     ordered_json zkinRecursive2 = joinzkinrecursive2(globalInfo, *(nlohmann::ordered_json *)zkin1, *(nlohmann::ordered_json *)zkin2, *(StarkInfo *)starkInfoRecursive2);
+    ordered_json zkinRecursive2 = joinzkinrecursive2(globalInfo, *(nlohmann::ordered_json *)zkin1, *(nlohmann::ordered_json *)zkin2, *(StarkInfo *)starkInfoRecursive2);
 
-//     return (void *) new nlohmann::ordered_json(zkinRecursive2);
-// }
+    return (void *) new nlohmann::ordered_json(zkinRecursive2);
+}
 
 void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, void **zkinRecursive2, void **starkInfoRecursive2) {
     json globalInfo;

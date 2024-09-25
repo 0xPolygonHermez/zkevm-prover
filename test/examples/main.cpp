@@ -140,8 +140,9 @@ int main(int argc, char **argv)
     nlohmann::ordered_json jProof;
     
     if(testName == "compressor") {
-        genRecursiveProof<ElementType>(setupCtx, (Goldilocks::Element *)pAddress, &publicInputs[0]);
-        jProof = fproof.proof.proof2json();
+        FRIProof<Goldilocks::Element> fproof(setupCtx.starkInfo);
+        // genRecursiveProof<Goldilocks::Element>(setupCtx, (Goldilocks::Element *)pAddress, &publicInputs[0]);
+        // jProof = fproof.proof.proof2json();
     } else if(testName == "fibonacci_pil2") {
         FRIProof<Goldilocks::Element> fproof(setupCtx.starkInfo);
         Starks<Goldilocks::Element> starks(setupCtx);

@@ -426,3 +426,7 @@ ordered_json joinzkinfinal(json& globalInfo, Goldilocks::Element* publics, Goldi
 
     return zkinFinal;
 }
+
+ordered_json joinzkinrecursive2(json& globalInfo, ordered_json &zkin1, ordered_json &zkin2, StarkInfo &starkInfo) {
+    
+}
