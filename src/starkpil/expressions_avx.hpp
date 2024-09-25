@@ -232,7 +232,7 @@ public:
             evals[i][2] = _mm256_set1_epi64x(params.evals[i * FIELD_EXTENSION + 2].fe);
         }
 
-    // #pragma omp parallel for
+    #pragma omp parallel for
         for (uint64_t i = 0; i < domainSize; i+= nrowsPack) {
             uint64_t i_args = 0;
 
