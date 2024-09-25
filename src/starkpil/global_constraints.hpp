@@ -152,7 +152,7 @@ bool verifyGlobalConstraint(Goldilocks::Element* publics, Goldilocks::Element** 
 }
 
   
-bool verifyGlobalConstraints(string globalInfoFile, string globalConstraintsBin, Goldilocks::Element* publicInputs, FRIProof<Goldilocks::Element>** proofs, uint64_t nProofs) 
+bool verifyGlobalConstraints(string globalConstraintsBin, Goldilocks::Element* publicInputs, Goldilocks::Element** airgroupValues)
 {
     std::unique_ptr<BinFileUtils::BinFile> globalConstraintsBinFile = BinFileUtils::openExisting(globalConstraintsBin, "chps", 1);
     BinFileUtils::BinFile *binFile = globalConstraintsBinFile.get();
@@ -209,44 +209,13 @@ bool verifyGlobalConstraints(string globalInfoFile, string globalConstraintsBin,
 
     binFile->endReadSection();
 
-    json globalInfo;
-    file2json(globalInfoFile, globalInfo);
-
-    uint64_t nSubproofs = globalInfo["subproofs"].size();
-    Goldilocks::Element *subproofValues[nSubproofs];
-    for(uint64_t i = 0; i < nSubproofs; ++i) {
-        subproofValues[i] = new Goldilocks::Element[globalInfo["aggTypes"][i].size() * FIELD_EXTENSION];
-        for(uint64_t j = 0; j < globalInfo["aggTypes"][i].size(); ++j) {
-            uint64_t aggType = globalInfo["aggTypes"][i][j]["aggType"];
-            subproofValues[i][j*FIELD_EXTENSION] = aggType == 0 ? Goldilocks::zero() : Goldilocks::one();
-            subproofValues[i][j*FIELD_EXTENSION + 1] = Goldilocks::zero();
-            subproofValues[i][j*FIELD_EXTENSION + 2] = Goldilocks::zero();
-        }
-    }
-
-    for(uint64_t i = 0; i < nProofs; ++i) {
-        FRIProof<Goldilocks::Element> proof = *proofs[i];
-        uint64_t subproofId = proof.subproofId;
-        for(uint64_t j = 0; j < proof.proof.subproofValues.size(); ++j) {
-            uint64_t aggType = globalInfo["aggTypes"][subproofId][j]["aggType"];
-            if(aggType == 0) {
-                Goldilocks3::op_pack(1, 0, &subproofValues[subproofId][j*FIELD_EXTENSION], &subproofValues[subproofId][j*FIELD_EXTENSION], &proof.proof.subproofValues[j][0]);
-            } else if (aggType == 1) {
-                Goldilocks3::op_pack(1, 2, &subproofValues[subproofId][j*FIELD_EXTENSION], &subproofValues[subproofId][j*FIELD_EXTENSION], &proof.proof.subproofValues[j][0]);
-            } else {
-                assert(0);
-                break;
-            }
-        }
-    }
-
     bool validGlobalConstraints = true;
     for(uint64_t i = 0; i < nGlobalConstraints; ++i) {
         TimerLog(CHECKING_CONSTRAINT);
         cout << "--------------------------------------------------------" << endl;
         cout << globalConstraintsInfo[i].line << endl;
         cout << "--------------------------------------------------------" << endl;
-        if(!verifyGlobalConstraint(publicInputs, subproofValues, globalConstraintsArgs, globalConstraintsInfo[i])) {
+        if(!verifyGlobalConstraint(publicInputs, airgroupValues, globalConstraintsArgs, globalConstraintsInfo[i])) {
             validGlobalConstraints = false;
         };
     }

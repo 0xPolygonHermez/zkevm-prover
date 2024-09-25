@@ -85,7 +85,7 @@
     // Verify constraints
     // =================================================================================
     void *verify_constraints(void *pSetupCtx, void* buffer, void* public_inputs, void* challenges, void* subproofValues, void* evals);
-    bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs);
+    bool verify_global_constraints(string globalConstraintsBin, Goldilocks::Element* publicInputs, Goldilocks::Element** airgroupValues);
 
     // Debug functions
     // =================================================================================

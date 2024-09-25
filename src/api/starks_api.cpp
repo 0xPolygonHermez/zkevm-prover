@@ -393,11 +393,8 @@ void *verify_constraints(void *pSetupCtx, void* buffer, void* public_inputs, voi
     return constraintsInfo;
 }
 
-bool verify_global_constraints(char *globalInfoFile, char *globalConstraintsBinFile, void *publics, void *pProofs, uint64_t nProofs) {
-    
-    FRIProof<Goldilocks::Element> **proofs = (FRIProof<Goldilocks::Element> **)pProofs;
-
-    return verifyGlobalConstraints(string(globalInfoFile), string(globalConstraintsBinFile), (Goldilocks::Element *)publics, proofs, nProofs);
+bool verify_global_constraints(char *globalConstraintsBinFile, void *publics, void **airgroupValues) {
+    return verifyGlobalConstraints(string(globalConstraintsBinFile), (Goldilocks::Element *)publics, (Goldilocks::Element **)airgroupValues);
 }
 
 // Debug functions
