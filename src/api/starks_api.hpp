@@ -99,7 +99,7 @@
     void *get_zkin_ptr(char *zkin_file);
     void *public2zkin(void *pZkin, void* pPublics, char* globalInfoFile, uint64_t airgroupId, bool isAggregated);
     void *add_recursive2_verkey(void *pZkin, char* recursive2VerKeyFilename);
-    void *join_zkin_recursive2(char* globalInfoFile, void *zkin1, void *zkin2, void *starkInfoRecursive2);
+    void *join_zkin_recursive2(char* globalInfoFile, void* pPublics, void* pChallenges, void *zkin1, void *zkin2, void *starkInfoRecursive2);
     void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, void **zkinRecursive2, void **starkInfoRecursive2);
 
 #endif
