@@ -76,7 +76,7 @@ SRCS_ZKEVM_LIB := $(shell find $(SRC_DIRS) \
 OBJS_ZKEVM_LIB := $(SRCS_ZKEVM_LIB:%=$(BUILD_DIR)/%.o)
 DEPS_ZKEVM_LIB := $(OBJS_ZKEVM_LIB:.o=.d)
 
-SRCS_STARKS_LIB := $(shell find ./src/api/starks_api.* ./src/hint ./src/XKCP ./src/goldilocks/src ./src/config ./src/starkpil/verify_constraints.hpp ./src/starkpil/gen_recursive_proof.hpp ./src/starkpil/hints.hpp ./src/poseidon_opt/ ./src/starkpil/proof2zkinStark.* ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/expressions_bin.*  ./src/starkpil/global_constraints.hpp ./src/starkpil/setup_ctx.hpp ./src/starkpil/expressions_ctx.hpp ./src/rapidsnark/binfile_utils.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/* ./src/starkpil/transcript/* ./src/starkpil/fri/* ./src/ffiasm ./src/utils -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_STARKS_LIB := $(shell find ./src/api/starks_api.*  ./src/hint ./src/XKCP ./src/goldilocks/src ./src/config ./src/starkpil/verify_constraints.hpp ./src/starkpil/gen_recursive_proof.hpp ./src/starkpil/hints.hpp ./src/poseidon_opt/ ./src/starkpil/proof2zkinStark.* ./src/starkpil/stark_info.* ./src/starkpil/starks.* ./src/starkpil/expressions_bin.*  ./src/starkpil/global_constraints.hpp ./src/starkpil/setup_ctx.hpp ./src/starkpil/expressions_ctx.hpp ./src/rapidsnark/binfile_utils.* ./src/rapidsnark/logger.* ./src/starkpil/steps.* ./src/starkpil/polinomial.hpp ./src/starkpil/merkleTree/* ./src/starkpil/transcript/* ./src/starkpil/fri/* ./src/ffiasm ./src/utils -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_STARKS_LIB := $(SRCS_STARKS_LIB:%=$(BUILD_DIR)/%.o)
 DEPS_STARKS_LIB := $(OBJS_STARKS_LIB:.o=.d)
 

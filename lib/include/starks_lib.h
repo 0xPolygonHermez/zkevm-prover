@@ -99,4 +99,6 @@
     void *add_recursive2_verkey(void *pZkin, char* recursive2VerKeyFilename);
     void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, void **zkinRecursive2, void **starkInfoRecursive2);
 
+    // Util calls
+    void setLogLevel(uint64_t level);
 #endif

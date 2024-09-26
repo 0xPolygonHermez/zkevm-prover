@@ -1,7 +1,10 @@
 #include "zklog.hpp"
 #include "utils.hpp"
 #include "version.hpp"
+#include "logger.hpp"
+#include "starks_api.hpp"
 
+using namespace CPlusPlusLogging;
 zkLog zklog;
 
 string zkLog::getThreadID (void)
@@ -20,6 +23,24 @@ zkLog::zkLog () : jsonLogs(true)
 
 void zkLog::log (const zkLogType type, const string &message, const vector<LogTag> *tags)
 {
+#ifdef LIB_API_H
+    switch (type)
+    {
+        case logTypeInfo:
+        {
+            Logger::getInstance()->debug((string &)message);
+        }
+        case logTypeWarning:
+        case logTypeError:
+        {
+            Logger::getInstance()->info((string &)message);
+        }
+        default:
+        {
+            Logger::getInstance()->trace((string &)message);
+        }
+    }
+#else
     lock();
     if (jsonLogs)
     {
@@ -101,4 +122,5 @@ void zkLog::log (const zkLogType type, const string &message, const vector<LogTa
         }
     }
     unlock();
+#endif
 }

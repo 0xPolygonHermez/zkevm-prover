@@ -7,11 +7,14 @@
 #include "hints.hpp"
 #include "global_constraints.hpp"
 #include "gen_recursive_proof.hpp"
+#include "logger.hpp"
 #include <filesystem>
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
+
+using namespace CPlusPlusLogging;
 
 void save_challenges(void *pChallenges, char* globalInfoFile, char *fileDir) {
 
@@ -457,4 +460,17 @@ void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, v
     ordered_json zkinFinal = joinzkinfinal(globalInfo, publics, challenges, zkinRecursive2, starkInfoRecursive2);
 
     return (void *) new nlohmann::ordered_json(zkinFinal);    
+}
+
+void setLogLevel(uint64_t level) {
+    if (level < 1 || level > 6)
+    {
+        cerr << "Invalid log level: " << level << endl;
+        return;
+    }
+
+    Logger* logger = Logger::getInstance();
+    logger->enableConsoleLogging();
+
+    logger->updateLogLevel((LOG_LEVEL)level);
 }
