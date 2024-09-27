@@ -41,11 +41,15 @@ Logger* Logger::m_Instance = 0;
 // Log file name. File name should be change from here only
 const string logFileName = "MyLogFile.log";
 
-Logger::Logger()
+Logger::Logger(int log_type)
 {
-   m_File.open(logFileName.c_str(), ios::out|ios::app);
-   m_LogLevel	= LOG_LEVEL_TRACE;
-   m_LogType	= FILE_LOG;
+   if (log_type == FILE_LOG)
+   {
+      m_File.open(logFileName.c_str(), ios::out | ios::app);
+   }
+
+   m_LogLevel = LOG_LEVEL_TRACE;
+   m_LogType = (LOG_TYPE)log_type;
 
    // Initialize mutex
 #ifdef WIN32
@@ -84,11 +88,11 @@ Logger::~Logger()
 #endif
 }
 
-Logger* Logger::getInstance() throw ()
+Logger *Logger::getInstance(int log_type) throw()
 {
-   if (m_Instance == 0) 
+   if (m_Instance == 0)
    {
-      m_Instance = new Logger();
+      m_Instance = new Logger(log_type);
    }
    return m_Instance;
 }

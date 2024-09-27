@@ -77,7 +77,7 @@ namespace CPlusPlusLogging
    class Logger
    {
       public:
-         static Logger* getInstance() throw ();
+         static Logger* getInstance(int log_type = LOG_TYPE::FILE_LOG) throw ();
 
          // Interface for Error Log 
          void error(const char* text) throw();
@@ -128,7 +128,7 @@ namespace CPlusPlusLogging
          void enableFileLogging();
 
       protected:
-         Logger();
+         Logger(int log_type);
          ~Logger();
 
          // Wrapper function for lock/unlock

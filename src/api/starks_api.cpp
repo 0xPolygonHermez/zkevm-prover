@@ -484,6 +484,5 @@ void setLogLevel(uint64_t level) {
             return;
     }
 
-    Logger::getInstance()->enableConsoleLogging();
-    Logger::getInstance()->updateLogLevel((LOG_LEVEL)new_level);
+    Logger::getInstance(LOG_TYPE::CONSOLE)->updateLogLevel((LOG_LEVEL)new_level);
 }
