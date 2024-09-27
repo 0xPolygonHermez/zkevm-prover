@@ -61,8 +61,8 @@ namespace CPlusPlusLogging
       DISABLE_LOG       = 1,
       LOG_LEVEL_INFO	   = 2,
       LOG_LEVEL_BUFFER	= 3,
-      LOG_LEVEL_TRACE   = 4,
-      LOG_LEVEL_DEBUG   = 5,
+      LOG_LEVEL_DEBUG   = 4,
+      LOG_LEVEL_TRACE   = 5,
       ENABLE_LOG        = 6,
    }LogLevel;
 

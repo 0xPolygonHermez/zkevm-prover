@@ -463,14 +463,27 @@ void *join_zkin_final(void* pPublics, void* pChallenges, char* globalInfoFile, v
 }
 
 void setLogLevel(uint64_t level) {
-    if (level < 1 || level > 6)
-    {
-        cerr << "Invalid log level: " << level << endl;
-        return;
+    LogLevel new_level;
+    switch(level) {
+        case 0:
+            new_level = DISABLE_LOG;
+            break;
+        case 1:
+        case 2:
+        case 3:
+            new_level = LOG_LEVEL_INFO;
+            break;
+        case 4:
+            new_level = LOG_LEVEL_DEBUG;
+            break;
+        case 5:
+            new_level = LOG_LEVEL_TRACE;
+            break;
+        default:
+            cerr << "Invalid log level: " << level << endl;
+            return;
     }
 
-    Logger* logger = Logger::getInstance();
-    logger->enableConsoleLogging();
-
-    logger->updateLogLevel((LOG_LEVEL)level);
+    Logger::getInstance()->enableConsoleLogging();
+    Logger::getInstance()->updateLogLevel((LOG_LEVEL)new_level);
 }
