@@ -1,10 +1,13 @@
 #include "zklog.hpp"
 #include "utils.hpp"
 #include "version.hpp"
+#include "logger.hpp"
+#include "starks_api.hpp"
 
+using namespace CPlusPlusLogging;
 zkLog zklog;
 
-string zkLog::getThreadID (void)
+string zkLog::getThreadID(void)
 {
     pthread_t selfThreadID = pthread_self();
     mpz_class selfThreadIDScalar(selfThreadID);
@@ -13,39 +16,70 @@ string zkLog::getThreadID (void)
     return selfThreadIDString.substr(offset, 7);
 }
 
-zkLog::zkLog () : jsonLogs(true)
+zkLog::zkLog() : jsonLogs(true)
 {
     pthread_mutex_init(&mutex, NULL);
 }
 
-void zkLog::log (const zkLogType type, const string &message, const vector<LogTag> *tags)
+void zkLog::log(const zkLogType type, const string &message, const vector<LogTag> *tags)
 {
+#ifdef LIB_API_H
+    switch (type)
+    {
+    case logTypeTrace:
+    {
+        Logger::getInstance()->trace((string &)message);
+        break;
+    }
+    case logTypeDebug:
+    {
+        Logger::getInstance()->debug((string &)message);
+        break;
+    }
+    case logTypeInfo:
+    {
+        Logger::getInstance()->info((string &)message);
+        break;
+    }
+    case logTypeWarning:
+    {
+        Logger::getInstance()->alarm((string &)message);
+        break;
+    }
+    case logTypeError:
+    {
+        Logger::getInstance()->error((string &)message);
+        break;
+    }
+    }
+#else
     lock();
     if (jsonLogs)
     {
         string s = "{";
         switch (type)
         {
-            case logTypeInfo:
-            {
-                s+= "\"level\":\"info\"";
-                break;
-            }
-            case logTypeWarning:
-            {
-                s+= "\"level\":\"warn\"";
-                break;
-            }
-            case logTypeError:
-            {
-                s+= "\"level\":\"error\"";
-                break;
-            }
-            default:
-            {
-                cerr << "zkLog::log() invalid type=" << type << endl << flush;
-                exitProcess();
-            }
+        case logTypeInfo:
+        {
+            s += "\"level\":\"info\"";
+            break;
+        }
+        case logTypeWarning:
+        {
+            s += "\"level\":\"warn\"";
+            break;
+        }
+        case logTypeError:
+        {
+            s += "\"level\":\"error\"";
+            break;
+        }
+        default:
+        {
+            cerr << "zkLog::log() invalid type=" << type << endl
+                 << flush;
+            exitProcess();
+        }
         }
         s += ",\"ts\":\"" + getTimestampWithPeriod() + "\"";
         s += ",\"msg\":\"" + message + "\"";
@@ -54,7 +88,7 @@ void zkLog::log (const zkLogType type, const string &message, const vector<LogTa
         s += ",\"version\":\"" ZKEVM_PROVER_VERSION "\"";
         if (tags != NULL)
         {
-            for (uint64_t i=0; i<tags->size(); i++)
+            for (uint64_t i = 0; i < tags->size(); i++)
             {
                 s += ",\"" + (*tags)[i].name + "\":\"" + (*tags)[i].value + "\"";
             }
@@ -63,11 +97,13 @@ void zkLog::log (const zkLogType type, const string &message, const vector<LogTa
 
         if (type == logTypeError)
         {
-            cerr << s << endl << flush;
+            cerr << s << endl
+                 << flush;
         }
         else
         {
-            cout << s << endl << flush;
+            cout << s << endl
+                 << flush;
         }
     }
     else
@@ -75,30 +111,35 @@ void zkLog::log (const zkLogType type, const string &message, const vector<LogTa
         string s = getTimestamp() + " " + pid + " " + getThreadID() + " ";
         switch (type)
         {
-            case logTypeInfo:
-            {
-                s += message;
-                cout << s << endl << flush;
-                break;
-            }
-            case logTypeWarning:
-            {
-                s += "zkWarning: " + message;
-                cout << s << endl << flush;
-                break;
-            }
-            case logTypeError:
-            {
-                s += "zkError: " + message;
-                cerr << s << endl << flush;
-                break;
-            }
-            default:
-            {
-                cerr << "zkLog::log() invalid type=" << type << endl << flush;
-                exitProcess();
-            }
+        case logTypeInfo:
+        {
+            s += message;
+            cout << s << endl
+                 << flush;
+            break;
+        }
+        case logTypeWarning:
+        {
+            s += "zkWarning: " + message;
+            cout << s << endl
+                 << flush;
+            break;
+        }
+        case logTypeError:
+        {
+            s += "zkError: " + message;
+            cerr << s << endl
+                 << flush;
+            break;
+        }
+        default:
+        {
+            cerr << "zkLog::log() invalid type=" << type << endl
+                 << flush;
+            exitProcess();
+        }
         }
     }
     unlock();
+#endif
 }
