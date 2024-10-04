@@ -11,9 +11,9 @@
 #include "version.hpp"
 #include "proof2zkin.hpp"
 #include "definitions.hpp"
-#if (PROVER_FORK_ID == 12)
-    #include "fork_12/calcwit.hpp"
-    #include "fork_12/circom.hpp"
+#if (PROVER_FORK_ID == 13)
+    #include "fork_13/calcwit.hpp"
+    #include "fork_13/circom.hpp"
 #else
     #error "Invalid PROVER_FORK_ID"
 #endif

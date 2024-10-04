@@ -1,5 +1,5 @@
-#ifndef __CIRCOM_2_H
-#define __CIRCOM_2_H
+#ifndef __CIRCOM_2_H_fork_12
+#define __CIRCOM_2_H_fork_12
 
 #include <map>
 #include <gmp.h>

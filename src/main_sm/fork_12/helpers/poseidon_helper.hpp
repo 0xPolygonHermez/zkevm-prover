@@ -1,5 +1,5 @@
-#ifndef POSEIDON_HELPER_HPP
-#define POSEIDON_HELPER_HPP
+#ifndef POSEIDON_HELPER_HPP_fork_12
+#define POSEIDON_HELPER_HPP_fork_12
 
 #include "zkresult.hpp"
 #include "main_sm/fork_12/main/context.hpp"

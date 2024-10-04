@@ -1,5 +1,5 @@
-#ifndef MEMORY_HELPER_HPP
-#define MEMORY_HELPER_HPP
+#ifndef MEMORY_HELPER_HPP_fork_12
+#define MEMORY_HELPER_HPP_fork_12
 
 #include "zkresult.hpp"
 #include "main_sm/fork_12/main/context.hpp"

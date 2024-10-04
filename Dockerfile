@@ -35,6 +35,7 @@ COPY ./src/main_sm/fork_9/scripts/rom.json ./src/main_sm/fork_9/scripts/rom.json
 COPY ./src/main_sm/fork_10/scripts/rom_10.json ./src/main_sm/fork_10/scripts/rom_10.json
 COPY ./src/main_sm/fork_10/scripts/rom_11.json ./src/main_sm/fork_10/scripts/rom_11.json
 COPY ./src/main_sm/fork_12/scripts/rom_12.json ./src/main_sm/fork_12/scripts/rom_12.json
+COPY ./src/main_sm/fork_13/scripts/rom_13.json ./src/main_sm/fork_13/scripts/rom_13.json
 
 ENTRYPOINT [ "zkProver" ]
 

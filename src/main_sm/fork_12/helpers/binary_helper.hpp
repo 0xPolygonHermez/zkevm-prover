@@ -1,5 +1,5 @@
-#ifndef BINARY_HELPER_HPP
-#define BINARY_HELPER_HPP
+#ifndef BINARY_HELPER_HPP_fork_12
+#define BINARY_HELPER_HPP_fork_12
 
 #include "zkresult.hpp"
 #include "main_sm/fork_12/main/context.hpp"

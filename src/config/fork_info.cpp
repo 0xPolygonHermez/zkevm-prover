@@ -5,7 +5,7 @@ using namespace std;
 
 #define NO_COUNTERS_MULTIPLIER uint64_t(256)
 
-array<ForkInfo, 13> forkInfo = {
+array<ForkInfo, 14> forkInfo = {
 //            ID   PID  Nbits        N N_NoCounters
     ForkInfo(  0,    0,   0,        0,          0 ),
     ForkInfo(  1,    1,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
@@ -19,7 +19,8 @@ array<ForkInfo, 13> forkInfo = {
     ForkInfo(  9,    9,  23,  8388608,  NO_COUNTERS_MULTIPLIER * 8388608 ),
     ForkInfo( 10,   10,  24, 16777216,  NO_COUNTERS_MULTIPLIER * 16777216 ),
     ForkInfo( 11,   10,  25, 33554432,  NO_COUNTERS_MULTIPLIER * 33554432 ),
-    ForkInfo( 12,   12,  25, 33554432,  NO_COUNTERS_MULTIPLIER * 33554432 )
+    ForkInfo( 12,   12,  25, 33554432,  NO_COUNTERS_MULTIPLIER * 33554432 ),
+    ForkInfo( 13,   13,  25, 33554432,  NO_COUNTERS_MULTIPLIER * 33554432 )
 };
 
 bool getForkInfo (uint64_t forkID, ForkInfo &_forkInfo)

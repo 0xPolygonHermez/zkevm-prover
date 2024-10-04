@@ -10,7 +10,8 @@
 #include "main_sm/fork_10/main_exec_generated/main_exec_generated_10_fast.hpp"
 #include "main_sm/fork_10/main_exec_generated/main_exec_generated_11_fast.hpp"
 #include "main_sm/fork_12/main_exec_generated/main_exec_generated_12_fast.hpp"
-#include "main_sm/fork_12/main_exec_generated/main_exec_generated_12.hpp"
+#include "main_sm/fork_13/main_exec_generated/main_exec_generated_13_fast.hpp"
+#include "main_sm/fork_13/main_exec_generated/main_exec_generated_13.hpp"
 
 #include "timer.hpp"
 #include "zklog.hpp"
@@ -386,10 +387,10 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 //zklog.info("Executor::processBatch() fork 12 native");
 
                 // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                void * pAddress = calloc(fork_12::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_12::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_12::CommitPols commitPols(pAddress,1);
@@ -398,6 +399,40 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 fork_12::MainExecRequired required;
 
                 mainExecutor_fork_12.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
+        case 13: // fork_13
+        {
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+            if (config.useMainExecGenerated)
+            {
+                TimerStart(MAIN_EXEC_GENERATED_FAST);
+                //zklog.info("Executor::processBatch() fork 13 generated");
+                fork_13::main_exec_generated_13_fast(mainExecutor_fork_13, proverRequest);
+                TimerStopAndLog(MAIN_EXEC_GENERATED_FAST);
+            }
+            else
+#endif
+            {
+                //zklog.info("Executor::processBatch() fork 13 native");
+
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_13::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_13::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
+                    exitProcess();
+                }
+                fork_13::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_13::MainExecRequired required;
+
+                mainExecutor_fork_13.execute(proverRequest, commitPols.Main, required);
 
                 // Free committed polynomials address space
                 free(pAddress);
@@ -597,12 +632,12 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
 #ifdef MAIN_SM_PROVER_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
-                PROVER_FORK_NAMESPACE::main_exec_generated_12(mainExecutor_fork_12, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated_13(mainExecutor_fork_13, proverRequest, commitPols.Main, required);
             }
             else
 #endif
             {
-                mainExecutor_fork_12.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_13.execute(proverRequest, commitPols.Main, required);
             }
 
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -719,12 +754,12 @@ void Executor::executeBatch (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE
 #ifdef MAIN_SM_PROVER_GENERATED_CODE
         if (config.useMainExecGenerated)
         {
-            PROVER_FORK_NAMESPACE::main_exec_generated_12(mainExecutor_fork_12, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated_13(mainExecutor_fork_13, proverRequest, commitPols.Main, required);
         }
         else
 #endif
         {
-            mainExecutor_fork_12.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_13.execute(proverRequest, commitPols.Main, required);
         }
 
         // Save input to <timestamp>.input.json after execution including dbReadLog

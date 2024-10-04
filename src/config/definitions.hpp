@@ -6,13 +6,13 @@
 
 /* Only one fork can generate proofs */
 #ifndef PROVER_FORK_ID
-#define PROVER_FORK_ID 12
+#define PROVER_FORK_ID 13
 #endif
 
 /* Regardless of the PROVER_FORK_ID, proof generation code uses the same namespace from the parent fork ID */
-#define PROVER_FORK_NAMESPACE fork_12
-#define PROVER_FORK_NAMESPACE_STRING "fork_12"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_12 // Same pols definition for all proof generation files
+#define PROVER_FORK_NAMESPACE fork_13
+#define PROVER_FORK_NAMESPACE_STRING "fork_13"
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_13 // Same pols definition for all proof generation files
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS

@@ -1,5 +1,5 @@
-#ifndef CIRCOM_CALCWIT_2_H
-#define CIRCOM_CALCWIT_2_H
+#ifndef CIRCOM_CALCWIT_2_H_fork_12
+#define CIRCOM_CALCWIT_2_H_fork_12
 
 #include <mutex>
 #include <condition_variable>

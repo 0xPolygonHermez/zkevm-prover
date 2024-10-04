@@ -28,9 +28,9 @@ jobs:
     - name: remove old proofs
       run: rm -rf runtime/output/*
     - name: list gha config files
-      run: ls /home/gha/v8.0.0-rc.9-fork.12/config/
+      run: ls /home/gha/v9.0.0-rc.1-fork.12/config/
     - name: link files
-      run: ln -s /home/gha/v8.0.0-rc.9-fork.12/config/ config
+      run: ln -s /home/gha/v9.0.0-rc.1-fork.12/config/ config
     - name: list local config files
       run: ls config
     - name: run collection native tests

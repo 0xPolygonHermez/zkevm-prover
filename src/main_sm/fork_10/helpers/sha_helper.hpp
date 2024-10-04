@@ -1,5 +1,5 @@
-#ifndef SHA_HELPER_HPP
-#define SHA_HELPER_HPP
+#ifndef SHA_HELPER_HPP_fork_10
+#define SHA_HELPER_HPP_fork_10
 
 #include "zkresult.hpp"
 #include "main_sm/fork_10/main/context.hpp"
