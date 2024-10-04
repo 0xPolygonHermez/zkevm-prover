@@ -1,5 +1,5 @@
-#ifndef ARITH_HELPER_HPP
-#define ARITH_HELPER_HPP
+#ifndef ARITH_HELPER_HPP_fork_12
+#define ARITH_HELPER_HPP_fork_12
 
 #include "zkresult.hpp"
 #include "main_sm/fork_12/main/context.hpp"

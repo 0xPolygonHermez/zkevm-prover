@@ -1,5 +1,5 @@
-#ifndef STORAGE_HELPER_HPP
-#define STORAGE_HELPER_HPP
+#ifndef STORAGE_HELPER_HPP_fork_12
+#define STORAGE_HELPER_HPP_fork_12
 
 #include "zkresult.hpp"
 #include "main_sm/fork_12/main/context.hpp"

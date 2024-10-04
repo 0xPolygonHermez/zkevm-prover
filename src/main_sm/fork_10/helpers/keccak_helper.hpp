@@ -1,5 +1,5 @@
-#ifndef KECCAK_HELPER_HPP
-#define KECCAK_HELPER_HPP
+#ifndef KECCAK_HELPER_HPP_fork_10
+#define KECCAK_HELPER_HPP_fork_10
 
 #include "zkresult.hpp"
 #include "main_sm/fork_10/main/context.hpp"

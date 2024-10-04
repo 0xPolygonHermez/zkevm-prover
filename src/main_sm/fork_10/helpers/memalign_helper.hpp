@@ -1,5 +1,5 @@
-#ifndef MEMALIGN_HELPER_HPP
-#define MEMALIGN_HELPER_HPP
+#ifndef MEMALIGN_HELPER_HPP_fork_10
+#define MEMALIGN_HELPER_HPP_fork_10
 
 #include "zkresult.hpp"
 #include "main_sm/fork_10/main/context.hpp"

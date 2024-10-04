@@ -386,10 +386,10 @@ void Executor::processBatch (ProverRequest &proverRequest)
                 //zklog.info("Executor::processBatch() fork 12 native");
 
                 // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                void * pAddress = calloc(fork_12::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
                 {
-                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_10::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
+                    zklog.error("Executor::processBatch() failed calling calloc(" + to_string(fork_12::CommitPols::numPols()*sizeof(Goldilocks::Element)) + ")");
                     exitProcess();
                 }
                 fork_12::CommitPols commitPols(pAddress,1);
