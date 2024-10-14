@@ -101,7 +101,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             if (!fr.isZero(pols.rem[p]))
             {
                 pols.remInv[p] = glp.inv(pols.rem[p]);
-                if (fr.toU64(pols.rem[p]) > 0xFFFF) pols.spare[p] = fr.one();
+                if (fr.toU64(pols.rem[p]) > 0xFFFFFFFF) pols.spare[p] = fr.one();
             }
             
             bool lastBlock = (p % bytesPerBlock) == (bytesPerBlock - 1);
