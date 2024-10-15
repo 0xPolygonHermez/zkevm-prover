@@ -1923,7 +1923,7 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = true;
-    proverRequest.input.bNoCounters = false;
+    proverRequest.input.bNoCounters = request->no_counters();
     proverRequest.input.bGetKeys = false;
     proverRequest.input.bSkipVerifyL1InfoRoot = true;
     proverRequest.input.bSkipFirstChangeL2Block = false;
