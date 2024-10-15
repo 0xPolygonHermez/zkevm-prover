@@ -360,7 +360,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
     }
     else
     {
-        code += "    Rom &rom = mainExecutor.romBatch_" + to_string(forkID) + ";\n";
+        code += "    Rom &rom = config.loadDiagnosticRom ? mainExecutor.romDiagnostic : mainExecutor.romBatch_" + to_string(forkID) + ";\n";
     }
 
     code += "    Goldilocks &fr = mainExecutor.fr;\n";
@@ -1404,7 +1404,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
 
             }
 
-            if (!bFastMode)
+            if (!bFastMode || (rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1)))
             {
                 //code += "    // Store polynomial FREE=fi\n";
                 code += "    pols.FREE0[" + string(bFastMode?"0":"i") + "] = fi0;\n";
@@ -1538,7 +1538,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         {
             //code += "    // Memory operation instruction\n";
             code += "    zkPC=" + to_string(zkPC) +";\n";
-            code += "    zkResult = Memory_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ", addr);\n";
+            if (rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1))
+            {
+                code += "    zkResult = Memory_verify(ctx, pols.FREE0[" + string(bFastMode?"0":"i") + "], pols.FREE1[" + string(bFastMode?"0":"i") + "], pols.FREE2[" + string(bFastMode?"0":"i") + "], pols.FREE3[" + string(bFastMode?"0":"i") + "], pols.FREE4[" + string(bFastMode?"0":"i") + "], pols.FREE5[" + string(bFastMode?"0":"i") + "], pols.FREE6[" + string(bFastMode?"0":"i") + "], pols.FREE7[" + string(bFastMode?"0":"i") + "], " + (bFastMode ? string("NULL") : string("&required")) + ", addr);\n";
+            }
+            else
+                code += "    zkResult = Memory_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, " + (bFastMode ? string("NULL") : string("&required")) + ", addr);\n";
             code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
             code += "        proverRequest.result = zkResult;\n";

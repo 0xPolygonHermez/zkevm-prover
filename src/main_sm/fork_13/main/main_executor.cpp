@@ -1232,7 +1232,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Memory operation instruction
         if (rom.line[zkPC].mOp == 1)
         {
-            zkresult zkr = Memory_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
+            zkresult zkr;
+            
+            if (ctx.rom.line[zkPC].assumeFree == 1)
+            {
+                zkr = Memory_verify(ctx, pols.FREE0[i], pols.FREE1[i], pols.FREE2[i], pols.FREE3[i], pols.FREE4[i], pols.FREE5[i], pols.FREE6[i], pols.FREE7[i], &required, addr);
+            }
+            else
+            {
+                zkr = Memory_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required, addr);
+            }
             if (zkr != ZKR_SUCCESS)
             {
                 proverRequest.result = zkr;
