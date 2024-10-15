@@ -5226,6 +5226,7 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
     kContextIdFieldNumber = 8,
     kTraceConfigFieldNumber = 9,
     kTimestampLimitFieldNumber = 6,
+    kNoCountersFieldNumber = 11,
   };
   // map<uint64, uint64> l1_info_tree_index_min_timestamp = 10;
   int l1_info_tree_index_min_timestamp_size() const;
@@ -5446,6 +5447,15 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   void _internal_set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint32 no_counters = 11;
+  void clear_no_counters();
+  ::PROTOBUF_NAMESPACE_ID::uint32 no_counters() const;
+  void set_no_counters(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_no_counters() const;
+  void _internal_set_no_counters(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessStatelessBatchRequestV2)
  private:
   class _Internal;
@@ -5468,6 +5478,7 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr context_id_;
   ::executor::v1::TraceConfigV2* trace_config_;
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 no_counters_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -17396,6 +17407,26 @@ inline ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF
 ProcessStatelessBatchRequestV2::mutable_l1_info_tree_index_min_timestamp() {
   // @@protoc_insertion_point(field_mutable_map:executor.v1.ProcessStatelessBatchRequestV2.l1_info_tree_index_min_timestamp)
   return _internal_mutable_l1_info_tree_index_min_timestamp();
+}
+
+// uint32 no_counters = 11;
+inline void ProcessStatelessBatchRequestV2::clear_no_counters() {
+  no_counters_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessStatelessBatchRequestV2::_internal_no_counters() const {
+  return no_counters_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessStatelessBatchRequestV2::no_counters() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.no_counters)
+  return _internal_no_counters();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_no_counters(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  no_counters_ = value;
+}
+inline void ProcessStatelessBatchRequestV2::set_no_counters(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_no_counters(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.no_counters)
 }
 
 // -------------------------------------------------------------------
