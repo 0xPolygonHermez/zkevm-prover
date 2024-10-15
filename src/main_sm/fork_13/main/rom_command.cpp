@@ -100,6 +100,14 @@ tFunction string2Function(string s)
     else if (s == "dumpRegs")                       return f_dumpRegs;
     else if (s == "dump")                           return f_dump;
     else if (s == "dumphex")                        return f_dumphex;
+    else if (s == "inverseFnEc_secp256r1")          return f_inverseFnEc_secp256r1;
+    else if (s == "xAddPointEc_secp256r1")          return f_xAddPointEc_secp256r1;
+    else if (s == "yAddPointEc_secp256r1")          return f_yAddPointEc_secp256r1;
+    else if (s == "xDblPointEc_secp256r1")          return f_xDblPointEc_secp256r1;
+    else if (s == "yDblPointEc_secp256r1")          return f_yDblPointEc_secp256r1;
+    else if (s == "signedComparison")               return f_signedComparison;
+    else if (s == "signedComparisonWithConst")      return f_signedComparisonWithConst;
+    else if (s == "getFirstDiffChunkRem")           return f_getFirstDiffChunkRem;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -170,7 +178,15 @@ string function2String(tFunction f)
         case f_fpBN254inv:                      return "fpBN254inv";
         case f_dumpRegs:                        return "dumpRegs";
         case f_dump:                            return "dump";
-        case f_dumphex:                            return "dumphex";
+        case f_dumphex:                         return "dumphex";
+        case f_inverseFnEc_secp256r1:           return "inverseFnEc_secp256r1";
+        case f_xAddPointEc_secp256r1:           return "xAddPointEc_secp256r1";
+        case f_yAddPointEc_secp256r1:           return "yAddPointEc_secp256r1";
+        case f_xDblPointEc_secp256r1:           return "xDblPointEc_secp256r1";
+        case f_yDblPointEc_secp256r1:           return "yDblPointEc_secp256r1";
+        case f_signedComparison:                return "signedComparison";
+        case f_signedComparisonWithConst:       return "signedComparisonWithConst";
+        case f_getFirstDiffChunkRem:            return "getFirstDiffChunkRem";
         case f_empty:                           return "";
         default:                                return "unknown";
     }

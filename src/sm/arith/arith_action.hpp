@@ -12,6 +12,8 @@ public:
     mpz_class y2;
     mpz_class x3;
     mpz_class y3;
+
+    // Used in forks <= 12 :
     uint64_t selEq0;
     uint64_t selEq1;
     uint64_t selEq2;
@@ -19,8 +21,11 @@ public:
     uint64_t selEq4;
     uint64_t selEq5;
     uint64_t selEq6;
+    
+    // Used in forks >= 13 :
+    uint64_t arithEq;
 
-    ArithAction() : selEq0(0), selEq1(0), selEq2(0), selEq3(0), selEq4(0), selEq5(0), selEq6(0) {};
+    ArithAction() : selEq0(0), selEq1(0), selEq2(0), selEq3(0), selEq4(0), selEq5(0), selEq6(0), arithEq(0) {};
 };
 
 #endif

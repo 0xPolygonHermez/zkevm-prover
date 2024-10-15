@@ -90,14 +90,28 @@ zkresult Memory_verify ( Context &ctx,
     else
     {
         Goldilocks::Element value[8];
-        value[0] = op0;
-        value[1] = op1;
-        value[2] = op2;
-        value[3] = op3;
-        value[4] = op4;
-        value[5] = op5;
-        value[6] = op6;
-        value[7] = op7;
+        if (ctx.rom.line[zkPC].assumeFree == 1)
+        {
+            value[0] = ctx.pols.FREE0[i];
+            value[1] = ctx.pols.FREE1[i];
+            value[2] = ctx.pols.FREE2[i];
+            value[3] = ctx.pols.FREE3[i];
+            value[4] = ctx.pols.FREE4[i];
+            value[5] = ctx.pols.FREE5[i];
+            value[6] = ctx.pols.FREE6[i];
+            value[7] = ctx.pols.FREE7[i];
+        }
+        else
+        {
+            value[0] = op0;
+            value[1] = op1;
+            value[2] = op2;
+            value[3] = op3;
+            value[4] = op4;
+            value[5] = op5;
+            value[6] = op6;
+            value[7] = op7;
+        }
         if (required != NULL)
         {
             MemoryAccess memoryAccess;

@@ -82,6 +82,16 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_dumpRegs:                        cr.zkResult = ZKR_SUCCESS; cr.type = crt_u64; cr.u64 = 0; return;
             case f_dump:                            cr.zkResult = ZKR_SUCCESS; cr.type = crt_u64; cr.u64 = 0; return;
             case f_dumphex:                         cr.zkResult = ZKR_SUCCESS; cr.type = crt_u64; cr.u64 = 0; return;
+
+            // Durian (fork 13) new methods:
+            case f_inverseFnEc_secp256r1:           return eval_inverseFnEc_secp256r1(ctx, cmd, cr);
+            case f_xAddPointEc_secp256r1:           return eval_xAddPointEc_secp256r1(ctx, cmd, cr);
+            case f_yAddPointEc_secp256r1:           return eval_yAddPointEc_secp256r1(ctx, cmd, cr);
+            case f_xDblPointEc_secp256r1:           return eval_xDblPointEc_secp256r1(ctx, cmd, cr);
+            case f_yDblPointEc_secp256r1:           return eval_yDblPointEc_secp256r1(ctx, cmd, cr);
+            case f_signedComparison:                return eval_signedComparison(ctx, cmd, cr);
+            case f_signedComparisonWithConst:       return eval_signedComparisonWithConst(ctx, cmd, cr);
+            case f_getFirstDiffChunkRem:            return eval_getFirstDiffChunkRem(ctx, cmd, cr);
             
             default:
                 zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + "=" + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
@@ -2535,6 +2545,244 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
     return ZKR_SUCCESS;
 }
 
+void eval_inverseFnEc_secp256r1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    #ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_inverseFnEc_secp256r1() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_inverseFnEc_secp256r1() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    mpz_class aScalar = cr.scalar;
+
+    // Check that a != 0
+    RawnSecp256r1::Element a;
+    nSecp256r1.fromMpz(a, aScalar.get_mpz_t());
+    if (nSecp256r1.isZero(a))
+    {
+        zklog.error("eval_inverseFnEc_secp256r1() got a=0 division by zero step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+
+    // Calculate the inverse
+    RawnSecp256r1::Element aInverse;
+    nSecp256r1.inv(aInverse, a);
+
+    // Convert back to scalar
+    cr.type = crt_scalar;
+    nSecp256r1.toMpz(cr.scalar.get_mpz_t(), aInverse);
+}
+
+
+void eval_AddPointEc_pSecp256r1 (Context &ctx, const RomCommand &cmd, bool dbl, RawpSecp256r1::Element &x3, RawpSecp256r1::Element &y3);
+
+void eval_xAddPointEc_secp256r1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    RawpSecp256r1::Element x3;
+    RawpSecp256r1::Element y3;
+    eval_AddPointEc_pSecp256r1(ctx, cmd, false, x3, y3);    
+    cr.type = crt_scalar;
+    pSecp256r1.toMpz(cr.scalar.get_mpz_t(), x3);
+}
+
+void eval_yAddPointEc_secp256r1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    RawpSecp256r1::Element y3;
+    RawpSecp256r1::Element x3;
+    eval_AddPointEc_pSecp256r1(ctx, cmd, false, x3, y3);
+    cr.type = crt_scalar;
+    pSecp256r1.toMpz(cr.scalar.get_mpz_t(), y3);
+}
+
+void eval_xDblPointEc_secp256r1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    RawpSecp256r1::Element x3;
+    RawpSecp256r1::Element y3;
+    eval_AddPointEc_pSecp256r1(ctx, cmd, true, x3, y3);
+    cr.type = crt_scalar;
+    pSecp256r1.toMpz(cr.scalar.get_mpz_t(), x3);
+}
+
+void eval_yDblPointEc_secp256r1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    RawpSecp256r1::Element y3;
+    RawpSecp256r1::Element x3;
+    eval_AddPointEc_pSecp256r1(ctx, cmd, true, x3, y3);
+    cr.type = crt_scalar;
+    pSecp256r1.toMpz(cr.scalar.get_mpz_t(), y3);
+}
+
+
+zkresult AddPointEc_pSecp256r1 (Context &ctx, bool dbl, const RawpSecp256r1::Element &x1, const RawpSecp256r1::Element &y1, const RawpSecp256r1::Element &x2, const RawpSecp256r1::Element &y2, RawpSecp256r1::Element &x3, RawpSecp256r1::Element &y3);
+
+void eval_AddPointEc_pSecp256r1 (Context &ctx, const RomCommand &cmd, bool dbl, RawpSecp256r1::Element &x3, RawpSecp256r1::Element &y3)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != (dbl ? 2 : 4))
+    {
+        zklog.error("eval_AddPointEc_pSecp256r1() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    CommandResult cr;
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_AddPointEc_pSecp256r1() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawpSecp256r1::Element x1;
+    pSecp256r1.fromMpz(x1, cr.scalar.get_mpz_t());
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_AddPointEc_pSecp256r1() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawpSecp256r1::Element y1;
+    pSecp256r1.fromMpz(y1, cr.scalar.get_mpz_t());
+
+    RawpSecp256r1::Element x2, y2;
+    if (dbl)
+    {
+        x2 = x1;
+        y2 = y1;
+    }
+    else
+    {
+        // Get x2 by executing cmd.params[2]
+        evalCommand(ctx, *cmd.params[2], cr);
+        if (cr.zkResult != ZKR_SUCCESS)
+        {
+            return;
+        }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+        if (cr.type != crt_scalar)
+        {
+            zklog.error("eval_AddPointEc_pSecp256r1() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+#endif
+        pSecp256r1.fromMpz(x2, cr.scalar.get_mpz_t());
+
+        // Get y2 by executing cmd.params[3]
+        evalCommand(ctx, *cmd.params[3], cr);
+        if (cr.zkResult != ZKR_SUCCESS)
+        {
+            return;
+        }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+        if (cr.type != crt_scalar)
+        {
+            zklog.error("eval_AddPointEc_pSecp256r1() 3 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+#endif
+        pSecp256r1.fromMpz(y2, cr.scalar.get_mpz_t());
+    }
+
+    cr.zkResult = AddPointEc_pSecp256r1(ctx, dbl, x1, y1, x2, y2, x3, y3);
+}
+
+zkresult AddPointEc_pSecp256r1 (Context &ctx, bool dbl, const RawpSecp256r1::Element &x1, const RawpSecp256r1::Element &y1, const RawpSecp256r1::Element &x2, const RawpSecp256r1::Element &y2, RawpSecp256r1::Element &x3, RawpSecp256r1::Element &y3)
+{
+    // Check if we have just computed this operation
+    if ( (ctx.lastECAdd_pSecp256r1.bDouble == dbl) &&
+         pSecp256r1.eq(ctx.lastECAdd_pSecp256r1.x1, x1) &&
+         pSecp256r1.eq(ctx.lastECAdd_pSecp256r1.y1, y1) &&
+         ( dbl || (pSecp256r1.eq(ctx.lastECAdd_pSecp256r1.x2, x2) && pSecp256r1.eq(ctx.lastECAdd_pSecp256r1.y2, y2) ) ) )
+    {
+        //zklog.info("eval_AddPointEc() reading from cache");
+        x3 = ctx.lastECAdd_pSecp256r1.x3;
+        y3 = ctx.lastECAdd_pSecp256r1.y3;
+        return ZKR_SUCCESS;
+    }
+
+    RawpSecp256r1::Element aux1, aux2, s;
+
+    if (dbl)
+    {
+        // s = 3*x1*x1/2*y1
+        pSecp256r1.mul(aux1, x1, x1);
+        pSecp256r1.fromUI(aux2, 3);
+        pSecp256r1.mul(aux1, aux1, aux2);
+        pSecp256r1.add(aux2, y1, y1);
+        if (pSecp256r1.isZero(aux2))
+        {
+            zklog.error("AddPointEc_pSecp256r1() got denominator=0 1");
+            return ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO;
+        }
+        pSecp256r1.div(s, aux1, aux2);
+    }
+    else
+    {
+        // s = (y2-y1)/(x2-x1)
+        pSecp256r1.sub(aux1, y2, y1);
+        pSecp256r1.sub(aux2, x2, x1);
+        if (pSecp256r1.isZero(aux2))
+        {
+            zklog.error("AddPointEc_pSecp256r1() got denominator=0 2");
+            return ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO;
+        }
+        pSecp256r1.div(s, aux1, aux2);
+    }
+
+    // x3 = s*s - (x1+x2)
+    pSecp256r1.mul(aux1, s, s);
+    pSecp256r1.add(aux2, x1, x2);
+    pSecp256r1.sub(x3, aux1, aux2);
+
+    // y3 = s*(x1-x3) - y1
+    pSecp256r1.sub(aux1, x1, x3);;
+    pSecp256r1.mul(aux1, aux1, s);
+    pSecp256r1.sub(y3, aux1, y1);
+
+    // Save parameters and result for later reuse
+    ctx.lastECAdd_pSecp256r1.bDouble = dbl;
+    ctx.lastECAdd_pSecp256r1.x1 = x1;
+    ctx.lastECAdd_pSecp256r1.y1 = y1;
+    ctx.lastECAdd_pSecp256r1.x2 = x2;
+    ctx.lastECAdd_pSecp256r1.y2 = y2;
+    ctx.lastECAdd_pSecp256r1.x3 = x3;
+    ctx.lastECAdd_pSecp256r1.y3 = y3;
+
+    return ZKR_SUCCESS;
+}
+
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value, const Goldilocks::Element (&key)[4])
 {
     zkassert(ctx.proverRequest.pFullTracer != NULL);
@@ -3922,6 +4170,315 @@ void CommandResult::toFea (Context &ctx, Goldilocks::Element &fi0, Goldilocks::E
         zklog.error("CommandResult::toFea() Unexpected command result type: " + to_string(type));
         exitProcess();
     }
+}
+
+
+
+// Compares two unsigned integers represented as arrays of scalars (a and b)
+// Returns i+1 if a > b, -i-1 if a < b, 0 if a == b, where i is the position of the first different chunk
+void eval_signedComparison (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if ((cmd.params.size() != 2) && (cmd.params.size() != 3))
+    {
+        zklog.error("eval_signedComparison() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get addr1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_signedComparison() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t addr1 = cr.scalar.get_ui();
+
+    // Get addr2 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_signedComparison() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t addr2 = cr.scalar.get_ui();
+
+    // Get len by executing cmd.params[2], or set to 1
+    uint64_t len;
+    if (cmd.params.size() == 3)
+    {
+        evalCommand(ctx, *cmd.params[2], cr);
+        if (cr.zkResult != ZKR_SUCCESS)
+        {
+            return;
+        }
+    #ifdef CHECK_EVAL_COMMAND_PARAMETERS
+        if (cr.type != crt_scalar)
+        {
+            zklog.error("eval_signedComparison() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+    #endif
+        len = cr.scalar.get_ui();
+        if (len == 0)
+        {
+            zklog.error("eval_signedComparison() unexpected length=0 step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+    }
+    else
+    {
+        len = 1;
+    }
+
+    for (int64_t i = len - 1; i >= 0; i--)
+    {
+        unordered_map<uint64_t, Fea>::const_iterator it;
+
+        it = ctx.mem.find(addr1 + i);
+        if (it == ctx.mem.end())
+        {
+            zklog.error("eval_signedComparison() mem not found addr1=" + to_string(addr1) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            cr.zkResult = ZKR_SM_MAIN_ASSERT;
+            return;
+        }
+        mpz_class input1i;
+        if (!fea2scalar(fr, input1i, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        {
+            zklog.error("eval_signedComparison() failed calling ctx.multiBaseFea2scalar addr1=" + to_string(addr1) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+            return;
+        }
+        
+        it = ctx.mem.find(addr2 + i);
+        if (it == ctx.mem.end())
+        {
+            zklog.error("eval_signedComparison() mem not found addr2=" + to_string(addr2) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            cr.zkResult = ZKR_SM_MAIN_ASSERT;
+            return;
+        }
+        mpz_class input2i;
+        if (!fea2scalar(fr, input2i, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        {
+            zklog.error("eval_signedComparison() failed calling ctx.multiBaseFea2scalar addr2=" + to_string(addr1) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+            return;
+        }
+
+        if (input1i != input2i)
+        {
+            int64_t iResult = input1i < input2i ? (-i-1) : (i+1);
+
+            // Return iResult in fea0
+            cr.type = crt_fea;
+            cr.fea0 = fr.fromS64(iResult);
+            cr.fea1 = fr.zero();
+            cr.fea2 = fr.zero();
+            cr.fea3 = fr.zero();
+            cr.fea4 = fr.zero();
+            cr.fea5 = fr.zero();
+            cr.fea6 = fr.zero();
+            cr.fea7 = fr.zero();
+
+            return;
+        }
+    }
+
+    // Return 0 in fea0
+    cr.type = crt_fea;
+    cr.fea0 = fr.zero();
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
+}
+
+// Compares two unsigned integers represented as arrays of scalars (a and b)
+// Returns i+1 if a > b, -i-1 if a < b, 0 if a == b, where i is the position of the first different chunk
+// The function does the following:
+// --------------------------------
+// if input < constant => return -1
+// if input > constant => return  1
+// if input = constant => return  0
+// --------------------------------
+void eval_signedComparisonWithConst (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_signedComparisonWithConst() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get addr by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_signedComparisonWithConst() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t addr = cr.scalar.get_ui();
+
+    // Get constant by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_signedComparisonWithConst() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t constant = cr.scalar.get_ui();
+
+    // Get input from memory[address]
+    unordered_map<uint64_t, Fea>::const_iterator it;
+    it = ctx.mem.find(addr);
+    if (it == ctx.mem.end())
+    {
+        zklog.error("eval_signedComparisonWithConst() mem not found addr=" + to_string(addr) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        cr.zkResult = ZKR_SM_MAIN_ASSERT;
+        return;
+    }
+    mpz_class input;
+    if (!fea2scalar(fr, input, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+    {
+        zklog.error("eval_signedComparison() failed calling ctx.multiBaseFea2scalar addr=" + to_string(addr) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+        return;
+    }
+    
+    // Calculate iResult
+    int64_t iResult = (input == constant) ? 0 : (input < constant) ? (-1) : 1;
+
+    // Return iResult in fea0
+    cr.type = crt_fea;
+    cr.fea0 = fr.fromS64(iResult);
+    cr.fea1 = fr.zero();
+    cr.fea2 = fr.zero();
+    cr.fea3 = fr.zero();
+    cr.fea4 = fr.zero();
+    cr.fea5 = fr.zero();
+    cr.fea6 = fr.zero();
+    cr.fea7 = fr.zero();
+}
+
+// Gets the first different chunk between two unsigned integers represented as arrays of BigInts
+// Returns i, where i is the position of the first different chunk
+void eval_getFirstDiffChunkRem (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_getFirstDiffChunkRem() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get addr by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getFirstDiffChunkRem() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t addr = cr.scalar.get_ui();
+
+    // Get len by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getFirstDiffChunkRem() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t len = cr.scalar.get_ui();
+
+    for (int64_t i = len - 1; i >= 0; i--)
+    {
+        unordered_map<uint64_t, Fea>::const_iterator it;
+
+        it = ctx.mem.find(addr + i);
+        if (it == ctx.mem.end())
+        {
+            zklog.error("eval_getFirstDiffChunkRem() mem not found addr=" + to_string(addr) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            cr.zkResult = ZKR_SM_MAIN_ASSERT;
+            return;
+        }
+        mpz_class inputi;
+        if (!fea2scalar(fr, inputi, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        {
+            zklog.error("eval_getFirstDiffChunkRem() failed calling ctx.multiBaseFea2scalar addr=" + to_string(addr) + " i=" + to_string(i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+            return;
+        }
+
+        if (i >= (int64_t)ctx.remainder.size())
+        {
+            zklog.error("eval_getFirstDiffChunkRem() ctx.remainder.size=" + to_string(ctx.remainder.size()) + " too small addr=" + to_string(addr) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            cr.zkResult = ZKR_SM_MAIN_ASSERT;
+            return;
+        }
+
+        if (inputi != ctx.remainder[i])
+        {
+            // Return i in fea0
+            cr.type = crt_fea;
+            cr.fea0 = fr.fromS64(i);
+            cr.fea1 = fr.zero();
+            cr.fea2 = fr.zero();
+            cr.fea3 = fr.zero();
+            cr.fea4 = fr.zero();
+            cr.fea5 = fr.zero();
+            cr.fea6 = fr.zero();
+            cr.fea7 = fr.zero();
+            return;
+        }
+    }
+
+    zklog.error("eval_getFirstDiffChunkRem() ctx.remainder and input are equal addr=" + to_string(addr) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+    cr.zkResult = ZKR_SM_MAIN_ASSERT;
+    return;
 }
 
 } // namespace

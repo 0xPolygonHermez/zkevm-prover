@@ -74,6 +74,14 @@ typedef enum : int {
     f_dumpRegs,
     f_dump,
     f_dumphex,
+    f_inverseFnEc_secp256r1,
+    f_xAddPointEc_secp256r1,
+    f_yAddPointEc_secp256r1,
+    f_xDblPointEc_secp256r1,
+    f_yDblPointEc_secp256r1,
+    f_signedComparison,
+    f_signedComparisonWithConst,
+    f_getFirstDiffChunkRem,
 } tFunction;
 
 // ROM command (op)

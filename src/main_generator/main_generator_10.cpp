@@ -1527,6 +1527,12 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         }
 
 
+        // Assume free
+        if (!bFastMode && rom["program"][zkPC].contains("assumeFree") && (rom["program"][zkPC]["assumeFree"] == 1))
+        {
+            code += "    pols.assumeFree[i] = fr.one();\n";
+        }
+
         // Memory operation instruction
         if (rom["program"][zkPC].contains("mOp") && (rom["program"][zkPC]["mOp"] == 1))
         {
@@ -1759,12 +1765,15 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         }
 
         // Arith instruction
-        if ( (rom["program"][zkPC].contains("arithEq0") && (rom["program"][zkPC]["arithEq0"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq1") && (rom["program"][zkPC]["arithEq1"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq2") && (rom["program"][zkPC]["arithEq2"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq3") && (rom["program"][zkPC]["arithEq3"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq4") && (rom["program"][zkPC]["arithEq4"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq5") && (rom["program"][zkPC]["arithEq5"]==1))
+        if ( ((forkID >= 13) && (rom["program"][zkPC].contains("arith") && (rom["program"][zkPC]["arith"]==1)) ) ||
+             ((forkID < 13) &&
+                ( (rom["program"][zkPC].contains("arithEq0") && (rom["program"][zkPC]["arithEq0"]==1)) ||
+                  (rom["program"][zkPC].contains("arithEq1") && (rom["program"][zkPC]["arithEq1"]==1)) ||
+                  (rom["program"][zkPC].contains("arithEq2") && (rom["program"][zkPC]["arithEq2"]==1)) ||
+                  (rom["program"][zkPC].contains("arithEq3") && (rom["program"][zkPC]["arithEq3"]==1)) ||
+                  (rom["program"][zkPC].contains("arithEq4") && (rom["program"][zkPC]["arithEq4"]==1)) ||
+                  (rom["program"][zkPC].contains("arithEq5") && (rom["program"][zkPC]["arithEq5"]==1)) )
+             )
            )
         {
             code += "    zkPC=" + to_string(zkPC) +";\n";
@@ -1831,6 +1840,19 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         /* SETTERS */
         /***********/
 
+        // Set op
+        if (!bFastMode)
+        {
+            code += "    pols.op0[i] = op0;\n";
+            code += "    pols.op1[i] = op1;\n";
+            code += "    pols.op2[i] = op2;\n";
+            code += "    pols.op3[i] = op3;\n";
+            code += "    pols.op4[i] = op4;\n";
+            code += "    pols.op5[i] = op5;\n";
+            code += "    pols.op6[i] = op6;\n";
+            code += "    pols.op7[i] = op7;\n";
+        }
+
         code += setter8("A",  rom["program"][zkPC].contains("setA") && (rom["program"][zkPC]["setA"]==1),   bFastMode, zkPC, rom, forkID);
         code += setter8("B",  rom["program"][zkPC].contains("setB") && (rom["program"][zkPC]["setB"]==1),   bFastMode, zkPC, rom, forkID);
         code += setter8("C",  rom["program"][zkPC].contains("setC") && (rom["program"][zkPC]["setC"]==1),   bFastMode, zkPC, rom, forkID);
@@ -1891,12 +1913,14 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
         // TODO: When regs are 0, do not copy to nexti.  Set bIsAZero to true at the beginning.
 
         // If arith, increment pols.cntArith
-        if ( (rom["program"][zkPC].contains("arithEq0") && (rom["program"][zkPC]["arithEq0"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq1") && (rom["program"][zkPC]["arithEq1"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq2") && (rom["program"][zkPC]["arithEq2"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq3") && (rom["program"][zkPC]["arithEq3"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq4") && (rom["program"][zkPC]["arithEq4"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq5") && (rom["program"][zkPC]["arithEq5"]==1))
+        if ( ((forkID >= 13) && (rom["program"][zkPC].contains("arith") && (rom["program"][zkPC]["arith"]==1)) ) ||
+             ((forkID < 13) && 
+             ( (rom["program"][zkPC].contains("arithEq0") && (rom["program"][zkPC]["arithEq0"]==1)) ||
+               (rom["program"][zkPC].contains("arithEq1") && (rom["program"][zkPC]["arithEq1"]==1)) ||
+               (rom["program"][zkPC].contains("arithEq2") && (rom["program"][zkPC]["arithEq2"]==1)) ||
+               (rom["program"][zkPC].contains("arithEq3") && (rom["program"][zkPC]["arithEq3"]==1)) ||
+               (rom["program"][zkPC].contains("arithEq4") && (rom["program"][zkPC]["arithEq4"]==1)) ||
+               (rom["program"][zkPC].contains("arithEq5") && (rom["program"][zkPC]["arithEq5"]==1)) ))
            )
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
@@ -2545,8 +2569,7 @@ string generate(const json &rom, uint64_t forkID, string forkNamespace, const st
                 " addr=\" << addr << \"" +
                 " RR=\" << fr.toString(pols.RR[" + string(bFastMode?"0":"nexti") + "],16) << \"" +
                 " RCX=\" << fr.toString(pols.RCX[" + string(bFastMode?"0":"nexti") + "],16) << \"" +
-                " HASHPOS=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "],16) << \"" +
-                " RID=\" << fr.toString(pols.RID[" + string(bFastMode?"0":"nexti") + "],16) << " +
+                " HASHPOS=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "],16) << " +
                 " endl;\n";
         code += "    outfile.close();\n";
 #endif

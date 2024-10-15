@@ -151,6 +151,15 @@ void eval_fp2InvBN254_x               (Context &ctx, const RomCommand &cmd, Comm
 void eval_fp2InvBN254_y               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_fpBN254inv                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
+// Durian (fork 13) new methods:
+void eval_inverseFnEc_secp256r1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_xAddPointEc_secp256r1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_yAddPointEc_secp256r1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_xDblPointEc_secp256r1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_yDblPointEc_secp256r1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_signedComparison            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_signedComparisonWithConst   (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getFirstDiffChunkRem        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);
 

@@ -13,13 +13,18 @@ public:
     mpz_class y2;
     mpz_class x3;
     mpz_class y3;
-    uint64_t selEq0;
-    uint64_t selEq1;
-    uint64_t selEq2;
-    uint64_t selEq3;
-    uint64_t selEq4;
-    uint64_t selEq5;
-    uint64_t selEq6;
+
+    // Used in forks <= 12 :
+    //uint64_t selEq0;
+    //uint64_t selEq1;
+    //uint64_t selEq2;
+    //uint64_t selEq3;
+    //uint64_t selEq4;
+    //uint64_t selEq5;
+    //uint64_t selEq6;
+    
+    // Used in forks >= 13 :
+    uint64_t arithEq;
 
     // These arrays will contain 16-bit numbers, except the last (15) one, which can be up to 20-bits long
     // For this reason, we use 64-bit numbers, to have room for all possible values

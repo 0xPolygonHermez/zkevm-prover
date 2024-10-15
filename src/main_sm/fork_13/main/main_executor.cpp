@@ -1223,6 +1223,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
+        // Assume free
+        if ((rom.line[zkPC].assumeFree == 1) && !bProcessBatch)
+        {
+            pols.assumeFree[i] = fr.one();
+        }
+
         // Memory operation instruction
         if (rom.line[zkPC].mOp == 1)
         {
@@ -1235,7 +1241,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
         }
-
 
         // overwrite 'op' when hitting 'checkFirstTxType' label
         if ((zkPC == rom.labels.checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
@@ -1433,7 +1438,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // Arith instruction
-        if (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1)
+        if (rom.line[zkPC].arith==1)
         {
             zkresult zkr;
             zkr = Arith_verify(ctx, op0, op1, op2, op3, op4, op5, op6, op7, &required);
@@ -1478,7 +1483,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         /***********/
 
         // Set op
-        
+        if (!bProcessBatch)
+        {
+            pols.op0[i] = op0;
+            pols.op1[i] = op1;
+            pols.op2[i] = op2;
+            pols.op3[i] = op3;
+            pols.op4[i] = op4;
+            pols.op5[i] = op5;
+            pols.op6[i] = op6;
+            pols.op7[i] = op7;
+        }        
 
         // If setA, A'=op
         if (rom.line[zkPC].setA == 1)
@@ -1727,7 +1742,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If arith, increment pols.cntArith
-        if (!proverRequest.input.bNoCounters && (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1) )
+        if (!proverRequest.input.bNoCounters && rom.line[zkPC].arith==1)
         {
             pols.cntArith[nexti] = fr.inc(pols.cntArith[i]);
 #ifdef CHECK_MAX_CNT_ASAP

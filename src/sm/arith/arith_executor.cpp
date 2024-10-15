@@ -20,11 +20,229 @@ int64_t eq7 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
 int64_t eq8 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
 int64_t eq9 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
 int64_t eq10 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq11 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq12 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq13 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq14 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
 
-const uint16_t chunksPrimeSecp256k1[16] = { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-                                            0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFE, 0xFFFF, 0xFC2F };
-const uint16_t chunksPrimeBN254[16] = { 0x3064, 0x4E72, 0xE131, 0xA029, 0xB850, 0x45B6, 0x8181, 0x585D, 
-                                        0x9781, 0x6A91, 0x6871, 0xCA8D, 0x3C20, 0x8C16, 0xD87C, 0xFD47 };
+const uint64_t ARITH = 1;
+const uint64_t ARITH_ECADD_DIFFERENT = 2;
+const uint64_t ARITH_ECADD_SAME = 3;
+const uint64_t ARITH_BN254_MULFP2 = 4;
+const uint64_t ARITH_BN254_ADDFP2 = 5;
+const uint64_t ARITH_BN254_SUBFP2 = 6;
+const uint64_t ARITH_SECP256R1_ECADD_DIFFERENT = 7;
+const uint64_t ARITH_SECP256R1_ECADD_SAME = 8;
+
+const uint16_t PRIME_SECP256K1_CHUNKS[16] = { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+                                              0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+                                              0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+                                              0xFFFF, 0xFFFE, 0xFFFF, 0xFC2F };
+
+const uint16_t PRIME_BN254_CHUNKS[16] = { 0x3064, 0x4E72, 0xE131, 0xA029,
+                                          0xB850, 0x45B6, 0x8181, 0x585D,
+                                          0x9781, 0x6A91, 0x6871, 0xCA8D,
+                                          0x3C20, 0x8C16, 0xD87C, 0xFD47 };
+
+const uint16_t PRIME_SECP256R1_CHUNKS[16] = { 0xFFFF, 0xFFFF, 0x0000, 0x0001,
+                                              0x0000, 0x0000, 0x0000, 0x0000,
+                                              0x0000, 0x0000, 0xFFFF, 0xFFFF,
+                                              0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF };
+
+const uint64_t PRIME_CHUNKS[3][16] = {
+    {
+        PRIME_SECP256K1_CHUNKS[0],
+        PRIME_SECP256K1_CHUNKS[1],
+        PRIME_SECP256K1_CHUNKS[2],
+        PRIME_SECP256K1_CHUNKS[3],
+        PRIME_SECP256K1_CHUNKS[4],
+        PRIME_SECP256K1_CHUNKS[5],
+        PRIME_SECP256K1_CHUNKS[6],
+        PRIME_SECP256K1_CHUNKS[7],
+        PRIME_SECP256K1_CHUNKS[8],
+        PRIME_SECP256K1_CHUNKS[9],
+        PRIME_SECP256K1_CHUNKS[10],
+        PRIME_SECP256K1_CHUNKS[11],
+        PRIME_SECP256K1_CHUNKS[12],
+        PRIME_SECP256K1_CHUNKS[13],
+        PRIME_SECP256K1_CHUNKS[14],
+        PRIME_SECP256K1_CHUNKS[15],
+    },
+    {
+        PRIME_BN254_CHUNKS[0],
+        PRIME_BN254_CHUNKS[1],
+        PRIME_BN254_CHUNKS[2],
+        PRIME_BN254_CHUNKS[3],
+        PRIME_BN254_CHUNKS[4],
+        PRIME_BN254_CHUNKS[5],
+        PRIME_BN254_CHUNKS[6],
+        PRIME_BN254_CHUNKS[7],
+        PRIME_BN254_CHUNKS[8],
+        PRIME_BN254_CHUNKS[9],
+        PRIME_BN254_CHUNKS[10],
+        PRIME_BN254_CHUNKS[11],
+        PRIME_BN254_CHUNKS[12],
+        PRIME_BN254_CHUNKS[13],
+        PRIME_BN254_CHUNKS[14],
+        PRIME_BN254_CHUNKS[15],
+    },
+    {
+        PRIME_SECP256R1_CHUNKS[0],
+        PRIME_SECP256R1_CHUNKS[1],
+        PRIME_SECP256R1_CHUNKS[2],
+        PRIME_SECP256R1_CHUNKS[3],
+        PRIME_SECP256R1_CHUNKS[4],
+        PRIME_SECP256R1_CHUNKS[5],
+        PRIME_SECP256R1_CHUNKS[6],
+        PRIME_SECP256R1_CHUNKS[7],
+        PRIME_SECP256R1_CHUNKS[8],
+        PRIME_SECP256R1_CHUNKS[9],
+        PRIME_SECP256R1_CHUNKS[10],
+        PRIME_SECP256R1_CHUNKS[11],
+        PRIME_SECP256R1_CHUNKS[12],
+        PRIME_SECP256R1_CHUNKS[13],
+        PRIME_SECP256R1_CHUNKS[14],
+        PRIME_SECP256R1_CHUNKS[15],
+    }
+};
+
+const uint64_t PRIME_SECP256K1_INDEX = 0;
+const uint64_t PRIME_BN254_INDEX = 1;
+const uint64_t PRIME_SECP256R1_INDEX = 2;
+
+const uint64_t EQ_INDEX_TO_CARRY_INDEX[15] = { 0, 0, 0, 1, 2, 1, 2, 1, 2, 1, 2, 0, 0, 1, 2 };
+
+class ArithInfo
+{
+public:
+    uint64_t selEq[10];
+    vector<uint64_t> eqIndexes;
+    uint64_t primeIndex;
+    bool checkAliasFree;
+    bool checkDifferent;
+    mpz_class prime;
+    mpz_class a;
+    string name;
+    string curve;
+    ArithInfo() :
+        primeIndex(false),
+        checkAliasFree(false),
+        checkDifferent(false) {
+            for (uint64_t i=0; i<10; i++)
+            {
+                selEq[i] = 0;
+            }
+        };
+};
+
+void getArithInfo(uint64_t arithEq, ArithInfo &arithInfo)
+{
+    switch (arithEq)
+    {
+        case ARITH:
+            arithInfo.selEq[0] = 1;
+            arithInfo.eqIndexes.push_back(0);
+            arithInfo.name = "ARITH";
+            break;
+
+        case ARITH_ECADD_DIFFERENT:
+            arithInfo.selEq[1] = 1;
+            arithInfo.selEq[3] = 1;
+            arithInfo.eqIndexes.push_back(1); // s.diff, x3, y3
+            arithInfo.eqIndexes.push_back(3);
+            arithInfo.eqIndexes.push_back(4);
+            arithInfo.primeIndex = PRIME_SECP256K1_INDEX;
+            arithInfo.checkAliasFree = true;
+            arithInfo.checkDifferent = true;
+            arithInfo.prime = Secp256k1p_prime;
+            arithInfo.name = "ARITH_ECADD_DIFFERENT";
+            arithInfo.curve = "SECP256K1";
+            break;
+
+        case ARITH_ECADD_SAME:
+            arithInfo.selEq[2] = 1;
+            arithInfo.selEq[3] = 1;
+            arithInfo.eqIndexes.push_back(2); // s.diff, x3, y3
+            arithInfo.eqIndexes.push_back(3);
+            arithInfo.eqIndexes.push_back(4);
+            arithInfo.primeIndex = PRIME_SECP256K1_INDEX;
+            arithInfo.checkAliasFree = true;
+            arithInfo.checkDifferent = false;
+            arithInfo.prime = Secp256k1p_prime;
+            arithInfo.name = "ARITH_ECADD_SAME";
+            arithInfo.curve = "SECP256K1";
+            break;
+
+        case ARITH_BN254_MULFP2:
+            arithInfo.selEq[4] = 1;
+            arithInfo.eqIndexes.push_back(5); // x3, y3
+            arithInfo.eqIndexes.push_back(6);
+            arithInfo.primeIndex = PRIME_BN254_INDEX;
+            arithInfo.checkAliasFree = true;
+            arithInfo.checkDifferent = false;
+            arithInfo.prime = BN254p_prime;
+            arithInfo.name = "ARITH_BN254_MULFP2";
+            arithInfo.curve = "BN254";
+            break;
+
+        case ARITH_BN254_ADDFP2:
+            arithInfo.selEq[5] = 1;
+            arithInfo.eqIndexes.push_back(7); // x3, y3
+            arithInfo.eqIndexes.push_back(8);
+            arithInfo.primeIndex = PRIME_BN254_INDEX;
+            arithInfo.checkAliasFree = true;
+            arithInfo.checkDifferent = false;
+            arithInfo.prime = BN254p_prime;
+            arithInfo.name = "ARITH_BN254_ADDFP2";
+            arithInfo.curve = "BN254";
+            break;
+
+        case ARITH_BN254_SUBFP2:
+            arithInfo.selEq[6] = 1;
+            arithInfo.eqIndexes.push_back(9); // x3, y3
+            arithInfo.eqIndexes.push_back(10);
+            arithInfo.primeIndex = PRIME_BN254_INDEX;
+            arithInfo.checkAliasFree = true;
+            arithInfo.checkDifferent = false;
+            arithInfo.prime = BN254p_prime;
+            arithInfo.name = "ARITH_BN254_SUBFP2";
+            arithInfo.curve = "BN254";
+            break;
+
+        case ARITH_SECP256R1_ECADD_DIFFERENT:
+            arithInfo.selEq[7] = 1;
+            arithInfo.selEq[9] = 1;
+            arithInfo.eqIndexes.push_back(11); // s.diff, x3, y3
+            arithInfo.eqIndexes.push_back(13);
+            arithInfo.eqIndexes.push_back(14);
+            arithInfo.primeIndex = PRIME_SECP256R1_INDEX;
+            arithInfo.checkAliasFree = true;
+            arithInfo.checkDifferent = true;
+            arithInfo.prime = pSecp256r1_prime;
+            arithInfo.name = "ARITH_SECP256R1_ECADD_DIFFERENT";
+            arithInfo.curve = "SECP256R1";
+            break;
+
+        case ARITH_SECP256R1_ECADD_SAME:
+            arithInfo.selEq[8] = 1;
+            arithInfo.selEq[9] = 1;
+            arithInfo.eqIndexes.push_back(12); // s.diff, x3, y3
+            arithInfo.eqIndexes.push_back(13);
+            arithInfo.eqIndexes.push_back(14);
+            arithInfo.primeIndex = PRIME_SECP256R1_INDEX;
+            arithInfo.checkAliasFree = true;
+            arithInfo.checkDifferent = false;
+            arithInfo.a = aSecp256r1;
+            arithInfo.prime = pSecp256r1_prime;
+            arithInfo.name = "ARITH_SECP256R1_ECADD_SAME";
+            arithInfo.curve = "SECP256R1";
+            break;
+
+        default:
+            zklog.error("ArithExecutor::getArithInfo() invalid arithEq=" + to_string(arithEq));
+            exitProcess();
+    }
+}
 
 void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 {
@@ -53,13 +271,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         actionBytes.y2 = action[i].y2;
         actionBytes.x3 = action[i].x3;
         actionBytes.y3 = action[i].y3;
-        actionBytes.selEq0 = action[i].selEq0;
-        actionBytes.selEq1 = action[i].selEq1;
-        actionBytes.selEq2 = action[i].selEq2;
-        actionBytes.selEq3 = action[i].selEq3;
-        actionBytes.selEq4 = action[i].selEq4;
-        actionBytes.selEq5 = action[i].selEq5;
-        actionBytes.selEq6 = action[i].selEq6;
+        actionBytes.arithEq = action[i].arithEq;
 
         dataSize = 16;
         scalar2ba16(actionBytes._x1, dataSize, action[i].x1);
@@ -96,9 +308,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         input.push_back(actionBytes);
     }
 
-    RawFec::Element s;
-    RawFec::Element aux1, aux2;
-    mpz_class q0, q1, q2;
+    mpz_class sScalar, q0, q1, q2;
 
     // Process all the inputs
 //#pragma omp parallel for // TODO: Disabled since OMP decreases performance, probably due to cache invalidations
@@ -112,18 +322,9 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 #endif
         // TODO: if not have x1, need to componse it
 
-        RawFec::Element x1;
-        RawFec::Element y1;
-        RawFec::Element x2;
-        RawFec::Element y2;
-        RawFec::Element x3;
-        RawFec::Element y3;
-        scalar2fec(fec, x1, input[i].x1);
-        scalar2fec(fec, y1, input[i].y1);
-        scalar2fec(fec, x2, input[i].x2);
-        scalar2fec(fec, y2, input[i].y2);
-        scalar2fec(fec, x3, input[i].x3);
-        scalar2fec(fec, y3, input[i].y3);
+
+        ArithInfo arithInfo;
+        getArithInfo(input[i].arithEq, arithInfo);
 
         // In the following, recall that we can only work with unsiged integers of 256 bits.
         // Therefore, as the quotient needs to be represented in our VM, we need to know
@@ -133,55 +334,203 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         //        that the added offset is the lowest.
         // Note2: x1,x2,y1,y2 can be assumed to be alias free, as this is the pre condition in the Arith SM.
         //        I.e, x1,x2,y1,y2 ∈ [0, 2^256-1].
-        if (input[i].selEq1 == 1)
+
+        bool calculateS = false;
+        
+        if (input[i].arithEq == ARITH_ECADD_DIFFERENT || input[i].arithEq == ARITH_SECP256R1_ECADD_DIFFERENT)
         {
-            // s=(y2-y1)/(x2-x1)
-            fec.sub(aux1, y2, y1);
-            fec.sub(aux2, x2, x1);
-            if (fec.isZero(aux2))
-            {
-                zklog.error("ArithExecutor::execute() divide by zero calculating S for input " + to_string(i));
-                exitProcess();
-            }
-            fec.div(s, aux1, aux2);
+            calculateS = true;
 
-            // Get s as a scalar
-            mpz_class sScalar;
-            fec2scalar(fec, s, sScalar);
+            switch (arithInfo.primeIndex)
+            {
+                case PRIME_SECP256K1_INDEX:
+                {
+                    // Convert scalars to field elements
+                    RawFec::Element x1;
+                    RawFec::Element y1;
+                    RawFec::Element x2;
+                    RawFec::Element y2;
+                    Secp256k1p.fromMpz(x1, input[i].x1.get_mpz_t());
+                    Secp256k1p.fromMpz(y1, input[i].y1.get_mpz_t());
+                    Secp256k1p.fromMpz(x2, input[i].x2.get_mpz_t());
+                    Secp256k1p.fromMpz(y2, input[i].y2.get_mpz_t());
 
-            // Check
-            mpz_class pq0;
-            pq0 = sScalar*input[i].x2 - sScalar*input[i].x1 - input[i].y2 + input[i].y1; // Worst values are {-2^256*(2^256-1),2^256*(2^256-1)}
-            q0 = pq0/pFec;
-            if ((pq0 - pFec*q0) != 0)
-            {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (diff point)");
-                exitProcess();
-            } 
-            q0 += ScalarTwoTo257;
-            if(q0 < 0)
-            {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (diff point). Actual value: " + q0.get_str(16));
-                exitProcess();
+                    // Calculate s=(y2-y1)/(x2-x1)
+                    RawFec::Element s;
+                    RawFec::Element aux1, aux2;
+                    Secp256k1p.sub(aux1, y2, y1);
+                    Secp256k1p.sub(aux2, x2, x1);
+                    if (fec.isZero(aux2))
+                    {
+                        zklog.error("ArithExecutor::execute() divide by zero calculating S for input " + to_string(i));
+                        exitProcess();
+                    }
+                    Secp256k1p.div(s, aux1, aux2);
+
+                    // Get s as a scalar
+                    Secp256k1p.toMpz(sScalar.get_mpz_t(), s);
+
+                    // Check result
+                    mpz_class pq0;
+                    pq0 = sScalar*input[i].x2 - sScalar*input[i].x1 - input[i].y2 + input[i].y1; // Worst values are {-2^256*(2^256-1),2^256*(2^256-1)}
+                    q0 = pq0/pFec;
+                    if ((pq0 - pFec*q0) != 0)
+                    {
+                        zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (diff point)");
+                        exitProcess();
+                    } 
+                    q0 += ScalarTwoTo257;
+                    if(q0 < 0)
+                    {
+                        zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (diff point). Actual value: " + q0.get_str(16));
+                        exitProcess();
+                    }
+                    break;
+                }
+                case PRIME_SECP256R1_INDEX:
+                {
+                    // Convert scalars to field elements
+                    RawpSecp256r1::Element x1;
+                    RawpSecp256r1::Element y1;
+                    RawpSecp256r1::Element x2;
+                    RawpSecp256r1::Element y2;
+                    pSecp256r1.fromMpz(x1, input[i].x1.get_mpz_t());
+                    pSecp256r1.fromMpz(y1, input[i].y1.get_mpz_t());
+                    pSecp256r1.fromMpz(x2, input[i].x2.get_mpz_t());
+                    pSecp256r1.fromMpz(y2, input[i].y2.get_mpz_t());
+
+                    // Calculate s=(y2-y1)/(x2-x1)
+                    RawpSecp256r1::Element s;
+                    RawpSecp256r1::Element aux1, aux2;
+                    pSecp256r1.sub(aux1, y2, y1);
+                    pSecp256r1.sub(aux2, x2, x1);
+                    if (pSecp256r1.isZero(aux2))
+                    {
+                        zklog.error("ArithExecutor::execute() divide by zero calculating S for input " + to_string(i));
+                        exitProcess();
+                    }
+                    pSecp256r1.div(s, aux1, aux2);
+
+                    // Get s as a scalar
+                    pSecp256r1.toMpz(sScalar.get_mpz_t(), s);
+
+                    // Check result
+                    mpz_class pq0;
+                    pq0 = sScalar*input[i].x2 - sScalar*input[i].x1 - input[i].y2 + input[i].y1; // Worst values are {-2^256*(2^256-1),2^256*(2^256-1)}
+                    q0 = pq0/pFec;
+                    if ((pq0 - pFec*q0) != 0)
+                    {
+                        zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (diff point)");
+                        exitProcess();
+                    } 
+                    q0 += ScalarTwoTo257;
+                    if(q0 < 0)
+                    {
+                        zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (diff point). Actual value: " + q0.get_str(16));
+                        exitProcess();
+                    }
+                    break;
+                }
+                default:
+                {
+                    zklog.error("ArithExecutor::execute() Invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input=" + to_string(i));
+                    exitProcess();
+                }
             }
         }
-        else if (input[i].selEq2 == 1)
+        else if (input[i].arithEq == ARITH_ECADD_SAME)
         {
-            // s = 3*x1*x1/(y1+y1
-            fec.mul(aux1, x1, x1);
-            fec.fromUI(aux2, 3);
-            fec.mul(aux1, aux1, aux2);
-            fec.add(aux2, y1, y1);
-            fec.div(s, aux1, aux2);
+            // Check prime index
+            if (arithInfo.primeIndex != PRIME_SECP256K1_INDEX)
+            {
+                zklog.error("ArithExecutor::execute() Invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input=" + to_string(i));
+                exitProcess();
+            }
+
+            // Convert scalars to field elements
+            RawFec::Element x1;
+            RawFec::Element y1;
+            RawFec::Element x2;
+            RawFec::Element y2;
+            Secp256k1p.fromMpz(x1, input[i].x1.get_mpz_t());
+            Secp256k1p.fromMpz(y1, input[i].y1.get_mpz_t());
+            Secp256k1p.fromMpz(x2, input[i].x2.get_mpz_t());
+            Secp256k1p.fromMpz(y2, input[i].y2.get_mpz_t());
+
+            // Calculate s = 3*x1*x1/(y1+y1)
+            RawFec::Element s;
+            RawFec::Element aux1, aux2;
+            Secp256k1p.mul(aux1, x1, x1);
+            Secp256k1p.fromUI(aux2, 3);
+            Secp256k1p.mul(aux1, aux1, aux2);
+            Secp256k1p.add(aux2, y1, y1);
+            Secp256k1p.div(s, aux1, aux2);
 
             // Get s as a scalar
-            mpz_class sScalar;
-            fec2scalar(fec, s, sScalar);
+            Secp256k1p.toMpz(sScalar.get_mpz_t(), s);
 
-            // Check
+            // Check result
             mpz_class pq0;
             pq0 = sScalar*2*input[i].y1 - 3*input[i].x1*input[i].x1; // Worst values are {-3*(2^256-1)**2,2*(2^256-1)**2}
                                                                      // with |-3*(2^256-1)**2| > 2*(2^256-1)**2
+            q0 = -(pq0/pFec);
+            if ((pq0 + pFec*q0) != 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (same point)");
+                exitProcess();
+            } 
+            q0 += ScalarTwoTo258;
+            if (q0 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (same point). Actual value: " + q0.get_str(16));
+                exitProcess();
+            }
+        }
+        else if (input[i].arithEq == ARITH_SECP256R1_ECADD_SAME)
+        {
+            // Check prime index
+            if (arithInfo.primeIndex != PRIME_SECP256R1_INDEX)
+            {
+                zklog.error("ArithExecutor::execute() Invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input=" + to_string(i));
+                exitProcess();
+            }
+
+            calculateS = true;
+
+            // Get a from arithInfo
+            if (arithInfo.a == 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " got arithInfo.a=0");
+                exitProcess();
+            }
+            mpz_class a = arithInfo.a;
+
+            // Convert scalars to field elements
+            RawpSecp256r1::Element x1;
+            RawpSecp256r1::Element y1;
+            RawpSecp256r1::Element x2;
+            RawpSecp256r1::Element y2;
+            pSecp256r1.fromMpz(x1, input[i].x1.get_mpz_t());
+            pSecp256r1.fromMpz(y1, input[i].y1.get_mpz_t());
+            pSecp256r1.fromMpz(x2, input[i].x2.get_mpz_t());
+            pSecp256r1.fromMpz(y2, input[i].y2.get_mpz_t());
+
+            // Calculate s = 3*x1*x1/(y1+y1)
+            RawpSecp256r1::Element s;
+            RawpSecp256r1::Element aux1, aux2;
+            pSecp256r1.mul(aux1, x1, x1);
+            pSecp256r1.fromUI(aux2, 3);
+            pSecp256r1.mul(aux1, aux1, aux2);
+            pSecp256r1.add(aux2, y1, y1);
+            pSecp256r1.div(s, aux1, aux2);
+
+            // Get s as a scalar
+            pSecp256r1.toMpz(sScalar.get_mpz_t(), s);
+
+            // Check result
+            mpz_class pq0;
+            pq0 = sScalar*2*input[i].y1 - 3*input[i].x1*input[i].x1 - a; // Worst values are {-3*(2^256-1)**2 - a,2*(2^256-1)**2 - a}
+                                                                         // with |-3*(2^256-1)**2| > 2*(2^256-1)**2
             q0 = -(pq0/pFec);
             if ((pq0 + pFec*q0) != 0)
             {
@@ -197,16 +546,12 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         }
         else
         {
-            fec.fromUI(s, 0);
+            //fec.fromUI(s, 0);
             q0 = 0;
         }
 
-        if (input[i].selEq3 == 1)
+        if (calculateS)
         {
-            // Get s as a scalar
-            mpz_class sScalar;
-            fec2scalar(fec, s, sScalar);
-
             // Check q1
             mpz_class pq1;
             pq1 = sScalar*sScalar - input[i].x1 - input[i].x2 - input[i].x3; /// Worst values are {-3*(2^256-1),(2^256-1)**2}
@@ -244,7 +589,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             }
 
         }        
-        else if (input[i].selEq4 == 1)
+        else if (input[i].arithEq == ARITH_BN254_MULFP2)
         {
             // Check q1
             mpz_class pq1;
@@ -282,7 +627,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
         }
-        else if (input[i].selEq5 == 1)
+        else if (input[i].arithEq == ARITH_BN254_ADDFP2)
         {
             // Check q1
             mpz_class pq1;
@@ -320,7 +665,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
         }
-        else if (input[i].selEq6 == 1)
+        else if (input[i].arithEq == ARITH_BN254_SUBFP2)
         {
             // Check q1
             mpz_class pq1;
@@ -364,10 +709,6 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q2 = 0;
         }
 
-        // Get s as a scalar
-        mpz_class sScalar;
-        fec2scalar(fec, s, sScalar);
-
         uint64_t dataSize;
         dataSize = 16;
         scalar2ba16(input[i]._s, dataSize, sScalar);
@@ -386,6 +727,11 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         uint64_t offset = i*32;
         bool xAreDifferent = false;
         bool valueLtPrime = false;
+        
+        // Get arith info
+        ArithInfo arithInfo;
+        getArithInfo(input[i].arithEq, arithInfo);
+
         for (uint64_t step=0; step<32; step++)
         {
             uint64_t index = offset + step;
@@ -407,17 +753,14 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 pols.q0[j][index] = fr.fromU64(input[i]._q0[j]);
                 pols.q1[j][index] = fr.fromU64(input[i]._q1[j]);
                 pols.q2[j][index] = fr.fromU64(input[i]._q2[j]);
+                if (j < (sizeof(arithInfo.selEq)/sizeof(uint64_t)))
+                {
+                    pols.selEq[j][index] = fr.fromU64(arithInfo.selEq[j]);
+                }
             }
-            pols.selEq[0][index] = fr.fromU64(input[i].selEq0);
-            pols.selEq[1][index] = fr.fromU64(input[i].selEq1);
-            pols.selEq[2][index] = fr.fromU64(input[i].selEq2);
-            pols.selEq[3][index] = fr.fromU64(input[i].selEq3);
-            pols.selEq[4][index] = fr.fromU64(input[i].selEq4);
-            pols.selEq[5][index] = fr.fromU64(input[i].selEq5);
-            pols.selEq[6][index] = fr.fromU64(input[i].selEq6);
 
             // selEq1 (addition different points) is select need to check that points are diferent
-            if (!fr.isZero(pols.selEq[1][index]) && (step < 16))
+            if (arithInfo.checkDifferent && (step < 16))
             {
                 if (xAreDifferent == false)
                 {
@@ -433,43 +776,25 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             if (!fr.isZero(pols.selEq[3][index]) || !fr.isZero(pols.selEq[4][index]) || !fr.isZero(pols.selEq[5][index]) || !fr.isZero(pols.selEq[6][index]))
             {
                 Goldilocks::Element chunkValue = step < 16 ? pols.x3[15 - step16][offset] : pols.y3[15 - step16][offset];
-                uint64_t chunkPrime = !fr.isZero(pols.selEq[3][index]) ? chunksPrimeSecp256k1[step16] : chunksPrimeBN254[step16];
+                uint64_t chunkPrime = PRIME_CHUNKS[arithInfo.primeIndex][step16];
 
                 bool chunkLtPrime = valueLtPrime ? false : (fr.toU64(chunkValue) < chunkPrime);
                 valueLtPrime = valueLtPrime || chunkLtPrime;
                 pols.chunkLtPrime[index] = chunkLtPrime ? fr.one() : fr.zero();
                 pols.valueLtPrime[nextIndex] = valueLtPrime ? fr.one() : fr.zero();
             }
-
-            pols.selEq[0][offset + step] = fr.fromU64(input[i].selEq0);
-            pols.selEq[1][offset + step] = fr.fromU64(input[i].selEq1);
-            pols.selEq[2][offset + step] = fr.fromU64(input[i].selEq2);
-            pols.selEq[3][offset + step] = fr.fromU64(input[i].selEq3);
-            pols.selEq[4][offset + step] = fr.fromU64(input[i].selEq4);
-            pols.selEq[5][offset + step] = fr.fromU64(input[i].selEq5);
-            pols.selEq[6][offset + step] = fr.fromU64(input[i].selEq6);
         }
 
         mpz_class carry[3] = {0, 0, 0};
-        uint64_t eqIndexToCarryIndex[11] = {0, 0, 0, 1, 2, 1, 2, 1, 2, 1, 2};
         mpz_class eq[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        vector<uint64_t> eqIndexes;
-        if (!fr.isZero(pols.selEq[0][offset])) eqIndexes.push_back(0);
-        if (!fr.isZero(pols.selEq[1][offset])) eqIndexes.push_back(1);
-        if (!fr.isZero(pols.selEq[2][offset])) eqIndexes.push_back(2);
-        if (!fr.isZero(pols.selEq[3][offset])) { eqIndexes.push_back(3); eqIndexes.push_back(4); }
-        if (!fr.isZero(pols.selEq[4][offset])) { eqIndexes.push_back(5); eqIndexes.push_back(6); }
-        if (!fr.isZero(pols.selEq[5][offset])) { eqIndexes.push_back(7); eqIndexes.push_back(8); }
-        if (!fr.isZero(pols.selEq[6][offset])) { eqIndexes.push_back(9); eqIndexes.push_back(10); }
 
         mpz_class auxScalar;
         for (uint64_t step=0; step<32; step++)
         {
-            for (uint64_t k=0; k<eqIndexes.size(); k++)
+            for (uint64_t k=0; k<arithInfo.eqIndexes.size(); k++)
             {
-                uint64_t eqIndex = eqIndexes[k];
-                uint64_t carryIndex = eqIndexToCarryIndex[eqIndex];
+                uint64_t eqIndex = arithInfo.eqIndexes[k];
+                uint64_t carryIndex = EQ_INDEX_TO_CARRY_INDEX[eqIndex];
                 switch(eqIndex)
                 {
                     case 0:  eq[eqIndex] = eq0(fr, pols, step, offset); break;
@@ -483,6 +808,10 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                     case 8:  eq[eqIndex] = eq8(fr, pols, step, offset); break;
                     case 9:  eq[eqIndex] = eq9(fr, pols, step, offset); break;
                     case 10: eq[eqIndex] = eq10(fr, pols, step, offset); break;
+                    case 11: eq[eqIndex] = eq11(fr, pols, step, offset); break;
+                    case 12: eq[eqIndex] = eq12(fr, pols, step, offset); break;
+                    case 13: eq[eqIndex] = eq13(fr, pols, step, offset); break;
+                    case 14: eq[eqIndex] = eq14(fr, pols, step, offset); break;
                     default:
                         zklog.error("ArithExecutor::execute() invalid eqIndex=" + to_string(eqIndex));
                         exitProcess();
@@ -500,18 +829,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             }
         }
 
-        if (!fr.isZero(pols.selEq[0][offset]))
-        {
-            pols.resultEq0[offset + 31] = fr.one();
-        }
-        if ((!fr.isZero(pols.selEq[1][offset]) && !fr.isZero(pols.selEq[3][offset])) || !fr.isZero(pols.selEq[4][offset]) || !fr.isZero(pols.selEq[5][offset]) || !fr.isZero(pols.selEq[6][offset]))
-        {
-            pols.resultEq1[offset + 31] = fr.one();
-        }
-        if (!fr.isZero(pols.selEq[2][offset]) && !fr.isZero(pols.selEq[3][offset]))
-        {
-            pols.resultEq2[offset + 31] = fr.one();
-        }
+        pols.resultEq[offset + 31] = fr.one();
     }
     
     zklog.info("ArithExecutor successfully processed " + to_string(action.size()) + " arith actions (" + to_string((double(action.size())*32*100)/N) + "%)");

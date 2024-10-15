@@ -41,6 +41,7 @@ string RomLine::toString(Goldilocks &fr)
     if (bElseAddrPresent) result += " elseAddr=" + fr.toString(elseAddr,10) + " elseAddrLabel=" + elseAddrLabel;
     if (mOp != 0) result += " mOp=" + to_string(mOp);
     if (mWR != 0) result += " mWR=" + to_string(mWR);
+    if (assumeFree != 0) result += " assumeFree=" + to_string(assumeFree);
     if (hashK != 0) result += " hashK=" + to_string(hashK);
     if (hashK1 != 0) result += " hashK1=" + to_string(hashK1);
     if (hashKLen != 0) result += " hashKLen=" + to_string(hashKLen);
@@ -87,12 +88,10 @@ string RomLine::toString(Goldilocks &fr)
 
     if (sRD != 0) result += " sRD=" + to_string(sRD);
     if (sWR != 0) result += " sWR=" + to_string(sWR);
-    if (arithEq0 != 0) result += " arithEq0=" + to_string(arithEq0);
-    if (arithEq1 != 0) result += " arithEq1=" + to_string(arithEq1);
-    if (arithEq2 != 0) result += " arithEq2=" + to_string(arithEq2);
-    if (arithEq3 != 0) result += " arithEq3=" + to_string(arithEq3);
-    if (arithEq4 != 0) result += " arithEq4=" + to_string(arithEq4);
-    if (arithEq5 != 0) result += " arithEq5=" + to_string(arithEq5);
+    if (arith != 0) result += " arith=" + to_string(arith);
+    if (arithEq != 0) result += " arithEq=" + to_string(arithEq);
+    if (arithSame12 != 0) result += " arithSame12=" + to_string(arithSame12);
+    if (arithUseE != 0) result += " arithUseE=" + to_string(arithUseE);
     if (bin != 0) result += " bin=" + to_string(bin);
     if (binOpcode != 0) result += " binOpcode=" + to_string(binOpcode);
     if (memAlignRD != 0) result += " memAlignRD=" + to_string(memAlignRD);

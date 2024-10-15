@@ -338,6 +338,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
 
         if (l["mOp"].is_number_integer()) line[i].mOp = l["mOp"]; else line[i].mOp = 0;
         if (l["mWR"].is_number_integer()) line[i].mWR = l["mWR"]; else line[i].mWR = 0;
+        if (l["assumeFree"].is_number_integer()) line[i].assumeFree = l["assumeFree"]; else line[i].assumeFree = 0;
         if (l["hashK"].is_number_integer()) line[i].hashK = l["hashK"]; else line[i].hashK = 0;
         if (l["hashK1"].is_number_integer()) line[i].hashK1 = l["hashK1"]; else line[i].hashK1 = 0;
         if (l["hashKLen"].is_number_integer()) line[i].hashKLen = l["hashKLen"]; else line[i].hashKLen = 0;
@@ -386,12 +387,10 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
  
         if (l["sRD"].is_number_integer()) line[i].sRD = l["sRD"]; else line[i].sRD = 0;
         if (l["sWR"].is_number_integer()) line[i].sWR = l["sWR"]; else line[i].sWR = 0;
-        if (l["arithEq0"].is_number_integer()) line[i].arithEq0 = l["arithEq0"]; else line[i].arithEq0 = 0;
-        if (l["arithEq1"].is_number_integer()) line[i].arithEq1 = l["arithEq1"]; else line[i].arithEq1 = 0;
-        if (l["arithEq2"].is_number_integer()) line[i].arithEq2 = l["arithEq2"]; else line[i].arithEq2 = 0;
-        if (l["arithEq3"].is_number_integer()) line[i].arithEq3 = l["arithEq3"]; else line[i].arithEq3 = 0;
-        if (l["arithEq4"].is_number_integer()) line[i].arithEq4 = l["arithEq4"]; else line[i].arithEq4 = 0;
-        if (l["arithEq5"].is_number_integer()) line[i].arithEq5 = l["arithEq5"]; else line[i].arithEq5 = 0;
+        if (l["arith"].is_number_integer()) line[i].arith = l["arith"]; else line[i].arith = 0;
+        if (l["arithEq"].is_number_integer()) line[i].arithEq = l["arithEq"]; else line[i].arithEq = 0;
+        if (l["arithSame12"].is_number_integer()) line[i].arithSame12 = l["arithSame12"]; else line[i].arithSame12 = 0;
+        if (l["arithUseE"].is_number_integer()) line[i].arithUseE = l["arithUseE"]; else line[i].arithUseE = 0;
         if (l["bin"].is_number_integer()) line[i].bin = l["bin"]; else line[i].bin = 0;
         if (l["binOpcode"].is_number_integer()) line[i].binOpcode = l["binOpcode"]; else line[i].binOpcode = 0;
         if (l["memAlignRD"].is_number_integer()) line[i].memAlignRD = l["memAlignRD"]; else line[i].memAlignRD = 0;

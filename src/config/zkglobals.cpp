@@ -38,3 +38,11 @@ RawBLS12_381_384 BLS12_381p;
 
 mpz_class  BLS12_381r_prime(BLS12_381r_prime_string);
 RawBLS12_381 BLS12_381r;
+
+mpz_class  aSecp256r1(aSecp256r1_string);
+
+mpz_class  pSecp256r1_prime(pSecp256r1_prime_string);
+RawpSecp256r1 pSecp256r1;
+
+mpz_class  nSecp256r1_prime(nSecp256r1_prime_string);
+RawnSecp256r1 nSecp256r1;

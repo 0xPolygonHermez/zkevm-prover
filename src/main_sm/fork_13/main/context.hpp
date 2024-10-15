@@ -131,6 +131,29 @@ public:
     };
 };
 
+// This class stores an elliptic curve addition operation result
+// [x3, y3] = [x1, y1] + [x2, y2]
+class EllipticCurveAddition_pSecp256r1
+{
+public:
+    bool bDouble;
+    RawpSecp256r1::Element x1;
+    RawpSecp256r1::Element y1;
+    RawpSecp256r1::Element x2;
+    RawpSecp256r1::Element y2;
+    RawpSecp256r1::Element x3;
+    RawpSecp256r1::Element y3;
+
+    EllipticCurveAddition_pSecp256r1() : bDouble(false) {
+        x1 = pSecp256r1.zero();
+        y1 = pSecp256r1.zero();
+        x2 = pSecp256r1.zero();
+        y2 = pSecp256r1.zero();
+        x3 = pSecp256r1.zero();
+        y3 = pSecp256r1.zero();
+    };
+};
+
 #ifdef ENABLE_EXPERIMENTAL_CODE
 class ECRecoverPrecalcBuffer
 {
@@ -160,6 +183,7 @@ public:
     uint64_t lastStep;
     mpz_class totalTransferredBalance; // Total transferred balance of all accounts, which should be 0 after any transfer
     EllipticCurveAddition lastECAdd; // Micro-cache of the last couple of added points, and the result
+    EllipticCurveAddition_pSecp256r1 lastECAdd_pSecp256r1; // Micro-cache of the last couple of added points, and the result
 #ifdef ENABLE_EXPERIMENTAL_CODE
     ECRecoverPrecalcBuffer ecRecoverPrecalcBuffer; // Buffer for precalculated points for ECRecover
 #endif
@@ -204,6 +228,7 @@ public:
         pHashDB(pHashDB),
         lastStep(0),
         lastECAdd(fec),
+        lastECAdd_pSecp256r1(),
     #ifdef ENABLE_EXPERIMENTAL_CODE
         ecRecoverPrecalcBuffer(),
     #endif

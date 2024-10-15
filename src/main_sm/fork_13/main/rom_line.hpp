@@ -53,6 +53,7 @@ public:
     string elseAddrLabel;
     uint8_t mOp;
     uint8_t mWR;
+    uint8_t assumeFree;
     uint8_t hashK;
     uint8_t hashK1;
     uint8_t hashKLen;
@@ -99,12 +100,10 @@ public:
     uint8_t setRCX;
     uint8_t sRD;
     uint8_t sWR;
-    uint8_t arithEq0;
-    uint8_t arithEq1;
-    uint8_t arithEq2;
-    uint8_t arithEq3;
-    uint8_t arithEq4;
-    uint8_t arithEq5;
+    uint8_t arith;
+    uint8_t arithEq;
+    uint8_t arithSame12;
+    uint8_t arithUseE;
     uint8_t bin;
     uint8_t binOpcode;
     vector<RomCommand *> cmdAfter;

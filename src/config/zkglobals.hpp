@@ -9,6 +9,8 @@
 #include "ffiasm/fq.hpp"
 #include "ffiasm/bls12_381.hpp"
 #include "ffiasm/bls12_381_384.hpp"
+#include "ffiasm/psecp256r1.hpp"
+#include "ffiasm/nsecp256r1.hpp"
 #include "config.hpp"
 #include <string>
 
@@ -59,5 +61,16 @@ extern RawBLS12_381_384 BLS12_381p;
 const  string     BLS12_381r_prime_string = "0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001";
 extern mpz_class  BLS12_381r_prime;
 extern RawBLS12_381 BLS12_381r;
+
+const  string     aSecp256r1_string = "0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc";
+extern mpz_class  aSecp256r1;
+
+const  string     pSecp256r1_prime_string = "0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff";
+extern mpz_class  pSecp256r1_prime;
+extern RawpSecp256r1 pSecp256r1;
+
+const  string     nSecp256r1_prime_string = "0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551";
+extern mpz_class  nSecp256r1_prime;
+extern RawnSecp256r1 nSecp256r1;
 
 #endif

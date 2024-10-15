@@ -15,8 +15,25 @@ zkresult Arith_verify ( Context &ctx,
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
 
+    uint64_t arithEq = ctx.rom.line[zkPC].arithEq;
+
+    // Write polynomials
+    if (!ctx.bProcessBatch)
+    {
+        ctx.pols.arith[i] = fr.one();
+        if ((arithEq == 3) || (arithEq == 8))
+        {
+            ctx.pols.arithSame12[i] = fr.one();
+        }
+        if (arithEq != 1)
+        {
+            ctx.pols.arithUseE[i] = fr.one();
+        }
+        ctx.pols.arithEq[i] = fr.fromU64(arithEq);
+    }
+
     // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
-    if (ctx.rom.line[zkPC].arithEq0==1 && ctx.rom.line[zkPC].arithEq1==0 && ctx.rom.line[zkPC].arithEq2==0 && ctx.rom.line[zkPC].arithEq3==0 && ctx.rom.line[zkPC].arithEq4==0 && ctx.rom.line[zkPC].arithEq5==0)
+    if (arithEq == 1)
     {
         // Convert to scalar
         mpz_class A, B, C, D, op;
@@ -56,11 +73,6 @@ zkresult Arith_verify ( Context &ctx,
         }
 
         // Store the arith action to execute it later with the arith SM
-        if (!ctx.bProcessBatch)
-        {
-            // Copy ROM flags into the polynomials
-            ctx.pols.arithEq0[i] = fr.one();
-        }
         if (required != NULL)
         {
             ArithAction arithAction;
@@ -70,18 +82,12 @@ zkresult Arith_verify ( Context &ctx,
             arithAction.y2 = D;
             arithAction.x3 = 0;
             arithAction.y3 = op;
-            arithAction.selEq0 = 1;
-            arithAction.selEq1 = 0;
-            arithAction.selEq2 = 0;
-            arithAction.selEq3 = 0;
-            arithAction.selEq4 = 0;
-            arithAction.selEq5 = 0;
-            arithAction.selEq6 = 0;
+            arithAction.arithEq = arithEq;
             required->Arith.push_back(arithAction);
         }
     }
     // Arithmetic FP2 multiplication
-    else if (ctx.rom.line[zkPC].arithEq0==0 && ctx.rom.line[zkPC].arithEq1==0 && ctx.rom.line[zkPC].arithEq2==0 && ctx.rom.line[zkPC].arithEq3==1 && ctx.rom.line[zkPC].arithEq4==0 && ctx.rom.line[zkPC].arithEq5==0)
+    else if (arithEq == 4)
     {
         // Convert to scalar
         mpz_class x1, y1, x2, y2, x3, y3;
@@ -141,11 +147,6 @@ zkresult Arith_verify ( Context &ctx,
         }
 
         // Store the arith action to execute it later with the arith SM
-        if (!ctx.bProcessBatch)
-        {
-            // Copy ROM flags into the polynomials
-            ctx.pols.arithEq3[i] = fr.one();
-        }
         if (required != NULL)
         {
             ArithAction arithAction;
@@ -155,18 +156,12 @@ zkresult Arith_verify ( Context &ctx,
             arithAction.y2 = y2;
             arithAction.x3 = x3;
             arithAction.y3 = y3;
-            arithAction.selEq0 = 0;
-            arithAction.selEq1 = 0;
-            arithAction.selEq2 = 0;
-            arithAction.selEq3 = 0;
-            arithAction.selEq4 = 1;
-            arithAction.selEq5 = 0;
-            arithAction.selEq6 = 0;
+            arithAction.arithEq = arithEq;
             required->Arith.push_back(arithAction);
         }
     }
     // Arithmetic FP2 addition
-    else if (ctx.rom.line[zkPC].arithEq0==0 && ctx.rom.line[zkPC].arithEq1==0 && ctx.rom.line[zkPC].arithEq2==0 && ctx.rom.line[zkPC].arithEq3==0 && ctx.rom.line[zkPC].arithEq4==1 && ctx.rom.line[zkPC].arithEq5==0)
+    else if (arithEq == 5)
     {
         // Convert to scalar
         mpz_class x1, y1, x2, y2, x3, y3;
@@ -226,11 +221,6 @@ zkresult Arith_verify ( Context &ctx,
         }
 
         // Store the arith action to execute it later with the arith SM
-        if (!ctx.bProcessBatch)
-        {
-            // Copy ROM flags into the polynomials
-            ctx.pols.arithEq4[i] = fr.one();
-        }
         if (required != NULL)
         {
             ArithAction arithAction;
@@ -240,18 +230,12 @@ zkresult Arith_verify ( Context &ctx,
             arithAction.y2 = y2;
             arithAction.x3 = x3;
             arithAction.y3 = y3;
-            arithAction.selEq0 = 0;
-            arithAction.selEq1 = 0;
-            arithAction.selEq2 = 0;
-            arithAction.selEq3 = 0;
-            arithAction.selEq4 = 0;
-            arithAction.selEq5 = 1;
-            arithAction.selEq6 = 0;
+            arithAction.arithEq = arithEq;
             required->Arith.push_back(arithAction);
         }
     }
     // Arithmetic FP2 subtraction
-    else if (ctx.rom.line[zkPC].arithEq0==0 && ctx.rom.line[zkPC].arithEq1==0 && ctx.rom.line[zkPC].arithEq2==0 && ctx.rom.line[zkPC].arithEq3==0 && ctx.rom.line[zkPC].arithEq4==0 && ctx.rom.line[zkPC].arithEq5==1)
+    else if (arithEq == 6)
     {
         // Convert to scalar
         mpz_class x1, y1, x2, y2, x3, y3;
@@ -311,11 +295,6 @@ zkresult Arith_verify ( Context &ctx,
         }
 
         // Store the arith action to execute it later with the arith SM
-        if (!ctx.bProcessBatch)
-        {
-            // Copy ROM flags into the polynomials
-            ctx.pols.arithEq5[i] = fr.one();
-        }
         if (required != NULL)
         {
             ArithAction arithAction;
@@ -325,18 +304,12 @@ zkresult Arith_verify ( Context &ctx,
             arithAction.y2 = y2;
             arithAction.x3 = x3;
             arithAction.y3 = y3;
-            arithAction.selEq0 = 0;
-            arithAction.selEq1 = 0;
-            arithAction.selEq2 = 0;
-            arithAction.selEq3 = 0;
-            arithAction.selEq4 = 0;
-            arithAction.selEq5 = 0;
-            arithAction.selEq6 = 1;
+            arithAction.arithEq = arithEq;
             required->Arith.push_back(arithAction);
         }
     }
     // Arith instruction: check curve points
-    else
+    else if ((arithEq == 2) || (arithEq == 3) || (arithEq == 7) || (arithEq == 8))
     {
         // Convert to scalar
         mpz_class x1, y1, x2, y2, x3, y3;
@@ -380,33 +353,189 @@ zkresult Arith_verify ( Context &ctx,
 
         // Check if this is a double operation
         bool dbl = false;
-        if (ctx.rom.line[zkPC].arithEq0==0 && ctx.rom.line[zkPC].arithEq1==1 && ctx.rom.line[zkPC].arithEq2==0 && ctx.rom.line[zkPC].arithEq3==0 && ctx.rom.line[zkPC].arithEq4==0 && ctx.rom.line[zkPC].arithEq5==0)
+        if ((arithEq == 2) || (arithEq == 7))
         {
             dbl = false;
         }
-        else if (ctx.rom.line[zkPC].arithEq0==0 && ctx.rom.line[zkPC].arithEq1==0 && ctx.rom.line[zkPC].arithEq2==1 && ctx.rom.line[zkPC].arithEq3==0 && ctx.rom.line[zkPC].arithEq4==0 && ctx.rom.line[zkPC].arithEq5==0)
+        else if ((arithEq == 3) || (arithEq == 8))
         {
             dbl = true;
         }
         else
         {
-            zklog.error("Arith_verify() Invalid arithmetic op");
+            zklog.error("Arith_verify() Invalid arithmetic op arithEq=" + to_string(arithEq));
             exitProcess();
         }
 
-        // Add the elliptic curve points
-        RawFec::Element fecX3, fecY3;
-        zkresult r = AddPointEc(ctx, dbl, fecX1, fecY1, dbl?fecX1:fecX2, dbl?fecY1:fecY2, fecX3, fecY3);
-        if (r != ZKR_SUCCESS)
-        {
-            zklog.error("Arith_verify() Failed calling AddPointEc() in arith operation");
-            return r;
-        }
-
-        // Convert to scalar
+        // Resulting third point coordinates
         mpz_class _x3, _y3;
-        fec.toMpz(_x3.get_mpz_t(), fecX3);
-        fec.toMpz(_y3.get_mpz_t(), fecY3);
+
+        // Secp256r1 finite field case
+        if ((arithEq == 7) || (arithEq == 8))
+        {
+            // Get field element versions of the point coordinates
+            RawpSecp256r1::Element x1fe;
+            pSecp256r1.fromMpz(x1fe, x1.get_mpz_t());
+            RawpSecp256r1::Element y1fe;
+            pSecp256r1.fromMpz(y1fe, y1.get_mpz_t());
+            RawpSecp256r1::Element x2fe;
+            pSecp256r1.fromMpz(x2fe, x2.get_mpz_t());
+            RawpSecp256r1::Element y2fe;
+            pSecp256r1.fromMpz(y2fe, y2.get_mpz_t());
+            RawpSecp256r1::Element x3fe;
+            RawpSecp256r1::Element y3fe;
+
+            RawpSecp256r1::Element s;
+
+            if (dbl)
+            {
+                // Calculate s divisor
+                // Division by zero must be managed by ROM before call ARITH
+                RawpSecp256r1::Element divisor;
+                divisor = pSecp256r1.add(y1fe, y1fe);
+                if (pSecp256r1.isZero(divisor))
+                {
+                    zklog.error("Arith_verify() got divisor=0");
+                    exitProcess();
+                }
+
+                // Calculate s, based on arith equation
+                if (arithEq == 8)
+                {
+                    RawpSecp256r1::Element aux1;
+                    aux1 = pSecp256r1.mul(x1fe, x1fe);
+                    RawpSecp256r1::Element aux2;
+                    aux2 = pSecp256r1.mul(3, aux1);
+                    RawpSecp256r1::Element prime;
+                    pSecp256r1.fromMpz(prime, aSecp256r1.get_mpz_t());
+                    RawpSecp256r1::Element aux3;
+                    aux3 = pSecp256r1.add(aux2, prime);
+                    pSecp256r1.div(s, aux3, divisor);
+                }
+                else
+                {
+                    RawpSecp256r1::Element aux1;
+                    aux1 = pSecp256r1.mul(x1fe, x1fe);
+                    RawpSecp256r1::Element aux2;
+                    aux2 = pSecp256r1.mul(3, aux1);
+                    pSecp256r1.div(s, aux2, divisor);
+                }
+            }
+            else
+            {
+                // Calculate s divisor
+                // Division by zero must be managed by ROM before call ARITH
+                RawpSecp256r1::Element deltaX;
+                deltaX = pSecp256r1.sub(x2fe, x1fe);
+                if (pSecp256r1.isZero(deltaX))
+                {
+                    zklog.error("Arith_verify() got deltaX=0");
+                    exitProcess();
+                }
+
+                // Calculate s
+                RawpSecp256r1::Element aux1;
+                aux1 = pSecp256r1.sub(y2fe, y1fe);
+                pSecp256r1.div(s, aux1, deltaX);
+            }
+
+            // Calculate x3
+            RawpSecp256r1::Element aux1;
+            aux1 = pSecp256r1.add(x1fe, dbl ? x1fe : x2fe);
+            RawpSecp256r1::Element aux2;
+            aux2 = pSecp256r1.mul(s, s);
+            x3fe = pSecp256r1.sub(aux2, aux1);
+            pSecp256r1.toMpz(_x3.get_mpz_t(), x3fe);
+
+            // Calculate y3
+            aux1 = pSecp256r1.sub(x1fe, x3fe);
+            aux2 = pSecp256r1.mul(s, aux1);
+            y3fe = pSecp256r1.sub(aux2, y1fe);
+            pSecp256r1.toMpz(_y3.get_mpz_t(), y3fe);
+        }
+        // Secp256k1p finite field case
+        else
+        {
+            // Get field element versions of the point coordinates
+            RawFec::Element x1fe;
+            Secp256k1p.fromMpz(x1fe, x1.get_mpz_t());
+            RawFec::Element y1fe;
+            Secp256k1p.fromMpz(y1fe, y1.get_mpz_t());
+            RawFec::Element x2fe;
+            Secp256k1p.fromMpz(x2fe, x2.get_mpz_t());
+            RawFec::Element y2fe;
+            Secp256k1p.fromMpz(y2fe, y2.get_mpz_t());
+            RawFec::Element x3fe;
+            RawFec::Element y3fe;
+
+            RawFec::Element s;
+
+            if (dbl)
+            {
+                // Calculate s divisor
+                // Division by zero must be managed by ROM before call ARITH
+                RawFec::Element divisor;
+                divisor = Secp256k1p.add(y1fe, y1fe);
+                if (Secp256k1p.isZero(divisor))
+                {
+                    zklog.error("Arith_verify() got divisor=0");
+                    exitProcess();
+                }
+
+                // Calculate s, based on arith equation
+                if (arithEq == 8)
+                {
+                    RawFec::Element aux1;
+                    aux1 = Secp256k1p.mul(x1fe, x1fe);
+                    RawFec::Element aux2;
+                    aux2 = Secp256k1p.mul(3, aux1);
+                    RawFec::Element prime;
+                    Secp256k1p.fromMpz(prime, aSecp256r1.get_mpz_t());
+                    RawFec::Element aux3;
+                    aux3 = Secp256k1p.add(aux2, prime);
+                    Secp256k1p.div(s, aux3, divisor);
+                }
+                else
+                {
+                    RawFec::Element aux1;
+                    aux1 = Secp256k1p.mul(x1fe, x1fe);
+                    RawFec::Element aux2;
+                    aux2 = Secp256k1p.mul(3, aux1);
+                    Secp256k1p.div(s, aux2, divisor);
+                }
+            }
+            else
+            {
+                // Calculate s divisor
+                // Division by zero must be managed by ROM before call ARITH
+                RawFec::Element deltaX;
+                deltaX = Secp256k1p.sub(x2fe, x1fe);
+                if (Secp256k1p.isZero(deltaX))
+                {
+                    zklog.error("Arith_verify() got deltaX=0");
+                    exitProcess();
+                }
+
+                // Calculate s
+                RawFec::Element aux1;
+                aux1 = Secp256k1p.sub(y2fe, y1fe);
+                Secp256k1p.div(s, aux1, deltaX);
+            }
+
+            // Calculate x3
+            RawFec::Element aux1;
+            aux1 = Secp256k1p.add(x1fe, dbl ? x1fe : x2fe);
+            RawFec::Element aux2;
+            aux2 = Secp256k1p.mul(s, s);
+            x3fe = Secp256k1p.sub(aux2, aux1);
+            Secp256k1p.toMpz(_x3.get_mpz_t(), x3fe);
+
+            // Calculate y3
+            aux1 = Secp256k1p.sub(x1fe, x3fe);
+            aux2 = Secp256k1p.mul(s, aux1);
+            y3fe = Secp256k1p.sub(aux2, y1fe);
+            Secp256k1p.toMpz(_y3.get_mpz_t(), y3fe);
+        }
 
         // Compare
         bool x3eq = (x3 == _x3);
@@ -426,12 +555,6 @@ zkresult Arith_verify ( Context &ctx,
             return ZKR_SM_MAIN_ARITH_ECRECOVER_MISMATCH;
         }
 
-        if (!ctx.bProcessBatch)
-        {
-            ctx.pols.arithEq0[i] = fr.fromU64(ctx.rom.line[zkPC].arithEq0);
-            ctx.pols.arithEq1[i] = fr.fromU64(ctx.rom.line[zkPC].arithEq1);
-            ctx.pols.arithEq2[i] = fr.fromU64(ctx.rom.line[zkPC].arithEq2);
-        }
         if (required != NULL)
         {
             // Store the arith action to execute it later with the arith SM
@@ -442,13 +565,7 @@ zkresult Arith_verify ( Context &ctx,
             arithAction.y2 = dbl ? y1 : y2;
             arithAction.x3 = x3;
             arithAction.y3 = y3;
-            arithAction.selEq0 = 0;
-            arithAction.selEq1 = dbl ? 0 : 1;
-            arithAction.selEq2 = dbl ? 1 : 0;
-            arithAction.selEq3 = 1;
-            arithAction.selEq4 = 0;
-            arithAction.selEq5 = 0;
-            arithAction.selEq6 = 0;
+            arithAction.arithEq = arithEq;
             required->Arith.push_back(arithAction);
         }
     }
