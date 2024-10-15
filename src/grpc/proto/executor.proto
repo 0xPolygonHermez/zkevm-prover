@@ -314,6 +314,9 @@ message ProcessStatelessBatchRequestV2 {
 
     // Mapping to provide minTimestamp for each l1InfoTreeIndex in a batch
     map<uint64, uint64> l1_info_tree_index_min_timestamp = 10;
+
+    // flag to indicate that counters should not be taken into account
+    uint32 no_counters = 11;
 }
 
 message L1DataV2 {
