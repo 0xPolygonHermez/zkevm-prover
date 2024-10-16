@@ -14,8 +14,12 @@ zkresult Arith_verify ( Context &ctx,
     uint64_t zkPC = *ctx.pZKPC;
     zkassert(ctx.pStep != NULL);
     uint64_t i = *ctx.pStep;
+    //zkassert(ctx.pEvaluation != NULL);
+    //uint64_t evaluation = *ctx.pEvaluation;
 
     uint64_t arithEq = ctx.rom.line[zkPC].arithEq;
+
+    //zklog.info("Arith_verify() arithEq=" + to_string(arithEq));
 
     // Write polynomials
     if (!ctx.bProcessBatch)
@@ -344,13 +348,6 @@ zkresult Arith_verify ( Context &ctx,
             return ZKR_SM_MAIN_FEA2SCALAR;
         }
 
-        // Convert to RawFec::Element
-        RawFec::Element fecX1, fecY1, fecX2, fecY2;
-        fec.fromMpz(fecX1, x1.get_mpz_t());
-        fec.fromMpz(fecY1, y1.get_mpz_t());
-        fec.fromMpz(fecX2, x2.get_mpz_t());
-        fec.fromMpz(fecY2, y2.get_mpz_t());
-
         // Check if this is a double operation
         bool dbl = false;
         if ((arithEq == 2) || (arithEq == 7))
@@ -379,9 +376,9 @@ zkresult Arith_verify ( Context &ctx,
             RawpSecp256r1::Element y1fe;
             pSecp256r1.fromMpz(y1fe, y1.get_mpz_t());
             RawpSecp256r1::Element x2fe;
-            pSecp256r1.fromMpz(x2fe, x2.get_mpz_t());
+            if (!dbl) pSecp256r1.fromMpz(x2fe, x2.get_mpz_t());
             RawpSecp256r1::Element y2fe;
-            pSecp256r1.fromMpz(y2fe, y2.get_mpz_t());
+            if (!dbl) pSecp256r1.fromMpz(y2fe, y2.get_mpz_t());
             RawpSecp256r1::Element x3fe;
             RawpSecp256r1::Element y3fe;
 
@@ -392,7 +389,7 @@ zkresult Arith_verify ( Context &ctx,
                 // Calculate s divisor
                 // Division by zero must be managed by ROM before call ARITH
                 RawpSecp256r1::Element divisor;
-                divisor = pSecp256r1.add(y1fe, y1fe);
+                divisor = pSecp256r1.add(y1fe, y1fe); // divisor = 2*y1
                 if (pSecp256r1.isZero(divisor))
                 {
                     zklog.error("Arith_verify() got divisor=0");
@@ -400,33 +397,20 @@ zkresult Arith_verify ( Context &ctx,
                 }
 
                 // Calculate s, based on arith equation
-                if (arithEq == 8)
-                {
-                    RawpSecp256r1::Element aux1;
-                    aux1 = pSecp256r1.mul(x1fe, x1fe);
-                    RawpSecp256r1::Element aux2;
-                    aux2 = pSecp256r1.mul(3, aux1);
-                    RawpSecp256r1::Element prime;
-                    pSecp256r1.fromMpz(prime, aSecp256r1.get_mpz_t());
-                    RawpSecp256r1::Element aux3;
-                    aux3 = pSecp256r1.add(aux2, prime);
-                    pSecp256r1.div(s, aux3, divisor);
-                }
-                else
-                {
-                    RawpSecp256r1::Element aux1;
-                    aux1 = pSecp256r1.mul(x1fe, x1fe);
-                    RawpSecp256r1::Element aux2;
-                    aux2 = pSecp256r1.mul(3, aux1);
-                    pSecp256r1.div(s, aux2, divisor);
-                }
+                RawpSecp256r1::Element aux1;
+                aux1 = pSecp256r1.mul(x1fe, x1fe); // aux1 = x1*x1
+                RawpSecp256r1::Element aux2;
+                aux2 = pSecp256r1.mul(3, aux1); // aux2 = 3*x1*x1
+                RawpSecp256r1::Element aux3;
+                aux3 = pSecp256r1.add(aux2, aSecp256r1_fe); // aux3 = 3*x1*x1 + a
+                pSecp256r1.div(s, aux3, divisor); // s = (3*x1*x1 + a) / divisor = (3*x1*x1 + a) / 2*y1
             }
             else
             {
                 // Calculate s divisor
                 // Division by zero must be managed by ROM before call ARITH
                 RawpSecp256r1::Element deltaX;
-                deltaX = pSecp256r1.sub(x2fe, x1fe);
+                deltaX = pSecp256r1.sub(x2fe, x1fe); // deltaX = x2 - x1
                 if (pSecp256r1.isZero(deltaX))
                 {
                     zklog.error("Arith_verify() got deltaX=0");
@@ -435,23 +419,23 @@ zkresult Arith_verify ( Context &ctx,
 
                 // Calculate s
                 RawpSecp256r1::Element aux1;
-                aux1 = pSecp256r1.sub(y2fe, y1fe);
-                pSecp256r1.div(s, aux1, deltaX);
+                aux1 = pSecp256r1.sub(y2fe, y1fe); // aux1 = y2 - y1
+                pSecp256r1.div(s, aux1, deltaX); // s = (y2 - y1) / deltaX = (y2 - y1) / (x2 - x1)
             }
 
-            // Calculate x3
+            // Calculate x3 = s*s - (x1 + x1|x2)
             RawpSecp256r1::Element aux1;
-            aux1 = pSecp256r1.add(x1fe, dbl ? x1fe : x2fe);
+            aux1 = pSecp256r1.add(x1fe, dbl ? x1fe : x2fe); // aux1 = x1 + x1|x2
             RawpSecp256r1::Element aux2;
-            aux2 = pSecp256r1.mul(s, s);
-            x3fe = pSecp256r1.sub(aux2, aux1);
-            pSecp256r1.toMpz(_x3.get_mpz_t(), x3fe);
+            aux2 = pSecp256r1.mul(s, s); // aux2 = s*s
+            x3fe = pSecp256r1.sub(aux2, aux1); // x3 = s*s - (x1 + x1|x2)
+            pSecp256r1.toMpz(_x3.get_mpz_t(), x3fe); // convert x3 to scalar _x3
 
-            // Calculate y3
-            aux1 = pSecp256r1.sub(x1fe, x3fe);
-            aux2 = pSecp256r1.mul(s, aux1);
-            y3fe = pSecp256r1.sub(aux2, y1fe);
-            pSecp256r1.toMpz(_y3.get_mpz_t(), y3fe);
+            // Calculate y3 = s(x1 - x3) - y1
+            aux1 = pSecp256r1.sub(x1fe, x3fe); // aux1 = x1 - x3
+            aux2 = pSecp256r1.mul(s, aux1); // aux2 = s(x1 - x3)
+            y3fe = pSecp256r1.sub(aux2, y1fe); // y3 = s(x1 - x3) - y1
+            pSecp256r1.toMpz(_y3.get_mpz_t(), y3fe); // convert y3 to scalar _y3
         }
         // Secp256k1p finite field case
         else
@@ -473,9 +457,9 @@ zkresult Arith_verify ( Context &ctx,
             if (dbl)
             {
                 // Calculate s divisor
-                // Division by zero must be managed by ROM before call ARITH
+                // Division by zero must be managed by ROM before calling ARITH
                 RawFec::Element divisor;
-                divisor = Secp256k1p.add(y1fe, y1fe);
+                divisor = Secp256k1p.add(y1fe, y1fe); // divisor = 2*y1
                 if (Secp256k1p.isZero(divisor))
                 {
                     zklog.error("Arith_verify() got divisor=0");
@@ -483,33 +467,18 @@ zkresult Arith_verify ( Context &ctx,
                 }
 
                 // Calculate s, based on arith equation
-                if (arithEq == 8)
-                {
-                    RawFec::Element aux1;
-                    aux1 = Secp256k1p.mul(x1fe, x1fe);
-                    RawFec::Element aux2;
-                    aux2 = Secp256k1p.mul(3, aux1);
-                    RawFec::Element prime;
-                    Secp256k1p.fromMpz(prime, aSecp256r1.get_mpz_t());
-                    RawFec::Element aux3;
-                    aux3 = Secp256k1p.add(aux2, prime);
-                    Secp256k1p.div(s, aux3, divisor);
-                }
-                else
-                {
-                    RawFec::Element aux1;
-                    aux1 = Secp256k1p.mul(x1fe, x1fe);
-                    RawFec::Element aux2;
-                    aux2 = Secp256k1p.mul(3, aux1);
-                    Secp256k1p.div(s, aux2, divisor);
-                }
+                RawFec::Element aux1;
+                aux1 = Secp256k1p.mul(x1fe, x1fe); // aux1 = x1*x1
+                RawFec::Element aux2;
+                aux2 = Secp256k1p.mul(3, aux1); // aux2 = 3*x1*x1
+                Secp256k1p.div(s, aux2, divisor); // s = 3*x1*x1 / divisor = 3*x1*x1 / 2*y1
             }
             else
             {
                 // Calculate s divisor
                 // Division by zero must be managed by ROM before call ARITH
                 RawFec::Element deltaX;
-                deltaX = Secp256k1p.sub(x2fe, x1fe);
+                deltaX = Secp256k1p.sub(x2fe, x1fe); // deltaX = x2 - x1
                 if (Secp256k1p.isZero(deltaX))
                 {
                     zklog.error("Arith_verify() got deltaX=0");
@@ -518,26 +487,26 @@ zkresult Arith_verify ( Context &ctx,
 
                 // Calculate s
                 RawFec::Element aux1;
-                aux1 = Secp256k1p.sub(y2fe, y1fe);
-                Secp256k1p.div(s, aux1, deltaX);
+                aux1 = Secp256k1p.sub(y2fe, y1fe); // aux1 = y2 - y1
+                Secp256k1p.div(s, aux1, deltaX); // s = (y2 - y1) / (x2 - x1)
             }
 
             // Calculate x3
             RawFec::Element aux1;
-            aux1 = Secp256k1p.add(x1fe, dbl ? x1fe : x2fe);
+            aux1 = Secp256k1p.add(x1fe, dbl ? x1fe : x2fe); // aux1 = x1 + x1|x2
             RawFec::Element aux2;
-            aux2 = Secp256k1p.mul(s, s);
-            x3fe = Secp256k1p.sub(aux2, aux1);
-            Secp256k1p.toMpz(_x3.get_mpz_t(), x3fe);
+            aux2 = Secp256k1p.mul(s, s); // aux2 = s*s
+            x3fe = Secp256k1p.sub(aux2, aux1); // x3 = s*s - (x1 + x1|x2)
+            Secp256k1p.toMpz(_x3.get_mpz_t(), x3fe); // convert x3 to scalar _x3
 
             // Calculate y3
-            aux1 = Secp256k1p.sub(x1fe, x3fe);
-            aux2 = Secp256k1p.mul(s, aux1);
-            y3fe = Secp256k1p.sub(aux2, y1fe);
-            Secp256k1p.toMpz(_y3.get_mpz_t(), y3fe);
+            aux1 = Secp256k1p.sub(x1fe, x3fe); // aux1 = x1 - x3
+            aux2 = Secp256k1p.mul(s, aux1); // aux2 = s(x1 - x3)
+            y3fe = Secp256k1p.sub(aux2, y1fe); // y3 = s(x1 - x3) - y1
+            Secp256k1p.toMpz(_y3.get_mpz_t(), y3fe); // convert y3 to scalar _y3
         }
 
-        // Compare
+        // Compare expected vs. calculated results
         bool x3eq = (x3 == _x3);
         bool y3eq = (y3 == _y3);
 
@@ -550,8 +519,8 @@ zkresult Arith_verify ( Context &ctx,
                 " y2=" + y2.get_str() +
                 " x3=" + x3.get_str() +
                 " y3=" + y3.get_str() +
-                "_x3=" + _x3.get_str() +
-                "_y3=" + _y3.get_str());
+                " _x3=" + _x3.get_str() +
+                " _y3=" + _y3.get_str());
             return ZKR_SM_MAIN_ARITH_ECRECOVER_MISMATCH;
         }
 

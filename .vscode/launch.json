@@ -218,6 +218,27 @@
       "miDebuggerPath": "/usr/bin/gdb"
     },
     {
+      "name": "main_generator_10",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/mainGenerator10",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build main generator",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
       "name": "pols_generator",
       "type": "cppdbg",
       "request": "launch",

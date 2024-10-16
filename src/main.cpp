@@ -366,6 +366,9 @@ int main(int argc, char **argv)
     // Create one instance of the Poseidon hash library
     PoseidonGoldilocks poseidon;
 
+    // Init globals
+    zkGlobalsInit();
+
 #ifdef DEBUG
     zklog.info("BN128 p-1 =" + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
     zklog.info("FQ    p-1 =" + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));

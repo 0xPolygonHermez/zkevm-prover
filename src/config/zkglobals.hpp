@@ -64,6 +64,7 @@ extern RawBLS12_381 BLS12_381r;
 
 const  string     aSecp256r1_string = "0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc";
 extern mpz_class  aSecp256r1;
+extern RawpSecp256r1::Element aSecp256r1_fe;
 
 const  string     pSecp256r1_prime_string = "0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff";
 extern mpz_class  pSecp256r1_prime;
@@ -72,5 +73,7 @@ extern RawpSecp256r1 pSecp256r1;
 const  string     nSecp256r1_prime_string = "0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551";
 extern mpz_class  nSecp256r1_prime;
 extern RawnSecp256r1 nSecp256r1;
+
+void zkGlobalsInit (void);
 
 #endif

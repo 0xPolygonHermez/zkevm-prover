@@ -2637,7 +2637,7 @@ void eval_AddPointEc_pSecp256r1 (Context &ctx, const RomCommand &cmd, bool dbl, 
     // Check parameters list size
     if (cmd.params.size() != (dbl ? 2 : 4))
     {
-        zklog.error("eval_AddPointEc_pSecp256r1() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_AddPointEc_pSecp256r1() invalid number of parameters function " + function2String(cmd.function) + " dbl=" + to_string(dbl) + " params.size=" + to_string(cmd.params.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -2736,40 +2736,41 @@ zkresult AddPointEc_pSecp256r1 (Context &ctx, bool dbl, const RawpSecp256r1::Ele
 
     if (dbl)
     {
-        // s = 3*x1*x1/2*y1
-        pSecp256r1.mul(aux1, x1, x1);
+        // s = (3*x1*x1 + a)/2*y1
+        pSecp256r1.mul(aux1, x1, x1); // aux1 = x1*x1
         pSecp256r1.fromUI(aux2, 3);
-        pSecp256r1.mul(aux1, aux1, aux2);
-        pSecp256r1.add(aux2, y1, y1);
+        pSecp256r1.mul(aux1, aux1, aux2); // aux1 = 3*x1*x1
+        pSecp256r1.add(aux1, aux1, aSecp256r1_fe); // aux1 = 3*x1*x1 + a
+        pSecp256r1.add(aux2, y1, y1); // aux2 = 2*y1
         if (pSecp256r1.isZero(aux2))
         {
             zklog.error("AddPointEc_pSecp256r1() got denominator=0 1");
             return ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO;
         }
-        pSecp256r1.div(s, aux1, aux2);
+        pSecp256r1.div(s, aux1, aux2); // s = (3*x1*x1 + a)/2*y1
     }
     else
     {
-        // s = (y2-y1)/(x2-x1)
-        pSecp256r1.sub(aux1, y2, y1);
-        pSecp256r1.sub(aux2, x2, x1);
+        // s = (y2 - y1)/(x2 - x1)
+        pSecp256r1.sub(aux1, y2, y1); // aux1 = y2 - y1
+        pSecp256r1.sub(aux2, x2, x1); // aux2 = x2 - x1
         if (pSecp256r1.isZero(aux2))
         {
             zklog.error("AddPointEc_pSecp256r1() got denominator=0 2");
             return ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO;
         }
-        pSecp256r1.div(s, aux1, aux2);
+        pSecp256r1.div(s, aux1, aux2); // s = (y2 - y1)/(x2 - x1)
     }
 
-    // x3 = s*s - (x1+x2)
-    pSecp256r1.mul(aux1, s, s);
-    pSecp256r1.add(aux2, x1, x2);
-    pSecp256r1.sub(x3, aux1, aux2);
+    // x3 = s*s - (x1 + x2)
+    pSecp256r1.mul(aux1, s, s); // aux1 = s*s
+    pSecp256r1.add(aux2, x1, x2); // aux2 = x1 + x2
+    pSecp256r1.sub(x3, aux1, aux2); // x3 = s*s - (x1 + x2)
 
-    // y3 = s*(x1-x3) - y1
-    pSecp256r1.sub(aux1, x1, x3);;
-    pSecp256r1.mul(aux1, aux1, s);
-    pSecp256r1.sub(y3, aux1, y1);
+    // y3 = s*(x1 - x3) - y1
+    pSecp256r1.sub(aux1, x1, x3);; // aux1 = x1 - x3
+    pSecp256r1.mul(aux2, aux1, s); // aux2 = s*(x1 - x3)
+    pSecp256r1.sub(y3, aux2, y1); // y3 = s*(x1 - x3) - y1
 
     // Save parameters and result for later reuse
     ctx.lastECAdd_pSecp256r1.bDouble = dbl;
