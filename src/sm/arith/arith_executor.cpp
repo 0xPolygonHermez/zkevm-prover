@@ -115,7 +115,7 @@ const uint64_t EQ_INDEX_TO_CARRY_INDEX[15] = { 0, 0, 0, 1, 2, 1, 2, 1, 2, 1, 2, 
 class ArithInfo
 {
 public:
-    uint64_t selEq[10];
+    uint64_t selEq[8];
     vector<uint64_t> eqIndexes;
     uint64_t primeIndex;
     bool checkAliasFree;
@@ -128,11 +128,48 @@ public:
         primeIndex(false),
         checkAliasFree(false),
         checkDifferent(false) {
-            for (uint64_t i=0; i<10; i++)
+            for (uint64_t i=0; i<8; i++)
             {
                 selEq[i] = 0;
             }
         };
+    string toString(void)
+    {
+        string s;
+
+        s += "name=" + name;
+
+        s += " curve=" + curve;
+
+        s += " prime=" + prime.get_str(16);
+
+        if (a != 0)
+            s += " a=" + a.get_str(16);
+
+        s += " selEq=[";
+        for (uint64_t i=0; i<8; i++)
+        {
+            s += to_string(selEq[i]);
+            if (i != 7) s += ",";
+            else s += "]";
+        }
+        
+        s += " eqIndexes=[";
+        for (uint64_t i=0; i<eqIndexes.size(); i++)
+        {
+            s += to_string(eqIndexes[i]);
+            if (i != (eqIndexes.size() - 1)) s += ",";
+            else s += "]";
+        }
+
+        s += " primeIndex=" + to_string(primeIndex);
+
+        s += " checkAliasFree=" + to_string(checkAliasFree);
+
+        s += " checkDifferent=" + to_string(checkDifferent);
+
+        return s;
+    }
 };
 
 void getArithInfo(uint64_t arithEq, ArithInfo &arithInfo)
@@ -147,7 +184,6 @@ void getArithInfo(uint64_t arithEq, ArithInfo &arithInfo)
 
         case ARITH_ECADD_DIFFERENT:
             arithInfo.selEq[1] = 1;
-            arithInfo.selEq[3] = 1;
             arithInfo.eqIndexes.push_back(1); // s.diff, x3, y3
             arithInfo.eqIndexes.push_back(3);
             arithInfo.eqIndexes.push_back(4);
@@ -161,7 +197,6 @@ void getArithInfo(uint64_t arithEq, ArithInfo &arithInfo)
 
         case ARITH_ECADD_SAME:
             arithInfo.selEq[2] = 1;
-            arithInfo.selEq[3] = 1;
             arithInfo.eqIndexes.push_back(2); // s.diff, x3, y3
             arithInfo.eqIndexes.push_back(3);
             arithInfo.eqIndexes.push_back(4);
@@ -174,7 +209,7 @@ void getArithInfo(uint64_t arithEq, ArithInfo &arithInfo)
             break;
 
         case ARITH_BN254_MULFP2:
-            arithInfo.selEq[4] = 1;
+            arithInfo.selEq[3] = 1;
             arithInfo.eqIndexes.push_back(5); // x3, y3
             arithInfo.eqIndexes.push_back(6);
             arithInfo.primeIndex = PRIME_BN254_INDEX;
@@ -186,7 +221,7 @@ void getArithInfo(uint64_t arithEq, ArithInfo &arithInfo)
             break;
 
         case ARITH_BN254_ADDFP2:
-            arithInfo.selEq[5] = 1;
+            arithInfo.selEq[4] = 1;
             arithInfo.eqIndexes.push_back(7); // x3, y3
             arithInfo.eqIndexes.push_back(8);
             arithInfo.primeIndex = PRIME_BN254_INDEX;
@@ -198,7 +233,7 @@ void getArithInfo(uint64_t arithEq, ArithInfo &arithInfo)
             break;
 
         case ARITH_BN254_SUBFP2:
-            arithInfo.selEq[6] = 1;
+            arithInfo.selEq[5] = 1;
             arithInfo.eqIndexes.push_back(9); // x3, y3
             arithInfo.eqIndexes.push_back(10);
             arithInfo.primeIndex = PRIME_BN254_INDEX;
@@ -210,8 +245,7 @@ void getArithInfo(uint64_t arithEq, ArithInfo &arithInfo)
             break;
 
         case ARITH_SECP256R1_ECADD_DIFFERENT:
-            arithInfo.selEq[7] = 1;
-            arithInfo.selEq[9] = 1;
+            arithInfo.selEq[6] = 1;
             arithInfo.eqIndexes.push_back(11); // s.diff, x3, y3
             arithInfo.eqIndexes.push_back(13);
             arithInfo.eqIndexes.push_back(14);
@@ -224,8 +258,7 @@ void getArithInfo(uint64_t arithEq, ArithInfo &arithInfo)
             break;
 
         case ARITH_SECP256R1_ECADD_SAME:
-            arithInfo.selEq[8] = 1;
-            arithInfo.selEq[9] = 1;
+            arithInfo.selEq[7] = 1;
             arithInfo.eqIndexes.push_back(12); // s.diff, x3, y3
             arithInfo.eqIndexes.push_back(13);
             arithInfo.eqIndexes.push_back(14);
@@ -446,6 +479,8 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 zklog.error("ArithExecutor::execute() Invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input=" + to_string(i));
                 exitProcess();
             }
+
+            calculateS = true;
 
             // Convert scalars to field elements
             RawFec::Element x1;
@@ -786,7 +821,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         }
 
         mpz_class carry[3] = {0, 0, 0};
-        mpz_class eq[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        mpz_class eq[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         mpz_class auxScalar;
         for (uint64_t step=0; step<32; step++)
@@ -820,9 +855,10 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 if (((eq[eqIndex] + carry[carryIndex]) % ScalarTwoTo16) != 0)
                 {
                     zklog.error("ArithExecutor::execute() For input " + to_string(i) +
+                        " step=" + to_string(step) + " k=" + to_string(k) + 
                         " eq[" + to_string(eqIndex) + "]=" + eq[eqIndex].get_str(16) +
                         " and carry[" + to_string(carryIndex) + "]=" + carry[carryIndex].get_str(16) +
-                        " do not sum 0 mod 2 to 16");
+                        " do not sum 0 mod 2 to 16; input=[" + input[i].toString() + "] arithInfo=[" + arithInfo.toString() + "]");
                     exitProcess();
                 }
                 carry[carryIndex] = (eq[eqIndex] + carry[carryIndex]) / ScalarTwoTo16;

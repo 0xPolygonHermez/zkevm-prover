@@ -45,6 +45,18 @@ public:
     uint64_t _q0[16];
     uint64_t _q1[16];
     uint64_t _q2[16];
+
+    string toString(void) {
+        string s;
+        s += "arithEq=" + to_string(arithEq) + " ";
+        s += "x1=" + x1.get_str(16) + " ";
+        s += "y1=" + y1.get_str(16) + " ";
+        s += "x2=" + x2.get_str(16) + " ";
+        s += "y2=" + y2.get_str(16) + " ";
+        s += "x3=" + x3.get_str(16) + " ";
+        s += "y3=" + y3.get_str(16) + " ";
+        return s;
+    }
 };
 
 #endif
