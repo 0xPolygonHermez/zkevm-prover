@@ -395,7 +395,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                     Secp256k1p.sub(aux2, x2, x1);
                     if (fec.isZero(aux2))
                     {
-                        zklog.error("ArithExecutor::execute() divide by zero calculating S for input " + to_string(i));
+                        zklog.error("ArithExecutor::execute() PRIME_SECP256K1_INDEX divide by zero calculating S for input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                         exitProcess();
                     }
                     Secp256k1p.div(s, aux1, aux2);
@@ -406,16 +406,16 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                     // Check result
                     mpz_class pq0;
                     pq0 = sScalar*input[i].x2 - sScalar*input[i].x1 - input[i].y2 + input[i].y1; // Worst values are {-2^256*(2^256-1),2^256*(2^256-1)}
-                    q0 = pq0/pFec;
-                    if ((pq0 - pFec*q0) != 0)
+                    q0 = pq0/arithInfo.prime;
+                    if ((pq0 - arithInfo.prime*q0) != 0)
                     {
-                        zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (diff point)");
+                        zklog.error("ArithExecutor::execute() PRIME_SECP256K1_INDEX with the calculated q0 the residual is not zero (diff point) input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                         exitProcess();
                     } 
                     q0 += ScalarTwoTo257;
                     if(q0 < 0)
                     {
-                        zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (diff point). Actual value: " + q0.get_str(16));
+                        zklog.error("ArithExecutor::execute() PRIME_SECP256K1_INDEX the q0 with offset is negative (diff point). Actual value: " + q0.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                         exitProcess();
                     }
                     break;
@@ -439,7 +439,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                     pSecp256r1.sub(aux2, x2, x1);
                     if (pSecp256r1.isZero(aux2))
                     {
-                        zklog.error("ArithExecutor::execute() divide by zero calculating S for input " + to_string(i));
+                        zklog.error("ArithExecutor::execute() PRIME_SECP256R1_INDEX divide by zero calculating S for input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                         exitProcess();
                     }
                     pSecp256r1.div(s, aux1, aux2);
@@ -450,23 +450,23 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                     // Check result
                     mpz_class pq0;
                     pq0 = sScalar*input[i].x2 - sScalar*input[i].x1 - input[i].y2 + input[i].y1; // Worst values are {-2^256*(2^256-1),2^256*(2^256-1)}
-                    q0 = pq0/pFec;
-                    if ((pq0 - pFec*q0) != 0)
+                    q0 = pq0/arithInfo.prime;
+                    if ((pq0 - arithInfo.prime*q0) != 0)
                     {
-                        zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (diff point)");
+                        zklog.error("ArithExecutor::execute() PRIME_SECP256R1_INDEX with the calculated q0 the residual is not zero (diff point) input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                         exitProcess();
                     } 
                     q0 += ScalarTwoTo257;
                     if(q0 < 0)
                     {
-                        zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (diff point). Actual value: " + q0.get_str(16));
+                        zklog.error("ArithExecutor::execute() PRIME_SECP256R1_INDEX the q0 with offset is negative (diff point). Actual value: " + q0.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                         exitProcess();
                     }
                     break;
                 }
                 default:
                 {
-                    zklog.error("ArithExecutor::execute() Invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input=" + to_string(i));
+                    zklog.error("ArithExecutor::execute() Invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                     exitProcess();
                 }
             }
@@ -476,7 +476,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             // Check prime index
             if (arithInfo.primeIndex != PRIME_SECP256K1_INDEX)
             {
-                zklog.error("ArithExecutor::execute() Invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input=" + to_string(i));
+                zklog.error("ArithExecutor::execute() ARITH_ECADD_SAME invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
 
@@ -508,16 +508,16 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             mpz_class pq0;
             pq0 = sScalar*2*input[i].y1 - 3*input[i].x1*input[i].x1; // Worst values are {-3*(2^256-1)**2,2*(2^256-1)**2}
                                                                      // with |-3*(2^256-1)**2| > 2*(2^256-1)**2
-            q0 = -(pq0/pFec);
-            if ((pq0 + pFec*q0) != 0)
+            q0 = -(pq0/arithInfo.prime);
+            if ((pq0 + arithInfo.prime*q0) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (same point)");
+                zklog.error("ArithExecutor::execute() ARITH_ECADD_SAME with the calculated q0 the residual is not zero (same point) input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             } 
             q0 += ScalarTwoTo258;
             if (q0 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (same point). Actual value: " + q0.get_str(16));
+                zklog.error("ArithExecutor::execute() ARITH_ECADD_SAME the q0 with offset is negative (same point). Actual value: " + q0.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
         }
@@ -526,7 +526,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             // Check prime index
             if (arithInfo.primeIndex != PRIME_SECP256R1_INDEX)
             {
-                zklog.error("ArithExecutor::execute() Invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input=" + to_string(i));
+                zklog.error("ArithExecutor::execute() ARITH_SECP256R1_ECADD_SAME invalid arithInfo.primeIndex=" + to_string(arithInfo.primeIndex) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
 
@@ -535,7 +535,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             // Get a from arithInfo
             if (arithInfo.a == 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " got arithInfo.a=0");
+                zklog.error("ArithExecutor::execute() ARITH_SECP256R1_ECADD_SAME got arithInfo.a=0 input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
             mpz_class a = arithInfo.a;
@@ -550,12 +550,15 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             pSecp256r1.fromMpz(x2, input[i].x2.get_mpz_t());
             pSecp256r1.fromMpz(y2, input[i].y2.get_mpz_t());
 
-            // Calculate s = 3*x1*x1/(y1+y1)
+            // Calculate s = (3*x1*x1 + a)/(y1+y1)
             RawpSecp256r1::Element s;
             RawpSecp256r1::Element aux1, aux2;
             pSecp256r1.mul(aux1, x1, x1);
             pSecp256r1.fromUI(aux2, 3);
             pSecp256r1.mul(aux1, aux1, aux2);
+            RawpSecp256r1::Element afe;
+            pSecp256r1.fromMpz(afe, a.get_mpz_t());
+            pSecp256r1.add(aux1, aux1, afe);
             pSecp256r1.add(aux2, y1, y1);
             pSecp256r1.div(s, aux1, aux2);
 
@@ -566,16 +569,16 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             mpz_class pq0;
             pq0 = sScalar*2*input[i].y1 - 3*input[i].x1*input[i].x1 - a; // Worst values are {-3*(2^256-1)**2 - a,2*(2^256-1)**2 - a}
                                                                          // with |-3*(2^256-1)**2| > 2*(2^256-1)**2
-            q0 = -(pq0/pFec);
-            if ((pq0 + pFec*q0) != 0)
+            q0 = -(pq0/arithInfo.prime);
+            if ((pq0 + arithInfo.prime*q0) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (same point)");
+                zklog.error("ArithExecutor::execute() ARITH_SECP256R1_ECADD_SAME with the calculated q0 the residual is not zero (same point) input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             } 
             q0 += ScalarTwoTo258;
             if(q0 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (same point). Actual value: " + q0.get_str(16));
+                zklog.error("ArithExecutor::execute() ARITH_SECP256R1_ECADD_SAME the q0 with offset is negative (same point). Actual value: " + q0.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
         }
@@ -591,17 +594,17 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             mpz_class pq1;
             pq1 = sScalar*sScalar - input[i].x1 - input[i].x2 - input[i].x3; /// Worst values are {-3*(2^256-1),(2^256-1)**2}
                                                                              // with (2^256-1)**2 > |-3*(2^256-1)|
-            q1 = pq1/pFec;
-            if ((pq1 - pFec*q1) != 0)
+            q1 = pq1/arithInfo.prime;
+            if ((pq1 - arithInfo.prime*q1) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q1 the residual is not zero");
+                zklog.error("ArithExecutor::execute() calculateS with the calculated q1 the residual is not zero input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
             // offset 
             q1 += 4; //2**2
             if(q1 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q1 with offset is negative (point addition). Actual value: " + q1.get_str(16));
+                zklog.error("ArithExecutor::execute() calculateS the q1 with offset is negative (point addition). Actual value: " + q1.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
 
@@ -609,17 +612,17 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             mpz_class pq2;
             pq2 = sScalar*input[i].x1 - sScalar*input[i].x3 - input[i].y1 - input[i].y3; // Worst values are {-(2^256+1)*(2^256-1),(2^256-1)**2}
                                                                                          // with |-(2^256+1)*(2^256-1)| > (2^256-1)**2
-            q2 = -(pq2/pFec);
-            if ((pq2 + pFec*q2) != 0)
+            q2 = -(pq2/arithInfo.prime);
+            if ((pq2 + arithInfo.prime*q2) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q2 the residual is not zero");
+                zklog.error("ArithExecutor::execute() calculateS with the calculated q2 the residual is not zero input=" + to_string(i) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
             //offset 
             q2 += ScalarTwoTo257;
             if(q2 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q2 with offset is negative (point addition). Actual value: " + q2.get_str(16));
+                zklog.error("ArithExecutor::execute() calculateS the q2 with offset is negative (point addition). Actual value: " + q2.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
 
@@ -633,14 +636,14 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q1 = -(pq1/pBN254);
             if ((pq1 + pBN254*q1) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q1 the residual is not zero");
+                zklog.error("ArithExecutor::execute() ARITH_BN254_MULFP2 with the calculated q1 the residual is not zero input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
             // offset
             q1 += ScalarTwoTo259;
             if(q1 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q1 with offset is negative (complex mul). Actual value: " + q1.get_str(16));
+                zklog.error("ArithExecutor::execute() ARITH_BN254_MULFP2 for the q1 with offset is negative (complex mul). Actual value: " + q1.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
 
@@ -651,14 +654,14 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q2 = pq2/pBN254;
             if ((pq2 - pBN254*q2) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q2 the residual is not zero");
+                zklog.error("ArithExecutor::execute() ARITH_BN254_MULFP2 with the calculated q2 the residual is not zero input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
             // offset
             q2 += 8; //2**3
             if(q2 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q2 with offset is negative (complex mul). Actual value: " + q2.get_str(16));
+                zklog.error("ArithExecutor::execute() ARITH_BN254_MULFP2 the q2 with offset is negative (complex mul). Actual value: " + q2.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
         }
@@ -671,14 +674,14 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q1 = pq1/pBN254;
             if ((pq1 - pBN254*q1) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q1 the residual is not zero");
+                zklog.error("ArithExecutor::execute() ARITH_BN254_ADDFP2 with the calculated q1 the residual is not zero input=" + to_string(i) + " input=" + input[i].toString());
                 exitProcess();
             }
             //offset
             q1 += 8; //2**3
             if(q1 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q1 with offset is negative (complex add). Actual value: " + q1.get_str(16));
+                zklog.error("ArithExecutor::execute() ARITH_BN254_ADDFP2 the q1 with offset is negative (complex add). Actual value: " + q1.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
 
@@ -689,14 +692,14 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q2 = pq2/pBN254;
             if ((pq2 - pBN254*q2) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q2 the residual is not zero");
+                zklog.error("ArithExecutor::execute() ARITH_BN254_ADDFP2 with the calculated q2 the residual is not zero input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
             //offset
             q2 += 8; //2**3
             if(q2 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q2 with offset is negative (complex add). Actual value: " + q2.get_str(16));
+                zklog.error("ArithExecutor::execute() ARITH_BN254_ADDFP2 the q2 with offset is negative (complex add). Actual value: " + q2.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
         }
@@ -709,14 +712,14 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q1 = -(pq1/pBN254);
             if ((pq1 + pBN254*q1) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q1 the residual is not zero");
+                zklog.error("ArithExecutor::execute() ARITH_BN254_SUBFP2 with the calculated q1 the residual is not zero input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
             //offset
             q1 += 8; //2**3
             if(q1 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q1 with offset is negative (complex sub). Actual value: " + q1.get_str(16));
+                zklog.error("ArithExecutor::execute() ARITH_BN254_SUBFP2 the q1 with offset is negative (complex sub). Actual value: " + q1.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
             // Check q2
@@ -727,14 +730,14 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q2 = -(pq2/pBN254);
             if ((pq2 + pBN254*q2) != 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q2 the residual is not zero");
+                zklog.error("ArithExecutor::execute() ARITH_BN254_SUBFP2 with the calculated q2 the residual is not zero input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
             //offset
             q2 += 8; //2**3
             if(q2 < 0)
             {
-                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q2 with offset is negative (complex sub). Actual value: " + q2.get_str(16));
+                zklog.error("ArithExecutor::execute() ARITH_BN254_SUBFP2 the q2 with offset is negative (complex sub). Actual value: " + q2.get_str(16) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                 exitProcess();
             }
         }
@@ -808,7 +811,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 
             // If either selEq3,selEq4,selEq5,selEq6 is selected, we need to ensure that x3, y3 is alias free.
             // Recall that selEq3 work over the Secp256k1 curve, and selEq4,selEq5,selEq6 work over the BN254 curve.
-            if (!fr.isZero(pols.selEq[3][index]) || !fr.isZero(pols.selEq[4][index]) || !fr.isZero(pols.selEq[5][index]) || !fr.isZero(pols.selEq[6][index]))
+            if (arithInfo.checkAliasFree)
             {
                 Goldilocks::Element chunkValue = step < 16 ? pols.x3[15 - step16][offset] : pols.y3[15 - step16][offset];
                 uint64_t chunkPrime = PRIME_CHUNKS[arithInfo.primeIndex][step16];
@@ -848,7 +851,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                     case 13: eq[eqIndex] = eq13(fr, pols, step, offset); break;
                     case 14: eq[eqIndex] = eq14(fr, pols, step, offset); break;
                     default:
-                        zklog.error("ArithExecutor::execute() invalid eqIndex=" + to_string(eqIndex));
+                        zklog.error("ArithExecutor::execute() invalid eqIndex=" + to_string(eqIndex) + " input[" + to_string(i) + "]=[" + input[i].toString() + "]");
                         exitProcess();
                 }
                 pols.carry[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex]);
@@ -858,7 +861,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                         " step=" + to_string(step) + " k=" + to_string(k) + 
                         " eq[" + to_string(eqIndex) + "]=" + eq[eqIndex].get_str(16) +
                         " and carry[" + to_string(carryIndex) + "]=" + carry[carryIndex].get_str(16) +
-                        " do not sum 0 mod 2 to 16; input=[" + input[i].toString() + "] arithInfo=[" + arithInfo.toString() + "]");
+                        " do not sum 0 mod 2 to 16; input[" + to_string(i) + "]=[" + input[i].toString() + "] arithInfo=[" + arithInfo.toString() + "]");
                     exitProcess();
                 }
                 carry[carryIndex] = (eq[eqIndex] + carry[carryIndex]) / ScalarTwoTo16;

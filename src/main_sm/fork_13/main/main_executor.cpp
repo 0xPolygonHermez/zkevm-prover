@@ -1487,6 +1487,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
         }
 
+        // Set repeat
+        if (!bProcessBatch && (rom.line[zkPC].repeat == 1))
+        {
+            pols.repeat[i] = fr.one();
+        }
+
         /***********/
         /* SETTERS */
         /***********/

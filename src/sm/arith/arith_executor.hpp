@@ -20,7 +20,6 @@ private:
     RawFec fec;
     const Config &config;
     const uint64_t N;
-    mpz_class pFec;
 
 public:
     ArithExecutor (Goldilocks &fr, const Config &config) :
@@ -28,9 +27,6 @@ public:
         config(config),
         N(getForkN(PROVER_FORK_ID))
     {
-        // Calculate the prime number
-        fec2scalar(fec, fec.negOne(), pFec);
-        pFec++;
     }
     ~ArithExecutor ()
     {
