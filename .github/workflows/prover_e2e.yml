@@ -3,9 +3,9 @@ name: Prover e2e test
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "develop", "release_*", "banana" ]
+    branches: [ "main", "develop", "release_*", "durian" ]
   pull_request:
-    branches: [ "main", "develop", "release_*", "banana" ]
+    branches: [ "main", "develop", "release_*", "durian" ]
 
 jobs:
   e2e-collection-tests:
