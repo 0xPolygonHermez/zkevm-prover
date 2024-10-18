@@ -552,6 +552,7 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
              || (inputFile.find("inputs-executor/ethereum-tests/GeneralStateTests/stCreate2/create2collisionCode_0.json") != string::npos)
              || (inputFile.find("inputs-executor/ethereum-tests/GeneralStateTests/stCreate2/create2collisionNonce_0.json") != string::npos)
              || (inputFile.find("inputs-executor/ethereum-tests/GeneralStateTests/stCreate2/create2noCash_2.json") != string::npos)
+             || (inputFile.find("calldata/test-length-data_1.json") != string::npos) // batchL2Data.size()=120119 > MAX_BATCH_L2_DATA_SIZE=120000
            )
         {
             zklog.warning("ProcessDirectory() skipping file=" + inputFile + " fileCounter=" + to_string(fileCounter) + " skippedFileCounter=" + to_string(skippedFileCounter));
