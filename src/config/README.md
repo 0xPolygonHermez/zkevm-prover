@@ -3,7 +3,7 @@
 The zkProver supports a number of configuration parameters.
 These parameters have a default value.
 This default value can be modified through a configuration json file using the -c option: zkProver -c <config.json>.
-They can also be modified usin environment variables, which have more priority than the config file modifications.
+They can also be modified using environment variables, which have more priority than the config file modifications.
 The configuration parameters can be of different uses:
 - **Production**: the ones normally required to run the zkProver
 - Test: used only while testing; most users can ignore them
