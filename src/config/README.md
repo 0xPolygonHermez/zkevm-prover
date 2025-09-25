@@ -74,7 +74,7 @@ The configuration parameters can be of different uses:
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
 |**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
 |`hashDB64`|test|boolean|Use HashDB64 new database (do not use in  production, under development)|false|HASHDB64|
-|`kvDBMaxVersions`|production|u64|Maximum number of KV versionn in Database|131072|HASHDB64_MAX_VERSIONS|
+|`kvDBMaxVersions`|production|u64|Maximum number of KV version in Database|131072|HASHDB64_MAX_VERSIONS|
 |`dbCacheSynchURL`|test|string|URL of the HashDB service to synchronize the Database cache (experimental)|""|DB_CACHE_SYNCH_URL|
 |`hashDBFileName`|test|string|Core name used for the hashDB files (path,numbering and extension not included). If hashDBFileName is empty in-memory version of the hashDB is used (only for DEBUG purposes). |""|HASHDB_FILE_NAME|
 |`hashDBFileSize`|test|u64|HashDB files size in GB|128|HASHDB_FILE_SIZE|failures
