@@ -75,7 +75,7 @@ This configuration will save not only the input parameters, but also the DB read
 However, this file is saved after the batch has been processed.
 If the process is killed before you reach the point where this file is saved, you can save it after every DB read.
 This slows down the processing, but ensures having the required DB data to reach the problematic point of the execution.
-If you want to get the input file continously updated, you can enable this feature by editing the config.json file and rebooting the zkEVM Prover:
+If you want to get the input file continuously updated, you can enable this feature by editing the config.json file and rebooting the zkEVM Prover:
 
 ```sh
 "saveDbReadsToFileOnChange": true,

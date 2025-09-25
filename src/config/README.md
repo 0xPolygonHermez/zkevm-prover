@@ -2,8 +2,8 @@
 
 The zkProver supports a number of configuration parameters.
 These parameters have a default value.
-This default value can be modified through a configuration json file using the -c option: zkProver -c <config.json>.
-They can also be modified usin environment variables, which have more priority than the config file modifications.
+This default value can be modified through a configuration json file usingg the -c option: zkProver -c <config.json>.
+They can also be modified using environment variables, which have more priority than the config file modifications.
 The configuration parameters can be of different uses:
 - **Production**: the ones normally required to run the zkProver
 - Test: used only while testing; most users can ignore them
@@ -69,12 +69,12 @@ The configuration parameters can be of different uses:
 |`executorClientPort`|test|u16|Executor client GRPC port it connects to|50071|EXECUTOR_CLIENT_PORT|
 |`executorClientHost`|test|string|Executor client host it connects to|"127.0.0.1"|EXECUTOR_CLIENT_HOST|
 |`executorClientLoops`|test|u64|Executor client iterations|1|EXECUTOR_CLIENT_LOOPS|
-|`executorClientCheckNewStateRoot`|test|bool|Executor client checks the new state root returned in the response using CheckTree|false|EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT|
+|`executorClientCheckNewStateRoot`|test|bool|Executor client checks the new state root returned in the response usingg CheckTree|false|EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT|
 |`executorClientResetDB`|test|bool|Executor client resets the database before processing a batch; it only works in debug mode|false|EXECUTOR_CLIENT_RESET_DB|
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
-|**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
+|**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface usingg direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
 |`hashDB64`|test|boolean|Use HashDB64 new database (do not use in  production, under development)|false|HASHDB64|
-|`kvDBMaxVersions`|production|u64|Maximum number of KV versionn in Database|131072|HASHDB64_MAX_VERSIONS|
+|`kvDBMaxVersions`|production|u64|Maximum number of KV version in Database|131072|HASHDB64_MAX_VERSIONS|
 |`dbCacheSynchURL`|test|string|URL of the HashDB service to synchronize the Database cache (experimental)|""|DB_CACHE_SYNCH_URL|
 |`hashDBFileName`|test|string|Core name used for the hashDB files (path,numbering and extension not included). If hashDBFileName is empty in-memory version of the hashDB is used (only for DEBUG purposes). |""|HASHDB_FILE_NAME|
 |`hashDBFileSize`|test|u64|HashDB files size in GB|128|HASHDB_FILE_SIZE|failures
@@ -93,7 +93,7 @@ The configuration parameters can be of different uses:
 |`logExecutorServerInput`|test|boolean|Log main state machine executor input data|false|LOG_EXECUTOR_SERVER_INPUT|
 |`logExecutorServerInputJson`|test|boolean|Log main state machine executor input data, in JSON format|false|LOG_EXECUTOR_SERVER_INPUT_JSON|
 |`logExecutorServerInputGasThreshold`|test|u64|Log main state machine executor input if gas/s < this value; active if this value is > 0|0|LOG_EXECUTOR_SERVER_INPUT_GAS_THRESHOLD|
-|`logExecutorServerResponses`|test|bool|Log executor server resonses|false|LOG_EXECUTOR_SERVER_RESPONSES|
+|`logExecutorServerResponses`|test|bool|Log executor server responses|false|LOG_EXECUTOR_SERVER_RESPONSES|
 |`logExecutorServerTxs`|test|bool|Log executor server transactins details|true|LOG_EXECUTOR_SERVER_TXS|
 |`dontLoadRomOffsets`|test|bool|Avoid loading ROM offsets; used with experimental or testing ROM.json files|false|DONT_LOAD_ROM_OFFSETS|
 |`inputFile`|test|string|Input file in some tests|"testvectors/batchProof/input_executor_0.json"|INPUT_FILE|
@@ -142,9 +142,9 @@ The configuration parameters can be of different uses:
 |`sha256ConnectionsFile`|production|string|SHA-256 connections file|"sha256_connections.json"|KECCAK_CONNECTIONS_FILE|
 |`zkevmStarkInfo`|production|string|zkEVN STARK info file|config + "/zkevm/zkevm.starkinfo.json"|ZKEVM_STARK_INFO|
 |`storageRomFile`|production|string|Storage ROM file|config + "/scripts/storage_sm_rom.json"|STORAGE_ROM_FILE|
-|`recursive1ConstantsTree`|production|string|Recursive 1 contant polynomials tree file|config + "/recursive1/recursive1.consttree"|
-|`recursive2ConstantsTree`|production|string|Recursive 2 contant polynomials tree file|config + "/recursive2/recursive2.consttree"|
-|`recursivefConstantsTree`|production|string|Recursive final contant polynomials tree file|config + "/recursivef/recursivef.consttree"|RECURSIVE1_CONSTANTS_TREE|
+|`recursive1ConstantsTree`|production|string|Recursive 1 constant, content polynomials tree file|config + "/recursive1/recursive1.consttree"|
+|`recursive2ConstantsTree`|production|string|Recursive 2 constant, content polynomials tree file|config + "/recursive2/recursive2.consttree"|
+|`recursivefConstantsTree`|production|string|Recursive final constant, content polynomials tree file|config + "/recursivef/recursivef.consttree"|RECURSIVE1_CONSTANTS_TREE|
 |`sha256PolsFile`|production|string|SHA-256 polynomials file|"sha256_pols.json"|SHA256_POLS_FILE|
 |`sha256ConnectionsFile`|production|string|SHA-256 connections file|"sha256_connections.json"|SHA256_CONNECTIONS_FILE|
 |**`databaseURL`**|production|string|URL of the external database, e.g. postgresql://statedb:statedb@127.0.0.1:5432/testdb, or "local" if no external database is used (data will be stored in cache)|"local"|DATABASE_URL|
