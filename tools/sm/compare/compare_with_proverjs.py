@@ -1,7 +1,7 @@
 #
 # Script: verification_script.py
 #
-# This script is used to compare the commited polynomials evaluations of the proverjs and the proverc.
+# This script is used to compare the committed polynomials evaluations of the proverjs and the proverc.
 # 
 # run: python3 verification_script.py
 #
