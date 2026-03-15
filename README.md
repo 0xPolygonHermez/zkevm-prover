@@ -37,7 +37,7 @@ Steps to compile `zkevm-prover` locally:
 ### Clone repository
 
 ```sh
-git clone --recursive https://github.com/0xPolygonHermez/zkevm-prover.git
+git clone --recursive https://github.com/0xPolygon/zkevm-prover.git
 cd zkevm-prover
 ```
 
@@ -144,3 +144,4 @@ To execute a proof test:
 ## Contact
 
 For more discussions, please head to the [R&D Discord](https://discord.gg/0xPolygonRnD)
+
